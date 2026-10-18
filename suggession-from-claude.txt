@@ -1,0 +1,382 @@
+Bashundhara Oil & Gas – Enterprise Platform
+Documentation, Architecture & Delivery Guide · Draft v1 · Prepared for Mohammed Arif · October 2026
+1. Summary and honest first thoughts
+The client wants one internal platform (web + mobile) that digitizes how employees, admins, management and the Chairman work. You listed 16 modules. That is not one application. It is an internal enterprise portal made of many small business systems that share the same foundation (users, roles, workflows, notifications, documents, audit).
+Three things matter most:
+1. Build the shared foundation first. Almost every module is the same pattern: someone requests, someone approves, something is tracked, people are notified, everything is logged. If you build that once as reusable services, each module becomes fast to add. If you build 16 separate features, you will drown.
+2. Deliver in phases, not all at once. Big companies never roll out 16 systems on day one. Start with a small set that proves value and trust, then expand.
+3. Run a proper discovery with the client before coding. They gave you a small overview. Your job now is to turn that into written workflows, approvers and rules, and get them signed off. Section 12 gives you the exact questions.
+You said you have not done a B2B project like this. That is fine. The good news is that this domain is well understood, and this document gives you the map.
+2. How big companies actually manage this
+No large company runs everything in one codebase built from scratch. In practice they use a combination of:
+Layer
+What it is
+Typical examples
+Employee portal / intranet
+The single front door: notices, announcements, requests, approvals, directory
+SharePoint, custom portals, ServiceNow, Workday
+ERP
+Finance, procurement, inventory, HR, assets
+SAP, Oracle, Microsoft Dynamics, Odoo
+Workflow / approval engine
+Routes any request through approvers with rules
+Built into the ERP/portal, or Camunda, Power Automate
+Specialized systems
+HSE incidents, fleet, visitor management, e-sign
+Dedicated tools, integrated through the portal
+Identity layer
+One login, roles, groups
+Active Directory / Azure AD / Okta
+What the client is asking for is essentially the employee portal plus several lightweight specialized modules, built custom so it fits Bashundhara's own processes. That is a legitimate approach, and it is what you are building.
+Patterns the big organizations all follow (copy these):
+• Everything is a workflow with states. A request is never just "done". It moves Draft → Submitted → Under review → Approved/Rejected → Completed, with a timestamp and a person at each step.
+• Approval chains follow the org structure. Reporting line (employee → line manager → department head → finance → director) is data, not hard-coded.
+• Delegation exists. When a manager is on leave, approvals go to a delegate. Without this, the system stalls in real life.
+• SLAs and escalation. If an approval sits 48 hours, remind; at 72 hours, escalate to the next level.
+• Immutable audit trail. Who did what, when, from where. Nobody can edit history.
+• Master data is controlled. Departments, locations, grades, vehicle types, asset categories are managed lists, not free text.
+• Notifications are multi-channel and configurable. In-app, push, email, SMS, with user preferences and priority levels.
+• Reports and dashboards are first-class, not an afterthought.
+A useful shortcut: install Odoo (open source) locally and look at its Fleet, Expenses, Attendance, Maintenance, Approvals and Sign modules. You will see how a mature product structures these exact features. Use it as a reference, not as a dependency. You can also study Bangladesh's government e-Nothi system for how note-sheet and file-based approval culture works locally, because Bashundhara staff will likely expect a similar "file moves from desk to desk" feel in document approval.
+3. System foundation (build this first)
+These are the shared services every module will use.
+3.1 Identity, organization and access
+• Users and employees: employee ID, name, photo, phone, email, designation, grade, department, location, reporting manager, employment status.
+• Org structure: Company → Division/Business unit → Department → Team. Locations: head office, depots, plants, field sites.
+• Authentication: username/employee ID + password, with OTP (SMS/email) for sensitive actions. Plan for SSO (Azure AD / LDAP) later if the group uses it. Biometric/PIN unlock on mobile.
+• Authorization: see section 4.
+3.2 Workflow and approval engine
+The heart of the platform. Design it generically:
+• A workflow template defines steps, who approves each step (a role, the line manager, a named person, or a department head), whether steps are sequential or parallel, conditions (e.g. amount > 50,000 BDT adds Finance Director), time limits and escalation.
+• A request instance records its current state, history, comments, attachments and assigned approver.
+• Features: approve, reject, send back for correction, delegate, reassign, withdraw, add comments, bulk approve.
+• Admins can configure templates without code changes (start simple: JSON config + admin screen).
+Used by: document approval, TA/DA, conveyance, tour, vehicle requests, license renewal, asset requests, guest approval, incident review, bus seat approval.
+3.3 Notification service
+• Channels: in-app inbox, push (FCM), email, SMS (use a Bangladesh SMS gateway), optional WhatsApp later.
+• Templates in English and Bangla, with variables.
+• Targeting: individual, role, department, location, everyone, custom group.
+• Priority levels: normal, important, critical (critical bypasses quiet hours and requires acknowledgement).
+• Delivery tracking: sent, delivered, read, acknowledged.
+• Scheduled and recurring notifications (for renewal reminders).
+• Queue-based (BullMQ/Redis) with retry.
+3.4 Document and file service
+• Upload, versioning, virus scan, size/type limits, thumbnails, PDF preview.
+• Storage on S3-compatible object storage (MinIO if on-premise).
+• Access controlled by the same permission model, with signed, expiring URLs.
+3.5 Audit log
+• Append-only table of every sensitive action: actor, action, object, before/after, IP, device, timestamp.
+• Searchable by admins and auditors, exportable.
+3.6 Master data and configuration
+• Admin-managed lists: departments, designations, grades, locations, vehicle types, asset categories, license types, incident categories, expense categories, holidays, policy tables.
+3.7 Reporting and search
+• Global search across notices, documents, assets, requests.
+• Standard reports with export to Excel/PDF; dashboards per role.
+3.8 Localization
+• English + Bangla UI from day one (use i18n keys everywhere). Bangla date formats and fonts. Many staff will be more comfortable in Bangla.
+4. Role-based access design
+Use RBAC with scope, meaning a role plus the data scope it applies to.
+• Role = what you can do (e.g. "Approve expense").
+• Scope = where you can do it (own records, own team, own department, own location, whole company).
+Example roles:
+Role
+Typical scope
+Main capabilities
+Employee
+Self
+Apply for vehicle, leave, TA/DA, view notices, seat requests, report incident
+Line Manager
+Team
+Approve team requests, view team attendance
+Department Head
+Department
+Approve, view department reports
+Admin / Transport Admin
+Company or function
+Assign vehicles and drivers, manage guest passes, manage master data
+Finance
+Company
+Approve and settle expenses, view asset values
+HR
+Company
+Attendance, leave, user lifecycle, policy tables
+Compliance Officer
+Company
+Manage licenses and renewals
+HSE Officer
+Company
+Investigate incidents
+Security / Gate
+Location
+Check in guests, scan parcels and passes
+Driver
+Self
+See assigned trips, log trip start/end, fuel
+Executive Assistant
+Delegated
+Act for Chairman/Director within limits
+Chairman / Director
+Company
+Dashboard, broadcast messages, approvals
+Super Admin
+System
+Configure roles, workflows, system settings
+Implementation notes:
+• Store permissions as data (permission and role_permission tables), checked in a central guard, not scattered if statements.
+• Support multiple roles per user (a manager can also be a driver supervisor).
+• Support temporary delegation with start and end dates.
+• Add field-level and record-level rules for sensitive items (Chairman's office data, HR data).
+• Every API endpoint checks permission server-side. The UI hiding a button is not security.
+5. Recommended technical architecture
+Your stack (Next.js, Node.js, React Native) fits well.
+Start as a modular monolith, not microservices. One backend, cleanly separated modules (each module owns its tables and services), shared foundation services. This is far simpler to build, deploy and debug as a small team, and you can split later if needed.
+Concern
+Recommendation
+Web frontend
+Next.js (App Router) + TypeScript, a component library (shadcn/ui or Ant Design)
+Mobile
+React Native (Expo, with dev builds for background location and push)
+Backend
+Node.js with NestJS (modules, guards and DI suit this structure well) or Express with strict structure
+API
+REST with OpenAPI docs; WebSocket for chat and live updates
+Database
+PostgreSQL (relational data, transactions, JSONB for workflow config)
+Cache / queues
+Redis + BullMQ (notifications, reminders, scheduled jobs)
+Files
+S3-compatible storage or MinIO
+Realtime chat
+Socket.io, or integrate an existing chat engine
+Push
+Firebase Cloud Messaging
+PDF / e-sign
+pdf-lib or similar for stamping, SHA-256 hashing for integrity
+Maps / geofence
+Device geofencing + server-side validation (Haversine check)
+Monitoring
+Sentry, structured logs, uptime checks, DB backups
+Deployment
+Docker, with CI/CD. See hosting note below
+Hosting decision (ask early): A conglomerate like this may require on-premise or local data-center hosting for confidentiality and compliance. Confirm before you design deployment. Docker makes either choice workable.
+Monorepo suggestion: apps/web, apps/mobile, apps/api, packages/shared (types, validation, constants).
+6. Module specifications
+Each module below lists purpose, flow, key features, and points to confirm with the client.
+6.1 Notice Board
+Purpose: Official announcements reach the right people and you can prove they saw them.
+• Create notice: title, body (rich text), attachments, category (HR, Admin, Safety, Policy), priority, publish time, expiry.
+• Audience targeting: everyone, department, location, role, or custom list.
+• Optional approval before publishing (draft → reviewed → published).
+• Push + in-app + optional SMS/email. Pinned notices. Archive and search.
+• Read receipts and an acknowledgement button for critical notices. Reports show who has not read.
+• Bangla and English versions.
+6.2 Chairman's Message
+• Special channel, visible prominently on home screen and as a full-screen modal on next app open.
+• Formats: text, image, video, audio, PDF. Scheduled or immediate.
+• Delivered to everyone, with delivery and read statistics.
+• Restricted publishing: only Chairman and his authorized office staff, with an approval step for staff-drafted messages.
+• Keep a permanent message archive.
+6.3 Document Approval and E-Signature
+This is the most technically sensitive module.
+Flow: Upload or create document → choose approval route (template or custom) → place signature/initial/date fields → sequential or parallel review → each approver views, comments, approves, rejects or sends back → final signed PDF + audit certificate.
+Key features
+• Document numbering (file number scheme such as BOGCL/HR/2026/0142), categories, confidentiality level.
+• Versioning; a signed version is locked.
+• Signature capture: drawn, typed, or uploaded stamp, with OTP confirmation at the moment of signing.
+• Tamper evidence: store a SHA-256 hash of the final PDF; embed signer name, time, IP and device in a certificate page.
+• Delegation, reminders, escalation, withdrawal, expiry.
+• Digital "note-sheet" (comments thread) that travels with the document.
+• Templates for recurring documents (leave letters, purchase approvals, memos).
+Legal caution: Whether an in-app e-signature is legally enough depends on the document type. Bangladesh's ICT law recognizes electronic signatures, but stronger "digital signatures" from a licensed Certifying Authority may be needed for some contracts. For internal approvals, a strong audit-trailed e-sign is normally acceptable. Get the client's legal team to confirm which documents need which level. Design so a certificate-based signing provider can be added later.
+6.4 Parcel Tracker
+You said you are unsure how big companies do this. They treat it like a mini courier system with chain of custody.
+Flow:
+1. Sender creates a parcel record: recipient (employee or location), contents description, type (document, package, confidential), priority, optional value, photo.
+2. System generates a tracking ID and QR code/label to print and stick on the parcel.
+3. Handoff scans at each point: sender dispatch → mail room/gate → transport (driver/courier) → destination mail room → recipient.
+4. Each scan records who, where, when, condition and optional photo.
+5. Delivery confirmation by the recipient using OTP, signature or QR scan. This solves your "did he receive it?" problem.
+Statuses: Created → Handed to dispatch → In transit → Arrived at destination → Out for delivery → Delivered (confirmed) → or Exception (Delayed, Lost, Damaged, Returned).
+Features: sender and recipient notifications at every step, "not received" dispute button, overdue alerts if a parcel sits too long at one stage, timeline view, bulk dispatch manifests per vehicle or trip, link to fleet trips, reports on average transit time and losses.
+Ask the client: internal only, or external couriers too (Pathao, Sundarban, etc.)? If external, store the courier tracking number and update status manually or via their API later.
+6.5 Asset Lifecycle Management
+Purpose: Track every significant asset from purchase to disposal, with smart alerts.
+Asset record: asset tag (QR), category, make/model, serial, purchase date, vendor, cost, warranty end, location, custodian, department, condition, documents, status.
+Lifecycle states: Requested → Procured → In stock → Assigned/In use → Under maintenance → Retired → Disposed (also Lost/Stolen).
+Smart alerts (configurable per category):
+• Warranty / AMC / insurance expiry (e.g. at 90, 60, 30, 7 days).
+• Calibration and certification due dates (important for oil and gas equipment such as meters, pressure vessels, safety valves, fire extinguishers).
+• Preventive maintenance schedules by time or usage (hours, km), with auto-created maintenance tasks.
+• Low stock thresholds for consumables and spares, reorder suggestions.
+• Asset end-of-life, depreciation reports, assignment and return tracking, periodic physical verification using QR scan.
+Smart part: a single "due date engine" (see 6.6) powers all of these. Define "something with a due date, a reminder schedule and an owner", and reuse it for warranties, maintenance, calibration and licenses.
+6.6 Business License and Compliance Management
+Generalize this as a Compliance Obligation module. Each license type is a configurable template with its own lifecycle.
+Examples to expect for an oil and gas business (confirm the real list with the client): Trade License, BSTI certification, environmental clearance, fire safety license, Department of Explosives licenses for petroleum/LPG storage, energy regulator licenses, import/export registrations, TIN/VAT, vehicle fitness and route permits.
+Renewal lifecycle (your BSTI example) as a workflow template:
+1. Renewal due (auto-created X days before expiry)
+2. Fund requirement and fund approval
+3. Documents prepared and application submitted
+4. Authority visit/inspection scheduled
+5. Audit performed, findings recorded, corrective actions if any
+6. Fees paid
+7. License issued, with new expiry date, scanned certificate uploaded
+8. Next cycle automatically scheduled
+Each step has an owner, a deadline, checklist, attachments, comments, and notifications. Dashboard shows: expiring in 90/60/30 days, overdue, in progress, cost per license, and a calendar view. Escalate to management if a critical license nears expiry with no application started.
+6.7 Incident Management
+In oil and gas this is an HSE (Health, Safety, Environment) function, so treat it seriously.
+Flow: Report (quick mobile form with photo/video/location) → triage and severity classification → assign investigator → containment and immediate actions → investigation and root-cause analysis → corrective and preventive actions (CAPA) with owners and deadlines → management review → close.
+Details: categories (injury, fire, spill/leak, equipment failure, theft, security, vehicle accident, near miss), severity levels, injured persons, witnesses, anonymous reporting option, regulatory reporting flag, escalation rules (critical incidents instantly notify senior management), statistics (incident rate, trends, open actions), repeat-incident detection. Keep a strict audit trail and restrict sensitive details.
+6.8 Guest Management
+Three guest classes with different rules:
+Type
+Process
+Normal visitor
+Host pre-registers (or walk-in at reception), gate verifies ID, gets a visitor pass, host notified on arrival, check-out recorded
+Government guest
+Advance notice, protocol checklist, designated escort, special meeting room/parking, higher-level approval, restricted data handling
+VIP guest
+Chairman/Director office approval, advance security briefing, reserved vehicle and driver, hospitality arrangements, priority notifications, discreet handling
+Features: pre-registration with QR pass, ID photo capture, blacklist/watchlist, host approval, meeting room and parking booking, security alerts, visit history and reports, emergency muster list (who is on-site right now). Gate staff use a simple mobile/tablet screen.
+6.9 Fleet / Vehicle Management
+Flow: Employee requests vehicle (from, to, date/time, purpose, passengers) → manager approval (if policy requires) → Transport Admin sees available vehicles and drivers → assigns → driver and employee notified → trip start/end logged → closed.
+Features: availability calendar with conflict detection, vehicle and driver master records, driver licence and vehicle document expiry alerts (feeds the due-date engine), trip logs with odometer, fuel records and efficiency, maintenance scheduling, shared trips (pool passengers heading the same way), GPS tracking integration later, trip cost allocation to department, emergency/priority requests, driver duty hours and leave.
+6.10 Attendance with Geo-fencing
+• Define geofences (circle or polygon) per office, depot and site.
+• Check-in/out from the mobile app only when inside the fence; server validates the coordinates.
+• Handle: late, early leave, missed punch with correction request and approval, shifts, rosters, overtime, holidays, field-duty (allowed outside the fence with approval), remote work.
+• Anti-spoofing: detect mock locations, rooted devices, combine with Wi-Fi/BSSID or face verification if the client wants stricter control. Be upfront: no phone-based method is 100% spoof-proof.
+• Offline tolerance: queue punches and sync, with timestamps validated.
+• Privacy: collect location only at punch time, not continuous tracking. State this clearly in the app and policy. Employees will care.
+• Integrate with leave and payroll exports. Ask whether biometric devices already exist at the office.
+6.11 TA & DA Management
+Travel Allowance (travel cost) and Daily Allowance (per-day living cost).
+• Policy engine: entitlements by grade, destination class (city/district/abroad), mode of travel, per-day DA rates.
+• Flow: travel request → approval → advance (optional) → travel → claim with receipts → line manager → finance verification → payment → settlement of advance.
+• Auto-calculation from policy; flag exceptions; receipt attachments; audit by finance.
+6.12 Conveyance Management
+Local travel reimbursement (rickshaw, CNG, ride share, bus, personal vehicle).
+• Monthly or per-trip claims, with from/to, purpose, amount, optional receipt (many local fares have none, so allow a declaration up to a policy limit).
+• Policy caps per grade, monthly limits, duplicate detection, bulk approval for managers, payroll or finance export.
+6.13 Tour and Expense Management
+Treat 6.11, 6.12 and 6.13 as one Travel & Expense domain sharing the same claim engine: claim header, line items, categories, receipts, policy checks, approval chain, payment status. This will save a lot of development time. Tour adds an itinerary, budget, advance and post-tour report; expense lines cover hotel, meals, fuel, entertainment and so on, with budget vs actual and project/cost-center coding.
+6.14 Bus Seat Reservation
+Your rule: limited seats, first-applied-first-served priority, and seats freed by someone leaving go to the next person in line.
+• Model: Route/Bus → Seat capacity → Allocations, plus a waitlist ordered by application timestamp.
+• Apply: employee requests a seat on a route/team bus. If seats exist, allocate; if not, join the waitlist and see their position.
+• When a seat frees (resignation, transfer, voluntary release, long absence), the system automatically offers it to the first waitlisted person, who has a set time (e.g. 24 hours) to accept before it passes to the next.
+• Admin can override with a reason (logged) for special cases. Optionally assign actual seat numbers, set boarding points and schedule times, and run monthly reconfirmation to clean ghost allocations.
+• Link to HR: when an employee's status changes to resigned, trigger the release automatically.
+6.15 Chairman Dashboard
+• Home: key analytics he chooses (pending approvals, license expiries, incidents, attendance summary, fleet and asset highlights, expense totals).
+• Selected people ("inner circle") view: a curated list of employees with their current status. Statuses: Present, On leave (informed), Absent (uninformed), Sick, In meeting, Travelling.
+• Privacy suggestion: show "Sick leave" as a leave category only, with no medical details. Make status sources automatic where possible (leave system, attendance, calendar).
+• In-app messaging for that group: one-to-one and group chat, attachments, read receipts, priority messages, and optional message retention policy. Encryption in transit and at rest; discuss whether end-to-end encryption is required, since it limits admin recovery and search.
+• Quick approve/reject from the dashboard and mobile, with biometric confirmation.
+• Strong security: stricter session rules, access logs on who views this data, and an Executive Assistant delegation model.
+7. Core data model (starting point)
+Main entities, simplified:
+• Identity/org: users, employees, departments, locations, designations, grades, roles, permissions, user_roles, delegations
+• Workflow: workflow_templates, workflow_steps, requests, request_steps, request_comments, request_attachments
+• Comms: notices, notice_audiences, notice_receipts, messages, conversations, notifications, notification_deliveries
+• Documents: documents, document_versions, signature_fields, signatures, signing_certificates
+• Parcels: parcels, parcel_events
+• Assets: assets, asset_categories, asset_assignments, maintenance_plans, maintenance_tasks, stock_items
+• Compliance: licenses, license_types, license_cycles, cycle_steps
+• Due engine: due_items (type, owner, due date, reminder rules) feeding assets, licenses, driver docs, vehicle docs
+• Incidents: incidents, incident_people, investigations, corrective_actions
+• Guests: guests, visits, guest_passes, watchlist
+• Fleet: vehicles, drivers, vehicle_requests, trips, fuel_logs
+• Attendance: geofences, shifts, attendance_records, correction_requests, leave_requests
+• Expense: expense_policies, claims, claim_lines, advances
+• Bus: bus_routes, bus_seats, seat_allocations, seat_waitlist
+• System: audit_logs, settings, master_lists
+Use UUID or sequential IDs plus human-readable reference numbers. Soft-delete everything; never hard-delete business records.
+8. Non-functional requirements
+• Security: HTTPS everywhere, hashed passwords (argon2/bcrypt), rate limiting, MFA for admins and executives, session/device management, input validation, regular dependency scans, penetration test before go-live, encrypted backups, secrets management. Document confidential files should be encrypted at rest.
+• Compliance: treat employee personal data carefully (location, ID, health-adjacent status). Write a short data-handling policy. Check Bangladesh's data protection and cyber laws with the client's legal team.
+• Availability: daily backups, tested restores, a clear recovery plan, health monitoring.
+• Performance: target pages under 2 seconds, with pagination and indexes on all list screens.
+• Offline: the mobile app should handle weak networks for attendance, incident reporting and parcel scans (queue then sync). Many field sites will have poor connectivity.
+• Accessibility and usability: large tap targets, clear Bangla labels, minimal training required. Gate staff and drivers are not office power users.
+• Scalability: group-wide could mean thousands of users. Plan for that in database design and notification volume, even if phase 1 is smaller.
+• Integrations (later): HRMS/payroll, ERP/accounting, SMS gateway, email, GPS trackers, biometric devices, Active Directory.
+9. Suggested phased roadmap
+Phase
+Focus
+Modules
+0. Discovery (3–4 weeks)
+Workshops, workflow mapping, signed requirements, UI wireframes
+All, documented
+1. Foundation + quick wins (about 8–10 weeks)
+Login, org, roles, workflow engine, notifications, audit
+Notice Board, Chairman's Message, basic Chairman dashboard
+2. Approval and movement (about 8–10 weeks)
+Everyday operational value
+Document approval + e-sign, Vehicle request, Guest management, Parcel tracker
+3. People and money (about 8–10 weeks)
+Highest volume daily use
+Attendance + geofence, TA/DA, Conveyance, Tour & expense, Bus seats
+4. Assets and compliance (about 8–10 weeks)
+Highest business risk reduction
+Asset lifecycle, Licenses, Incident management
+5. Advanced and polish
+Analytics, integrations, hardening
+Chairman analytics and inner-circle chat, reporting, integrations
+The estimates are rough and assume a small team. Reorder phases based on what the client values most. If licenses and compliance carry the biggest risk (missed renewals can stop operations), bring them forward. Releasing in phases also lets real users give feedback before you build everything.
+Team reality check: a platform of this size is unlikely to be built well by one person in a short time. Plan for roughly: 1 tech lead/backend, 1 full-stack/web, 1 mobile, 1 UI/UX designer (part-time at least), 1 QA, and a part-time business analyst/project manager. If you are solo, quote a long timeline, start with phases 0 to 2, and get the client to agree to staged delivery and payment.
+10. Project and commercial protection
+Since the client gave only a small overview and could not explain details, protect yourself:
+• Do not fix a price for all 16 modules before discovery. Price discovery first, then phase by phase.
+• Get a written scope per phase with workflows, roles, screens and acceptance criteria signed by an authorized person.
+• Agree a change request process. New ideas will come, and they are fine when they are priced.
+• Name a client product owner who can answer questions and decide, plus department champions for each module.
+• Agree on hosting, data ownership, support and maintenance terms after go-live.
+• Plan user training, manuals, and a pilot group before company-wide rollout.
+11. Risks
+Risk
+Mitigation
+Scope too large and vague
+Phased delivery, signed scope per phase
+Workflows differ per department
+Configurable workflow engine, early workshops
+Low user adoption
+Simple UX, Bangla, training, executive push, pilot users
+Legal acceptance of e-sign
+Early legal review, certificate-ready design
+Poor connectivity on sites
+Offline-first features on mobile
+Privacy objections (location, status)
+Minimal collection, clear policy, access logs
+Security of Chairman and VIP data
+Stricter access, MFA, audit, review access regularly
+Key-person dependency
+Documentation, clean code structure, handover
+12. Discovery questions for the client
+General
+1. Who is the project sponsor and who decides day-to-day? How many users at launch and at full scale? Which companies in the group are included?
+2. Do they already use an HRMS, ERP, payroll, Active Directory or biometric devices? What must integrate?
+3. On-premise, local data center or cloud? Any rules on data residency?
+4. Bangla, English or both? Web, mobile or both for each module?
+5. Is there an existing org chart, grade structure and delegation policy we can import?
+Per module
+• Notice/Chairman: who may publish, who approves, must everyone acknowledge?
+• Documents: top 10 document types, approval chains for each, which need legal-grade signatures, retention period?
+• Parcels: internal only or external couriers? Which points need scanning? Confidential parcel rules?
+• Assets: asset categories, existing register (Excel?), who owns maintenance, alert lead times?
+• Licenses: full list of licenses, authorities, renewal steps, fee owners, and who sees what?
+• Incidents: existing HSE procedure, severity scale, mandatory regulator reporting?
+• Guests: gate flow today, ID rules, government and VIP protocol documents?
+• Fleet: number of vehicles and drivers, who is the approver, any GPS devices, fuel policy?
+• Attendance: shifts, field staff, grace time, existing devices, privacy stance on location?
+• TA/DA, Conveyance, Tour: written policy by grade, rates, limits, finance workflow and payment method?
+• Bus seats: routes, buses, boarding points, how freed seats are decided today, exceptions?
+• Chairman dashboard: which metrics, who is in the inner circle, who manages that list, message retention, security expectations?
+13. Immediate next steps
+1. Share this document with the client, and ask them to review modules and answer section 12.
+2. Hold workflow workshops, with one session per module group, and record each flow as a diagram.
+3. Produce wireframes for the home screen, approvals inbox and two or three key modules.
+4. Finalize the architecture decisions: hosting, authentication, language, integrations.
+5. Build a thin vertical slice: login → role → one workflow → notification → audit log. Demo it to the client early. This proves the foundation and builds their trust.
+6. Agree phase 1 scope, timeline and payment, then start.
+This is a living document. Update it after each workshop, and keep the approved version as the baseline for scope.

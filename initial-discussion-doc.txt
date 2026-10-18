@@ -1,0 +1,73 @@
+BASHUNDHARA OIL AND GAS COMPANY LIMITED.
+
+BASICALL WE WILL DO A COMPREHENSIVE B2B PLATFORM FOR BASHUNDHARA GROUP, SPECIALLY FOR THE OIL AND  GAS SECTION (IN BANGLADESH), 
+WHRE THEY WILL BE ABLE TO MANAGE THEIRE ENTAIRE SYSTEM AND 
+MAKE THE PROCESS DIGITILIZATION.
+
+
+
+
+High Label Overview.
+
+1. Notice Board - this will be for everyone. notice should go and notify to everyone
+
+2. Chairman's Message - So when chairman  will deliver message, it should be visible and send to everyone.
+
+3. Paper / Document Approval Automation - something like DocuSign platform
+There should be documet e-sign also.
+
+4. Parcel Tracker -  like send and recive - so there should be system like track the percel. like for example sometime we do not know does he send that parcel
+to another person or desier destination or not, and  does they recive the parcel or not. For transparency and where right now the parcel is, we need to manage this also. i do not know how big company done this process / step. to be honest, they just gave us small overview, we did not able to here in deft details from them. so we have to done this how big company do these.
+
+5. Asset Lifetime tracking or Lifecycle Management - you know, company have different kind of expensive asset, like we have manage, when they are getting expired, notification aleart, lowstock, renew date, maintanance time and so on. so we have to doen this very smartly.
+
+- Business License Management - Trade License, BSTI, etc.
+- like also BSTI renew date and flow: (Fund  Approval, Apply for licence, visit date,  audit, license get) full life cycle.
+
+Basically we have to make sure here proffer notification, status, steps and so on like that big organization and company does and follow. 
+  
+8. Incident Management - There will be incident management system also like so many incident can happen in a big company, so we have to report and track them also.
+
+9. Guest Management System - Like there will be normal visitor, govt guest, VIP guest. so we have to manage them according to their respective.
+
+10. Fleet / Vehicle Management System - so  here emoloyee will ask for vehicle for office work from one place to another place to admin,
+admin will assign available drive and vehicle
+
+11. Attendance with Geo-fancing
+
+12. TA & DA Management System
+
+13. Conveyance Management System
+
+14. Tour and expense management
+
+15. Bus seat reservation for employee - like let say for a particular team, from office to a specipic area, given a buss, in the buss, let say, 20 seats only,
+but the team has 30 people. so remining those person will ask for their seat, and who applied first, they will get the new seat if from existing 20 people, if 
+anyone left the job. basically they will get priority who applied first.
+
+
+
+16. Chairman Dashboard, from there he will see the analytics of selective person like those always stay with him and he liked,
+also there should be in-app messaging also for that group.
+Chairman will know also leave employee status like (Informed, non informed, sick, meeting)
+
+So definitely this platform should be role based system, and  you there will be different type of employee and process.
+so we have to design this platform like that way.
+
+
+TO BE HONEST, I DO NOT KNOW, HOW BIG COMPANY MANAGE EVERYTHING IN A SINGLE PLATFORM. THEY ASKED US TO DO/ DEVELOP 
+A PLATFORM WHERE EVERYTHING SHOULD BE IN A SINGLE APP AND WEBSITE.
+HONESTLY, I  DID  NOT DONE  ANY B2B PROJECT LIKE THIS.
+
+
+FEW THINGS TO ALWAYS REMEMBER:
+- This platform for internal use among all the employee and process and system
+- Definitely there will be role base system here
+
+
+
+
+
+so write me comprehensive documentation, share your thoughts like how can I do this and how big company manage their system and so on.
+
+
