@@ -44,6 +44,7 @@ const CHAIRMAN_NAV: NavSection[] = [
     items: [
       { view: 'dashboard',     icon: <Crown size={16} />,          label: 'Executive Command Center',     labelBn: 'এক্সিকিউটিভ কমান্ড সেন্টার', badge: '3', badgeType: 'danger' },
       { view: 'inner_circle',  icon: <MessageSquare size={16} />,  label: "Inner Circle Messaging",       labelBn: 'ইনার সার্কেল মেসেজিং',       badge: '3', badgeType: 'info' },
+      { view: 'approvals',     icon: <ClipboardCheck size={16} />, label: 'Consolidated Approval Inbox',   labelBn: 'সম্মিলিত অনুমোদন ইনবক্স',     badge: '5', badgeType: 'danger' },
       { view: 'notesheet',     icon: <FileSignature size={16} />,  label: 'Priority Authorizations',      labelBn: 'অগ্রাধিকার অনুমোদন' },
     ],
   },
@@ -113,7 +114,8 @@ const HOD_NAV: NavSection[] = [
     items: [
       { view: 'dashboard',     icon: <Briefcase size={16} />,      label: 'Department Governance Hub',    labelBn: 'বিভাগীয় গভর্ন্যান্স হাব',   badge: '7', badgeType: 'warn' },
       { view: 'inner_circle',  icon: <MessageSquare size={16} />,  label: 'Executive Leadership Comm',    labelBn: 'শীর্ষ নেতৃত্ব যোগাযোগ',     badge: '2', badgeType: 'info' },
-      { view: 'notesheet',     icon: <ClipboardCheck size={16} />, label: 'Unified Approval Queue',       labelBn: 'ইউনিফায়েড অনুমোদন সারি',     badge: '7', badgeType: 'danger' },
+      { view: 'approvals',     icon: <ClipboardCheck size={16} />, label: 'Unified Approval Inbox',       labelBn: 'ইউনিফায়েড অনুমোদন ইনবক্স', badge: '5', badgeType: 'danger' },
+      { view: 'notesheet',     icon: <FileSignature size={16} />,  label: 'Note-Sheet & E-Sign',          labelBn: 'নোট-শীট ও ই-স্বাক্ষর' },
       { view: 'compliance',    icon: <ShieldCheck size={16} />,    label: 'Dept Compliance Tracker',      labelBn: 'বিভাগীয় কমপ্লায়েন্স' },
     ],
   },

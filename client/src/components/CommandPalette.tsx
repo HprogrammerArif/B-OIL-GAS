@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AppRole, AppView, Lang, t } from '../types';
 import {
   Search, LayoutDashboard, FileSignature, ShieldCheck, Truck, Bus,
-  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users
+  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -58,6 +58,14 @@ export default function CommandPalette({
       category: 'Views',
       icon: <LayoutDashboard size={15} />,
       action: () => { onNavigate('dashboard'); onClose(); },
+    },
+    {
+      id: 'view-approvals',
+      title: 'Unified Executive Approval Inbox',
+      titleBn: 'একীভূত নির্বাহী অনুমোদন ইনবক্স',
+      category: 'Views',
+      icon: <ClipboardCheck size={15} />,
+      action: () => { onNavigate('approvals'); onClose(); },
     },
     {
       id: 'view-notesheet',

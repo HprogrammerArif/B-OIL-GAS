@@ -20,6 +20,7 @@ import ClaimsView from './views/ClaimsView';
 import AssetView from './views/AssetView';
 import GuestView from './views/GuestView';
 import WorkforceView from './views/WorkforceView';
+import ApprovalsView from './views/ApprovalsView';
 import ToastManager, { showToast } from './components/ToastManager';
 import BroadcastModal from './components/BroadcastModal';
 
@@ -144,6 +145,7 @@ export default function App() {
             {view === 'asset'          && <AssetView          role={role} lang={lang} />}
             {view === 'guest'          && <GuestView          role={role} lang={lang} />}
             {view === 'workforce'      && <WorkforceView      role={role} lang={lang} />}
+            {view === 'approvals'      && <ApprovalsView      role={role} lang={lang} />}
           </div>
         </main>
       </div>

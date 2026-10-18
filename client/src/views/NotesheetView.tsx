@@ -4,8 +4,9 @@ import { showToast } from '../App';
 import {
   FileSignature, CheckCircle, Clock, AlertTriangle, ShieldCheck,
   Send, PenTool, Hash, Download, ArrowRight, UserCheck, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X
+  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer
 } from 'lucide-react';
+import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 
 interface NoteItem {
   id: number;
@@ -138,6 +139,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const [isSigned, setIsSigned] = useState(false);
   const [activeTab, setActiveTab] = useState<'sheet' | 'audit' | 'compare'>('sheet');
   const [showCertModal, setShowCertModal] = useState(false);
+  const [showOfficialDoc, setShowOfficialDoc] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signatureHash, setSignatureHash] = useState<string | null>(null);
@@ -253,6 +255,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     setShowCertModal(true);
   };
 
+  const officialDocData: DocumentData = {
+    type: 'notesheet',
+    docNumber: currentFile.fileNo,
+    title: currentFile.title,
+    date: currentFile.date,
+    department: currentFile.dept,
+    authorizedBy: currentFile.notes.find((n) => n.isChairman)?.author || 'Ahmed Akbar Sobhan',
+    authorizerRole: 'Chairman & Managing Director, Bashundhara Group',
+    amountOrValue: currentFile.amount,
+    sapReference: currentFile.sapRef,
+    paragraphs: currentFile.notes.map((n) => ({
+      label: `Para ${n.para} (${n.dept})`,
+      text: n.body,
+      signedBy: `${n.author} — ${n.role}`,
+      hash: n.hash,
+    })),
+  };
+
   return (
     <div className="view-container">
       {/* Top Header */}
@@ -287,6 +307,13 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             onClick={() => setActiveTab('audit')}
           >
             <Lock size={14} /> {t('Audit & Proof Ledger', 'নিরীক্ষা খতিয়ান', lang)}
+          </button>
+          <button
+            className="btn-outline"
+            onClick={() => setShowOfficialDoc(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Printer size={14} /> {t('Print Official Memo', 'মেমো প্রিন্ট', lang)}
           </button>
           <button
             className="btn-primary"
@@ -637,6 +664,14 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           </div>
         </div>
       )}
+
+      {/* Official Bashundhara Group Letterhead & Memo Print Modal */}
+      <OfficialDocumentModal
+        isOpen={showOfficialDoc}
+        onClose={() => setShowOfficialDoc(false)}
+        lang={lang}
+        docData={officialDocData}
+      />
     </div>
   );
 }
