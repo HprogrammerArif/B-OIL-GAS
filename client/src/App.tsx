@@ -23,6 +23,7 @@ import WorkforceView from './views/WorkforceView';
 import ApprovalsView from './views/ApprovalsView';
 import ToastManager, { showToast } from './components/ToastManager';
 import BroadcastModal from './components/BroadcastModal';
+import MobileBottomNav from './components/MobileBottomNav';
 
 export { showToast };
 
@@ -165,6 +166,18 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* Mobile Enterprise Bottom Tab Navigation Bar */}
+      <MobileBottomNav
+        role={role}
+        activeView={view}
+        onNavigate={(v) => {
+          setView(v);
+          setIsMobileSidebarOpen(false);
+        }}
+        lang={lang}
+        onOpenMenu={() => setIsMobileSidebarOpen(true)}
+      />
 
       {/* Global Command Palette */}
       <CommandPalette
