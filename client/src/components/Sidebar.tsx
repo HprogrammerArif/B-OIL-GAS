@@ -5,7 +5,7 @@ import {
   Package, MapPin, AlertTriangle, ChevronLeft, ChevronRight,
   MessageSquare, Crown, Gauge, ClipboardCheck, Users,
   Wrench, CalendarClock, UserCheck, Receipt, Car,
-  Building2, Shield, Briefcase, Bell, BarChart3
+  Building2, Shield, Briefcase, Bell, BarChart3, X
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -15,6 +15,8 @@ interface SidebarProps {
   lang: Lang;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 interface NavEntry {
@@ -194,12 +196,14 @@ export default function Sidebar({
   lang,
   isCollapsed = false,
   onToggleCollapse,
+  isMobileOpen = false,
+  onCloseMobile,
 }: SidebarProps) {
   const meta = ROLE_META[role];
   const sections = ROLE_NAV[role];
 
   return (
-    <aside className={`sidebar${isCollapsed ? ' collapsed' : ''}`}>
+    <aside className={`sidebar${isCollapsed ? ' collapsed' : ''}${isMobileOpen ? ' mobile-open' : ''}`}>
       {/* Brand Header */}
       <div className="sidebar-header">
         <div className="brand-emblem">B</div>
@@ -211,11 +215,21 @@ export default function Sidebar({
         )}
         {onToggleCollapse && (
           <button
-            className="sidebar-collapse-toggle"
+            className="sidebar-collapse-toggle desktop-collapse-btn"
             onClick={onToggleCollapse}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
+        )}
+        {onCloseMobile && (
+          <button
+            className="sidebar-mobile-close"
+            onClick={onCloseMobile}
+            title="Close navigation menu"
+            aria-label="Close menu"
+          >
+            <X size={18} />
           </button>
         )}
       </div>
@@ -248,7 +262,10 @@ export default function Sidebar({
                 <a
                   key={item.view + '-' + si}
                   className={`nav-link${isActive ? ' active' : ''}${isCollapsed ? ' collapsed' : ''}`}
-                  onClick={() => onNavigate(item.view)}
+                  onClick={() => {
+                    onNavigate(item.view);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
                   title={isCollapsed ? t(item.label, item.labelBn, lang) : undefined}
                 >
                   <div className="nav-icon-wrap">{item.icon}</div>

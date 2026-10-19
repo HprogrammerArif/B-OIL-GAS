@@ -6211,3 +6211,534 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
 [data-theme="dark"] .ic-search-bar { background: #0A1227; border-color: #1E293B; }
 [data-theme="dark"] .ic-search-bar input { color: #E2E8F0; }
 
+
+/* ==========================================================================
+   BOGCL ONENET / ONNEOPS MASTER RESPONSIVE DESIGN SYSTEM
+   Supports Desktop, Laptop, iPad/Tablet, and Mobile (360px - 1024px)
+   ========================================================================== */
+
+/* ─── BASE RESPONSIVE CONTROLS & UTILITIES ─────────────────────────────────── */
+.sidebar-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 23, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1050;
+  animation: fadeInBackdrop 0.22s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.topbar-mobile-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--brand-slate-200);
+  background: #ffffff;
+  color: var(--brand-slate-800);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.topbar-mobile-hamburger:hover {
+  background: var(--brand-slate-100);
+  color: var(--brand-crimson);
+}
+
+[data-theme="dark"] .topbar-mobile-hamburger {
+  background: #111A38;
+  border-color: #1E293B;
+  color: #E2E8F0;
+}
+
+[data-theme="dark"] .topbar-mobile-hamburger:hover {
+  background: #16254C;
+  color: #fff;
+}
+
+.sidebar-mobile-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-mobile-close:hover {
+  background: rgba(165, 28, 48, 0.6);
+  border-color: var(--brand-crimson);
+}
+
+.ic-mobile-back-btn {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: rgba(165, 28, 48, 0.12);
+  border: 1px solid rgba(165, 28, 48, 0.28);
+  color: var(--brand-crimson);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-right: 8px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.ic-mobile-back-btn:hover {
+  background: var(--brand-crimson);
+  color: #fff;
+}
+
+[data-theme="dark"] .ic-mobile-back-btn {
+  background: rgba(165, 28, 48, 0.25);
+  border-color: rgba(165, 28, 48, 0.5);
+  color: #F87171;
+}
+
+/* ─── TABLET & IPAD BREAKPOINT (<= 1024px) ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  /* Off-canvas Navigation Drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    z-index: 1100 !important;
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: none !important;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0) !important;
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  /* Full-width Main Workspace */
+  .main-wrapper,
+  .main-wrapper.sidebar-collapsed {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Topbar Mobile Controls */
+  .topbar-mobile-hamburger {
+    display: flex !important;
+  }
+
+  .desktop-collapse-btn {
+    display: none !important;
+  }
+
+  .sidebar-mobile-close {
+    display: flex !important;
+  }
+
+  .topbar {
+    padding: 0 16px !important;
+    gap: 12px !important;
+  }
+
+  /* Responsive Page Content Padding */
+  .page-content {
+    padding: 18px 16px 40px !important;
+  }
+
+  /* Grid Layouts Stack / 2-Columns */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .dashboard-columns {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .col-2,
+  .col-2-eq {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .col-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .col-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .notesheet-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .bus-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  /* Strategic ROI Ribbon Wrap */
+  .roi-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .roi-stats {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+}
+
+/* ─── INNER CIRCLE CHAT MOBILE / TABLET ADAPTATION (<= 900px) ──────────────── */
+@media (max-width: 900px) {
+  .inner-circle-workspace {
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 60px) !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .ic-vault-drawer {
+    display: none !important;
+  }
+
+  /* When viewing contacts & channels hub */
+  .inner-circle-workspace.mobile-show-hub .ic-hub-sidebar {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-right: none !important;
+  }
+
+  .inner-circle-workspace.mobile-show-hub .ic-chat-main {
+    display: none !important;
+  }
+
+  /* When viewing active message thread */
+  .inner-circle-workspace.mobile-show-chat .ic-hub-sidebar {
+    display: none !important;
+  }
+
+  .inner-circle-workspace.mobile-show-chat .ic-chat-main {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex: 1 !important;
+  }
+
+  .ic-mobile-back-btn {
+    display: inline-flex !important;
+  }
+
+  .ic-topbar-actions .ic-btn-call span,
+  .ic-topbar-actions .ic-btn-video span,
+  .ic-topbar-actions .ic-topbar-tool-btn span {
+    display: none !important;
+  }
+
+  .ic-btn-panel-toggle {
+    display: none !important;
+  }
+}
+
+/* ─── PHONES & COMPACT SCREENS (<= 768px) ──────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Topbar Compaction */
+  .topbar {
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    padding: 0 10px !important;
+    gap: 6px !important;
+  }
+
+  .breadcrumb-hide-mobile {
+    display: none !important;
+  }
+
+  .breadcrumb-trail {
+    font-size: 13px !important;
+    gap: 4px !important;
+  }
+
+  .brand-badge-pill {
+    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+  }
+
+  .breadcrumb-current {
+    font-size: 12.5px !important;
+    max-width: 120px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Compact Search Trigger */
+  .topbar-search-trigger {
+    padding: 6px 8px !important;
+    min-width: 32px !important;
+    border-radius: 6px !important;
+  }
+
+  .topbar-search-trigger .search-placeholder,
+  .topbar-search-trigger .search-kbd {
+    display: none !important;
+  }
+
+  /* Compact Telemetry */
+  .telemetry-hide-mobile {
+    display: none !important;
+  }
+
+  .topbar-telemetry-capsule {
+    padding: 4px 7px !important;
+    font-size: 10px !important;
+    border-radius: 6px !important;
+  }
+
+  .sap-label {
+    font-size: 10px !important;
+  }
+
+  /* Utility Dock Compact */
+  .topbar-utility-dock {
+    gap: 3px !important;
+  }
+
+  .btn-dock-tool {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+  }
+
+  .btn-dock-lang span {
+    font-size: 9.5px !important;
+  }
+
+  /* Compact Broadcast Button */
+  .btn-broadcast-compact {
+    padding: 5px 8px !important;
+  }
+
+  .broadcast-btn-text {
+    display: none !important;
+  }
+
+  /* Compact User Profile */
+  .user-widget-interactive {
+    padding: 2px !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .user-meta {
+    display: none !important;
+  }
+
+  .user-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 10.5px !important;
+  }
+
+  .user-dropdown-menu {
+    right: -4px !important;
+    width: calc(100vw - 16px) !important;
+    max-width: 320px !important;
+  }
+
+  /* Page Content Padding */
+  .page-content {
+    padding: 12px 8px 36px !important;
+  }
+
+  /* Section Headers & Action Groups */
+  .section-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .section-header .btn-group {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .section-header .btn-group button,
+  .section-header .btn-group a {
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Card Reductions */
+  .card {
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .card-hd {
+    padding: 10px 12px !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .card-body {
+    padding: 10px 12px !important;
+  }
+
+  .col-3,
+  .col-4 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Universal Table Scrolling Wrapper */
+  .table-responsive,
+  .data-table-container,
+  .doc-itemized-table-wrapper,
+  .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+
+  .data-table,
+  .doc-itemized-table {
+    min-width: 580px !important;
+  }
+
+  /* Kanban Board Touch Swipe */
+  .kanban {
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 14px !important;
+    gap: 10px !important;
+  }
+
+  .kanban-col {
+    min-width: 82vw !important;
+    max-width: 85vw !important;
+    scroll-snap-align: start !important;
+  }
+
+  /* Bus 20-Seats Grid for Mobile */
+  .bus-seats {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  /* Full-bleed Modals & Drawers */
+  .modal,
+  .sap-modal,
+  .broadcast-modal,
+  .official-doc-modal {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 90vh !important;
+    margin: 8px auto !important;
+    padding: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  .drawer-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  .command-palette {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 12px auto !important;
+  }
+
+  /* Notesheet Canvas Touch Friendly */
+  .signature-canvas,
+  .sig-pad canvas,
+  canvas {
+    max-width: 100% !important;
+    touch-action: none !important;
+  }
+}
+
+/* ─── ULTRA COMPACT PHONES (<= 480px) ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    padding: 12px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .btn-row,
+  .modal-footer,
+  .card-footer {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+
+  .btn-row > *,
+  .modal-footer > * {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .tabs-nav,
+  .filter-tabs {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    padding-bottom: 4px !important;
+  }
+
+  .tabs-nav button,
+  .filter-tabs button {
+    flex-shrink: 0 !important;
+  }
+}
+
+

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, RefreshCw, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight
+  Search, Moon, Sun, Clock, ChevronRight, Menu
 } from 'lucide-react';
 import { showToast } from '../App';
 import SapGatewayModal from './SapGatewayModal';
@@ -56,6 +56,7 @@ interface TopbarProps {
   onNavigate: (v: AppView) => void;
   onBroadcastOpen: () => void;
   onLogout: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 export default function Topbar({
@@ -70,6 +71,7 @@ export default function Topbar({
   onNavigate,
   onBroadcastOpen,
   onLogout,
+  onToggleMobileMenu,
 }: TopbarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSapModal, setShowSapModal] = useState(false);
@@ -116,16 +118,26 @@ export default function Topbar({
   return (
     <header className="topbar">
       <div className="topbar-left">
+        {/* Mobile Menu Hamburger Button */}
+        <button
+          className="topbar-mobile-hamburger"
+          onClick={onToggleMobileMenu}
+          aria-label="Toggle navigation menu"
+          title="Open Menu"
+        >
+          <Menu size={20} />
+        </button>
+
         {/* Breadcrumb & Page Title */}
         <div className="page-heading">
           <div className="breadcrumb-trail">
             <span className="brand-badge-pill">BOGCL OneOps</span>
-            <ChevronRight size={12} className="breadcrumb-sep" />
-            <span className="breadcrumb-section">{t(page.section, page.sectionBn, lang)}</span>
-            <ChevronRight size={12} className="breadcrumb-sep" />
+            <ChevronRight size={12} className="breadcrumb-sep breadcrumb-hide-mobile" />
+            <span className="breadcrumb-section breadcrumb-hide-mobile">{t(page.section, page.sectionBn, lang)}</span>
+            <ChevronRight size={12} className="breadcrumb-sep breadcrumb-hide-mobile" />
             <h2 className="breadcrumb-current">{t(page.en, page.bn, lang)}</h2>
           </div>
-          <p className="page-subtitle">{t(page.sub, page.subBn, lang)}</p>
+          <p className="page-subtitle breadcrumb-hide-mobile">{t(page.sub, page.subBn, lang)}</p>
         </div>
       </div>
 
@@ -151,8 +163,8 @@ export default function Topbar({
             <span className="sap-dot" />
             <span className="sap-label">SAP Live</span>
           </div>
-          <span className="telemetry-divider" />
-          <div className="telemetry-clock">
+          <span className="telemetry-divider telemetry-hide-mobile" />
+          <div className="telemetry-clock telemetry-hide-mobile">
             <Clock size={11} className="clock-icon" />
             <span className="clock-time">{currentTime}</span>
           </div>
@@ -191,7 +203,7 @@ export default function Topbar({
             title="Dispatch Sovereign Alert Broadcast to Leadership"
           >
             <Megaphone size={13} />
-            <span>{t('Broadcast', 'জরুরি বার্তা', lang)}</span>
+            <span className="broadcast-btn-text">{t('Broadcast', 'জরুরি বার্তা', lang)}</span>
           </button>
         )}
 

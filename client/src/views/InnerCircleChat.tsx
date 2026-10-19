@@ -3,7 +3,7 @@ import { ViewProps, t } from '../types';
 import { showToast } from '../App';
 import {
   Send, Paperclip, Mic, Flag, Pin, Search, Phone, Video,
-  CheckCheck, Check, Clock, Shield, ChevronRight, MessageSquare,
+  CheckCheck, Check, Clock, Shield, ChevronRight, ChevronLeft, MessageSquare,
   Users, Star, MoreVertical, Image, FileText, X, Hash,
   Lock, Eye, Play, Pause, Volume2, CornerDownRight, Smile,
   Sliders, ThumbsUp, AlertCircle, Sparkles, Download, PhoneOff,
@@ -210,6 +210,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
   const [voiceProgress, setVoiceProgress] = useState(14);
   const [voiceSpeed, setVoiceSpeed] = useState<number>(1);
+  const [mobileShowChat, setMobileShowChat] = useState(false);
 
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -357,7 +358,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   };
 
   return (
-    <div className={`inner-circle-workspace ${!showRightDrawer ? 'drawer-closed' : ''}`}>
+    <div className={`inner-circle-workspace ${!showRightDrawer ? 'drawer-closed' : ''} ${mobileShowChat ? 'mobile-show-chat' : 'mobile-show-hub'}`}>
       {/* ──────────────────────────────────────────────────────────────────────
           LEFT COLUMN: Inner Circle Hub (Channels & Direct Messages)
           ────────────────────────────────────────────────────────────────────── */}
@@ -424,7 +425,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 <div
                   key={ch.id}
                   className={`ic-list-item channel-item ${activeTarget.type === 'channel' && activeTarget.id === ch.id ? 'active' : ''}`}
-                  onClick={() => setActiveTarget({ type: 'channel', id: ch.id })}
+                  onClick={() => {
+                    setActiveTarget({ type: 'channel', id: ch.id });
+                    setMobileShowChat(true);
+                  }}
                 >
                   <div className="ic-item-prefix">
                     {ch.isLocked ? <Lock size={14} /> : <Hash size={14} />}
@@ -450,7 +454,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 <div
                   key={member.id}
                   className={`ic-list-item contact-item ${activeTarget.type === 'dm' && activeTarget.id === member.id ? 'active' : ''}`}
-                  onClick={() => setActiveTarget({ type: 'dm', id: member.id })}
+                  onClick={() => {
+                    setActiveTarget({ type: 'dm', id: member.id });
+                    setMobileShowChat(true);
+                  }}
                 >
                   <div className="ic-avatar-wrap">
                     <div className="ic-avatar" style={{ background: member.color }}>
@@ -494,6 +501,14 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
       <main className="ic-chat-main">
         {/* Chat Room Top Bar - Sleek, Compact Enterprise Header */}
         <header className="ic-chat-topbar">
+          <button
+            className="ic-mobile-back-btn"
+            onClick={() => setMobileShowChat(false)}
+            title={t('Back to Channels & Contacts', 'চ্যানেল তালিকায় ফিরুন', lang)}
+          >
+            <ChevronLeft size={16} />
+            <span>{t('Back', 'তালিকা', lang)}</span>
+          </button>
           <div className="ic-topbar-left">
             <div className="ic-room-avatar-badge">
               {activeTarget.type === 'channel' ? (

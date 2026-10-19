@@ -33,6 +33,7 @@ export default function App() {
   const [lang, setLang] = useState<Lang>('en');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
 
@@ -106,13 +107,27 @@ export default function App() {
       className={`app-shell${lang === 'bn' ? ' lang-bn' : ''}${isSidebarCollapsed ? ' sidebar-collapsed-shell' : ''}${view === 'inner_circle' ? ' chat-view-shell' : ''}`}
       data-theme={theme}
     >
+      {/* Mobile Drawer Backdrop Overlay */}
+      {isMobileSidebarOpen && (
+        <div
+          className="sidebar-mobile-backdrop"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-label="Close sidebar menu"
+        />
+      )}
+
       <Sidebar
         role={role}
         activeView={view}
-        onNavigate={setView}
+        onNavigate={(v) => {
+          setView(v);
+          setIsMobileSidebarOpen(false);
+        }}
         lang={lang}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
       <div className={`main-wrapper${isSidebarCollapsed ? ' sidebar-collapsed' : ''}${view === 'inner_circle' ? ' chat-view-wrapper' : ''}`}>
@@ -128,6 +143,7 @@ export default function App() {
           onNavigate={setView}
           onBroadcastOpen={() => setShowBroadcast(true)}
           onLogout={handleLogout}
+          onToggleMobileMenu={() => setIsMobileSidebarOpen((prev) => !prev)}
         />
 
         <main className={`page-content${view === 'inner_circle' ? ' no-padding-chat' : ''}`}>
