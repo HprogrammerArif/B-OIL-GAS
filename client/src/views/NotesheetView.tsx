@@ -4,7 +4,7 @@ import { showToast } from '../App';
 import {
   FileSignature, CheckCircle, Clock, AlertTriangle, ShieldCheck,
   Send, PenTool, Hash, Download, ArrowRight, UserCheck, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer
+  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw
 } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 
@@ -143,8 +143,51 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signatureHash, setSignatureHash] = useState<string | null>(null);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('Budget Justification Incomplete');
+  const [returnObservation, setReturnObservation] = useState('');
 
   const currentFile = files.find((f) => f.id === activeFileId) || files[0];
+
+  const handleRejectOrReturn = () => {
+    const reasonText = returnObservation.trim() || returnReason;
+    const returnNote: NoteItem = {
+      id: currentFile.notes.length + 1,
+      para: currentFile.notes.length + 1,
+      author: role === 'chairman' ? 'Ahmed Akbar Sobhan' : 'Reviewing Authority',
+      role: role === 'chairman' ? 'Chairman & Managing Director' : 'Executive Approver',
+      dept: "Chairman's Secretariat, Bashundhara Group",
+      date: 'Today, Just Now',
+      body: `[RETURNED FOR REVISION / কোয়ারি ও ফেরত]: ${returnReason} — ${reasonText}. File sent back to initiating department for clarification before further consideration.`,
+      status: 'pending',
+      hash: 'REVISION-AUDIT-STAMP: ' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+      isChairman: role === 'chairman',
+    };
+
+    setFiles((prev) =>
+      prev.map((f) => {
+        if (f.id === currentFile.id) {
+          return {
+            ...f,
+            status: 'in_review',
+            notes: [...f.notes, returnNote],
+          };
+        }
+        return f;
+      })
+    );
+
+    setShowReturnModal(false);
+    setReturnObservation('');
+    showToast(
+      t(
+        `File ${currentFile.fileNo} returned with official query note: "${returnReason}". Initiator notified.`,
+        `নথিটি কোয়ারি নোটসহ আবেদনকারী বিভাগে ফেরত পাঠানো হয়েছে।`,
+        lang
+      ),
+      'info'
+    );
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -556,13 +599,22 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   />
                 </div>
 
-                <button
-                  className="btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', padding: '10px', background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)' }}
-                  onClick={handleApproveChairman}
-                >
-                  <Stamp size={16} /> {t('Authorize with Executive Chairman Seal', 'চেয়ারম্যানের সিলসহ চূড়ান্ত অনুমোদন', lang)}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className="btn-primary"
+                    style={{ flex: 1.5, justifyContent: 'center', padding: '10px 12px', background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)', fontSize: '12px' }}
+                    onClick={handleApproveChairman}
+                  >
+                    <Stamp size={15} /> {t('Authorize & Seal', 'অনুমোদন ও সিল', lang)}
+                  </button>
+                  <button
+                    className="btn-outline"
+                    style={{ flex: 1, justifyContent: 'center', padding: '10px 10px', borderColor: '#DC2626', color: '#DC2626', background: 'rgba(220, 38, 38, 0.04)', fontSize: '12px' }}
+                    onClick={() => setShowReturnModal(true)}
+                  >
+                    <RotateCcw size={14} /> {t('Return / Query', 'আপত্তি ও ফেরত', lang)}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -659,6 +711,78 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 }}
               >
                 <Download size={14} /> {t('Download Sealed PDF', 'সিলকৃত পিডিএফ ডাউনলোড', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection / Return with Query Modal */}
+      {showReturnModal && (
+        <div className="modal-backdrop" onClick={() => setShowReturnModal(false)}>
+          <div className="modal-container" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header" style={{ background: '#7F1D1D', color: '#fff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <RotateCcw size={18} color="#FCA5A5" />
+                <h3 style={{ margin: 0, fontSize: '15px', color: '#fff' }}>
+                  {t('Return File with Official Observation Query', 'দাপ্তরিক কোয়ারি ও আপত্তি সহ ফাইল ফেরত', lang)}
+                </h3>
+              </div>
+              <button className="modal-close-btn" style={{ color: '#fff' }} onClick={() => setShowReturnModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '20px' }}>
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px', padding: '12px 14px', marginBottom: '16px', fontSize: '12px', color: '#991B1B' }}>
+                ⚠️ <strong>DocuSign Audit Trail Notice:</strong> This action will append a formal numbered observation paragraph to the running note-sheet and route the dossier back to the initiating department.
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '12px' }}>
+                  {t('Primary Regulatory / Operational Reason', 'প্রধান আপত্তি বা পর্যালোচনার কারণ', lang)}
+                </label>
+                <select
+                  className="form-select"
+                  value={returnReason}
+                  onChange={(e) => setReturnReason(e.target.value)}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--brand-border)', fontSize: '12.5px' }}
+                >
+                  <option value="Budget Justification Incomplete">Budget Justification & Capex GL Account Mismatch</option>
+                  <option value="Vendor Quotation Discrepancy">Vendor Quotations Lack 3 Competitive OEM Bids</option>
+                  <option value="Technical Clarification Required">Technical Clarification Required on ASME Spec</option>
+                  <option value="Regulatory Non-Compliance">DoE / Explosives Statutory Certificate Missing</option>
+                  <option value="Commercial Terms Re-negotiation">Commercial Price Revision / Payment Terms Adjustment</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label className="form-label" style={{ fontWeight: 700, fontSize: '12px' }}>
+                  {t('Executive Directive & Specific Instructions to Initiator', 'সুনির্দিষ্ট পর্যবেক্ষণ ও সংশোধনী নির্দেশনা', lang)}
+                </label>
+                <textarea
+                  className="form-input"
+                  rows={4}
+                  placeholder={t(
+                    'Specify what data, revised quotes, or technical certificates must be resubmitted...',
+                    'কী কী তথ্য, সংশোধিত দরপত্র বা সনদ পুনরায় দাখিল করতে হবে তা লিখুন...',
+                    lang
+                  )}
+                  value={returnObservation}
+                  onChange={(e) => setReturnObservation(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--brand-border)', fontSize: '12.5px' }}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ padding: '12px 20px', background: 'var(--brand-slate-50)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button className="btn-outline" onClick={() => setShowReturnModal(false)}>
+                {t('Cancel', 'বাতিল', lang)}
+              </button>
+              <button
+                className="btn-primary"
+                style={{ background: '#DC2626', borderColor: '#DC2626' }}
+                onClick={handleRejectOrReturn}
+              >
+                <RotateCcw size={14} /> {t('Confirm Return & Notify Dept', 'ফেরত নিশ্চিত করুন ও বিভাগকে জানান', lang)}
               </button>
             </div>
           </div>

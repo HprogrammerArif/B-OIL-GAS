@@ -22,10 +22,12 @@ import { useFleetStore } from '../store/fleetStore';
    ═══════════════════════════════════════════ */
 const INNER_CIRCLE = [
   { name: 'Engr. M. Harunur Rashid', role: 'Plant GM, Keraniganj', initials: 'HR', color: '#0369A1', status: 'present', statusLabel: 'Present at Plant', statusLabelBn: 'প্ল্যান্টে উপস্থিত', badge: 'present', location: 'Control Room Unit-1', phone: '+880 1711-002101' },
-  { name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: '#7C3AED', status: 'meeting', statusLabel: 'In Board Meeting', statusLabelBn: 'সভায় আছেন', badge: 'meeting', location: 'Boardroom A, Dhaka HQ', phone: '+880 1711-002102' },
+  { name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: '#7C3AED', status: 'meeting', statusLabel: 'In Board Meeting', statusLabelBn: 'বোর্ড মিটিংয়ে আছেন', badge: 'meeting', location: 'Boardroom A, Dhaka HQ', phone: '+880 1711-002102' },
   { name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: '#059669', status: 'travel', statusLabel: 'At BSTI Inspection', statusLabelBn: 'বিএসটিআই পরিদর্শনে', badge: 'travel', location: 'BSTI Directorate, Tejgaon', phone: '+880 1711-002103' },
   { name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: '#D97706', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'present', location: 'Level-8 Commercial Wing', phone: '+880 1711-002104' },
-  { name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: '#A51C30', status: 'leave', statusLabel: 'On Approved Leave', statusLabelBn: 'অনুমোদিত ছুটিতে', badge: 'leave', location: 'Dhaka', phone: '+880 1711-002105' },
+  { name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: '#A51C30', status: 'leave', statusLabel: 'Informed Leave (Pre-Approved)', statusLabelBn: 'অনুমোদিত ছুটি (অবহিত)', badge: 'leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105' },
+  { name: 'Dr. Rafiqul Huq', role: 'Chief Chemist & Lab Head', initials: 'RH', color: '#D97706', status: 'sick', statusLabel: 'Sick Leave (Medical Cert)', statusLabelBn: 'অসুস্থতাজনিত ছুটি (মেডিকেল)', badge: 'warn', location: 'Apollo Hospital Dhaka', phone: '+880 1711-002107' },
+  { name: 'Kazi Moinul Islam', role: 'Chief SCADA DCS Automation', initials: 'MI', color: '#DC2626', status: 'uninformed', statusLabel: '⚠️ Uninformed Absent', statusLabelBn: '⚠️ অননুমোদিত অনুপস্থিত', badge: 'danger', location: 'Unknown (No Biometric/App Punch)', phone: '+880 1711-002108' },
   { name: 'Nusrat Jahan', role: 'GM, Human Resources', initials: 'NJ', color: '#0891B2', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'present', location: 'HR Suite, Dhaka HQ', phone: '+880 1711-002106' },
 ];
 
@@ -195,6 +197,9 @@ export default function DashboardView({ role, lang }: ViewProps) {
 
   // Employee State
   const [showGatePassModal, setShowGatePassModal] = useState(false);
+
+  // Chairman Notice Board State
+  const [notices, setNotices] = useState(NOTICE_BOARD);
 
   const handleRowClick = (item: DetailDrawerData) => {
     setSelectedDrawerItem(item);
@@ -1010,14 +1015,30 @@ export default function DashboardView({ role, lang }: ViewProps) {
                   <div className="card-subtitle">{t('Live status of key leadership', 'মূল নেতৃত্বের লাইভ স্ট্যাটাস', lang)}</div>
                 </div>
               </div>
-              <span className="badge success">6 tracked</span>
+              <span className="badge success">8 tracked</span>
             </div>
             <div className="card-body">
+              {/* Presence Triage Breakdown Pills */}
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px', fontSize: '11px' }}>
+                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#ECFDF5', color: '#065F46', fontWeight: 600 }}>🟢 4 Present</span>
+                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#EFF6FF', color: '#1E40AF', fontWeight: 600 }}>🔵 1 In Meeting</span>
+                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FEF3C7', color: '#92400E', fontWeight: 600 }}>🟡 1 Informed Leave</span>
+                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FFFBEB', color: '#B45309', fontWeight: 600 }}>🟠 1 Sick Leave</span>
+                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FEE2E2', color: '#991B1B', fontWeight: 700 }}>🔴 1 Uninformed Absent ⚠️</span>
+              </div>
+
               <div className="presence-list">
                 {INNER_CIRCLE.map((person, i) => (
                   <div key={i} className="presence-row interactive-row"
-                    onClick={() => showToast(`📍 ${person.name} location: ${person.location} (${person.phone})`, 'info')}
-                    title="Click to view leadership detail">
+                    onClick={() => {
+                      if (person.status === 'uninformed') {
+                        showToast(`🚨 URGENT: HR GM Sayeda Afroza instructed to initiate formal inquiry for ${person.name}.`, 'danger');
+                      } else {
+                        showToast(`📍 ${person.name} location: ${person.location} (${person.phone})`, 'info');
+                      }
+                    }}
+                    title="Click to view leadership detail or trigger intervention"
+                    style={{ background: person.status === 'uninformed' ? '#FEF2F2' : undefined, border: person.status === 'uninformed' ? '1px solid #FECACA' : undefined }}>
                     <div className="presence-person">
                       <div className="presence-avatar" style={{ background: person.color }}>{person.initials}</div>
                       <div>
@@ -1027,7 +1048,20 @@ export default function DashboardView({ role, lang }: ViewProps) {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span className={`badge ${person.badge}`}>{t(person.statusLabel, person.statusLabelBn, lang)}</span>
-                      <ChevronRight size={14} color="var(--brand-slate-300)" />
+                      {person.status === 'uninformed' ? (
+                        <button
+                          className="btn-outline-danger"
+                          style={{ padding: '2px 8px', fontSize: '10px' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            showToast(`🚨 Priority Notice dispatched to ${person.name} & GM HR for unauthorized absence.`, 'danger');
+                          }}
+                        >
+                          Alert HR
+                        </button>
+                      ) : (
+                        <ChevronRight size={14} color="var(--brand-slate-300)" />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1045,6 +1079,26 @@ export default function DashboardView({ role, lang }: ViewProps) {
                   <div className="card-subtitle">{t('Latest corporate announcements', 'সর্বশেষ কর্পোরেট ঘোষণা', lang)}</div>
                 </div>
               </div>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '11px', padding: '4px 10px' }}
+                onClick={() => {
+                  const titleInput = prompt('Enter new corporate circular headline / নোটিশ শিরোনাম লিখুন:');
+                  if (!titleInput) return;
+                  const newNotice = {
+                    title: titleInput,
+                    title_bn: titleInput,
+                    tag: 'URGENT CIRCULAR',
+                    date: 'Today, Just Now',
+                    read: false,
+                    pinned: true
+                  };
+                  setNotices([newNotice, ...notices]);
+                  showToast('📢 New company-wide notice published & pushed to all 1,240 employees via App & SMS.', 'gold');
+                }}
+              >
+                + {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}
+              </button>
             </div>
             <div className="card-body">
               <div className="notice-card gold-pin" style={{ marginBottom: '10px' }}>
@@ -1060,7 +1114,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 </div>
               </div>
               <div className="notice-list">
-                {NOTICE_BOARD.map((notice, i) => (
+                {notices.map((notice, i) => (
                   <div key={i} className={`notice-card${notice.pinned ? ' pinned' : ''}`}>
                     <div className="notice-hd">
                       <div className="notice-title">{t(notice.title, notice.title_bn, lang)}</div>

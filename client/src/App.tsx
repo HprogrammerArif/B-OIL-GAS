@@ -136,7 +136,7 @@ export default function App() {
             {view === 'inner_circle'   && <InnerCircleChat    role={role} lang={lang} />}
             {view === 'notesheet'      && <NotesheetView      role={role} lang={lang} />}
             {view === 'compliance'     && <ComplianceView     role={role} lang={lang} />}
-            {view === 'fleet'          && <FleetView          role={role} lang={lang} />}
+            {(view === 'fleet' || view === 'vehicle_request') && <FleetView role={role} lang={lang} />}
             {view === 'bus'            && <BusView            role={role} lang={lang} />}
             {view === 'parcel'         && <ParcelView         role={role} lang={lang} />}
             {view === 'attendance'     && <AttendanceView     role={role} lang={lang} />}

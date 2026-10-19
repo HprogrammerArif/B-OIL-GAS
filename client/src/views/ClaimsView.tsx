@@ -12,11 +12,13 @@ interface ClaimItem {
   claimant: string;
   designation: string;
   dept: string;
-  type: 'tada' | 'conveyance';
+  type: 'tada' | 'conveyance' | 'tour_event';
   purpose: string;
   destination?: string;
   period: string;
   amount: number;
+  advanceTaken?: number;
+  netSettlement?: number;
   status: 'pending_hod' | 'pending_finance' | 'approved' | 'settled' | 'rejected';
   dateSubmitted: string;
   sapVoucher?: string;
@@ -24,6 +26,47 @@ interface ClaimItem {
 }
 
 const INITIAL_CLAIMS: ClaimItem[] = [
+  {
+    id: 'TOUR-2026-008',
+    claimant: 'Engr. Md. Harunur Rashid',
+    designation: 'Plant General Manager',
+    dept: 'Keraniganj Refinery',
+    type: 'tour_event',
+    purpose: 'Chittagong Coastal Oil Terminal Turnaround Delegation Tour & Jetty Audit',
+    destination: 'Patenga Terminal & BIWTA Jetty',
+    period: 'Oct 05 – Oct 08, 2026 (4 days)',
+    amount: 114500,
+    advanceTaken: 120000,
+    netSettlement: -5500, // Refund to BOGCL Treasury
+    status: 'approved',
+    dateSubmitted: '11 Oct 2026',
+    sapVoucher: 'SAP-TR-2026-10492',
+    items: [
+      { desc: 'Official Technical Delegation Airfare (4 Engineers)', date: '05, 08 Oct', amount: 56000, category: 'Airfare' },
+      { desc: 'Port Area Hotel Agrabad (3 Rooms, 3 Nights)', date: '05-07 Oct', amount: 38500, category: 'Accommodation' },
+      { desc: 'Local Speedboat & River Jetty Inspection Logistics', date: '06-07 Oct', amount: 20000, category: 'River Logistics' },
+    ],
+  },
+  {
+    id: 'SPRT-2026-003',
+    claimant: 'Md. Kamruzzaman',
+    designation: 'Transport & Admin Supervisor',
+    dept: 'Admin & Transport',
+    type: 'tour_event',
+    purpose: 'BOGCL Annual Inter-Plant Sports & Cricket Tournament (Keraniganj Ground)',
+    destination: 'Keraniganj Refinery Ground',
+    period: 'Oct 12 – Oct 14, 2026',
+    amount: 362400,
+    advanceTaken: 350000,
+    netSettlement: 12400, // Reimbursement Payable to Admin
+    status: 'pending_hod',
+    dateSubmitted: '16 Oct 2026',
+    items: [
+      { desc: 'Refinery Ground Preparation, Tents & Sound System', date: '12 Oct', amount: 145000, category: 'Event Setup' },
+      { desc: 'Player Jerseys & Sports Equipment for 8 Plant Teams', date: '12 Oct', amount: 98400, category: 'Sports Kit' },
+      { desc: 'Player Catering & Refreshment (350 Staff for 3 Days)', date: '12-14 Oct', amount: 119000, category: 'Catering' },
+    ],
+  },
   {
     id: 'TADA-2026-0419',
     claimant: 'Tanvir Ahmed',
@@ -106,11 +149,11 @@ const GRADE_POLICY = [
 
 export default function ClaimsView({ role, lang }: ViewProps) {
   const [claims, setClaims] = useState<ClaimItem[]>(INITIAL_CLAIMS);
-  const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'submit' | 'policy'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'submit' | 'policy'>('all');
   const [selectedClaim, setSelectedClaim] = useState<ClaimItem | null>(INITIAL_CLAIMS[0]);
   
   // New Claim Form State
-  const [formType, setFormType] = useState<'tada' | 'conveyance'>('tada');
+  const [formType, setFormType] = useState<'tada' | 'conveyance' | 'tour_event'>('tada');
   const [formPurpose, setFormPurpose] = useState('');
   const [formDestination, setFormDestination] = useState('');
   const [formStartDate, setFormStartDate] = useState('');
@@ -121,6 +164,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const filteredClaims = claims.filter(c => {
     if (activeTab === 'tada') return c.type === 'tada';
     if (activeTab === 'conveyance') return c.type === 'conveyance';
+    if (activeTab === 'tour_event') return c.type === 'tour_event';
     return true;
   });
 
@@ -151,7 +195,16 @@ export default function ClaimsView({ role, lang }: ViewProps) {
       showToast(lang === 'en' ? 'Please fill in purpose and amount.' : 'অনুগ্রহ করে উদ্দেশ্য এবং টাকার পরিমাণ লিখুন।', 'warn');
       return;
     }
-    const newId = formType === 'tada' ? `TADA-2026-${Math.floor(1000 + Math.random() * 9000)}` : `CNV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newId = formType === 'tada'
+      ? `TADA-2026-${Math.floor(1000 + Math.random() * 9000)}`
+      : formType === 'tour_event'
+      ? `TOUR-2026-${Math.floor(1000 + Math.random() * 9000)}`
+      : `CNV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const totalAmt = parseFloat(formAmount);
+    const advanceAmt = parseFloat(formAdvanceTaken) || 0;
+    const netSettlementAmt = formType === 'tour_event' ? totalAmt - advanceAmt : undefined;
+
     const newClaim: ClaimItem = {
       id: newId,
       claimant: 'Tanvir Ahmed',
@@ -159,13 +212,15 @@ export default function ClaimsView({ role, lang }: ViewProps) {
       dept: 'Sales & Distribution',
       type: formType,
       purpose: formPurpose,
-      destination: formType === 'tada' ? formDestination : 'Dhaka Metro Area',
+      destination: formType === 'tada' || formType === 'tour_event' ? formDestination : 'Dhaka Metro Area',
       period: formStartDate && formEndDate ? `${formStartDate} to ${formEndDate}` : 'Oct 2026',
-      amount: parseFloat(formAmount),
+      amount: totalAmt,
+      advanceTaken: advanceAmt > 0 ? advanceAmt : undefined,
+      netSettlement: netSettlementAmt,
       status: 'pending_hod',
       dateSubmitted: 'Today, 21:20',
       items: [
-        { desc: formPurpose, date: formStartDate || 'Today', amount: parseFloat(formAmount), category: formType === 'tada' ? 'Tour Expense' : 'Local Travel' }
+        { desc: formPurpose, date: formStartDate || 'Today', amount: totalAmt, category: formType === 'tada' ? 'Tour Expense' : formType === 'tour_event' ? 'Event / Delegation Advance' : 'Local Travel' }
       ]
     };
     setClaims([newClaim, ...claims]);
@@ -173,6 +228,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
     setActiveTab('all');
     setFormPurpose('');
     setFormAmount('');
+    setFormAdvanceTaken('0');
     showToast(lang === 'en' ? `Claim ${newId} submitted for HOD approval.` : `দাবি ${newId} বিভাগীয় প্রধানের অনুমোদনের জন্য দাখিল করা হয়েছে।`, 'success');
   };
 
@@ -260,6 +316,9 @@ export default function ClaimsView({ role, lang }: ViewProps) {
         <button className={`pill-tab ${activeTab === 'conveyance' ? 'active' : ''}`} onClick={() => setActiveTab('conveyance')}>
           🚕 {t('Monthly Conveyance', 'মাসিক যাতায়াত', lang)}
         </button>
+        <button className={`pill-tab ${activeTab === 'tour_event' ? 'active' : ''}`} onClick={() => setActiveTab('tour_event')}>
+          🏆 {t('Tour & Event Advance Settlement', 'সফর ও ইভেন্ট অগ্রিম সমন্বয়', lang)}
+        </button>
         <button className={`pill-tab ${activeTab === 'policy' ? 'active' : ''}`} onClick={() => setActiveTab('policy')}>
           📜 {t('Grade Entitlement Matrix', 'গ্রেড নীতিমালা ম্যাট্রিক্স', lang)}
         </button>
@@ -323,8 +382,9 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                     value={formType}
                     onChange={(e) => setFormType(e.target.value as any)}
                   >
-                    <option value="tada">✈️ TA / DA Tour Expense (Outstation)</option>
+                    <option value="tada">✈️ TA / DA Tour Expense (Outstation Individual)</option>
                     <option value="conveyance">🚕 Local Conveyance (City Metro Trips)</option>
+                    <option value="tour_event">🏆 Tour, Sports & Corporate Event Advance Settlement</option>
                   </select>
                 </div>
                 <div>
@@ -334,23 +394,23 @@ export default function ClaimsView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label className="form-label">{t('Official Purpose / Project Ref', 'দাপ্তরিক উদ্দেশ্য / প্রকল্প তথ্য', lang)}</label>
+                <label className="form-label">{t('Official Purpose / Event Ref', 'দাপ্তরিক উদ্দেশ্য / ইভেন্ট তথ্য', lang)}</label>
                 <input
                   className="form-input"
-                  placeholder="e.g. Factory maintenance inspection or Chittagong dealer visit"
+                  placeholder={formType === 'tour_event' ? 'e.g. Annual Inter-plant Sports Meet or Chittagong Riverine Terminal Technical Delegation' : 'e.g. Factory maintenance inspection or Chittagong dealer visit'}
                   value={formPurpose}
                   onChange={(e) => setFormPurpose(e.target.value)}
                   required
                 />
               </div>
 
-              {formType === 'tada' && (
+              {(formType === 'tada' || formType === 'tour_event') && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <div>
-                    <label className="form-label">{t('Destination', 'গন্তব্য', lang)}</label>
+                    <label className="form-label">{t('Destination / Location', 'গন্তব্য / স্থান', lang)}</label>
                     <input
                       className="form-input"
-                      placeholder="e.g. Sitakunda, CTG"
+                      placeholder="e.g. Keraniganj Ground / Sitakunda Depot"
                       value={formDestination}
                       onChange={(e) => setFormDestination(e.target.value)}
                     />
@@ -454,8 +514,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                       </td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span className={`badge ${item.type === 'tada' ? 'info' : 'purple'}`}>
-                            {item.type === 'tada' ? '✈️ TA/DA' : '🚕 Conveyance'}
+                          <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`}>
+                            {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour & Event' : '🚕 Conveyance'}
                           </span>
                         </div>
                         <div style={{ fontSize: '12px', marginTop: '3px', maxWidth: '220px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -523,8 +583,29 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   )}
                 </div>
 
+                {selectedClaim.advanceTaken !== undefined && (
+                  <div style={{ background: 'var(--brand-slate-100)', borderRadius: '6px', padding: '10px 14px', marginBottom: '14px', border: '1px solid var(--brand-border)', fontSize: '11.5px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ color: 'var(--brand-slate-500)' }}>{t('Advance Cash Disbursed:', 'প্রদত্ত নগদ অগ্রিম:', lang)}</span>
+                      <strong>৳{selectedClaim.advanceTaken.toLocaleString()}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ color: 'var(--brand-slate-500)' }}>{t('Actual Verified Bills:', 'যাচাইকৃত প্রকৃত বিল:', lang)}</span>
+                      <strong>৳{selectedClaim.amount.toLocaleString()}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--brand-border)', paddingTop: '6px', fontWeight: 700 }}>
+                      <span>{t('Net Settlement Balance:', 'চূড়ান্ত সমন্বয় স্থিতি:', lang)}</span>
+                      <span style={{ color: (selectedClaim.netSettlement || 0) >= 0 ? '#15803D' : '#DC2626' }}>
+                        {(selectedClaim.netSettlement || 0) >= 0
+                          ? `+ ৳${(selectedClaim.netSettlement || 0).toLocaleString()} (Payable to Staff)`
+                          : `- ৳${Math.abs(selectedClaim.netSettlement || 0).toLocaleString()} (Refund to Treasury)`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--brand-border)', paddingTop: '12px', marginBottom: '20px' }}>
-                  <span style={{ fontWeight: 600 }}>{t('Total Claimable', 'মোট দাবিযোগ্য', lang)}</span>
+                  <span style={{ fontWeight: 600 }}>{selectedClaim.advanceTaken ? t('Total Verified Bills', 'মোট যাচাইকৃত ব্যয়', lang) : t('Total Claimable', 'মোট দাবিযোগ্য', lang)}</span>
                   <span style={{ fontSize: '18px', fontWeight: 800, color: 'var(--brand-crimson)' }}>
                     ৳{selectedClaim.amount.toLocaleString()}
                   </span>
