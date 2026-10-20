@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewProps, t, AppRole } from '../types';
 import {
   Users, FileCheck, AlertTriangle, TrendingUp, Clock, CheckCircle,
@@ -15,6 +15,7 @@ import AnimatedCounter from '../components/AnimatedCounter';
 import Sparkline from '../components/Sparkline';
 import RefineryOutputChart from '../components/RefineryOutputChart';
 import DetailDrawer, { DetailDrawerData } from '../components/DetailDrawer';
+import Pagination from '../components/Pagination';
 import { useFleetStore } from '../store/fleetStore';
 
 /* ═══════════════════════════════════════════
@@ -201,6 +202,67 @@ export default function DashboardView({ role, lang }: ViewProps) {
   // Chairman Notice Board State
   const [notices, setNotices] = useState(NOTICE_BOARD);
 
+  // Cockpit Segmented Tabs & Pagination State (Solves Information Overload)
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [approvalsPage, setApprovalsPage] = useState(1);
+  const [innerCirclePage, setInnerCirclePage] = useState(1);
+  const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
+  const [noticesPage, setNoticesPage] = useState(1);
+  const [requisitionsPage, setRequisitionsPage] = useState(1);
+  const [hodQueuePage, setHodQueuePage] = useState(1);
+  const [lotoPage, setLotoPage] = useState(1);
+
+  useEffect(() => {
+    setActiveTab('overview');
+  }, [role]);
+
+  const getRoleTabs = () => {
+    switch (role) {
+      case 'chairman':
+        return [
+          { id: 'overview',     label: 'Strategic Cockpit',    labelBn: 'কক্পিট সংক্ষিপ্ত', icon: <Crown size={15} /> },
+          { id: 'approvals',    label: 'Priority Approvals',   labelBn: 'জরুরি অনুমোদন',    icon: <FileCheck size={15} />, badge: PENDING_APPROVALS.length, badgeType: 'danger' as const },
+          { id: 'inner_circle', label: 'Inner Circle Roster',  labelBn: 'ইনার সার্কেল',      icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' as const },
+          { id: 'notices',      label: 'Corporate Notices',    labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: notices.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
+        ];
+      case 'plant_gm':
+        return [
+          { id: 'overview',    label: 'Plant SCADA Console',  labelBn: 'প্ল্যান্ট কনসোল',    icon: <Gauge size={15} />, badge: DCS_ALARMS.length, badgeType: 'danger' as const },
+          { id: 'refinery',    label: 'Refinery Production',  labelBn: 'উৎপাদন চার্ট',      icon: <BarChart3 size={15} /> },
+          { id: 'safety_loto', label: 'LOTO Safety & Shifts', labelBn: 'নিরাপত্তা পারমিট',  icon: <Lock size={15} />, badge: lotoPermits.length, badgeType: 'warn' as const },
+        ];
+      case 'transport_admin':
+        return [
+          { id: 'overview',     label: 'Fleet Operations',     labelBn: 'ফ্লিট হাব',         icon: <Truck size={15} /> },
+          { id: 'requisitions', label: 'Travel Requisitions',  labelBn: 'যানবাহন আবেদন',    icon: <Car size={15} />, badge: sharedRequisitions.filter(r => r.status === 'pending').length, badgeType: 'warn' as const },
+          { id: 'corridor',     label: 'Corridor Transit HUD', labelBn: 'টোল করিডোর',       icon: <Navigation size={15} /> },
+        ];
+      case 'hod':
+        return [
+          { id: 'overview',  label: 'Department Hub',        labelBn: 'বিভাগ হাব',          icon: <Briefcase size={15} /> },
+          { id: 'approvals', label: 'Omni-Approval Queue',   labelBn: 'অনুমোদন সারি',       icon: <FileCheck size={15} />, badge: hodQueue.length, badgeType: 'danger' as const },
+        ];
+      case 'hr_admin':
+        return [
+          { id: 'overview',  label: 'Workforce Cockpit',     labelBn: 'কর্মী কক্পিট',      icon: <Users size={15} /> },
+          { id: 'clearance', label: 'Exit Clearances',       labelBn: 'ছাড়পত্র অডিট',     icon: <UserCheck size={15} />, badge: '1', badgeType: 'warn' as const },
+          { id: 'sites',     label: 'Site Deployment Nodes', labelBn: 'আঞ্চলিক নোড',      icon: <Building2 size={15} /> },
+        ];
+      case 'employee':
+        return [
+          { id: 'overview', label: 'My Launchpad',           labelBn: 'সেলফ-সার্ভিস',      icon: <Sparkles size={15} /> },
+          { id: 'activity', label: 'Activity & Entitlements',labelBn: 'কার্যক্রম ও ছুটি',   icon: <Activity size={15} /> },
+        ];
+      default:
+        return [{ id: 'overview', label: 'Overview', labelBn: 'সংক্ষিপ্ত', icon: <Crown size={15} /> }];
+    }
+  };
+
+  const filteredInnerCircle = INNER_CIRCLE.filter(p => {
+    if (innerCircleFilter === 'all') return true;
+    return p.status === innerCircleFilter;
+  });
+
   const handleRowClick = (item: DetailDrawerData) => {
     setSelectedDrawerItem(item);
   };
@@ -380,357 +442,930 @@ export default function DashboardView({ role, lang }: ViewProps) {
       </div>
 
       {/* ═══════════════════════════════════════════
-          CHAIRMAN: Executive Ribbon
+          COCKPIT SEGMENTED TABS BAR
           ═══════════════════════════════════════════ */}
-      {role === 'chairman' && (
-        <div className="exec-ribbon">
-          <div className="ribbon-left">
-            <div className="ribbon-icon">👑</div>
-            <div className="ribbon-text">
-              <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
-              <p>{t(
-                '1. Keraniganj Output: 5,000 MT/Day (96.3%) • 2. Net Cash Outflow Pending: ৳ 48.5L • 3. Explosives License Due: 18 Days',
-                '১. কেরানীগঞ্জ উৎপাদন: ৫,০০০ মে.টন/দিন (৯৬.৩%) • ২. বকেয়া অনুমোদন: ৪৮.৫ লাখ • ৩. বিস্ফোরক লাইসেন্স: ১৮ দিন বাকি',
-                lang
-              )}</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-ribbon" onClick={() => showToast('60-Sec Voice Memo delivered.', 'gold')}>
-              🎙️ {t('Send Voice Briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          PLANT GM: DCS Alarm Banner
-          ═══════════════════════════════════════════ */}
-      {role === 'plant_gm' && (
-        <div className="dcs-alarm-banner">
-          <div className="ribbon-left">
-            <div className="ribbon-icon">🔴</div>
-            <div className="ribbon-text">
-              <h4>{t('DCS SCADA Alarm Console — Keraniganj Complex Unit-1 & Unit-2', 'ডিসিএস স্ক্যাডা অ্যালার্ম কনসোল', lang)}</h4>
-              <p>{t('Column C-102 top temp 342°C (Set Point 335°C). Reflux pump P-102 operating at 85% capacity. All vacuum seals nominal.', 'কলাম C-102 তাপমাত্রা ৩৪২°C। রিফ্লাক্স পাম্প ৮৫% গতিতে সক্রিয়।', lang)}</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-ribbon" style={{ background: '#DC2626' }} onClick={() => showToast('🔴 Alarm acknowledged. Set point trimmed by 2°C.', 'danger')}>
-              ⚡ {t('Acknowledge Alarm', 'অ্যালার্ম স্বীকৃতি', lang)}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          STATS GRID — Different per role
-          ═══════════════════════════════════════════ */}
-      <div className="stats-grid mb-5">
-        {stats.map((s, i) => (
-          <div key={i} className={`stat-card ${s.type}`}>
-            <div className="stat-top">
-              <div className="stat-label">{t(s.label, s.labelBn, lang)}</div>
-              <div className="stat-icon-wrap">{s.icon}</div>
-            </div>
-            <div className="stat-main-row">
-              <div className="stat-value"><AnimatedCounter value={s.value} /></div>
-              <Sparkline data={s.sparkline} color={s.sparkColor} />
-            </div>
-            <div className="stat-sub">{s.sub}</div>
-          </div>
+      <div className="cockpit-tabs-container mb-4">
+        {getRoleTabs().map(tab => (
+          <button
+            key={tab.id}
+            className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.icon}
+            <span>{t(tab.label, tab.labelBn, lang)}</span>
+            {tab.badge !== undefined && (
+              <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>
+                {tab.badge}
+              </span>
+            )}
+          </button>
         ))}
       </div>
 
       {/* ═══════════════════════════════════════════
-          PLANT GM: Refinery Telemetry & LOTO Board
+          TAB CONTENT: OVERVIEW (Lightweight & Uncluttered)
           ═══════════════════════════════════════════ */}
-      {role === 'plant_gm' && (
-        <>
-          <RefineryOutputChart lang={lang} />
-
-          {/* LOTO Safety Permit Matrix + DCS Alarms */}
-          <div className="col-2 mb-5">
-            {/* Lockout Tagout (LOTO) Board */}
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon"><Lock size={16} color="var(--brand-crimson)" /></div>
-                  <div>
-                    <div className="card-title">{t('Active Lockout-Tagout (LOTO) & High-Risk Permits', 'সক্রিয় লকআউট-ট্যাগআউট ও ঝুঁকি পারমিট', lang)}</div>
-                    <div className="card-subtitle">{t('OSHA 1910.147 Control of Hazardous Energy', 'বিপজ্জনক শক্তি নিয়ন্ত্রণ ও নিরাপত্তা অনুমোদন', lang)}</div>
-                  </div>
-                </div>
-                <span className="badge danger">2 Active Isolations</span>
-              </div>
-              <div className="card-body">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {lotoPermits.map((p) => (
-                    <div key={p.id} style={{ border: '1px solid var(--brand-slate-200)', padding: '12px 14px', borderRadius: '6px', background: 'var(--brand-card-bg)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-crimson)', fontSize: '12px' }}>{p.id}</span>
-                        <span className="badge danger">{p.status}</span>
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: '13px', marginTop: '3px', color: 'var(--brand-slate-900)' }}>{p.equipment}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                        Isolator: <strong>{p.breaker}</strong> • Permittee: <strong>{p.issuedTo}</strong>
-                      </div>
-                      <div style={{ fontSize: '10.5px', color: 'var(--status-danger)', marginTop: '4px', background: 'var(--status-danger-bg)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                        ⚠️ Hazard: {p.hazard}
-                      </div>
-                    </div>
-                  ))}
+      {activeTab === 'overview' && (
+        <div className="tab-pane-fade">
+          {/* CHAIRMAN: Executive Ribbon */}
+          {role === 'chairman' && (
+            <div className="exec-ribbon">
+              <div className="ribbon-left">
+                <div className="ribbon-icon">👑</div>
+                <div className="ribbon-text">
+                  <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
+                  <p>{t(
+                    '1. Keraniganj Output: 5,000 MT/Day (96.3%) • 2. Net Cash Outflow Pending: ৳ 48.5L • 3. Explosives License Due: 18 Days',
+                    '১. কেরানীগঞ্জ উৎপাদন: ৫,০০০ মে.টন/দিন (৯৬.৩%) • ২. বকেয়া অনুমোদন: ৪৮.৫ লাখ • ৩. বিস্ফোরক লাইসেন্স: ১৮ দিন বাকি',
+                    lang
+                  )}</p>
                 </div>
               </div>
-            </div>
-
-            {/* Shift Handover Log */}
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon"><CalendarClock size={16} /></div>
-                  <div>
-                    <div className="card-title">{t('Shift Handover Continuity Log', 'শিফট হস্তান্তর ধারাবাহিকতা লগ', lang)}</div>
-                    <div className="card-subtitle">{t('Operational continuity tracker (A/B/C Shifts)', 'অপারেশনাল ধারাবাহিকতা ট্র্যাকার', lang)}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="card-body">
-                {SHIFT_HANDOVER.map((sh, i) => (
-                  <div key={i} className="shift-handover-row">
-                    <div className="shift-handover-header">
-                      <strong>{sh.shift}</strong>
-                      <span className={`badge ${sh.status === 'completed' ? 'success' : 'info'}`}>{sh.status}</span>
-                    </div>
-                    <div className="shift-handover-meta">{sh.handover} · {sh.time}</div>
-                    <div className="shift-handover-notes">{sh.notes}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          TRANSPORT ADMIN: Fleet Transit & Fuel Reconciliation
-          ═══════════════════════════════════════════ */}
-      {role === 'transport_admin' && (
-        <>
-          {/* Corridor Transit Monitor */}
-          <div className="card mb-5" style={{ background: '#0F172A', color: '#fff', border: '1px solid #334155' }}>
-            <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Navigation size={16} color="#FBBF24" />
-                <strong style={{ fontSize: '13px' }}>
-                  {t('Live Tanker Corridor Transit & Toll Alert HUD', 'ট্যাংকার করিডোর ট্রানজিট ও টোল প্লাজা সতর্কতা', lang)}
-                </strong>
-              </div>
-              <span className="badge success">Live Telematics</span>
-            </div>
-            <div style={{ padding: '16px 18px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>Babubazar Bridge Corridor</div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#34D399', marginTop: '2px' }}>Normal Flow (18m)</div>
-                <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>4 Tankers in Transit • Zero Delay</div>
-              </div>
-
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>Postogola Bridge Toll Plaza</div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#FBBF24', marginTop: '2px' }}>Moderate Congestion (38m)</div>
-                <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Reroute Bitumen Bulk to Mawa Expressway</div>
-              </div>
-
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>Padma Bridge Expressway Corridor</div>
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#60A5FA', marginTop: '2px' }}>High Speed Clear (80 km/h)</div>
-                <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Mongla Depot Carrier #V-05 Passing Toll</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Vehicle Allocation Queue */}
-          <div className="card mb-5">
-            <div className="card-hd">
-              <div className="card-hd-left">
-                <div className="card-hd-icon"><Car size={16} /></div>
-                <div>
-                  <div className="card-title">{t('Incoming Duty Travel Requisitions', 'আগত অফিসিয়াল যানবাহন আবেদনসমূহ', lang)}</div>
-                  <div className="card-subtitle">{t('Assign certified drivers & roadworthy vehicles', 'অনুমোদিত চালক ও গাড়ি বরাদ্দ নিশ্চিত করুন', lang)}</div>
-                </div>
-              </div>
-              <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} pending</span>
-            </div>
-            <div className="card-body">
-              <table className="fleet-table">
-                <thead>
-                  <tr>
-                    <th>{t('ID', 'আইডি', lang)}</th>
-                    <th>{t('Requester & Dept', 'অনুরোধকারী ও বিভাগ', lang)}</th>
-                    <th>{t('Route & Trip Mode', 'রুট ও ধরন', lang)}</th>
-                    <th>{t('Departure Time', 'যাত্রার সময়', lang)}</th>
-                    <th>{t('Required Capacity', 'প্রয়োজনীয় ধরন', lang)}</th>
-                    <th>{t('Actions', 'পদক্ষেপ', lang)}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sharedRequisitions.map((req, i) => (
-                    <tr key={i} className={req.status === 'assigned' ? 'row-muted' : ''}>
-                      <td><code style={{ fontWeight: 800 }}>{req.id}</code></td>
-                      <td>
-                        <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{req.requesterName}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{req.dept} • {req.requesterRole}</div>
-                      </td>
-                      <td>
-                        <div>{req.from.split(',')[0]} → {req.to.split(',')[0]}</div>
-                        <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontWeight: 600 }}>
-                          {req.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One-Way Drop'}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '12px', fontWeight: 600 }}>{req.departureTime}</div>
-                        <span className="badge info">{req.passengersCount} Passengers</span>
-                      </td>
-                      <td>
-                        <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
-                          {req.requiredCapacity === 'sedan_4' ? '4-Seat Sedan' : req.requiredCapacity === 'microbus_7' ? '7-Seat HiAce' : '4x4 Pickup'}
-                        </span>
-                      </td>
-                      <td>
-                        {req.status === 'pending' ? (
-                          <div className="flex-gap">
-                            <button
-                              className="btn-primary"
-                              style={{ fontSize: '11px', padding: '5px 12px' }}
-                              onClick={() => {
-                                const availableCar = sharedVehicles.find(v => v.status === 'available') || sharedVehicles[0];
-                                const availableDriver = sharedDrivers.find(d => d.status === 'available') || sharedDrivers[0];
-                                sharedAssignRequisition(req.id, availableCar.plate, availableDriver.id);
-                                showToast(`🚗 Allocated ${availableCar.plate} & Driver ${availableDriver.name} to ${req.requesterName}!`, 'success');
-                              }}
-                            >
-                              Assign Driver & Vehicle
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <span className="badge success">✓ {req.assignedVehiclePlate}</span>
-                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                              Driver: <strong>{req.assignedDriverName}</strong>
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          HR ADMIN: Workforce Roster & Separation Monitor
-          ═══════════════════════════════════════════ */}
-      {role === 'hr_admin' && (
-        <div className="col-2 mb-5">
-          {/* Active Separation Exit Clearances */}
-          <div className="card">
-            <div className="card-hd">
-              <div className="card-hd-left">
-                <div className="card-hd-icon"><UserCheck size={16} color="var(--brand-crimson)" /></div>
-                <div>
-                  <div className="card-title">{t('Active Employee Separation & Exit Clearance', 'সক্রিয় কর্মী বহির্গমন ও ছাড়পত্র ট্র্যাকার', lang)}</div>
-                  <div className="card-subtitle">{t('4-Way Audit: IT · Security · Fleet · Finance', '৪-ধাপ নিরীক্ষা: আইটি · নিরাপত্তা · পরিবহন · অর্থায়ন', lang)}</div>
-                </div>
-              </div>
-              <span className="badge danger">1 In Clearance</span>
-            </div>
-            <div className="card-body">
-              <div style={{ background: 'var(--brand-slate-100)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div>
-                    <strong style={{ fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>Engr. Faisal Ahmed</strong>
-                    <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginLeft: '8px' }}>EMP-004 · Maintenance Lead</span>
-                  </div>
-                  <span className="badge warn">50% Cleared (2/4)</span>
-                </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', marginBottom: '10px' }}>
-                  Resignation notice submitted · Last working day: <strong>Nov 15, 2026</strong> · Keraniganj Plant
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', fontSize: '10.5px' }}>
-                  <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
-                    ✓ IT Accounts Revoked
-                  </div>
-                  <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
-                    ✓ Security RFID Surrendered
-                  </div>
-                  <div style={{ background: '#FEF3C7', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FDE68A', color: '#92400E' }}>
-                    ⏳ Fleet: Pool Car Return
-                  </div>
-                  <div style={{ background: '#FEE2E2', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FECACA', color: '#991B1B' }}>
-                    ⏳ Finance: TA/DA Reconciliation
-                  </div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <button
-                  className="btn-outline"
-                  style={{ fontSize: '11px', padding: '6px 12px' }}
-                  onClick={() => showToast(t('Access the Workforce Master from the sidebar for full clearance sign-off.', 'কর্মী মাস্টার থেকে পূর্ণ ছাড়পত্র সম্পন্ন করুন।', lang), 'info')}
-                >
-                  {t('Open Complete Workforce Directory →', 'সম্পূর্ণ কর্মী ডিরেক্টরি দেখুন →', lang)}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn-ribbon" onClick={() => showToast('60-Sec Voice Memo delivered.', 'gold')}>
+                  🎙️ {t('Send Voice Briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
                 </button>
               </div>
             </div>
+          )}
+
+          {/* PLANT GM: DCS Alarm Banner */}
+          {role === 'plant_gm' && (
+            <div className="dcs-alarm-banner">
+              <div className="ribbon-left">
+                <div className="ribbon-icon">🔴</div>
+                <div className="ribbon-text">
+                  <h4>{t('DCS SCADA Alarm Console — Keraniganj Complex Unit-1 & Unit-2', 'ডিসিএস স্ক্যাডা অ্যালার্ম কনসোল', lang)}</h4>
+                  <p>{t('Column C-102 top temp 342°C (Set Point 335°C). Reflux pump P-102 operating at 85% capacity. All vacuum seals nominal.', 'কলাম C-102 তাপমাত্রা ৩৪২°C। রিফ্লাক্স পাম্প ৮৫% গতিতে সক্রিয়।', lang)}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn-ribbon" style={{ background: '#DC2626' }} onClick={() => showToast('🔴 Alarm acknowledged. Set point trimmed by 2°C.', 'danger')}>
+                  ⚡ {t('Acknowledge Alarm', 'অ্যালার্ম স্বীকৃতি', lang)}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* EMPLOYEE: Quick Action Launchpad */}
+          {role === 'employee' && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                <div
+                  className="card interactive-row"
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #BFDBFE', background: '#EFF6FF' }}
+                  onClick={() => showToast('📍 Geofence verified: Punched In at South Gate Keraniganj Complex (08:52 AM)', 'success')}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                    <MapPin size={20} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#1E40AF' }}>Clock-In Geofence</div>
+                  <div style={{ fontSize: '11px', color: '#60A5FA', marginTop: '2px' }}>Verified Biometric GPS</div>
+                </div>
+
+                <div
+                  className="card interactive-row"
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--brand-gold-muted)', background: 'var(--brand-card-bg)' }}
+                  onClick={() => showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F59E0B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                    <Car size={20} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-gold-dark)' }}>Request Vehicle</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Inter-terminal transit</div>
+                </div>
+
+                <div
+                  className="card interactive-row"
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #A7F3D0', background: '#ECFDF5' }}
+                  onClick={() => showToast('🚌 Commuter Shuttle Pass: Seat #7, Mirpur-Keraniganj Express Active', 'success')}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                    <Bus size={20} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#065F46' }}>Shuttle Bus Pass</div>
+                  <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px' }}>Seat #7 Confirmed</div>
+                </div>
+
+                <div
+                  className="card interactive-row"
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #DDD6FE', background: '#F5F3FF' }}
+                  onClick={() => showToast('🧾 Local Conveyance & Tour Claim form ready.', 'info')}
+                >
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#8B5CF6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                    <Receipt size={20} />
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#5B21B6' }}>Submit Claim</div>
+                  <div style={{ fontSize: '11px', color: '#7C3AED', marginTop: '2px' }}>Grade 7-10 Matrix</div>
+                </div>
+              </div>
+
+              {/* Active Requisition Status Banner for Employee */}
+              {sharedRequisitions.filter(r => r.requesterName.includes('Tanvir')).slice(0, 1).map(myReq => (
+                <div key={myReq.id} className="card mb-4" style={{ background: myReq.status === 'assigned' ? '#F0FDF4' : '#FFFBEB', border: myReq.status === 'assigned' ? '1px solid #86EFAC' : '1px solid #FDE68A', padding: '14px 18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Car size={20} color={myReq.status === 'assigned' ? '#16A34A' : '#D97706'} />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                          {myReq.status === 'assigned' ? '✓ Vehicle & Driver Allocated for Your Duty Travel' : '⏳ Vehicle Requisition Under Review by Transport Admin (Md. Kamruzzaman)'}
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
+                          {myReq.id} • {myReq.from.split(',')[0]} ➔ {myReq.to.split(',')[0]} ({myReq.tripType === 'round_trip' ? 'Round Trip' : 'One-Way'}) • Departure: {myReq.departureTime}
+                        </div>
+                        {myReq.status === 'assigned' && (
+                          <div style={{ fontSize: '12px', color: '#15803D', fontWeight: 700, marginTop: '3px' }}>
+                            Car: {myReq.assignedVehiclePlate} • Driver: {myReq.assignedDriverName} (📞 {myReq.assignedDriverPhone}) • Pass #{myReq.tripPassNo}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className={`badge ${myReq.status === 'assigned' ? 'success' : 'warn'}`}>
+                      {myReq.status === 'assigned' ? 'DISPATCH READY' : 'PENDING ADMIN'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* STATS GRID — High-level KPI cards with sparklines */}
+          <div className="stats-grid mb-5">
+            {stats.map((s, i) => (
+              <div key={i} className={`stat-card ${s.type}`}>
+                <div className="stat-top">
+                  <div className="stat-label">{t(s.label, s.labelBn, lang)}</div>
+                  <div className="stat-icon-wrap">{s.icon}</div>
+                </div>
+                <div className="stat-main-row">
+                  <div className="stat-value"><AnimatedCounter value={s.value} /></div>
+                  <Sparkline data={s.sparkline} color={s.sparkColor} />
+                </div>
+                <div className="stat-sub">{s.sub}</div>
+              </div>
+            ))}
           </div>
 
-          {/* Departmental Headcount & Geofence Site Allocation */}
+          {/* PROGRESSIVE DISCLOSURE JUMP CARDS (Zero clutter — clean direct pathways) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+            {role === 'chairman' && (
+              <>
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('approvals')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <FileCheck size={18} color="var(--brand-crimson)" />
+                      <span>{t('Priority Approvals', 'জরুরি অনুমোদন', lang)}</span>
+                    </div>
+                    <span className="badge danger">3 {t('Pending', 'অপেক্ষমান', lang)}</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('High-value files awaiting Chairman\'s signature: ASME Safety Valves (৳48.5L), Grade 7-10 HR Policy, and Q4 Utility Budget (৳1.2 Cr).', 'চেয়ারম্যান মহোদয়ের স্বাক্ষরের অপেক্ষায় ৩টি উচ্চমূল্যের ফাইল: সেফটি ভালভ (৪৮.৫ লাখ), এইচআর নীতিমালা ও কিউ৪ ইউটিলিটি বাজেট।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Open Approval Queue', 'অনুমোদন সারি দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('inner_circle')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Users size={18} color="var(--brand-gold-dark)" />
+                      <span>{t('Executive Inner Circle', 'ইনার সার্কেল নেতৃত্ব', lang)}</span>
+                    </div>
+                    <span className="badge info">8 {t('Tracked', 'ট্র্যাকড', lang)}</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Live presence roster of key leadership: 4 Present at Plant/HQ, 1 Board Meeting, 1 BSTI Travel, 🔴 1 Uninformed Absent.', 'মূল নেতৃত্বের রিয়েল-টাইম উপস্থিতি: ৪ জন কর্মস্থলে, ১ জন মিটিংয়ে, ১ জন সরকারি পরিদর্শনে, ১ জন অননুমোদিত অনুপস্থিত।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('View Executive Roster', 'নেতৃত্ব উপস্থিতি তালিকা', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('notices')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Bell size={18} color="#0284C7" />
+                      <span>{t('Enterprise Notices', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</span>
+                    </div>
+                    <span className="badge gold">{notices.length} {t('Circulars', 'বিজ্ঞপ্তি', lang)}</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Latest circulars & announcements: Chairman\'s Eid Message, Mandatory Q4 Plant Safety Briefing, HSE Incident protocol.', 'সর্বশেষ নোটিশ ও ঘোষণা: চেয়ারম্যানের বার্তা, চতুর্থ ত্রৈমাসিক নিরাপত্তা ব্রিফিং ও এইচএসই প্রটোকল।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Open Notice Board', 'নোটিশ বোর্ড দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {role === 'plant_gm' && (
+              <>
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('refinery')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <BarChart3 size={18} color="#0284C7" />
+                      <span>{t('Refinery Telemetry & Output', 'উৎপাদন ও ডিস্টিলেশন চার্ট', lang)}</span>
+                    </div>
+                    <span className="badge success">5,000 MT/Day</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('96.3% Overall Equipment Effectiveness (OEE). 24-hour Bitumen 60/70 & 80/100 production yield graph and furnace vacuum seals.', '৯৬.৩% সামগ্রিক কার্যকারিতা। ২৪ ঘণ্টার বিটুমিন উৎপাদন লেখচিত্র এবং ফার্নেস ভ্যাকুয়াম অবস্থা।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Inspect Refinery Production', 'উৎপাদন গ্রাফ দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('safety_loto')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Lock size={18} color="var(--brand-crimson)" />
+                      <span>{t('LOTO Safety & Shift Handover', 'এলওটিও নিরাপত্তা ও শিফট লগ', lang)}</span>
+                    </div>
+                    <span className="badge danger">{lotoPermits.length} {t('Active Isolations', 'সক্রিয় আইসোলেশন', lang)}</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('OSHA 1910.147 Control of Hazardous Energy permits & shift handover continuity between Shift-A, B and C engineers.', 'ঝুঁকিপূর্ণ শক্তি নিয়ন্ত্রণ পারমিট এবং এ, বি ও সি শিফটের প্রকৌশলীদের ধারাবাহিকতা লগ।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('View LOTO Permits & Shifts', 'পারমিট ও শিফট লগ দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {role === 'transport_admin' && (
+              <>
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('requisitions')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Car size={18} color="#D97706" />
+                      <span>{t('Duty Travel Requisitions', 'অফিসিয়াল যানবাহন আবেদন', lang)}</span>
+                    </div>
+                    <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} {t('Pending', 'বাকি', lang)}</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Review inter-depot and headquarters transport applications. Assign roadworthy vehicles and certified drivers.', 'হেডকোয়ার্টার ও ডিপো যাতায়াত আবেদন পর্যালোচনা এবং চালক ও গাড়ি বরাদ্দ নিশ্চিত করুন।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Manage Requisitions', 'আবেদন নিষ্পত্তি করুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('corridor')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Navigation size={18} color="#059669" />
+                      <span>{t('Corridor Transit & Toll Alerts', 'ট্যাংকার করিডোর ও টোল সতর্কতা', lang)}</span>
+                    </div>
+                    <span className="badge success">Live Telematics</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Live telematics for Babubazar Bridge, Postogola Toll Plaza and Padma Bridge Expressway heavy carrier corridor.', 'বাবুবাজার ব্রিজ, পোস্তগোলা টোল ও পদ্মা সেতু এক্সপ্রেসওয়েতে ভারী ট্যাংকার করিডোরের লাইভ তথ্য।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Open Corridor HUD', 'করিডোর ট্র্যাকার দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {role === 'hr_admin' && (
+              <>
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('clearance')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <UserCheck size={18} color="var(--brand-crimson)" />
+                      <span>{t('Exit Clearance Audits', 'বহির্গমন ছাড়পত্র অডিট', lang)}</span>
+                    </div>
+                    <span className="badge warn">1 In Progress</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Track 4-way separation audits (IT, Security, Fleet, Finance) for resigning personnel prior to final settlement.', 'চাকরি ইস্তফাদানকারী কর্মীদের ৪-ধাপ নিরীক্ষা (আইটি, সিকিউরিটি, ফ্লিট, ফিন্যান্স) ট্র্যাকিং।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('View Clearance Checklists', 'ছাড়পত্র বিবরণী দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+
+                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('sites')}>
+                  <div className="tab-jump-top">
+                    <div className="tab-jump-title">
+                      <Building2 size={18} color="#0284C7" />
+                      <span>{t('Regional Deployment Nodes', 'আঞ্চলিক জনবল ডেপ্লয়মেন্ট', lang)}</span>
+                    </div>
+                    <span className="badge info">743 Staff</span>
+                  </div>
+                  <div className="tab-jump-desc">
+                    {t('Deployment distribution across Dhaka HQ (420), Keraniganj Bitumen Refinery (218) and Chattogram Terminal (105).', 'ঢাকা সদর দপ্তর (৪২০), কেরানীগঞ্জ রিফাইনারি (২১৮) ও চট্টগ্রাম টার্মিনালে (১০৫) জনবল বণ্টন।', lang)}
+                  </div>
+                  <div className="tab-jump-footer">
+                    <span>{t('Inspect Site Nodes', 'আঞ্চলিক নোড দেখুন', lang)}</span>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {role === 'hod' && (
+              <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('approvals')}>
+                <div className="tab-jump-top">
+                  <div className="tab-jump-title">
+                    <FileCheck size={18} color="var(--brand-crimson)" />
+                    <span>{t('Omni-Approval Inbox & OPEX Ceiling', 'বিভাগীয় অনুমোদন ইনবক্স ও বাজেট', lang)}</span>
+                  </div>
+                  <span className="badge danger">{hodQueue.length} {t('Pending', 'বাকি', lang)}</span>
+                </div>
+                <div className="tab-jump-desc">
+                  {t('Multi-category triage for employee conveyance claims, duty travel, stationery POs, and leave applications. Safe OPEX buffer remaining: ৳', 'যাতায়াত দাবি, ভ্রমণ, স্টেশনারি ক্রয় ও ছুটির অনুমোদন। অবশিষ্ট নিরাপদ পরিচালন বাজেট: ৳', lang)}{(5320000 - (3840000 + approvedAmountSum)).toLocaleString()}.
+                </div>
+                <div className="tab-jump-footer">
+                  <span>{t('Open Approval Queue & Batch Actions', 'অনুমোদন সারি ও ব্যাচ অ্যাকশন খুলুন', lang)}</span>
+                  <ArrowRight size={14} />
+                </div>
+              </div>
+            )}
+
+            {role === 'employee' && (
+              <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('activity')}>
+                <div className="tab-jump-top">
+                  <div className="tab-jump-title">
+                    <Activity size={18} color="#059669" />
+                    <span>{t('Recent Activity & Leave Entitlements', 'সাম্প্রতিক কার্যক্রম ও ছুটি স্থিতি', lang)}</span>
+                  </div>
+                  <span className="badge success">Active</span>
+                </div>
+                <div className="tab-jump-desc">
+                  {t('Check your biometric punch timeline, shuttle pass details, approved requisitions, and casual/sick leave balances.', 'আপনার বায়োমেট্রিক পাঞ্চ টাইমলাইন, শাটল পাস, অনুমোদিত রিকুইজিশন এবং ক্যাজুয়াল/মেডিকেল ছুটি স্থিতি দেখুন।', lang)}
+                </div>
+                <div className="tab-jump-footer">
+                  <span>{t('View Detailed Activity & Leave Ledger', 'বিস্তারিত কার্যক্রম ও ছুটি লেজার দেখুন', lang)}</span>
+                  <ArrowRight size={14} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          CHAIRMAN: TAB "approvals" (Paginated)
+          ═══════════════════════════════════════════ */}
+      {role === 'chairman' && activeTab === 'approvals' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon">⚡</div>
+              <div>
+                <div className="card-title">{t('Priority Approvals — Chairman\'s Action Required', 'জরুরি অনুমোদন — চেয়ারম্যানের পদক্ষেপ প্রয়োজন', lang)}</div>
+                <div className="card-subtitle">{t('High-value files escalated to Chairman\'s office', 'উচ্চ-মূল্যের ফাইল চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
+              </div>
+            </div>
+            <span className="badge danger">{PENDING_APPROVALS.length} {t('items', 'টি ফাইল', lang)}</span>
+          </div>
+          <div className="card-body">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {PENDING_APPROVALS.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => (
+                <div
+                  key={i}
+                  className="approval-interactive-card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`
+                  }}
+                  onClick={() => handleRowClick(item)}
+                >
+                  <div>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{item.title}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
+                      {item.id} · {item.dept} · <strong style={{ color: 'var(--brand-gold-dark)' }}>{item.amount}</strong>
+                    </div>
+                  </div>
+                  <div className="flex-gap" onClick={(e) => e.stopPropagation()}>
+                    <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }} onClick={() => showToast(`👑 Chairman authorized: ${item.id}`, 'gold')}>
+                      👑 {t('Authorize', 'অনুমোদন', lang)}
+                    </button>
+                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => handleRowClick(item)}>
+                      {t('Inspect File', 'নথি দেখুন', lang)}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={approvalsPage}
+              totalItems={PENDING_APPROVALS.length}
+              pageSize={2}
+              onPageChange={setApprovalsPage}
+              lang={lang}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          CHAIRMAN: TAB "inner_circle" (Paginated & Filterable)
+          ═══════════════════════════════════════════ */}
+      {role === 'chairman' && activeTab === 'inner_circle' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon">👥</div>
+              <div>
+                <div className="card-title">{t('Inner Circle — Executive Presence', 'ইনার সার্কেল — নেতৃত্ব উপস্থিতি', lang)}</div>
+                <div className="card-subtitle">{t('Live status of key leadership across Refinery, Finance & Operations', 'মূল নেতৃত্বের লাইভ স্ট্যাটাস', lang)}</div>
+              </div>
+            </div>
+            <span className="badge success">{filteredInnerCircle.length} {t('executives', 'জন কর্মকর্তা', lang)}</span>
+          </div>
+          <div className="card-body">
+            {/* Interactive Filter Pills */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', fontSize: '11px' }}>
+              {[
+                { id: 'all', label: 'All Tracked (8)', bg: '#F1F5F9', color: '#334155' },
+                { id: 'present', label: '🟢 Present (4)', bg: '#ECFDF5', color: '#065F46' },
+                { id: 'meeting', label: '🔵 In Meeting (1)', bg: '#EFF6FF', color: '#1E40AF' },
+                { id: 'leave', label: '🟡 Informed Leave (1)', bg: '#FEF3C7', color: '#92400E' },
+                { id: 'sick', label: '🟠 Sick Leave (1)', bg: '#FFFBEB', color: '#B45309' },
+                { id: 'uninformed', label: '🔴 Uninformed Absent (1)', bg: '#FEE2E2', color: '#991B1B' },
+              ].map(pill => (
+                <button
+                  key={pill.id}
+                  onClick={() => { setInnerCircleFilter(pill.id); setInnerCirclePage(1); }}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    border: innerCircleFilter === pill.id ? '2px solid var(--brand-crimson)' : '1px solid transparent',
+                    background: pill.bg,
+                    color: pill.color,
+                    fontWeight: innerCircleFilter === pill.id ? 800 : 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="presence-list">
+              {filteredInnerCircle.slice((innerCirclePage - 1) * 4, innerCirclePage * 4).map((person, i) => (
+                <div
+                  key={i}
+                  className="presence-row interactive-row"
+                  onClick={() => {
+                    if (person.status === 'uninformed') {
+                      showToast(`🚨 URGENT: HR GM Sayeda Afroza instructed to initiate formal inquiry for ${person.name}.`, 'danger');
+                    } else {
+                      showToast(`📍 ${person.name} location: ${person.location} (${person.phone})`, 'info');
+                    }
+                  }}
+                  title="Click to view leadership detail or trigger intervention"
+                  style={{
+                    background: person.status === 'uninformed' ? '#FEF2F2' : undefined,
+                    border: person.status === 'uninformed' ? '1px solid #FECACA' : undefined
+                  }}
+                >
+                  <div className="presence-person">
+                    <div className="presence-avatar" style={{ background: person.color }}>{person.initials}</div>
+                    <div>
+                      <div className="prs-name">{person.name}</div>
+                      <div className="prs-role">{person.role} • <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{person.location}</span></div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`badge ${person.badge}`}>{t(person.statusLabel, person.statusLabelBn, lang)}</span>
+                    {person.status === 'uninformed' ? (
+                      <button
+                        className="btn-outline-danger"
+                        style={{ padding: '2px 8px', fontSize: '10px' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          showToast(`🚨 Priority Notice dispatched to ${person.name} & GM HR for unauthorized absence.`, 'danger');
+                        }}
+                      >
+                        Alert HR
+                      </button>
+                    ) : (
+                      <ChevronRight size={14} color="var(--brand-slate-300)" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={innerCirclePage}
+              totalItems={filteredInnerCircle.length}
+              pageSize={4}
+              onPageChange={setInnerCirclePage}
+              lang={lang}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          CHAIRMAN: TAB "notices" (Paginated)
+          ═══════════════════════════════════════════ */}
+      {role === 'chairman' && activeTab === 'notices' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon">📢</div>
+              <div>
+                <div className="card-title">{t('Enterprise Notice Board', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</div>
+                <div className="card-subtitle">{t('Latest corporate announcements & group circulars', 'সর্বশেষ কর্পোরেট ঘোষণা', lang)}</div>
+              </div>
+            </div>
+            <button
+              className="btn-outline"
+              style={{ fontSize: '11px', padding: '4px 10px' }}
+              onClick={() => {
+                const titleInput = prompt('Enter new corporate circular headline / নোটিশ শিরোনাম লিখুন:');
+                if (!titleInput) return;
+                const newNotice = {
+                  title: titleInput,
+                  title_bn: titleInput,
+                  tag: 'URGENT CIRCULAR',
+                  date: 'Today, Just Now',
+                  read: false,
+                  pinned: true
+                };
+                setNotices([newNotice, ...notices]);
+                showToast('📢 New company-wide notice published & pushed to all 1,240 employees via App & SMS.', 'gold');
+              }}
+            >
+              + {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}
+            </button>
+          </div>
+          <div className="card-body">
+            {/* Pinned Chairman Message */}
+            <div className="notice-card gold-pin" style={{ marginBottom: '12px' }}>
+              <div className="notice-hd">
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-gold-dark)' }}>
+                  👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
+                </div>
+                <span className="badge gold">Pinned</span>
+              </div>
+              <div className="notice-meta">Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman</div>
+              <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-600)' }}>
+                {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
+              </div>
+            </div>
+
+            <div className="notice-list">
+              {notices.slice((noticesPage - 1) * 2, noticesPage * 2).map((notice, i) => (
+                <div key={i} className={`notice-card${notice.pinned ? ' pinned' : ''}`}>
+                  <div className="notice-hd">
+                    <div className="notice-title">{t(notice.title, notice.title_bn, lang)}</div>
+                    <span className={`badge ${notice.pinned ? 'danger' : 'info'}`}>{notice.tag}</span>
+                  </div>
+                  <div className="notice-meta">{notice.date}</div>
+                  {!notice.read && (
+                    <button className="btn-sm-ghost" style={{ fontSize: '11px' }} onClick={() => showToast('Notice acknowledged.', 'success')}>
+                      ✅ {t('Acknowledge', 'পড়েছি', lang)}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={noticesPage}
+              totalItems={notices.length}
+              pageSize={2}
+              onPageChange={setNoticesPage}
+              lang={lang}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          PLANT GM: TAB "refinery"
+          ═══════════════════════════════════════════ */}
+      {role === 'plant_gm' && activeTab === 'refinery' && (
+        <div className="tab-pane-fade">
+          <RefineryOutputChart lang={lang} />
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          PLANT GM: TAB "safety_loto" (Paginated Permits + Handover)
+          ═══════════════════════════════════════════ */}
+      {role === 'plant_gm' && activeTab === 'safety_loto' && (
+        <div className="col-2 mb-5 tab-pane-fade">
+          {/* Lockout Tagout (LOTO) Board */}
           <div className="card">
             <div className="card-hd">
               <div className="card-hd-left">
-                <div className="card-hd-icon"><Building2 size={16} /></div>
+                <div className="card-hd-icon"><Lock size={16} color="var(--brand-crimson)" /></div>
                 <div>
-                  <div className="card-title">{t('Enterprise Headcount & Site Deployment', 'সংস্থার কর্মী বণ্টন ও সাইট ডেপ্লয়মেন্ট', lang)}</div>
-                  <div className="card-subtitle">{t('Active personnel across 3 regional nodes', '৩টি আঞ্চলিক নোডে সক্রিয় জনবল', lang)}</div>
+                  <div className="card-title">{t('Active Lockout-Tagout (LOTO) & High-Risk Permits', 'সক্রিয় লকআউট-ট্যাগআউট ও ঝুঁকি পারমিট', lang)}</div>
+                  <div className="card-subtitle">{t('OSHA 1910.147 Control of Hazardous Energy', 'বিপজ্জনক শক্তি নিয়ন্ত্রণ ও নিরাপত্তা অনুমোদন', lang)}</div>
                 </div>
               </div>
-              <span className="badge info">743 Total</span>
+              <span className="badge danger">{lotoPermits.length} {t('Isolations', 'আইসোলেশন', lang)}</span>
             </div>
             <div className="card-body">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px' }}>
-                  <div>
-                    <strong style={{ fontSize: '13px' }}>Bashundhara Dhaka HQ</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Plot-3, Block-G, Umme Kulsum Road, Baridhara</div>
+                {lotoPermits.slice((lotoPage - 1) * 2, lotoPage * 2).map((p) => (
+                  <div key={p.id} style={{ border: '1px solid var(--brand-slate-200)', padding: '12px 14px', borderRadius: '6px', background: 'var(--brand-card-bg)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-crimson)', fontSize: '12px' }}>{p.id}</span>
+                      <span className="badge danger">{p.status}</span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '13px', marginTop: '3px', color: 'var(--brand-slate-900)' }}>{p.equipment}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                      Isolator: <strong>{p.breaker}</strong> • Permittee: <strong>{p.issuedTo}</strong>
+                    </div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-danger)', marginTop: '4px', background: 'var(--status-danger-bg)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      ⚠️ Hazard: {p.hazard}
+                    </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#059669' }}>420 Staff</div>
-                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Corporate, Finance & Sales</div>
-                  </div>
-                </div>
+                ))}
+              </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px' }}>
-                  <div>
-                    <strong style={{ fontSize: '13px' }}>Keraniganj Bitumen Refinery Complex</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Industrial Area, Dhaleshwari River Corridor</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#0284C7' }}>218 Staff</div>
-                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Engineering, QC & Plant Ops</div>
-                  </div>
-                </div>
+              <Pagination
+                currentPage={lotoPage}
+                totalItems={lotoPermits.length}
+                pageSize={2}
+                onPageChange={setLotoPage}
+                lang={lang}
+              />
+            </div>
+          </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px' }}>
-                  <div>
-                    <strong style={{ fontSize: '13px' }}>Chattogram Marine Bulk Terminal</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Guptakhal, Patenga River Jetty</div>
+          {/* Shift Handover Log */}
+          <div className="card">
+            <div className="card-hd">
+              <div className="card-hd-left">
+                <div className="card-hd-icon"><CalendarClock size={16} /></div>
+                <div>
+                  <div className="card-title">{t('Shift Handover Continuity Log', 'শিফট হস্তান্তর ধারাবাহিকতা লগ', lang)}</div>
+                  <div className="card-subtitle">{t('Operational continuity tracker (A/B/C Shifts)', 'অপারেশনাল ধারাবাহিকতা ট্র্যাকার', lang)}</div>
+                </div>
+              </div>
+            </div>
+            <div className="card-body">
+              {SHIFT_HANDOVER.map((sh, i) => (
+                <div key={i} className="shift-handover-row">
+                  <div className="shift-handover-header">
+                    <strong>{sh.shift}</strong>
+                    <span className={`badge ${sh.status === 'completed' ? 'success' : 'info'}`}>{sh.status}</span>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#D97706' }}>105 Staff</div>
-                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Maritime Discharge & Heavy Fleet</div>
-                  </div>
+                  <div className="shift-handover-meta">{sh.handover} · {sh.time}</div>
+                  <div className="shift-handover-notes">{sh.notes}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          TRANSPORT ADMIN: TAB "requisitions" (Paginated)
+          ═══════════════════════════════════════════ */}
+      {role === 'transport_admin' && activeTab === 'requisitions' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><Car size={16} /></div>
+              <div>
+                <div className="card-title">{t('Incoming Duty Travel Requisitions', 'আগত অফিসিয়াল যানবাহন আবেদনসমূহ', lang)}</div>
+                <div className="card-subtitle">{t('Assign certified drivers & roadworthy vehicles', 'অনুমোদিত চালক ও গাড়ি বরাদ্দ নিশ্চিত করুন', lang)}</div>
+              </div>
+            </div>
+            <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} pending</span>
+          </div>
+          <div className="card-body">
+            <table className="fleet-table">
+              <thead>
+                <tr>
+                  <th>{t('ID', 'আইডি', lang)}</th>
+                  <th>{t('Requester & Dept', 'অনুরোধকারী ও বিভাগ', lang)}</th>
+                  <th>{t('Route & Trip Mode', 'রুট ও ধরন', lang)}</th>
+                  <th>{t('Departure Time', 'যাত্রার সময়', lang)}</th>
+                  <th>{t('Required Capacity', 'প্রয়োজনীয় ধরন', lang)}</th>
+                  <th>{t('Actions', 'পদক্ষেপ', lang)}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sharedRequisitions.slice((requisitionsPage - 1) * 3, requisitionsPage * 3).map((req, i) => (
+                  <tr key={i} className={req.status === 'assigned' ? 'row-muted' : ''}>
+                    <td><code style={{ fontWeight: 800 }}>{req.id}</code></td>
+                    <td>
+                      <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{req.requesterName}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{req.dept} • {req.requesterRole}</div>
+                    </td>
+                    <td>
+                      <div>{req.from.split(',')[0]} → {req.to.split(',')[0]}</div>
+                      <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontWeight: 600 }}>
+                        {req.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One-Way Drop'}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '12px', fontWeight: 600 }}>{req.departureTime}</div>
+                      <span className="badge info">{req.passengersCount} Passengers</span>
+                    </td>
+                    <td>
+                      <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
+                        {req.requiredCapacity === 'sedan_4' ? '4-Seat Sedan' : req.requiredCapacity === 'microbus_7' ? '7-Seat HiAce' : '4x4 Pickup'}
+                      </span>
+                    </td>
+                    <td>
+                      {req.status === 'pending' ? (
+                        <div className="flex-gap">
+                          <button
+                            className="btn-primary"
+                            style={{ fontSize: '11px', padding: '5px 12px' }}
+                            onClick={() => {
+                              const availableCar = sharedVehicles.find(v => v.status === 'available') || sharedVehicles[0];
+                              const availableDriver = sharedDrivers.find(d => d.status === 'available') || sharedDrivers[0];
+                              sharedAssignRequisition(req.id, availableCar.plate, availableDriver.id);
+                              showToast(`🚗 Allocated ${availableCar.plate} & Driver ${availableDriver.name} to ${req.requesterName}!`, 'success');
+                            }}
+                          >
+                            Assign Driver & Vehicle
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="badge success">✓ {req.assignedVehiclePlate}</span>
+                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                            Driver: <strong>{req.assignedDriverName}</strong>
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Pagination
+              currentPage={requisitionsPage}
+              totalItems={sharedRequisitions.length}
+              pageSize={3}
+              onPageChange={setRequisitionsPage}
+              lang={lang}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          TRANSPORT ADMIN: TAB "corridor"
+          ═══════════════════════════════════════════ */}
+      {role === 'transport_admin' && activeTab === 'corridor' && (
+        <div className="card mb-5 tab-pane-fade" style={{ background: '#0F172A', color: '#fff', border: '1px solid #334155' }}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Navigation size={16} color="#FBBF24" />
+              <strong style={{ fontSize: '13px' }}>
+                {t('Live Tanker Corridor Transit & Toll Alert HUD', 'ট্যাংকার করিডোর ট্রানজিট ও টোল প্লাজা সতর্কতা', lang)}
+              </strong>
+            </div>
+            <span className="badge success">Live Telematics</span>
+          </div>
+          <div style={{ padding: '16px 18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Babubazar Bridge Corridor</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: '#34D399', marginTop: '2px' }}>Normal Flow (18m)</div>
+              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>4 Tankers in Transit • Zero Delay</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Postogola Bridge Toll Plaza</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: '#FBBF24', marginTop: '2px' }}>Moderate Congestion (38m)</div>
+              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Reroute Bitumen Bulk to Mawa Expressway</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Padma Bridge Expressway Corridor</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: '#60A5FA', marginTop: '2px' }}>High Speed Clear (80 km/h)</div>
+              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Mongla Depot Carrier #V-05 Passing Toll</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          HR ADMIN: TAB "clearance"
+          ═══════════════════════════════════════════ */}
+      {role === 'hr_admin' && activeTab === 'clearance' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><UserCheck size={16} color="var(--brand-crimson)" /></div>
+              <div>
+                <div className="card-title">{t('Active Employee Separation & Exit Clearance', 'সক্রিয় কর্মী বহির্গমন ও ছাড়পত্র ট্র্যাকার', lang)}</div>
+                <div className="card-subtitle">{t('4-Way Audit: IT · Security · Fleet · Finance', '৪-ধাপ নিরীক্ষা: আইটি · নিরাপত্তা · পরিবহন · অর্থায়ন', lang)}</div>
+              </div>
+            </div>
+            <span className="badge danger">1 In Clearance</span>
+          </div>
+          <div className="card-body">
+            <div style={{ background: 'var(--brand-slate-100)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <strong style={{ fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>Engr. Faisal Ahmed</strong>
+                  <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginLeft: '8px' }}>EMP-004 · Maintenance Lead</span>
+                </div>
+                <span className="badge warn">50% Cleared (2/4)</span>
+              </div>
+              <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', marginBottom: '10px' }}>
+                Resignation notice submitted · Last working day: <strong>Nov 15, 2026</strong> · Keraniganj Plant
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '10.5px' }}>
+                <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
+                  ✓ IT Accounts Revoked
+                </div>
+                <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
+                  ✓ Security RFID Surrendered
+                </div>
+                <div style={{ background: '#FEF3C7', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FDE68A', color: '#92400E' }}>
+                  ⏳ Fleet: Pool Car Return
+                </div>
+                <div style={{ background: '#FEE2E2', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FECACA', color: '#991B1B' }}>
+                  ⏳ Finance: TA/DA Reconciliation
+                </div>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '11px', padding: '6px 12px' }}
+                onClick={() => showToast(t('Access the Workforce Master from the sidebar for full clearance sign-off.', 'কর্মী মাস্টার থেকে পূর্ণ ছাড়পত্র সম্পন্ন করুন।', lang), 'info')}
+              >
+                {t('Open Complete Workforce Directory →', 'সম্পূর্ণ কর্মী ডিরেক্টরি দেখুন →', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════
+          HR ADMIN: TAB "sites"
+          ═══════════════════════════════════════════ */}
+      {role === 'hr_admin' && activeTab === 'sites' && (
+        <div className="card mb-5 tab-pane-fade">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><Building2 size={16} /></div>
+              <div>
+                <div className="card-title">{t('Enterprise Headcount & Site Deployment', 'সংস্থার কর্মী বণ্টন ও সাইট ডেপ্লয়মেন্ট', lang)}</div>
+                <div className="card-subtitle">{t('Active personnel across 3 regional nodes', '৩টি আঞ্চলিক নোডে সক্রিয় জনবল', lang)}</div>
+              </div>
+            </div>
+            <span className="badge info">743 Total</span>
+          </div>
+          <div className="card-body">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <strong style={{ fontSize: '13px' }}>Bashundhara Dhaka HQ</strong>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Plot-3, Block-G, Umme Kulsum Road, Baridhara</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#059669' }}>420 Staff</div>
+                  <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Corporate, Finance & Sales</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <strong style={{ fontSize: '13px' }}>Keraniganj Bitumen Refinery Complex</strong>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Industrial Area, Dhaleshwari River Corridor</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#0284C7' }}>218 Staff</div>
+                  <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Engineering, QC & Plant Ops</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--brand-slate-100)', borderRadius: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                <div>
+                  <strong style={{ fontSize: '13px' }}>Chattogram Marine Bulk Terminal</strong>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Guptakhal, Patenga River Jetty</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#D97706' }}>105 Staff</div>
+                  <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Maritime Discharge & Heavy Fleet</div>
                 </div>
               </div>
             </div>
@@ -739,10 +1374,10 @@ export default function DashboardView({ role, lang }: ViewProps) {
       )}
 
       {/* ═══════════════════════════════════════════
-          HOD: Unified Approval Queue + Q4 Budget Meter
+          HOD: TAB "approvals" (Paginated & Checkbox Selection)
           ═══════════════════════════════════════════ */}
-      {role === 'hod' && (
-        <div className="card mb-5">
+      {role === 'hod' && activeTab === 'approvals' && (
+        <div className="card mb-5 tab-pane-fade">
           <div className="card-hd">
             <div className="card-hd-left">
               <div className="card-hd-icon"><FileCheck size={18} color="var(--brand-crimson)" /></div>
@@ -771,7 +1406,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
           <div className="card-body">
             {/* Live Q4 Budget Burn-Down Gauge */}
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px 18px', borderRadius: '6px', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
                 <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>Q4 Operational Expenditure (OPEX) Ceiling: ৳53,20,000</span>
                 <span style={{ color: '#059669', fontWeight: 800 }}>
                   Safe Buffer: ৳{(5320000 - (3840000 + approvedAmountSum)).toLocaleString()} Remaining
@@ -791,7 +1426,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
 
             {/* Approval Items List with Checkboxes */}
             <div className="approval-queue-list">
-              {hodQueue.map((item) => (
+              {hodQueue.slice((hodQueuePage - 1) * 4, hodQueuePage * 4).map((item) => (
                 <div key={item.id} className={`approval-queue-item${item.urgency === 'overdue' ? ' overdue' : ''}`}>
                   <button
                     type="button"
@@ -842,226 +1477,42 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 </div>
               ))}
             </div>
+
+            <Pagination
+              currentPage={hodQueuePage}
+              totalItems={hodQueue.length}
+              pageSize={4}
+              onPageChange={setHodQueuePage}
+              lang={lang}
+            />
           </div>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════
-          EMPLOYEE: Quick Action Launchpad & Activity
+          EMPLOYEE: TAB "activity" (Timeline & Balances)
           ═══════════════════════════════════════════ */}
-      {role === 'employee' && (
-        <>
-          {/* Quick Action Launchpad */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '22px' }}>
-            <div
-              className="card interactive-row"
-              style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #BFDBFE', background: '#EFF6FF' }}
-              onClick={() => showToast('📍 Geofence verified: Punched In at South Gate Keraniganj Complex (08:52 AM)', 'success')}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                <MapPin size={20} />
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '13px', color: '#1E40AF' }}>Clock-In Geofence</div>
-              <div style={{ fontSize: '11px', color: '#60A5FA', marginTop: '2px' }}>Verified Biometric GPS</div>
-            </div>
-
-            <div
-              className="card interactive-row"
-              style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--brand-gold-muted)', background: 'var(--brand-card-bg)' }}
-              onClick={() => showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F59E0B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                <Car size={20} />
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-gold-dark)' }}>Request Vehicle</div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Inter-terminal transit</div>
-            </div>
-
-            <div
-              className="card interactive-row"
-              style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #A7F3D0', background: '#ECFDF5' }}
-              onClick={() => showToast('🚌 Commuter Shuttle Pass: Seat #7, Mirpur-Keraniganj Express Active', 'success')}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                <Bus size={20} />
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '13px', color: '#065F46' }}>Shuttle Bus Pass</div>
-              <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px' }}>Seat #7 Confirmed</div>
-            </div>
-
-            <div
-              className="card interactive-row"
-              style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #DDD6FE', background: '#F5F3FF' }}
-              onClick={() => showToast('🧾 Local Conveyance & Tour Claim form ready.', 'info')}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#8B5CF6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                <Receipt size={20} />
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '13px', color: '#5B21B6' }}>Submit Claim</div>
-              <div style={{ fontSize: '11px', color: '#7C3AED', marginTop: '2px' }}>Grade 7-10 Matrix</div>
-            </div>
-          </div>
-
-          {/* Active Requisition Status Banner for Employee */}
-          {sharedRequisitions.filter(r => r.requesterName.includes('Tanvir')).slice(0, 1).map(myReq => (
-            <div key={myReq.id} className="card mb-4" style={{ background: myReq.status === 'assigned' ? '#F0FDF4' : '#FFFBEB', border: myReq.status === 'assigned' ? '1px solid #86EFAC' : '1px solid #FDE68A', padding: '14px 18px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Car size={20} color={myReq.status === 'assigned' ? '#16A34A' : '#D97706'} />
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                      {myReq.status === 'assigned' ? '✓ Vehicle & Driver Allocated for Your Duty Travel' : '⏳ Vehicle Requisition Under Review by Transport Admin (Md. Kamruzzaman)'}
-                    </div>
-                    <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                      {myReq.id} • {myReq.from.split(',')[0]} ➔ {myReq.to.split(',')[0]} ({myReq.tripType === 'round_trip' ? 'Round Trip' : 'One-Way'}) • Departure: {myReq.departureTime}
-                    </div>
-                    {myReq.status === 'assigned' && (
-                      <div style={{ fontSize: '12px', color: '#15803D', fontWeight: 700, marginTop: '3px' }}>
-                        Car: {myReq.assignedVehiclePlate} • Driver: {myReq.assignedDriverName} (📞 {myReq.assignedDriverPhone}) • Pass #{myReq.tripPassNo}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <span className={`badge ${myReq.status === 'assigned' ? 'success' : 'warn'}`}>
-                  {myReq.status === 'assigned' ? 'DISPATCH READY' : 'PENDING ADMIN'}
-                </span>
-              </div>
-            </div>
-          ))}
-
-          {/* Activity + Leave Balances */}
-          <div className="col-2">
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon"><Activity size={16} /></div>
-                  <div>
-                    <div className="card-title">{t('My Recent Activity Log', 'আমার সাম্প্রতিক কার্যক্রম', lang)}</div>
-                    <div className="card-subtitle">{t('Your latest actions and updates', 'আপনার সর্বশেষ কার্যক্রম ও আপডেট', lang)}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="card-body">
-                <div className="activity-timeline">
-                  {MY_RECENT_ACTIVITY.map((act, i) => (
-                    <div key={i} className="activity-item">
-                      <div className="activity-dot">{act.icon}</div>
-                      <div className="activity-content">
-                        <div className="activity-title">{act.title}</div>
-                        <div className="activity-detail">{act.detail}</div>
-                        <div className="activity-time">{act.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Leave & Benefit Balances */}
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon"><Award size={16} /></div>
-                  <div>
-                    <div className="card-title">{t('Entitlements & Leave Balance', 'ছুটি ব্যালেন্স ও প্রাপ্য ভাতাসমূহ', lang)}</div>
-                    <div className="card-subtitle">{t('Fiscal Year 2026 Allowance', 'চলতি অর্থবছরের ছুটি স্থিতি', lang)}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="card-body">
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Casual Leave (CL)</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>8 / 10</div>
-                    <div style={{ fontSize: '10px', color: '#059669' }}>2 Days Utilized</div>
-                  </div>
-
-                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Medical / Sick Leave</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>6 / 14</div>
-                    <div style={{ fontSize: '10px', color: '#D97706' }}>8 Days Remaining</div>
-                  </div>
-
-                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Attendance Bonus</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>৳ 3,000</div>
-                    <div style={{ fontSize: '10px', color: '#059669' }}>Qualified (100% On-Time)</div>
-                  </div>
-
-                  <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Provident Fund Accrued</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: '#1D4ED8' }}>৳ 4,12,000</div>
-                    <div style={{ fontSize: '10px', color: '#64748B' }}>Matching BOGCL Contrib.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          CHAIRMAN: Inner Circle + Priority Approvals
-          ═══════════════════════════════════════════ */}
-      {role === 'chairman' && (
-        <div className="col-2">
-          {/* Inner Circle Presence */}
+      {role === 'employee' && activeTab === 'activity' && (
+        <div className="col-2 mb-5 tab-pane-fade">
           <div className="card">
             <div className="card-hd">
               <div className="card-hd-left">
-                <div className="card-hd-icon">👥</div>
+                <div className="card-hd-icon"><Activity size={16} /></div>
                 <div>
-                  <div className="card-title">{t('Inner Circle — Executive Presence', 'ইনার সার্কেল — নেতৃত্ব উপস্থিতি', lang)}</div>
-                  <div className="card-subtitle">{t('Live status of key leadership', 'মূল নেতৃত্বের লাইভ স্ট্যাটাস', lang)}</div>
+                  <div className="card-title">{t('My Recent Activity Log', 'আমার সাম্প্রতিক কার্যক্রম', lang)}</div>
+                  <div className="card-subtitle">{t('Your latest actions and updates', 'আপনার সর্বশেষ কার্যক্রম ও আপডেট', lang)}</div>
                 </div>
               </div>
-              <span className="badge success">8 tracked</span>
             </div>
             <div className="card-body">
-              {/* Presence Triage Breakdown Pills */}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px', fontSize: '11px' }}>
-                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#ECFDF5', color: '#065F46', fontWeight: 600 }}>🟢 4 Present</span>
-                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#EFF6FF', color: '#1E40AF', fontWeight: 600 }}>🔵 1 In Meeting</span>
-                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FEF3C7', color: '#92400E', fontWeight: 600 }}>🟡 1 Informed Leave</span>
-                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FFFBEB', color: '#B45309', fontWeight: 600 }}>🟠 1 Sick Leave</span>
-                <span style={{ padding: '3px 8px', borderRadius: '4px', background: '#FEE2E2', color: '#991B1B', fontWeight: 700 }}>🔴 1 Uninformed Absent ⚠️</span>
-              </div>
-
-              <div className="presence-list">
-                {INNER_CIRCLE.map((person, i) => (
-                  <div key={i} className="presence-row interactive-row"
-                    onClick={() => {
-                      if (person.status === 'uninformed') {
-                        showToast(`🚨 URGENT: HR GM Sayeda Afroza instructed to initiate formal inquiry for ${person.name}.`, 'danger');
-                      } else {
-                        showToast(`📍 ${person.name} location: ${person.location} (${person.phone})`, 'info');
-                      }
-                    }}
-                    title="Click to view leadership detail or trigger intervention"
-                    style={{ background: person.status === 'uninformed' ? '#FEF2F2' : undefined, border: person.status === 'uninformed' ? '1px solid #FECACA' : undefined }}>
-                    <div className="presence-person">
-                      <div className="presence-avatar" style={{ background: person.color }}>{person.initials}</div>
-                      <div>
-                        <div className="prs-name">{person.name}</div>
-                        <div className="prs-role">{person.role} • <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{person.location}</span></div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className={`badge ${person.badge}`}>{t(person.statusLabel, person.statusLabelBn, lang)}</span>
-                      {person.status === 'uninformed' ? (
-                        <button
-                          className="btn-outline-danger"
-                          style={{ padding: '2px 8px', fontSize: '10px' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            showToast(`🚨 Priority Notice dispatched to ${person.name} & GM HR for unauthorized absence.`, 'danger');
-                          }}
-                        >
-                          Alert HR
-                        </button>
-                      ) : (
-                        <ChevronRight size={14} color="var(--brand-slate-300)" />
-                      )}
+              <div className="activity-timeline">
+                {MY_RECENT_ACTIVITY.map((act, i) => (
+                  <div key={i} className="activity-item">
+                    <div className="activity-dot">{act.icon}</div>
+                    <div className="activity-content">
+                      <div className="activity-title">{act.title}</div>
+                      <div className="activity-detail">{act.detail}</div>
+                      <div className="activity-time">{act.time}</div>
                     </div>
                   </div>
                 ))}
@@ -1069,105 +1520,43 @@ export default function DashboardView({ role, lang }: ViewProps) {
             </div>
           </div>
 
-          {/* Notice Board */}
+          {/* Leave & Benefit Balances */}
           <div className="card">
             <div className="card-hd">
               <div className="card-hd-left">
-                <div className="card-hd-icon">📢</div>
+                <div className="card-hd-icon"><Award size={16} /></div>
                 <div>
-                  <div className="card-title">{t('Enterprise Notice Board', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</div>
-                  <div className="card-subtitle">{t('Latest corporate announcements', 'সর্বশেষ কর্পোরেট ঘোষণা', lang)}</div>
+                  <div className="card-title">{t('Entitlements & Leave Balance', 'ছুটি ব্যালেন্স ও প্রাপ্য ভাতাসমূহ', lang)}</div>
+                  <div className="card-subtitle">{t('Fiscal Year 2026 Allowance', 'চলতি অর্থবছরের ছুটি স্থিতি', lang)}</div>
                 </div>
               </div>
-              <button
-                className="btn-outline"
-                style={{ fontSize: '11px', padding: '4px 10px' }}
-                onClick={() => {
-                  const titleInput = prompt('Enter new corporate circular headline / নোটিশ শিরোনাম লিখুন:');
-                  if (!titleInput) return;
-                  const newNotice = {
-                    title: titleInput,
-                    title_bn: titleInput,
-                    tag: 'URGENT CIRCULAR',
-                    date: 'Today, Just Now',
-                    read: false,
-                    pinned: true
-                  };
-                  setNotices([newNotice, ...notices]);
-                  showToast('📢 New company-wide notice published & pushed to all 1,240 employees via App & SMS.', 'gold');
-                }}
-              >
-                + {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}
-              </button>
             </div>
             <div className="card-body">
-              <div className="notice-card gold-pin" style={{ marginBottom: '10px' }}>
-                <div className="notice-hd">
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-gold-dark)' }}>
-                    👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
-                  </div>
-                  <span className="badge gold">Pinned</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Casual Leave (CL)</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>8 / 10</div>
+                  <div style={{ fontSize: '10px', color: '#059669' }}>2 Days Utilized</div>
                 </div>
-                <div className="notice-meta">Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman</div>
-                <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-600)' }}>
-                  {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
-                </div>
-              </div>
-              <div className="notice-list">
-                {notices.map((notice, i) => (
-                  <div key={i} className={`notice-card${notice.pinned ? ' pinned' : ''}`}>
-                    <div className="notice-hd">
-                      <div className="notice-title">{t(notice.title, notice.title_bn, lang)}</div>
-                      <span className={`badge ${notice.pinned ? 'danger' : 'info'}`}>{notice.tag}</span>
-                    </div>
-                    <div className="notice-meta">{notice.date}</div>
-                    {!notice.read && (
-                      <button className="btn-sm-ghost" style={{ fontSize: '11px' }} onClick={() => showToast('Notice acknowledged.', 'success')}>
-                        ✅ {t('Acknowledge', 'পড়েছি', lang)}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Chairman Priority Approvals */}
-      {role === 'chairman' && (
-        <div className="card mb-5">
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon">⚡</div>
-              <div>
-                <div className="card-title">{t('Priority Approvals — Chairman\'s Action Required', 'জরুরি অনুমোদন — চেয়ারম্যানের পদক্ষেপ প্রয়োজন', lang)}</div>
-                <div className="card-subtitle">{t('High-value files escalated to Chairman\'s office', 'উচ্চ-মূল্যের ফাইল চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
-              </div>
-            </div>
-            <span className="badge danger">3 items</span>
-          </div>
-          <div className="card-body">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {PENDING_APPROVALS.map((item, i) => (
-                <div key={i} className="approval-interactive-card"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}` }}
-                  onClick={() => handleRowClick(item)}>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{item.title}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.id} · {item.dept} · <strong style={{ color: 'var(--brand-gold-dark)' }}>{item.amount}</strong></div>
-                  </div>
-                  <div className="flex-gap" onClick={(e) => e.stopPropagation()}>
-                    <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }} onClick={() => showToast(`👑 Chairman authorized: ${item.id}`, 'gold')}>
-                      👑 Authorize
-                    </button>
-                    <button className="btn-outline" style={{ fontSize: '11px' }} onClick={() => handleRowClick(item)}>
-                      Inspect File
-                    </button>
-                  </div>
+                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Medical / Sick Leave</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>6 / 14</div>
+                  <div style={{ fontSize: '10px', color: '#D97706' }}>8 Days Remaining</div>
                 </div>
-              ))}
+
+                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Attendance Bonus</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669' }}>৳ 3,000</div>
+                  <div style={{ fontSize: '10px', color: '#059669' }}>Qualified (100% On-Time)</div>
+                </div>
+
+                <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Provident Fund Accrued</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#1D4ED8' }}>৳ 4,12,000</div>
+                  <div style={{ fontSize: '10px', color: '#64748B' }}>Matching BOGCL Contrib.</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
