@@ -844,6 +844,103 @@ body {
 }
 .hash-value { font-family:monospace; font-size:9.5px; color:var(--brand-slate-700); font-weight:700; word-break:break-all; }
 
+/* ─── SEGMENTED PILL TABS ─── */
+.pill-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-slate-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--brand-slate-200);
+  overflow-x: auto;
+  max-width: 100%;
+}
+.pill-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--brand-slate-600);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+.pill-tab:hover {
+  color: var(--brand-slate-900);
+}
+.pill-tab.active {
+  background: #FFFFFF;
+  color: var(--brand-crimson);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-color: var(--brand-slate-200);
+}
+[data-theme="dark"] .pill-tabs {
+  background: #0B132B;
+  border-color: #1E293B;
+}
+[data-theme="dark"] .pill-tab {
+  color: #94A3B8;
+}
+[data-theme="dark"] .pill-tab:hover {
+  color: #F8FAFC;
+}
+[data-theme="dark"] .pill-tab.active {
+  background: #1E293B;
+  color: var(--brand-gold);
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── KPI COMPATIBILITY LAYER ─── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.kpi-card {
+  background: var(--brand-card-bg, #fff);
+  border: 1px solid var(--brand-slate-200);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--brand-slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--brand-slate-900);
+  line-height: 1.2;
+}
+.kpi-sub {
+  font-size: 11.5px;
+  color: var(--brand-slate-500);
+  margin-top: 4px;
+}
+.text-emerald { color: #059669 !important; }
+.text-crimson { color: var(--brand-crimson) !important; }
+.text-blue { color: #0284C7 !important; }
+.text-gold { color: var(--brand-gold-dark) !important; }
+
 /* ─── BUTTONS ─────────────────────────────────────────────────────────────── */
 .btn { border:none; cursor:pointer; font-family:var(--font-main); transition:all var(--transition-fast); }
 .btn-sm-ghost {
@@ -7423,6 +7520,46 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
     justify-content: center !important;
     padding: 8px 12px !important;
   }
+}
+
+/* ─── VISITOR MANIFEST RESPONSIVE STYLES ─── */
+.visitor-mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.visitor-desktop-table {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .visitor-desktop-table {
+    display: none !important;
+  }
+  .visitor-mobile-cards {
+    display: flex !important;
+  }
+}
+
+.visitor-card-item {
+  background: var(--brand-card-bg, #fff);
+  border: 1px solid var(--brand-slate-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.visitor-card-item:hover, .visitor-card-item.selected {
+  border-color: var(--brand-crimson);
+  box-shadow: 0 2px 8px rgba(165, 28, 48, 0.08);
+}
+[data-theme="dark"] .visitor-card-item {
+  background: #0E1834;
+  border-color: #1E293B;
+}
+[data-theme="dark"] .visitor-card-item:hover, [data-theme="dark"] .visitor-card-item.selected {
+  border-color: var(--brand-gold);
 }
 
 

@@ -4,7 +4,7 @@ import { showToast } from '../App';
 import {
   FileSignature, CheckCircle, Clock, AlertTriangle, ShieldCheck,
   Send, PenTool, Hash, Download, ArrowRight, UserCheck, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw
+  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw, Crown
 } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 
@@ -251,6 +251,37 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     );
   };
 
+  const handleQuickSignChairman = () => {
+    const generatedHash =
+      'SHA256: ' +
+      Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    setSignatureHash(generatedHash);
+    setIsSigned(true);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#1E293B';
+        ctx.font = 'italic 700 24px "Outfit", "Times New Roman", serif';
+        ctx.fillText('Ahmed Akbar Sobhan', 25, 75);
+        ctx.beginPath();
+        ctx.moveTo(20, 88);
+        ctx.bezierCurveTo(70, 105, 180, 65, 270, 80);
+        ctx.stroke();
+      }
+    }
+    showToast(
+      t(
+        'Executive cryptographic token applied for Ahmed Akbar Sobhan.',
+        'চেয়ারম্যান মহোদয়ের ক্রিপ্টোগ্রাফিক টোকেন সংযুক্ত হয়েছে।',
+        lang
+      ),
+      'gold'
+    );
+  };
+
   const handleApproveChairman = () => {
     if (!isSigned) {
       showToast(
@@ -318,172 +349,205 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
   return (
     <div className="view-container">
-      {/* Top Header */}
-      <div className="section-header">
+      {/* ─── SLEEK MINIMAL HEADER & TOOLBAR ─── */}
+      <div className="section-header" style={{ marginBottom: '14px', alignItems: 'center' }}>
         <div>
-          <h2 className="section-title">
-            ✍️ {t('E-Note Sheet & Cryptographic E-Sign Platform', 'ই-নোটশীট ও ডিজিটাল স্বাক্ষর প্ল্যাটফর্ম', lang)}
+          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '18px' }}>
+            <span>✍️</span>
+            <span>{t('E-Note Sheet & Sign-Off Platform', 'ই-নোটশীট ও ডিজিটাল স্বাক্ষর প্ল্যাটফর্ম', lang)}</span>
           </h2>
-          <p className="section-subtitle">
+          <p className="section-subtitle" style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
             {t(
-              'DocuSign-grade enterprise workflow with multi-tier endorsements, SHA-256 seal & SAP S/4HANA PO integration.',
-              'বহুস্তরীয় অনুমোদন ব্যবস্থা, এসএইচএ-২৫৬ এনক্রিপশন সিল এবং স্যাপ এস/৪ হানা ক্রয়াদেশ সমন্বয়।',
+              'DocuSign-grade sequential authorization & cryptographic ledger.',
+              'ধারাবাহিক অনুমোদন ব্যবস্থা ও ক্রিপ্টোগ্রাফিক ডিজিটাল খতিয়ান।',
               lang
             )}
           </p>
         </div>
-        <div className="btn-group">
-          <button
-            className={`btn-sm-ghost ${activeTab === 'sheet' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sheet')}
-          >
-            <FileText size={14} /> {t('Note Sheet Document', 'নথিপত্র বিবরণী', lang)}
-          </button>
-          <button
-            className={`btn-sm-ghost ${activeTab === 'compare' ? 'active' : ''}`}
-            onClick={() => setActiveTab('compare')}
-          >
-            <Layers size={14} /> {t('Vendor Quotations (3)', 'দরপত্র তুলনা (৩টি)', lang)}
-          </button>
-          <button
-            className={`btn-sm-ghost ${activeTab === 'audit' ? 'active' : ''}`}
-            onClick={() => setActiveTab('audit')}
-          >
-            <Lock size={14} /> {t('Audit & Proof Ledger', 'নিরীক্ষা খতিয়ান', lang)}
-          </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Segmented View Switcher */}
+          <div style={{ display: 'inline-flex', background: 'var(--brand-slate-100)', padding: '3px', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+            <button
+              onClick={() => setActiveTab('sheet')}
+              style={{
+                border: 'none',
+                background: activeTab === 'sheet' ? '#fff' : 'transparent',
+                boxShadow: activeTab === 'sheet' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: activeTab === 'sheet' ? 700 : 500,
+                color: activeTab === 'sheet' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <FileText size={13} /> {t('Note Sheet', 'নোটশীট', lang)}
+            </button>
+            <button
+              onClick={() => setActiveTab('compare')}
+              style={{
+                border: 'none',
+                background: activeTab === 'compare' ? '#fff' : 'transparent',
+                boxShadow: activeTab === 'compare' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: activeTab === 'compare' ? 700 : 500,
+                color: activeTab === 'compare' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Layers size={13} /> {t('Quotations (3)', 'দরপত্র (৩টি)', lang)}
+            </button>
+            <button
+              onClick={() => setActiveTab('audit')}
+              style={{
+                border: 'none',
+                background: activeTab === 'audit' ? '#fff' : 'transparent',
+                boxShadow: activeTab === 'audit' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: activeTab === 'audit' ? 700 : 500,
+                color: activeTab === 'audit' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Lock size={13} /> {t('Audit Ledger', 'খতিয়ান', lang)}
+            </button>
+          </div>
+
+          {/* Quick Actions */}
           <button
             className="btn-outline"
             onClick={() => setShowOfficialDoc(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontSize: '11.5px', padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <Printer size={14} /> {t('Print Official Memo', 'মেমো প্রিন্ট', lang)}
+            <Printer size={13} /> {t('Print', 'প্রিন্ট', lang)}
           </button>
           <button
             className="btn-primary"
             onClick={() => setShowCertModal(true)}
+            style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <QrCode size={14} /> {t('Certificate of Execution', 'সম্পাদন সনদ', lang)}
+            <QrCode size={13} /> {t('Certificate', 'সনদ', lang)}
           </button>
         </div>
       </div>
 
-      {/* Multi-Document File Switcher Ribbon */}
-      <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '18px', paddingBottom: '4px' }}>
-        {files.map((file) => (
-          <div
-            key={file.id}
-            onClick={() => {
-              setActiveFileId(file.id);
-              clearCanvas();
-            }}
-            style={{
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: activeFileId === file.id ? '2px solid var(--brand-crimson)' : '1px solid var(--brand-border)',
-              background: activeFileId === file.id ? 'var(--brand-card-bg)' : 'var(--brand-slate-50)',
-              cursor: 'pointer',
-              minWidth: '260px',
-              boxShadow: activeFileId === file.id ? 'var(--shadow-md)' : 'none',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--brand-crimson)' }}>
-                {file.fileNo}
-              </span>
-              <span className={`badge ${file.status === 'approved' ? 'success' : 'warn'}`}>
-                {file.status === 'approved' ? 'Approved' : 'Action Needed'}
-              </span>
-            </div>
-            <div style={{ fontSize: '12px', fontWeight: 600, marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {file.title}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-              <span>Valuation: <strong>{file.amount}</strong></span>
-              <span>{file.date}</span>
-            </div>
+      {/* ─── SLEEK MINIMAL DOSSIER BAR & STEPPER ─── */}
+      <div className="card mb-4" style={{ padding: '10px 16px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-border)', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          
+          {/* Clean Dossier Pill Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', maxWidth: '100%' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px' }}>
+              Dossier:
+            </span>
+            {files.map((file) => {
+              const isSelected = activeFileId === file.id;
+              return (
+                <button
+                  key={file.id}
+                  onClick={() => {
+                    setActiveFileId(file.id);
+                    clearCanvas();
+                  }}
+                  style={{
+                    border: isSelected ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                    background: isSelected ? 'rgba(165, 28, 48, 0.08)' : 'transparent',
+                    color: isSelected ? 'var(--brand-crimson)' : 'var(--brand-slate-700)',
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    fontSize: '11.5px',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: file.status === 'approved' ? '#10B981' : '#F59E0B'
+                  }} />
+                  <span style={{ fontFamily: 'monospace' }}>{file.fileNo.split('/')[2] || file.fileNo}</span>
+                  <span style={{ opacity: 0.75, fontSize: '10.5px' }}>({file.amount})</span>
+                  {file.urgency === 'urgent' && isSelected && (
+                    <span style={{ fontSize: '9px', background: '#FEE2E2', color: '#DC2626', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>
+                      URGENT
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        ))}
-      </div>
 
-      {/* Approval Flow Stepper (DocuSign Chain) */}
-      <div className="card mb-4" style={{ padding: '14px 20px', background: 'linear-gradient(135deg, #0B132B 0%, #1E293B 100%)', color: '#fff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
-          <div>
-            <div style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '0.8px', color: '#D4AF37', fontWeight: 700 }}>
-              {t('SEQUENTIAL AUTHORIZATION PIPELINE (DOCUSIGN STANDARD)', 'ধারাবাহিক অনুমোদন পাইপলাইন', lang)}
+          {/* Minimal Inline Authorization Pipeline */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
+              <CheckCircle size={12} />
+              <span>Plant Engr</span>
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 600, marginTop: '2px' }}>
-              File: {currentFile.fileNo} · {currentFile.sapRef}
+            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
+              <CheckCircle size={12} />
+              <span>Plant GM</span>
+            </div>
+            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
+              <CheckCircle size={12} />
+              <span>CFO</span>
+            </div>
+            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 8px',
+              borderRadius: '10px',
+              background: currentFile.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.15)',
+              color: currentFile.status === 'approved' ? '#059669' : '#B45309',
+              fontWeight: 700
+            }}>
+              <span>{currentFile.status === 'approved' ? '✓' : '👑'}</span>
+              <span>Chairman {currentFile.status === 'approved' ? 'Signed' : 'Sign-Off'}</span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>✓</div>
-              <span style={{ fontSize: '11.5px', color: '#E2E8F0' }}>1. Plant Engr</span>
-            </div>
-            <ArrowRight size={14} color="#64748B" />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>✓</div>
-              <span style={{ fontSize: '11.5px', color: '#E2E8F0' }}>2. Plant GM</span>
-            </div>
-            <ArrowRight size={14} color="#64748B" />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>✓</div>
-              <span style={{ fontSize: '11.5px', color: '#E2E8F0' }}>3. CFO Vetting</span>
-            </div>
-            <ArrowRight size={14} color="#64748B" />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: currentFile.status === 'approved' ? '#10B981' : '#D4AF37',
-                color: '#0F172A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '11px',
-                fontWeight: 800
-              }}>
-                {currentFile.status === 'approved' ? '✓' : '👑'}
-              </div>
-              <span style={{ fontSize: '11.5px', fontWeight: 700, color: currentFile.status === 'approved' ? '#34D399' : '#FDE047' }}>
-                4. Chairman Sign-off
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
+      {/* ─── TAB 1: OFFICIAL NOTE-SHEET DOCUMENT ─── */}
       {activeTab === 'sheet' && (
         <div className="responsive-col-2">
           {/* Official Document View */}
-          <div className="card">
-            <div className="card-hd">
-              <div className="card-hd-left">
-                <div className="card-hd-icon">
-                  <FileSignature size={18} />
-                </div>
+          <div className="card" style={{ border: '1px solid var(--brand-slate-200)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="card-body" style={{ padding: '24px' }}>
+              {/* Official Letterhead Directly on Document Paper */}
+              <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '14px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <div className="card-title">{t('Official Secretariat Note-Sheet', 'দাপ্তরিক কার্যবিবরণী ও নোটশীট', lang)}</div>
-                  <div className="card-subtitle">{currentFile.fileNo} · {currentFile.dept}</div>
-                </div>
-              </div>
-              <span className={`badge ${currentFile.urgency === 'urgent' ? 'danger' : 'info'}`}>
-                {currentFile.urgency === 'urgent' ? '🚨 URGENT / জরুরি' : 'PRIORITY'}
-              </span>
-            </div>
-
-            <div className="card-body">
-              {/* Official Letterhead */}
-              <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '12px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-crimson)', margin: 0 }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--brand-crimson)', margin: 0, letterSpacing: '0.4px' }}>
                     BASHUNDHARA OIL & GAS COMPANY LTD.
                   </h3>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
                     Corporate Secretariat • Keraniganj Petroleum Refinery Division
                   </div>
                   <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
@@ -491,48 +555,48 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '12px' }}>{currentFile.fileNo}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>Date: {currentFile.date}</div>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--brand-crimson)', marginTop: '2px' }}>
+                  <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '12px', color: 'var(--brand-slate-900)' }}>{currentFile.fileNo}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Date: {currentFile.date}</div>
+                  <div style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-crimson)', marginTop: '3px', background: 'rgba(165,28,48,0.06)', padding: '2px 8px', borderRadius: '4px' }}>
                     Value: {currentFile.amount}
                   </div>
                 </div>
               </div>
 
               {/* Subject */}
-              <div style={{ background: 'var(--brand-slate-50)', padding: '12px 14px', borderRadius: '6px', borderLeft: '4px solid var(--brand-crimson)', marginBottom: '16px', fontWeight: 600, fontSize: '13px' }}>
-                {t('Subject: ', 'বিষয়: ', lang)} {currentFile.title}
+              <div style={{ background: 'var(--brand-slate-50)', padding: '12px 14px', borderRadius: '6px', borderLeft: '3px solid var(--brand-crimson)', marginBottom: '18px', fontWeight: 600, fontSize: '12.5px', color: 'var(--brand-slate-900)', lineHeight: 1.5 }}>
+                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 700 }}>{t('Subject: ', 'বিষয়: ', lang)}</span> {currentFile.title}
               </div>
 
               {/* Notes Paragraphs */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {currentFile.notes.map((n) => (
                   <div
                     key={n.id}
                     style={{
                       padding: '14px',
                       borderRadius: '8px',
-                      border: n.isChairman ? '1.5px solid #D4AF37' : '1px solid var(--brand-border)',
-                      background: n.isChairman ? 'rgba(212, 175, 55, 0.05)' : 'var(--brand-card-bg)',
+                      border: n.isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-slate-200)',
+                      background: n.isChairman ? 'rgba(212, 175, 55, 0.04)' : 'var(--brand-card-bg)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: n.isChairman ? '#B45309' : 'var(--brand-slate-700)' }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? '#B45309' : 'var(--brand-slate-700)' }}>
                           Para-{n.para}.
                         </span>
-                        <strong>{n.author}</strong>
-                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>({n.role})</span>
+                        <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{n.author}</strong>
+                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>({n.role})</span>
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{n.date}</span>
                     </div>
 
-                    <p style={{ fontSize: '13px', lineHeight: '1.6', margin: '0 0 10px 0', color: 'var(--brand-slate-800)' }}>
+                    <p style={{ fontSize: '12.5px', lineHeight: '1.65', margin: '0 0 10px 0', color: 'var(--brand-slate-800)' }}>
                       {n.body}
                     </p>
 
                     {n.hash && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--brand-border)', paddingTop: '6px', fontSize: '10px', color: 'var(--brand-slate-400)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px', fontSize: '10px', color: 'var(--brand-slate-400)', flexWrap: 'wrap', gap: '4px' }}>
                         <span style={{ fontFamily: 'monospace' }}>🔒 {n.hash}</span>
                         <span style={{ color: '#059669', fontWeight: 600 }}>✓ Digitally Validated</span>
                       </div>
@@ -544,23 +608,50 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           </div>
 
           {/* Right Column: Signature Pad & Executive Authorization */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="card">
-              <div className="card-hd">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="card" style={{ border: '1px solid var(--brand-slate-200)' }}>
+              <div className="card-hd" style={{ padding: '12px 16px' }}>
                 <div className="card-hd-left">
-                  <div className="card-hd-icon"><Stamp size={16} /></div>
+                  <div className="card-hd-icon"><Stamp size={15} /></div>
                   <div>
-                    <div className="card-title">{t('Cryptographic Signature Pad', 'ডিজিটাল স্বাক্ষর প্যাড', lang)}</div>
-                    <div className="card-subtitle">{t('Draw signature or apply digital seal', 'স্বাক্ষর আঁকুন বা ডিজিটাল সিল প্রয়োগ করুন', lang)}</div>
+                    <div className="card-title" style={{ fontSize: '13px' }}>{t('Executive E-Sign Pad', 'ডিজিটাল স্বাক্ষর প্যাড', lang)}</div>
+                    <div className="card-subtitle">{t('Draw or apply 1-click cryptographic token', 'স্বাক্ষর আঁকুন বা ডিজিটাল সিল প্রয়োগ করুন', lang)}</div>
                   </div>
                 </div>
               </div>
-              <div className="card-body">
-                <div style={{ border: '1.5px dashed var(--brand-border)', borderRadius: '8px', background: '#FAFAFC', position: 'relative', height: '140px', marginBottom: '12px' }}>
+              <div className="card-body" style={{ padding: '16px' }}>
+                {/* 1-Click Quick Sign Action */}
+                <button
+                  type="button"
+                  onClick={handleQuickSignChairman}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px dashed #D4AF37',
+                    background: 'rgba(212, 175, 55, 0.08)',
+                    color: '#B45309',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    marginBottom: '10px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Crown size={14} color="#D4AF37" />
+                  <span>{t('⚡ 1-Click Executive Token: Ahmed Akbar Sobhan', '⚡ চেয়ারম্যান টোকেন সিল প্রয়োগ করুন', lang)}</span>
+                </button>
+
+                {/* Canvas Drawing Box */}
+                <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: '#FAFAFC', position: 'relative', height: '110px', marginBottom: '10px' }}>
                   <canvas
                     ref={canvasRef}
                     width={340}
-                    height={140}
+                    height={110}
                     style={{ width: '100%', height: '100%', cursor: 'crosshair' }}
                     onMouseDown={startDrawing}
                     onMouseMove={draw}
@@ -568,82 +659,207 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     onMouseLeave={stopDrawing}
                   />
                   {!isDrawing && !isSigned && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--brand-slate-400)', fontSize: '12px' }}>
-                      <PenTool size={14} style={{ marginRight: '6px' }} /> Draw Signature with mouse / stylus
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--brand-slate-400)', fontSize: '11px' }}>
+                      <PenTool size={13} style={{ marginRight: '5px' }} /> Or draw signature with stylus / mouse
                     </div>
                   )}
                   {isSigned && (
-                    <div style={{ position: 'absolute', bottom: '8px', right: '10px', background: 'rgba(5, 150, 105, 0.1)', border: '1px solid #10B981', color: '#059669', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>
+                    <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: '#ECFDF5', border: '1px solid #10B981', color: '#059669', padding: '2px 6px', borderRadius: '4px', fontSize: '9.5px', fontWeight: 700 }}>
                       ✓ Cryptographically Signed
                     </div>
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                  <button className="btn-outline" style={{ flex: 1, fontSize: '11.5px' }} onClick={clearCanvas}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <button className="btn-outline" style={{ flex: 1, fontSize: '11px', padding: '5px 8px' }} onClick={clearCanvas}>
                     {t('Clear Pad', 'মুছে ফেলুন', lang)}
                   </button>
-                  <button className="btn-primary" style={{ flex: 1, fontSize: '11.5px' }} onClick={handleApplySignature}>
-                    <CheckCheck size={14} /> {t('Apply Signature', 'স্বাক্ষর প্রয়োগ', lang)}
+                  <button className="btn-primary" style={{ flex: 1, fontSize: '11px', padding: '5px 8px' }} onClick={handleApplySignature}>
+                    <CheckCheck size={13} /> {t('Apply Signature', 'স্বাক্ষর প্রয়োগ', lang)}
                   </button>
                 </div>
 
-                <div style={{ marginBottom: '14px' }}>
-                  <label className="form-label">{t("Chairman / Approver's Directive Note", 'চেয়ারম্যানের নির্বাহী মন্তব্য', lang)}</label>
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 600 }}>{t("Directive Note / Sanction Remarks", 'নির্বাহী মন্তব্য', lang)}</label>
                   <textarea
                     className="form-input"
-                    rows={3}
-                    placeholder="Enter executive directive or sanction text..."
+                    rows={2}
+                    placeholder="Enter directive or approved remarks..."
                     value={newNoteText}
                     onChange={(e) => setNewNoteText(e.target.value)}
+                    style={{ fontSize: '12px', padding: '8px 10px' }}
                   />
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     className="btn-primary"
-                    style={{ flex: 1.5, justifyContent: 'center', padding: '10px 12px', background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)', fontSize: '12px' }}
+                    style={{ flex: 1.5, justifyContent: 'center', padding: '9px 12px', background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)', fontSize: '12px', fontWeight: 700 }}
                     onClick={handleApproveChairman}
                   >
-                    <Stamp size={15} /> {t('Authorize & Seal', 'অনুমোদন ও সিল', lang)}
+                    <Stamp size={14} /> {t('Authorize & Seal', 'অনুমোদন ও সিল', lang)}
                   </button>
                   <button
                     className="btn-outline"
-                    style={{ flex: 1, justifyContent: 'center', padding: '10px 10px', borderColor: '#DC2626', color: '#DC2626', background: 'rgba(220, 38, 38, 0.04)', fontSize: '12px' }}
+                    style={{ flex: 1, justifyContent: 'center', padding: '9px 10px', borderColor: '#DC2626', color: '#DC2626', background: 'rgba(220, 38, 38, 0.04)', fontSize: '12px' }}
                     onClick={() => setShowReturnModal(true)}
                   >
-                    <RotateCcw size={14} /> {t('Return / Query', 'আপত্তি ও ফেরত', lang)}
+                    <RotateCcw size={13} /> {t('Return / Query', 'আপত্তি ও ফেরত', lang)}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Document Meta & SAP Connection */}
-            <div className="card">
-              <div className="card-hd">
+            <div className="card" style={{ border: '1px solid var(--brand-slate-200)' }}>
+              <div className="card-hd" style={{ padding: '10px 14px' }}>
                 <div className="card-hd-left">
-                  <div className="card-hd-icon">🔗</div>
+                  <div className="card-hd-icon" style={{ width: '24px', height: '24px' }}>🔗</div>
                   <div>
-                    <div className="card-title">SAP S/4HANA Linkage</div>
-                    <div className="card-subtitle">Purchase Requisition: {currentFile.sapRef}</div>
+                    <div className="card-title" style={{ fontSize: '12px' }}>SAP S/4HANA Linkage</div>
+                    <div className="card-subtitle" style={{ fontSize: '10.5px' }}>Purchase Requisition: {currentFile.sapRef}</div>
                   </div>
                 </div>
               </div>
-              <div className="card-body" style={{ fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--brand-border)' }}>
+              <div className="card-body" style={{ padding: '12px 14px', fontSize: '11.5px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Cost Center:</span>
                   <strong>CC-4102 (Keraniganj Refinery)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--brand-border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>GL Account:</span>
                   <strong>GL-88201 (Plant Capital Spares)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Audit Hash:</span>
-                  <code style={{ fontSize: '10px' }}>SHA256: 7f83b1...d9069</code>
+                  <code style={{ fontSize: '10px', color: 'var(--brand-slate-600)' }}>SHA256: 7f83b1...d9069</code>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 2: VENDOR QUOTATIONS COMPARISON ─── */}
+      {activeTab === 'compare' && (
+        <div className="card mb-4" style={{ border: '1px solid var(--brand-slate-200)', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--brand-slate-900)' }}>
+                {t('Commercial & Technical Tender Comparison (3 OEM Bids)', 'বাণিজ্যিক ও কারিগরি দরপত্র তুলনা (৩টি ওইএম দরপত্র)', lang)}
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                Dossier {currentFile.fileNo} · ASME Section VIII Div 1 Safety Relief Valves (Class 600)
+              </p>
+            </div>
+            <span className="badge success">3/3 Bids Vetted & BSTI Compliant</span>
+          </div>
+
+          <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
+            {/* Vendor 1 (Selected) */}
+            <div style={{ border: '2px solid #059669', borderRadius: '8px', padding: '16px', background: '#F0FDF4', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                RECOMMENDED & LOWEST BID
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#065F46' }}>KSB Valves SE & Co.</div>
+              <div style={{ fontSize: '11px', color: '#047857' }}>Frankenthal, Germany (OEM Authorized)</div>
+              
+              <div style={{ margin: '14px 0', borderTop: '1px solid #A7F3D0', borderBottom: '1px solid #A7F3D0', padding: '10px 0' }}>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#065F46' }}>৳48,50,000</div>
+                <div style={{ fontSize: '10.5px', color: '#059669' }}>Inclusive of C&F, Import Duty & BSTI Fee</div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#064E3B' }}>
+                <div><strong>Lead Time:</strong> 14 Calendar Days (Air Freight)</div>
+                <div><strong>Warranty:</strong> 36 Months Comprehensive</div>
+                <div><strong>Material:</strong> ASTM A216 WCB / Stellite Trim</div>
+                <div><strong>Quality Score:</strong> 98.4% (Highest Technical Rating)</div>
+              </div>
+            </div>
+
+            {/* Vendor 2 */}
+            <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Flowserve SAS</div>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Arnhem, France</div>
+              
+              <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳52,10,000</div>
+                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳3,60,000 variance vs lowest bid</div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
+                <div><strong>Lead Time:</strong> 21 Calendar Days (Sea Freight)</div>
+                <div><strong>Warranty:</strong> 24 Months Standard</div>
+                <div><strong>Material:</strong> ASME Class 600 Carbon Steel</div>
+                <div><strong>Quality Score:</strong> 92.1%</div>
+              </div>
+            </div>
+
+            {/* Vendor 3 */}
+            <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Velan Inc.</div>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Montreal, Canada / Tokyo Depot</div>
+              
+              <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳54,80,000</div>
+                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳6,30,000 variance vs lowest bid</div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
+                <div><strong>Lead Time:</strong> 30 Calendar Days</div>
+                <div><strong>Warranty:</strong> 24 Months Standard</div>
+                <div><strong>Material:</strong> ASME Class 600 Monel Trim</div>
+                <div><strong>Quality Score:</strong> 94.0%</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '6px', borderLeft: '3px solid #059669', fontSize: '12px', color: 'var(--brand-slate-700)' }}>
+            ✓ <strong>Procurement Committee Resolution:</strong> KSB Valves SE & Co. complies 100% with technical parameters and saves <strong>৳3,60,000</strong> compared to the second lowest bidder. Recommended for immediate Chairman sanction and SAP PO release.
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 3: AUDIT & PROOF LEDGER ─── */}
+      {activeTab === 'audit' && (
+        <div className="card mb-4" style={{ border: '1px solid var(--brand-slate-200)', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--brand-slate-900)' }}>
+                {t('Cryptographic Endorsement Ledger & Audit Trail', 'ক্রিপ্টোগ্রাফিক নিরীক্ষা খতিয়ান ও টাইমস্ট্যাম্প', lang)}
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                Envelope Ref: ENV-2026-90412 · SHA-256 Merkle Provenance
+              </p>
+            </div>
+            <span className="badge success">4-Tier Chain Validated</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {currentFile.notes.map((n, idx) => (
+              <div key={n.id} style={{ display: 'flex', gap: '14px', padding: '14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: n.isChairman ? '#D4AF37' : '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '12px', flexShrink: 0 }}>
+                  {idx + 1}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                      {n.author} <span style={{ fontWeight: 400, color: 'var(--brand-slate-500)', fontSize: '11px' }}>({n.role})</span>
+                    </div>
+                    <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>{n.date}</span>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--brand-slate-700)', margin: '4px 0 8px 0', lineHeight: 1.5 }}>
+                    {n.body}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', fontFamily: 'monospace', color: 'var(--brand-slate-500)', flexWrap: 'wrap' }}>
+                    <span style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)' }}>
+                      {n.hash}
+                    </span>
+                    <span style={{ color: '#059669', fontWeight: 700 }}>✓ SHA-256 VERIFIED</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
