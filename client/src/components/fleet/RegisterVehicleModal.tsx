@@ -83,7 +83,7 @@ export default function RegisterVehicleModal({ isOpen, onClose, lang }: Register
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Vehicle Model & Make *', 'মডেল ও ব্র্যান্ড *', lang)}</label>
                 <input
@@ -106,7 +106,7 @@ export default function RegisterVehicleModal({ isOpen, onClose, lang }: Register
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Seating / Crew Capacity', 'আসন ক্ষমতা', lang)}</label>
                 <input

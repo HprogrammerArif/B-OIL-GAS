@@ -249,7 +249,7 @@ export default function AssetView({ role, lang }: ViewProps) {
       </div>
 
       {/* Main Grid: Asset Register Table + Inspector */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '20px' }}>
+      <div className="responsive-col-2">
         {/* Asset Table */}
         <div className="card">
           <div className="card-hd">
@@ -268,51 +268,53 @@ export default function AssetView({ role, lang }: ViewProps) {
             </button>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>{t('Tag / Name', 'ট্যাগ ও নাম', lang)}</th>
-                  <th>{t('Location & Custodian', 'স্থান ও দায়িত্বপ্রাপ্ত', lang)}</th>
-                  <th>{t('Valuation', 'বর্তমান মূল্য', lang)}</th>
-                  <th>{t('Service Due', 'সার্ভিস বাকি', lang)}</th>
-                  <th>{t('Status', 'অবস্থা', lang)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAssets.map(item => (
-                  <tr
-                    key={item.id}
-                    onClick={() => setSelectedAsset(item)}
-                    style={{
-                      cursor: 'pointer',
-                      background: selectedAsset?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
-                    }}
-                  >
-                    <td>
-                      <div style={{ fontWeight: 600, fontSize: '13px' }}>{item.name}</div>
-                      <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-crimson)', fontWeight: 600 }}>
-                        🏷️ {item.tag}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '12px' }}>{item.location}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.custodian}</div>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>৳{(item.currentBookValue / 100000).toFixed(1)}L</div>
-                      <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Orig: ৳{(item.purchaseCost / 100000).toFixed(1)}L</div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '12px', fontWeight: 600, color: item.daysToService <= 15 ? 'var(--brand-crimson)' : 'inherit' }}>
-                        {item.daysToService} days
-                      </div>
-                      <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{item.nextServiceDate}</div>
-                    </td>
-                    <td>{getStatusBadge(item.status)}</td>
+            <div className="table-responsive">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>{t('Tag / Name', 'ট্যাগ ও নাম', lang)}</th>
+                    <th>{t('Location & Custodian', 'স্থান ও দায়িত্বপ্রাপ্ত', lang)}</th>
+                    <th>{t('Valuation', 'বর্তমান মূল্য', lang)}</th>
+                    <th>{t('Service Due', 'সার্ভিস বাকি', lang)}</th>
+                    <th>{t('Status', 'অবস্থা', lang)}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredAssets.map(item => (
+                    <tr
+                      key={item.id}
+                      onClick={() => setSelectedAsset(item)}
+                      style={{
+                        cursor: 'pointer',
+                        background: selectedAsset?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
+                      }}
+                    >
+                      <td>
+                        <div style={{ fontWeight: 600, fontSize: '13px' }}>{item.name}</div>
+                        <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-crimson)', fontWeight: 600 }}>
+                          🏷️ {item.tag}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '12px' }}>{item.location}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.custodian}</div>
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: 700 }}>৳{(item.currentBookValue / 100000).toFixed(1)}L</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Orig: ৳{(item.purchaseCost / 100000).toFixed(1)}L</div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: item.daysToService <= 15 ? 'var(--brand-crimson)' : 'inherit' }}>
+                          {item.daysToService} days
+                        </div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{item.nextServiceDate}</div>
+                      </td>
+                      <td>{getStatusBadge(item.status)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -342,7 +344,7 @@ export default function AssetView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+              <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '16px' }}>
                 <div style={{ padding: '10px', border: '1px solid var(--brand-border)', borderRadius: '6px' }}>
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{t('Procurement Date', 'ক্রয় তারিখ', lang)}</div>
                   <div style={{ fontWeight: 600, fontSize: '12.5px' }}>{selectedAsset.procurementDate}</div>

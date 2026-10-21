@@ -308,11 +308,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value="৳ 4,82,50,000" /></div>
                 <div className="lbl">{t('Net Realized Savings & Loss Mitigation', 'সাশ্রয় ও ক্ষতি প্রতিরোধ (চলতি অর্থবছর)', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="284 Days" /></div>
                 <div className="lbl">{t('Zero-Shutdown Safety Record', 'শূন্য শাটডাউন নিরাপদ কর্মদিবস', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="৳ 18.2 Cr" /></div>
                 <div className="lbl">{t('October Revenue (Running)', 'অক্টোবর রাজস্ব (চলমান)', lang)}</div>
               </div>
@@ -324,11 +324,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value="5,000 MT/Day" /></div>
                 <div className="lbl">{t('Refinery Output — Keraniganj', 'রিফাইনারি উৎপাদন — কেরানীগঞ্জ', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="96.3%" /></div>
                 <div className="lbl">{t('Overall Equipment Effectiveness (OEE)', 'যন্ত্রপাতি সামগ্রিক কার্যকারিতা', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="2 Active LOTO" /></div>
                 <div className="lbl">{t('Lockout-Tagout Safety Isolations', 'সক্রিয় এলওটিও নিরাপত্তা ট্যাগ', lang)}</div>
               </div>
@@ -340,11 +340,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value="24 Heavy Fleet" /></div>
                 <div className="lbl">{t('Tankers & Executive Pool', 'ট্যাংকার ও নির্বাহী বহর', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="0.00% Zero Theft" /></div>
                 <div className="lbl">{t('Fuel Dip-Rod Variance Today', 'জ্বালানি পরিমাপ নির্ভুলতা', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="৳ 14,80,000" /></div>
                 <div className="lbl">{t('Fleet Cost Savings (AI Pooling)', 'ফ্লিট পুলিং সাশ্রয়', lang)}</div>
               </div>
@@ -356,11 +356,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value="743 Personnel" /></div>
                 <div className="lbl">{t('Total Active Corporate Workforce', 'মোট সক্রিয় কর্মকর্তা ও কর্মচারী', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="94.8% Checked In" /></div>
                 <div className="lbl">{t('Geofenced Attendance (Shift-A)', 'জিওফেন্স উপস্থিতি (শিফট-এ)', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="1 In Clearance" /></div>
                 <div className="lbl">{t('Active Separation Exit Checklist', 'সক্রিয় বহির্গমন ছাড়পত্র অডিট', lang)}</div>
               </div>
@@ -372,11 +372,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value={`${hodQueue.length} Items`} /></div>
                 <div className="lbl">{t('Pending Your Approval', 'আপনার অনুমোদনের অপেক্ষায়', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#F87171' }}><AnimatedCounter value="2 Overdue" /></div>
                 <div className="lbl">{t('SLA Breach Alert (<24h)', 'এসএলএ লঙ্ঘন সতর্কতা', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#34D399' }}>
                   <AnimatedCounter value={`৳ ${(3840000 + approvedAmountSum).toLocaleString()}`} />
                 </div>
@@ -390,11 +390,11 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="val"><AnimatedCounter value="22/23 Days" /></div>
                 <div className="lbl">{t('October Attendance Record', 'অক্টোবর উপস্থিতি রেকর্ড', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="৳ 4,850" /></div>
                 <div className="lbl">{t('Conveyance Claim — Pending HOD', 'যাতায়াত দাবি — অনুমোদনের অপেক্ষায়', lang)}</div>
               </div>
-              <div className="roi-stat-item" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '24px' }}>
+              <div className="roi-stat-item divider">
                 <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="14 Days" /></div>
                 <div className="lbl">{t('Casual / Sick Leave Balance', 'অবশিষ্ট ছুটি ব্যালেন্স', lang)}</div>
               </div>
@@ -607,7 +607,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
           </div>
 
           {/* PROGRESSIVE DISCLOSURE JUMP CARDS (Zero clutter — clean direct pathways) */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+          <div className="tab-jump-grid">
             {role === 'chairman' && (
               <>
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('approvals')}>
@@ -1153,69 +1153,71 @@ export default function DashboardView({ role, lang }: ViewProps) {
             <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} pending</span>
           </div>
           <div className="card-body">
-            <table className="fleet-table">
-              <thead>
-                <tr>
-                  <th>{t('ID', 'আইডি', lang)}</th>
-                  <th>{t('Requester & Dept', 'অনুরোধকারী ও বিভাগ', lang)}</th>
-                  <th>{t('Route & Trip Mode', 'রুট ও ধরন', lang)}</th>
-                  <th>{t('Departure Time', 'যাত্রার সময়', lang)}</th>
-                  <th>{t('Required Capacity', 'প্রয়োজনীয় ধরন', lang)}</th>
-                  <th>{t('Actions', 'পদক্ষেপ', lang)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sharedRequisitions.slice((requisitionsPage - 1) * 3, requisitionsPage * 3).map((req, i) => (
-                  <tr key={i} className={req.status === 'assigned' ? 'row-muted' : ''}>
-                    <td><code style={{ fontWeight: 800 }}>{req.id}</code></td>
-                    <td>
-                      <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{req.requesterName}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{req.dept} • {req.requesterRole}</div>
-                    </td>
-                    <td>
-                      <div>{req.from.split(',')[0]} → {req.to.split(',')[0]}</div>
-                      <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontWeight: 600 }}>
-                        {req.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One-Way Drop'}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '12px', fontWeight: 600 }}>{req.departureTime}</div>
-                      <span className="badge info">{req.passengersCount} Passengers</span>
-                    </td>
-                    <td>
-                      <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
-                        {req.requiredCapacity === 'sedan_4' ? '4-Seat Sedan' : req.requiredCapacity === 'microbus_7' ? '7-Seat HiAce' : '4x4 Pickup'}
-                      </span>
-                    </td>
-                    <td>
-                      {req.status === 'pending' ? (
-                        <div className="flex-gap">
-                          <button
-                            className="btn-primary"
-                            style={{ fontSize: '11px', padding: '5px 12px' }}
-                            onClick={() => {
-                              const availableCar = sharedVehicles.find(v => v.status === 'available') || sharedVehicles[0];
-                              const availableDriver = sharedDrivers.find(d => d.status === 'available') || sharedDrivers[0];
-                              sharedAssignRequisition(req.id, availableCar.plate, availableDriver.id);
-                              showToast(`🚗 Allocated ${availableCar.plate} & Driver ${availableDriver.name} to ${req.requesterName}!`, 'success');
-                            }}
-                          >
-                            Assign Driver & Vehicle
-                          </button>
-                        </div>
-                      ) : (
-                        <div>
-                          <span className="badge success">✓ {req.assignedVehiclePlate}</span>
-                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                            Driver: <strong>{req.assignedDriverName}</strong>
-                          </div>
-                        </div>
-                      )}
-                    </td>
+            <div className="table-responsive">
+              <table className="fleet-table">
+                <thead>
+                  <tr>
+                    <th>{t('ID', 'আইডি', lang)}</th>
+                    <th>{t('Requester & Dept', 'অনুরোধকারী ও বিভাগ', lang)}</th>
+                    <th>{t('Route & Trip Mode', 'রুট ও ধরন', lang)}</th>
+                    <th>{t('Departure Time', 'যাত্রার সময়', lang)}</th>
+                    <th>{t('Required Capacity', 'প্রয়োজনীয় ধরন', lang)}</th>
+                    <th>{t('Actions', 'পদক্ষেপ', lang)}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sharedRequisitions.slice((requisitionsPage - 1) * 3, requisitionsPage * 3).map((req, i) => (
+                    <tr key={i} className={req.status === 'assigned' ? 'row-muted' : ''}>
+                      <td><code style={{ fontWeight: 800 }}>{req.id}</code></td>
+                      <td>
+                        <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{req.requesterName}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{req.dept} • {req.requesterRole}</div>
+                      </td>
+                      <td>
+                        <div>{req.from.split(',')[0]} → {req.to.split(',')[0]}</div>
+                        <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontWeight: 600 }}>
+                          {req.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One-Way Drop'}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: '12px', fontWeight: 600 }}>{req.departureTime}</div>
+                        <span className="badge info">{req.passengersCount} Passengers</span>
+                      </td>
+                      <td>
+                        <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
+                          {req.requiredCapacity === 'sedan_4' ? '4-Seat Sedan' : req.requiredCapacity === 'microbus_7' ? '7-Seat HiAce' : '4x4 Pickup'}
+                        </span>
+                      </td>
+                      <td>
+                        {req.status === 'pending' ? (
+                          <div className="flex-gap">
+                            <button
+                              className="btn-primary"
+                              style={{ fontSize: '11px', padding: '5px 12px' }}
+                              onClick={() => {
+                                const availableCar = sharedVehicles.find(v => v.status === 'available') || sharedVehicles[0];
+                                const availableDriver = sharedDrivers.find(d => d.status === 'available') || sharedDrivers[0];
+                                sharedAssignRequisition(req.id, availableCar.plate, availableDriver.id);
+                                showToast(`🚗 Allocated ${availableCar.plate} & Driver ${availableDriver.name} to ${req.requesterName}!`, 'success');
+                              }}
+                            >
+                              Assign Driver & Vehicle
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="badge success">✓ {req.assignedVehiclePlate}</span>
+                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                              Driver: <strong>{req.assignedDriverName}</strong>
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <Pagination
               currentPage={requisitionsPage}
@@ -1580,7 +1582,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
 
             <div className="modal-body">
               <div style={{ border: '2px solid #E2E8F0', padding: '16px', borderRadius: '6px', background: '#FAFAFC', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #CBD5E1', paddingBottom: '8px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #CBD5E1', paddingBottom: '8px', marginBottom: '10px' }}>
                   <div>
                     <strong>Batch No:</strong> <span style={{ fontFamily: 'monospace' }}>BOGCL-BIT-2026-B88</span>
                   </div>
@@ -1593,7 +1595,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 </div>
 
                 <div style={{ fontSize: '11.5px', fontWeight: 700, marginBottom: '6px' }}>Laboratory Physical Test Parameters (BDS 1238:2020 Standard):</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '11px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '11px' }}>
                   <div style={{ background: '#ECFDF5', padding: '8px', borderRadius: '4px', border: '1px solid #A7F3D0' }}>
                     Penetration @ 25°C: <strong>64 dmm</strong> (Passed)
                   </div>
@@ -1669,7 +1671,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                   <QrCode size={110} color="#0F172A" />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '10.5px', borderTop: '1px solid #CBD5E1', paddingTop: '10px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10.5px', borderTop: '1px solid #CBD5E1', paddingTop: '10px' }}>
                   <div>Blood Group: <strong>B+ (Positive)</strong></div>
                   <div>Security Zone: <strong>Level-2 Refinery Access</strong></div>
                 </div>

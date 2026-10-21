@@ -86,7 +86,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Full Name (English) *', 'পুরো নাম (ইংরেজি) *', lang)}</label>
                 <input
@@ -109,7 +109,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Official Email Address *', 'দাপ্তরিক ইমেইল *', lang)}</label>
                 <input
@@ -131,7 +131,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Designation / Official Title *', 'পদবি *', lang)}</label>
                 <input
@@ -154,7 +154,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Department Unit *', 'বিভাগ *', lang)}</label>
                 <select value={dept} onChange={(e) => setDept(e.target.value as Employee['dept'])}>
@@ -180,7 +180,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Assigned Geofence Terminal *', 'কর্মস্থল / জিওফেন্স টার্মিনাল *', lang)}</label>
                 <select value={assignedSite} onChange={(e) => setAssignedSite(e.target.value as Employee['assignedSite'])}>

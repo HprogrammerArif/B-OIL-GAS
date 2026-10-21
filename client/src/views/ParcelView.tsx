@@ -261,7 +261,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           </div>
 
           {/* Consignment Details Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', marginTop: '20px', background: 'var(--brand-slate-100)', padding: '16px 20px', borderRadius: 'var(--radius-md)' }}>
+          <div className="responsive-col-2" style={{ marginTop: '20px', background: 'var(--brand-slate-100)', padding: '16px 20px', borderRadius: 'var(--radius-md)' }}>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {t('Consignment Description & Sealed Content', 'পার্সেলের বিবরণ ও বিষয়বস্তু', lang)}
@@ -269,7 +269,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
                 {selectedParcel.contents}
               </div>
-              <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '12px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '12px', fontSize: '12px' }}>
                 <div>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Sender: </span>
                   <strong>{selectedParcel.sender}</strong> ({selectedParcel.senderDept})
@@ -281,7 +281,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            <div style={{ borderLeft: '1px solid var(--brand-slate-200)', paddingLeft: '18px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginBottom: '4px' }}>
                 <strong>Security Seal Status:</strong> <span style={{ color: '#059669', fontWeight: 700 }}>✓ INTACT & VERIFIED</span>
               </div>
@@ -326,7 +326,8 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
 
         <div className="card-body">
-          <table className="fleet-table">
+          <div className="table-responsive">
+            <table className="fleet-table">
             <thead>
               <tr>
                 <th>Tracking / Seal</th>
@@ -384,6 +385,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -509,7 +511,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '4px' }}>WAYBILL & SECURITY CUSTODY CERTIFICATE</div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
                   <div><strong>Waybill No:</strong> {selectedParcel.trackingNo}</div>
                   <div><strong>Tamper Seal:</strong> {selectedParcel.sealNo}</div>
                   <div><strong>Origin:</strong> {selectedParcel.origin}</div>

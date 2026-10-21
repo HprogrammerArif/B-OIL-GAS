@@ -378,7 +378,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
             <span className="badge success">8 Tanks Online</span>
           </div>
           <div className="card-body">
-            <table className="doc-table">
+            <div className="table-responsive">
+              <table className="doc-table">
               <thead>
                 <tr>
                   <th>Tank ID</th>
@@ -419,6 +420,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
         </div>
 
@@ -435,7 +437,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
             <span className="badge success">100% Compliant</span>
           </div>
           <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px' }}>
               <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>SO2 Stack Emission</div>
                 <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>142 mg/Nm³</div>
@@ -489,7 +491,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
               {/* Summary Strip */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
+              <div className="responsive-col-3" style={{ gap: '10px', marginBottom: '16px' }}>
                 <div style={{ background: '#F8FAFC', padding: '10px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>Statutory Law Reference</div>
                   <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '2px' }}>{selectedLicense.sroLawRef}</div>

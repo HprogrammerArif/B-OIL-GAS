@@ -78,7 +78,7 @@ export default function SapGatewayModal({ onClose, lang }: SapGatewayModalProps)
           </div>
 
           {/* Architecture Benefits Strip */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '11.5px', background: '#F8FAFC', padding: '12px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
+          <div className="responsive-col-2-eq" style={{ gap: '12px', fontSize: '11.5px', background: '#F8FAFC', padding: '12px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0', marginBottom: 0 }}>
             <div>
               <span style={{ color: '#059669', fontWeight: 700 }}>✓ Zero SAP User License Overhead</span>
               <div style={{ color: 'var(--brand-slate-500)' }}>1,000+ plant staff don't need expensive SAP named user licenses.</div>

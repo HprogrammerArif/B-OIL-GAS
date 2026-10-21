@@ -266,7 +266,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
           </div>
 
           <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', textAlign: 'center', marginBottom: '16px' }}>
+            <div className="responsive-col-3" style={{ textAlign: 'center', marginBottom: '16px' }}>
               <div style={{ background: '#ECFDF5', padding: '16px 10px', borderRadius: 'var(--radius-md)', border: '1px solid #A7F3D0' }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '32px', fontWeight: 800, color: '#059669', lineHeight: 1 }}>284</div>
                 <div style={{ fontSize: '11px', color: '#065F46', fontWeight: 700, marginTop: '4px' }}>
@@ -309,7 +309,8 @@ export default function IncidentView({ role, lang }: ViewProps) {
           </div>
 
           <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', textAlign: 'center', fontSize: '10px', fontWeight: 700 }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px' }}>
+              <div style={{ minWidth: '340px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', textAlign: 'center', fontSize: '10px', fontWeight: 700 }}>
               {/* Row 5 Catastrophic */}
               <div style={{ background: '#FEF08A', padding: '8px 2px', borderRadius: '3px' }}>Low (5)</div>
               <div style={{ background: '#FDBA74', padding: '8px 2px', borderRadius: '3px' }}>Med (10)</div>
@@ -344,6 +345,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
               <div style={{ background: '#BBF7D0', padding: '8px 2px', borderRadius: '3px' }}>Low (3)</div>
               <div style={{ background: '#BBF7D0', padding: '8px 2px', borderRadius: '3px' }}>Low (4)</div>
               <div style={{ background: '#FEF08A', padding: '8px 2px', borderRadius: '3px' }}>Low (5)</div>
+            </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
@@ -644,7 +646,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
                   <div><strong>Dossier Ref:</strong> {selectedDossierIncident.incNo}</div>
                   <div><strong>Occurrence Date:</strong> {selectedDossierIncident.date}</div>
                   <div><strong>Refinery Section:</strong> {selectedDossierIncident.location}</div>
@@ -680,7 +682,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
                 </div>
 
                 {/* Sign-off Stamps */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', borderTop: '2px solid #CBD5E1', paddingTop: '14px', marginTop: '10px' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '16px', borderTop: '2px solid #CBD5E1', paddingTop: '14px', marginTop: '10px' }}>
                   <div style={{ textAlign: 'center', border: '1px dashed #94A3B8', padding: '10px', borderRadius: '4px' }}>
                     <div style={{ fontSize: '11px', color: '#059669', fontWeight: 800 }}>✓ VERIFIED BY EHS HEAD</div>
                     <div style={{ fontSize: '12px', fontWeight: 700, marginTop: '2px' }}>Farhana Kabir</div>

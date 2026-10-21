@@ -204,7 +204,7 @@ export default function BusView({ role, lang }: ViewProps) {
       </div>
 
       {/* Main Bus Seating Graphic + Queue Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '20px' }}>
+      <div className="responsive-col-2">
         {/* Visual Coach Seat Map */}
         <div className="card">
           <div className="card-hd">
@@ -413,45 +413,47 @@ export default function BusView({ role, lang }: ViewProps) {
               </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Colleague</th>
-                    <th>Stop</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {waitlist.map((w) => (
-                    <tr key={w.rank}>
-                      <td>
-                        <span className={`badge ${w.rank === 1 ? 'gold' : 'info'}`}>#{w.rank}</span>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{w.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{w.dept}</div>
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '11px' }}>📍 {w.pickupPoint}</span>
-                      </td>
-                      <td>
-                        {vacatedSeats.length > 0 ? (
-                          <button
-                            className="btn-primary"
-                            style={{ fontSize: '10.5px', padding: '3px 8px' }}
-                            onClick={() => handleAutoReassign(w, vacatedSeats[0].num)}
-                          >
-                            Assign #{vacatedSeats[0].num}
-                          </button>
-                        ) : (
-                          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Standby</span>
-                        )}
-                      </td>
+              <div className="table-responsive">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Colleague</th>
+                      <th>Stop</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {waitlist.map((w) => (
+                      <tr key={w.rank}>
+                        <td>
+                          <span className={`badge ${w.rank === 1 ? 'gold' : 'info'}`}>#{w.rank}</span>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{w.name}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{w.dept}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: '11px' }}>📍 {w.pickupPoint}</span>
+                        </td>
+                        <td>
+                          {vacatedSeats.length > 0 ? (
+                            <button
+                              className="btn-primary"
+                              style={{ fontSize: '10.5px', padding: '3px 8px' }}
+                              onClick={() => handleAutoReassign(w, vacatedSeats[0].num)}
+                            >
+                              Assign #{vacatedSeats[0].num}
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Standby</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

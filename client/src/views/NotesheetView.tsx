@@ -458,7 +458,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       </div>
 
       {activeTab === 'sheet' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '20px' }}>
+        <div className="responsive-col-2">
           {/* Official Document View */}
           <div className="card">
             <div className="card-hd">

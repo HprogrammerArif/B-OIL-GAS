@@ -179,7 +179,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
       </div>
 
       {/* Main Grid: Live Radar View + Punch Card */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+      <div className="responsive-col-2-eq" style={{ marginBottom: '24px' }}>
         {/* Geofence Radar Canvas Card */}
         <div className="card">
           <div className="card-hd">
@@ -321,57 +321,59 @@ export default function AttendanceView({ role, lang }: ViewProps) {
         </div>
 
         <div className="card-body" style={{ padding: 0 }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>ID / Employee</th>
-                <th>Role & Dept</th>
-                <th>Shift Schedule</th>
-                <th>Punch In</th>
-                <th>Geofence Status</th>
-                <th>Overtime</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ROSTER_DATA.map((r) => (
-                <tr key={r.id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{r.name}</div>
-                    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-slate-400)' }}>{r.id}</div>
-                  </td>
-                  <td>
-                    <div style={{ fontSize: '12px' }}>{r.role}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{r.dept}</div>
-                  </td>
-                  <td>{r.shift}</td>
-                  <td><strong>{r.inTime}</strong></td>
-                  <td>
-                    {r.locationStatus === 'inside_geofence' ? (
-                      <span className="badge success">Inside Geofence ({r.distanceMeters}m)</span>
-                    ) : r.locationStatus === 'late' ? (
-                      <span className="badge warn">Late In ({r.distanceMeters}m)</span>
-                    ) : (
-                      <span className="badge danger">Approved Leave</span>
-                    )}
-                  </td>
-                  <td>
-                    {r.overtimeHours > 0 ? (
-                      <span className="badge gold">+{r.overtimeHours} hrs OT</span>
-                    ) : (
-                      <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>-</span>
-                    )}
-                  </td>
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>ID / Employee</th>
+                  <th>Role & Dept</th>
+                  <th>Shift Schedule</th>
+                  <th>Punch In</th>
+                  <th>Geofence Status</th>
+                  <th>Overtime</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {ROSTER_DATA.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{r.name}</div>
+                      <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-slate-400)' }}>{r.id}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontSize: '12px' }}>{r.role}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{r.dept}</div>
+                    </td>
+                    <td>{r.shift}</td>
+                    <td><strong>{r.inTime}</strong></td>
+                    <td>
+                      {r.locationStatus === 'inside_geofence' ? (
+                        <span className="badge success">Inside Geofence ({r.distanceMeters}m)</span>
+                      ) : r.locationStatus === 'late' ? (
+                        <span className="badge warn">Late In ({r.distanceMeters}m)</span>
+                      ) : (
+                        <span className="badge danger">Approved Leave</span>
+                      )}
+                    </td>
+                    <td>
+                      {r.overtimeHours > 0 ? (
+                        <span className="badge gold">+{r.overtimeHours} hrs OT</span>
+                      ) : (
+                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Biometric Face Verification Viewfinder Modal */}
       {showFaceModal && (
         <div className="ic-call-overlay">
-          <div className="ic-call-modal" style={{ width: '480px', background: '#0F172A', color: '#fff' }}>
+          <div className="ic-call-modal" style={{ width: '480px', maxWidth: '92vw', background: '#0F172A', color: '#fff' }}>
             <div className="ic-call-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38BDF8', fontSize: '11px', fontWeight: 800 }}>
                 <Camera size={14} />

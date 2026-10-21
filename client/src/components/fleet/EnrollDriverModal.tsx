@@ -73,7 +73,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Driver Full Legal Name *', 'চালকের পুরো নাম *', lang)}</label>
                 <input
@@ -96,7 +96,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('BRTA License Number *', 'বিআরটিএ লাইসেন্স নম্বর *', lang)}</label>
                 <input
@@ -118,7 +118,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
               <div className="form-group">
                 <label>{t('Commercial License Class *', 'লাইসেন্স শ্রেণি *', lang)}</label>
                 <select value={licenseType} onChange={(e) => setLicenseType(e.target.value as Driver['licenseType'])}>

@@ -284,7 +284,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           </div>
           <div className="card-body">
             <form onSubmit={handleRegister}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="responsive-col-2-eq" style={{ marginBottom: '16px' }}>
                 <div>
                   <label className="form-label">{t('Full Name of Guest', 'অতিথির পূর্ণ নাম', lang)}</label>
                   <input
@@ -307,7 +307,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
                 <div>
                   <label className="form-label">{t('Guest Category', 'অতিথির শ্রেণি', lang)}</label>
                   <select
@@ -340,7 +340,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+              <div className="responsive-col-2-eq" style={{ marginBottom: '20px' }}>
                 <div>
                   <label className="form-label">{t('Official Purpose of Visit', 'পরিদর্শনের দাপ্তরিক উদ্দেশ্য', lang)}</label>
                   <input
@@ -374,7 +374,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+        <div className="responsive-col-2">
           {/* Visitor Table */}
           <div className="card">
             <div className="card-hd">
@@ -387,57 +387,59 @@ export default function GuestView({ role, lang }: ViewProps) {
               </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>{t('Pass / Guest', 'পাস ও অতিথি', lang)}</th>
-                    <th>{t('Category', 'শ্রেণি', lang)}</th>
-                    <th>{t('Host & Purpose', 'স্বাগতিক ও উদ্দেশ্য', lang)}</th>
-                    <th>{t('Timing', 'সময়', lang)}</th>
-                    <th>{t('Status', 'অবস্থা', lang)}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredVisitors.map(v => (
-                    <tr
-                      key={v.id}
-                      onClick={() => setSelectedVisitor(v)}
-                      style={{
-                        cursor: 'pointer',
-                        background: selectedVisitor?.id === v.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
-                      }}
-                    >
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{v.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{v.organization}</div>
-                        <div style={{ fontSize: '10.5px', fontFamily: 'monospace', color: 'var(--brand-crimson)' }}>{v.id}</div>
-                      </td>
-                      <td>{getCategoryBadge(v.category)}</td>
-                      <td>
-                        <div style={{ fontSize: '12px', fontWeight: 500 }}>Host: {v.hostEmployee}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {v.purpose}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '12px' }}>{v.expectedDate}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>
-                          {v.checkInTime ? `In: ${v.checkInTime}` : `Exp: ${v.expectedTime}`}
-                        </div>
-                      </td>
-                      <td>
-                        {v.status === 'checked_in' ? (
-                          <span className="badge success">Inside Campus</span>
-                        ) : v.status === 'pre_registered' ? (
-                          <span className="badge info">Pre-Registered</span>
-                        ) : (
-                          <span className="badge">Checked Out</span>
-                        )}
-                      </td>
+              <div className="table-responsive">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>{t('Pass / Guest', 'পাস ও অতিথি', lang)}</th>
+                      <th>{t('Category', 'শ্রেণি', lang)}</th>
+                      <th>{t('Host & Purpose', 'স্বাগতিক ও উদ্দেশ্য', lang)}</th>
+                      <th>{t('Timing', 'সময়', lang)}</th>
+                      <th>{t('Status', 'অবস্থা', lang)}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredVisitors.map(v => (
+                      <tr
+                        key={v.id}
+                        onClick={() => setSelectedVisitor(v)}
+                        style={{
+                          cursor: 'pointer',
+                          background: selectedVisitor?.id === v.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
+                        }}
+                      >
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{v.name}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{v.organization}</div>
+                          <div style={{ fontSize: '10.5px', fontFamily: 'monospace', color: 'var(--brand-crimson)' }}>{v.id}</div>
+                        </td>
+                        <td>{getCategoryBadge(v.category)}</td>
+                        <td>
+                          <div style={{ fontSize: '12px', fontWeight: 500 }}>Host: {v.hostEmployee}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {v.purpose}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '12px' }}>{v.expectedDate}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>
+                            {v.checkInTime ? `In: ${v.checkInTime}` : `Exp: ${v.expectedTime}`}
+                          </div>
+                        </td>
+                        <td>
+                          {v.status === 'checked_in' ? (
+                            <span className="badge success">Inside Campus</span>
+                          ) : v.status === 'pre_registered' ? (
+                            <span className="badge info">Pre-Registered</span>
+                          ) : (
+                            <span className="badge">Checked Out</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 

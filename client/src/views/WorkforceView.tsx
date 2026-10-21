@@ -209,7 +209,8 @@ export default function WorkforceView({ role, lang }: ViewProps) {
 
         {/* Workforce Table */}
         <div className="card-body" style={{ padding: 0 }}>
-          <table className="data-table">
+          <div className="table-responsive">
+            <table className="data-table">
             <thead>
               <tr>
                 <th>{t('Personnel Identity', 'কর্মচারী পরিচয়', lang)}</th>
@@ -324,6 +325,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

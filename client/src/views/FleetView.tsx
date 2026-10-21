@@ -299,7 +299,8 @@ export default function FleetView({ role, lang }: ViewProps) {
           </div>
 
           <div className="card-body">
-            <table className="fleet-table">
+            <div className="table-responsive">
+              <table className="fleet-table">
               <thead>
                 <tr>
                   <th>Req ID</th>
@@ -403,6 +404,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
@@ -424,7 +426,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           </div>
 
           <div className="card-body">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            <div className="responsive-col-3">
               {drivers.map(d => (
                 <div key={d.id} style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '14px', background: 'var(--brand-card-bg)', position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -505,7 +507,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{ padding: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '20px' }}>
+                <div className="responsive-col-4" style={{ marginBottom: '20px' }}>
                   <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
                     <div style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Gauge size={14} color="#60A5FA" />
@@ -613,7 +615,8 @@ export default function FleetView({ role, lang }: ViewProps) {
             </div>
 
             <div className="card-body">
-              <table className="fleet-table">
+              <div className="table-responsive">
+                <table className="fleet-table">
                 <thead>
                   <tr>
                     <th>Plate Number</th>
@@ -703,6 +706,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         </>
@@ -724,7 +728,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               {t('Zero Fuel Theft: 9 Months Streak', 'জ্বালানি অপচয় রোধ: ৯ মাস অক্ষুণ্ণ', lang)}
             </span>
           </div>
-          <div style={{ padding: '16px 18px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', fontSize: '12px' }}>
+          <div className="responsive-col-3" style={{ padding: '16px 18px', fontSize: '12px' }}>
             <div className="driver-score-card">
               <div>
                 <div style={{ fontWeight: 700 }}>Md. Shahidul Islam</div>
@@ -772,7 +776,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               {/* Trip Type Selector */}
               <div className="form-group mb-3">
                 <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Trip Type', 'যাত্রার ধরন', lang)}</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '10px' }}>
                   <button
                     type="button"
                     style={{
@@ -814,7 +818,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               {/* Required Vehicle Class */}
               <div className="form-group mb-3">
                 <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Required Vehicle Capacity / Class', 'প্রয়োজনীয় গাড়ির ধরন', lang)}</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                <div className="responsive-col-4" style={{ gap: '8px' }}>
                   {[
                     { id: 'sedan_4', label: 'Sedan (4-Seats)', desc: 'Executive / Meeting' },
                     { id: 'microbus_7', label: 'HiAce (7-Seats)', desc: 'Team Delegation' },
@@ -1078,7 +1082,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
                   <div><strong>Pass Ref:</strong> {selectedTripPassReq.tripPassNo}</div>
                   <div><strong>Date of Issue:</strong> 17 Oct 2026</div>
                   <div><strong>Authorized Requester:</strong> {selectedTripPassReq.requesterName}</div>

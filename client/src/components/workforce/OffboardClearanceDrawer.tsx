@@ -107,7 +107,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
           {/* Separation Details */}
           {!isOffboarded ? (
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '12px', marginBottom: '10px' }}>
+              <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '10px' }}>
                 <div>
                   <label>{t('Formal Exit Effective Date', 'চাকরি সমাপ্তির তারিখ', lang)}</label>
                   <input

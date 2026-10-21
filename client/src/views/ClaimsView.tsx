@@ -337,7 +337,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
             </div>
           </div>
           <div className="card-body">
-            <table className="data-table">
+            <div className="table-responsive">
+              <table className="data-table">
               <thead>
                 <tr>
                   <th>{t('Grade / Designation Category', 'গ্রেড / পদবি', lang)}</th>
@@ -359,6 +360,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       ) : activeTab === 'submit' ? (
@@ -374,7 +376,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
           </div>
           <div className="card-body">
             <form onSubmit={handleCreateClaim}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="responsive-col-2-eq" style={{ marginBottom: '16px' }}>
                 <div>
                   <label className="form-label">{t('Claim Type', 'দাবির ধরন', lang)}</label>
                   <select
@@ -388,7 +390,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">{t('Claimant Profile', 'দাবিদার প্রোফাইল', lang)}</label>
+                  <label className="form-label">{t('Claim claimant Profile', 'দাবিদার প্রোফাইল', lang)}</label>
                   <input className="form-input" disabled value="Tanvir Ahmed (Sales Officer, Grade 8)" />
                 </div>
               </div>
@@ -405,7 +407,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
               </div>
 
               {(formType === 'tada' || formType === 'tour_event') && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
                   <div>
                     <label className="form-label">{t('Destination / Location', 'গন্তব্য / স্থান', lang)}</label>
                     <input
@@ -436,7 +438,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+              <div className="responsive-col-2-eq" style={{ marginBottom: '20px' }}>
                 <div>
                   <label className="form-label">{t('Total Claim Amount (৳ BDT)', 'মোট দাবি (টাকা)', lang)}</label>
                   <input
@@ -471,7 +473,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '20px' }}>
+        <div className="responsive-col-2">
           {/* Claims List Table */}
           <div className="card">
             <div className="card-hd">
@@ -484,7 +486,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
               </div>
             </div>
             <div className="card-body" style={{ padding: 0 }}>
-              <table className="data-table">
+              <div className="table-responsive">
+                <table className="data-table">
                 <thead>
                   <tr>
                     <th>{t('ID / Date', 'আইডি / তারিখ', lang)}</th>
@@ -533,6 +536,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
