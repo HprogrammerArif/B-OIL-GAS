@@ -9,7 +9,7 @@ interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (view: AppView) => void;
-  onRoleChange: (role: AppRole) => void;
+  onRoleChange?: (role: AppRole) => void;
   onToggleTheme: () => void;
   lang: Lang;
   currentTheme: 'light' | 'dark';
@@ -173,38 +173,6 @@ export default function CommandPalette({
       icon: currentTheme === 'light' ? <Moon size={15} /> : <Sun size={15} />,
       action: () => { onToggleTheme(); onClose(); },
       shortcut: '⌘D',
-    },
-    {
-      id: 'act-switch-chairman',
-      title: 'Switch Persona: Chairman & Managing Director',
-      titleBn: 'চেয়ারম্যান হিসেবে স্যুইচ করুন',
-      category: 'Quick Actions',
-      icon: <Shield size={15} color="#A51C30" />,
-      action: () => { onRoleChange('chairman'); onClose(); },
-    },
-    {
-      id: 'act-switch-gm',
-      title: 'Switch Persona: Plant General Manager',
-      titleBn: 'প্ল্যান্ট জেনারেল ম্যানেজার হিসেবে স্যুইচ করুন',
-      category: 'Quick Actions',
-      icon: <Shield size={15} color="#0369A1" />,
-      action: () => { onRoleChange('plant_gm'); onClose(); },
-    },
-    {
-      id: 'act-switch-hr',
-      title: 'Switch Persona: GM HR & Corporate Services (Sayeda Afroza)',
-      titleBn: 'জিএম এইচআর হিসেবে স্যুইচ করুন',
-      category: 'Quick Actions',
-      icon: <Users size={15} color="#7C3AED" />,
-      action: () => { onRoleChange('hr_admin'); onClose(); },
-    },
-    {
-      id: 'act-switch-transport',
-      title: 'Switch Persona: Transport & Admin Supervisor',
-      titleBn: 'পরিবহন সুপারভাইজার হিসেবে স্যুইচ করুন',
-      category: 'Quick Actions',
-      icon: <Shield size={15} color="#059669" />,
-      action: () => { onRoleChange('transport_admin'); onClose(); },
     },
 
     // Searchable Records

@@ -1,21 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
-  Globe, Megaphone, ChevronDown, LogOut, RefreshCw, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu
+  Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award
 } from 'lucide-react';
 import { showToast } from '../App';
 import SapGatewayModal from './SapGatewayModal';
 import NotificationCenter from './NotificationCenter';
-
-const ROLES: { key: AppRole; emoji: string; label: string; labelBn: string }[] = [
-  { key: 'chairman',       emoji: '👑', label: 'Chairman & MD',          labelBn: 'চেয়ারম্যান ও এমডি' },
-  { key: 'plant_gm',       emoji: '🏭', label: 'Plant General Manager',  labelBn: 'প্ল্যান্ট জেনারেল ম্যানেজার' },
-  { key: 'hr_admin',       emoji: '👥', label: 'HR & Corporate Services GM', labelBn: 'জিএম, এইচআর ও মানবসম্পদ' },
-  { key: 'transport_admin',emoji: '🚚', label: 'Transport & Admin Super',labelBn: 'পরিবহন ও প্রশাসন পরিদর্শক' },
-  { key: 'hod',            emoji: '📋', label: 'HOD / Chief Approver',   labelBn: 'বিভাগীয় প্রধান / অর্থ পরিচালক' },
-  { key: 'employee',       emoji: '👷', label: 'Staff Self-Service',     labelBn: 'কর্মচারী পোর্টাল' },
-];
+import UserProfileModal from './UserProfileModal';
+import LockScreenModal from './LockScreenModal';
 
 const PAGE_META: Record<string, { section: string; sectionBn: string; en: string; bn: string; sub: string; subBn: string }> = {
   dashboard:       { section: 'Governance',  sectionBn: 'গভর্ন্যান্স', en: 'Executive Cockpit',                  bn: 'এক্সিকিউটিভ কক্পিট',                 sub: 'Real-time enterprise intelligence & multi-tier governance',        subBn: 'রিয়েল-টাইম এন্টারপ্রাইজ ইন্টেলিজেন্স' },
@@ -44,6 +37,16 @@ const DEFAULT_PAGE_META = {
   subBn: 'অপারেশনাল কনসোল',
 };
 
+// Enterprise personnel metadata per role
+const USER_CREDENTIALS: Record<AppRole, { email: string; pernr: string; clearance: string }> = {
+  chairman:       { email: 'ahmed.sobhan@bashundhara.com',    pernr: 'PERNR-000101', clearance: 'Level-5 Executive' },
+  plant_gm:       { email: 'harunur.rashid@bashundhara.com',  pernr: 'PERNR-001042', clearance: 'Level-4 Operations' },
+  hr_admin:       { email: 'afroza.sultana@bashundhara.com',  pernr: 'PERNR-001205', clearance: 'Level-4 Compliance' },
+  transport_admin:{ email: 'kamruzzaman@bashundhara.com',     pernr: 'PERNR-002410', clearance: 'Level-3 Dispatch' },
+  hod:            { email: 'farida.begum@bashundhara.com',    pernr: 'PERNR-001088', clearance: 'Level-4 Signatory' },
+  employee:       { email: 'tanvir.ahmed@bashundhara.com',    pernr: 'PERNR-004119', clearance: 'Level-2 Staff' },
+};
+
 interface TopbarProps {
   role: AppRole;
   lang: Lang;
@@ -64,7 +67,7 @@ export default function Topbar({
   lang,
   view,
   theme,
-  onRoleChange,
+  onRoleChange: _onRoleChange, // Role is solely switched from login page per requirements
   onLangToggle,
   onToggleTheme,
   onOpenSearch,
@@ -75,9 +78,13 @@ export default function Topbar({
 }: TopbarProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSapModal, setShowSapModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'security' | 'delegation' | 'audit'>('profile');
+  const [showLockScreen, setShowLockScreen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const meta = ROLE_META[role];
+  const creds = USER_CREDENTIALS[role];
   const page = PAGE_META[view] || DEFAULT_PAGE_META;
 
   // Real-time ticking clock
@@ -109,12 +116,6 @@ export default function Topbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleRoleSelect = (newRole: AppRole) => {
-    onRoleChange(newRole);
-    setShowDropdown(false);
-    showToast(t(`Switched role to ${ROLE_META[newRole].name}`, `${ROLE_META[newRole].name} হিসেবে স্যুইচ করা হয়েছে`, lang), 'info');
-  };
-
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -128,16 +129,21 @@ export default function Topbar({
           <Menu size={20} />
         </button>
 
-        {/* Breadcrumb & Page Title */}
+        {/* Page Heading: Step 1 (Top) Page Title + Step 2 (Bottom) Small Breadcrumb */}
         <div className="page-heading">
-          <div className="breadcrumb-trail">
-            <span className="brand-badge-pill">BOGCL OneOps</span>
-            <ChevronRight size={12} className="breadcrumb-sep breadcrumb-hide-mobile" />
-            <span className="breadcrumb-section breadcrumb-hide-mobile">{t(page.section, page.sectionBn, lang)}</span>
-            <ChevronRight size={12} className="breadcrumb-sep breadcrumb-hide-mobile" />
-            <h2 className="breadcrumb-current">{t(page.en, page.bn, lang)}</h2>
-          </div>
-          <p className="page-subtitle breadcrumb-hide-mobile">{t(page.sub, page.subBn, lang)}</p>
+          {/* Top: Primary Page Title */}
+          <h1 className="topbar-page-title">
+            {t(page.en, page.bn, lang)}
+          </h1>
+
+          {/* Bottom (one step bottom): Subdued Breadcrumb with small words */}
+          <nav className="topbar-breadcrumb" aria-label="Breadcrumb">
+            <span className="crumb-segment crumb-brand">BOGCL OneOps</span>
+            <span className="crumb-sep">/</span>
+            <span className="crumb-segment crumb-section">{t(page.section, page.sectionBn, lang)}</span>
+            <span className="crumb-sep">/</span>
+            <span className="crumb-segment crumb-page">{t(page.en, page.bn, lang)}</span>
+          </nav>
         </div>
       </div>
 
@@ -207,12 +213,12 @@ export default function Topbar({
           </button>
         )}
 
-        {/* 5. Executive Persona & Identity Widget */}
+        {/* 5. Enterprise Authenticated Identity Widget (Never clipped or hidden) */}
         <div className="topbar-user-section" ref={dropdownRef}>
           <div
             className="user-widget-interactive"
             onClick={() => setShowDropdown(!showDropdown)}
-            title="Click to view profile or switch role"
+            title="Click to view official employee profile, security & session settings"
           >
             <div className="user-avatar" style={{ background: meta.avatarColor }}>
               {meta.initials}
@@ -227,64 +233,120 @@ export default function Topbar({
             </div>
           </div>
 
-          {/* Profile Dropdown Menu */}
+          {/* Enterprise Profile Dropdown Menu */}
           {showDropdown && (
             <div className="user-dropdown-menu">
+              {/* Header with Enterprise Credentials */}
               <div className="user-dropdown-hd">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <div className="user-avatar" style={{ background: meta.avatarColor, width: '40px', height: '40px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <div className="user-avatar" style={{ background: meta.avatarColor, width: '42px', height: '42px', fontSize: '15px' }}>
                     {meta.initials}
                   </div>
-                  <div>
-                    <div className="name">{meta.name}</div>
-                    <div className="role">{t(meta.label, meta.labelBn, lang)}</div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div className="name" style={{ fontSize: '13.5px', fontWeight: 800 }}>{meta.name}</div>
+                    <div className="role" style={{ fontSize: '11px', color: 'var(--brand-gold)' }}>{t(meta.label, meta.labelBn, lang)}</div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', wordBreak: 'break-all' }}>{creds.email}</div>
                   </div>
                 </div>
-                <div className="dept">📍 {meta.dept}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '10px', color: 'var(--brand-gold-light)' }}>
-                  <Shield size={12} color="var(--brand-gold)" />
-                  <span>Security Clearance: Level-5 (Executive Access)</span>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.08)', padding: '5px 10px', borderRadius: '6px', fontSize: '10px' }}>
+                  <span style={{ color: 'var(--brand-gold-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Shield size={11} color="var(--brand-gold)" />
+                    {creds.clearance}
+                  </span>
+                  <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{creds.pernr}</span>
                 </div>
               </div>
 
+              {/* Real Enterprise Software Actions */}
               <div className="user-dropdown-body">
-                <div style={{ padding: '8px 16px 4px', fontSize: '10.5px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
-                  {t('Switch Persona for Demo', 'ডেমো উপস্থাপনার জন্য ভূমিকা পরিবর্তন', lang)}
-                </div>
-
-                {ROLES.map((r) => {
-                  const isCurrent = role === r.key;
-                  return (
-                    <div
-                      key={r.key}
-                      className="user-dropdown-item"
-                      style={{
-                        background: isCurrent ? 'var(--brand-slate-100)' : 'transparent',
-                        fontWeight: isCurrent ? 700 : 500,
-                        color: isCurrent ? 'var(--brand-crimson)' : 'inherit',
-                      }}
-                      onClick={() => handleRoleSelect(r.key)}
-                    >
-                      <span>{r.emoji}</span>
-                      <span style={{ flex: 1 }}>{t(r.label, r.labelBn, lang)}</span>
-                      {isCurrent && <span className="badge success" style={{ fontSize: '9px', padding: '1px 5px' }}>Active</span>}
-                    </div>
-                  );
-                })}
-
-                <div className="user-dropdown-divider"></div>
-
+                {/* 1. My Profile & Credentials */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
-                    showToast(t('Terminal locked. Password required to wake.', 'টার্মিনাল লক করা হয়েছে।', lang), 'info');
+                    setProfileModalTab('profile');
+                    setShowProfileModal(true);
                   }}
                 >
-                  <Lock size={14} />
-                  <span>{t('Lock Workstation', 'ওয়ার্কস্টেশন লক করুন', lang)}</span>
+                  <User size={15} color="var(--brand-slate-600)" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{t('My Profile & Credentials', 'আমার প্রোফাইল ও সনদপত্র', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Official designation, reporting line & SAP dossier', 'অফিসিয়াল পদবী ও সার্ভিস রেকর্ড', lang)}</div>
+                  </div>
+                  <ChevronRight size={13} color="var(--brand-slate-300)" />
                 </div>
 
+                {/* 2. Security & 2FA */}
+                <div
+                  className="user-dropdown-item"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setProfileModalTab('security');
+                    setShowProfileModal(true);
+                  }}
+                >
+                  <Key size={15} color="#059669" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{t('Security & 2-Factor Auth (2FA)', 'নিরাপত্তা ও ২-ফ্যাক্টর অথেনটিকেশন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: '#059669' }}>✓ FIDO2 Key & MFA Enforced</div>
+                  </div>
+                  <ChevronRight size={13} color="var(--brand-slate-300)" />
+                </div>
+
+                {/* 3. Out-of-Office / Delegation */}
+                <div
+                  className="user-dropdown-item"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setProfileModalTab('delegation');
+                    setShowProfileModal(true);
+                  }}
+                >
+                  <Award size={15} color="#D97706" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{t('Delegation & Out of Office', 'অনুমোদন প্রতিনিধিত্ব (ছুটি/ভ্রমণ)', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Assign signing authority during plant visits', 'অনুপস্থিতিতে বিকল্প স্বাক্ষরকারী নির্ধারণ', lang)}</div>
+                  </div>
+                  <ChevronRight size={13} color="var(--brand-slate-300)" />
+                </div>
+
+                {/* 4. Sign-In History & Audit */}
+                <div
+                  className="user-dropdown-item"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setProfileModalTab('audit');
+                    setShowProfileModal(true);
+                  }}
+                >
+                  <Clock size={15} color="#0284C7" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{t('Sign-In History & Sessions', 'লগইন ইতিহাস ও সেশন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('10.14.2.88 (Dhaka HQ Gateway) · 0 failed', '১০.১৪.২.৮৮ (ঢাকা সদর দপ্তর)', lang)}</div>
+                  </div>
+                  <ChevronRight size={13} color="var(--brand-slate-300)" />
+                </div>
+
+                <div className="user-dropdown-divider" />
+
+                {/* 5. Lock Workstation */}
+                <div
+                  className="user-dropdown-item"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setShowLockScreen(true);
+                  }}
+                >
+                  <Lock size={15} color="var(--brand-slate-600)" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{t('Lock Workstation', 'ওয়ার্কস্টেশন লক করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Instant terminal security lock (PIN / Biometric)', 'তাৎক্ষণিক টার্মিনাল লক', lang)}</div>
+                  </div>
+                  <span style={{ fontSize: '10px', background: 'var(--brand-slate-100)', padding: '2px 5px', borderRadius: '4px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>⌘L</span>
+                </div>
+
+                {/* 6. Sign Out / Exit Session */}
                 <div
                   className="user-dropdown-item danger"
                   onClick={() => {
@@ -292,15 +354,43 @@ export default function Topbar({
                     onLogout();
                   }}
                 >
-                  <LogOut size={14} />
-                  <span>{t('Sign Out / Exit Session', 'সাইন আউট করুন', lang)}</span>
+                  <LogOut size={15} color="#DC2626" />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, color: '#DC2626' }}>{t('Sign Out / Exit Session', 'সাইন আউট করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: '#EF4444' }}>{t('End S/4HANA session & return to login', 'সেশন সমাপ্ত করে লগইন পেজে ফিরে যান', lang)}</div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* SAP Gateway Modal */}
       {showSapModal && <SapGatewayModal onClose={() => setShowSapModal(false)} lang={lang} />}
+
+      {/* Enterprise Personnel Dossier & Security Modal */}
+      {showProfileModal && (
+        <UserProfileModal
+          role={role}
+          lang={lang}
+          initialTab={profileModalTab}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
+
+      {/* Workstation Lock Screen */}
+      {showLockScreen && (
+        <LockScreenModal
+          role={role}
+          lang={lang}
+          onUnlock={() => setShowLockScreen(false)}
+          onLogout={() => {
+            setShowLockScreen(false);
+            onLogout();
+          }}
+        />
+      )}
     </header>
   );
 }

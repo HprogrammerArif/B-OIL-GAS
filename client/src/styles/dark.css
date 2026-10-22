@@ -204,6 +204,19 @@
   background: #16254C;
 }
 
+[data-theme="dark"] .user-dropdown-item {
+  color: #CBD5E1;
+}
+
+[data-theme="dark"] .user-dropdown-item:hover {
+  background: #16254C;
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .user-dropdown-divider {
+  background: #1E293B;
+}
+
 [data-theme="dark"] .palette-input {
   color: #F8FAFC;
 }
