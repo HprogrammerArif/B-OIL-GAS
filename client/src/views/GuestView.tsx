@@ -1,35 +1,67 @@
-import React, { useState } from 'react';
-import { ViewProps, t } from '../types';
+import React, { useState, useMemo } from 'react';
+import { ViewProps, ROLE_META, t } from '../types';
 import { showToast } from '../App';
 import {
-  Users, UserCheck, ShieldAlert, QrCode, Plus, Search,
+  Users, User, UserCheck, ShieldAlert, QrCode, Plus, Search,
   CheckCircle, Clock, AlertTriangle, Building2, Crown,
   Download, Car, Shield, Phone, FileText, Check, X,
-  Printer, Smartphone, ShieldCheck, Send, Sparkles
+  Printer, Smartphone, ShieldCheck, Send, Sparkles,
+  HardHat, Eye, MapPin, Compass, AlertCircle, Share2,
+  ExternalLink, Key, CheckSquare, RefreshCw, ChevronRight,
+  Flame, Radio, UserX, MessageSquare
 } from 'lucide-react';
 
-interface VisitorRecord {
-  id: string;
+export interface PermittedZone {
+  zoneId: string;
+  name: string;
+  nameBn: string;
+  level: 'green' | 'yellow' | 'red';
+  escortRequired: boolean;
+}
+
+export interface VisitorRecord {
+  id: string; // e.g. 'VIS-2026-0811'
   name: string;
   organization: string;
   designation: string;
-  category: 'vip' | 'govt' | 'vendor' | 'regular';
+  category: 'vip' | 'govt' | 'vendor' | 'client' | 'regular';
   hostEmployee: string;
   hostDept: string;
+  hostPhone?: string;
+  facility: 'Keraniganj Bitumen Refinery' | 'Bashundhara Corporate HQ, Baridhara' | 'Chittagong Patenga Terminal';
+  permittedZones: PermittedZone[];
   purpose: string;
   expectedDate: string;
   expectedTime: string;
   checkInTime?: string;
   checkOutTime?: string;
+  durationHours?: number;
   status: 'pre_registered' | 'checked_in' | 'checked_out' | 'overdue';
   vehiclePlate?: string;
   badgeNo?: string;
   vipProtocol?: boolean;
+  safetyBriefingCompleted: boolean;
   ndaSigned: boolean;
+  ppeCleared: {
+    hardHat: boolean;
+    safetyGoggles: boolean;
+    safetyShoes: boolean;
+    hiVisVest: boolean;
+    h2sBriefing: boolean;
+  };
   phone?: string;
+  email?: string;
+  idProofType?: 'National ID' | 'Passport' | 'Official Govt Badge' | 'Company ID';
+  idProofNumber?: string;
+  emergencyContact?: string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPREHENSIVE REFINERY & CORPORATE SEED DATA
+// ─────────────────────────────────────────────────────────────────────────────
+
 const INITIAL_VISITORS: VisitorRecord[] = [
+  // ── 1. REGULATORY GOVERNMENT INSPECTOR (Checked In - High Risk Zone) ──
   {
     id: 'VIS-2026-0811',
     name: 'Dr. Shahabuddin Ahmed',
@@ -37,18 +69,40 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     designation: 'Chief Inspector of Explosives (Grade-1)',
     category: 'govt',
     hostEmployee: 'Engr. Md. Harunur Rashid',
-    hostDept: 'Keraniganj Refinery',
-    purpose: 'Statutory Annual Inspection of Bitumen Storage Spheres & Flare Stack',
+    hostDept: 'Keraniganj Refinery Complex',
+    hostPhone: '01711-554433',
+    facility: 'Keraniganj Bitumen Refinery',
+    permittedZones: [
+      { zoneId: 'Z-01', name: 'Admin Building & Reception', nameBn: 'প্রশাসন ভবন ও অভ্যর্থনা', level: 'green', escortRequired: false },
+      { zoneId: 'Z-02', name: 'Central QC & Bitumen Testing Lab', nameBn: 'কেন্দ্রীয় কিউসি ল্যাব', level: 'yellow', escortRequired: false },
+      { zoneId: 'Z-03', name: 'Bitumen Reactor & Tank Farm Spheres', nameBn: 'রিঅ্যাক্টর ও স্টোরেজ স্ফিয়ার', level: 'red', escortRequired: true },
+    ],
+    purpose: 'Statutory Annual Inspection of Bitumen Storage Spheres, Pressure Relief Valves & Flare Stack',
     expectedDate: 'Today, 17 Oct',
     expectedTime: '10:30 AM',
     checkInTime: '10:28 AM',
     status: 'checked_in',
+    durationHours: 4,
     vehiclePlate: 'DHAKA-METRO-GHA-11-9042',
     badgeNo: 'GOVT-04',
     vipProtocol: true,
+    safetyBriefingCompleted: true,
     ndaSigned: true,
+    ppeCleared: {
+      hardHat: true,
+      safetyGoggles: true,
+      safetyShoes: true,
+      hiVisVest: true,
+      h2sBriefing: true,
+    },
     phone: '+880 1711-234567',
+    email: 'shahabuddin@explosives.gov.bd',
+    idProofType: 'Official Govt Badge',
+    idProofNumber: 'DOE-HQ-9902',
+    emergencyContact: 'Dept of Explosives Control: 02-9552144',
   },
+
+  // ── 2. INTERNATIONAL VIP DIGNITARY (Pre-Registered - Chairman Escort) ──
   {
     id: 'VIS-2026-0812',
     name: 'Francois Dubois',
@@ -57,34 +111,115 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     category: 'vip',
     hostEmployee: 'Ahmed Akbar Sobhan',
     hostDept: "Chairman's Office",
-    purpose: 'High-Level Technical Review for Euro-V Base Oil Expansion Plant',
+    hostPhone: '01713-000001',
+    facility: 'Bashundhara Corporate HQ, Baridhara',
+    permittedZones: [
+      { zoneId: 'Z-01', name: 'Executive Suite & Boardroom (Level 12)', nameBn: 'এক্সিকিউটিভ স্যুট ও বোর্ডরুম', level: 'green', escortRequired: false },
+      { zoneId: 'Z-04', name: 'Project Engineering Studio (Level 9)', nameBn: 'প্রজেক্ট ইঞ্জিনিয়ারিং স্টুডিও', level: 'green', escortRequired: false },
+    ],
+    purpose: 'High-Level Technical Review for Euro-V Base Oil Expansion Plant & Catalyst Supply Agreement',
     expectedDate: 'Today, 17 Oct',
     expectedTime: '02:30 PM',
     status: 'pre_registered',
+    durationHours: 3,
     vehiclePlate: 'DHAKA-METRO-CHA-22-1001 (VIP Escort Pool)',
     badgeNo: 'VIP-01',
     vipProtocol: true,
+    safetyBriefingCompleted: true,
     ndaSigned: true,
+    ppeCleared: {
+      hardHat: false,
+      safetyGoggles: false,
+      safetyShoes: false,
+      hiVisVest: false,
+      h2sBriefing: false,
+    },
     phone: '+33 6 12 34 56 78',
+    email: 'francois.dubois@axens.net',
+    idProofType: 'Passport',
+    idProofNumber: 'FR-88914022',
+    emergencyContact: 'French Embassy Diplomatic Security: 02-55668600',
   },
+
+  // ── 3. ROADS & HIGHWAYS (RHD) EXECUTIVE (Pre-Registered - Host: TANVIR AHMED) ──
   {
-    id: 'VIS-2026-0810',
-    name: 'Kazi Mahbub Alam',
-    organization: 'BSTI Standards Directorate',
-    designation: 'Senior Field Officer, Chemical Testing Division',
+    id: 'VIS-2026-0814',
+    name: 'Engr. Mahfuzur Rahman',
+    organization: 'Roads & Highways Department (RHD), Govt of BD',
+    designation: 'Executive Engineer, Procurement & Quality Audit',
     category: 'govt',
-    hostEmployee: 'Adv. Karim Molla',
-    hostDept: 'Legal & Regulatory Compliance',
-    purpose: 'Sample verification for VG-30 Paving Grade Bitumen certification',
+    hostEmployee: 'Tanvir Ahmed',
+    hostDept: 'Sales & Distribution, Dhaka',
+    hostPhone: '01711-998877',
+    facility: 'Bashundhara Corporate HQ, Baridhara',
+    permittedZones: [
+      { zoneId: 'Z-01', name: 'Sales & Commercial Division (Level 4)', nameBn: 'বিক্রয় ও বাণিজ্যিক বিভাগ', level: 'green', escortRequired: false },
+      { zoneId: 'Z-02', name: 'Executive Meeting Room B (Level 4)', nameBn: 'নির্বাহী সভাকক্ষ', level: 'green', escortRequired: false },
+    ],
+    purpose: 'Commercial Review of BDT 14.5 Crore Penetration 60/70 Bitumen Tender & Certified Test Certificates',
     expectedDate: 'Today, 17 Oct',
-    expectedTime: '09:00 AM',
-    checkInTime: '09:05 AM',
-    checkOutTime: '12:40 PM',
-    status: 'checked_out',
-    badgeNo: 'GOVT-02',
+    expectedTime: '03:15 PM',
+    status: 'pre_registered',
+    durationHours: 2,
+    vehiclePlate: 'DHAKA-METRO-GHA-14-3829',
+    badgeNo: 'GOVT-06',
+    vipProtocol: true,
+    safetyBriefingCompleted: true,
     ndaSigned: true,
-    phone: '+880 1819-876543',
+    ppeCleared: {
+      hardHat: false,
+      safetyGoggles: false,
+      safetyShoes: false,
+      hiVisVest: false,
+      h2sBriefing: false,
+    },
+    phone: '+880 1712-449911',
+    email: 'mahfuz.rhd@rhd.gov.bd',
+    idProofType: 'Official Govt Badge',
+    idProofNumber: 'RHD-EE-4190',
+    emergencyContact: 'RHD Dhaka Division: 02-48119830',
   },
+
+  // ── 4. MAJOR ROAD CONTRACTOR (Checked In - Host: TANVIR AHMED) ──
+  {
+    id: 'VIS-2026-0815',
+    name: 'S.M. Rezaul Karim',
+    organization: 'National Asphalt & Infrastructure Works Ltd.',
+    designation: 'Managing Director & Chief Contractor',
+    category: 'client',
+    hostEmployee: 'Tanvir Ahmed',
+    hostDept: 'Sales & Distribution, Dhaka',
+    hostPhone: '01711-998877',
+    facility: 'Bashundhara Corporate HQ, Baridhara',
+    permittedZones: [
+      { zoneId: 'Z-01', name: 'Sales & Commercial Division (Level 4)', nameBn: 'বিক্রয় ও বাণিজ্যিক বিভাগ', level: 'green', escortRequired: false },
+    ],
+    purpose: 'Finalize Purchase Order for 2,500 MT Bulk Bitumen & Payment Term L/C Verification',
+    expectedDate: 'Today, 17 Oct',
+    expectedTime: '11:00 AM',
+    checkInTime: '11:05 AM',
+    status: 'checked_in',
+    durationHours: 3,
+    vehiclePlate: 'DHAKA-METRO-GHA-18-2020',
+    badgeNo: 'CLN-09',
+    vipProtocol: false,
+    safetyBriefingCompleted: true,
+    ndaSigned: true,
+    ppeCleared: {
+      hardHat: false,
+      safetyGoggles: false,
+      safetyShoes: false,
+      hiVisVest: false,
+      h2sBriefing: false,
+    },
+    phone: '+880 1819-338822',
+    email: 'rezaul@nationalasphalt.com.bd',
+    idProofType: 'National ID',
+    idProofNumber: '19842691234567890',
+    emergencyContact: 'Corporate HQ: 01819-001122',
+  },
+
+  // ── 5. TECHNICAL VENDOR (Checked In - High Hazards SCADA PLC Checks) ──
   {
     id: 'VIS-2026-0813',
     name: 'Enamul Haque',
@@ -93,122 +228,311 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     category: 'vendor',
     hostEmployee: 'Engr. Tariq Ahmed',
     hostDept: 'Refinery Maintenance',
-    purpose: 'SCADA PLC Unit 2 firmware diagnostics and safety loop checks',
+    hostPhone: '01712-334455',
+    facility: 'Keraniganj Bitumen Refinery',
+    permittedZones: [
+      { zoneId: 'Z-01', name: 'Admin Building & Workshop', nameBn: 'ওয়ার্কশপ ও প্রশাসন', level: 'green', escortRequired: false },
+      { zoneId: 'Z-05', name: 'SCADA Central Control Room (DCS)', nameBn: 'স্কার্ডা কন্ট্রোল রুম', level: 'yellow', escortRequired: true },
+    ],
+    purpose: 'SCADA PLC Unit 2 firmware diagnostics, redundant safety interlock checks & burner trip loop verification',
     expectedDate: 'Today, 17 Oct',
     expectedTime: '11:15 AM',
     checkInTime: '11:12 AM',
     status: 'checked_in',
+    durationHours: 6,
     vehiclePlate: 'DHAKA-METRO-KHA-55-4019',
     badgeNo: 'VND-18',
+    vipProtocol: false,
+    safetyBriefingCompleted: true,
     ndaSigned: true,
+    ppeCleared: {
+      hardHat: true,
+      safetyGoggles: true,
+      safetyShoes: true,
+      hiVisVest: true,
+      h2sBriefing: true,
+    },
     phone: '+880 1912-345678',
+    email: 'enamul.haque@siemens-energy.com',
+    idProofType: 'Company ID',
+    idProofNumber: 'SIE-BD-8841',
+    emergencyContact: 'Siemens Dispatch Control: 02-9883300',
+  },
+
+  // ── 6. STATUTORY STANDARDS OFFICER (Checked Out) ──
+  {
+    id: 'VIS-2026-0810',
+    name: 'Kazi Mahbub Alam',
+    organization: 'BSTI Standards Directorate',
+    designation: 'Senior Field Officer, Chemical Testing Division',
+    category: 'govt',
+    hostEmployee: 'Adv. Karim Molla',
+    hostDept: 'Legal & Regulatory Compliance',
+    facility: 'Keraniganj Bitumen Refinery',
+    permittedZones: [
+      { zoneId: 'Z-02', name: 'Central Quality Lab (Keraniganj)', nameBn: 'কেন্দ্রীয় মান নিয়ন্ত্রণ ল্যাব', level: 'yellow', escortRequired: false },
+    ],
+    purpose: 'Sample verification for VG-30 Paving Grade Bitumen certification & laboratory batch logs audit',
+    expectedDate: 'Today, 17 Oct',
+    expectedTime: '09:00 AM',
+    checkInTime: '09:05 AM',
+    checkOutTime: '12:40 PM',
+    status: 'checked_out',
+    durationHours: 4,
+    badgeNo: 'GOVT-02',
+    ndaSigned: true,
+    safetyBriefingCompleted: true,
+    ppeCleared: {
+      hardHat: true,
+      safetyGoggles: true,
+      safetyShoes: true,
+      hiVisVest: true,
+      h2sBriefing: true,
+    },
+    phone: '+880 1819-876543',
+    idProofType: 'Official Govt Badge',
+    idProofNumber: 'BSTI-CHEM-092',
   },
 ];
 
 export default function GuestView({ role, lang }: ViewProps) {
+  const currentUser = ROLE_META[role] || ROLE_META.employee;
+  const currentUserName = currentUser.name;
+  const currentUserDept = currentUser.dept;
+  const isStaff = role === 'employee';
+
+  // State
   const [visitors, setVisitors] = useState<VisitorRecord[]>(INITIAL_VISITORS);
-  const [selectedVisitor, setSelectedVisitor] = useState<VisitorRecord | null>(INITIAL_VISITORS[0]);
-  const [activeTab, setActiveTab] = useState<'all' | 'checked_in' | 'vip' | 'govt'>('all');
+  const [selectedVisitorId, setSelectedVisitorId] = useState<string>('VIS-2026-0811');
+  const [activeTab, setActiveTab] = useState<'all' | 'inside' | 'my_guests' | 'vip_govt' | 'pre_registered'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [facilityFilter, setFacilityFilter] = useState<'all' | 'Keraniganj Bitumen Refinery' | 'Bashundhara Corporate HQ, Baridhara'>('all');
+
+  // Scope Toggle: Staff defaults to 'my_guests' or 'all'
+  const [scopeMode, setScopeMode] = useState<'my_guests' | 'all'>(isStaff ? 'my_guests' : 'all');
+
+  // Cockpit Internal Sub-Views: 'pass' | 'ppe' | 'alpr' | 'zones'
+  const [cockpitSubTab, setCockpitSubTab] = useState<'pass' | 'ppe' | 'alpr' | 'zones'>('pass');
+
+  // Modals
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showGatePassModal, setShowGatePassModal] = useState(false);
-  
+  const [showALPRModal, setShowALPRModal] = useState(false);
+  const [showMusterModal, setShowMusterModal] = useState(false);
+  const [showSMSModal, setShowSMSModal] = useState(false);
+
+  // Barrier simulator state
+  const [barrierOpen, setBarrierOpen] = useState(false);
+
   // New Visitor Form State
   const [formName, setFormName] = useState('');
   const [formOrg, setFormOrg] = useState('');
-  const [formCategory, setFormCategory] = useState<'vip' | 'govt' | 'vendor' | 'regular'>('vip');
-  const [formHost, setFormHost] = useState('');
+  const [formDesignation, setFormDesignation] = useState('');
+  const [formCategory, setFormCategory] = useState<VisitorRecord['category']>('client');
+  const [formFacility, setFormFacility] = useState<VisitorRecord['facility']>('Bashundhara Corporate HQ, Baridhara');
+  const [formHost, setFormHost] = useState(isStaff ? currentUserName : '');
   const [formPurpose, setFormPurpose] = useState('');
   const [formVehicle, setFormVehicle] = useState('');
   const [formPhone, setFormPhone] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formDate, setFormDate] = useState('Today, 17 Oct');
   const [formTime, setFormTime] = useState('02:30 PM');
+  const [formDuration, setFormDuration] = useState('3');
+  const [formIdProofType, setFormIdProofType] = useState<VisitorRecord['idProofType']>('National ID');
+  const [formIdProofNum, setFormIdProofNum] = useState('');
 
-  const filteredVisitors = visitors.filter(v => {
-    const matchesTab =
-      activeTab === 'all' ||
-      (activeTab === 'checked_in' && v.status === 'checked_in') ||
-      (activeTab === 'vip' && v.category === 'vip') ||
-      (activeTab === 'govt' && v.category === 'govt');
+  // ─────────────────────────────────────────────────────────────────────────
+  // Scoped & Filtered Visitors
+  // ─────────────────────────────────────────────────────────────────────────
+  const scopedVisitors = useMemo(() => {
+    if (scopeMode === 'my_guests') {
+      return visitors.filter(v => v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()));
+    }
+    return visitors;
+  }, [visitors, scopeMode, currentUserName]);
 
-    const q = searchQuery.toLowerCase().trim();
-    const matchesSearch =
-      !q ||
-      v.name.toLowerCase().includes(q) ||
-      v.organization.toLowerCase().includes(q) ||
-      v.hostEmployee.toLowerCase().includes(q) ||
-      v.id.toLowerCase().includes(q) ||
-      (v.badgeNo && v.badgeNo.toLowerCase().includes(q));
+  const selectedVisitor = useMemo(() => {
+    return visitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0] || visitors[0];
+  }, [visitors, selectedVisitorId, scopedVisitors]);
 
-    return matchesTab && matchesSearch;
-  });
+  // Statistics calculation
+  const stats = useMemo(() => {
+    const inside = visitors.filter(v => v.status === 'checked_in');
+    const preReg = visitors.filter(v => v.status === 'pre_registered');
+    const vipGovt = visitors.filter(v => v.category === 'vip' || v.category === 'govt');
+    const myGuests = visitors.filter(v => v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()));
+    const myGuestsInside = myGuests.filter(v => v.status === 'checked_in');
+
+    const ppeTotal = visitors.filter(v => v.facility === 'Keraniganj Bitumen Refinery');
+    const ppeCleared = ppeTotal.filter(v => v.ppeCleared.hardHat && v.ppeCleared.safetyShoes);
+
+    return {
+      totalInside: inside.length,
+      insideRefinery: inside.filter(v => v.facility === 'Keraniganj Bitumen Refinery').length,
+      insideHQ: inside.filter(v => v.facility === 'Bashundhara Corporate HQ, Baridhara').length,
+      preRegisteredCount: preReg.length,
+      vipGovtCount: vipGovt.length,
+      myGuestsCount: myGuests.length,
+      myGuestsInsideCount: myGuestsInside.length,
+      ppeComplianceRate: ppeTotal.length ? Math.round((ppeCleared.length / ppeTotal.length) * 100) : 100,
+      overdueCount: visitors.filter(v => v.status === 'overdue').length,
+    };
+  }, [visitors, currentUserName]);
+
+  const displayedVisitors = useMemo(() => {
+    return scopedVisitors.filter(v => {
+      // Tab Filtering
+      if (activeTab === 'inside' && v.status !== 'checked_in') return false;
+      if (activeTab === 'my_guests' && !v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase())) return false;
+      if (activeTab === 'vip_govt' && v.category !== 'vip' && v.category !== 'govt') return false;
+      if (activeTab === 'pre_registered' && v.status !== 'pre_registered') return false;
+
+      // Facility filter
+      if (facilityFilter !== 'all' && v.facility !== facilityFilter) return false;
+
+      // Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matches =
+          v.name.toLowerCase().includes(q) ||
+          v.organization.toLowerCase().includes(q) ||
+          v.hostEmployee.toLowerCase().includes(q) ||
+          v.id.toLowerCase().includes(q) ||
+          (v.badgeNo && v.badgeNo.toLowerCase().includes(q)) ||
+          (v.vehiclePlate && v.vehiclePlate.toLowerCase().includes(q)) ||
+          v.purpose.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+
+      return true;
+    });
+  }, [scopedVisitors, activeTab, facilityFilter, searchQuery, currentUserName]);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Handlers
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleCheckIn = (id: string) => {
     setVisitors(prev => prev.map(v => {
       if (v.id === id) {
+        const badge = v.category === 'vip' ? 'VIP-02' : v.category === 'govt' ? 'GOVT-05' : `BDG-${Math.floor(100 + Math.random() * 900)}`;
         return {
           ...v,
           status: 'checked_in',
           checkInTime: 'Just Now',
-          badgeNo: v.category === 'vip' ? 'VIP-02' : v.category === 'govt' ? 'GOVT-05' : `BDG-${Math.floor(100 + Math.random() * 900)}`
+          badgeNo: badge,
+          safetyBriefingCompleted: true,
         };
       }
       return v;
     }));
+
     const target = visitors.find(v => v.id === id);
     if (target?.vipProtocol || target?.category === 'vip' || target?.category === 'govt') {
       showToast(
         lang === 'en'
           ? `👑 VIP PROTOCOL ACTIVATED: ${target?.name} checked in. Escort vehicle & Chairman Secretariat alerted.`
-          : `👑 ভিআইপি প্রটোকল সক্রিয়: ${target?.name} প্রবেশ করেছেন। চেয়ারম্যান সচিবালয়কে অবহিত করা হয়েছে।`,
+          : `👑 ভিআইপি প্রটোকল সক্রিয়: ${target?.name} প্রবেশ করেছেন। সচিবালয়কে অবহিত করা হয়েছে।`,
         'gold'
       );
     } else {
-      showToast(lang === 'en' ? `Visitor ${target?.name} checked in successfully.` : `অতিথি চেক-ইন সম্পন্ন হয়েছে।`, 'success');
+      showToast(lang === 'en' ? `Visitor ${target?.name} checked in. Badge ${target?.badgeNo || 'BDG-01'} issued.` : `অতিথি চেক-ইন সফল হয়েছে। ব্যাজ প্রদান সম্পন্ন।`, 'success');
     }
   };
 
   const handleCheckOut = (id: string) => {
     setVisitors(prev => prev.map(v => v.id === id ? { ...v, status: 'checked_out', checkOutTime: 'Just Now' } : v));
-    showToast(lang === 'en' ? `Visitor pass surrendered & security checkout logged.` : `পাস জমা ও নিরাপত্তা চেক-আউট সম্পন্ন হয়েছে।`, 'info');
+    showToast(lang === 'en' ? `Security checkout logged. Badge surrendered & barrier cleared.` : `পাস জমা ও নিরাপত্তা চেক-আউট সম্পন্ন হয়েছে।`, 'info');
+  };
+
+  const handleTogglePPE = (gearKey: keyof VisitorRecord['ppeCleared']) => {
+    if (!selectedVisitor) return;
+    setVisitors(prev => prev.map(v => {
+      if (v.id === selectedVisitor.id) {
+        const updatedPPE = {
+          ...v.ppeCleared,
+          [gearKey]: !v.ppeCleared[gearKey],
+        };
+        return {
+          ...v,
+          ppeCleared: updatedPPE,
+        };
+      }
+      return v;
+    }));
+    showToast(t('HSE Safety PPE Equipment Checklist updated.', 'নিরাপত্তা সরঞ্জাম তালিকা হালনাগাদ হয়েছে।', lang), 'success');
+  };
+
+  const handleSimulateBarrier = () => {
+    setBarrierOpen(true);
+    showToast(t('ALPR CAMERA MATCHED: Vehicle plate verified. Gate Barrier #1 RAISED.', 'লাইসেন্স প্লেট মিল নিশ্চিত: গেট বেরিয়ার ১ উন্মুক্ত হয়েছে।', lang), 'gold');
+    setTimeout(() => {
+      setBarrierOpen(false);
+    }, 4000);
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName || !formOrg || !formPurpose) {
-      showToast(lang === 'en' ? 'Please complete required fields.' : 'প্রয়োজনীয় তথ্য পূরণ করুন।', 'warn');
+    if (!formName.trim() || !formOrg.trim() || !formPurpose.trim()) {
+      showToast(lang === 'en' ? 'Please complete required fields.' : 'অনুগ্রহ করে প্রয়োজনীয় তথ্য পূরণ করুন।', 'warn');
       return;
     }
+
     const newId = `VIS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const newVis: VisitorRecord = {
       id: newId,
-      name: formName,
-      organization: formOrg,
-      designation: formCategory === 'vip' ? 'Honorary Dignitary' : formCategory === 'govt' ? 'Inspector' : 'Representative',
+      name: formName.trim(),
+      organization: formOrg.trim(),
+      designation: formDesignation.trim() || (formCategory === 'vip' ? 'Honorary Dignitary' : formCategory === 'govt' ? 'Official Inspector' : 'Representative'),
       category: formCategory,
-      hostEmployee: formHost || 'Operations Division',
-      hostDept: formCategory === 'vip' ? "Chairman's Secretariat" : 'Keraniganj Complex',
-      purpose: formPurpose,
-      expectedDate: 'Today',
+      hostEmployee: formHost.trim() || currentUserName,
+      hostDept: isStaff ? currentUserDept : 'Plant Administration',
+      hostPhone: '+880 1711-998877',
+      facility: formFacility,
+      permittedZones: [
+        { zoneId: 'Z-01', name: 'Reception & Admin Lobby', nameBn: 'অভ্যর্থনা ও লবি', level: 'green', escortRequired: false },
+        { zoneId: 'Z-02', name: 'Meeting Room Suites', nameBn: 'মিটিং রুম স্যুট', level: 'green', escortRequired: false },
+      ],
+      purpose: formPurpose.trim(),
+      expectedDate: formDate,
       expectedTime: formTime,
+      durationHours: Number(formDuration) || 3,
       status: 'pre_registered',
-      vehiclePlate: formVehicle || 'Pending Entry',
-      phone: formPhone || '+880 1700-000000',
+      vehiclePlate: formVehicle.trim() || 'Pedestrian / Escort Pool',
+      phone: formPhone.trim() || '+880 1700-000000',
+      email: formEmail.trim(),
       vipProtocol: formCategory === 'vip' || formCategory === 'govt',
+      safetyBriefingCompleted: false,
       ndaSigned: true,
-      badgeNo: formCategory === 'vip' ? 'VIP-03' : undefined,
+      ppeCleared: {
+        hardHat: formFacility === 'Keraniganj Bitumen Refinery',
+        safetyGoggles: formFacility === 'Keraniganj Bitumen Refinery',
+        safetyShoes: formFacility === 'Keraniganj Bitumen Refinery',
+        hiVisVest: formFacility === 'Keraniganj Bitumen Refinery',
+        h2sBriefing: formFacility === 'Keraniganj Bitumen Refinery',
+      },
+      idProofType: formIdProofType,
+      idProofNumber: formIdProofNum.trim() || 'NID-VERIFIED',
     };
+
     setVisitors([newVis, ...visitors]);
-    setSelectedVisitor(newVis);
+    setSelectedVisitorId(newVis.id);
     setShowRegisterModal(false);
+
+    // Reset Form
     setFormName('');
     setFormOrg('');
+    setFormDesignation('');
     setFormPurpose('');
     setFormVehicle('');
     setFormPhone('');
+    setFormEmail('');
+    setFormIdProofNum('');
+
     showToast(
       lang === 'en'
         ? `Digital Gate Pass ${newId} issued for ${newVis.name}! Encrypted QR dispatched.`
-        : `ডিজিটাল গেট পাস ${newId} সফলভাবে তৈরি হয়েছে!`,
+        : `ডিজিটাল গেট পাস ${newId} সফলভাবে তৈরি হয়েছে! কিউআর কোড পাঠানো হয়েছে।`,
       'success'
     );
   };
@@ -219,539 +543,930 @@ export default function GuestView({ role, lang }: ViewProps) {
         return <span className="badge gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>👑 VIP Guest</span>;
       case 'govt':
         return <span className="badge danger" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🏛️ Govt Inspector</span>;
+      case 'client':
+        return <span className="badge meeting" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🤝 Commercial Client</span>;
       case 'vendor':
         return <span className="badge info" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🔧 Technical Vendor</span>;
       case 'regular':
+      default:
         return <span className="badge">Regular Visitor</span>;
     }
   };
 
   return (
-    <div className="view-container page-enter-active">
-      {/* ─── SLEEK MINIMAL HEADER & TOOLBAR ─── */}
-      <div className="section-header" style={{ marginBottom: '16px', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+    <div style={{ paddingBottom: '50px' }}>
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 1. TOP HEADER & EMERGENCY MUSTER ACTIONS */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="flex-between mb-4" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '18px' }}>
-            <span>🎫</span>
-            <span>{t('Guest & VIP Protocol Management', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}</span>
-          </h2>
-          <p className="section-subtitle" style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
+              {t('Guest & VIP Protocol Management System', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}
+            </h2>
+            <span className="badge success" style={{ fontSize: '10.5px' }}>
+              ALPR & HSE PERMIT-TO-ENTER
+            </span>
+          </div>
+          <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
             {t(
-              'Digital QR gate passes, regulatory audit delegations & Chairman VIP escort protocols.',
-              'ডিজিটাল কিউআর গেট পাস, সরকারি নিয়ন্ত্রক অডিট পরিদর্শন দল ও ভিআইপি প্রটোকল।',
+              'Encrypted QR Gate Passes, ALPR Barrier Automation, HSE Safety Gear Allotment & Emergency Evacuation Muster',
+              'এনক্রিপ্টেড কিউআর গেট পাস, লাইসেন্স প্লেট বেরিয়ার, এইচএসই নিরাপত্তা সরঞ্জাম ও জরুরি ইভাকুয়েশন মাস্টার',
               lang
             )}
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Emergency Muster Button */}
+          <button
+            className="btn-outline-danger"
+            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowMusterModal(true)}
+            title="View Live Evacuation Muster Roll"
+          >
+            <Flame size={14} />
+            {t('Emergency Muster List', 'জরুরি ইভাকুয়েশন তালিকা', lang)} ({stats.totalInside})
+          </button>
+
+          {/* ALPR Gate Barrier Scanner Simulator */}
           <button
             className="btn-outline"
-            onClick={() => {
-              showToast(
-                t(
-                  'Camera ALPR & QR Scanner Active. Gate barrier 1 ready.',
-                  'গেট ক্যামেরা কিউআর রিডার ও নম্বরপ্লেট সেন্সর সক্রিয়।',
-                  lang
-                ),
-                'info'
-              );
-            }}
-            style={{ fontSize: '12px', padding: '6px 12px' }}
+            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowALPRModal(true)}
           >
-            <QrCode size={14} /> {t('Scan Pass at Gate', 'পাস স্ক্যান', lang)}
+            <Car size={14} />
+            {t('ALPR Gate Barrier 1', 'গেট ১ ক্যামেরা ও বেরিয়ার', lang)}
           </button>
 
+          {/* Pre-Register Button */}
           <button
             className="btn-primary"
-            onClick={() => setShowRegisterModal(true)}
-            style={{ fontSize: '12px', padding: '6px 14px', background: 'var(--brand-crimson)', color: '#fff', fontWeight: 700 }}
+            style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--brand-crimson)', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => {
+              setFormHost(isStaff ? currentUserName : '');
+              setShowRegisterModal(true);
+            }}
           >
-            <Plus size={14} /> {t('Pre-Register Guest', 'অতিথি পূর্ব-নিবন্ধন', lang)}
+            <Plus size={14} />
+            {t('Pre-Register Guest', 'নতুন অতিথি প্রাক-নিবন্ধন', lang)}
           </button>
         </div>
       </div>
 
-      {/* ─── EXECUTIVE KPI STATS STRIP ─── */}
-      <div className="stats-grid mb-4">
-        {/* Card 1: Currently Inside */}
-        <div className="stat-card green">
-          <div className="stat-top">
-            <span className="stat-label">{t('Currently on Premises', 'বর্তমানে ক্যাম্পাসে উপস্থিত', lang)}</span>
-            <div className="stat-icon-wrap" style={{ background: '#ECFDF5', color: '#059669' }}>
-              <UserCheck size={16} />
-            </div>
+      {/* Staff Workspace & Scope Notice */}
+      <div
+        style={{
+          background: isStaff ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+          border: `1px solid ${isStaff ? 'rgba(59, 130, 246, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
+          borderRadius: 'var(--radius-md)',
+          padding: '10px 16px',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '10px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
+          <div
+            style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: isStaff ? '#3B82F6' : '#10B981',
+              color: '#FFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              fontSize: '11px',
+            }}
+          >
+            {currentUser.initials}
           </div>
-          <div className="stat-value" style={{ color: '#059669' }}>
-            {visitors.filter(v => v.status === 'checked_in').length} <span style={{ fontSize: '14px', fontWeight: 500 }}>Guests</span>
-          </div>
-          <div className="stat-sub">
-            {t('Refinery & HQ Security Perimeter', 'রিফাইনারি ও সদর দপ্তর প্রাঙ্গণ', lang)}
-          </div>
-        </div>
-
-        {/* Card 2: VIP & Delegations */}
-        <div className="stat-card gold">
-          <div className="stat-top">
-            <span className="stat-label">{t('VIP / Govt Inspections Today', 'আজকের ভিআইপি/সরকারি পরিদর্শন', lang)}</span>
-            <div className="stat-icon-wrap" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#B45309' }}>
-              <Crown size={16} />
-            </div>
-          </div>
-          <div className="stat-value" style={{ color: 'var(--brand-crimson)' }}>
-            {visitors.filter(v => v.category === 'vip' || v.category === 'govt').length} <span style={{ fontSize: '14px', fontWeight: 500 }}>Delegations</span>
-          </div>
-          <div className="stat-sub">
-            DoE Explosives & Axens France in Schedule
-          </div>
-        </div>
-
-        {/* Card 3: Safety Induction NDA */}
-        <div className="stat-card blue">
-          <div className="stat-top">
-            <span className="stat-label">{t('Safety Induction & NDA', 'নিরাপত্তা চুক্তি (এনডিএ)', lang)}</span>
-            <div className="stat-icon-wrap" style={{ background: '#F0F9FF', color: '#0284C7' }}>
-              <ShieldCheck size={16} />
-            </div>
-          </div>
-          <div className="stat-value" style={{ color: '#0284C7' }}>
-            100% <span style={{ fontSize: '14px', fontWeight: 500 }}>Signed</span>
-          </div>
-          <div className="stat-sub">
-            {t('Mandatory Refinery Plant Clearance', 'বাধ্যতামূলক রিফাইনারি প্রবেশ সম্মতি', lang)}
-          </div>
-        </div>
-
-        {/* Card 4: Security Protocol */}
-        <div className="stat-card warn">
-          <div className="stat-top">
-            <span className="stat-label">{t('Security Gate Protocol', 'নিরাপত্তা গেট প্রটোকল', lang)}</span>
-            <div className="stat-icon-wrap" style={{ background: '#FFFBEB', color: '#D97706' }}>
-              <Shield size={16} />
-            </div>
-          </div>
-          <div className="stat-value" style={{ fontSize: '18px' }}>
-            DEFCON 1
-          </div>
-          <div className="stat-sub">
-            Automated License Plate (ALPR) Active
-          </div>
-        </div>
-      </div>
-
-      {/* ─── SEGMENTED FILTER & SEARCH TOOLBAR ─── */}
-      <div className="card mb-4" style={{ padding: '10px 14px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          {/* Filter Pills */}
-          <div className="pill-tabs">
-            <button
-              className={`pill-tab ${activeTab === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveTab('all')}
-            >
-              {t('All Registrations', 'সকল নিবন্ধন', lang)} ({visitors.length})
-            </button>
-            <button
-              className={`pill-tab ${activeTab === 'checked_in' ? 'active' : ''}`}
-              onClick={() => setActiveTab('checked_in')}
-            >
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-              {t('Currently Inside', 'বর্তমানে ভেতরে', lang)} ({visitors.filter(v => v.status === 'checked_in').length})
-            </button>
-            <button
-              className={`pill-tab ${activeTab === 'vip' ? 'active' : ''}`}
-              onClick={() => setActiveTab('vip')}
-            >
-              👑 {t('VIP Dignitaries', 'ভিআইপি সম্মানিত অতিথি', lang)}
-            </button>
-            <button
-              className={`pill-tab ${activeTab === 'govt' ? 'active' : ''}`}
-              onClick={() => setActiveTab('govt')}
-            >
-              🏛️ {t('Govt Regulatory Inspections', 'সরকারি নিয়ন্ত্রক পরিদর্শন', lang)}
-            </button>
-          </div>
-
-          {/* Quick Search Box */}
-          <div style={{ position: 'relative', minWidth: '220px', maxWidth: '300px', flex: '1 1 auto' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)' }} />
-            <input
-              type="text"
-              className="form-input"
-              placeholder={t('Search guest, agency, host or pass ID...', 'নাম, সংস্থা বা পাস খুঁজুন...', lang)}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: '32px', fontSize: '11.5px', height: '34px' }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ─── MAIN CONTENT: DUAL RESPONSIVE LAYOUT ─── */}
-      <div className="responsive-col-2">
-        {/* Left Column: Visitor Manifest (Desktop Table + Mobile Cards) */}
-        <div className="card" style={{ border: '1px solid var(--brand-slate-200)', overflow: 'hidden' }}>
-          <div className="card-hd" style={{ padding: '12px 16px' }}>
-            <div className="card-hd-left">
-              <div className="card-hd-icon" style={{ width: '28px', height: '28px' }}><Users size={15} /></div>
-              <div>
-                <div className="card-title" style={{ fontSize: '13px' }}>{t('Visitor Manifest & Access Log', 'অতিথি তালিকা ও প্রবেশ লগ', lang)}</div>
-                <div className="card-subtitle" style={{ fontSize: '10.5px' }}>{t('Real-time security gate telemetry & clearance', 'নিরাপত্তা গেটের লাইভ তথ্য ও অনুমোদন', lang)}</div>
-              </div>
-            </div>
-            <span className="badge info" style={{ fontSize: '10.5px' }}>
-              {filteredVisitors.length} {t('Records', 'জন', lang)}
+          <div>
+            <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>
+              {currentUserName} ({currentUserDept})
+            </span>
+            <span style={{ color: 'var(--brand-slate-500)', marginLeft: '6px' }}>
+              • {t('Active Workspace:', 'সক্রিয় মোড:', lang)}{' '}
+              <strong>
+                {scopeMode === 'my_guests'
+                  ? t('Showing guests hosted by you', 'আপনার আমন্ত্রিত অতিথি দেখা হচ্ছে', lang)
+                  : t('Showing all campus visitors across facilities', 'সকল শাখার অতিথি প্রদর্শিত হচ্ছে', lang)}
+              </strong>
             </span>
           </div>
+        </div>
 
-          <div className="card-body" style={{ padding: 0 }}>
-            {/* 1. DESKTOP VIEW: Clean, Spacious Data Table */}
-            <div className="visitor-desktop-table">
-              <div className="table-responsive">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>{t('Pass / Guest', 'পাস ও অতিথি', lang)}</th>
-                      <th>{t('Category', 'শ্রেণি', lang)}</th>
-                      <th>{t('Host & Purpose', 'স্বাগতিক ও উদ্দেশ্য', lang)}</th>
-                      <th>{t('Timing', 'সময়', lang)}</th>
-                      <th style={{ textAlign: 'right' }}>{t('Status / Action', 'অবস্থা ও ব্যবস্থা', lang)}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredVisitors.map(v => {
-                      const isSelected = selectedVisitor?.id === v.id;
-                      return (
-                        <tr
-                          key={v.id}
-                          onClick={() => setSelectedVisitor(v)}
-                          style={{
-                            cursor: 'pointer',
-                            background: isSelected ? 'rgba(165, 28, 48, 0.05)' : undefined,
-                            borderLeft: isSelected ? '3px solid var(--brand-crimson)' : '3px solid transparent',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <td>
-                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>{v.name}</div>
-                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '1px' }}>{v.organization}</div>
-                            <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--brand-crimson)', marginTop: '2px' }}>{v.id}</div>
-                          </td>
-                          <td>{getCategoryBadge(v.category)}</td>
-                          <td>
-                            <div style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--brand-slate-800)' }}>Host: {v.hostEmployee}</div>
-                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', maxWidth: '220px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {v.purpose}
-                            </div>
-                          </td>
-                          <td>
-                            <div style={{ fontSize: '11.5px', fontWeight: 500 }}>{v.expectedDate}</div>
-                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-                              {v.checkInTime ? `In: ${v.checkInTime}` : `Exp: ${v.expectedTime}`}
-                            </div>
-                          </td>
-                          <td style={{ textAlign: 'right' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                              {v.status === 'checked_in' ? (
-                                <span className="badge success" style={{ fontSize: '10px' }}>✓ Inside Campus</span>
-                              ) : v.status === 'pre_registered' ? (
-                                <span className="badge info" style={{ fontSize: '10px' }}>Pre-Registered</span>
-                              ) : (
-                                <span className="badge" style={{ fontSize: '10px' }}>Checked Out</span>
-                              )}
-                              {v.status === 'pre_registered' && (
-                                <button
-                                  className="btn-primary"
-                                  style={{ padding: '3px 8px', fontSize: '10.5px' }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCheckIn(v.id);
-                                  }}
-                                >
-                                  Check In
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', background: 'var(--brand-slate-200)', borderRadius: '6px', padding: '2px' }}>
+            <button
+              className={`btn-sm-ghost ${scopeMode === 'my_guests' ? 'active' : ''}`}
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '3px 10px',
+                background: scopeMode === 'my_guests' ? '#FFF' : 'transparent',
+              }}
+              onClick={() => setScopeMode('my_guests')}
+            >
+              {t('My Guests', 'আমার অতিথি', lang)} ({stats.myGuestsCount})
+            </button>
+            <button
+              className={`btn-sm-ghost ${scopeMode === 'all' ? 'active' : ''}`}
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '3px 10px',
+                background: scopeMode === 'all' ? '#FFF' : 'transparent',
+              }}
+              onClick={() => setScopeMode('all')}
+            >
+              {t('All Campus Manifest', 'সকল ক্যাম্পাস তালিকা', lang)} ({visitors.length})
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 2. 5-KPI EXECUTIVE SECURITY & PROTOCOL CARDS */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="parcel-kpi-grid">
+        {/* Card 1: Currently Inside Campus */}
+        <div
+          className={`parcel-kpi-card ${activeTab === 'inside' ? 'active' : ''}`}
+          onClick={() => setActiveTab(activeTab === 'inside' ? 'all' : 'inside')}
+          title="Click to view guests currently inside"
+        >
+          <div className="parcel-kpi-top">
+            <div className="parcel-kpi-icon" style={{ background: '#ECFDF5', color: '#059669' }}>
+              <UserCheck size={18} />
+            </div>
+            <span className="badge success" style={{ fontSize: '10px' }}>
+              ● LIVE MUSTER
+            </span>
+          </div>
+          <div>
+            <div className="parcel-kpi-val" style={{ color: '#059669' }}>
+              {stats.totalInside} <span style={{ fontSize: '14px', fontWeight: 600 }}>Guests</span>
+            </div>
+            <div className="parcel-kpi-title">
+              {t('Currently Inside Perimeter', 'বর্তমানে ক্যাম্পাসে উপস্থিত', lang)}
+            </div>
+            <div className="parcel-kpi-sub">
+              {stats.insideRefinery} at Keraniganj • {stats.insideHQ} at Dhaka HQ
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Pre-Registered / Expected */}
+        <div
+          className={`parcel-kpi-card ${activeTab === 'pre_registered' ? 'active' : ''}`}
+          onClick={() => setActiveTab(activeTab === 'pre_registered' ? 'all' : 'pre_registered')}
+          title="Click to view pre-registered upcoming visits"
+        >
+          <div className="parcel-kpi-top">
+            <div className="parcel-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+              <Clock size={18} />
+            </div>
+            <span className="badge info" style={{ fontSize: '10px' }}>
+              TODAY
+            </span>
+          </div>
+          <div>
+            <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>
+              {stats.preRegisteredCount}
+            </div>
+            <div className="parcel-kpi-title">
+              {t('Expected / Pre-Registered', 'প্রত্যাশিত অতিথি তালিকা', lang)}
+            </div>
+            <div className="parcel-kpi-sub">
+              Digital QR Gate Passes Issued
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: VIP & Govt Inspections */}
+        <div
+          className={`parcel-kpi-card ${activeTab === 'vip_govt' ? 'active' : ''}`}
+          onClick={() => setActiveTab(activeTab === 'vip_govt' ? 'all' : 'vip_govt')}
+          title="Click to view VIP & Govt inspectors"
+        >
+          <div className="parcel-kpi-top">
+            <div className="parcel-kpi-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#B45309' }}>
+              <Crown size={18} />
+            </div>
+            <span className="badge warn" style={{ fontSize: '10px' }}>
+              HIGH PROTOCOL
+            </span>
+          </div>
+          <div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--brand-crimson)' }}>
+              {stats.vipGovtCount} <span style={{ fontSize: '13px', fontWeight: 500 }}>Delegations</span>
+            </div>
+            <div className="parcel-kpi-title">
+              {t('VIP & Govt Inspections', 'ভিআইপি ও সরকারি পরিদর্শন', lang)}
+            </div>
+            <div className="parcel-kpi-sub">
+              DoE Explosives & Axens France
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Safety Induction & PPE Allotment */}
+        <div
+          className="parcel-kpi-card"
+          onClick={() => setCockpitSubTab('ppe')}
+          title="Click to inspect safety gear & induction checklist"
+        >
+          <div className="parcel-kpi-top">
+            <div className="parcel-kpi-icon" style={{ background: '#F0F9FF', color: '#0284C7' }}>
+              <HardHat size={18} />
+            </div>
+            <span className="badge success" style={{ fontSize: '10px' }}>
+              {stats.ppeComplianceRate}%
+            </span>
+          </div>
+          <div>
+            <div className="parcel-kpi-val" style={{ color: '#0284C7' }}>
+              100%
+            </div>
+            <div className="parcel-kpi-title">
+              {t('HSE Gear Allotment & NDA', 'নিরাপত্তা সরঞ্জাম ও চুক্তি', lang)}
+            </div>
+            <div className="parcel-kpi-sub">
+              Mandatory Refinery Plant PPE Active
+            </div>
+          </div>
+        </div>
+
+        {/* Card 5: ALPR Barrier & Gate Protocol */}
+        <div
+          className="parcel-kpi-card"
+          onClick={() => setShowALPRModal(true)}
+          title="Click to view ALPR gate camera feed"
+        >
+          <div className="parcel-kpi-top">
+            <div className="parcel-kpi-icon" style={{ background: '#FEF2F2', color: '#DC2626' }}>
+              <Shield size={18} />
+            </div>
+            <span className="badge success" style={{ fontSize: '10px' }}>
+              ALPR ACTIVE
+            </span>
+          </div>
+          <div>
+            <div className="parcel-kpi-val" style={{ fontSize: '20px', color: '#991B1B' }}>
+              GATE 1 & 2
+            </div>
+            <div className="parcel-kpi-title">
+              {t('Automatic Plate Recognition', 'নম্বরপ্লেট সেন্সর বেরিয়ার', lang)}
+            </div>
+            <div className="parcel-kpi-sub">
+              Barrier Auto-Open on QR Match
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 3. PRACTICAL TWO-COLUMN MASTER-DETAIL WORKSPACE */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      <div className="guest-two-col-layout">
+        {/* ── LEFT COLUMN: VISITOR DIRECTORY FEED ── */}
+        <div>
+          {/* Feed Header & Search Filter */}
+          <div style={{ background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                {t('Visitor Directory', 'অতিথি রেজিস্টার', lang)} ({displayedVisitors.length})
+              </span>
+              <select
+                value={facilityFilter}
+                onChange={(e) => setFacilityFilter(e.target.value as any)}
+                style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--brand-slate-300)' }}
+              >
+                <option value="all">All Facilities</option>
+                <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
+                <option value="Bashundhara Corporate HQ, Baridhara">Dhaka HQ Baridhara</option>
+              </select>
             </div>
 
-            {/* 2. MOBILE VIEW: Touch-Friendly Responsive Cards (No Squished Columns!) */}
-            <div className="visitor-mobile-cards" style={{ padding: '12px' }}>
-              {filteredVisitors.map(v => {
+            {/* Search Input */}
+            <div style={{ position: 'relative', marginBottom: '10px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
+              <input
+                type="text"
+                placeholder={t('Search visitor, agency, host, car plate...', 'নাম, সংস্থা, স্বাগতিক বা গাড়ি খুঁজুন...', lang)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  paddingLeft: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--brand-slate-300)',
+                  width: '100%',
+                  fontSize: '12px',
+                }}
+              />
+            </div>
+
+            {/* Quick Filter Tabs */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
+                style={{ padding: '3px 8px', fontSize: '10.5px' }}
+                onClick={() => setActiveTab('all')}
+              >
+                All ({scopedVisitors.length})
+              </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'inside' ? 'active' : ''}`}
+                style={{ padding: '3px 8px', fontSize: '10.5px' }}
+                onClick={() => setActiveTab('inside')}
+              >
+                🟢 Inside ({stats.totalInside})
+              </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'vip_govt' ? 'active' : ''}`}
+                style={{ padding: '3px 8px', fontSize: '10.5px' }}
+                onClick={() => setActiveTab('vip_govt')}
+              >
+                👑 VIP/Govt ({stats.vipGovtCount})
+              </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'pre_registered' ? 'active' : ''}`}
+                style={{ padding: '3px 8px', fontSize: '10.5px' }}
+                onClick={() => setActiveTab('pre_registered')}
+              >
+                ⏳ Expected ({stats.preRegisteredCount})
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable Visitor Cards Feed */}
+          <div className="guest-feed-list">
+            {displayedVisitors.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
+                <Users size={28} style={{ opacity: 0.4, margin: '0 auto 8px' }} />
+                <div style={{ fontWeight: 700, fontSize: '13px' }}>No visitors found</div>
+                <div style={{ fontSize: '11px' }}>Adjust filters or pre-register a new guest.</div>
+              </div>
+            ) : (
+              displayedVisitors.map((v) => {
                 const isSelected = selectedVisitor?.id === v.id;
+                const isHostMe = v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase());
+
                 return (
                   <div
                     key={v.id}
-                    className={`visitor-card-item ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedVisitor(v)}
-                    style={{
-                      borderLeft: isSelected ? '4px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                      background: isSelected ? 'rgba(165, 28, 48, 0.04)' : 'var(--brand-card-bg)',
-                    }}
+                    className={`guest-feed-card ${isSelected ? 'active' : ''}`}
+                    onClick={() => setSelectedVisitorId(v.id)}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{v.name}</div>
-                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>{v.organization}</div>
-                        <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--brand-crimson)' }}>Pass: {v.id}</div>
+                        <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>
+                          {v.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                          {v.organization}
+                        </div>
                       </div>
-                      <div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                        {v.status === 'checked_in' ? (
+                          <span className="badge success" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            ✓ INSIDE CAMPUS
+                          </span>
+                        ) : v.status === 'pre_registered' ? (
+                          <span className="badge info" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            EXPECTED {v.expectedTime}
+                          </span>
+                        ) : (
+                          <span className="badge neutral" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            CHECKED OUT
+                          </span>
+                        )}
                         {getCategoryBadge(v.category)}
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-700)', padding: '6px 8px', background: 'var(--brand-slate-100)', borderRadius: '6px', marginBottom: '8px' }}>
-                      <strong>Host:</strong> {v.hostEmployee} ({v.hostDept})<br />
-                      <span style={{ color: 'var(--brand-slate-500)' }}>{v.purpose}</span>
+                    <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-700)', marginBottom: '8px', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {v.purpose}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid var(--brand-slate-100)', flexWrap: 'wrap', gap: '6px' }}>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                        🕒 {v.checkInTime ? `Checked In: ${v.checkInTime}` : `Expected: ${v.expectedTime}`}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        {v.status === 'pre_registered' ? (
-                          <button
-                            className="btn-primary"
-                            style={{ padding: '5px 10px', fontSize: '11px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCheckIn(v.id);
-                            }}
-                          >
-                            <UserCheck size={12} /> {t('Check In', 'চেক ইন', lang)}
-                          </button>
-                        ) : v.status === 'checked_in' ? (
-                          <button
-                            className="btn-outline-danger"
-                            style={{ padding: '5px 10px', fontSize: '11px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCheckOut(v.id);
-                            }}
-                          >
-                            <Clock size={12} /> {t('Check Out', 'চেক আউট', lang)}
-                          </button>
-                        ) : (
-                          <span className="badge" style={{ fontSize: '10px' }}>Completed</span>
-                        )}
-                      </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '10.5px' }}>
+                      <span style={{ color: isHostMe ? '#2563EB' : 'var(--brand-slate-500)', fontWeight: isHostMe ? 700 : 500 }}>
+                        Host: {v.hostEmployee}
+                      </span>
+                      <span style={{ color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>
+                        {v.id}
+                      </span>
                     </div>
                   </div>
                 );
-              })}
-            </div>
+              })
+            )}
           </div>
         </div>
 
-        {/* Right Column: Digital Gate Pass & VIP Protocol Details */}
-        {selectedVisitor ? (
-          <div className="card" style={{ border: '1px solid var(--brand-slate-200)', height: 'fit-content' }}>
-            <div className="card-hd" style={{ padding: '12px 16px' }}>
-              <div className="card-hd-left">
-                <div className="card-hd-icon" style={{ width: '28px', height: '28px' }}>🪪</div>
-                <div>
-                  <div className="card-title" style={{ fontSize: '13px' }}>{selectedVisitor.name}</div>
-                  <div className="card-subtitle" style={{ fontSize: '10.5px' }}>{selectedVisitor.designation} · {selectedVisitor.organization}</div>
+        {/* ── RIGHT COLUMN: DIGITAL GATE PASS & SECURITY COCKPIT ── */}
+        <div>
+          {selectedVisitor && (
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              {/* Digital Pass Holographic Card Header */}
+              <div className="guest-pass-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#93C5FD', fontWeight: 800 }}>
+                        BASHUNDHARA OIL & GAS · ENCRYPTED DIGITAL ACCESS CREDENTIAL
+                      </span>
+                      {selectedVisitor.vipProtocol && (
+                        <span className="badge gold" style={{ fontSize: '9.5px' }}>
+                          👑 VIP PROTOCOL ESCORT
+                        </span>
+                      )}
+                    </div>
+
+                    <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', margin: '6px 0 2px' }}>
+                      {selectedVisitor.name}
+                    </h1>
+
+                    <div style={{ fontSize: '13px', color: '#CBD5E1', fontWeight: 600 }}>
+                      {selectedVisitor.designation} • <strong>{selectedVisitor.organization}</strong>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', fontSize: '11.5px', color: '#94A3B8' }}>
+                      <span>Pass ID: <strong style={{ color: '#fff', fontFamily: 'monospace' }}>{selectedVisitor.id}</strong></span>
+                      <span>•</span>
+                      <span>Badge No: <strong style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{selectedVisitor.badgeNo || 'UNISSUED'}</strong></span>
+                      <span>•</span>
+                      <span>ALPR Plate: <code style={{ color: '#4ADE80' }}>{selectedVisitor.vehiclePlate}</code></span>
+                    </div>
+                  </div>
+
+                  {/* QR Code & Printable Slip */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: '#fff', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                    <QrCode size={64} color="#000" />
+                    <span style={{ fontSize: '9px', fontWeight: 800, color: '#0F172A', letterSpacing: '0.5px' }}>
+                      SCAN AT GATE
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status Bar */}
+                <div style={{ marginTop: '20px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', position: 'relative', zIndex: 2 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedVisitor.status === 'checked_in' ? '#10B981' : '#F59E0B', display: 'inline-block' }} />
+                    <strong style={{ color: '#F8FAFC' }}>
+                      {selectedVisitor.status === 'checked_in'
+                        ? `Inside Premises since ${selectedVisitor.checkInTime}`
+                        : selectedVisitor.status === 'pre_registered'
+                        ? `Expected Arrival: ${selectedVisitor.expectedTime}`
+                        : `Checked Out at ${selectedVisitor.checkOutTime}`}
+                    </strong>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      onClick={() => setShowGatePassModal(true)}
+                    >
+                      <Printer size={12} />
+                      {t('Print ID Badge', 'ব্যাজ প্রিন্ট', lang)}
+                    </button>
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      onClick={() => setShowSMSModal(true)}
+                    >
+                      <Send size={12} />
+                      {t('SMS QR Pass', 'এসএমএস পাঠান', lang)}
+                    </button>
+                  </div>
                 </div>
               </div>
-              {getCategoryBadge(selectedVisitor.category)}
-            </div>
 
-            <div className="card-body" style={{ padding: '16px' }}>
-              {/* VIP Protocol Banner if applicable */}
-              {(selectedVisitor.category === 'vip' || selectedVisitor.category === 'govt') && (
-                <div style={{
-                  padding: '10px 12px',
-                  borderRadius: '6px',
-                  background: 'rgba(212, 175, 55, 0.08)',
-                  border: '1px solid #D4AF37',
-                  marginBottom: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '11.5px',
-                  color: '#92400E'
-                }}>
-                  <Crown size={15} color="#D4AF37" style={{ flexShrink: 0 }} />
-                  <div>
-                    <strong>{t('VIP Executive Escort Protocol Active', 'ভিআইপি প্রটোকল সক্রিয়', lang)}</strong>
-                    <div style={{ fontSize: '10.5px', color: '#B45309' }}>
-                      Security escort unit assigned · Chairman / GM reception briefed · Priority parking cleared.
+              {/* ── COCKPIT SUB-NAVIGATION ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', padding: '12px 20px', background: 'var(--brand-slate-50)' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'pass' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('pass')}
+                  >
+                    <User size={13} />
+                    {t('Visit & Host Details', 'সাক্ষাৎ ও স্বাগতিক বিবরণ', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'ppe' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('ppe')}
+                  >
+                    <HardHat size={13} />
+                    {t('HSE Gear & Safety Induction', 'এইচএসই গিয়ার ও নিরাপত্তা সম্মতি', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'alpr' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('alpr')}
+                  >
+                    <Car size={13} />
+                    {t('ALPR Vehicle Entry & Barrier', 'গাড়ি এন্ট্রি ও গেট বেরিয়ার', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'zones' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('zones')}
+                  >
+                    <MapPin size={13} />
+                    {t('Permitted Plant Zones', 'অনুমোদিত প্ল্যান্ট অঞ্চল', lang)}
+                  </button>
+                </div>
+
+                {/* Primary Action Buttons */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {selectedVisitor.status === 'pre_registered' ? (
+                    <button
+                      className="btn-primary"
+                      style={{ fontSize: '12px', padding: '6px 14px', background: '#059669', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      onClick={() => handleCheckIn(selectedVisitor.id)}
+                    >
+                      <UserCheck size={14} />
+                      {t('Check-In & Issue Badge', 'চেক-ইন ও ব্যাজ প্রদান', lang)}
+                    </button>
+                  ) : selectedVisitor.status === 'checked_in' ? (
+                    <button
+                      className="btn-outline-danger"
+                      style={{ fontSize: '12px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      onClick={() => handleCheckOut(selectedVisitor.id)}
+                    >
+                      <Clock size={14} />
+                      {t('Check-Out & Surrender', 'চেক-আউট ও পাস ফেরত', lang)}
+                    </button>
+                  ) : (
+                    <span className="badge" style={{ padding: '6px 12px' }}>Visit Completed</span>
+                  )}
+                </div>
+              </div>
+
+              {/* ── TAB 1: VISIT & HOST DETAILS ── */}
+              {cockpitSubTab === 'pass' && (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                    {/* Host Card */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        HOST OFFICER & ESCORT
+                      </div>
+                      <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
+                        {selectedVisitor.hostEmployee}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                        {selectedVisitor.hostDept}
+                      </div>
+                      <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+                        <button
+                          className="btn-primary"
+                          style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                          onClick={() => showToast(`Calling Host ${selectedVisitor.hostEmployee}: ${selectedVisitor.hostPhone || '01711-000000'}`, 'info')}
+                        >
+                          <Phone size={12} />
+                          Call Host
+                        </button>
+                        <button
+                          className="btn-sm-ghost"
+                          style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                          onClick={() => showToast(`Host ${selectedVisitor.hostEmployee} notified of guest arrival at reception desk.`, 'success')}
+                        >
+                          <MessageSquare size={12} />
+                          Notify Host
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Purpose of Visit */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        OFFICIAL PURPOSE
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '6px', lineHeight: 1.4 }}>
+                        {selectedVisitor.purpose}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '8px' }}>
+                        Target Facility: <strong>{selectedVisitor.facility}</strong>
+                      </div>
+                    </div>
+
+                    {/* Identity Proof & Security Verification */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        ID PROOF & CLEARANCE
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
+                        {selectedVisitor.idProofType}: <span style={{ fontFamily: 'monospace' }}>{selectedVisitor.idProofNumber}</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '4px' }}>
+                        ✓ Biometric & ID Match Confirmed
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
+                        Emergency: {selectedVisitor.emergencyContact || 'Direct Contact via Reception'}
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Encrypted Digital Gate Pass Credential Card */}
-              <div style={{
-                background: 'linear-gradient(135deg, #0B132B 0%, #172554 100%)',
-                border: '1px solid #1E293B',
-                color: '#fff',
-                borderRadius: '10px',
-                padding: '16px',
-                marginBottom: '14px',
-                position: 'relative',
-                boxShadow: '0 4px 14px rgba(11, 19, 43, 0.15)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#94A3B8' }}>
-                      BASHUNDHARA OIL & GAS · GATE CREDENTIAL
-                    </div>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#F8FAFC', marginTop: '3px' }}>
-                      {selectedVisitor.name}
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '1px' }}>
-                      {selectedVisitor.organization}
+              {/* ── TAB 2: HSE SAFETY GEAR & INDUCTION CLEARANCE ── */}
+              {cockpitSubTab === 'ppe' && (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <HardHat size={28} color="#B45309" />
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#92400E' }}>
+                        MANDATORY PETROCHEMICAL REFINERY SAFETY INDUCTION (HSE POLICY 10.4)
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: '#B45309', marginTop: '2px' }}>
+                        Visitors entering refinery process units must wear full PPE, undergo H2S emergency breathing briefing, and surrender non-intrinsically safe mobile phones.
+                      </div>
                     </div>
                   </div>
-                  <div style={{ background: '#fff', padding: '6px', borderRadius: '6px', flexShrink: 0 }}>
-                    <QrCode size={44} color="#000" />
-                  </div>
-                </div>
 
-                <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.12)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px' }}>
-                  <div>
-                    <div style={{ color: '#94A3B8' }}>Security Badge:</div>
-                    <div style={{ fontWeight: 700, color: '#38BDF8', fontFamily: 'monospace' }}>
-                      {selectedVisitor.badgeNo || 'PENDING CHECK-IN'}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: selectedVisitor.ppeCleared.hardHat ? '#A7F3D0' : '#E2E8F0',
+                        background: selectedVisitor.ppeCleared.hardHat ? '#ECFDF5' : '#fff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      onClick={() => handleTogglePPE('hardHat')}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Industrial Hard Hat</div>
+                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Color: White (Visitor Tag)</div>
+                      </div>
+                      <span className={`badge ${selectedVisitor.ppeCleared.hardHat ? 'success' : 'neutral'}`}>
+                        {selectedVisitor.ppeCleared.hardHat ? '✓ Issued' : 'Pending'}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: selectedVisitor.ppeCleared.safetyGoggles ? '#A7F3D0' : '#E2E8F0',
+                        background: selectedVisitor.ppeCleared.safetyGoggles ? '#ECFDF5' : '#fff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      onClick={() => handleTogglePPE('safetyGoggles')}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Safety Eye Goggles</div>
+                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Anti-Chemical Impact</div>
+                      </div>
+                      <span className={`badge ${selectedVisitor.ppeCleared.safetyGoggles ? 'success' : 'neutral'}`}>
+                        {selectedVisitor.ppeCleared.safetyGoggles ? '✓ Issued' : 'Pending'}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: selectedVisitor.ppeCleared.safetyShoes ? '#A7F3D0' : '#E2E8F0',
+                        background: selectedVisitor.ppeCleared.safetyShoes ? '#ECFDF5' : '#fff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      onClick={() => handleTogglePPE('safetyShoes')}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Steel-Toe Boots</div>
+                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Static Dissipative Sole</div>
+                      </div>
+                      <span className={`badge ${selectedVisitor.ppeCleared.safetyShoes ? 'success' : 'neutral'}`}>
+                        {selectedVisitor.ppeCleared.safetyShoes ? '✓ Issued' : 'Pending'}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: selectedVisitor.ppeCleared.hiVisVest ? '#A7F3D0' : '#E2E8F0',
+                        background: selectedVisitor.ppeCleared.hiVisVest ? '#ECFDF5' : '#fff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      onClick={() => handleTogglePPE('hiVisVest')}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Hi-Vis Safety Vest</div>
+                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Reflective Luminescent</div>
+                      </div>
+                      <span className={`badge ${selectedVisitor.ppeCleared.hiVisVest ? 'success' : 'neutral'}`}>
+                        {selectedVisitor.ppeCleared.hiVisVest ? '✓ Issued' : 'Pending'}
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: selectedVisitor.ppeCleared.h2sBriefing ? '#A7F3D0' : '#E2E8F0',
+                        background: selectedVisitor.ppeCleared.h2sBriefing ? '#ECFDF5' : '#fff',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                      onClick={() => handleTogglePPE('h2sBriefing')}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '12.5px' }}>H2S Toxic Gas Alarm Drill</div>
+                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Assembly Point #3 briefed</div>
+                      </div>
+                      <span className={`badge ${selectedVisitor.ppeCleared.h2sBriefing ? 'success' : 'neutral'}`}>
+                        {selectedVisitor.ppeCleared.h2sBriefing ? '✓ Briefed' : 'Pending'}
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <div style={{ color: '#94A3B8' }}>Gate Barrier Sensor:</div>
-                    <div style={{ fontWeight: 700, color: '#4ADE80' }}>
-                      {selectedVisitor.status === 'checked_in' ? '🟢 PERMITTED / INSIDE' : '⏳ READY FOR SCAN'}
+                </div>
+              )}
+
+              {/* ── TAB 3: ALPR VEHICLE ENTRY & GATE BARRIER ── */}
+              {cockpitSubTab === 'alpr' && (
+                <div style={{ padding: '24px' }}>
+                  <div className="guest-barrier-box">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                      <div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff' }}>
+                          ALPR SMART BARRIER GATE #1 — KERANIGANJ MAIN PERIMETER
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                          Camera Resolution: 4K UHD 60fps • Neural License Plate Match Algorithm
+                        </div>
+                      </div>
+                      <span className="badge success">
+                        SENSOR ONLINE
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px', padding: '20px 0' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '6px' }}>
+                          RECOGNIZED NUMBER PLATE
+                        </div>
+                        <div style={{ background: '#F8FAFC', color: '#0F172A', border: '3px solid #3B82F6', padding: '8px 24px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '18px', fontWeight: 900, letterSpacing: '2px' }}>
+                          {selectedVisitor.vehiclePlate}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#34D399', fontWeight: 700, marginTop: '6px' }}>
+                          ✓ Plate Matched Pre-Registration (Confidence: 99.4%)
+                        </div>
+                      </div>
+
+                      {/* Visual Barrier Arm Animation */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '10px' }}>
+                          BOOM BARRIER GATE STATUS
+                        </div>
+                        <div style={{ width: '40px', height: '60px', background: '#334155', borderRadius: '6px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div className={`guest-barrier-arm ${barrierOpen ? 'open' : ''}`} />
+                        </div>
+                        <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 800, color: barrierOpen ? '#34D399' : '#EF4444' }}>
+                          {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (CLOSED)'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+                      <button
+                        className="btn-gold"
+                        style={{ padding: '8px 24px', fontWeight: 800 }}
+                        onClick={handleSimulateBarrier}
+                      >
+                        <Car size={16} />
+                        {t('Trigger Simulated Gate Barrier Open', 'গেট বেরিয়ার খোলার সিমুলেশন চালান', lang)}
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Detailed Metadata Grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginBottom: '16px', fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Host Officer:</span>
-                  <strong>{selectedVisitor.hostEmployee} ({selectedVisitor.hostDept})</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Vehicle ALPR Entry:</span>
-                  <code style={{ fontSize: '11px', color: 'var(--brand-slate-800)' }}>{selectedVisitor.vehiclePlate || 'Pedestrian / Escort Pool'}</code>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Safety Induction NDA:</span>
-                  <span style={{ color: '#059669', fontWeight: 600 }}>✓ Verified & Signed</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Contact Phone:</span>
-                  <span>{selectedVisitor.phone || '+880 1711-000000'}</span>
-                </div>
-              </div>
+              {/* ── TAB 4: PERMITTED FACILITY ZONES ── */}
+              {cockpitSubTab === 'zones' && (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, marginBottom: '12px', color: 'var(--brand-slate-800)' }}>
+                    SECURITY CLEARANCE ACCESS MATRIX FOR {selectedVisitor.name.toUpperCase()}
+                  </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {selectedVisitor.status === 'pre_registered' ? (
-                  <button
-                    className="btn-primary"
-                    style={{ flex: 1.5, justifyContent: 'center', padding: '8px 12px', fontSize: '12px' }}
-                    onClick={() => handleCheckIn(selectedVisitor.id)}
-                  >
-                    <UserCheck size={14} /> {t('Check-In & Issue Badge', 'চেক-ইন ও ব্যাজ প্রদান', lang)}
-                  </button>
-                ) : selectedVisitor.status === 'checked_in' ? (
-                  <button
-                    className="btn-outline-danger"
-                    style={{ flex: 1.5, justifyContent: 'center', padding: '8px 12px', fontSize: '12px' }}
-                    onClick={() => handleCheckOut(selectedVisitor.id)}
-                  >
-                    <Clock size={14} /> {t('Check-Out & Surrender', 'চেক-আউট ও পাস ফেরত', lang)}
-                  </button>
-                ) : (
-                  <button
-                    className="btn-outline"
-                    style={{ flex: 1.5, justifyContent: 'center', padding: '8px 12px', fontSize: '12px' }}
-                    disabled
-                  >
-                    <CheckCircle size={14} /> {t('Visit Completed', 'সাক্ষাৎ সম্পন্ন', lang)}
-                  </button>
-                )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {selectedVisitor.permittedZones.map((zone, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '12px 16px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--brand-slate-200)',
+                          background: '#fff',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span className={`guest-zone-tag ${zone.level}`}>
+                            {zone.level === 'green' ? '🟢 GREEN ZONE' : zone.level === 'yellow' ? '🟡 YELLOW ZONE' : '🔴 RED ZONE (HIGH HAZARD)'}
+                          </span>
+                          <div>
+                            <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                              {zone.name}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                              Zone Code: {zone.zoneId}
+                            </div>
+                          </div>
+                        </div>
 
-                <button
-                  className="btn-outline"
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                  onClick={() => {
-                    showToast(t(`Digital Gate Pass slip printed for ${selectedVisitor.name}.`, `গেট পাস প্রিন্ট সম্পন্ন হয়েছে।`, lang), 'info');
-                  }}
-                  title="Print Gate Slip"
-                >
-                  <Printer size={13} /> {t('Print Slip', 'প্রিন্ট', lang)}
-                </button>
-
-                <button
-                  className="btn-outline"
-                  style={{ fontSize: '12px', padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                  onClick={() => {
-                    showToast(t(`Encrypted QR Gate Pass dispatched via SMS to ${selectedVisitor.phone || 'visitor mobile'}.`, `মোবাইলে কিউআর গেট পাস প্রেরণ সম্পন্ন।`, lang), 'success');
-                  }}
-                  title="Dispatch QR via SMS/WhatsApp"
-                >
-                  <Send size={13} /> {t('SMS Pass', 'এসএমএস', lang)}
-                </button>
-              </div>
+                        <div>
+                          {zone.escortRequired ? (
+                            <span className="badge danger" style={{ fontSize: '10.5px' }}>
+                              ⚠️ Mandatory Security Officer Escort
+                            </span>
+                          ) : (
+                            <span className="badge success" style={{ fontSize: '10.5px' }}>
+                              ✓ Unaccompanied Movement Permitted
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="card" style={{ padding: '30px', textAlign: 'center', color: 'var(--brand-slate-400)' }}>
-            <Users size={32} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-            <p style={{ margin: 0, fontSize: '13px' }}>Select any visitor from the manifest to inspect digital credential.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* ─── PRE-REGISTER GUEST MODAL ─── */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* 4. MODALS (Pre-Register, ID Badge Print, ALPR Scanner, Muster List) */}
+      {/* ─────────────────────────────────────────────────────────────────── */}
+
+      {/* Pre-Register Guest Modal */}
       {showRegisterModal && (
-        <div className="modal-backdrop" onClick={() => setShowRegisterModal(false)}>
-          <div className="modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-bg" onClick={() => setShowRegisterModal(false)}>
+          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '18px' }}>📝</span>
+                <span style={{ fontSize: '20px' }}>🎫</span>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                    {t('Pre-Register Guest / Official Delegation', 'অতিথি বা প্রতিনিধিদল পূর্ব-নিবন্ধন', lang)}
+                    {t('Pre-Register Official Guest / Inspection Delegation', 'অতিথি বা প্রতিনিধিদল পূর্ব-নিবন্ধন', lang)}
                   </h3>
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
                     {t('Generates encrypted QR digital gate pass for ALPR sensor & security gates', 'স্বয়ংক্রিয় কিউআর গেট পাস ও নম্বরপ্লেট এন্ট্রি প্রস্তুত হবে', lang)}
                   </div>
                 </div>
               </div>
-              <button className="btn-link-plain" onClick={() => setShowRegisterModal(false)}>
-                <X size={18} />
-              </button>
+              <button className="modal-close" onClick={() => setShowRegisterModal(false)}>×</button>
             </div>
 
             <form onSubmit={handleRegister}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div className="responsive-col-2-eq">
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Full Name of Guest', 'অতিথির পূর্ণ নাম', lang)} *</label>
+              <div className="modal-body">
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Guest Full Name', 'অতিথির পূর্ণ নাম', lang)} *</label>
                     <input
-                      className="form-input"
+                      type="text"
                       placeholder="e.g. Dr. Mohammad Rafiqul Islam"
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
                       required
                     />
                   </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Organization / Government Agency', 'প্রতিষ্ঠান বা সরকারি সংস্থা', lang)} *</label>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Organization / Government Agency', 'সংস্থা বা প্রতিষ্ঠান', lang)} *</label>
                     <input
-                      className="form-input"
-                      placeholder="e.g. Directorate of Explosives / Axens France"
+                      type="text"
+                      placeholder="e.g. Roads & Highways Dept / Axens France"
                       value={formOrg}
                       onChange={(e) => setFormOrg(e.target.value)}
                       required
@@ -759,53 +1474,62 @@ export default function GuestView({ role, lang }: ViewProps) {
                   </div>
                 </div>
 
-                <div className="responsive-col-3">
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Category', 'শ্রেণি', lang)}</label>
-                    <select
-                      className="form-input"
-                      value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value as any)}
-                    >
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Official Designation', 'দাপ্তরিক পদবি', lang)}</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Executive Engineer / Technical Director"
+                      value={formDesignation}
+                      onChange={(e) => setFormDesignation(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Visitor Category', 'অতিথির শ্রেণি', lang)}</label>
+                    <select value={formCategory} onChange={(e) => setFormCategory(e.target.value as any)}>
+                      <option value="client">🤝 Commercial Client / Contractor</option>
                       <option value="vip">👑 VIP Dignitary / Board Guest</option>
                       <option value="govt">🏛️ Government Regulatory Inspector</option>
                       <option value="vendor">🔧 Technical Vendor / Specialist</option>
                       <option value="regular">Regular Visitor / Business Meeting</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Host Employee', 'স্বাগতিক কর্মকর্তা', lang)}</label>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Target Facility', 'পরিদর্শনের শাখা', lang)}</label>
+                    <select value={formFacility} onChange={(e) => setFormFacility(e.target.value as any)}>
+                      <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
+                      <option value="Keraniganj Bitumen Refinery">Keraniganj Bitumen Refinery Complex</option>
+                      <option value="Chittagong Patenga Terminal">Chittagong Patenga Terminal Office</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Host Employee', 'স্বাগতিক কর্মকর্তা', lang)}</label>
                     <input
-                      className="form-input"
-                      placeholder="e.g. Engr. Harunur Rashid"
+                      type="text"
                       value={formHost}
                       onChange={(e) => setFormHost(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Expected Time', 'প্রত্যাশিত সময়', lang)}</label>
-                    <input
-                      className="form-input"
-                      value={formTime}
-                      onChange={(e) => setFormTime(e.target.value)}
+                      placeholder="e.g. Tanvir Ahmed (Sales)"
                     />
                   </div>
                 </div>
 
-                <div className="responsive-col-2-eq">
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Vehicle Plate (for ALPR barrier)', 'গাড়ির নম্বরপ্লেট', lang)}</label>
+                <div className="form-row">
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Vehicle Plate (for ALPR barrier)', 'গাড়ির নম্বরপ্লেট (ALPR)', lang)}</label>
                     <input
-                      className="form-input"
+                      type="text"
                       placeholder="e.g. DHAKA-METRO-GHA-11-9042"
                       value={formVehicle}
                       onChange={(e) => setFormVehicle(e.target.value)}
                     />
                   </div>
-                  <div>
-                    <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Mobile Phone (for QR SMS)', 'মোবাইল নম্বর', lang)}</label>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label>{t('Mobile Number (for QR Pass SMS)', 'মোবাইল নম্বর', lang)}</label>
                     <input
-                      className="form-input"
+                      type="text"
                       placeholder="+880 1711-xxxxxx"
                       value={formPhone}
                       onChange={(e) => setFormPhone(e.target.value)}
@@ -813,12 +1537,11 @@ export default function GuestView({ role, lang }: ViewProps) {
                   </div>
                 </div>
 
-                <div>
-                  <label className="form-label" style={{ fontSize: '11.5px', fontWeight: 600 }}>{t('Official Purpose of Visit', 'পরিদর্শনের দাপ্তরিক উদ্দেশ্য', lang)} *</label>
+                <div className="form-group">
+                  <label>{t('Official Purpose of Visit', 'পরিদর্শনের দাপ্তরিক উদ্দেশ্য', lang)} *</label>
                   <textarea
-                    className="form-input"
                     rows={2}
-                    placeholder="e.g. Statutory annual inspection of bitumen storage spheres and safety valves..."
+                    placeholder="Specify meeting agenda, tender docket review, technical inspection..."
                     value={formPurpose}
                     onChange={(e) => setFormPurpose(e.target.value)}
                     required
@@ -826,15 +1549,261 @@ export default function GuestView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div className="modal-ft" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button type="button" className="btn-outline" onClick={() => setShowRegisterModal(false)}>
+              <div className="modal-ft">
+                <button type="button" className="btn-sm-ghost" onClick={() => setShowRegisterModal(false)}>
                   {t('Cancel', 'বাতিল', lang)}
                 </button>
                 <button type="submit" className="btn-primary" style={{ background: 'var(--brand-crimson)' }}>
-                  <QrCode size={14} /> {t('Issue Digital QR Pass', 'ডিজিটাল কিউআর পাস ইস্যু করুন', lang)}
+                  <QrCode size={14} />
+                  {t('Issue Digital QR Pass', 'ডিজিটাল কিউআর পাস ইস্যু করুন', lang)}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Official Security Visitor Badge Print Slip Modal */}
+      {showGatePassModal && selectedVisitor && (
+        <div className="modal-bg" onClick={() => setShowGatePassModal(false)}>
+          <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0 }}>
+                  {t('Official Gate Security Visitor Badge Slip', 'অফিসিয়াল গেট সিকিউরিটি ভিজিটর ব্যাজ', lang)}
+                </h3>
+                <div style={{ fontSize: '11px', color: '#94A3B8' }}>Pass ID: {selectedVisitor.id}</div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowGatePassModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <div style={{ border: '2px solid #0F172A', padding: '18px', borderRadius: '8px', background: '#FFF' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid #0F172A', paddingBottom: '10px', marginBottom: '14px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--brand-crimson)' }}>
+                    BASHUNDHARA OIL AND GAS COMPANY LIMITED
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Corporate Security & Refinery Gate Control Division</div>
+                  <div style={{ fontSize: '12px', fontWeight: 900, marginTop: '4px', letterSpacing: '1px' }}>
+                    OFFICIAL VISITOR PASS · {selectedVisitor.category.toUpperCase()} CLEARANCE
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                  <div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#0F172A' }}>
+                      {selectedVisitor.name}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                      {selectedVisitor.designation} · {selectedVisitor.organization}
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '6px' }}>
+                      Host Officer: <strong>{selectedVisitor.hostEmployee}</strong> ({selectedVisitor.hostDept})
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: '#64748B' }}>
+                      Security Badge Number: <strong style={{ fontFamily: 'monospace', color: '#0284C7' }}>{selectedVisitor.badgeNo || 'BDG-01'}</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <QrCode size={70} color="#000" />
+                    <div style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 700, marginTop: '2px' }}>
+                      {selectedVisitor.id}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '10px', fontSize: '11.5px', color: '#475569' }}>
+                  <div><strong>Permitted Zones:</strong> {selectedVisitor.permittedZones.map(z => z.name).join(', ')}</div>
+                  <div style={{ marginTop: '2px' }}><strong>Vehicle Plate:</strong> {selectedVisitor.vehiclePlate}</div>
+                  <div style={{ marginTop: '2px' }}><strong>HSE Safety Status:</strong> PPE Allotment Verified • Assembly Point #3</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowGatePassModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  showToast(t(`Visitor Badge slip sent to gate printer.`, `ভিজিটর স্লিপ প্রিন্টারে পাঠানো হয়েছে।`, lang), 'success');
+                  setShowGatePassModal(false);
+                }}
+              >
+                <Printer size={14} />
+                {t('Print Security Badge', 'ব্যাজ প্রিন্ট করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Emergency Evacuation Muster List Modal */}
+      {showMusterModal && (
+        <div className="modal-bg" onClick={() => setShowMusterModal(false)}>
+          <div className="modal" style={{ maxWidth: '720px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Flame size={20} color="#FCA5A5" />
+                <div>
+                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+                    {t('Emergency Evacuation Muster List (HSE Roll-Call)', 'জরুরি ইভাকুয়েশন মাস্টার রোল-কল তালিকা', lang)}
+                  </h3>
+                  <div style={{ fontSize: '11px', color: '#FEE2E2' }}>
+                    Live count of all {stats.totalInside} external visitors currently on campus
+                  </div>
+                </div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowMusterModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <div style={{ background: '#FEF2F2', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: '#991B1B', marginBottom: '14px' }}>
+                🚨 In the event of a plant emergency or fire drill, all safety wardens must verify visitor headcounts at <strong>Evacuation Assembly Point #3 (Main Security Gate Ground)</strong>.
+              </div>
+
+              <div className="table-responsive">
+                <table className="fleet-table">
+                  <thead>
+                    <tr>
+                      <th>Guest Name</th>
+                      <th>Organization</th>
+                      <th>Facility & Location</th>
+                      <th>Host Officer</th>
+                      <th>Contact Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visitors.filter(v => v.status === 'checked_in').map(v => (
+                      <tr key={v.id}>
+                        <td><strong>{v.name}</strong></td>
+                        <td>{v.organization}</td>
+                        <td><span className="badge info">{v.facility.split(',')[0]}</span></td>
+                        <td>{v.hostEmployee}</td>
+                        <td><a href={`tel:${v.phone}`}>{v.phone}</a></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowMusterModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+              <button
+                className="btn-primary"
+                style={{ background: '#991B1B' }}
+                onClick={() => {
+                  showToast(t('HSE Evacuation Muster PDF generated for Incident Commander.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
+                  setShowMusterModal(false);
+                }}
+              >
+                <Download size={14} />
+                {t('Export Muster Roll-Call PDF', 'মাস্টার শিট ডাউনলোড', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ALPR Camera & Gate Scanner Simulator Modal */}
+      {showALPRModal && (
+        <div className="modal-bg" onClick={() => setShowALPRModal(false)}>
+          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Car size={18} color="#38BDF8" />
+                <h3 style={{ color: '#fff', margin: 0 }}>
+                  {t('ALPR Gate Barrier Camera Live Telemetry', 'গেট ক্যামেরা ও বেরিয়ার লাইভ ফিড', lang)}
+                </h3>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowALPRModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <div style={{ border: '2px solid #334155', borderRadius: '8px', background: '#090F1E', padding: '20px', color: '#fff', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94A3B8', marginBottom: '14px' }}>
+                  <span>CAM-01: KERANIGANJ GATE 1 INWARD</span>
+                  <span style={{ color: '#34D399', fontWeight: 800 }}>● 60 FPS UHD LIVE</span>
+                </div>
+
+                <div style={{ border: '2px dashed #3B82F6', borderRadius: '8px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.05)', position: 'relative' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: '#38BDF8' }}>
+                    [ DHAKA-METRO-GHA-11-9042 ]
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+                    Target: Dr. Shahabuddin Ahmed (Directorate of Explosives)
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#34D399', fontWeight: 700, marginTop: '2px' }}>
+                    ALPR MATCH CONFIRMED (99.4%) · PRE-REGISTERED
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>Barrier Boom Status:</div>
+                    <div style={{ fontWeight: 800, color: barrierOpen ? '#34D399' : '#EF4444' }}>
+                      {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (LOCKED)'}
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn-gold"
+                    style={{ fontWeight: 800 }}
+                    onClick={handleSimulateBarrier}
+                  >
+                    <Car size={14} />
+                    {t('Raise Gate Barrier', 'বেরিয়ার উন্মুক্ত করুন', lang)}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowALPRModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SMS QR Pass Dispatch Modal */}
+      {showSMSModal && selectedVisitor && (
+        <div className="modal-bg" onClick={() => setShowSMSModal(false)}>
+          <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#059669', color: '#fff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Smartphone size={18} color="#fff" />
+                <h3 style={{ color: '#fff', margin: 0 }}>
+                  {t('Send Digital QR Pass via SMS / WhatsApp', 'এসএমএস/হোয়াটসঅ্যাপে কিউআর পাস প্রেরণ', lang)}
+                </h3>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowSMSModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginBottom: '12px' }}>
+                Recipient Phone: <strong>{selectedVisitor.phone}</strong>
+              </div>
+
+              <div style={{ background: '#DCF8C6', border: '1px solid #C4E2B1', borderRadius: '8px', padding: '14px', fontSize: '12px', color: '#075E54', lineHeight: 1.5 }}>
+                "Dear {selectedVisitor.name}, your Digital Gate Pass for Bashundhara Oil & Gas Co. Ltd. is confirmed! Pass ID: {selectedVisitor.id}. Click link to view your QR Pass & Google Maps Gate directions: https://oneops.bashundhara.com/pass/{selectedVisitor.id}"
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowSMSModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button
+                className="btn-primary"
+                style={{ background: '#059669' }}
+                onClick={() => {
+                  showToast(t(`Digital QR Gate Pass dispatched to ${selectedVisitor.phone}!`, `ডিজিটাল পাস সফলভাবে পাঠানো হয়েছে!`, lang), 'success');
+                  setShowSMSModal(false);
+                }}
+              >
+                <Send size={14} />
+                {t('Dispatch Pass to Phone', 'মোবাইলে প্রেরণ করুন', lang)}
+              </button>
+            </div>
           </div>
         </div>
       )}

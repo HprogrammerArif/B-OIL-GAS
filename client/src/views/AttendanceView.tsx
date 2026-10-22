@@ -372,26 +372,31 @@ export default function AttendanceView({ role, lang }: ViewProps) {
 
       {/* Biometric Face Verification Viewfinder Modal */}
       {showFaceModal && (
-        <div className="ic-call-overlay">
-          <div className="ic-call-modal" style={{ width: '480px', maxWidth: '92vw', background: '#0F172A', color: '#fff' }}>
-            <div className="ic-call-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#38BDF8', fontSize: '11px', fontWeight: 800 }}>
-                <Camera size={14} />
-                <span>AI FACIAL LIVENESS & BIOMETRIC VERIFIER</span>
+        <div className="app-modal-overlay" onClick={() => setShowFaceModal(false)}>
+          <div className="app-modal-dialog" style={{ width: '480px', maxWidth: '92vw' }} onClick={e => e.stopPropagation()}>
+            <div className="app-modal-header">
+              <div className="app-modal-header-left">
+                <div className="app-modal-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#0284C7' }}>
+                  <Camera size={18} />
+                </div>
+                <div>
+                  <h3 className="app-modal-title">{t('AI Facial Biometric Liveness Verification', 'এআই ফেসিয়াল বায়োমেট্রিক হাজিরা যাচাই', lang)}</h3>
+                  <div className="app-modal-subtitle">{t('BOGCL Keraniganj Plant Geofence Security', 'কেরানীগঞ্জ রিফাইনারি জিওফেন্স নিরাপত্তা', lang)}</div>
+                </div>
               </div>
-              <button className="ic-call-close" onClick={() => setShowFaceModal(false)}>
+              <button className="app-modal-close" onClick={() => setShowFaceModal(false)} aria-label="Close">
                 <X size={16} />
               </button>
             </div>
 
-            <div style={{ padding: '30px 20px', textAlign: 'center' }}>
+            <div className="app-modal-body" style={{ padding: '24px 20px', textAlign: 'center' }}>
               {/* Viewfinder Circle */}
               <div style={{
-                width: '180px',
-                height: '180px',
+                width: '170px',
+                height: '170px',
                 borderRadius: '50%',
-                margin: '0 auto 20px',
-                border: faceVerified ? '3px solid #10B981' : '3px dashed #38BDF8',
+                margin: '0 auto 18px',
+                border: faceVerified ? '3px solid #10B981' : '3px dashed #0284C7',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
@@ -399,7 +404,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 background: 'rgba(56, 189, 248, 0.05)',
                 overflow: 'hidden',
               }}>
-                <div style={{ fontSize: '64px' }}>👤</div>
+                <div style={{ fontSize: '56px' }}>👤</div>
                 {faceScanning && (
                   <div style={{
                     position: 'absolute',
@@ -407,8 +412,8 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                     left: 0,
                     right: 0,
                     height: '2px',
-                    background: '#38BDF8',
-                    boxShadow: '0 0 12px #38BDF8',
+                    background: '#0284C7',
+                    boxShadow: '0 0 12px #0284C7',
                     animation: 'recWave 1.2s infinite alternate',
                   }} />
                 )}
@@ -419,16 +424,16 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 )}
               </div>
 
-              <h4 style={{ fontSize: '16px', fontWeight: 800, margin: '0 0 6px 0' }}>
-                {faceScanning ? 'Scanning Facial Geometry...' : 'Biometric Match: 99.4% Verified'}
+              <h4 style={{ fontSize: '15px', fontWeight: 800, margin: '0 0 6px 0', color: 'var(--brand-slate-900)' }}>
+                {faceScanning ? t('Scanning Facial Geometry...', 'মুখমন্ডলের জ্যামিতি স্ক্যান করা হচ্ছে...', lang) : t('Biometric Match: 99.4% Verified', 'বায়োমেট্রিক ম্যাচ: ৯৯.৪% নিশ্চিত', lang)}
               </h4>
-              <p style={{ fontSize: '11.5px', color: '#94A3B8', margin: 0 }}>
-                {faceScanning ? 'Please look directly at camera inside Keraniganj Plant geofence.' : 'Tanvir Ahmed (ID: BOGCL-1049) authenticated successfully.'}
+              <p style={{ fontSize: '12px', color: 'var(--brand-slate-500)', margin: 0 }}>
+                {faceScanning ? t('Please look directly at camera inside Keraniganj Plant geofence.', 'অনুগ্রহ করে ক্যামেরার দিকে তাকান।', lang) : t('Tanvir Ahmed (ID: BOGCL-1049) authenticated successfully.', 'তানভীর আহমেদ (আইডি: BOGCL-1049) যাচাই সম্পন্ন হয়েছে।', lang)}
               </p>
             </div>
 
-            <div style={{ padding: '14px 20px', background: 'rgba(0,0,0,0.3)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button className="btn-outline" onClick={() => setShowFaceModal(false)}>
+            <div className="app-modal-footer">
+              <button className="btn-sm-ghost" onClick={() => setShowFaceModal(false)}>
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button

@@ -866,19 +866,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
       {/* Certificate of Completion Modal */}
       {showCertModal && (
-        <div className="ic-call-overlay">
-          <div className="ic-call-modal" style={{ maxWidth: '600px', width: '95vw', background: 'var(--brand-modal-bg)', color: 'var(--brand-slate-900)' }}>
-            <div className="ic-call-header" style={{ borderBottomColor: 'var(--brand-slate-200)', background: 'var(--brand-slate-100)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={18} color="#059669" />
-                <strong style={{ fontSize: '13px' }}>BASHUNDHARA CERTIFICATE OF EXECUTION</strong>
+        <div className="app-modal-overlay" onClick={() => setShowCertModal(false)}>
+          <div className="app-modal-dialog" style={{ maxWidth: '620px', width: '95vw' }} onClick={e => e.stopPropagation()}>
+            <div className="app-modal-header">
+              <div className="app-modal-header-left">
+                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <h3 className="app-modal-title">{t('Bashundhara Certificate of Execution', 'বসুন্ধরা এক্সিকিউশন সার্টিফিকেট', lang)}</h3>
+                  <div className="app-modal-subtitle">{t('Cryptographic SHA-256 Immutable Audit Trail Record', 'ক্রিপ্টোগ্রাফিক ডিজিটাল অডিট রেকর্ড', lang)}</div>
+                </div>
               </div>
-              <button className="ic-call-close" onClick={() => setShowCertModal(false)}>
+              <button className="app-modal-close" onClick={() => setShowCertModal(false)} aria-label="Close">
                 <X size={16} />
               </button>
             </div>
 
-            <div style={{ padding: '24px', textAlign: 'center' }}>
+            <div className="app-modal-body">
               <div style={{ border: '2px solid #D4AF37', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#B45309', fontWeight: 800 }}>
                   IMMUTABLE AUDIT TRAIL RECORD
@@ -915,8 +920,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            <div style={{ padding: '14px 20px', background: 'var(--brand-slate-50)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button className="btn-outline" onClick={() => setShowCertModal(false)}>
+            <div className="app-modal-footer">
+              <button className="btn-sm-ghost" onClick={() => setShowCertModal(false)}>
                 {t('Close', 'বন্ধ করুন', lang)}
               </button>
               <button
