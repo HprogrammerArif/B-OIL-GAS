@@ -167,48 +167,50 @@ export default function WorkforceView({ role, lang }: ViewProps) {
           </div>
 
           {/* Search & Department Filters */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'flex-end', minWidth: '320px' }}>
-            <div style={{ position: 'relative', width: '220px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--brand-slate-400)' }} />
+          <div className="workforce-filter-row">
+            <div className="workforce-search-wrap">
+              <Search size={14} className="workforce-search-icon" />
               <input
                 type="text"
                 placeholder={t('Search staff, ID, SAP...', 'খুঁজুন...', lang)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '30px', height: '34px', fontSize: '12px' }}
+                className="workforce-search-input"
               />
             </div>
 
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              style={{ height: '34px', fontSize: '11.5px', width: '160px' }}
-            >
-              <option value="ALL">All Departments</option>
-              <option value="Plant Operations">Plant Operations</option>
-              <option value="Sales & Distribution">Sales & Distribution</option>
-              <option value="Finance & Accounts">Finance & Accounts</option>
-              <option value="Transport & Logistics">Transport & Logistics</option>
-              <option value="HSE & Compliance">HSE & Compliance</option>
-              <option value="Human Resources">Human Resources</option>
-              <option value="Security Administration">Security Admin</option>
-            </select>
+            <div className="workforce-select-group">
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="workforce-select"
+              >
+                <option value="ALL">All Departments</option>
+                <option value="Plant Operations">Plant Operations</option>
+                <option value="Sales & Distribution">Sales & Distribution</option>
+                <option value="Finance & Accounts">Finance & Accounts</option>
+                <option value="Transport & Logistics">Transport & Logistics</option>
+                <option value="HSE & Compliance">HSE & Compliance</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Security Administration">Security Admin</option>
+              </select>
 
-            <select
-              value={selectedSite}
-              onChange={(e) => setSelectedSite(e.target.value)}
-              style={{ height: '34px', fontSize: '11.5px', width: '150px' }}
-            >
-              <option value="ALL">All Facilities</option>
-              <option value="PLANT_KERANIGANJ">Keraniganj Refinery</option>
-              <option value="HQ_BARIDHARA">Baridhara HQ</option>
-              <option value="TERMINAL_CTG">Chattogram Port</option>
-            </select>
+              <select
+                value={selectedSite}
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="workforce-select"
+              >
+                <option value="ALL">All Facilities</option>
+                <option value="PLANT_KERANIGANJ">Keraniganj Refinery</option>
+                <option value="HQ_BARIDHARA">Baridhara HQ</option>
+                <option value="TERMINAL_CTG">Chattogram Port</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Workforce Table */}
-        <div className="card-body" style={{ padding: 0 }}>
+        {/* 1. Desktop & Tablet Table View */}
+        <div className="card-body workforce-desktop-table" style={{ padding: 0 }}>
           <div className="table-responsive">
             <table className="data-table">
             <thead>
@@ -326,6 +328,78 @@ export default function WorkforceView({ role, lang }: ViewProps) {
             </tbody>
           </table>
           </div>
+        </div>
+
+        {/* 2. Mobile Responsive Touch Cards */}
+        <div className="workforce-mobile-cards">
+          {displayedList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '24px', color: 'var(--brand-slate-400)' }}>
+              {t('No personnel found matching the specified filters.', 'কোনো কর্মচারী পাওয়া যায়নি।', lang)}
+            </div>
+          ) : (
+            displayedList.map((emp) => (
+              <div key={emp.id} className="workforce-card-item">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: emp.avatarColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
+                      {emp.initials}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>
+                        {emp.name}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                        {emp.designation} • <span style={{ color: 'var(--brand-crimson)', fontFamily: 'monospace', fontWeight: 700 }}>{emp.id}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    {emp.status === 'active' ? (
+                      <span className="badge success">Active Duty</span>
+                    ) : emp.status === 'on_leave' ? (
+                      <span className="badge warn">On Leave</span>
+                    ) : (
+                      <span className="badge danger">Offboarded</span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--brand-slate-100)', padding: '8px 10px', borderRadius: '6px', fontSize: '11.5px', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  <div><strong>Dept:</strong> {emp.dept} ({emp.reportingHOD.split(' ')[0]})</div>
+                  <div><strong>SAP:</strong> <span style={{ fontFamily: 'monospace' }}>{emp.sapPernr}</span> • 📞 {emp.phone}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--brand-slate-600)' }}>
+                    <MapPin size={11} color="var(--brand-crimson)" />
+                    <span>{emp.assignedSite === 'PLANT_KERANIGANJ' ? 'Keraniganj Refinery' : emp.assignedSite === 'HQ_BARIDHARA' ? 'Baridhara HQ' : 'Chattogram Terminal'}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '1px solid var(--brand-slate-200)' }}>
+                  <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                    {emp.status === 'offboarded' ? `Exit: ${emp.exitDate}` : `Joined: ${emp.joinDate}`}
+                  </span>
+                  {emp.status === 'active' ? (
+                    <button
+                      className="btn-outline-danger"
+                      style={{ fontSize: '11px', padding: '5px 12px' }}
+                      onClick={() => setSelectedEmployeeForExit(emp)}
+                    >
+                      <UserX size={12} />
+                      {t('Exit Clearance', 'ছাড়পত্র প্রক্রিয়া', lang)}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ fontSize: '11px', padding: '5px 12px' }}
+                      onClick={() => setSelectedEmployeeForExit(emp)}
+                    >
+                      <FileText size={12} />
+                      {t('Exit Dossier', 'নথিপত্র', lang)}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

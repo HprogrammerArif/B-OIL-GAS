@@ -867,7 +867,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       {/* Certificate of Completion Modal */}
       {showCertModal && (
         <div className="ic-call-overlay">
-          <div className="ic-call-modal" style={{ width: '600px', background: 'var(--brand-modal-bg)', color: 'var(--brand-slate-900)' }}>
+          <div className="ic-call-modal" style={{ maxWidth: '600px', width: '95vw', background: 'var(--brand-modal-bg)', color: 'var(--brand-slate-900)' }}>
             <div className="ic-call-header" style={{ borderBottomColor: 'var(--brand-slate-200)', background: 'var(--brand-slate-100)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <ShieldCheck size={18} color="#059669" />

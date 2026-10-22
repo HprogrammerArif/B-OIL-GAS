@@ -37,7 +37,7 @@ export default function BroadcastModal({ onClose }: { onClose: () => void }) {
             <textarea rows={4} value={body} onChange={e => setBody(e.target.value)} style={{ resize: 'vertical' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', gap: '12px 20px', marginBottom: '8px', flexWrap: 'wrap' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', fontSize: '12.5px' }}>
               <input type="checkbox" checked={ack} onChange={() => setAck(v => !v)} />
               Require Read Acknowledgement

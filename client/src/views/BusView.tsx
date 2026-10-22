@@ -332,7 +332,7 @@ export default function BusView({ role, lang }: ViewProps) {
             </div>
 
             {/* Legend */}
-            <div style={{ marginTop: '16px', display: 'flex', gap: '16px', justifyContent: 'center', fontSize: '11.5px' }}>
+            <div style={{ marginTop: '16px', display: 'flex', gap: '10px 16px', justifyContent: 'center', fontSize: '11.5px', flexWrap: 'wrap' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '12px', height: '12px', background: '#fff', border: '1px solid var(--brand-border)', borderRadius: '3px' }}></span>
                 {t('Occupied Staff', 'যাত্রী বরাদ্দ', lang)}
@@ -462,7 +462,7 @@ export default function BusView({ role, lang }: ViewProps) {
       {/* Digital Boarding Pass Modal */}
       {showQrModal && (
         <div className="ic-call-overlay">
-          <div className="ic-call-modal" style={{ width: '480px', background: '#0B132B', color: '#fff' }}>
+          <div className="ic-call-modal" style={{ maxWidth: '480px', width: '95vw', background: '#0B132B', color: '#fff' }}>
             <div className="ic-call-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#D4AF37', fontSize: '11px', fontWeight: 800 }}>
                 <QrCode size={14} />

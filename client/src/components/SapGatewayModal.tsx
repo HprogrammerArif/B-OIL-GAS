@@ -45,30 +45,30 @@ export default function SapGatewayModal({ onClose, lang }: SapGatewayModalProps)
             </h5>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                <div>
+              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <strong>SAP FI-CO (Financials & GL Ledger):</strong>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                     POST /sap/opu/odata/sap/API_FINANCIALDOCUMENT (Requisition GL-4102 Auto-Post)
                   </div>
                 </div>
                 <span className="badge success">Live Sync</span>
               </div>
 
-              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                <div>
+              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <strong>SAP PM / MM (Plant Maintenance & Materials):</strong>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                     GET /sap/opu/odata/sap/API_EQUIPMENT_STATUS (Tank Thickness & Safety Valves)
                   </div>
                 </div>
                 <span className="badge success">Live Sync</span>
               </div>
 
-              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                <div>
+              <div style={{ padding: '10px 14px', background: 'var(--brand-slate-100)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <strong>SAP SuccessFactors (HCM & Shift Payroll):</strong>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                     POST /sap/opu/odata/sap/API_TIME_RECORDING (Geofenced Punch In & Overtime)
                   </div>
                 </div>
