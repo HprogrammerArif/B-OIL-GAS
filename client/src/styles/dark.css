@@ -651,6 +651,48 @@
   background: #1E293B;
 }
 
+[data-theme="dark"] .parcel-kpi-card {
+  background: #0D162C;
+  border-color: #1E293B;
+}
+[data-theme="dark"] .parcel-kpi-card:hover {
+  border-color: #334155;
+  background: #111D3B;
+}
+[data-theme="dark"] .parcel-kpi-card.active {
+  background: linear-gradient(180deg, #111D3B 0%, #1A1325 100%);
+  border-color: #E11D48;
+}
+[data-theme="dark"] .parcel-kpi-val {
+  color: #F8FAFC;
+}
+[data-theme="dark"] .parcel-kpi-title {
+  color: #94A3B8;
+}
+[data-theme="dark"] .parcel-pill-tab {
+  background: #0D162C;
+  border-color: #1E293B;
+  color: #94A3B8;
+}
+[data-theme="dark"] .parcel-pill-tab:hover {
+  background: #1E293B;
+  color: #F8FAFC;
+}
+[data-theme="dark"] .parcel-pill-tab.active {
+  background: #3B82F6;
+  border-color: #3B82F6;
+  color: #FFF;
+}
+[data-theme="dark"] .parcel-pill-tab .tab-badge {
+  background: #1E293B;
+  color: #CBD5E1;
+}
+[data-theme="dark"] .tl-circle {
+  background: #0D162C;
+  border-color: #334155;
+  color: #94A3B8;
+}
+
 /* ─── UNIVERSAL CATCH-ALL FOR INLINE BRIGHT BACKGROUNDS IN DARK MODE ───────── */
 [data-theme="dark"] div[style*="background: #FFF"]:not([data-qr="true"]):not(.qr-box):not(.qr-code-wrap),
 [data-theme="dark"] div[style*="background: #fff"]:not([data-qr="true"]):not(.qr-box):not(.qr-code-wrap) {
