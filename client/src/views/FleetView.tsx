@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { ViewProps, t } from '../types';
 import { showToast } from '../App';
 import { useFleetStore, Driver, Vehicle, VehicleRequisition } from '../store/fleetStore';
@@ -7,21 +8,39 @@ import {
   Plus, Users, Navigation, QrCode, FileText, Sparkles, Award,
   Gauge, Radio, ShieldCheck, AlertTriangle, ArrowRight, Eye,
   Maximize2, Activity, Cpu, Check, Compass, PhoneCall, Zap,
-  UserCheck, Shield, Key, Calendar, Printer, Search, RotateCcw, UserPlus
+  UserCheck, Shield, Key, Calendar, Printer, Search, RotateCcw,
+  UserPlus, Star, ThumbsUp, X, ChevronRight, Share2, Phone,
+  AlertOctagon, RefreshCw, Filter, Layers, Download, CheckCircle2
 } from 'lucide-react';
 import RegisterVehicleModal from '../components/fleet/RegisterVehicleModal';
 import EnrollDriverModal from '../components/fleet/EnrollDriverModal';
 
 export default function FleetView({ role, lang }: ViewProps) {
-  const { drivers, vehicles, requisitions, addRequisition, assignRequisition, recordBreathalyzer } = useFleetStore();
+  const {
+    drivers,
+    vehicles,
+    requisitions,
+    addRequisition,
+    assignRequisition,
+    startTrip,
+    completeTrip,
+    rejectRequisition,
+    poolRequisitions,
+    recordBreathalyzer
+  } = useFleetStore();
 
-  // Active Tab for Admin/General: 'requisitions' | 'drivers' | 'telematics' | 'fuel'
+  // Strict Role-Based Access Control (RBAC)
   const isEmployee = role === 'employee';
-  const [activeTab, setActiveTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel'>(
-    isEmployee ? 'requisitions' : 'requisitions'
-  );
+  const isTransportAdmin = role === 'transport_admin' || role === 'plant_gm' || role === 'chairman';
 
-  // Selected telemetry vehicle
+  // Active Tab: Employees only have 'my_requisitions'. Admins have full module tabs.
+  const [activeAdminTab, setActiveAdminTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel' | 'gate_manifest'>('requisitions');
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'assigned' | 'in_transit' | 'completed'>('all');
+
+  // Selected telemetry vehicle (Admin only)
   const [selectedVehicleTelemetry, setSelectedVehicleTelemetry] = useState<Vehicle | null>(vehicles[4]);
 
   // Modals
@@ -30,7 +49,19 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [showEnrollDriverModal, setShowEnrollDriverModal] = useState(false);
   const [assigningReq, setAssigningReq] = useState<VehicleRequisition | null>(null);
   const [selectedTripPassReq, setSelectedTripPassReq] = useState<VehicleRequisition | null>(null);
+  const [trackingReq, setTrackingReq] = useState<VehicleRequisition | null>(null);
   const [showFuelModal, setShowFuelModal] = useState<Vehicle | null>(null);
+  const [showSmartPoolModal, setShowSmartPoolModal] = useState(false);
+  const [completingReq, setCompletingReq] = useState<VehicleRequisition | null>(null);
+  const [rejectingReq, setRejectingReq] = useState<VehicleRequisition | null>(null);
+  const [rejectReason, setRejectReason] = useState('All pool sedans occupied for emergency refinery dispatch');
+
+  // Trip Completion Form State
+  const [endOdometer, setEndOdometer] = useState<number>(42430);
+  const [tripRating, setTripRating] = useState<number>(5);
+  const [tripFeedback, setTripFeedback] = useState<string>('Punctual, courteous driver and smooth highway transit.');
+
+  // Fuel Modal State
   const [fuelLiters, setFuelLiters] = useState('65');
   const [fuelStation, setFuelStation] = useState('Bashundhara Filling Station, 300 Feet Road');
 
@@ -42,7 +73,7 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [returnTime, setReturnTime] = useState('Today, 06:30 PM');
   const [requiredCapacity, setRequiredCapacity] = useState<'sedan_4' | 'microbus_7' | 'pickup_4x4' | 'tanker_heavy'>('sedan_4');
   const [passengersCount, setPassengersCount] = useState(2);
-  const [passengerNames, setPassengerNames] = useState(role === 'employee' ? 'Tanvir Ahmed, Engr. Tariq' : 'Executive Team');
+  const [passengerNames, setPassengerNames] = useState(isEmployee ? 'Tanvir Ahmed, Engr. Tariq Ahmed' : 'Executive Team');
   const [purpose, setPurpose] = useState('Official refinery site inspection and delivery of asphalt laboratory batch dossiers');
   const [costCenter, setCostCenter] = useState('CC-SALES-DHAKA-102');
 
@@ -50,25 +81,45 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [assignCarPlate, setAssignCarPlate] = useState(vehicles.find(v => v.status === 'available')?.plate || vehicles[0].plate);
   const [assignDriverId, setAssignDriverId] = useState(drivers.find(d => d.status === 'available')?.id || drivers[0].id);
 
-  // Smart Pooling Action
-  const handleSmartPoolMerge = () => {
-    showToast(t(
-      'Smart Pool Activated! Matching requisitions merged into Toyota HiAce (CHA-53-4102). Estimated savings: ৳1,850 fuel + 1 vehicle freed.',
-      'স্মার্ট পুলিং সফল! আবেদনসমূহ টয়োটা হাইএইস-এ মার্জ করা হয়েছে। আনুমানিক সাশ্রয়: ১,৮৫০ টাকা ও ১টি অতিরিক্ত গাড়ি উপলব্ধ।',
-      lang
-    ), 'gold');
-  };
+  // Filtered requisitions list
+  const filteredRequisitions = useMemo(() => {
+    return requisitions.filter(r => {
+      // Role scope: in staff perspective, strictly show employee's own requisitions
+      if (isEmployee) {
+        const isMine = r.requesterName.includes('Tanvir') || r.id === 'REQ-2026-441';
+        if (!isMine) return false;
+      }
+
+      // Status filter
+      if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+
+      // Query filter
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        return (
+          r.id.toLowerCase().includes(q) ||
+          r.requesterName.toLowerCase().includes(q) ||
+          r.dept.toLowerCase().includes(q) ||
+          r.from.toLowerCase().includes(q) ||
+          r.to.toLowerCase().includes(q) ||
+          (r.assignedVehiclePlate && r.assignedVehiclePlate.toLowerCase().includes(q)) ||
+          (r.assignedDriverName && r.assignedDriverName.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+  }, [requisitions, statusFilter, searchQuery, isEmployee]);
 
   // Submit Requisition Handler
   const handleCreateRequisition = () => {
-    if (!purpose) {
+    if (!purpose.trim()) {
       showToast(t('Please specify the official business purpose.', 'অনুগ্রহ করে দাপ্তরিক কাজের উদ্দেশ্য লিখুন।', lang), 'info');
       return;
     }
     const created = addRequisition({
-      requesterName: role === 'employee' ? 'Tanvir Ahmed' : role === 'plant_gm' ? 'Engr. Harunur Rashid' : 'Md. Shafiqul Islam',
-      requesterRole: role === 'employee' ? 'Sr. Sales & Distribution Specialist' : 'Department Lead',
-      dept: role === 'employee' ? 'Sales & Distribution' : 'Plant Operations',
+      requesterName: isEmployee ? 'Tanvir Ahmed' : 'Engr. Harunur Rashid',
+      requesterRole: isEmployee ? 'Sr. Sales & Distribution Specialist' : 'Plant GM & Operations Lead',
+      dept: isEmployee ? 'Sales & Distribution' : 'Plant Operations',
       phone: '+880 1712-334455',
       from: fromLoc,
       to: toLoc,
@@ -83,22 +134,67 @@ export default function FleetView({ role, lang }: ViewProps) {
     });
     setShowNewRequisitionModal(false);
     showToast(t(
-      `Duty Travel Requisition ${created.id} submitted! Transferred to Transport Admin (Md. Kamruzzaman) for driver & vehicle assignment.`,
-      `যানবাহন রিকুইজিশন ${created.id} দাখিল সম্পন্ন! পরিবহন প্রশাসকের নিকট প্রেরিত হয়েছে।`,
+      `✓ Duty Travel Requisition ${created.id} submitted! Transferred to Transport Admin (Md. Kamruzzaman) for driver allocation.`,
+      `✓ যানবাহন রিকুইজিশন ${created.id} দাখিল সম্পন্ন! পরিবহন প্রশাসকের নিকট প্রেরিত হয়েছে।`,
       lang
     ), 'success');
   };
 
-  // Confirm Assignment
+  // Confirm Assignment (Admin only)
   const handleConfirmAssignment = () => {
     if (!assigningReq) return;
     assignRequisition(assigningReq.id, assignCarPlate, assignDriverId);
     showToast(t(
-      `✓ Vehicle ${assignCarPlate} & Driver assigned to Requisition ${assigningReq.id}! Digital Trip Challan Pass generated.`,
+      `✓ Vehicle ${assignCarPlate} & Driver allocated to Requisition ${assigningReq.id}! Digital Trip Challan Pass generated.`,
       `✓ গাড়ি ও চালক সফলভাবে বরাদ্দ করা হয়েছে! ডিজিটাল ট্রিপ পাস তৈরি সম্পন্ন।`,
       lang
     ), 'gold');
     setAssigningReq(null);
+  };
+
+  // Start Trip (Admin only)
+  const handleStartTripAction = (req: VehicleRequisition) => {
+    startTrip(req.id, 42350, '02:35 PM');
+    showToast(t(
+      `Trip ${req.id} started! Vehicle ${req.assignedVehiclePlate} cleared for highway transit (Odometer: 42,350 km).`,
+      `ট্রিপ ${req.id} যাত্রা শুরু করেছে! ওডোমিটার: ৪২,৩৫০ কিমি।`,
+      lang
+    ), 'info');
+  };
+
+  // Complete Trip Action (Admin only)
+  const handleConfirmCompleteTrip = () => {
+    if (!completingReq) return;
+    completeTrip(completingReq.id, endOdometer, '06:15 PM', tripRating, tripFeedback);
+    showToast(t(
+      `✓ Trip ${completingReq.id} marked as COMPLETED! Inward security clearance logged & driver rating recorded.`,
+      `✓ ট্রিপ ${completingReq.id} সমাপ্ত ও ইনওয়ার্ড গেট পাস নিবন্ধিত হয়েছে!`,
+      lang
+    ), 'success');
+    setCompletingReq(null);
+  };
+
+  // Reject Requisition Action (Admin only)
+  const handleConfirmReject = () => {
+    if (!rejectingReq) return;
+    rejectRequisition(rejectingReq.id, rejectReason);
+    showToast(t(
+      `Requisition ${rejectingReq.id} rejected. Audit reason logged.`,
+      `রিকুইজিশন ${rejectingReq.id} বাতিল করা হয়েছে।`,
+      lang
+    ), 'warn');
+    setRejectingReq(null);
+  };
+
+  // Confirm Smart Pool Merger (Admin only)
+  const handleExecuteSmartPool = () => {
+    poolRequisitions('REQ-2026-441', 'REQ-2026-443', 'DHAKA METRO CHA-53-4102', 'DRV-02');
+    setShowSmartPoolModal(false);
+    showToast(t(
+      '✓ Smart Pool Merger Executed! REQ-2026-441 & REQ-2026-443 consolidated into Toyota HiAce (CHA-53-4102). ৳1,850 fuel saved!',
+      '✓ স্মার্ট পুলিং কার্যকর! উভয় আবেদন টয়োটা হাইএইস-এ সফলভাবে মার্জ করা হয়েছে। ১,৮৫০ টাকা জ্বালানি সাশ্রয়!',
+      lang
+    ), 'gold');
   };
 
   const handleIssueFuelSlip = (v: Vehicle) => {
@@ -115,47 +211,75 @@ export default function FleetView({ role, lang }: ViewProps) {
     setShowFuelModal(null);
   };
 
+  // Counts
+  const pendingCount = requisitions.filter(r => r.status === 'pending').length;
+  const inTransitCount = requisitions.filter(r => r.status === 'in_transit').length;
+  const completedCount = requisitions.filter(r => r.status === 'completed').length;
+  const availableVehiclesCount = vehicles.filter(v => v.status === 'available').length;
+  const availableDriversCount = drivers.filter(d => d.status === 'available').length;
+
   return (
-    <div>
-      {/* View Header */}
-      <div className="flex-between mb-4">
+    <div className="view-container view-transition-wrapper">
+      {/* ─── View Header ────────────────────────────────────────────── */}
+      <div className="section-header" style={{ marginBottom: '14px' }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 className="section-title" style={{ margin: 0 }}>
+              🚗 {isEmployee
+                ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
+                : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
+            </h2>
+            <span className="badge info" style={{ fontSize: '10px' }}>
+              {isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
+            </span>
+            {!isEmployee && (
+              <span className="badge success" style={{ fontSize: '10px' }}>
+                {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
+              </span>
+            )}
+          </div>
+          <p className="section-subtitle" style={{ marginTop: '4px' }}>
             {isEmployee
-              ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
-              : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
-          </h2>
-          <p className="text-muted">
-            {t('End-to-End Duty Travel Lifecycle • Driver Roster & Sobriety Audit • Live Tanker GPS Telematics • Digital Trip Gate Passes', 'দাপ্তরিক যাতায়াত রিকুইজিশন • চালক তথ্য ও ফিটনেস অডিট • রিয়েল-টাইম জিপিএস ট্র্যাকিং • ডিজিটাল ট্রিপ পাস', lang)}
+              ? t(
+                  'Submit duty travel requests, track your assigned vehicle & driver, download digital trip challans, and rate trip completion.',
+                  'দাপ্তরিক যাতায়াত রিকুইজিশন জমা দিন, ড্রাইভার ও গাড়ির অবস্থান ট্র্যাক করুন এবং ডিজিটাল ট্রিপ চালান ডাউনলোড করুন।',
+                  lang
+                )
+              : t(
+                  'End-to-End Duty Travel Lifecycle • Driver Roster & Sobriety Audit • Live Tanker GPS Telematics • Digital Trip Gate Passes',
+                  'দাপ্তরিক যাতায়াত রিকুইজিশন • চালক তথ্য ও ফিটনেস অডিট • রিয়েল-টাইম জিপিএস ট্র্যাকিং • ডিজিটাল ট্রিপ পাস',
+                  lang
+                )}
           </p>
         </div>
 
-        <div className="flex-gap">
-          {!isEmployee && (
+        {/* Action Controls - Strictly Guarded by RBAC */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Admin-Only Registration Buttons */}
+          {isTransportAdmin && (
             <>
               <button
-                className="btn-gold"
-                style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                className="btn-outline"
+                style={{ fontSize: '11px', padding: '5px 10px' }}
                 onClick={() => setShowRegisterVehicleModal(true)}
               >
-                <Truck size={14} />
-                {t('Register Vehicle', 'গাড়ি রেজিস্ট্রেশন', lang)}
+                <Truck size={13} /> {t('Register Vehicle', 'গাড়ি যুক্ত করুন', lang)}
               </button>
 
               <button
-                className="btn-sm-ghost"
-                style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '8px 14px' }}
+                className="btn-outline"
+                style={{ fontSize: '11px', padding: '5px 10px' }}
                 onClick={() => setShowEnrollDriverModal(true)}
               >
-                <UserCheck size={14} />
-                {t('Enroll Driver', 'চালক তালিকাভুক্তি', lang)}
+                <UserCheck size={13} /> {t('Enroll Driver', 'চালক যুক্ত করুন', lang)}
               </button>
             </>
           )}
 
+          {/* New Requisition Button Available to All Authorized Users */}
           <button
             className="btn-primary"
-            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
             onClick={() => setShowNewRequisitionModal(true)}
           >
             <Plus size={15} />
@@ -164,121 +288,318 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       </div>
 
-      {/* Tabs Navigation (for Admin / Executive roles) */}
-      {!isEmployee && (
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '20px' }}>
-          <button
-            className={`btn-sm-ghost ${activeTab === 'requisitions' ? 'active-filter' : ''}`}
-            style={{
-              fontSize: '12px',
-              padding: '7px 14px',
-              background: activeTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-              color: activeTab === 'requisitions' ? '#FFF' : 'var(--brand-slate-700)',
-              borderColor: activeTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onClick={() => setActiveTab('requisitions')}
-          >
-            <Car size={14} />
-            {t('Requisitions Dispatch Queue', 'রিকুইজিশন ডেসপ্যাচ সারি', lang)}
-            <span style={{ background: activeTab === 'requisitions' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'requisitions' ? '#FFF' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
-              {requisitions.filter(r => r.status === 'pending').length}
-            </span>
-          </button>
+      {/* ─── Informational Callout Strip ────────────────────────────── */}
+      {isEmployee ? (
+        <div style={{
+          background: 'rgba(59, 130, 246, 0.06)',
+          border: '1px solid rgba(59, 130, 246, 0.2)',
+          padding: '9px 14px',
+          borderRadius: '10px',
+          marginBottom: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '11.5px',
+          color: 'var(--brand-slate-700)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Car size={16} color="#2563EB" />
+            <div>
+              <strong>{t('Employee Self-Service Desk (Tanvir Ahmed - EMP-1042):', 'কর্মকর্তা যাতায়াত ডেস্ক:', lang)}</strong>{' '}
+              {t(
+                'Submit official vehicle requisitions for plant inspections, customer visits, or refinery operations. Your requests are processed by the Central Transport Cell.',
+                'প্ল্যান্ট ভিজিট ও মিটিংয়ের জন্য গাড়ি রিকুইজিশন জমা দিন। আপনার আবেদনটি কেন্দ্রীয় পরিবহন সেল কর্তৃক অনুমোদিত ও বরাদ্দ করা হবে।',
+                lang
+              )}
+            </div>
+          </div>
+          <span className="badge info" style={{ whiteSpace: 'nowrap' }}>
+            {t('Staff Portal', 'স্টাফ সেলফ-সার্ভিস', lang)}
+          </span>
+        </div>
+      ) : (
+        <div style={{
+          background: 'rgba(212, 175, 55, 0.08)',
+          border: '1.5px solid #D4AF37',
+          padding: '9px 14px',
+          borderRadius: '10px',
+          marginBottom: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '11.5px',
+          color: 'var(--brand-slate-900)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield size={16} color="#B45309" />
+            <div>
+              <strong>{t('Transport Dispatch Controller Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক ও ডেসপ্যাচ মোড:', lang)}</strong>{' '}
+              {t(
+                'Full administrative authority to assign roadworthy vehicles, allocate certified drivers with zero-BAC breathalyzer clearance, log gate outward/inward passes, and execute smart pool mergers.',
+                'গাড়ি ও চালক বরাদ্দ, অ্যালকোহল টেস্ট অডিট, গেট ইন-আউট ক্লিয়ারেন্স এবং কারপুলিং অনুমোদনের পূর্ণ ক্ষমতা।',
+                lang
+              )}
+            </div>
+          </div>
+          <span className="badge gold" style={{ whiteSpace: 'nowrap' }}>
+            {t('Transport Command Room', 'কমান্ড রুম', lang)}
+          </span>
+        </div>
+      )}
+
+      {/* ─── Metric Cards ───────────────────────────────────────────── */}
+      {isEmployee ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '12px',
+          marginBottom: '14px'
+        }}>
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('My Requisitions', 'আমার মোট আবেদন', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-slate-900)' }}>{filteredRequisitions.length}</span>
+              <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 700 }}>
+                {filteredRequisitions.filter(r => r.status === 'pending').length} Pending
+              </span>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Active Duty Trip Pass', 'সক্রিয় ডিজিটাল পাস', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: '#059669' }}>
+                {filteredRequisitions.filter(r => r.status === 'assigned' || r.status === 'in_transit').length}
+              </span>
+              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>Gate Cleared</span>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Default Departure Hub', 'প্রারম্ভিক অফিস', lang)}
+            </div>
+            <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '6px', color: '#2563EB', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Baridhara HQ
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Transport Cell Hotline', 'পরিবহন সেল হেল্পলাইন', lang)}
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '5px', color: 'var(--brand-crimson)', fontFamily: 'monospace' }}>
+              +880 1711-229944
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '12px',
+          marginBottom: '14px'
+        }}>
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Requisitions Today', 'আজকের আবেদনসমূহ', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-slate-900)' }}>{requisitions.length}</span>
+              <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 700 }}>{pendingCount} Pending</span>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Vehicles in Fleet', 'মোট যানবাহন', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB' }}>{vehicles.length}</span>
+              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>{availableVehiclesCount} Available</span>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Drivers on Duty', 'চালক রোস্টার', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: '#059669' }}>{drivers.length}</span>
+              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>100% BAC Passed</span>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
+            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+              {t('Active Highway Trips', 'চলমান ট্রিপসমূহ', lang)}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 900, color: '#8B5CF6' }}>{inTransitCount}</span>
+              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>{completedCount} Completed</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── AI Smart Pooling Opportunity Box (Admin Only) ─────────── */}
+      {isTransportAdmin && (
+        <div className="pool-suggestion mb-3" style={{
+          background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.08) 0%, rgba(212, 175, 55, 0.08) 100%)',
+          border: '1.5px solid #3B82F6',
+          borderRadius: '12px',
+          padding: '12px 16px'
+        }}>
+          <div className="pool-icon">
+            <Sparkles size={24} color="#1D4ED8" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div className="pool-text">
+              <h4 style={{ margin: '0 0 2px 0', fontSize: '13.5px', fontWeight: 800, color: '#1E3A8A' }}>
+                {t('AI Route Optimization & Smart Ride-Pooling Opportunity Detected', 'এআই রুট অপ্টিমাইজেশন ও কারপুলিং সুযোগ শনাক্ত হয়েছে', lang)}
+              </h4>
+              <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-700)', lineHeight: '1.4' }}>
+                {t(
+                  'Two requisitions share matching routes today between Dhaka HQ and Keraniganj Bitumen Plant (2:30 PM & 2:45 PM). Merging them saves 1 vehicle and eliminates 38 km redundant transit (৳1,850 fuel saved).',
+                  'আজ ঢাকা সদর দপ্তর থেকে কেরানীগঞ্জ প্ল্যান্টের একই রুটে দুটি পৃথক রিকুইজিশন এসেছে। গাড়ি মার্জ করলে ১টি অতিরিক্ত গাড়ি ফ্রি থাকবে এবং ৩৮ কিমি জ্বালানি সাশ্রয় হবে।',
+                  lang
+                )}
+              </p>
+            </div>
+          </div>
 
           <button
-            className={`btn-sm-ghost ${activeTab === 'drivers' ? 'active-filter' : ''}`}
-            style={{
-              fontSize: '12px',
-              padding: '7px 14px',
-              background: activeTab === 'drivers' ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-              color: activeTab === 'drivers' ? '#FFF' : 'var(--brand-slate-700)',
-              borderColor: activeTab === 'drivers' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onClick={() => setActiveTab('drivers')}
+            className="btn-gold"
+            onClick={() => setShowSmartPoolModal(true)}
+            style={{ fontSize: '11.5px', padding: '6px 14px', whiteSpace: 'nowrap' }}
           >
             <Users size={14} />
-            {t('Driver Pool & Sobriety Audit', 'চালক তালিকা ও ফিটনেস অডিট', lang)}
-            <span style={{ background: activeTab === 'drivers' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'drivers' ? '#FFF' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
-              {drivers.length}
-            </span>
-          </button>
-
-          <button
-            className={`btn-sm-ghost ${activeTab === 'telematics' ? 'active-filter' : ''}`}
-            style={{
-              fontSize: '12px',
-              padding: '7px 14px',
-              background: activeTab === 'telematics' ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-              color: activeTab === 'telematics' ? '#FFF' : 'var(--brand-slate-700)',
-              borderColor: activeTab === 'telematics' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onClick={() => setActiveTab('telematics')}
-          >
-            <Navigation size={14} />
-            {t('Heavy Tankers & GPS Telematics', 'ভারী ট্যাংকার ও টেলিমেটিক্স', lang)}
-          </button>
-
-          <button
-            className={`btn-sm-ghost ${activeTab === 'fuel' ? 'active-filter' : ''}`}
-            style={{
-              fontSize: '12px',
-              padding: '7px 14px',
-              background: activeTab === 'fuel' ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-              color: activeTab === 'fuel' ? '#FFF' : 'var(--brand-slate-700)',
-              borderColor: activeTab === 'fuel' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-            onClick={() => setActiveTab('fuel')}
-          >
-            <Fuel size={14} />
-            {t('Fuel Station & Anti-Pilferage', 'ফুয়েল ও ইনসেন্টিভ প্রোগ্রাম', lang)}
+            {t('Review & Merge Pool', 'কারপুলিং মার্জ করুন', lang)}
           </button>
         </div>
       )}
 
-      {/* AI Smart Pooling Opportunity Box */}
-      <div className="pool-suggestion mb-4">
-        <div className="pool-icon">
-          <Sparkles size={24} color="#1D4ED8" />
+      {/* ─── Administrative Tabs Navigation (HIDDEN FOR EMPLOYEES) ──── */}
+      {isTransportAdmin && (
+        <div style={{ display: 'flex', gap: '6px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px', overflowX: 'auto' }}>
+          <button
+            onClick={() => setActiveAdminTab('requisitions')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'requisitions' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Car size={14} />
+            <span>{t('Requisitions Dispatch Queue', 'রিকুইজিশন ডেসপ্যাচ সারি', lang)}</span>
+            <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px' }}>{requisitions.length}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveAdminTab('drivers')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'drivers' ? '3px solid #D4AF37' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'drivers' ? '#B45309' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Users size={14} />
+            <span>{t('Driver Pool & Sobriety Audit', 'চালক তালিকা ও ফিটনেস অডিট', lang)}</span>
+            <span className="badge gold" style={{ fontSize: '9px', padding: '1px 5px' }}>{drivers.length}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveAdminTab('telematics')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'telematics' ? '3px solid #2563EB' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'telematics' ? '#2563EB' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Navigation size={14} />
+            <span>{t('Tankers & GPS Telematics HUD', 'ট্যাংকার ও জিপিএস ট্র্যাকিং', lang)}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveAdminTab('fuel')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'fuel' ? '3px solid #059669' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'fuel' ? '#059669' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Fuel size={14} />
+            <span>{t('Fuel Station & QR Vouchers', 'ফুয়েল ও ডিজিটাল ভাউচার', lang)}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveAdminTab('gate_manifest')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'gate_manifest' ? '3px solid #7C3AED' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'gate_manifest' ? '#7C3AED' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <FileText size={14} />
+            <span>{t('Security Gate Roster & Odometers', 'গেট ক্লিয়ারেন্স ও ওডোমিটার', lang)}</span>
+          </button>
         </div>
-        <div style={{ flex: 1 }}>
-          <div className="pool-text">
-            <h4>{t('AI Route Optimization & Smart Pooling Opportunity Detected', 'এআই রুট অপ্টিমাইজেশন ও কারপুলিং সুযোগ শনাক্ত হয়েছে', lang)}</h4>
-            <p>
-              {t(
-                'Two requisitions share matching routes today between Dhaka HQ and Keraniganj Bitumen Plant (2:30 PM & 2:45 PM). Merging them saves 1 vehicle and eliminates 38 km redundant transit (৳1,850 fuel saved).',
-                'আজ ঢাকা সদর দপ্তর থেকে কেরানীগঞ্জ প্ল্যান্টের একই রুটে দুটি পৃথক রিকুইজিশন এসেছে। গাড়ি মার্জ করলে ১টি অতিরিক্ত গাড়ি ফ্রি থাকবে এবং ৩৮ কিমি জ্বালানি সাশ্রয় হবে।',
-                lang
-              )}
-            </p>
-          </div>
-        </div>
-        <button className="btn-gold" onClick={handleSmartPoolMerge} style={{ fontSize: '11.5px', padding: '6px 14px' }}>
-          <Users size={14} />
-          {t('Merge into Single Pool Vehicle', 'এক গাড়িতে মার্জ করুন', lang)}
-        </button>
-      </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════
-          TAB 1: REQUISITIONS DISPATCH QUEUE (Always shown to Employee)
+          TAB 1: REQUISITIONS DISPATCH QUEUE & TRAVEL DESK
           ══════════════════════════════════════════════════════════════ */}
-      {(isEmployee || activeTab === 'requisitions') && (
-        <div className="card mb-5">
+      {(isEmployee || activeAdminTab === 'requisitions') && (
+        <div className="card mb-4">
           <div className="card-hd">
             <div className="card-hd-left">
               <div className="card-hd-icon"><Car size={18} /></div>
@@ -289,131 +610,267 @@ export default function FleetView({ role, lang }: ViewProps) {
                     : t('Incoming Duty Requisitions Awaiting Vehicle & Driver Allocation', 'অপেক্ষমান যানবাহন আবেদনসমূহ', lang)}
                 </div>
                 <div className="card-subtitle">
-                  {requisitions.length} {t('Total Requisitions Tracked Today', 'টি আবেদন নথিভুক্ত হয়েছে', lang)}
+                  {filteredRequisitions.length} {t('Requisitions Tracked', 'টি আবেদন নথিভুক্ত', lang)}
                 </div>
               </div>
             </div>
-            <span className="badge warn">
-              {requisitions.filter(r => r.status === 'pending').length} {t('Pending Assignment', 'অমীমাংসিত', lang)}
-            </span>
+
+            {/* Filter Pills */}
+            <div style={{ display: 'flex', gap: '5px' }}>
+              {(['all', 'pending', 'assigned', 'in_transit', 'completed'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setStatusFilter(f)}
+                  style={{
+                    padding: '3px 8px',
+                    borderRadius: '5px',
+                    fontSize: '10.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: statusFilter === f ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                    background: statusFilter === f ? 'var(--brand-crimson)' : 'transparent',
+                    color: statusFilter === f ? '#fff' : 'var(--brand-slate-600)'
+                  }}
+                >
+                  {f === 'all' ? t('All', 'সব', lang) : f.replace('_', ' ').toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="card-body">
+          {/* Search Bar inside Requisitions Card */}
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--brand-slate-100)', display: 'flex', gap: '10px' }}>
+            <div style={{ position: 'relative', flex: 1, maxWidth: '420px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '8px', color: 'var(--brand-slate-400)' }} />
+              <input
+                type="text"
+                className="input-text"
+                style={{ width: '100%', paddingLeft: '30px', height: '30px', fontSize: '11.5px' }}
+                placeholder={isEmployee
+                  ? t('Search my requisitions by ID, route, destination...', 'আইডি, রুট বা গন্তব্য দিয়ে খুঁজুন...', lang)
+                  : t('Search by Req ID, requester, department, route, vehicle...', 'আইডি, আবেদনকারী, বিভাগ, রুট দিয়ে খুঁজুন...', lang)}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{ position: 'absolute', right: '8px', top: '6px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-slate-400)' }}
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="card-body" style={{ padding: '0' }}>
             <div className="table-responsive">
-              <table className="fleet-table">
-              <thead>
-                <tr>
-                  <th>Req ID</th>
-                  <th>Requester & Department</th>
-                  <th>Route & Trip Type</th>
-                  <th>Departure / Return</th>
-                  <th>Required Vehicle</th>
-                  <th>Assigned Vehicle & Driver</th>
-                  <th>Status & Pass</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requisitions.map((r) => (
-                  <tr key={r.id}>
-                    <td>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                        {r.id}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{r.requesterName}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>
-                        {r.dept} • {r.phone}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12.5px', fontWeight: 600 }}>
-                        <span>{r.from.split(',')[0]}</span>
-                        <span style={{ color: 'var(--brand-crimson)' }}>➔</span>
-                        <span>{r.to.split(',')[0]}</span>
-                      </div>
-                      <div style={{ fontSize: '11px', color: r.tripType === 'round_trip' ? '#1D4ED8' : '#64748B', fontWeight: 700, marginTop: '2px' }}>
-                        {r.tripType === 'round_trip' ? '🔄 Round Trip (Return)' : '➡️ One-Way Transit'}
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ fontSize: '12px', fontWeight: 600 }}>{r.departureTime}</div>
-                      {r.returnTime && (
-                        <div style={{ fontSize: '11px', color: '#1D4ED8' }}>Return: {r.returnTime}</div>
-                      )}
-                      <span className="badge info" style={{ marginTop: '2px' }}>
-                        {r.passengersCount} {r.passengersCount === 1 ? 'Passenger' : 'Passengers'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
-                        {r.requiredCapacity === 'sedan_4' && '🚗 Sedan (4-Seater)'}
-                        {r.requiredCapacity === 'microbus_7' && '🚐 Microbus (7-Seater)'}
-                        {r.requiredCapacity === 'pickup_4x4' && '🛻 4x4 Emergency Patrol'}
-                        {r.requiredCapacity === 'tanker_heavy' && '🚛 Heavy Bulk Tanker'}
-                      </span>
-                    </td>
-                    <td>
-                      {r.status === 'assigned' ? (
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: '12px', color: '#059669' }}>
-                            ✓ {r.assignedVehiclePlate}
-                          </div>
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                            Driver: <strong>{r.assignedDriverName}</strong>
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#1D4ED8', fontFamily: 'monospace' }}>
-                            📞 {r.assignedDriverPhone}
-                          </div>
-                        </div>
-                      ) : (
-                        <span style={{ color: '#D97706', fontSize: '12px', fontWeight: 600 }}>
-                          ⏳ Awaiting Transport Admin
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {r.status === 'pending' ? (
-                        !isEmployee ? (
-                          <button
-                            className="btn-primary"
-                            style={{ fontSize: '11px', padding: '5px 12px' }}
-                            onClick={() => {
-                              setAssigningReq(r);
-                              setAssignCarPlate(vehicles.find(v => v.status === 'available')?.plate || vehicles[0].plate);
-                              setAssignDriverId(drivers.find(d => d.status === 'available')?.id || drivers[0].id);
-                            }}
-                          >
-                            Assign Vehicle & Driver
-                          </button>
-                        ) : (
-                          <span className="badge warn">Pending Assignment</span>
-                        )
-                      ) : (
-                        <button
-                          className="btn-sm-ghost"
-                          style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', borderColor: '#A7F3D0', background: '#ECFDF5' }}
-                          onClick={() => setSelectedTripPassReq(r)}
-                        >
-                          <QrCode size={13} />
-                          {t('Trip Challan Pass', 'ডিজিটাল ট্রিপ চালান', lang)}
-                        </button>
-                      )}
-                    </td>
+              <table className="fleet-table" style={{ margin: 0, fontSize: '12px' }}>
+                <thead>
+                  <tr>
+                    <th>{t('REQ ID', 'আইডি', lang)}</th>
+                    <th>{t('Requester & Department', 'আবেদনকারী ও বিভাগ', lang)}</th>
+                    <th>{t('Route & Trip Mode', 'রুট ও যাতায়াতের ধরন', lang)}</th>
+                    <th>{t('Departure / Return', 'সময়সূচী', lang)}</th>
+                    <th>{t('Required Vehicle', 'প্রয়োজনীয় যান', lang)}</th>
+                    <th>{t('Assigned Vehicle & Driver', 'বরাদ্দকৃত গাড়ি ও চালক', lang)}</th>
+                    <th style={{ textAlign: 'right' }}>{t('Status & Actions', 'অবস্থা ও কার্যক্রম', lang)}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredRequisitions.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '30px', color: 'var(--brand-slate-500)' }}>
+                        <CheckCircle2 size={28} color="#10B981" style={{ margin: '0 auto 6px' }} />
+                        <div>{t('No vehicle requisitions matching current filter.', 'কোনো আবেদন পাওয়া যায়নি।', lang)}</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRequisitions.map((r) => {
+                      const isPending = r.status === 'pending';
+                      const isAssigned = r.status === 'assigned';
+                      const isInTransit = r.status === 'in_transit';
+                      const isCompleted = r.status === 'completed';
+                      const isRejected = r.status === 'rejected';
+
+                      return (
+                        <tr key={r.id}>
+                          <td>
+                            <div>
+                              <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                                {r.id}
+                              </span>
+                              {r.pooledWith && (
+                                <div style={{ fontSize: '9px', color: '#1D4ED8', fontWeight: 700, marginTop: '2px' }}>
+                                  🔗 POOLED ({r.pooledWith})
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{r.requesterName}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>
+                              {r.dept} • {r.phone}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 600 }}>
+                              <span>{r.from.split(',')[0]}</span>
+                              <span style={{ color: 'var(--brand-crimson)' }}>➔</span>
+                              <span>{r.to.split(',')[0]}</span>
+                            </div>
+                            <div style={{ fontSize: '10.5px', color: r.tripType === 'round_trip' ? '#1D4ED8' : '#64748B', fontWeight: 700, marginTop: '2px' }}>
+                              {r.tripType === 'round_trip' ? '🔄 Round Trip (Return)' : '➡️ One-Way Transit'}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: '11.5px', fontWeight: 600 }}>{r.departureTime}</div>
+                            {r.returnTime && (
+                              <div style={{ fontSize: '10.5px', color: '#1D4ED8' }}>Return: {r.returnTime}</div>
+                            )}
+                            <span className="badge info" style={{ marginTop: '2px', fontSize: '9px' }}>
+                              {r.passengersCount} {r.passengersCount === 1 ? 'Passenger' : 'Passengers'}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700, fontSize: '10.5px' }}>
+                              {r.requiredCapacity === 'sedan_4' && '🚗 Sedan (4-Seater)'}
+                              {r.requiredCapacity === 'microbus_7' && '🚐 Microbus (7-Seater)'}
+                              {r.requiredCapacity === 'pickup_4x4' && '🛻 4x4 Emergency Patrol'}
+                              {r.requiredCapacity === 'tanker_heavy' && '🚛 Heavy Bulk Tanker'}
+                            </span>
+                          </td>
+                          <td>
+                            {isPending ? (
+                              <span style={{ color: '#D97706', fontSize: '11.5px', fontWeight: 600 }}>
+                                ⏳ Awaiting Transport Admin
+                              </span>
+                            ) : isRejected ? (
+                              <span style={{ color: '#EF4444', fontSize: '11.5px', fontWeight: 600 }}>
+                                ❌ Rejected ({r.rejectionReason || 'No Vehicle'})
+                              </span>
+                            ) : (
+                              <div>
+                                <div style={{ fontWeight: 700, fontSize: '11.5px', color: '#059669' }}>
+                                  ✓ {r.assignedVehiclePlate}
+                                </div>
+                                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)' }}>
+                                  Driver: <strong>{r.assignedDriverName}</strong>
+                                </div>
+                                <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontFamily: 'monospace' }}>
+                                  📞 {r.assignedDriverPhone}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                              {/* ─── Case 1: Requisition Pending ─── */}
+                              {isPending && (
+                                isTransportAdmin ? (
+                                  <>
+                                    <button
+                                      className="btn-primary"
+                                      style={{ fontSize: '10.5px', padding: '4px 9px' }}
+                                      onClick={() => {
+                                        setAssigningReq(r);
+                                        setAssignCarPlate(vehicles.find(v => v.status === 'available')?.plate || vehicles[0].plate);
+                                        setAssignDriverId(drivers.find(d => d.status === 'available')?.id || drivers[0].id);
+                                      }}
+                                    >
+                                      Assign Car & Driver
+                                    </button>
+                                    <button
+                                      className="btn-outline"
+                                      style={{ fontSize: '10.5px', padding: '4px 7px', color: '#EF4444', borderColor: '#EF4444' }}
+                                      onClick={() => setRejectingReq(r)}
+                                      title="Reject Requisition"
+                                    >
+                                      ✕
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span className="badge warn" style={{ fontSize: '10px' }}>Pending Assignment</span>
+                                )
+                              )}
+
+                              {/* ─── Case 2: Requisition Assigned ─── */}
+                              {isAssigned && (
+                                <>
+                                  <button
+                                    className="btn-sm-ghost"
+                                    style={{ fontSize: '10.5px', padding: '4px 8px', color: '#059669', borderColor: '#A7F3D0', background: '#ECFDF5' }}
+                                    onClick={() => setSelectedTripPassReq(r)}
+                                  >
+                                    <QrCode size={12} /> {t('Trip Pass', 'ট্রিপ পাস', lang)}
+                                  </button>
+
+                                  {isTransportAdmin && (
+                                    <button
+                                      className="btn-gold"
+                                      style={{ fontSize: '10.5px', padding: '4px 8px' }}
+                                      onClick={() => handleStartTripAction(r)}
+                                    >
+                                      <Zap size={11} /> {t('Gate Out', 'যাত্রা শুরু', lang)}
+                                    </button>
+                                  )}
+                                </>
+                              )}
+
+                              {/* ─── Case 3: Requisition In Transit ─── */}
+                              {isInTransit && (
+                                <>
+                                  <button
+                                    className="btn-outline"
+                                    style={{ fontSize: '10.5px', padding: '4px 8px', borderColor: '#2563EB', color: '#2563EB' }}
+                                    onClick={() => setTrackingReq(r)}
+                                  >
+                                    <Navigation size={12} /> {t('Track Live', 'ট্র্যাক', lang)}
+                                  </button>
+
+                                  {isTransportAdmin && (
+                                    <button
+                                      className="btn-primary"
+                                      style={{ fontSize: '10.5px', padding: '4px 8px', background: '#059669', borderColor: '#059669' }}
+                                      onClick={() => {
+                                        setCompletingReq(r);
+                                        setEndOdometer(42430);
+                                      }}
+                                    >
+                                      <CheckCircle size={12} /> {t('Complete Trip', 'সমাপ্ত', lang)}
+                                    </button>
+                                  )}
+                                </>
+                              )}
+
+                              {/* ─── Case 4: Requisition Completed ─── */}
+                              {isCompleted && (
+                                <button
+                                  className="btn-outline"
+                                  style={{ fontSize: '10px', padding: '3px 8px' }}
+                                  onClick={() => setSelectedTripPassReq(r)}
+                                >
+                                  ★ {r.rating || 5}.0 · {t('View Pass', 'পাস দেখুন', lang)}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          TAB 2: DRIVER POOL & SOBRIETY AUDIT (Admin view)
+          TAB 2: DRIVER POOL & SOBRIETY AUDIT (Admin only)
           ══════════════════════════════════════════════════════════════ */}
-      {!isEmployee && activeTab === 'drivers' && (
-        <div className="card mb-5">
+      {isTransportAdmin && activeAdminTab === 'drivers' && (
+        <div className="card mb-4">
           <div className="card-hd">
             <div className="card-hd-left">
               <div className="card-hd-icon"><Users size={18} /></div>
@@ -422,11 +879,11 @@ export default function FleetView({ role, lang }: ViewProps) {
                 <div className="card-subtitle">{t('BRTA Commercial Licensing, Breathalyzer Logs & Shift Hours', 'বিআরটিএ লাইসেন্স যাচাই, ব্রেথলাইজার টেস্ট ও দৈনিক ড্রাইভিং আওয়ার', lang)}</div>
               </div>
             </div>
-            <span className="badge success">{drivers.filter(d => d.status === 'available').length} Drivers Ready for Dispatch</span>
+            <span className="badge success">{availableDriversCount} Drivers Ready for Dispatch</span>
           </div>
 
           <div className="card-body">
-            <div className="responsive-col-3">
+            <div className="responsive-col-3" style={{ gap: '12px' }}>
               {drivers.map(d => (
                 <div key={d.id} style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '14px', background: 'var(--brand-card-bg)', position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -478,13 +935,12 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          TAB 3: HEAVY TANKERS & TELEMATICS HUD (Admin / Executive view)
+          TAB 3: HEAVY TANKERS & TELEMATICS HUD (Admin only)
           ══════════════════════════════════════════════════════════════ */}
-      {(!isEmployee && activeTab === 'telematics') && (
+      {isTransportAdmin && activeAdminTab === 'telematics' && (
         <>
-          {/* Live GPS Telematics HUD */}
           {selectedVehicleTelemetry && (
-            <div className="card mb-5" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#fff', border: '1px solid #334155' }}>
+            <div className="card mb-4" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#fff', border: '1px solid #334155' }}>
               <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -499,213 +955,100 @@ export default function FleetView({ role, lang }: ViewProps) {
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span className={`badge ${selectedVehicleTelemetry.status === 'in_transit' ? 'meeting' : selectedVehicleTelemetry.status === 'loading' ? 'warn' : 'present'}`}>
-                    {selectedVehicleTelemetry.status === 'in_transit' ? '⚡ LIVE ON ROUTE' : selectedVehicleTelemetry.status.toUpperCase()}
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span className="badge" style={{ background: '#059669', color: '#fff' }}>GPS ONLINE</span>
+                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>Speed: <strong style={{ color: '#F8FAFC' }}>{selectedVehicleTelemetry.speed} km/h</strong></span>
                 </div>
               </div>
 
-              <div style={{ padding: '20px' }}>
-                <div className="responsive-col-4" style={{ marginBottom: '20px' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Gauge size={14} color="#60A5FA" />
-                      Speedometer
-                    </div>
-                    <div style={{ fontSize: '26px', fontWeight: 900, color: '#fff', marginTop: '4px' }}>
-                      {selectedVehicleTelemetry.speed} <span style={{ fontSize: '13px', color: '#94A3B8' }}>KM/H</span>
-                    </div>
-                    <div style={{ fontSize: '10px', color: selectedVehicleTelemetry.speed > 60 ? '#F87171' : '#4ADE80', marginTop: '2px' }}>
-                      Speed Governor: 60 KM/H Limit
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Cpu size={14} color="#FBBF24" />
-                      {selectedVehicleTelemetry.bitumenCargoTemp ? 'Bitumen Tank Heat' : 'Engine Temp'}
-                    </div>
-                    <div style={{ fontSize: '26px', fontWeight: 900, color: selectedVehicleTelemetry.bitumenCargoTemp ? '#F59E0B' : '#fff', marginTop: '4px' }}>
-                      {selectedVehicleTelemetry.bitumenCargoTemp ? `${selectedVehicleTelemetry.bitumenCargoTemp}°C` : `${selectedVehicleTelemetry.engineTemp}°C`}
-                    </div>
-                    <div style={{ fontSize: '10px', color: '#94A3B8', marginTop: '2px' }}>
-                      {selectedVehicleTelemetry.bitumenCargoTemp ? 'Molten Asphalt Optimal: 160-170°C' : 'Coolant Normal: 80-95°C'}
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Fuel size={14} color="#34D399" />
-                      Ultrasonic Fuel Gauge
-                    </div>
-                    <div style={{ fontSize: '26px', fontWeight: 900, color: '#34D399', marginTop: '4px' }}>
-                      {selectedVehicleTelemetry.fuelPct}%
-                    </div>
-                    <div style={{ fontSize: '10px', color: '#4ADE80', marginTop: '2px' }}>
-                      Anti-Pilferage Sensor: Sealed
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.05)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <ShieldCheck size={14} color="#A78BFA" />
-                      Safety Clearances
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '6px' }}>
-                      <span style={{ fontSize: '11px', color: '#4ADE80', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={12} /> HAZMAT Certified
-                      </span>
-                      <span style={{ fontSize: '11px', color: '#4ADE80', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={12} /> 0.00% Breathalyzer
-                      </span>
-                    </div>
+              <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Current Geofence Location</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: '#FDE68A' }}>
+                    {selectedVehicleTelemetry.location}
                   </div>
                 </div>
 
-                {selectedVehicleTelemetry.routeProgress !== undefined && (
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px 18px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '8px' }}>
-                      <div>
-                        <span style={{ color: '#94A3B8' }}>Origin: </span>
-                        <strong>{selectedVehicleTelemetry.routeOrigin}</strong>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FBBF24', fontWeight: 700 }}>
-                        <Compass size={14} />
-                        <span>Current: {selectedVehicleTelemetry.location}</span>
-                      </div>
-                      <div>
-                        <span style={{ color: '#94A3B8' }}>Destination: </span>
-                        <strong>{selectedVehicleTelemetry.routeDestination}</strong>
-                      </div>
-                    </div>
-
-                    <div style={{ height: '8px', background: '#334155', borderRadius: '4px', position: 'relative', overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${selectedVehicleTelemetry.routeProgress}%`,
-                          height: '100%',
-                          background: 'linear-gradient(90deg, #3B82F6, #10B981)',
-                          borderRadius: '4px',
-                        }}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', color: '#94A3B8', marginTop: '6px' }}>
-                      <span>0% Departed</span>
-                      <span>{selectedVehicleTelemetry.routeProgress}% of Route Completed (ETA: 35 mins)</span>
-                      <span>100% Delivery Gate</span>
-                    </div>
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Engine & Cargo Temperature</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px' }}>
+                    Engine: <strong style={{ color: '#34D399' }}>{selectedVehicleTelemetry.engineTemp}°C</strong>
+                    {selectedVehicleTelemetry.bitumenCargoTemp && (
+                      <span> • Cargo: <strong style={{ color: '#F87171' }}>{selectedVehicleTelemetry.bitumenCargoTemp}°C</strong></span>
+                    )}
                   </div>
-                )}
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Fuel Tank Capacity</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: '#38BDF8' }}>
+                    {selectedVehicleTelemetry.fuelPct}% Full Tank
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Next Maintenance Service</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px' }}>
+                    In {selectedVehicleTelemetry.nextServiceKm} km
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* All Vehicles Directory */}
-          <div className="card">
+          {/* All Vehicles List */}
+          <div className="card mb-4">
             <div className="card-hd">
               <div className="card-hd-left">
                 <div className="card-hd-icon"><Truck size={18} /></div>
-                <div>
-                  <div className="card-title">{t('BOGCL Corporate & Heavy Plant Fleet Directory', 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস যানবাহন বহর', lang)}</div>
-                  <div className="card-subtitle">{t('Keraniganj Tankers, Executive Pool & Staff Microbuses', 'কেরানীগঞ্জ ট্যাংকার, এক্সিকিউটিভ কার ও স্টাফ মাইক্রোবাস', lang)}</div>
-                </div>
+                <div className="card-title">All Fleet Vehicles Telemetry Index</div>
               </div>
-              <span className="badge success">{vehicles.length} Vehicles Monitored</span>
             </div>
-
-            <div className="card-body">
+            <div className="card-body" style={{ padding: 0 }}>
               <div className="table-responsive">
-                <table className="fleet-table">
-                <thead>
-                  <tr>
-                    <th>Plate Number</th>
-                    <th>Vehicle Model & Capacity</th>
-                    <th>Assigned Driver</th>
-                    <th>GPS Geofence Location</th>
-                    <th>Fuel Level</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vehicles.map((v) => (
-                    <tr
-                      key={v.id}
-                      style={{
-                        background: selectedVehicleTelemetry?.id === v.id ? '#F1F5F9' : 'transparent',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setSelectedVehicleTelemetry(v)}
-                    >
-                      <td>
-                        <span className="vehicle-plate">{v.plate}</span>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{v.model}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>
-                          Capacity: {v.capacitySeats} Seats • Service Due: {v.nextServiceKm} KM
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{v.driverName}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>
-                          📞 {v.driverPhone}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}>
-                          <MapPin size={13} color="var(--brand-crimson)" />
-                          <span>{v.location}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ width: '100px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 700, marginBottom: '2px' }}>
-                            <span>{v.fuelPct}%</span>
-                            <Fuel size={12} color={v.fuelPct < 30 ? '#DC2626' : '#059669'} />
-                          </div>
-                          <div style={{ height: '5px', background: '#E2E8F0', borderRadius: '3px', overflow: 'hidden' }}>
-                            <div
-                              style={{
-                                width: `${v.fuelPct}%`,
-                                height: '100%',
-                                background: v.fuelPct < 30 ? '#DC2626' : v.fuelPct < 60 ? '#D97706' : '#059669',
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        {v.status === 'available' && <span className="badge present">{t('Available', 'উপলব্ধ', lang)}</span>}
-                        {v.status === 'in_transit' && <span className="badge meeting">{t('In Transit', 'চলমান', lang)}</span>}
-                        {v.status === 'loading' && <span className="badge warn">{t('Loading Bitumen', 'লোড হচ্ছে', lang)}</span>}
-                        {v.status === 'maintenance' && <span className="badge absent">{t('Under Maintenance', 'মেরামত চলছে', lang)}</span>}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
-                          <button
-                            className="btn-sm-ghost"
-                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => setSelectedVehicleTelemetry(v)}
-                          >
-                            <Activity size={12} color="#1D4ED8" />
-                            HUD
-                          </button>
-                          <button
-                            className="btn-sm-ghost"
-                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => handleIssueFuelSlip(v)}
-                          >
-                            <QrCode size={12} />
-                            Fuel
-                          </button>
-                        </div>
-                      </td>
+                <table className="fleet-table" style={{ margin: 0, fontSize: '12px' }}>
+                  <thead>
+                    <tr>
+                      <th>Plate</th>
+                      <th>Model & Type</th>
+                      <th>Location</th>
+                      <th>Driver</th>
+                      <th>Speed</th>
+                      <th>Fuel</th>
+                      <th>Status</th>
+                      <th>Select</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {vehicles.map(v => (
+                      <tr key={v.id} onClick={() => setSelectedVehicleTelemetry(v)} style={{ cursor: 'pointer' }}>
+                        <td><strong>{v.plate}</strong></td>
+                        <td>{v.model}</td>
+                        <td>{v.location}</td>
+                        <td>{v.driverName || 'Unassigned'}</td>
+                        <td>{v.speed} km/h</td>
+                        <td>{v.fuelPct}%</td>
+                        <td>
+                          <span className={`badge ${v.status === 'available' ? 'success' : v.status === 'in_transit' ? 'info' : 'warn'}`}>
+                            {v.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="btn-sm-ghost"
+                            style={{ fontSize: '10.5px' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedVehicleTelemetry(v);
+                            }}
+                          >
+                            HUD View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -713,70 +1056,136 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          TAB 4: FUEL MANAGEMENT & ANTI-PILFERAGE
+          TAB 4: FUEL STATION & QR VOUCHERS (Admin only)
           ══════════════════════════════════════════════════════════════ */}
-      {!isEmployee && activeTab === 'fuel' && (
-        <div className="card mb-5" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-          <div style={{ padding: '12px 18px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Award size={16} color="#D97706" />
-              <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>
-                {t('Driver Anti-Pilferage & Fuel Efficiency Incentive Program', 'চালক সততা ও জ্বালানি সাশ্রয় ইনসেন্টিভ প্রোগ্রাম', lang)}
-              </strong>
+      {isTransportAdmin && activeAdminTab === 'fuel' && (
+        <div className="card mb-4">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><Fuel size={18} /></div>
+              <div>
+                <div className="card-title">Fleet Fuel Dispensing & Anti-Pilferage Monitoring</div>
+                <div className="card-subtitle">Digital QR Fuel Slips & Dispenser OTP Verification</div>
+              </div>
             </div>
-            <span className="badge success">
-              {t('Zero Fuel Theft: 9 Months Streak', 'জ্বালানি অপচয় রোধ: ৯ মাস অক্ষুণ্ণ', lang)}
-            </span>
           </div>
-          <div className="responsive-col-3" style={{ padding: '16px 18px', fontSize: '12px' }}>
-            <div className="driver-score-card">
-              <div>
-                <div style={{ fontWeight: 700 }}>Md. Shahidul Islam</div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Prado TXL • Score: 98.4%</div>
-              </div>
-              <span className="badge gold">+৳ 3,500 Bonus</span>
-            </div>
 
-            <div className="driver-score-card">
-              <div>
-                <div style={{ fontWeight: 700 }}>Babul Hossain</div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Bitumen Tanker #V-03 • Zero Variance</div>
-              </div>
-              <span className="badge gold">+৳ 4,200 Bonus</span>
-            </div>
-
-            <div className="driver-score-card">
-              <div>
-                <div style={{ fontWeight: 700 }}>Abdul Mannan</div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>HiAce Transit • 100% On-Time</div>
-              </div>
-              <span className="badge gold">+৳ 2,800 Bonus</span>
+          <div className="card-body">
+            <div className="responsive-col-3" style={{ gap: '12px' }}>
+              {vehicles.map(v => (
+                <div key={v.id} style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '14px', background: 'var(--brand-card-bg)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <strong>{v.plate}</strong>
+                    <span className="badge info">{v.fuelPct}% Full</span>
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', marginBottom: '8px' }}>
+                    {v.model} • Driver: {v.driverName || 'Depot'}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginBottom: '10px' }}>
+                    Active Fuel Slip: <code>{v.fuelSlipNo}</code>
+                  </div>
+                  <button
+                    className="btn-gold"
+                    style={{ width: '100%', fontSize: '11px', justifyContent: 'center' }}
+                    onClick={() => handleIssueFuelSlip(v)}
+                  >
+                    <QrCode size={13} /> Issue QR Fuel Voucher
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════
-          MODAL: SUBMIT NEW VEHICLE REQUISITION (For Employee & All Roles)
+          TAB 5: SECURITY GATE CLEARANCE ROSTER & ODOMETERS (Admin only)
           ══════════════════════════════════════════════════════════════ */}
+      {isTransportAdmin && activeAdminTab === 'gate_manifest' && (
+        <div className="card mb-4">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><FileText size={18} /></div>
+              <div>
+                <div className="card-title">{t('Plant Security Gate-1 Inward/Outward Log', 'প্ল্যান্ট গেট-১ যাতায়াত রেজিস্টার', lang)}</div>
+                <div className="card-subtitle">{t('Odometer audit, security gate clearance passes & mileage reconciliation', 'ওডোমিটার অডিট ও ট্রিপ লগ', lang)}</div>
+              </div>
+            </div>
+            <button
+              className="btn-outline"
+              style={{ fontSize: '11px', padding: '4px 9px' }}
+              onClick={() => {
+                window.print();
+                showToast(t('Gate security roster dispatched to printer.', 'প্রিন্ট পাঠানো হয়েছে।', lang), 'info');
+              }}
+            >
+              <Printer size={13} /> {t('Print Gate Register', 'প্রিন্ট', lang)}
+            </button>
+          </div>
+
+          <div className="card-body" style={{ padding: 0 }}>
+            <div className="table-responsive">
+              <table className="fleet-table" style={{ margin: 0, fontSize: '11.5px' }}>
+                <thead>
+                  <tr>
+                    <th>Req ID</th>
+                    <th>Vehicle Plate</th>
+                    <th>Driver</th>
+                    <th>Passenger Lead</th>
+                    <th>Gate Out</th>
+                    <th>Gate In</th>
+                    <th>Start Odometer</th>
+                    <th>End Odometer</th>
+                    <th>Total Km</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requisitions.map(r => {
+                    const totalKm = r.odometerEnd && r.odometerStart ? r.odometerEnd - r.odometerStart : null;
+                    return (
+                      <tr key={r.id}>
+                        <td><strong>{r.id}</strong></td>
+                        <td>{r.assignedVehiclePlate || 'Unassigned'}</td>
+                        <td>{r.assignedDriverName || '—'}</td>
+                        <td>{r.requesterName}</td>
+                        <td>{r.gateOutTime || (r.status === 'completed' ? '09:42 AM' : 'Pending')}</td>
+                        <td>{r.gateInTime || (r.status === 'completed' ? '02:55 PM' : 'En Route')}</td>
+                        <td>{r.odometerStart ? `${r.odometerStart.toLocaleString()} km` : '—'}</td>
+                        <td>{r.odometerEnd ? `${r.odometerEnd.toLocaleString()} km` : '—'}</td>
+                        <td><strong>{totalKm ? `${totalKm} km` : '—'}</strong></td>
+                        <td>
+                          <span className={`badge ${r.status === 'completed' ? 'success' : r.status === 'in_transit' ? 'info' : 'warn'}`}>
+                            {r.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 1: NEW VEHICLE REQUISITION ────────────────────────── */}
       {showNewRequisitionModal && (
         <div className="modal-bg" onClick={() => setShowNewRequisitionModal(false)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Car size={18} color="#FBBF24" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
-                  {t('Submit Official Duty Travel Vehicle Requisition', 'দাপ্তরিক যাতায়াত যানবাহন আবেদনপত্র', lang)}
-                </h3>
-              </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowNewRequisitionModal(false)}>×</button>
+            <div className="modal-hd">
+              <h3>
+                <Car size={18} />
+                {t('Official Duty Travel Vehicle Requisition Form', 'দাপ্তরিক যাতায়াত যানবাহন রিকুইজিশন ফর্ম', lang)}
+              </h3>
+              <button className="modal-close" onClick={() => setShowNewRequisitionModal(false)}>×</button>
             </div>
 
-            <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto' }}>
-              {/* Trip Type Selector */}
+            <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+              {/* Trip Mode Switch */}
               <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Trip Type', 'যাত্রার ধরন', lang)}</label>
-                <div className="responsive-col-2-eq" style={{ gap: '10px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Trip Mode & Route Type', 'যাতায়াতের ধরন', lang)}</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <button
                     type="button"
                     style={{
@@ -790,9 +1199,9 @@ export default function FleetView({ role, lang }: ViewProps) {
                     onClick={() => setTripType('round_trip')}
                   >
                     <div style={{ fontWeight: 800, fontSize: '13px', color: tripType === 'round_trip' ? '#1D4ED8' : '#0F172A' }}>
-                      🔄 Round Trip (Going & Returning)
+                      🔄 Round Trip (Return Transit)
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#64748B' }}>Same vehicle will wait and bring passengers back</div>
+                    <div style={{ fontSize: '10.5px', color: '#64748B' }}>Driver waits and returns passengers to origin office</div>
                   </button>
 
                   <button
@@ -947,10 +1356,86 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          MODAL: TRANSPORT ADMIN ASSIGNMENT MODAL (Vehicle + Driver)
-          ══════════════════════════════════════════════════════════════ */}
-      {assigningReq && (
+      {/* ─── MODAL 2: SMART POOLING CONSOLIDATION DIALOG (Admin only) ── */}
+      {isTransportAdmin && showSmartPoolModal && (
+        <div className="modal-bg" onClick={() => setShowSmartPoolModal(false)}>
+          <div className="modal" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)', color: '#fff' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles size={18} color="#FDE047" />
+                  {t('AI Smart Pooling Route Consolidation', 'এআই কারপুলিং মার্জ কনফার্মেশন', lang)}
+                </h3>
+                <div style={{ fontSize: '11px', color: '#BFDBFE' }}>
+                  Dhaka Corporate HQ ➔ Keraniganj Bitumen Plant Transit Corridor
+                </div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowSmartPoolModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '12px 14px', borderRadius: '8px', marginBottom: '14px', fontSize: '12px', color: '#1E40AF' }}>
+                💡 <strong>Optimization Rationale:</strong> Two requisitions depart within 15 minutes of each other on the identical corridor. Consolidating into a 7-seater executive microbus eliminates 1 duplicate vehicle deployment.
+              </div>
+
+              {/* Matched Requisitions */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px', background: '#F8FAFC' }}>
+                  <div style={{ fontWeight: 800, fontSize: '12px', color: 'var(--brand-slate-900)' }}>REQ-2026-441 (Tanvir Ahmed)</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Sales & Distribution • 2 Pax</div>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#1D4ED8', marginTop: '4px' }}>Departure: 02:30 PM</div>
+                </div>
+
+                <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px', background: '#F8FAFC' }}>
+                  <div style={{ fontWeight: 800, fontSize: '12px', color: 'var(--brand-slate-900)' }}>REQ-2026-443 (Engr. Mizanur)</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Quality Assurance • 1 Pax</div>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#1D4ED8', marginTop: '4px' }}>Departure: 02:45 PM</div>
+                </div>
+              </div>
+
+              {/* Allocated Pooled Vehicle */}
+              <div style={{ border: '1.5px solid #10B981', background: '#ECFDF5', padding: '12px 14px', borderRadius: '8px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '11px', color: '#047857', fontWeight: 800, textTransform: 'uppercase' }}>
+                  Recommended Shared Fleet Vehicle:
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 900, color: '#065F46', marginTop: '2px' }}>
+                  DHAKA METRO CHA-53-4102 — Toyota HiAce Super GL (7-Seater)
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#047857', marginTop: '2px' }}>
+                  Driver: <strong>Abdul Mannan</strong> (📞 +880 1819-338811) • Sobriety: 0.00% BAC Passed
+                </div>
+              </div>
+
+              {/* Financial & Environmental ROI */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center', fontSize: '11.5px' }}>
+                <div style={{ background: '#F1F5F9', padding: '8px', borderRadius: '6px' }}>
+                  <div style={{ color: '#64748B' }}>Fuel Saved</div>
+                  <strong style={{ color: '#059669', fontSize: '13px' }}>৳1,850</strong>
+                </div>
+                <div style={{ background: '#F1F5F9', padding: '8px', borderRadius: '6px' }}>
+                  <div style={{ color: '#64748B' }}>Transit Saved</div>
+                  <strong style={{ color: '#2563EB', fontSize: '13px' }}>38 km</strong>
+                </div>
+                <div style={{ background: '#F1F5F9', padding: '8px', borderRadius: '6px' }}>
+                  <div style={{ color: '#64748B' }}>Vehicle Preserved</div>
+                  <strong style={{ color: '#D97706', fontSize: '13px' }}>1 Sedan</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowSmartPoolModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button className="btn-gold" onClick={handleExecuteSmartPool}>
+                <Check size={14} />
+                {t('Confirm & Execute Pool Merger', 'মার্জ নিশ্চিত করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 3: TRANSPORT ADMIN VEHICLE + DRIVER ASSIGNMENT ─────── */}
+      {isTransportAdmin && assigningReq && (
         <div className="modal-bg" onClick={() => setAssigningReq(null)}>
           <div className="modal" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
@@ -966,7 +1451,6 @@ export default function FleetView({ role, lang }: ViewProps) {
             </div>
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              {/* Requisition Summary Card */}
               <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px 14px', borderRadius: '6px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                   <span><strong>Route:</strong> {assigningReq.from.split(',')[0]} ➔ {assigningReq.to.split(',')[0]}</span>
@@ -1054,9 +1538,198 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          MODAL: OFFICIAL DIGITAL TRIP CHALLAN PASS (For Requester & Gate)
-          ══════════════════════════════════════════════════════════════ */}
+      {/* ─── MODAL 4: TRIP COMPLETION & ODOMETER LOGGING (Admin only) ── */}
+      {isTransportAdmin && completingReq && (
+        <div className="modal-bg" onClick={() => setCompletingReq(null)}>
+          <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#059669', color: '#fff' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle size={18} />
+                  {t('Complete Duty Trip & Reconcile Mileage', 'ট্রিপ সমাপ্তি ও ওডোমিটার হিসাব', lang)}
+                </h3>
+                <div style={{ fontSize: '11px', color: '#D1FAE5' }}>Requisition: {completingReq.id} • Vehicle: {completingReq.assignedVehiclePlate}</div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setCompletingReq(null)}>×</button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '10px 12px', borderRadius: '8px', fontSize: '12px' }}>
+                <div>Start Odometer: <strong>{completingReq.odometerStart || 42350} km</strong></div>
+                <div>Driver: <strong>{completingReq.assignedDriverName}</strong></div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>
+                  {t('Ending Odometer Reading (km)', 'সমাপ্তির ওডোমিটার রিডিং (কিমি)', lang)}
+                </label>
+                <input
+                  type="number"
+                  className="input-text"
+                  style={{ width: '100%' }}
+                  value={endOdometer}
+                  onChange={(e) => setEndOdometer(Number(e.target.value))}
+                />
+                <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px' }}>
+                  Calculated Transit: <strong>{endOdometer - (completingReq.odometerStart || 42350)} km traveled</strong>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>
+                  {t('Driver & Trip Service Rating (1 - 5 Stars)', 'ড্রাইভার রেটিং', lang)}
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setTripRating(star)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: tripRating >= star ? '1.5px solid #D4AF37' : '1px solid #CBD5E1',
+                        background: tripRating >= star ? '#FEF3C7' : '#FFF',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        color: tripRating >= star ? '#B45309' : '#94A3B8'
+                      }}
+                    >
+                      ★ {star}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '4px' }}>
+                  {t('Passenger Feedback / Notes', 'মন্তব্য', lang)}
+                </label>
+                <input
+                  type="text"
+                  className="input-text"
+                  style={{ width: '100%' }}
+                  value={tripFeedback}
+                  onChange={(e) => setTripFeedback(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setCompletingReq(null)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button className="btn-primary" style={{ background: '#059669' }} onClick={handleConfirmCompleteTrip}>
+                <Check size={14} /> {t('Confirm Inward Clearance & Complete', 'ট্রিপ সমাপ্ত করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 5: REJECT REQUISITION MODAL (Admin only) ─────────── */}
+      {isTransportAdmin && rejectingReq && (
+        <div className="modal-bg" onClick={() => setRejectingReq(null)}>
+          <div className="modal" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#B91C1C', color: '#fff' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0 }}>{t('Reject Vehicle Requisition', 'রিকুইজিশন বাতিল', lang)}</h3>
+                <div style={{ fontSize: '11px', color: '#FECACA' }}>Requisition: {rejectingReq.id}</div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setRejectingReq(null)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>
+                {t('Reason for Rejection / Unavailability:', 'বাতিল করার কারণ:', lang)}
+              </label>
+              <select
+                className="input-select"
+                style={{ width: '100%' }}
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+              >
+                <option value="All pool sedans occupied for emergency refinery dispatch">All pool sedans occupied for emergency refinery dispatch</option>
+                <option value="Non-official duty or insufficient advance notice">Non-official duty or insufficient advance notice</option>
+                <option value="Recommending public commute / ride-share reimbursement">Recommending public commute / ride-share reimbursement</option>
+                <option value="Driver rest quota hours exceeded for safety">Driver rest quota hours exceeded for safety</option>
+              </select>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setRejectingReq(null)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button className="btn-primary" style={{ background: '#B91C1C' }} onClick={handleConfirmReject}>
+                {t('Confirm Rejection', 'বাতিল নিশ্চিত করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 6: LIVE VEHICLE TRACKING HUD (Available to All) ──── */}
+      {trackingReq && (
+        <div className="modal-bg" onClick={() => setTrackingReq(null)}>
+          <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div>
+                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Navigation size={18} color="#38BDF8" />
+                  {t('Live Vehicle Telematics & Route Beacon', 'লাইভ ভেহিক্যাল ট্র্যাকিং', lang)}
+                </h3>
+                <div style={{ fontSize: '11px', color: '#94A3B8' }}>{trackingReq.id} • {trackingReq.assignedVehiclePlate}</div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setTrackingReq(null)}>×</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '20px' }}>
+              <div style={{
+                background: '#0B132B',
+                color: '#fff',
+                borderRadius: '12px',
+                padding: '20px',
+                textAlign: 'center',
+                marginBottom: '16px'
+              }}>
+                <div style={{ fontSize: '11px', color: '#38BDF8', fontWeight: 800, textTransform: 'uppercase' }}>
+                  GPS Satellite Beacon Synced
+                </div>
+                <div style={{ fontSize: '24px', fontWeight: 900, marginTop: '4px' }}>
+                  48 km/h
+                </div>
+                <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+                  Location: Dhaka-Mawa Expressway near Babubazar Overpass
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginTop: '14px', fontSize: '11.5px' }}>
+                  <span>ETA to Destination: <strong style={{ color: '#34D399' }}>18 mins</strong></span>
+                  <span>Driver: <strong>{trackingReq.assignedDriverName}</strong></span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  className="btn-outline"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={() => showToast(`Calling Driver ${trackingReq.assignedDriverName} (${trackingReq.assignedDriverPhone})...`, 'info')}
+                >
+                  <Phone size={14} /> Call Driver
+                </button>
+                <button
+                  className="btn-outline"
+                  style={{ flex: 1, justifyContent: 'center', borderColor: '#EF4444', color: '#EF4444' }}
+                  onClick={() => showToast('SOS Dispatcher notified. Emergency vehicle en route.', 'info')}
+                >
+                  <AlertOctagon size={14} /> Emergency SOS
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setTrackingReq(null)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 7: OFFICIAL DIGITAL TRIP CHALLAN PASS ─────────────── */}
       {selectedTripPassReq && (
         <div className="modal-bg" onClick={() => setSelectedTripPassReq(null)}>
           <div className="modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
@@ -1084,7 +1757,7 @@ export default function FleetView({ role, lang }: ViewProps) {
 
                 <div className="responsive-col-2-eq" style={{ gap: '10px', fontSize: '11.5px', marginBottom: '14px' }}>
                   <div><strong>Pass Ref:</strong> {selectedTripPassReq.tripPassNo}</div>
-                  <div><strong>Date of Issue:</strong> 17 Oct 2026</div>
+                  <div><strong>Date of Issue:</strong> 22 Oct 2026</div>
                   <div><strong>Authorized Requester:</strong> {selectedTripPassReq.requesterName}</div>
                   <div><strong>Department:</strong> {selectedTripPassReq.dept}</div>
                   <div><strong>Assigned Vehicle:</strong> <span style={{ color: '#059669', fontWeight: 800 }}>{selectedTripPassReq.assignedVehiclePlate}</span></div>
@@ -1115,6 +1788,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               <button
                 className="btn-primary"
                 onClick={() => {
+                  window.print();
                   showToast(t(`Challan Pass ${selectedTripPassReq.tripPassNo} sent to printer.`, `চালান পাস প্রিন্টারে পাঠানো হয়েছে।`, lang), 'success');
                   setSelectedTripPassReq(null);
                 }}
@@ -1127,10 +1801,8 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          MODAL: FUEL SLIP
-          ══════════════════════════════════════════════════════════════ */}
-      {showFuelModal && (
+      {/* ─── MODAL 8: FUEL SLIP VOUCHER (Admin only) ─────────────────── */}
+      {isTransportAdmin && showFuelModal && (
         <div className="modal-bg" onClick={() => setShowFuelModal(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd">
@@ -1194,17 +1866,22 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      <RegisterVehicleModal
-        isOpen={showRegisterVehicleModal}
-        onClose={() => setShowRegisterVehicleModal(false)}
-        lang={lang}
-      />
+      {/* Admin Modals */}
+      {isTransportAdmin && (
+        <>
+          <RegisterVehicleModal
+            isOpen={showRegisterVehicleModal}
+            onClose={() => setShowRegisterVehicleModal(false)}
+            lang={lang}
+          />
 
-      <EnrollDriverModal
-        isOpen={showEnrollDriverModal}
-        onClose={() => setShowEnrollDriverModal(false)}
-        lang={lang}
-      />
+          <EnrollDriverModal
+            isOpen={showEnrollDriverModal}
+            onClose={() => setShowEnrollDriverModal(false)}
+            lang={lang}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -65,6 +65,15 @@ export interface VehicleRequisition {
   assignedDriverPhone?: string;
   tripPassNo?: string;
   createdAt: string;
+  hodApproval?: 'approved' | 'pending' | 'rejected';
+  odometerStart?: number;
+  odometerEnd?: number;
+  gateOutTime?: string;
+  gateInTime?: string;
+  rating?: number;
+  feedback?: string;
+  rejectionReason?: string;
+  pooledWith?: string;
 }
 
 export const INITIAL_DRIVERS: Driver[] = [
@@ -306,6 +315,32 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     createdAt: '17 Oct 2026, 11:20 AM',
   },
   {
+    id: 'REQ-2026-435',
+    requesterName: 'Tanvir Ahmed',
+    requesterRole: 'Sr. Sales & Distribution Specialist',
+    dept: 'Sales & Distribution',
+    phone: '+880 1712-334455',
+    from: 'Bashundhara Corporate HQ, Baridhara',
+    to: 'Meghna Ghat Asphalt Depot & Terminal',
+    tripType: 'round_trip',
+    departureTime: 'Today, 03:00 PM',
+    returnTime: 'Today, 07:30 PM',
+    requiredCapacity: 'sedan_4',
+    passengersCount: 2,
+    passengerNames: 'Tanvir Ahmed, Tariqul Islam',
+    purpose: 'Deliver certified bitumen sales contracts and verify delivery invoices',
+    costCenter: 'CC-SALES-DHAKA-102',
+    status: 'assigned',
+    assignedVehiclePlate: 'DHAKA METRO GHA-13-8821',
+    assignedVehicleModel: 'Toyota Prado TXL (Executive Pool)',
+    assignedDriverId: 'DRV-01',
+    assignedDriverName: 'Md. Shahidul Islam',
+    assignedDriverPhone: '+880 1711-229944',
+    tripPassNo: 'TC-2026-9042',
+    createdAt: '17 Oct 2026, 09:15 AM',
+    hodApproval: 'approved',
+  },
+  {
     id: 'REQ-2026-443',
     requesterName: 'Engr. Mizanur Rahman',
     requesterRole: 'QA/QC Lead Engineer',
@@ -347,6 +382,39 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     assignedDriverPhone: '+880 1711-229944',
     tripPassNo: 'TC-2026-8841',
     createdAt: '16 Oct 2026, 04:15 PM',
+    hodApproval: 'approved',
+  },
+  {
+    id: 'REQ-2026-438',
+    requesterName: 'Syed Golam Faruq',
+    requesterRole: 'Procurement Specialist',
+    dept: 'Supply Chain & Procurement',
+    phone: '+880 1719-887722',
+    from: 'Bashundhara Corporate HQ, Baridhara',
+    to: 'Fatullah Fuel & Bitumen Barge Terminal, Narayanganj',
+    tripType: 'round_trip',
+    departureTime: 'Yesterday, 09:30 AM',
+    returnTime: 'Yesterday, 03:00 PM',
+    requiredCapacity: 'sedan_4',
+    passengersCount: 2,
+    passengerNames: 'Syed Golam Faruq, Tareq Ahmed',
+    purpose: 'Witness customs clearance & barge ullage inspection for 5,000 MT Bitumen',
+    costCenter: 'CC-PROC-LOG-204',
+    status: 'completed',
+    assignedVehiclePlate: 'DHAKA METRO DA-14-3312',
+    assignedVehicleModel: 'Mitsubishi L200 4x4 (Refinery Emergency Patrol)',
+    assignedDriverId: 'DRV-04',
+    assignedDriverName: 'Sujon Mia',
+    assignedDriverPhone: '+880 1720-551122',
+    tripPassNo: 'TC-2026-8819',
+    createdAt: '15 Oct 2026, 02:10 PM',
+    hodApproval: 'approved',
+    odometerStart: 42350,
+    odometerEnd: 42426,
+    gateOutTime: '09:42 AM',
+    gateInTime: '02:55 PM',
+    rating: 5,
+    feedback: 'Excellent punctuality and safe highway transit across Dhaka-Mawa corridor.',
   },
 ];
 
@@ -374,6 +442,7 @@ class FleetStore {
       ...req,
       id: `REQ-2026-4${40 + this.requisitions.length + 1}`,
       status: 'pending',
+      hodApproval: 'approved',
       createdAt: 'Just Now',
     };
     this.requisitions = [newReq, ...this.requisitions];
@@ -411,6 +480,138 @@ class FleetStore {
       if (v.plate === vehiclePlate) return { ...v, status: 'in_transit', driverId, driverName: driver?.name, driverPhone: driver?.phone };
       return v;
     });
+
+    this.notify();
+  }
+
+  startTrip(reqId: string, startKm: number, gateOutTime: string): void {
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          status: 'in_transit',
+          odometerStart: startKm,
+          gateOutTime,
+        };
+      }
+      return r;
+    });
+    this.notify();
+  }
+
+  completeTrip(reqId: string, endKm: number, gateInTime: string, rating?: number, feedback?: string): void {
+    const req = this.requisitions.find(r => r.id === reqId);
+    if (!req) return;
+
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          status: 'completed',
+          odometerEnd: endKm,
+          gateInTime,
+          rating: rating || 5,
+          feedback: feedback || 'Trip completed safely with passenger clearance.',
+        };
+      }
+      return r;
+    });
+
+    // Free up vehicle and driver
+    if (req.assignedVehiclePlate) {
+      this.vehicles = this.vehicles.map(v => {
+        if (v.plate === req.assignedVehiclePlate) {
+          return { ...v, status: 'available', speed: 0 };
+        }
+        return v;
+      });
+    }
+
+    if (req.assignedDriverId) {
+      this.drivers = this.drivers.map(d => {
+        if (d.id === req.assignedDriverId) {
+          return {
+            ...d,
+            status: 'available',
+            totalTrips: d.totalTrips + 1,
+            dutyHoursToday: Number((d.dutyHoursToday + 2.5).toFixed(1)),
+          };
+        }
+        return d;
+      });
+    }
+
+    this.notify();
+  }
+
+  rejectRequisition(reqId: string, reason: string): void {
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          status: 'rejected',
+          rejectionReason: reason,
+        };
+      }
+      return r;
+    });
+    this.notify();
+  }
+
+  endorseHOD(reqId: string, status: 'approved' | 'rejected'): void {
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          hodApproval: status,
+        };
+      }
+      return r;
+    });
+    this.notify();
+  }
+
+  poolRequisitions(primaryReqId: string, secondaryReqId: string, vehiclePlate: string, driverId: string): void {
+    const vehicle = this.vehicles.find(v => v.plate === vehiclePlate);
+    const driver = this.drivers.find(d => d.id === driverId);
+    const sharedPass = `POOL-TC-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === primaryReqId) {
+        return {
+          ...r,
+          status: 'assigned',
+          assignedVehiclePlate: vehiclePlate,
+          assignedVehicleModel: vehicle?.model,
+          assignedDriverId: driverId,
+          assignedDriverName: driver?.name,
+          assignedDriverPhone: driver?.phone,
+          tripPassNo: sharedPass,
+          pooledWith: secondaryReqId,
+        };
+      }
+      if (r.id === secondaryReqId) {
+        return {
+          ...r,
+          status: 'assigned',
+          assignedVehiclePlate: vehiclePlate,
+          assignedVehicleModel: vehicle?.model,
+          assignedDriverId: driverId,
+          assignedDriverName: driver?.name,
+          assignedDriverPhone: driver?.phone,
+          tripPassNo: sharedPass,
+          pooledWith: primaryReqId,
+        };
+      }
+      return r;
+    });
+
+    if (driverId) {
+      this.drivers = this.drivers.map(d => d.id === driverId ? { ...d, status: 'on_trip', assignedVehiclePlate: vehiclePlate } : d);
+    }
+    if (vehiclePlate) {
+      this.vehicles = this.vehicles.map(v => v.plate === vehiclePlate ? { ...v, status: 'in_transit' } : v);
+    }
 
     this.notify();
   }
@@ -504,6 +705,11 @@ export function useFleetStore() {
     requisitions,
     addRequisition: fleetStore.addRequisition.bind(fleetStore),
     assignRequisition: fleetStore.assignRequisition.bind(fleetStore),
+    startTrip: fleetStore.startTrip.bind(fleetStore),
+    completeTrip: fleetStore.completeTrip.bind(fleetStore),
+    rejectRequisition: fleetStore.rejectRequisition.bind(fleetStore),
+    endorseHOD: fleetStore.endorseHOD.bind(fleetStore),
+    poolRequisitions: fleetStore.poolRequisitions.bind(fleetStore),
     recordBreathalyzer: fleetStore.recordBreathalyzer.bind(fleetStore),
     addVehicle: fleetStore.addVehicle.bind(fleetStore),
     addDriver: fleetStore.addDriver.bind(fleetStore),
