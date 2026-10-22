@@ -7,7 +7,8 @@ import {
   Camera, Printer, Key, Check, Eye, Download, ShieldAlert,
   FileText, ExternalLink, RefreshCw, Inbox, Send, RotateCcw,
   Truck, ArrowUpRight, ArrowDownLeft, AlertCircle, Building,
-  Hash, Shield, User, Filter, CheckSquare, X
+  Hash, Shield, User, Filter, CheckSquare, X, Phone, MessageSquare,
+  Copy, Share2, Compass, Layers, CheckCircle2, ChevronRight
 } from 'lucide-react';
 
 export interface CustodyLogEntry {
@@ -56,6 +57,15 @@ export interface ParcelItem {
   currentStage: number; // 1 to 5
   status: 'dispatched' | 'in_transit' | 'at_gate' | 'delivered' | 'returned' | 'quarantined';
   lastUpdated: string;
+  eta: string;
+  corridorProgressPercent: number; // 0 to 100
+  courier: {
+    name: string;
+    phone: string;
+    vehicle: string;
+    avatarInitials: string;
+    currentSpeed?: string;
+  };
   dispatchedBy: string;
   tamperStatus: 'secure' | 'inspected' | 'flagged';
   deliveryOtp: string;
@@ -65,8 +75,6 @@ export interface ParcelItem {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INITIAL ENTERPRISE PARCELS SEED DATA
-// Fully segmented with realistic personal consignments for Tanvir Ahmed (Staff)
-// and administrative manifests for leadership oversight
 // ─────────────────────────────────────────────────────────────────────────────
 
 const INITIAL_PARCELS: ParcelItem[] = [
@@ -90,6 +98,15 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 4,
     status: 'at_gate',
     lastUpdated: 'Today, 01:15 PM',
+    eta: 'Ready for Pickup at Reception',
+    corridorProgressPercent: 88,
+    courier: {
+      name: 'Rafiqul Islam',
+      phone: '01711-884210',
+      vehicle: 'Toyota HiAce (Dhaka Metro-Cha 11-4921)',
+      avatarInitials: 'RI',
+      currentSpeed: 'Arrived at Station',
+    },
     dispatchedBy: 'Md. Kamruzzaman (Admin)',
     tamperStatus: 'secure',
     deliveryOtp: '7482',
@@ -141,7 +158,76 @@ const INITIAL_PARCELS: ParcelItem[] = [
     ],
   },
 
-  // ── 2. INCOMING TO TANVIR AHMED (Delivered & Verified) ──
+  // ── 2. OUTBOUND SENT BY TANVIR AHMED (In-Transit to Keraniganj) ──
+  {
+    id: 'P-TA-05',
+    trackingNo: 'BOGCL-WB-2026-9055',
+    sealNo: 'TAMPER-SEAL #BG-99430',
+    sender: 'Tanvir Ahmed',
+    senderDept: 'Sales & Distribution, Dhaka',
+    origin: 'Bashundhara Corporate HQ, Baridhara',
+    receiver: 'Engr. Md. Harunur Rashid (Plant GM)',
+    receiverDept: 'Plant General Management',
+    destination: 'Keraniganj Bitumen Refinery Complex',
+    contents: 'Counter-signed Roads & Highways Dept (RHD) BDT 14.5 Crore Bulk Bitumen Supply Contract & Original Bank Guarantee Copies',
+    category: 'legal_docs',
+    weight: '0.65 kg',
+    declaredValue: 'BDT 145,000,000 (Commercial Contract)',
+    specialHandling: 'Confidential Executive Contract • Armed Courier Escort • Biometric Receipt',
+    urgency: 'critical',
+    currentStage: 3,
+    status: 'in_transit',
+    lastUpdated: 'Today, 10:45 AM',
+    eta: 'Today by 02:45 PM (ETA: 35 mins)',
+    corridorProgressPercent: 62,
+    courier: {
+      name: 'Jahangir Alam',
+      phone: '01819-332910',
+      vehicle: 'Armored Courier Pickup #05 (Dhaka Metro-Th 14-8821)',
+      avatarInitials: 'JA',
+      currentSpeed: '46 km/h (Postogola Toll Plaza)',
+    },
+    dispatchedBy: 'Despatch Counter HQ #1',
+    tamperStatus: 'secure',
+    deliveryOtp: '6218',
+    chainOfCustody: [
+      {
+        stage: 1,
+        stageName: 'Despatch Logged',
+        stageNameBn: 'ডেসপ্যাচ এন্ট্রি',
+        location: 'Dhaka HQ Executive Mail Counter',
+        timestamp: 'Today, 09:10 AM',
+        actor: 'Tanvir Ahmed',
+        actorRole: 'Sender (Sales & Distribution)',
+        notes: 'Original contract packet sealed with security seal BG-99430.',
+        securityHash: 'sha256:6218a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
+      },
+      {
+        stage: 2,
+        stageName: 'Driver Handover',
+        stageNameBn: 'ড্রাইভার হস্তান্তর',
+        location: 'HQ Baridhara Logistics Gate',
+        timestamp: 'Today, 09:40 AM',
+        actor: 'Vehicle Courier #05 (Driver Jahangir)',
+        actorRole: 'Inter-Office Shuttle Courier',
+        notes: 'Custody handshake completed with transit verification.',
+        securityHash: 'sha256:7218b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
+      },
+      {
+        stage: 3,
+        stageName: 'Transit Checkpoint',
+        stageNameBn: 'ট্রানজিট চেকপয়েন্ট',
+        location: 'Postogola Bridge Toll Gate Checkpoint',
+        timestamp: 'Today, 10:45 AM',
+        actor: 'Transit Security Post #2',
+        actorRole: 'Toll Gate Inspection Post',
+        notes: 'Vehicle reached Southern Toll corridor. En route to Keraniganj.',
+        securityHash: 'sha256:8218c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
+      },
+    ],
+  },
+
+  // ── 3. INCOMING TO TANVIR AHMED (Delivered & Verified) ──
   {
     id: 'P-TA-02',
     trackingNo: 'BOGCL-WB-2026-8975',
@@ -161,6 +247,15 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 5,
     status: 'delivered',
     lastUpdated: 'Yesterday, 04:30 PM',
+    eta: 'Delivered Yesterday',
+    corridorProgressPercent: 100,
+    courier: {
+      name: 'Delwar Hossain',
+      phone: '01912-774411',
+      vehicle: 'Dedicated QC Transit Van #01',
+      avatarInitials: 'DH',
+      currentSpeed: 'Trip Completed',
+    },
     dispatchedBy: 'Keraniganj Gate Post #1',
     tamperStatus: 'secure',
     deliveryOtp: '3914',
@@ -189,54 +284,6 @@ const INITIAL_PARCELS: ParcelItem[] = [
     ],
   },
 
-  // ── 3. INCOMING TO TANVIR AHMED (Delivered & Verified) ──
-  {
-    id: 'P-TA-03',
-    trackingNo: 'BOGCL-WB-2026-8910',
-    sealNo: 'TAMPER-SEAL #BG-99380',
-    sender: 'Md. Kamruzzaman',
-    senderDept: 'Admin & Transport Division',
-    origin: 'HQ Transport & Security Counter',
-    receiver: 'Tanvir Ahmed',
-    receiverDept: 'Sales & Distribution, Dhaka',
-    destination: 'Bashundhara Corporate HQ, Level 4',
-    contents: 'Annual Refinery Gate RFID Access Smartcard & Fire-Retardant PPE Safety Gear Pack',
-    category: 'it_hardware',
-    weight: '2.50 kg',
-    declaredValue: 'BDT 15,000',
-    specialHandling: 'Standard Secure Parcel Box',
-    urgency: 'normal',
-    currentStage: 5,
-    status: 'delivered',
-    lastUpdated: '19 Oct 2026, 11:20 AM',
-    dispatchedBy: 'HQ Logistics Counter #1',
-    tamperStatus: 'secure',
-    deliveryOtp: '5124',
-    chainOfCustody: [
-      {
-        stage: 1,
-        stageName: 'Despatch Logged',
-        stageNameBn: 'ডেসপ্যাচ এন্ট্রি',
-        location: 'HQ Logistics Counter #1',
-        timestamp: '19 Oct 2026, 09:00 AM',
-        actor: 'Md. Kamruzzaman',
-        actorRole: 'Transport Supervisor',
-        securityHash: 'sha256:5524a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-      },
-      {
-        stage: 5,
-        stageName: 'Recipient Verified',
-        stageNameBn: 'প্রাপকের নিকট হস্তান্তর সম্পন্ন',
-        location: 'Dhaka HQ Level 4',
-        timestamp: '19 Oct 2026, 11:20 AM',
-        actor: 'Tanvir Ahmed',
-        actorRole: 'Recipient',
-        notes: 'PPE uniform and RFID card received.',
-        securityHash: 'sha256:7724b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
-      },
-    ],
-  },
-
   // ── 4. INCOMING TO TANVIR AHMED (RETURNED / RTO DISCREPANCY CASE) ──
   {
     id: 'P-TA-04',
@@ -257,6 +304,15 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 4,
     status: 'returned',
     lastUpdated: '18 Oct 2026, 05:10 PM',
+    eta: 'Returned to Sender (RTO Completed)',
+    corridorProgressPercent: 100,
+    courier: {
+      name: 'Kalam Miah',
+      phone: '01611-998822',
+      vehicle: 'Return Courier Van #02',
+      avatarInitials: 'KM',
+      currentSpeed: 'RTO Handed Back',
+    },
     dispatchedBy: 'Keraniganj Dispatch Desk',
     tamperStatus: 'flagged',
     deliveryOtp: '8491',
@@ -304,71 +360,11 @@ const INITIAL_PARCELS: ParcelItem[] = [
       returnStage: 3,
       returnOtp: '4491',
       resolvedAt: '18 Oct 2026, 05:10 PM',
-      courierName: 'Courier Van #02 (Driver Kalam)',
+      courierName: 'Courier Van #02 (Driver Kalam Miah)',
     },
   },
 
-  // ── 5. OUTBOUND SENT BY TANVIR AHMED (In-Transit to Keraniganj) ──
-  {
-    id: 'P-TA-05',
-    trackingNo: 'BOGCL-WB-2026-9055',
-    sealNo: 'TAMPER-SEAL #BG-99430',
-    sender: 'Tanvir Ahmed',
-    senderDept: 'Sales & Distribution, Dhaka',
-    origin: 'Bashundhara Corporate HQ, Baridhara',
-    receiver: 'Engr. Md. Harunur Rashid (Plant GM)',
-    receiverDept: 'Plant General Management',
-    destination: 'Keraniganj Bitumen Refinery Complex',
-    contents: 'Counter-signed Roads & Highways Dept (RHD) BDT 14.5 Crore Bulk Bitumen Supply Contract & Original Bank Guarantee Copies',
-    category: 'legal_docs',
-    weight: '0.65 kg',
-    declaredValue: 'BDT 145,000,000 (Commercial Contract)',
-    specialHandling: 'Confidential Executive Contract • Armed Courier Escort • Biometric Receipt',
-    urgency: 'critical',
-    currentStage: 3,
-    status: 'in_transit',
-    lastUpdated: 'Today, 10:45 AM',
-    dispatchedBy: 'Despatch Counter HQ #1',
-    tamperStatus: 'secure',
-    deliveryOtp: '6218',
-    chainOfCustody: [
-      {
-        stage: 1,
-        stageName: 'Despatch Logged',
-        stageNameBn: 'ডেসপ্যাচ এন্ট্রি',
-        location: 'Dhaka HQ Executive Mail Counter',
-        timestamp: 'Today, 09:10 AM',
-        actor: 'Tanvir Ahmed',
-        actorRole: 'Sender (Sales & Distribution)',
-        notes: 'Original contract packet sealed with security seal BG-99430.',
-        securityHash: 'sha256:6218a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-      },
-      {
-        stage: 2,
-        stageName: 'Driver Handover',
-        stageNameBn: 'ড্রাইভার হস্তান্তর',
-        location: 'HQ Baridhara Logistics Gate',
-        timestamp: 'Today, 09:40 AM',
-        actor: 'Vehicle Courier #05 (Driver Jahangir)',
-        actorRole: 'Inter-Office Shuttle Courier',
-        notes: 'Custody handshake completed with transit verification.',
-        securityHash: 'sha256:7218b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
-      },
-      {
-        stage: 3,
-        stageName: 'Transit Checkpoint',
-        stageNameBn: 'ট্রানজিট চেকপয়েন্ট',
-        location: 'Postogola Bridge Toll Gate Checkpoint',
-        timestamp: 'Today, 10:45 AM',
-        actor: 'Transit Security Post #2',
-        actorRole: 'Toll Gate Inspection Post',
-        notes: 'Vehicle reached Southern Toll corridor. ETA Keraniganj: 35 mins.',
-        securityHash: 'sha256:8218c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
-      },
-    ],
-  },
-
-  // ── 6. OUTBOUND SENT BY TANVIR AHMED (Delivered & Verified) ──
+  // ── 5. OUTBOUND SENT BY TANVIR AHMED (Delivered & Verified) ──
   {
     id: 'P-TA-06',
     trackingNo: 'BOGCL-WB-2026-9022',
@@ -388,35 +384,21 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 5,
     status: 'delivered',
     lastUpdated: '20 Oct 2026, 03:00 PM',
+    eta: 'Delivered on Oct 20',
+    corridorProgressPercent: 100,
+    courier: {
+      name: 'Anwar Hossain',
+      phone: '01712-445566',
+      vehicle: 'Internal HQ Messenger',
+      avatarInitials: 'AH',
+    },
     dispatchedBy: 'Internal HQ Messenger Service',
     tamperStatus: 'secure',
     deliveryOtp: '8832',
-    chainOfCustody: [
-      {
-        stage: 1,
-        stageName: 'Despatch Logged',
-        stageNameBn: 'ডেসপ্যাচ এন্ট্রি',
-        location: 'Sales Dept Counter Level 4',
-        timestamp: '20 Oct 2026, 01:30 PM',
-        actor: 'Tanvir Ahmed',
-        actorRole: 'Sender',
-        securityHash: 'sha256:8832a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-      },
-      {
-        stage: 5,
-        stageName: 'Recipient Verified',
-        stageNameBn: 'প্রাপকের নিকট হস্তান্তর সম্পন্ন',
-        location: 'Level 11 Marketing Directorate',
-        timestamp: '20 Oct 2026, 03:00 PM',
-        actor: 'Executive Secretary to Marketing Director',
-        actorRole: 'Recipient Authorized Agent',
-        notes: 'Handover completed and signed with OTP 8832.',
-        securityHash: 'sha256:9832b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
-      },
-    ],
+    chainOfCustody: [],
   },
 
-  // ── 7. OUTBOUND SENT BY TANVIR AHMED (In-Transit / Driver Handover) ──
+  // ── 6. OUTBOUND SENT BY TANVIR AHMED (In-Transit / Driver Handover) ──
   {
     id: 'P-TA-07',
     trackingNo: 'BOGCL-WB-2026-8892',
@@ -436,35 +418,22 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 2,
     status: 'in_transit',
     lastUpdated: 'Today, 09:15 AM',
+    eta: 'Today by 04:00 PM',
+    corridorProgressPercent: 35,
+    courier: {
+      name: 'Anwar Hossain',
+      phone: '01712-445566',
+      vehicle: 'Shuttle Pickup #BOGCL-09',
+      avatarInitials: 'AH',
+      currentSpeed: '38 km/h',
+    },
     dispatchedBy: 'HQ Logistics Bay',
     tamperStatus: 'secure',
     deliveryOtp: '1943',
-    chainOfCustody: [
-      {
-        stage: 1,
-        stageName: 'Despatch Logged',
-        stageNameBn: 'ডেসপ্যাচ এন্ট্রি',
-        location: 'HQ Baridhara Logistics Desk',
-        timestamp: 'Today, 08:30 AM',
-        actor: 'Tanvir Ahmed',
-        actorRole: 'Sender',
-        securityHash: 'sha256:1943a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0',
-      },
-      {
-        stage: 2,
-        stageName: 'Driver Handover',
-        stageNameBn: 'ড্রাইভার হস্তান্তর',
-        location: 'HQ Baridhara Vehicle Bay',
-        timestamp: 'Today, 09:15 AM',
-        actor: 'Driver Anwar Hossain (Pickup #BOGCL-09)',
-        actorRole: 'Inter-Office Shuttle Courier',
-        notes: 'Handover complete. En route to Keraniganj plant.',
-        securityHash: 'sha256:2943b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0',
-      },
-    ],
+    chainOfCustody: [],
   },
 
-  // ── 8. OTHER CORPORATE CONSIGNMENTS (Visible only in Master Manifest for Leadership/Admin) ──
+  // ── 7. OTHER CORPORATE CONSIGNMENTS (Visible in Master Mode for Admins) ──
   {
     id: 'P-GEN-01',
     trackingNo: 'BOGCL-WB-2026-8812',
@@ -484,57 +453,18 @@ const INITIAL_PARCELS: ParcelItem[] = [
     currentStage: 3,
     status: 'in_transit',
     lastUpdated: '17 Oct 2026, 03:15 PM',
+    eta: 'Today by 03:30 PM',
+    corridorProgressPercent: 55,
+    courier: {
+      name: 'Kalam Miah',
+      phone: '01611-998822',
+      vehicle: 'Armored Security Van #03',
+      avatarInitials: 'KM',
+      currentSpeed: '40 km/h',
+    },
     dispatchedBy: 'Md. Kamruzzaman (Admin)',
     tamperStatus: 'secure',
     deliveryOtp: '7482',
-    chainOfCustody: [],
-  },
-  {
-    id: 'P-GEN-02',
-    trackingNo: 'BOGCL-WB-2026-8819',
-    sealNo: 'TAMPER-SEAL #BG-99418',
-    sender: 'Dr. Rafiqul Huq (QC Head)',
-    senderDept: 'Central Quality Lab, Keraniganj',
-    origin: 'Keraniganj Bitumen Plant',
-    receiver: 'Director of Marketing & Sales',
-    receiverDept: 'Corporate Head Office, Dhaka',
-    destination: 'Dhaka Corporate HQ',
-    contents: 'Certified Lab Test Reports (Ductility, Penetration Grade 60/70) for RHD Highway Tender',
-    category: 'tender_bid',
-    weight: '0.45 kg',
-    declaredValue: 'Confidential Tender Asset',
-    specialHandling: 'Tamper Evident Envelope',
-    urgency: 'high',
-    currentStage: 4,
-    status: 'at_gate',
-    lastUpdated: '17 Oct 2026, 04:30 PM',
-    dispatchedBy: 'Keraniganj Gate Post #1',
-    tamperStatus: 'secure',
-    deliveryOtp: '3914',
-    chainOfCustody: [],
-  },
-  {
-    id: 'P-GEN-03',
-    trackingNo: 'BOGCL-WB-2026-8824',
-    sealNo: 'TAMPER-SEAL #BG-99430',
-    sender: 'Procurement Specialist',
-    senderDept: 'Supply Chain Division',
-    origin: 'Dhaka Corporate HQ',
-    receiver: 'Instrument Engineer',
-    receiverDept: 'Bitumen Unit-2 Maintenance',
-    destination: 'Keraniganj Plant',
-    contents: 'Emergency Siemens Micro-PLC Interface Card for Reactor Temperature Controller',
-    category: 'refinery_spares',
-    weight: '1.80 kg',
-    declaredValue: 'EUR 8,500',
-    specialHandling: 'Electrostatic Sensitive • Anti-Static Bag',
-    urgency: 'critical',
-    currentStage: 2,
-    status: 'in_transit',
-    lastUpdated: '17 Oct 2026, 02:00 PM',
-    dispatchedBy: 'Despatch Counter HQ',
-    tamperStatus: 'secure',
-    deliveryOtp: '5521',
     chainOfCustody: [],
   },
 ];
@@ -565,7 +495,10 @@ export default function ParcelView({ role, lang }: ViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'normal'>('all');
 
-  // Toggle for Admin / Leadership oversight: "My Parcels" vs "Master Corporate Manifest"
+  // Cockpit Internal View Switcher: 'map' | 'timeline' | 'details'
+  const [cockpitView, setCockpitView] = useState<'map' | 'timeline' | 'details'>('map');
+
+  // Scope Toggle: Staff is strictly 'personal'
   const [scopeMode, setScopeMode] = useState<'personal' | 'master'>(isStaff ? 'personal' : 'personal');
 
   // Modals
@@ -599,30 +532,28 @@ export default function ParcelView({ role, lang }: ViewProps) {
   const [newHandlingNotes, setNewHandlingNotes] = useState('Tamper-Proof Pouch • Keep Dry');
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Filtered Parcels based on Staff Partitioning & Active Tab
+  // Scoped Parcels
   // ─────────────────────────────────────────────────────────────────────────
   const scopedParcels = useMemo(() => {
-    // If staff (employee), STRICTLY partition to parcels where user is sender or receiver
     if (isStaff || scopeMode === 'personal') {
       return parcels.filter(p =>
         p.sender.toLowerCase().includes(currentUserName.toLowerCase()) ||
         p.receiver.toLowerCase().includes(currentUserName.toLowerCase())
       );
     }
-    // If Admin / Leadership and master mode is enabled, show all
     return parcels;
   }, [parcels, isStaff, scopeMode, currentUserName]);
 
-  // Selected Parcel (default to first of scoped list)
-  const [selectedParcelId, setSelectedParcelId] = useState<string>(scopedParcels[0]?.id || 'P-TA-01');
+  // Selected Parcel ID
+  const [selectedParcelId, setSelectedParcelId] = useState<string>('P-TA-01');
 
-  // Keep selected parcel in sync
+  // Active Selected Parcel
   const selectedParcel = useMemo(() => {
     return parcels.find(p => p.id === selectedParcelId) || scopedParcels[0] || parcels[0];
   }, [parcels, selectedParcelId, scopedParcels]);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Computed Statistics for the current user
+  // Computed Statistics
   // ─────────────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
     const userParcels = parcels.filter(p =>
@@ -665,7 +596,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
   }, [parcels, currentUserName]);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Filtered List based on tab, search, and urgency
+  // Filtered List
   // ─────────────────────────────────────────────────────────────────────────
   const displayedParcels = useMemo(() => {
     return scopedParcels.filter(p => {
@@ -704,7 +635,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
   }, [scopedParcels, activeTab, urgencyFilter, searchQuery, currentUserName]);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Actions
+  // Handlers
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleAdvanceStage = (parcelId: string) => {
@@ -720,12 +651,10 @@ export default function ParcelView({ role, lang }: ViewProps) {
     }
 
     if (selectedParcel.currentStage === 4) {
-      // Step 5 requires OTP verification
       setIsReturnOtpMode(false);
       setShowOtpModal(true);
       return;
     }
-    // Step 2, 3, 4 use Scanner Handshake
     setShowScannerModal(true);
   };
 
@@ -735,13 +664,14 @@ export default function ParcelView({ role, lang }: ViewProps) {
       if (p.id === selectedParcel.id && p.currentStage < 5 && p.status !== 'returned') {
         const nextStage = p.currentStage + 1;
         const newStatus: ParcelItem['status'] = nextStage === 4 ? 'at_gate' : 'in_transit';
-        const newHash = `sha256:${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-        
+        const newProgress = nextStage === 2 ? 35 : nextStage === 3 ? 65 : nextStage === 4 ? 88 : 100;
+        const newHash = `sha256:${Math.random().toString(36).substring(2, 15)}`;
+
         const newLog: CustodyLogEntry = {
           stage: nextStage,
           stageName: STAGES[nextStage - 1].label,
           stageNameBn: STAGES[nextStage - 1].labelBn,
-          location: nextStage === 3 ? 'Babubazar / Postogola Toll Transit Post' : 'Station Security Desk',
+          location: nextStage === 3 ? 'Babubazar / Postogola Toll Transit Post' : 'Plant Reception Desk',
           timestamp: 'Just Now',
           actor: 'Station Checkpoint Scanner',
           actorRole: 'Security Gate Post',
@@ -753,6 +683,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           ...p,
           currentStage: nextStage,
           status: newStatus,
+          corridorProgressPercent: newProgress,
           lastUpdated: 'Just Now',
           chainOfCustody: [...p.chainOfCustody, newLog],
         };
@@ -767,7 +698,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
     if (!selectedParcel) return;
 
     if (isReturnOtpMode) {
-      // Return verification by original sender
       const expectedOtp = selectedParcel.returnDetails?.returnOtp || '1234';
       if (enteredOtp !== expectedOtp && enteredOtp !== '1234') {
         showToast(t(`Invalid Return OTP PIN. Expected: ${expectedOtp}`, `ভুল রিটার্ন ওটিপি কোড। প্রত্যাশিত: ${expectedOtp}`, lang), 'info');
@@ -795,6 +725,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           return {
             ...p,
             lastUpdated: 'Just Now',
+            corridorProgressPercent: 100,
             returnDetails: updatedReturn,
             chainOfCustody: [...p.chainOfCustody, newLog],
           };
@@ -808,7 +739,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
       return;
     }
 
-    // Normal Delivery OTP
     if (enteredOtp !== selectedParcel.deliveryOtp && enteredOtp !== '1234') {
       showToast(t(`Invalid OTP. Please enter correct 4-digit PIN sent to ${selectedParcel.receiver}. Hint: ${selectedParcel.deliveryOtp}`, `ভুল ওটিপি কোড। অনুগ্রহ করে সঠিক ৪ ডিজিটের পিন লিখুন। হিন্ট: ${selectedParcel.deliveryOtp}`, lang), 'info');
       return;
@@ -831,7 +761,9 @@ export default function ParcelView({ role, lang }: ViewProps) {
           ...p,
           currentStage: 5,
           status: 'delivered',
+          corridorProgressPercent: 100,
           lastUpdated: 'Just Now',
+          eta: 'Delivered Just Now',
           chainOfCustody: [...p.chainOfCustody, newLog],
         };
       }
@@ -843,7 +775,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
     showToast(t(`Handover successful! Consignment ${selectedParcel.trackingNo} confirmed delivered to ${selectedParcel.receiver}.`, `হস্তান্তর সফল! পার্সেল সফলভাবে প্রাপকের নিকট হস্তান্তর করা হয়েছে।`, lang), 'success');
   };
 
-  // ── RETURN / RTO WORKFLOW ──
   const handleInitiateReturn = () => {
     if (!selectedParcel) return;
     if (selectedParcel.status === 'returned') {
@@ -898,6 +829,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           status: 'returned',
           tamperStatus: returnReason === 'tamper_broken' ? 'flagged' : 'inspected',
           lastUpdated: 'Just Now',
+          eta: 'In Return Transit (RTO)',
           returnDetails: newReturn,
           chainOfCustody: [...p.chainOfCustody, newLog],
         };
@@ -909,40 +841,12 @@ export default function ParcelView({ role, lang }: ViewProps) {
     showToast(t(`Return Consignment ${rtoTrackingNo} initiated. Reverse logistics courier dispatched back to ${selectedParcel.sender}.`, `ফেরত চালান ${rtoTrackingNo} সফলভাবে ইস্যু হয়েছে। প্রেরকের নিকট ফেরত পাঠানো হচ্ছে।`, lang), 'gold');
   };
 
-  // ── TAMPER / FLAG SEAL ALERT ──
-  const handleOpenTamperModal = () => {
-    setShowTamperModal(true);
-  };
-
-  const confirmTamperQuarantine = () => {
+  const handleCopyLink = () => {
     if (!selectedParcel) return;
-    setParcels(prev => prev.map(p => {
-      if (p.id === selectedParcel.id) {
-        const newLog: CustodyLogEntry = {
-          stage: p.currentStage,
-          stageName: 'Security Breach Flagged & Quarantined',
-          stageNameBn: 'নিরাপত্তা ত্রুটি ও কোয়ারেন্টাইন',
-          location: p.destination,
-          timestamp: 'Just Now',
-          actor: currentUserName,
-          actorRole: 'Staff / Inspection Officer',
-          notes: 'Tamper seal flagged. Plant Gate #1 Security and Chief Security Officer notified.',
-          securityHash: `sha256:tamper_${Math.random().toString(36).substring(2, 15)}`,
-        };
-        return {
-          ...p,
-          tamperStatus: 'flagged',
-          lastUpdated: 'Just Now',
-          chainOfCustody: [...p.chainOfCustody, newLog],
-        };
-      }
-      return p;
-    }));
-    setShowTamperModal(false);
-    showToast(t('SECURITY ALERT ISSUED: Chief Security Officer & Keraniganj Gate alerted. Seal quarantined.', 'নিরাপত্তা অ্যালার্ট জারি: চিফ সিকিউরিটি অফিসার ও গেটকে অবহিত করা হয়েছে।', lang), 'danger');
+    navigator.clipboard?.writeText(`https://oneops.bashundhara.com/tracking?waybill=${selectedParcel.trackingNo}`);
+    showToast(t(`Tracking link copied for ${selectedParcel.trackingNo}`, `ট্র্যাকিং লিংক কপি করা হয়েছে: ${selectedParcel.trackingNo}`, lang), 'success');
   };
 
-  // ── CREATE NEW CONSIGNMENT ──
   const handleCreateParcel = () => {
     if (!newRecipient.trim() || !newContents.trim()) {
       showToast(t('Please complete recipient and contents fields.', 'অনুগ্রহ করে প্রাপক ও পণ্যের বিবরণ পূরণ করুন।', lang), 'info');
@@ -973,6 +877,15 @@ export default function ParcelView({ role, lang }: ViewProps) {
       currentStage: 1,
       status: 'dispatched',
       lastUpdated: 'Just Now',
+      eta: 'Departing Origin Terminal',
+      corridorProgressPercent: 12,
+      courier: {
+        name: 'Logistics Courier Shuttle #04',
+        phone: '01711-884210',
+        vehicle: 'HQ Despatch Pool Vehicle',
+        avatarInitials: 'CS',
+        currentSpeed: 'Loading at Bay',
+      },
       dispatchedBy: `${currentUserName} (${currentUserDept})`,
       tamperStatus: 'secure',
       deliveryOtp: newOtp,
@@ -1000,9 +913,9 @@ export default function ParcelView({ role, lang }: ViewProps) {
   };
 
   return (
-    <div style={{ paddingBottom: '40px' }}>
+    <div style={{ paddingBottom: '50px' }}>
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 1. Header Bar with Enterprise Controls */}
+      {/* 1. TOP HEADER & INSTANT SEARCH HERO */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="flex-between mb-4" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
         <div>
@@ -1010,21 +923,20 @@ export default function ParcelView({ role, lang }: ViewProps) {
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
               {t('Inter-Office Parcel & Secure Waybill Tracker', 'আন্তঃঅফিস পার্সেল ও ওয়েবিল ট্র্যাকিং সিস্টেম', lang)}
             </h2>
-            <span className="badge success" style={{ fontSize: '10.5px', textTransform: 'uppercase' }}>
+            <span className="badge success" style={{ fontSize: '10.5px' }}>
               ISO 27001 CHAIN-OF-CUSTODY
             </span>
           </div>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
             {t(
-              'Tamper-Evident Chain of Custody & Reverse Logistics (RTO) between Dhaka HQ & Keraniganj Bitumen Refinery',
-              'ঢাকা সদর দপ্তর ও কেরানীগঞ্জ রিফাইনারির মধ্যে বারকোড নিরাপত্তা ও রিটার্ন (RTO) লজিস্টিকস',
+              'Real-Time Geofenced Transit Corridor, Live Courier Custody & Reverse Logistics (RTO) System',
+              'রিয়েল-টাইম ট্রানজিট করিডোর, লাইভ কুরিয়ার কাস্টডি ও রিটার্ন (RTO) লজিস্টিকস পোর্টাল',
               lang
             )}
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Admin toggle if not staff */}
           {!isStaff && (
             <div style={{ display: 'flex', background: 'var(--brand-slate-200)', borderRadius: '6px', padding: '2px' }}>
               <button
@@ -1033,9 +945,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   fontSize: '11px',
                   fontWeight: 700,
                   padding: '4px 10px',
-                  borderRadius: '4px',
                   background: scopeMode === 'personal' ? '#FFF' : 'transparent',
-                  color: scopeMode === 'personal' ? 'var(--brand-slate-900)' : 'var(--brand-slate-600)',
                 }}
                 onClick={() => setScopeMode('personal')}
               >
@@ -1047,9 +957,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   fontSize: '11px',
                   fontWeight: 700,
                   padding: '4px 10px',
-                  borderRadius: '4px',
                   background: scopeMode === 'master' ? '#FFF' : 'transparent',
-                  color: scopeMode === 'master' ? 'var(--brand-slate-900)' : 'var(--brand-slate-600)',
                 }}
                 onClick={() => setScopeMode('master')}
               >
@@ -1069,60 +977,85 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       </div>
 
-      {/* Staff Identity & Privacy Indicator */}
+      {/* Quick Search & Instant Tracking Hero Bar */}
       <div
         style={{
-          background: isStaff ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-          border: `1px solid ${isStaff ? 'rgba(59, 130, 246, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
+          background: '#fff',
+          border: '1px solid var(--brand-slate-200)',
           borderRadius: 'var(--radius-md)',
-          padding: '10px 16px',
+          padding: '12px 16px',
           marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '10px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-          <div
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              background: isStaff ? '#3B82F6' : '#10B981',
-              color: '#FFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '11px',
-            }}
-          >
-            {currentUser.initials}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--brand-slate-400)' }} />
+            <input
+              type="text"
+              placeholder={t('Search or enter Waybill Number (e.g. BOGCL-WB-2026-9041, BG-99412, name)...', 'ওয়েবিল নম্বর, সিল কোড বা প্রাপক লিখে খুঁজুন...', lang)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                paddingLeft: '36px',
+                paddingRight: searchQuery ? '32px' : '12px',
+                height: '38px',
+                borderRadius: '8px',
+                border: '1px solid var(--brand-slate-300)',
+                width: '100%',
+                fontSize: '13px',
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '9px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--brand-slate-400)',
+                }}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <div>
-            <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>
-              {currentUserName} ({currentUserDept})
-            </span>
-            <span style={{ color: 'var(--brand-slate-500)', marginLeft: '6px' }}>
-              {isStaff ? (
-                <>• <strong>{t('Staff Personal Workspace', 'কর্মী ব্যক্তিগত ওয়ার্কস্পেস', lang)}:</strong> {t('Displaying your private inbound & outbound consignments only.', 'শুধুমাত্র আপনার নিজস্ব আসা ও পাঠানো পার্সেল প্রদর্শিত হচ্ছে।', lang)}</>
-              ) : (
-                <>• <strong>{currentUser.label}:</strong> {scopeMode === 'personal' ? t('Viewing your consignments.', 'আপনার পার্সেল দেখা হচ্ছে।', lang) : t('Viewing enterprise master manifests across terminals.', 'সকল টার্মিনালের মাস্টার চালান দেখা হচ্ছে।', lang)}</>
-              )}
-            </span>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-          <Shield size={13} color="#059669" />
-          <span>{t('AES-256 Tamper Pouch Tracking Active', 'এএইএস-২৫৬ বারকোড ট্র্যাকিং সক্রিয়', lang)}</span>
+          {/* Quick Filter Chips for Fast Access */}
+          <div className="parcel-quick-chips">
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+              Quick:
+            </span>
+            <button
+              className={`parcel-quick-chip ${selectedParcelId === 'P-TA-01' ? 'active' : ''}`}
+              onClick={() => setSelectedParcelId('P-TA-01')}
+            >
+              <Key size={12} color="#F59E0B" />
+              ⚡ Awaiting Your OTP (Bonus Docket)
+            </button>
+            <button
+              className={`parcel-quick-chip ${selectedParcelId === 'P-TA-05' ? 'active' : ''}`}
+              onClick={() => setSelectedParcelId('P-TA-05')}
+            >
+              <Truck size={12} color="#3B82F6" />
+              🚚 In Transit (RHD Contract)
+            </button>
+            <button
+              className={`parcel-quick-chip ${selectedParcelId === 'P-TA-04' ? 'active' : ''}`}
+              onClick={() => setSelectedParcelId('P-TA-04')}
+            >
+              <RotateCcw size={12} color="#EF4444" />
+              ↩️ Returned Sample (RTO)
+            </button>
+          </div>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 2. Rich 5-KPI Statistics Cards Dashboard */}
+      {/* 2. 5-KPI INTERACTIVE STATISTICS DECK */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="parcel-kpi-grid">
         {/* Card 1: Received Till Now */}
@@ -1286,625 +1219,601 @@ export default function ParcelView({ role, lang }: ViewProps) {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 3. Selected Parcel Deep-Dive Inspector Card */}
+      {/* 3. PRACTICAL TWO-COLUMN MODERN COCKPIT WORKSPACE */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {selectedParcel && (
-        <div className="card mb-5">
-          <div className="card-hd" style={{ flexWrap: 'wrap', gap: '10px' }}>
-            <div className="card-hd-left">
-              <div
-                className="card-hd-icon"
-                style={{
-                  background: selectedParcel.status === 'returned' ? '#FEF2F2' : undefined,
-                  color: selectedParcel.status === 'returned' ? '#DC2626' : undefined,
-                }}
-              >
-                {selectedParcel.status === 'returned' ? <RotateCcw size={18} /> : <Package size={18} />}
-              </div>
-              <div>
-                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span>{selectedParcel.trackingNo}</span>
-                  <span style={{ color: 'var(--brand-slate-400)', fontWeight: 400 }}>•</span>
-                  <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--brand-slate-600)' }}>
-                    {selectedParcel.sealNo}
-                  </span>
-                  {selectedParcel.status === 'returned' && (
-                    <span className="badge danger" style={{ fontSize: '10.5px' }}>
-                      <RotateCcw size={10} style={{ marginRight: '4px' }} />
-                      RETURN TO ORIGIN (RTO)
-                    </span>
-                  )}
-                  {selectedParcel.tamperStatus === 'flagged' && (
-                    <span className="badge danger" style={{ fontSize: '10.5px' }}>
-                      <AlertTriangle size={10} style={{ marginRight: '4px' }} />
-                      SEAL COMPROMISED
-                    </span>
-                  )}
-                </div>
-                <div className="card-subtitle">
-                  {t('Origin:', 'উৎস:', lang)} <strong>{selectedParcel.origin}</strong> ➔ {t('Destination:', 'গন্তব্য:', lang)} <strong>{selectedParcel.destination}</strong>
-                </div>
-              </div>
+      <div className="parcel-two-col-layout">
+        {/* ── LEFT COLUMN: MY CONSIGNMENTS FEED ── */}
+        <div>
+          {/* Feed Header with Pill Filters */}
+          <div style={{ background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                {t('Consignment Feed', 'চালান তালিকা', lang)} ({displayedParcels.length})
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                {isStaff ? 'Tanvir Ahmed Personal' : 'Enterprise View'}
+              </span>
             </div>
 
-            <div className="flex-gap" style={{ flexWrap: 'wrap' }}>
+            {/* Quick Pill Tabs */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               <button
-                className="btn-sm-ghost"
-                style={{ fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                onClick={() => setShowAuditModal(true)}
+                className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setActiveTab('all')}
               >
-                <FileText size={13} />
-                {t('Audit Trail Ledger', 'অডিট লেজার', lang)}
+                All ({scopedParcels.length})
               </button>
-
               <button
-                className="btn-sm-ghost"
-                style={{ fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                onClick={() => setShowManifestModal(true)}
+                className={`parcel-pill-tab ${activeTab === 'inbound' ? 'active' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setActiveTab('inbound')}
               >
-                <Printer size={13} />
-                {t('Waybill Manifest', 'চালান স্লিপ', lang)}
+                Inward ({stats.totalReceived})
               </button>
-
-              <span className={`badge ${selectedParcel.urgency === 'critical' ? 'danger' : selectedParcel.urgency === 'high' ? 'warn' : 'neutral'}`}>
-                {selectedParcel.urgency.toUpperCase()} PRIORITY
-              </span>
-
-              {/* Broken Seal Button */}
-              {selectedParcel.tamperStatus !== 'flagged' && selectedParcel.status !== 'returned' && selectedParcel.currentStage < 5 && (
-                <button
-                  className="btn-outline-danger"
-                  onClick={handleOpenTamperModal}
-                  style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <AlertTriangle size={12} />
-                  {t('Flag Broken Seal', 'সিল ত্রুটি রিপোর্ট', lang)}
-                </button>
-              )}
-
-              {/* Initiate Return / RTO Button */}
-              {selectedParcel.status !== 'returned' && selectedParcel.currentStage < 5 && (
-                <button
-                  className="btn-sm-ghost"
-                  onClick={handleInitiateReturn}
-                  style={{
-                    fontSize: '11px',
-                    padding: '5px 10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: '#DC2626',
-                    borderColor: '#FCA5A5',
-                    background: '#FFF5F5',
-                  }}
-                  title={t('Reject consignment and return to origin sender', 'পার্সেল প্রত্যাখ্যান ও প্রেরকের নিকট ফেরত পাঠান', lang)}
-                >
-                  <RotateCcw size={12} />
-                  {t('Initiate Return (RTO)', 'ফেরত পাঠান (RTO)', lang)}
-                </button>
-              )}
+              <button
+                className={`parcel-pill-tab ${activeTab === 'outbound' ? 'active' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setActiveTab('outbound')}
+              >
+                Outward ({stats.totalSent})
+              </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'transit' ? 'active' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px' }}
+                onClick={() => setActiveTab('transit')}
+              >
+                In-Transit ({stats.inTransitCount})
+              </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'returned' ? 'active' : ''}`}
+                style={{ padding: '4px 10px', fontSize: '11px', color: stats.returnsCount > 0 ? '#DC2626' : undefined }}
+                onClick={() => setActiveTab('returned')}
+              >
+                Returns ({stats.returnsCount})
+              </button>
             </div>
           </div>
 
-          <div className="card-body">
-            {/* ── Return Warning Banner if Parcel has RTO active ── */}
-            {selectedParcel.status === 'returned' && selectedParcel.returnDetails && (
-              <div
-                style={{
-                  background: '#FEF2F2',
-                  border: '1px solid #F87171',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '14px 18px',
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                }}
-              >
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <div style={{ color: '#DC2626', marginTop: '2px' }}><AlertTriangle size={20} /></div>
-                  <div>
-                    <div style={{ fontWeight: 800, color: '#991B1B', fontSize: '13.5px' }}>
-                      {t('RETURN CONSIGNMENT IN REVERSE LOGISTICS', 'ফেরত প্রক্রিয়াধীন চালান (RTO)', lang)} — {selectedParcel.returnDetails.returnTrackingNo}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#7F1D1D', marginTop: '3px' }}>
-                      <strong>{t('Reason for Return:', 'ফেরতের কারণ:', lang)}</strong> {selectedParcel.returnDetails.reasonText}
-                    </div>
-                    <div style={{ fontSize: '11.5px', color: '#991B1B', marginTop: '2px' }}>
-                      <strong>{t('Discrepancy Notes:', 'পরিদর্শন মন্তব্য:', lang)}</strong> "{selectedParcel.returnDetails.notes}"
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#B91C1C', marginTop: '4px' }}>
-                      Initiated by <strong>{selectedParcel.returnDetails.initiatedBy}</strong> • Reverse Courier: <strong>{selectedParcel.returnDetails.courierName}</strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right', minWidth: '150px' }}>
-                  <span className="badge danger" style={{ fontSize: '11px' }}>
-                    {selectedParcel.returnDetails.returnStage === 3 ? t('Returned & Resolved', 'ফেরত সম্পন্ন', lang) : t('Reverse Transit Active', 'ফেরত ট্রানজিটে আছে', lang)}
-                  </span>
-                  <div style={{ fontSize: '11px', color: '#7F1D1D', marginTop: '6px' }}>
-                    Return PIN: <strong style={{ letterSpacing: '2px' }}>{selectedParcel.returnDetails.returnOtp}</strong>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Visual Timeline: Standard 5-Stage vs Return 3-Stage ── */}
-            {selectedParcel.status === 'returned' && selectedParcel.returnDetails ? (
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                  {t('Reverse Logistics (RTO) Chain-of-Custody Timeline', 'রিটার্ন লজিস্টিকস (RTO) চেইন অব কাস্টডি টাইমলাইন', lang)}
-                </div>
-                <div className="parcel-timeline">
-                  {RETURN_STAGES.map((st) => {
-                    const isDone = st.step < (selectedParcel.returnDetails?.returnStage || 1);
-                    const isActive = st.step === (selectedParcel.returnDetails?.returnStage || 1);
-                    return (
-                      <div key={st.step} className={`timeline-point ${isDone ? 'done' : ''} ${isActive ? 'returned active' : ''}`}>
-                        <div className="tl-circle">
-                          {isDone ? <CheckCircle size={16} /> : st.step}
-                        </div>
-                        <div className="tl-label">{t(st.label, st.labelBn, lang)}</div>
-                        <div className="tl-sub">{st.desc}</div>
-                      </div>
-                    );
-                  })}
-                </div>
+          {/* Vertical Parcel Cards Feed */}
+          <div className="parcel-feed-list">
+            {displayedParcels.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
+                <Package size={28} style={{ opacity: 0.4, margin: '0 auto 8px' }} />
+                <div style={{ fontWeight: 700, fontSize: '13px' }}>No shipments found</div>
+                <div style={{ fontSize: '11px' }}>Try switching filter tabs or clearing search.</div>
               </div>
             ) : (
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
-                  {t('Inter-Office Custody Stage Timeline (Dhaka HQ ➔ Keraniganj Plant)', 'আন্তঃঅফিস কাস্টডি টাইমলাইন (হেড অফিস ➔ কেরানীগঞ্জ প্ল্যান্ট)', lang)}
-                </div>
-                <div className="parcel-timeline">
-                  {STAGES.map((st) => {
-                    const isDone = st.step < selectedParcel.currentStage;
-                    const isActive = st.step === selectedParcel.currentStage;
-                    return (
-                      <div key={st.step} className={`timeline-point ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
-                        <div className="tl-circle">
-                          {isDone ? <CheckCircle size={16} /> : st.step}
+              displayedParcels.map((p) => {
+                const isSelected = selectedParcel?.id === p.id;
+                const isIncoming = p.receiver.toLowerCase().includes(currentUserName.toLowerCase());
+                const isReturned = p.status === 'returned';
+                const isActionNeeded = isIncoming && p.currentStage === 4 && !isReturned;
+
+                return (
+                  <div
+                    key={p.id}
+                    className={`parcel-feed-card ${isSelected ? 'active' : ''}`}
+                    onClick={() => setSelectedParcelId(p.id)}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                      <div>
+                        <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                          {p.trackingNo}
                         </div>
-                        <div className="tl-label">{t(st.label, st.labelBn, lang)}</div>
-                        <div className="tl-sub">{st.desc}</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                          {p.sealNo}
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
-            {/* ── Consignment Deep-Dive Information Grid ── */}
-            <div
-              className="responsive-col-2"
-              style={{
-                marginTop: '16px',
-                background: 'var(--brand-slate-100)',
-                padding: '18px 22px',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--brand-slate-200)',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
-                  {t('Consignment Description & Sealed Content', 'পার্সেলের বিবরণ ও বিষয়বস্তু', lang)}
-                </div>
-                <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
-                  {selectedParcel.contents}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginTop: '14px', fontSize: '12px' }}>
-                  <div>
-                    <span style={{ color: 'var(--brand-slate-500)', display: 'block', fontSize: '11px' }}>{t('Sender:', 'প্রেরক:', lang)}</span>
-                    <strong style={{ color: 'var(--brand-slate-900)' }}>{selectedParcel.sender}</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{selectedParcel.senderDept}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--brand-slate-500)', display: 'block', fontSize: '11px' }}>{t('Recipient:', 'প্রাপক:', lang)}</span>
-                    <strong style={{ color: 'var(--brand-slate-900)' }}>{selectedParcel.receiver}</strong>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{selectedParcel.receiverDept}</div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid var(--brand-slate-200)', display: 'flex', flexWrap: 'wrap', gap: '14px', fontSize: '11.5px' }}>
-                  <div>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Weight: </span>
-                    <strong>{selectedParcel.weight}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Declared Value: </span>
-                    <strong>{selectedParcel.declaredValue}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Handling: </span>
-                    <span style={{ color: 'var(--brand-crimson)', fontWeight: 600 }}>{selectedParcel.specialHandling}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Box: Seal Status & Handover Action */}
-              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginBottom: '4px' }}>
-                  <strong>Security Seal Status: </strong>
-                  {selectedParcel.tamperStatus === 'flagged' ? (
-                    <span style={{ color: '#DC2626', fontWeight: 800 }}>⚠️ TAMPER DETECTED / COMPROMISED</span>
-                  ) : (
-                    <span style={{ color: '#059669', fontWeight: 800 }}>✓ INTACT & VERIFIED</span>
-                  )}
-                </div>
-
-                <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginBottom: '6px' }}>
-                  <strong>SHA-256 Checksum: </strong>
-                  <span style={{ fontFamily: 'monospace', color: '#059669' }}>9a8f...21b4 (VALID)</span>
-                </div>
-
-                <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginBottom: '14px' }}>
-                  <strong>Last Checkpoint: </strong> {selectedParcel.lastUpdated}
-                </div>
-
-                {/* Handover Buttons depending on Status */}
-                {selectedParcel.status === 'returned' ? (
-                  selectedParcel.returnDetails?.returnStage === 2 && selectedParcel.sender.includes(currentUserName) ? (
-                    <button
-                      className="btn-primary"
-                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '6px', background: '#DC2626' }}
-                      onClick={() => handleAdvanceStage(selectedParcel.id)}
-                    >
-                      <RotateCcw size={14} />
-                      {t('Acknowledge Return Receipt (Sender PIN)', 'ফেরত পার্সেল গ্রহণ নিশ্চিত করুন (পিন)', lang)}
-                    </button>
-                  ) : (
-                    <div style={{ color: '#DC2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                      <RotateCcw size={16} />
-                      {selectedParcel.returnDetails?.returnStage === 3
-                        ? t('Returned to Original Sender & Formally Closed', 'মূল প্রেরকের নিকট ফেরত সম্পন্ন ও কেস ক্লোজড', lang)
-                        : t('Reverse Transit in Progress by Courier', 'কুরিয়ার কর্তৃক ফেরত যাত্রা চলমান', lang)}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                        {isReturned ? (
+                          <span className="badge danger" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            RTO RETURN
+                          </span>
+                        ) : isActionNeeded ? (
+                          <span className="badge danger" style={{ fontSize: '9.5px', padding: '2px 6px', animation: 'pulse 1.5s infinite' }}>
+                            ⚡ READY FOR OTP
+                          </span>
+                        ) : p.currentStage === 5 ? (
+                          <span className="badge success" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            ✓ DELIVERED
+                          </span>
+                        ) : (
+                          <span className="badge meeting" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
+                            IN TRANSIT ({p.corridorProgressPercent}%)
+                          </span>
+                        )}
+                        <span className={`badge ${p.urgency === 'critical' ? 'danger' : p.urgency === 'high' ? 'warn' : 'neutral'}`} style={{ fontSize: '8.5px', padding: '1px 4px' }}>
+                          {p.urgency.toUpperCase()}
+                        </span>
+                      </div>
                     </div>
-                  )
-                ) : selectedParcel.currentStage < 5 ? (
+
+                    <div style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--brand-slate-800)', marginBottom: '8px', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {p.contents}
+                    </div>
+
+                    {/* Route line */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: 'var(--brand-slate-500)', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px' }}>
+                      <span style={{ color: isIncoming ? '#2563EB' : '#7C3AED', fontWeight: 700 }}>
+                        {isIncoming ? '📥 Inward' : '📤 Outward'}
+                      </span>
+                      <span>•</span>
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {p.origin.split(',')[0]} ➔ {p.destination.split(',')[0]}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN: INTERACTIVE LIVE TRACKING COCKPIT ── */}
+        <div>
+          {selectedParcel && (
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              {/* Cockpit Hero Banner */}
+              <div className="parcel-cockpit-hero">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#93C5FD', fontWeight: 700 }}>
+                        TAMPER-EVIDENT OFFICIAL WAYBILL
+                      </span>
+                      <span className="badge" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: '10px' }}>
+                        {selectedParcel.category.replace('_', ' ').toUpperCase()}
+                      </span>
+                      {selectedParcel.tamperStatus === 'flagged' && (
+                        <span className="badge danger" style={{ fontSize: '10px' }}>
+                          SEAL COMPROMISED
+                        </span>
+                      )}
+                    </div>
+
+                    <h1 style={{ fontSize: '26px', fontWeight: 900, color: '#fff', margin: '4px 0 2px', fontFamily: 'monospace' }}>
+                      {selectedParcel.trackingNo}
+                    </h1>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#CBD5E1' }}>
+                      <span>Seal: <strong>{selectedParcel.sealNo}</strong></span>
+                      <span>•</span>
+                      <span style={{ color: '#34D399', fontWeight: 700 }}>✓ SHA-256 Validated</span>
+                    </div>
+                  </div>
+
+                  {/* Top Action Toolbar */}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button
-                      className="btn-primary"
-                      style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '6px' }}
-                      onClick={() => handleAdvanceStage(selectedParcel.id)}
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      onClick={handleCopyLink}
                     >
-                      <UserCheck size={14} />
-                      {selectedParcel.currentStage === 4 ? (
-                        t('Verify Recipient OTP & Accept Delivery', 'প্রাপকের ওটিপি যাচাই ও ডেলিভারি গ্রহণ', lang)
-                      ) : (
-                        t(`Scan Seal & Advance to Stage ${selectedParcel.currentStage + 1}`, `সিল স্ক্যান ও পরবর্তী ধাপে স্থানান্তর (${selectedParcel.currentStage + 1})`, lang)
-                      )}
+                      <Copy size={13} />
+                      {t('Copy Link', 'লিংক কপি', lang)}
                     </button>
-
                     <button
                       className="btn-sm-ghost"
-                      style={{ color: '#DC2626', borderColor: '#FCA5A5', background: '#FFF5F5', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      onClick={handleInitiateReturn}
+                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      onClick={() => setShowManifestModal(true)}
                     >
-                      <RotateCcw size={13} />
-                      {t('Reject & Return', 'প্রত্যাখ্যান ও ফেরত', lang)}
+                      <Printer size={13} />
+                      {t('Waybill Manifest', 'চালান স্লিপ', lang)}
+                    </button>
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      onClick={() => setShowAuditModal(true)}
+                    >
+                      <FileText size={13} />
+                      {t('Audit Trail', 'অডিট লেজার', lang)}
                     </button>
                   </div>
-                ) : (
-                  <div style={{ color: '#059669', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                    <CheckCircle size={16} />
-                    {t('Delivered & Biometrically Signed by Recipient', 'প্রাপক কর্তৃক সফলভাবে গৃহীত ও স্বাক্ষরিত', lang)}
+                </div>
+
+                {/* Live Progress Bar with Estimated Time */}
+                <div style={{ marginTop: '22px', position: 'relative', zIndex: 2 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+                      <strong style={{ color: '#F8FAFC' }}>
+                        {selectedParcel.status === 'returned'
+                          ? 'Return to Origin (RTO) in Progress'
+                          : selectedParcel.currentStage === 5
+                          ? 'Delivered & Biometrically Signed'
+                          : selectedParcel.currentStage === 4
+                          ? 'Arrived at Destination Station (Ready for Pickup)'
+                          : 'In Active Vehicle Corridor Transit'}
+                      </strong>
+                    </div>
+                    <div style={{ color: '#93C5FD', fontWeight: 700 }}>
+                      {selectedParcel.eta}
+                    </div>
                   </div>
-                )}
+
+                  {/* Progress Line */}
+                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.15)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${selectedParcel.corridorProgressPercent}%`,
+                        height: '100%',
+                        background: selectedParcel.status === 'returned' ? '#EF4444' : 'linear-gradient(90deg, #10B981, #60A5FA)',
+                        borderRadius: '4px',
+                        transition: 'width 0.5s ease',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: '#94A3B8' }}>
+                    <span>{selectedParcel.origin.split(',')[0]}</span>
+                    <span>Toll Gate Postogola</span>
+                    <span>{selectedParcel.destination.split(',')[0]}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 4. Filter Tabs, Search Bar & Consignments Data Table */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="card">
-        <div className="card-hd" style={{ flexWrap: 'wrap', gap: '12px' }}>
-          <div className="card-hd-left">
-            <div className="card-hd-icon"><Lock size={18} /></div>
-            <div>
-              <div className="card-title">
-                {isStaff
-                  ? t('My Inter-Office Consignments & Waybills', 'আমার আন্তঃঅফিস চালান ও ওয়েবিল রেজিস্টার', lang)
-                  : scopeMode === 'personal'
-                  ? t('My Personal Consignments', 'আমার নিজস্ব পার্সেল রেজিস্টার', lang)
-                  : t('All Terminal Waybills & Active Transit Manifests', 'চলমান সকল ওয়েবিল ও চালান তালিকা', lang)}
-              </div>
-              <div className="card-subtitle">
-                {displayedParcels.length} {t('Consignments Monitored in Ledger', 'টি চালান প্রদর্শিত হচ্ছে', lang)}
-              </div>
-            </div>
-          </div>
-
-          {/* Search & Urgency Filter */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: '220px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--brand-slate-400)' }} />
-              <input
-                type="text"
-                placeholder={t('Search tracking, seal, name...', 'খুঁজুন ট্র্যাকিং, সিল, নাম...', lang)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  paddingLeft: '32px',
-                  fontSize: '12px',
-                  height: '34px',
-                  borderRadius: '20px',
-                  border: '1px solid var(--brand-slate-300)',
-                  width: '100%',
-                }}
-              />
-            </div>
-
-            <select
-              value={urgencyFilter}
-              onChange={(e) => setUrgencyFilter(e.target.value as any)}
-              style={{
-                fontSize: '12px',
-                height: '34px',
-                borderRadius: '20px',
-                border: '1px solid var(--brand-slate-300)',
-                padding: '0 12px',
-                background: '#FFF',
-              }}
-            >
-              <option value="all">{t('All Priorities', 'সকল অগ্রাধিকার', lang)}</option>
-              <option value="critical">{t('Critical Only', 'শুধুমাত্র ক্রিটিক্যাল', lang)}</option>
-              <option value="high">{t('High Priority', 'হাই প্রায়োরিটি', lang)}</option>
-              <option value="normal">{t('Normal Routine', 'নরমাল রুটিন', lang)}</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Pill Tab Bar */}
-        <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--brand-slate-200)', background: 'var(--brand-slate-50)' }}>
-          <div className="parcel-pill-tabs">
-            <button
-              className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveTab('all')}
-            >
-              {t('All My Consignments', 'সকল পার্সেল', lang)}
-              <span className="tab-badge">{scopedParcels.length}</span>
-            </button>
-
-            <button
-              className={`parcel-pill-tab ${activeTab === 'inbound' ? 'active' : ''}`}
-              onClick={() => setActiveTab('inbound')}
-            >
-              <ArrowDownLeft size={13} />
-              {t('Incoming / Received', 'আসা পার্সেল', lang)}
-              <span className="tab-badge">{stats.totalReceived}</span>
-            </button>
-
-            <button
-              className={`parcel-pill-tab ${activeTab === 'outbound' ? 'active' : ''}`}
-              onClick={() => setActiveTab('outbound')}
-            >
-              <ArrowUpRight size={13} />
-              {t('Sent by Me', 'আমার পাঠানো', lang)}
-              <span className="tab-badge">{stats.totalSent}</span>
-            </button>
-
-            <button
-              className={`parcel-pill-tab ${activeTab === 'transit' ? 'active' : ''}`}
-              onClick={() => setActiveTab('transit')}
-            >
-              <Truck size={13} />
-              {t('Active In-Transit', 'ট্রানজিটে আছে', lang)}
-              <span className="tab-badge">{stats.inTransitCount}</span>
-            </button>
-
-            <button
-              className={`parcel-pill-tab ${activeTab === 'delivered' ? 'active' : ''}`}
-              onClick={() => setActiveTab('delivered')}
-            >
-              <CheckCircle size={13} />
-              {t('Delivered & Verified', 'হস্তান্তর সম্পন্ন', lang)}
-              <span className="tab-badge">{scopedParcels.filter(p => p.status === 'delivered').length}</span>
-            </button>
-
-            <button
-              className={`parcel-pill-tab ${activeTab === 'returned' ? 'active' : ''}`}
-              onClick={() => setActiveTab('returned')}
-            >
-              <RotateCcw size={13} />
-              {t('Returns & Issues (RTO)', 'ফেরত ও সমস্যা (RTO)', lang)}
-              <span className="tab-badge" style={{ background: stats.returnsCount > 0 ? '#FEE2E2' : undefined, color: stats.returnsCount > 0 ? '#DC2626' : undefined }}>
-                {stats.returnsCount}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="fleet-table">
-              <thead>
-                <tr>
-                  <th>{t('Tracking / Seal', 'ট্র্যাকিং ও সিল', lang)}</th>
-                  <th>{t('Sender', 'প্রেরক', lang)}</th>
-                  <th>{t('Recipient', 'প্রাপক', lang)}</th>
-                  <th>{t('Contents & Category', 'বিবরণ ও ক্যাটাগরি', lang)}</th>
-                  <th>{t('Current Status', 'বর্তমান অবস্থা', lang)}</th>
-                  <th>{t('Security / RTO', 'সিকিউরিটি / রিটার্ন', lang)}</th>
-                  <th>{t('Action', 'পদক্ষেপ', lang)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedParcels.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--brand-slate-500)' }}>
-                      <Package size={32} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
-                      <div style={{ fontWeight: 700, fontSize: '14px' }}>
-                        {t('No consignments found matching your filter criteria.', 'কোনো পার্সেল খুঁজে পাওয়া যায়নি।', lang)}
+              {/* ── ACTION REQUIRED CALLOUT (Zero Ambiguity for Users) ── */}
+              {selectedParcel.currentStage === 4 && selectedParcel.status !== 'returned' && (
+                <div style={{ padding: '16px 22px', background: '#ECFDF5', borderBottom: '1px solid #A7F3D0' }}>
+                  <div className="parcel-otp-callout">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Key size={22} />
                       </div>
-                      <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                        {t('Try resetting search filters or register a new consignment.', 'অনুসন্ধান ফিল্টার পরিবর্তন করুন অথবা নতুন পার্সেল বুকিং করুন।', lang)}
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '14px', color: '#065F46' }}>
+                          {t('CONSIGNMENT READY FOR PICKUP & HANDOVER', 'পার্সেল হস্তান্তরের জন্য প্রস্তুত', lang)}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#047857', marginTop: '2px' }}>
+                          {t('Provide this 4-digit Delivery PIN to Station Reception or Courier to accept goods:', 'পণ্য গ্রহণের জন্য রিসিপশন বা কুরিয়ারকে এই ৪ ডিজিটের পিন কোড দিন:', lang)}
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ) : (
-                  displayedParcels.map((p) => {
-                    const isSelected = selectedParcel?.id === p.id;
-                    const isUserSender = p.sender.toLowerCase().includes(currentUserName.toLowerCase());
-                    const isUserReceiver = p.receiver.toLowerCase().includes(currentUserName.toLowerCase());
+                    </div>
 
-                    return (
-                      <tr
-                        key={p.id}
-                        style={{
-                          cursor: 'pointer',
-                          background: isSelected ? 'rgba(59, 130, 246, 0.06)' : undefined,
-                        }}
-                        onClick={() => setSelectedParcelId(p.id)}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ background: '#fff', border: '2px dashed #059669', padding: '6px 16px', borderRadius: '8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '10px', color: '#065F46', fontWeight: 700, textTransform: 'uppercase' }}>DELIVERY PIN</div>
+                        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '6px', color: '#065F46', fontFamily: 'monospace' }}>
+                          {selectedParcel.deliveryOtp}
+                        </div>
+                      </div>
+
+                      <button
+                        className="btn-primary"
+                        style={{ height: '46px', padding: '0 20px', fontWeight: 800, background: '#059669', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => handleAdvanceStage(selectedParcel.id)}
                       >
-                        {/* 1. Tracking / Seal */}
-                        <td>
-                          <div style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
-                            {p.trackingNo}
+                        <UserCheck size={16} />
+                        {t('Instant OTP Handshake', 'ওটিপি যাচাই সম্পন্ন করুন', lang)}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── RETURN TO SENDER CALLOUT (If Returned) ── */}
+              {selectedParcel.status === 'returned' && selectedParcel.returnDetails && (
+                <div style={{ padding: '16px 22px', background: '#FEF2F2', borderBottom: '1px solid #FECACA' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ color: '#DC2626' }}><RotateCcw size={24} /></div>
+                      <div>
+                        <div style={{ fontWeight: 800, color: '#991B1B', fontSize: '13.5px' }}>
+                          RETURN TO ORIGIN (RTO) — {selectedParcel.returnDetails.returnTrackingNo}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#7F1D1D' }}>
+                          <strong>Reason:</strong> {selectedParcel.returnDetails.reasonText} • "{selectedParcel.returnDetails.notes}"
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedParcel.returnDetails.returnStage === 2 && selectedParcel.sender.includes(currentUserName) && (
+                      <button
+                        className="btn-primary"
+                        style={{ background: '#DC2626', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => handleAdvanceStage(selectedParcel.id)}
+                      >
+                        <RotateCcw size={14} />
+                        {t('Verify Return Receipt (PIN)', 'ফেরত গ্রহণ নিশ্চিত করুন', lang)}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── COCKPIT INTERNAL SUB-NAV BAR ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', padding: '12px 22px', background: 'var(--brand-slate-50)' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    className={`parcel-pill-tab ${cockpitView === 'map' ? 'active' : ''}`}
+                    onClick={() => setCockpitView('map')}
+                  >
+                    <Compass size={13} />
+                    {t('Live Transit Corridor', 'লাইভ করিডোর ম্যাপ', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitView === 'timeline' ? 'active' : ''}`}
+                    onClick={() => setCockpitView('timeline')}
+                  >
+                    <Clock size={13} />
+                    {t('Step-by-Step History', 'ধাপভিত্তিক টাইমলাইন', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitView === 'details' ? 'active' : ''}`}
+                    onClick={() => setCockpitView('details')}
+                  >
+                    <Layers size={13} />
+                    {t('Package Specs & Custody', 'পণ্যের স্পেকস ও কাস্টডি', lang)}
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {selectedParcel.status !== 'returned' && selectedParcel.currentStage < 5 && (
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ color: '#DC2626', borderColor: '#FCA5A5', background: '#FFF5F5', fontSize: '11px' }}
+                      onClick={handleInitiateReturn}
+                    >
+                      <RotateCcw size={12} />
+                      {t('Report Issue / Return', 'সমস্যা / ফেরত পাঠান', lang)}
+                    </button>
+                  )}
+                  {selectedParcel.tamperStatus !== 'flagged' && selectedParcel.currentStage < 5 && (
+                    <button
+                      className="btn-outline-danger"
+                      style={{ fontSize: '11px', padding: '4px 8px' }}
+                      onClick={() => setShowTamperModal(true)}
+                    >
+                      <AlertTriangle size={12} />
+                      {t('Flag Broken Seal', 'সিল ত্রুটি', lang)}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* ── VIEW 1: LIVE TRANSIT CORRIDOR MAP (Simulated Real-Time Route) ── */}
+              {cockpitView === 'map' && (
+                <div style={{ padding: '22px' }}>
+                  <div className="parcel-corridor-map-box">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                          Dhaka HQ ➔ Keraniganj Bitumen Plant Highway Corridor (22.4 km)
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                          Monitored via Automatic Number Plate Recognition (ANPR) & RFID Checkpoints
+                        </div>
+                      </div>
+                      <span className="badge success" style={{ fontSize: '10.5px' }}>
+                        ● GPS CORRIDOR ACTIVE
+                      </span>
+                    </div>
+
+                    {/* Visual Route Corridor */}
+                    <div style={{ position: 'relative', height: '110px', margin: '20px 0' }}>
+                      <div className="corridor-track-line" />
+                      <div
+                        className="corridor-progress-line"
+                        style={{ width: `calc(${selectedParcel.corridorProgressPercent}% - 50px)` }}
+                      />
+
+                      {/* Moving Vehicle Courier Beacon */}
+                      {selectedParcel.currentStage >= 2 && selectedParcel.currentStage < 5 && (
+                        <div
+                          className="corridor-vehicle-beacon"
+                          style={{ left: `${selectedParcel.corridorProgressPercent}%` }}
+                        >
+                          <div className="corridor-vehicle-bubble">
+                            <Truck size={16} />
                           </div>
-                          <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>{p.sealNo}</div>
-                          {isUserSender && (
-                            <span className="badge neutral" style={{ fontSize: '9px', marginTop: '2px', padding: '1px 5px' }}>
-                              Sent by Me
-                            </span>
-                          )}
-                          {isUserReceiver && (
-                            <span className="badge info" style={{ fontSize: '9px', marginTop: '2px', padding: '1px 5px' }}>
-                              Incoming for Me
-                            </span>
-                          )}
-                        </td>
-
-                        {/* 2. Sender */}
-                        <td>
-                          <div style={{ fontWeight: 600, color: 'var(--brand-slate-900)' }}>{p.sender}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{p.senderDept}</div>
-                        </td>
-
-                        {/* 3. Recipient */}
-                        <td>
-                          <div style={{ fontWeight: 600, color: 'var(--brand-slate-900)' }}>{p.receiver}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{p.receiverDept}</div>
-                        </td>
-
-                        {/* 4. Contents */}
-                        <td style={{ fontSize: '12px', maxWidth: '280px' }}>
-                          <div style={{ fontWeight: 600, color: 'var(--brand-slate-800)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {p.contents}
+                          <div style={{ background: '#1E293B', color: '#fff', fontSize: '9.5px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                            {selectedParcel.courier.currentSpeed || 'En Route'}
                           </div>
-                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', display: 'flex', gap: '8px' }}>
-                            <span>{p.weight}</span>
-                            <span>•</span>
-                            <span style={{ textTransform: 'capitalize' }}>{p.category.replace('_', ' ')}</span>
-                          </div>
-                        </td>
+                        </div>
+                      )}
 
-                        {/* 5. Current Status */}
-                        <td>
-                          {p.status === 'returned' ? (
-                            <span className="badge danger">
-                              RTO — {RETURN_STAGES[(p.returnDetails?.returnStage || 1) - 1].label}
-                            </span>
-                          ) : (
-                            <span className={`badge ${p.currentStage === 5 ? 'success' : p.currentStage >= 3 ? 'meeting' : 'warn'}`}>
-                              Stage {p.currentStage}/5 — {STAGES[p.currentStage - 1].label}
-                            </span>
-                          )}
-                          <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                            {p.lastUpdated}
-                          </div>
-                        </td>
+                      {/* Route Node Milestones */}
+                      <div className="corridor-nodes-row">
+                        <div className={`corridor-node ${selectedParcel.currentStage >= 1 ? 'passed' : ''}`}>
+                          <div className="corridor-node-dot">1</div>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: 'var(--brand-slate-800)' }}>Dhaka HQ Gate</div>
+                          <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)' }}>Baridhara Hub</div>
+                        </div>
 
-                        {/* 6. Security / RTO */}
-                        <td>
-                          {p.status === 'returned' ? (
+                        <div className={`corridor-node ${selectedParcel.currentStage >= 2 ? 'passed' : ''}`}>
+                          <div className="corridor-node-dot">2</div>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: 'var(--brand-slate-800)' }}>Babubazar Bridge</div>
+                          <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)' }}>River Crossing</div>
+                        </div>
+
+                        <div className={`corridor-node ${selectedParcel.currentStage >= 3 ? 'passed' : ''}`}>
+                          <div className="corridor-node-dot">3</div>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: 'var(--brand-slate-800)' }}>Postogola Toll</div>
+                          <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)' }}>Toll Checkpoint</div>
+                        </div>
+
+                        <div className={`corridor-node ${selectedParcel.currentStage >= 4 ? 'passed' : ''}`}>
+                          <div className="corridor-node-dot">4</div>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: 'var(--brand-slate-800)' }}>Plant Gate #1</div>
+                          <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)' }}>Refinery Inward</div>
+                        </div>
+
+                        <div className={`corridor-node ${selectedParcel.currentStage === 5 ? 'passed' : ''}`}>
+                          <div className="corridor-node-dot">5</div>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: 'var(--brand-slate-800)' }}>Recipient Desk</div>
+                          <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)' }}>Handover PIN</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Courier Custody Card (Practical & Actionable!) */}
+                    <div style={{ marginTop: '24px', background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
+                          {selectedParcel.courier.avatarInitials}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', textTransform: 'uppercase', fontWeight: 700 }}>
+                            CURRENT CUSTODIAN & COURIER
+                          </div>
+                          <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--brand-slate-900)' }}>
+                            {selectedParcel.courier.name}
+                          </div>
+                          <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                            Vehicle: <strong>{selectedParcel.courier.vehicle}</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <a
+                          href={`tel:${selectedParcel.courier.phone}`}
+                          className="btn-primary"
+                          style={{ textDecoration: 'none', fontSize: '11.5px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            showToast(`Dialing Courier ${selectedParcel.courier.name}: ${selectedParcel.courier.phone}`, 'info');
+                          }}
+                        >
+                          <Phone size={13} />
+                          {selectedParcel.courier.phone}
+                        </a>
+                        <button
+                          className="btn-sm-ghost"
+                          style={{ fontSize: '11.5px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          onClick={() => showToast(`Opening secure internal dispatch chat with ${selectedParcel.courier.name}...`, 'info')}
+                        >
+                          <MessageSquare size={13} />
+                          Chat
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── VIEW 2: STEP-BY-STEP VERTICAL JOURNEY TIMELINE ── */}
+              {cockpitView === 'timeline' && (
+                <div style={{ padding: '24px' }}>
+                  <div className="parcel-vertical-stepper">
+                    {STAGES.map((st) => {
+                      const isCompleted = st.step < selectedParcel.currentStage;
+                      const isCurrent = st.step === selectedParcel.currentStage;
+                      const logEntry = selectedParcel.chainOfCustody.find(c => c.stage === st.step);
+
+                      return (
+                        <div
+                          key={st.step}
+                          className={`parcel-step-item ${isCompleted ? 'completed' : isCurrent ? 'current' : ''}`}
+                        >
+                          <div className="parcel-step-dot">
+                            {isCompleted ? <Check size={14} /> : st.step}
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                             <div>
-                              <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <RotateCcw size={11} /> {t('Return Issued', 'ফেরত প্রক্রিয়াধীন', lang)}
-                              </span>
-                              <div style={{ fontSize: '9.5px', color: '#991B1B', fontFamily: 'monospace' }}>
-                                {p.returnDetails?.returnTrackingNo}
+                              <div style={{ fontWeight: 800, fontSize: '13.5px', color: isCurrent ? '#2563EB' : 'var(--brand-slate-900)' }}>
+                                {t(st.label, st.labelBn, lang)}
+                              </div>
+                              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                                {st.desc}
                               </div>
                             </div>
-                          ) : p.tamperStatus === 'flagged' ? (
-                            <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <AlertTriangle size={11} /> {t('Seal Flagged', 'সিল ত্রুটি', lang)}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <ShieldCheck size={12} /> {t('Seal Intact', 'সিল সুরক্ষিত', lang)}
-                            </span>
-                          )}
-                        </td>
 
-                        {/* 7. Action */}
-                        <td>
-                          <div style={{ display: 'flex', gap: '4px' }}>
-                            {p.status === 'returned' ? (
-                              <button
-                                className="btn-sm-ghost"
-                                style={{ fontSize: '11px', color: '#DC2626' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedParcelId(p.id);
-                                  if (p.returnDetails?.returnStage === 2 && p.sender.includes(currentUserName)) {
-                                    setIsReturnOtpMode(true);
-                                    setShowOtpModal(true);
-                                  } else {
-                                    setShowAuditModal(true);
-                                  }
-                                }}
-                              >
-                                <RotateCcw size={11} />
-                                {p.returnDetails?.returnStage === 2 && p.sender.includes(currentUserName) ? 'Return PIN' : 'Details'}
-                              </button>
-                            ) : p.currentStage < 5 ? (
-                              <button
-                                className="btn-sm-ghost"
-                                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedParcelId(p.id);
-                                  handleAdvanceStage(p.id);
-                                }}
-                              >
-                                <UserCheck size={11} />
-                                {p.currentStage === 4 ? 'OTP Verify' : 'Scan'}
-                              </button>
-                            ) : (
-                              <button
-                                className="btn-sm-ghost"
-                                style={{ fontSize: '11px' }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedParcelId(p.id);
-                                  setShowManifestModal(true);
-                                }}
-                              >
-                                <Eye size={11} />
-                                View
-                              </button>
-                            )}
+                            <span className="badge neutral" style={{ fontSize: '10px' }}>
+                              {logEntry ? logEntry.timestamp : isCurrent ? 'In Progress' : 'Pending'}
+                            </span>
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+
+                          {logEntry && (
+                            <div style={{ marginTop: '8px', background: 'var(--brand-slate-100)', padding: '8px 12px', borderRadius: '6px', fontSize: '11.5px', border: '1px solid var(--brand-slate-200)' }}>
+                              <div>📍 <strong>Location:</strong> {logEntry.location}</div>
+                              <div>👤 <strong>Officer:</strong> {logEntry.actor} ({logEntry.actorRole})</div>
+                              {logEntry.notes && <div style={{ marginTop: '2px', color: 'var(--brand-slate-700)' }}>"{logEntry.notes}"</div>}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── VIEW 3: PACKAGE DETAILS & SPECIFICATIONS ── */}
+              {cockpitView === 'details' && (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        CONSIGNMENT CONTENT
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
+                        {selectedParcel.contents}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '8px' }}>
+                        Category: <strong>{selectedParcel.category.replace('_', ' ').toUpperCase()}</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        WEIGHT & DECLARED VALUE
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
+                        {selectedParcel.weight}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', marginTop: '4px' }}>
+                        Asset Valuation: <strong>{selectedParcel.declaredValue}</strong>
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-crimson)', fontWeight: 600, marginTop: '4px' }}>
+                        {selectedParcel.specialHandling}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        SENDER PARTICULARS
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
+                        {selectedParcel.sender}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                        {selectedParcel.senderDept}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
+                        Origin: {selectedParcel.origin}
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                        RECIPIENT PARTICULARS
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
+                        {selectedParcel.receiver}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                        {selectedParcel.receiverDept}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
+                        Destination: {selectedParcel.destination}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 5. Barcode / RFID Tag Scanner Simulation Modal */}
+      {/* 4. MODALS (Scanner, OTP, Waybill Manifest, RTO Return, Incident) */}
       {/* ─────────────────────────────────────────────────────────────────── */}
+
+      {/* Barcode / RFID Tag Scanner Simulation Modal */}
       {showScannerModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowScannerModal(false)}>
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
@@ -1931,7 +1840,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{ marginTop: '16px', fontSize: '12px', color: 'var(--brand-slate-600)', background: '#ECFDF5', padding: '10px 14px', borderRadius: '6px', border: '1px solid #A7F3D0', textAlign: 'left' }}>
-                ✓ Barcode recognized. Geo-location verified at <strong>{selectedParcel.currentStage === 2 ? 'Babubazar / Postogola Toll Transit Post' : 'Plant Gate Reception'}</strong>. Custody will advance to <strong>Stage {selectedParcel.currentStage + 1}</strong>.
+                ✓ Barcode recognized. Geo-location verified at <strong>Babubazar / Postogola Toll Transit Post</strong>. Custody will advance to <strong>Stage {selectedParcel.currentStage + 1}</strong>.
               </div>
             </div>
 
@@ -1946,9 +1855,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 6. Recipient / Return OTP Verification Modal */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Recipient / Return OTP Verification Modal */}
       {showOtpModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowOtpModal(false)}>
           <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
@@ -1968,13 +1875,9 @@ export default function ParcelView({ role, lang }: ViewProps) {
               <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
                 <div style={{ fontSize: '13.5px', color: 'var(--brand-slate-700)', fontWeight: 600 }}>
                   {isReturnOtpMode ? (
-                    <>
-                      Enter the 4-digit Return PIN issued when <strong>{selectedParcel.trackingNo}</strong> was rejected.
-                    </>
+                    <>Enter the 4-digit Return PIN issued when <strong>{selectedParcel.trackingNo}</strong> was rejected.</>
                   ) : (
-                    <>
-                      A 4-digit security PIN was dispatched via SMS to <strong>{selectedParcel.receiver}</strong>.
-                    </>
+                    <>A 4-digit security PIN was dispatched to <strong>{selectedParcel.receiver}</strong>.</>
                   )}
                 </div>
                 <div style={{ fontSize: '11.5px', color: '#D97706', marginTop: '6px' }}>
@@ -2017,9 +1920,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 7. Comprehensive Return / RTO Initiation Modal */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Return Consignment (RTO) Modal */}
       {showReturnModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowReturnModal(false)}>
           <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
@@ -2091,7 +1992,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       checked={returnCourierOption === 'immediate_courier'}
                       onChange={() => setReturnCourierOption('immediate_courier')}
                     />
-                    <span><strong>Immediate Reverse Courier Shuttle</strong> (Hand back to vehicle courier for direct return to sender)</span>
+                    <span><strong>Immediate Reverse Courier Shuttle</strong> (Hand back to courier for direct return)</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input
@@ -2100,13 +2001,9 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       checked={returnCourierOption === 'security_quarantine'}
                       onChange={() => setReturnCourierOption('security_quarantine')}
                     />
-                    <span><strong>Security Quarantine Locker</strong> (Hold under station guard custody pending joint audit)</span>
+                    <span><strong>Security Quarantine Locker</strong> (Hold under station guard custody)</span>
                   </label>
                 </div>
-              </div>
-
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 12px', borderRadius: '6px', fontSize: '11.5px', color: '#475569' }}>
-                ℹ️ <strong>Tamper-Evident Chain of Custody:</strong> An automated Return Waybill (<code>BOGCL-RTO-2026-XXXX</code>) will be generated. The sender ({selectedParcel.sender}) will be notified immediately via SMS/Email to receive the returned goods.
               </div>
             </div>
 
@@ -2125,9 +2022,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 8. Tamper Seal Incident Alert Modal */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Tamper Seal Flag Modal */}
       {showTamperModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowTamperModal(false)}>
           <div className="modal" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
@@ -2174,15 +2069,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <RotateCcw size={14} />
                   {t('Quarantine & Initiate Return to Origin (RTO)', 'কোয়ারেন্টাইন ও অবিলম্বে প্রেরকের নিকট ফেরত', lang)}
                 </button>
-
-                <button
-                  className="btn-sm-ghost"
-                  style={{ justifyContent: 'center', borderColor: '#DC2626', color: '#DC2626' }}
-                  onClick={confirmTamperQuarantine}
-                >
-                  <ShieldAlert size={14} />
-                  {t('Flag Seal Only (Await Joint Inspection)', 'শুধুমাত্র সিল ত্রুটি ফ্ল্যাগ করুন', lang)}
-                </button>
               </div>
             </div>
 
@@ -2193,9 +2079,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 9. Full Chain-of-Custody Audit Trail Ledger Modal (For Board Presentation) */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Digital Audit Trail Ledger Modal */}
       {showAuditModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowAuditModal(false)}>
           <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
@@ -2284,9 +2168,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 10. Official Waybill Manifest Modal with Print Layout */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Official Waybill Manifest Modal */}
       {showManifestModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowManifestModal(false)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
@@ -2358,9 +2240,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────────── */}
-      {/* 11. Register New Consignment Modal (Pre-filled for logged-in user) */}
-      {/* ─────────────────────────────────────────────────────────────────── */}
+      {/* Register New Consignment Modal */}
       {showNewModal && (
         <div className="modal-bg" onClick={() => setShowNewModal(false)}>
           <div className="modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
@@ -2373,14 +2253,12 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
 
             <div className="modal-body">
-              {/* Sender Details (Auto-filled with Current Logged-in Staff) */}
               <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 14px', borderRadius: '6px', marginBottom: '14px', fontSize: '12px' }}>
                 <span style={{ color: '#64748B' }}>{t('Consignment Originator (Sender):', 'প্রেরকের বিবরণ:', lang)} </span>
                 <strong style={{ color: 'var(--brand-slate-900)' }}>{currentUserName}</strong>
                 <span style={{ color: '#64748B' }}> ({currentUserDept})</span>
               </div>
 
-              {/* Recipient Name & Department */}
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>{t('Recipient Name & Officer', 'প্রাপকের নাম ও পদবি', lang)} <span style={{ color: '#DC2626' }}>*</span></label>
@@ -2398,7 +2276,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <option value="Sayeda Afroza Sultana (GM, HR & Admin)" />
                     <option value="Md. Kamruzzaman (Transport & Security Supervisor)" />
                     <option value="Director of Marketing & Sales (Dhaka HQ)" />
-                    <option value="Instrument Engineer (Bitumen Unit-2 Maintenance)" />
                   </datalist>
                 </div>
 
@@ -2413,14 +2290,12 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              {/* Facilities */}
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>{t('Origin Facility', 'প্রেরক শাখা', lang)}</label>
                   <select value={newOrigin} onChange={(e) => setNewOrigin(e.target.value)}>
                     <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
                     <option value="Keraniganj Bitumen Refinery Complex">Keraniganj Bitumen Refinery Complex</option>
-                    <option value="Chittagong Patenga Terminal Office">Chittagong Patenga Terminal Office</option>
                   </select>
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
@@ -2428,12 +2303,10 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <select value={newDestination} onChange={(e) => setNewDestination(e.target.value)}>
                     <option value="Keraniganj Bitumen Refinery Complex">Keraniganj Bitumen Refinery Complex</option>
                     <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
-                    <option value="Chittagong Patenga Terminal Office">Chittagong Patenga Terminal Office</option>
                   </select>
                 </div>
               </div>
 
-              {/* Category & Urgency */}
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>{t('Category of Content', 'পণ্যের শ্রেণিবিভাগ', lang)}</label>
@@ -2456,7 +2329,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              {/* Weight & Declared Value */}
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>{t('Weight (kg)', 'ওজন (কেজি)', lang)}</label>
@@ -2478,7 +2350,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              {/* Contents Description */}
               <div className="form-group">
                 <label>{t('Contents Description & Sealed Items', 'পণ্যের বিস্তারিত বিবরণ ও নথির তালিকা', lang)} <span style={{ color: '#DC2626' }}>*</span></label>
                 <textarea
@@ -2489,7 +2360,6 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 />
               </div>
 
-              {/* Handling Notes */}
               <div className="form-group">
                 <label>{t('Special Handling & Safety Instructions', 'বিশেষ সতর্কতা ও নির্দেশনা', lang)}</label>
                 <input

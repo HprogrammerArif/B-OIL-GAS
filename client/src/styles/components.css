@@ -549,6 +549,283 @@
   color: #fff;
 }
 
+/* ─── ENHANCED PRACTICAL PARCEL TRACKING COCKPIT ────────────────────────────── */
+.parcel-two-col-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .parcel-two-col-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.parcel-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.parcel-feed-list::-webkit-scrollbar {
+  width: 5px;
+}
+.parcel-feed-list::-webkit-scrollbar-thumb {
+  background: var(--brand-slate-300);
+  border-radius: 4px;
+}
+
+.parcel-feed-card {
+  background: #fff;
+  border: 1px solid var(--brand-slate-200);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+.parcel-feed-card:hover {
+  border-color: var(--brand-slate-300);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.parcel-feed-card.active {
+  border-color: var(--brand-crimson);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF8F8 100%);
+  box-shadow: 0 4px 16px rgba(165, 28, 48, 0.12);
+}
+.parcel-feed-card.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--brand-crimson);
+}
+
+.parcel-cockpit-hero {
+  background: linear-gradient(135deg, #0B132B 0%, #172554 100%);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+}
+.parcel-cockpit-hero::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.parcel-corridor-map-box {
+  background: #F8FAFC;
+  border: 1px solid var(--brand-slate-200);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.corridor-track-line {
+  position: absolute;
+  top: 48px;
+  left: 50px;
+  right: 50px;
+  height: 4px;
+  background: #CBD5E1;
+  border-radius: 2px;
+  z-index: 1;
+}
+.corridor-progress-line {
+  position: absolute;
+  top: 48px;
+  left: 50px;
+  height: 4px;
+  background: linear-gradient(90deg, #10B981, #3B82F6);
+  border-radius: 2px;
+  z-index: 2;
+  transition: width 0.6s ease;
+}
+
+.corridor-vehicle-beacon {
+  position: absolute;
+  top: 36px;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.6s ease;
+}
+.corridor-vehicle-bubble {
+  background: #1D4ED8;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.25);
+  animation: pulse-ring 2s infinite;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+.corridor-nodes-row {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  z-index: 3;
+}
+.corridor-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 120px;
+}
+.corridor-node-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748B;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+.corridor-node.passed .corridor-node-dot {
+  background: #10B981;
+  border-color: #10B981;
+  color: #fff;
+}
+.corridor-node.active .corridor-node-dot {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+.parcel-vertical-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 20px;
+}
+.parcel-step-item {
+  position: relative;
+  padding-bottom: 22px;
+  padding-left: 28px;
+  border-left: 2px solid var(--brand-slate-200);
+}
+.parcel-step-item:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+.parcel-step-dot {
+  position: absolute;
+  left: -13px;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--brand-slate-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--brand-slate-500);
+}
+.parcel-step-item.completed {
+  border-left-color: #10B981;
+}
+.parcel-step-item.completed .parcel-step-dot {
+  background: #10B981;
+  border-color: #10B981;
+  color: #fff;
+}
+.parcel-step-item.current {
+  border-left-color: var(--brand-slate-200);
+}
+.parcel-step-item.current .parcel-step-dot {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+.parcel-step-item.returned .parcel-step-dot {
+  background: #DC2626;
+  border-color: #DC2626;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2);
+}
+
+.parcel-otp-callout {
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+  border: 1.5px solid #10B981;
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.parcel-quick-chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.parcel-quick-chip {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--brand-slate-100);
+  color: var(--brand-slate-700);
+  border: 1px solid var(--brand-slate-200);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.parcel-quick-chip:hover {
+  background: var(--brand-slate-200);
+  color: var(--brand-slate-900);
+}
+.parcel-quick-chip.active {
+  background: #2563EB;
+  color: #fff;
+  border-color: #2563EB;
+}
+
 /* ─── ATTENDANCE SIMULATOR ─────────────────────────────────────────────────── */
 .geo-map-placeholder {
   background:linear-gradient(135deg, #EFF6FF, #DBEAFE);
