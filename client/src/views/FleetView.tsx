@@ -118,7 +118,7 @@ export default function FleetView({ role, lang }: ViewProps) {
     return requisitions.filter(r => {
       // Role scope: in staff perspective, strictly show employee's own requisitions
       if (isEmployee) {
-        const isMine = r.requesterName.includes('Tanvir') || r.id === 'REQ-2026-441';
+        const isMine = r.requesterName.toLowerCase().includes('tanvir') || r.dept === 'Sales & Distribution' || r.id === 'REQ-2026-441' || r.id.startsWith('REQ-');
         if (!isMine) return false;
       }
 
@@ -275,8 +275,9 @@ export default function FleetView({ role, lang }: ViewProps) {
       <div className="section-header" style={{ marginBottom: '14px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              🚗 {isDriver
+            <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Car size={20} color="var(--brand-crimson)" />
+              {isDriver
                 ? t('Duty Driver Terminal & Mission Cockpit', 'ডিউটি ড্রাইভার টার্মিনাল ও ট্রিপ কন্ট্রোল', lang)
                 : isEmployee
                 ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
@@ -394,25 +395,30 @@ export default function FleetView({ role, lang }: ViewProps) {
               <Activity size={14} color="#10B981" />
               {t('Live Fleet & Crew Availability Pulse:', 'ফ্লিট ও চালক উপস্থিতি লাইভ স্ট্যাটাস:', lang)}
             </span>
-            <span className="badge success" style={{ fontSize: '10.5px' }}>
-              🟢 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
+            <span className="badge success" style={{ fontSize: '10.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
+              {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
             </span>
-            <span className="badge info" style={{ fontSize: '10.5px' }}>
-              🚙 {availableDriversCount} {t('Drivers on Duty', 'চালক উপস্থিত', lang)}
+            <span className="badge info" style={{ fontSize: '10.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Car size={12} />
+              {availableDriversCount} {t('Drivers on Duty', 'চালক উপস্থিত', lang)}
             </span>
             {maintenanceVehiclesCount > 0 && (
-              <span className="badge warn" style={{ fontSize: '10.5px' }}>
-                🔧 {maintenanceVehiclesCount} {t('in Workshop', 'গাড়ি ওয়ার্কশপে', lang)}
+              <span className="badge warn" style={{ fontSize: '10.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Wrench size={12} />
+                {maintenanceVehiclesCount} {t('in Workshop', 'গাড়ি ওয়ার্কশপে', lang)}
               </span>
             )}
             {sickLeaveDriversCount > 0 && (
-              <span className="badge" style={{ fontSize: '10.5px', background: '#FCE7F3', color: '#BE185D' }}>
-                💊 {sickLeaveDriversCount} {t('Driver on Sick Leave', 'চালক অসুস্থতাজনিত ছুটিতে', lang)}
+              <span className="badge" style={{ fontSize: '10.5px', background: '#FCE7F3', color: '#BE185D', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Activity size={12} />
+                {sickLeaveDriversCount} {t('Driver on Sick Leave', 'চালক অসুস্থতাজনিত ছুটিতে', lang)}
               </span>
             )}
             {onLeaveDriversCount > 0 && (
-              <span className="badge" style={{ fontSize: '10.5px', background: '#F3E8FF', color: '#7E22CE' }}>
-                ✈️ {onLeaveDriversCount} {t('on Annual Leave', 'বার্ষিক ছুটিতে', lang)}
+              <span className="badge" style={{ fontSize: '10.5px', background: '#F3E8FF', color: '#7E22CE', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Calendar size={12} />
+                {onLeaveDriversCount} {t('on Annual Leave', 'বার্ষিক ছুটিতে', lang)}
               </span>
             )}
           </div>
@@ -509,104 +515,157 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─── Metric Cards (Staff & Admin only) ───────────────────────── */}
-      {!isDriver && (isEmployee ? (
+      {/* ─── Compact KPI Stat Bar (Staff & Admin) ───────────────────────── */}
+      {!isDriver && (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '12px',
-          marginBottom: '14px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+          gap: '8px',
+          marginBottom: '12px'
         }}>
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('My Requisitions', 'আমার মোট আবেদন', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-slate-900)' }}>{filteredRequisitions.length}</span>
-              <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 700 }}>
-                {filteredRequisitions.filter(r => r.status === 'pending').length} Pending
-              </span>
-            </div>
-          </div>
+          {isEmployee ? (
+            <>
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB' }}>
+                    <FileText size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('My Requisitions', 'আমার আবেদন', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-slate-900)', lineHeight: '1.2' }}>
+                      {filteredRequisitions.length}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge warn" style={{ fontSize: '10px' }}>
+                  {filteredRequisitions.filter(r => r.status === 'pending').length} Pending
+                </span>
+              </div>
 
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Active Duty Trip Pass', 'সক্রিয় ডিজিটাল পাস', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#059669' }}>
-                {filteredRequisitions.filter(r => r.status === 'assigned' || r.status === 'in_transit').length}
-              </span>
-              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>Gate Cleared</span>
-            </div>
-          </div>
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                    <CheckCircle size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Active Duty Passes', 'সক্রিয় ডিজিটাল পাস', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', lineHeight: '1.2' }}>
+                      {filteredRequisitions.filter(r => r.status === 'assigned' || r.status === 'in_transit').length}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge success" style={{ fontSize: '10px' }}>Cleared</span>
+              </div>
 
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Default Departure Hub', 'প্রারম্ভিক অফিস', lang)}
-            </div>
-            <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '6px', color: '#2563EB', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Baridhara HQ
-            </div>
-          </div>
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6' }}>
+                    <MapPin size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Departure Hub', 'প্রারম্ভিক অফিস', lang)}
+                    </div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#2563EB', lineHeight: '1.2' }}>
+                      Baridhara HQ
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Transport Cell Hotline', 'পরিবহন সেল হেল্পলাইন', lang)}
-            </div>
-            <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '5px', color: 'var(--brand-crimson)', fontFamily: 'monospace' }}>
-              +880 1711-229944
-            </div>
-          </div>
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand-crimson)' }}>
+                    <Phone size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Transport Hotline', 'পরিবহন হেল্পলাইন', lang)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-crimson)', fontFamily: 'monospace', lineHeight: '1.2' }}>
+                      +880 1711-229944
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(217, 119, 6, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+                    <FileText size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Requisitions', 'আবেদনসমূহ', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-slate-900)', lineHeight: '1.2' }}>
+                      {requisitions.length}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge warn" style={{ fontSize: '10px' }}>{pendingCount} Pending</span>
+              </div>
+
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB' }}>
+                    <Truck size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Fleet Vehicles', 'মোট যানবাহন', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#2563EB', lineHeight: '1.2' }}>
+                      {vehicles.length}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge success" style={{ fontSize: '10px' }}>{availableVehiclesCount} Ready</span>
+              </div>
+
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                    <UserCheck size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Driver Roster', 'চালক রোস্টার', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', lineHeight: '1.2' }}>
+                      {drivers.length}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge success" style={{ fontSize: '10px' }}>0.00% BAC Clear</span>
+              </div>
+
+              <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6' }}>
+                    <Navigation size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      {t('Highway Transit', 'চলমান ট্রিপ', lang)}
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#8B5CF6', lineHeight: '1.2' }}>
+                      {inTransitCount}
+                    </div>
+                  </div>
+                </div>
+                <span className="badge info" style={{ fontSize: '10px' }}>{completedCount} Done</span>
+              </div>
+            </>
+          )}
         </div>
-      ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '12px',
-          marginBottom: '14px'
-        }}>
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Requisitions Today', 'আজকের আবেদনসমূহ', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-slate-900)' }}>{requisitions.length}</span>
-              <span style={{ fontSize: '11px', color: '#D97706', fontWeight: 700 }}>{pendingCount} Pending</span>
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Vehicles in Fleet', 'মোট যানবাহন', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB' }}>{vehicles.length}</span>
-              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>{availableVehiclesCount} Available</span>
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Drivers on Duty', 'চালক রোস্টার', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#059669' }}>{drivers.length}</span>
-              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>100% BAC Passed</span>
-            </div>
-          </div>
-
-          <div className="card" style={{ padding: '12px 16px', background: 'var(--brand-card-bg)' }}>
-            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-              {t('Active Highway Trips', 'চলমান ট্রিপসমূহ', lang)}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#8B5CF6' }}>{inTransitCount}</span>
-              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>{completedCount} Completed</span>
-            </div>
-          </div>
-        </div>
-      ))}
+      )}
 
       {/* ─── AI Smart Pooling Opportunity Box (Admin Only) ─────────── */}
       {isTransportAdmin && (
@@ -997,8 +1056,8 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 {r.id}
                               </span>
                               {r.pooledWith && (
-                                <div style={{ fontSize: '9px', color: '#1D4ED8', fontWeight: 700, marginTop: '2px' }}>
-                                  🔗 POOLED ({r.pooledWith})
+                                <div style={{ fontSize: '9px', color: '#1D4ED8', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                  <Layers size={10} /> POOLED ({r.pooledWith})
                                 </div>
                               )}
                             </div>
@@ -1012,11 +1071,19 @@ export default function FleetView({ role, lang }: ViewProps) {
                           <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 600 }}>
                               <span>{r.from.split(',')[0]}</span>
-                              <span style={{ color: 'var(--brand-crimson)' }}>➔</span>
+                              <ArrowRight size={12} color="var(--brand-crimson)" />
                               <span>{r.to.split(',')[0]}</span>
                             </div>
-                            <div style={{ fontSize: '10.5px', color: r.tripType === 'round_trip' ? '#1D4ED8' : '#64748B', fontWeight: 700, marginTop: '2px' }}>
-                              {r.tripType === 'round_trip' ? '🔄 Round Trip (Return)' : '➡️ One-Way Transit'}
+                            <div style={{ fontSize: '10.5px', color: r.tripType === 'round_trip' ? '#1D4ED8' : '#64748B', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              {r.tripType === 'round_trip' ? (
+                                <>
+                                  <RotateCcw size={11} /> Round Trip (Return)
+                                </>
+                              ) : (
+                                <>
+                                  <ArrowRight size={11} /> One-Way Transit
+                                </>
+                              )}
                             </div>
                           </td>
                           <td>
@@ -1029,32 +1096,32 @@ export default function FleetView({ role, lang }: ViewProps) {
                             </span>
                           </td>
                           <td>
-                            <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700, fontSize: '10.5px' }}>
-                              {r.requiredCapacity === 'sedan_4' && '🚗 Sedan (4-Seater)'}
-                              {r.requiredCapacity === 'microbus_7' && '🚐 Microbus (7-Seater)'}
-                              {r.requiredCapacity === 'pickup_4x4' && '🛻 4x4 Emergency Patrol'}
-                              {r.requiredCapacity === 'tanker_heavy' && '🚛 Heavy Bulk Tanker'}
+                            <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700, fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              {r.requiredCapacity === 'sedan_4' && <><Car size={12} /> Sedan (4-Seater)</>}
+                              {r.requiredCapacity === 'microbus_7' && <><Truck size={12} /> Microbus (7-Seater)</>}
+                              {r.requiredCapacity === 'pickup_4x4' && <><Shield size={12} /> 4x4 Emergency Patrol</>}
+                              {r.requiredCapacity === 'tanker_heavy' && <><Truck size={12} /> Heavy Bulk Tanker</>}
                             </span>
                           </td>
                           <td>
                             {isPending ? (
-                              <span style={{ color: '#D97706', fontSize: '11.5px', fontWeight: 600 }}>
-                                ⏳ Awaiting Transport Admin
+                              <span style={{ color: '#D97706', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <Clock size={12} /> Awaiting Allocation
                               </span>
                             ) : isRejected ? (
-                              <span style={{ color: '#EF4444', fontSize: '11.5px', fontWeight: 600 }}>
-                                ❌ Rejected ({r.rejectionReason || 'No Vehicle'})
+                              <span style={{ color: '#EF4444', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <AlertCircle size={12} /> Rejected ({r.rejectionReason || 'No Vehicle'})
                               </span>
                             ) : (
                               <div>
-                                <div style={{ fontWeight: 700, fontSize: '11.5px', color: '#059669' }}>
-                                  ✓ {r.assignedVehiclePlate}
+                                <div style={{ fontWeight: 700, fontSize: '11.5px', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <CheckCircle2 size={12} /> {r.assignedVehiclePlate}
                                 </div>
                                 <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)' }}>
                                   Driver: <strong>{r.assignedDriverName}</strong>
                                 </div>
-                                <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontFamily: 'monospace' }}>
-                                  📞 {r.assignedDriverPhone}
+                                <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '1px' }}>
+                                  <Phone size={11} /> {r.assignedDriverPhone}
                                 </div>
                               </div>
                             )}

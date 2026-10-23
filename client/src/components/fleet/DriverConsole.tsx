@@ -183,8 +183,8 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-2xl shadow-inner">
-              👨‍✈️
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 font-bold shadow-inner">
+              <UserCheck className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
             <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center text-[10px]">
               ✓
@@ -262,8 +262,9 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
           {/* Mission Top Bar */}
           <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent px-6 py-4 border-b border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="px-2.5 py-1 rounded-md bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider">
-                {activeMission.status === 'in_transit' ? t('🚀 IN TRANSIT', '🚀 চলমান ট্রিপ') : t('📋 ASSIGNED MISSION', '📋 বরাদ্দকৃত মিশন')}
+              <span className="px-2.5 py-1 rounded-md bg-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <Navigation className="w-3.5 h-3.5" />
+                {activeMission.status === 'in_transit' ? t('IN TRANSIT', 'চলমান ট্রিপ') : t('ASSIGNED MISSION', 'বরাদ্দকৃত মিশন')}
               </span>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 {t('Requisition Pass #', 'রিকুইজিশন পাস #')}{activeMission.id}
@@ -383,20 +384,20 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                   {/* Step 1: Arrive at Bay */}
                   <button
                     onClick={handleNotifyArrival}
-                    className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full min-h-[48px] py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm transition flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.98]"
                   >
-                    <MapPin className="w-4 h-4" />
-                    {t('1. Arrived at Pickup Bay', '১. পিকআপ পয়েন্টে পৌঁছেছি')}
+                    <MapPin className="w-5 h-5" />
+                    <span>{t('1. Arrived at Pickup Bay', '১. পিকআপ পয়েন্টে পৌঁছেছি')}</span>
                   </button>
 
                   {/* Step 2: Start Trip */}
                   {activeMission.status === 'assigned' && (
                     <button
                       onClick={() => setShowStartTripDialog(true)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-sm"
+                      className="w-full min-h-[48px] py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-bold text-sm transition flex items-center justify-center gap-2.5 shadow-md shadow-amber-900/20 active:scale-[0.98]"
                     >
-                      <Navigation className="w-4 h-4" />
-                      {t('2. Start Journey (Gate-Out)', '২. যাত্রা শুরু (গেট আউট)')}
+                      <Navigation className="w-5 h-5" />
+                      <span>{t('2. Start Journey (Gate-Out Pass)', '২. যাত্রা শুরু (গেট আউট)')}</span>
                     </button>
                   )}
 
@@ -404,20 +405,20 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                   {activeMission.status === 'in_transit' && (
                     <button
                       onClick={() => setShowCompleteDialog(true)}
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-sm"
+                      className="w-full min-h-[48px] py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm transition flex items-center justify-center gap-2.5 shadow-md shadow-emerald-900/20 active:scale-[0.98]"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                      {t('3. Complete Journey (Gate-In)', '৩. যাত্রা সমাপ্ত (গেট ইন)')}
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>{t('3. Complete Journey (Gate-In Pass)', '৩. যাত্রা সমাপ্ত (গেট ইন)')}</span>
                     </button>
                   )}
 
                   {/* Step 4: Quick Toll Claim */}
                   <button
                     onClick={() => setShowTollModal(true)}
-                    className="w-full py-2.5 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-semibold text-xs transition flex items-center justify-center gap-2"
+                    className="w-full min-h-[48px] py-3 px-4 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold text-sm transition flex items-center justify-center gap-2.5 active:scale-[0.98]"
                   >
-                    <Receipt className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    {t('Log Highway Toll Voucher', 'হাইওয়ে টোল ভাউচার এন্ট্রি')}
+                    <Receipt className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    <span>{t('Log Highway Toll Voucher', 'হাইওয়ে টোল ভাউচার এন্ট্রি')}</span>
                   </button>
                 </div>
               </div>
@@ -427,14 +428,14 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                 <button
                   onClick={handleTriggerSos}
                   disabled={sosSent}
-                  className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 ${
+                  className={`w-full min-h-[50px] py-3 px-4 rounded-xl text-sm font-black tracking-wide transition flex items-center justify-center gap-2.5 uppercase active:scale-[0.98] ${
                     sosSent
                       ? 'bg-red-800 text-white opacity-70 cursor-not-allowed'
-                      : 'bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-900/20'
+                      : 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-lg shadow-red-900/20'
                   }`}
                 >
-                  <AlertOctagon className="w-4 h-4" />
-                  {sosSent ? t('SOS Broadcast Active', 'জরুরী সতর্কবার্তা সচল') : t('Emergency Highway SOS', 'জরুরী হাইওয়ে এসওএস')}
+                  <AlertOctagon className="w-5 h-5" />
+                  <span>{sosSent ? t('SOS Broadcast Active', 'জরুরী সতর্কবার্তা সচল') : t('Emergency Highway SOS', 'জরুরী হাইওয়ে এসওএস')}</span>
                 </button>
               </div>
             </div>
@@ -507,35 +508,53 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
               {t('Record vehicle starting odometer reading and confirm passenger aboard.', 'ওডোমিটার রিডিং নিশ্চিত করে যাত্রা শুরু করুন।')}
             </p>
 
-            <div className="space-y-3 mb-5">
+            <div className="space-y-4 mb-5">
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block mb-1.5">
                   {t('Current Starting Odometer (km)', 'শুরুর ওডোমিটার (কিমি)')}
                 </label>
-                <input
-                  type="number"
-                  value={startOdoInput}
-                  onChange={(e) => setStartOdoInput(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStartOdoInput(prev => String(Math.max(0, (parseInt(prev, 10) || 42350) - 5)))}
+                    className="min-w-[48px] h-12 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-base flex items-center justify-center border border-slate-300 dark:border-slate-700 active:scale-95 transition"
+                  >
+                    -5
+                  </button>
+                  <input
+                    type="number"
+                    value={startOdoInput}
+                    onChange={(e) => setStartOdoInput(e.target.value)}
+                    className="flex-1 h-12 text-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-bold font-mono focus:ring-2 focus:ring-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setStartOdoInput(prev => String((parseInt(prev, 10) || 42350) + 5))}
+                    className="min-w-[48px] h-12 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-base flex items-center justify-center border border-slate-300 dark:border-slate-700 active:scale-95 transition"
+                  >
+                    +5
+                  </button>
+                </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
-                ⚠️ Speed limit: 60 km/h on Dhaka corridors, 80 km/h on expressways. Seatbelts mandatory for all passengers.
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 flex items-center gap-2 font-medium">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>Speed limit: 60 km/h on Dhaka corridors, 80 km/h on expressways. Seatbelts mandatory.</span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowStartTripDialog(false)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 {t('Cancel', 'বাতিল')}
               </button>
               <button
                 onClick={handleConfirmStartJourney}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-900/20"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white shadow-md shadow-amber-900/20 transition flex items-center gap-1.5"
               >
+                <Navigation className="w-4 h-4" />
                 {t('Confirm Departure & Open Gate', 'যাত্রা শুরু নিশ্চিত করুন')}
               </button>
             </div>
@@ -555,35 +574,53 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
               {t('Enter ending odometer reading and return vehicle to pool.', 'সমাপনী ওডোমিটার রিডিং প্রদান করুন।')}
             </p>
 
-            <div className="space-y-3 mb-5">
+            <div className="space-y-4 mb-5">
               <div>
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block mb-1.5">
                   {t('Final Odometer Reading (km)', 'সমাপনী ওডোমিটার (কিমি)')}
                 </label>
-                <input
-                  type="number"
-                  value={closingOdoInput}
-                  onChange={(e) => setClosingOdoInput(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setClosingOdoInput(prev => String(Math.max(0, (parseInt(prev, 10) || 42435) - 5)))}
+                    className="min-w-[48px] h-12 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-base flex items-center justify-center border border-slate-300 dark:border-slate-700 active:scale-95 transition"
+                  >
+                    -5
+                  </button>
+                  <input
+                    type="number"
+                    value={closingOdoInput}
+                    onChange={(e) => setClosingOdoInput(e.target.value)}
+                    className="flex-1 h-12 text-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-bold font-mono focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setClosingOdoInput(prev => String((parseInt(prev, 10) || 42435) + 5))}
+                    className="min-w-[48px] h-12 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-base flex items-center justify-center border border-slate-300 dark:border-slate-700 active:scale-95 transition"
+                  >
+                    +5
+                  </button>
+                </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400">
-                ✓ Distance Traveled: ~{(parseInt(closingOdoInput, 10) || 42435) - 42350} km recorded in BOGCL fleet log.
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2 font-medium">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                <span>Distance Traveled: ~{(parseInt(closingOdoInput, 10) || 42435) - 42350} km recorded in BOGCL fleet log.</span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowCompleteDialog(false)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
               >
                 {t('Cancel', 'বাতিল')}
               </button>
               <button
                 onClick={handleConfirmCompleteJourney}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-900/20"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-md shadow-emerald-900/20 transition flex items-center gap-1.5"
               >
+                <CheckCircle2 className="w-4 h-4" />
                 {t('Submit Inward Gate Pass', 'ইনওয়ার্ড পাস নিশ্চিত করুন')}
               </button>
             </div>
