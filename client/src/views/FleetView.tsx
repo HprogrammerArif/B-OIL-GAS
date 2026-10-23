@@ -17,6 +17,7 @@ import RegisterVehicleModal from '../components/fleet/RegisterVehicleModal';
 import EnrollDriverModal from '../components/fleet/EnrollDriverModal';
 import TripChatModal from '../components/fleet/TripChatModal';
 import FleetNotificationsDrawer from '../components/fleet/FleetNotificationsDrawer';
+import FleetChatCenter from '../components/fleet/FleetChatCenter';
 
 export default function FleetView({ role, lang }: ViewProps) {
   const {
@@ -43,8 +44,9 @@ export default function FleetView({ role, lang }: ViewProps) {
   const isEmployee = role === 'employee';
   const isTransportAdmin = role === 'transport_admin' || role === 'plant_gm' || role === 'chairman';
 
-  // Active Tab: Employees only have 'my_requisitions'. Admins have full module tabs.
-  const [activeAdminTab, setActiveAdminTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel' | 'gate_manifest'>('requisitions');
+  // Active Tab: Employees have requisitions and dedicated chat center. Admins have full module tabs + chat center.
+  const [activeAdminTab, setActiveAdminTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel' | 'gate_manifest' | 'chat_center'>('requisitions');
+  const [employeeTab, setEmployeeTab] = useState<'requisitions' | 'chat_center'>('requisitions');
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +57,10 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [activeChatReq, setActiveChatReq] = useState<VehicleRequisition | null>(null);
   const [chatInputText, setChatInputText] = useState('');
   const [chatSimulatedRole, setChatSimulatedRole] = useState<'employee' | 'driver' | 'admin'>(isEmployee ? 'employee' : 'admin');
+
+  // Multi-Stop Route Itinerary State
+  const [intermediateStops, setIntermediateStops] = useState<string[]>([]);
+  const [newStopInput, setNewStopInput] = useState('');
 
   // Notifications Drawer State
   const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
@@ -137,6 +143,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       showToast(t('Please specify the official business purpose.', 'অনুগ্রহ করে দাপ্তরিক কাজের উদ্দেশ্য লিখুন।', lang), 'info');
       return;
     }
+    const cleanStops = intermediateStops.filter(s => s.trim().length > 0);
     const created = addRequisition({
       requesterName: isEmployee ? 'Tanvir Ahmed' : 'Engr. Harunur Rashid',
       requesterRole: isEmployee ? 'Sr. Sales & Distribution Specialist' : 'Plant GM & Operations Lead',
@@ -152,7 +159,17 @@ export default function FleetView({ role, lang }: ViewProps) {
       passengerNames,
       purpose,
       costCenter,
+      intermediateStops: cleanStops.length > 0
+        ? cleanStops.map((loc, idx) => ({
+            id: `STP-${Date.now()}-${idx + 1}`,
+            location: loc,
+            waitDurationMins: 15
+          }))
+        : undefined,
+      estimatedCost: 1500 + cleanStops.length * 350,
     });
+    setIntermediateStops([]);
+    setNewStopInput('');
     setShowNewRequisitionModal(false);
     showToast(t(
       `✓ Duty Travel Requisition ${created.id} submitted! Transferred to Transport Admin (Md. Kamruzzaman) for driver allocation.`,
@@ -694,13 +711,82 @@ export default function FleetView({ role, lang }: ViewProps) {
             <FileText size={14} />
             <span>{t('Security Gate Roster & Odometers', 'গেট ক্লিয়ারেন্স ও ওডোমিটার', lang)}</span>
           </button>
+
+          <button
+            onClick={() => setActiveAdminTab('chat_center')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: activeAdminTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
+              padding: '7px 12px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: activeAdminTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <MessageSquare size={14} />
+            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
+            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live</span>
+          </button>
+        </div>
+      )}
+
+      {/* ─── Employee Navigation Tabs ─── */}
+      {isEmployee && (
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px' }}>
+          <button
+            onClick={() => setEmployeeTab('requisitions')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: employeeTab === 'requisitions' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
+              padding: '7px 14px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: employeeTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Car size={14} />
+            <span>{t('My Official Duty Travel Requisitions', 'আমার রিকুইজিশনসমূহ', lang)}</span>
+            <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px' }}>{filteredRequisitions.length}</span>
+          </button>
+
+          <button
+            onClick={() => setEmployeeTab('chat_center')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: employeeTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
+              padding: '7px 14px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: employeeTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <MessageSquare size={14} />
+            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
+            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live Channels</span>
+          </button>
         </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════
           TAB 1: REQUISITIONS DISPATCH QUEUE & TRAVEL DESK
           ══════════════════════════════════════════════════════════════ */}
-      {(isEmployee || activeAdminTab === 'requisitions') && (
+      {((isEmployee && employeeTab === 'requisitions') || (!isEmployee && activeAdminTab === 'requisitions')) && (
         <div className="card mb-4">
           <div className="card-hd">
             <div className="card-hd-left">
@@ -956,7 +1042,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 </button>
                               )}
 
-                              {/* ─── Tri-Party Trip Chat Button (Staff & Admin) ─── */}
+                              {/* ─── Dedicated Dispatch Communications Desk (Staff & Admin) ─── */}
                               <button
                                 className="btn-outline"
                                 style={{
@@ -969,11 +1055,17 @@ export default function FleetView({ role, lang }: ViewProps) {
                                   borderColor: '#93C5FD',
                                   background: 'rgba(29, 78, 216, 0.05)',
                                 }}
-                                onClick={() => setActiveChatReq(r)}
-                                title={t('Open Tri-Party Dispatch Chat', 'ত্রিপক্ষীয় চ্যাট খুলুন', lang)}
+                                onClick={() => {
+                                  if (isEmployee) {
+                                    setEmployeeTab('chat_center');
+                                  } else {
+                                    setActiveAdminTab('chat_center');
+                                  }
+                                }}
+                                title={t('Open Dedicated Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক খুলুন', lang)}
                               >
                                 <MessageSquare size={11} />
-                                <span>{t('Trip Chat', 'চ্যাট', lang)}</span>
+                                <span>{t('Chat Desk', 'চ্যাট ডেস্ক', lang)}</span>
                               </button>
                             </div>
                           </td>
@@ -1492,6 +1584,17 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
+      {/* ══════════════════════════════════════════════════════════════
+          TAB 6: DEDICATED DISPATCH COMMUNICATIONS DESK (Staff & Admin)
+          ══════════════════════════════════════════════════════════════ */}
+      {((isEmployee && employeeTab === 'chat_center') || (!isEmployee && activeAdminTab === 'chat_center')) && (
+        <FleetChatCenter
+          userRole={isEmployee ? 'employee' : 'admin'}
+          lang={lang}
+          onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
+        />
+      )}
+
       {/* ─── MODAL 1: NEW VEHICLE REQUISITION ────────────────────────── */}
       {showNewRequisitionModal && (
         <div className="modal-bg" onClick={() => setShowNewRequisitionModal(false)}>
@@ -1599,6 +1702,83 @@ export default function FleetView({ role, lang }: ViewProps) {
                     onChange={(e) => setToLoc(e.target.value)}
                     placeholder="e.g. Keraniganj Bitumen Plant Gate #1 / Bangladesh Bank"
                   />
+                </div>
+              </div>
+
+              {/* Multi-Stop Itinerary Route Builder */}
+              <div className="form-group mb-3" style={{ background: '#F8FAFC', border: '1px dashed #CBD5E1', padding: '10px 12px', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', margin: 0, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <MapPin size={13} color="#2563EB" />
+                    {t('Multi-Stop Itinerary & Via Waypoints (Optional)', 'ভায়া স্টপ / মধ্যবর্তী বিরতিসমূহ', lang)}
+                  </label>
+                  <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
+                    {intermediateStops.length} {t('stops added', 'স্টপ যোগ করা হয়েছে', lang)}
+                  </span>
+                </div>
+
+                {intermediateStops.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+                    {intermediateStops.map((stop, idx) => (
+                      <div key={idx} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#FFF',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: '6px',
+                        padding: '6px 10px',
+                        fontSize: '11.5px',
+                      }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--brand-slate-800)' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#EFF6FF', color: '#1D4ED8', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                            {idx + 1}
+                          </span>
+                          <span>{stop}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setIntermediateStops(intermediateStops.filter((_, i) => i !== idx))}
+                          style={{ border: 'none', background: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
+                          title="Remove Stop"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="text"
+                    value={newStopInput}
+                    onChange={(e) => setNewStopInput(e.target.value)}
+                    placeholder="e.g. Sonali Bank Motijheel / Ministry Secretariat..."
+                    style={{ flex: 1, fontSize: '11px', height: '30px' }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (newStopInput.trim()) {
+                          setIntermediateStops([...intermediateStops, newStopInput.trim()]);
+                          setNewStopInput('');
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-outline"
+                    style={{ fontSize: '11px', padding: '0 10px', height: '30px', whiteSpace: 'nowrap' }}
+                    onClick={() => {
+                      if (newStopInput.trim()) {
+                        setIntermediateStops([...intermediateStops, newStopInput.trim()]);
+                        setNewStopInput('');
+                      }
+                    }}
+                  >
+                    + {t('Add Via Stop', 'স্টপ যোগ করুন', lang)}
+                  </button>
                 </div>
               </div>
 
@@ -2238,8 +2418,12 @@ export default function FleetView({ role, lang }: ViewProps) {
           if (req) setSelectedTripPassReq(req);
         }}
         onOpenChat={(reqId) => {
-          const req = requisitions.find(r => r.id === reqId);
-          if (req) setActiveChatReq(req);
+          setShowNotificationsDrawer(false);
+          if (isEmployee) {
+            setEmployeeTab('chat_center');
+          } else {
+            setActiveAdminTab('chat_center');
+          }
         }}
       />
     </div>

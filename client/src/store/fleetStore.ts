@@ -46,15 +46,31 @@ export interface Vehicle {
 export interface TripChatMessage {
   id: string;
   requisitionId: string;
-  senderRole: 'employee' | 'driver' | 'admin';
+  senderRole: 'employee' | 'driver' | 'admin' | 'system';
   senderName: string;
   text: string;
   timestamp: string;
+  messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event';
+  tollData?: {
+    tollName: string;
+    amount: number;
+    receiptNo: string;
+    approved?: boolean;
+    approvedBy?: string;
+    approvedAt?: string;
+  };
+  locationData?: {
+    title: string;
+    address: string;
+    coordinates?: string;
+  };
+  actionType?: 'gate_out_authorized' | 'toll_approved' | 'route_deviation';
+  actionLabel?: string;
 }
 
 export interface FleetNotification {
   id: string;
-  type: 'assignment' | 'requisition_created' | 'gate_out' | 'gate_in' | 'chat_message' | 'driver_status' | 'maintenance';
+  type: 'assignment' | 'requisition_created' | 'gate_out' | 'gate_in' | 'chat_message' | 'driver_status' | 'maintenance' | 'toll_claimed';
   title: string;
   message: string;
   time: string;
@@ -71,6 +87,9 @@ export interface VehicleRequisition {
   phone: string;
   from: string;
   to: string;
+  intermediateStops?: { id: string; location: string; waitDurationMins: number }[];
+  tollExpenses?: { id: string; tollName: string; amount: number; receiptNo: string }[];
+  estimatedCost?: number;
   tripType: 'round_trip' | 'one_way';
   departureTime: string;
   returnTime?: string;
@@ -493,6 +512,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
 ];
 
 export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
+  // ─── REQ-2026-435: Active Duty Trip (Tanvir Ahmed & Driver Shahidul) ───
   {
     id: 'msg-1',
     requisitionId: 'REQ-2026-435',
@@ -500,23 +520,59 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
     senderName: 'Md. Kamruzzaman (Transport Admin)',
     text: 'Vehicle Prado GHA-13-8821 assigned for Meghna Ghat transit. Driver Shahidul has cleared 0.00% BAC breathalyzer audit.',
     timestamp: '09:20 AM',
+    messageType: 'system_event',
+    actionType: 'gate_out_authorized',
+    actionLabel: 'Gate Out Authorized',
   },
   {
     id: 'msg-2',
     requisitionId: 'REQ-2026-435',
     senderRole: 'driver',
     senderName: 'Md. Shahidul Islam (Driver)',
-    text: 'Assalamu Alaikum Tanvir Sir. Car is fueled with 82% Octane and stationed at Baridhara Gate-1 porch.',
+    text: 'Assalamu Alaikum Tanvir Sir. Car is fueled with 82% Octane and stationed at Baridhara Gate-1 porch. AC is running at 22°C.',
     timestamp: '09:25 AM',
+    messageType: 'text',
   },
   {
     id: 'msg-3',
     requisitionId: 'REQ-2026-435',
     senderRole: 'employee',
-    senderName: 'Tanvir Ahmed (Staff)',
+    senderName: 'Tanvir Ahmed',
     text: 'Thank you Shahidul Bhai. I am bringing the asphalt test batch certificates down in 5 mins.',
     timestamp: '09:28 AM',
+    messageType: 'text',
   },
+  {
+    id: 'msg-loc-1',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'employee',
+    senderName: 'Tanvir Ahmed',
+    text: '📍 Shared Passenger Pickup Pin: Baridhara Corporate HQ, Main Reception Porch',
+    timestamp: '09:30 AM',
+    messageType: 'location_share',
+    locationData: {
+      title: 'Bashundhara Corporate HQ Reception',
+      address: 'Plot-3, Block-G, Umme Kulsum Road, Bashundhara R/A, Dhaka',
+      coordinates: '23.8166° N, 90.4328° E'
+    }
+  },
+  {
+    id: 'msg-toll-1',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'driver',
+    senderName: 'Md. Shahidul Islam (Driver)',
+    text: 'Claimed official highway toll: Mayor Hanif Flyover (৳260). Receipt: TOL-2026-8819',
+    timestamp: '09:45 AM',
+    messageType: 'toll_claim',
+    tollData: {
+      tollName: 'Mayor Hanif Flyover',
+      amount: 260,
+      receiptNo: 'TOL-2026-8819',
+      approved: false
+    }
+  },
+
+  // ─── REQ-2026-441: Requisition in Progress ───
   {
     id: 'msg-4',
     requisitionId: 'REQ-2026-441',
@@ -524,6 +580,96 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
     senderName: 'Md. Kamruzzaman (Transport Admin)',
     text: 'Requisition REQ-2026-441 is prioritized in the dispatch queue. Awaiting sedan return from Keraniganj.',
     timestamp: '11:40 AM',
+    messageType: 'text',
+  },
+
+  // ─── Direct Help Desk Support (Employee <-> Transport Admin) ───
+  {
+    id: 'msg-desk-1',
+    requisitionId: 'desk_direct',
+    senderRole: 'employee',
+    senderName: 'Tanvir Ahmed',
+    text: 'Kamruzzaman Bhai, can we request a 7-seater microbus for the Keraniganj delegation tomorrow? We have 4 engineering inspectors.',
+    timestamp: '11:45 AM',
+    messageType: 'text',
+  },
+  {
+    id: 'msg-desk-2',
+    requisitionId: 'desk_direct',
+    senderRole: 'admin',
+    senderName: 'Md. Kamruzzaman (Transport Supervisor)',
+    text: 'Assalamu Alaikum Tanvir. Yes, please select HiAce (7-Seater) in the requisition modal and mention 4 passengers. I will allocate Toyota HiAce CHA-53-4102 for your team.',
+    timestamp: '11:48 AM',
+    messageType: 'text',
+  },
+
+  // ─── Driver Direct Hotline (Admin <-> Driver Shahidul) ───
+  {
+    id: 'msg-drv1-1',
+    requisitionId: 'drv_direct_DRV-01',
+    senderRole: 'admin',
+    senderName: 'Md. Kamruzzaman (Transport Supervisor)',
+    text: 'Shahidul, please ensure vehicle inspection checklist is cleared before departure. Verify coolant and wiper fluid.',
+    timestamp: '08:45 AM',
+    messageType: 'text',
+  },
+  {
+    id: 'msg-drv1-2',
+    requisitionId: 'drv_direct_DRV-01',
+    senderRole: 'driver',
+    senderName: 'Md. Shahidul Islam (Driver)',
+    text: 'Ji Sir, all fluids and tire pressure (32 PSI) verified. Vehicle sanitized and AC tested.',
+    timestamp: '08:50 AM',
+    messageType: 'text',
+  },
+
+  // ─── Company Fleet Broadcast Channel ───
+  {
+    id: 'msg-b1',
+    requisitionId: 'broadcast',
+    senderRole: 'admin',
+    senderName: 'Central Logistics Dispatch',
+    text: '📢 Notice to all fleet drivers: Mayor Hanif Flyover eastbound ramp undergoing repair work today from 02:00 PM to 06:00 PM. Please use Postogola or Demra bypass.',
+    timestamp: '08:00 AM',
+    messageType: 'text',
+  },
+  {
+    id: 'msg-b2',
+    requisitionId: 'broadcast',
+    senderRole: 'admin',
+    senderName: 'Central Logistics Dispatch',
+    text: '⛽ Fuel Station Advisory: Bashundhara Filling Station (300 Feet Road) has full stock of Euro-4 Octane and low-sulfur diesel with valid electronic vouchers.',
+    timestamp: '09:00 AM',
+    messageType: 'text',
+  },
+
+  // ─── Emergency Roadside SOS Channel ───
+  {
+    id: 'msg-s1',
+    requisitionId: 'emergency_sos',
+    senderRole: 'admin',
+    senderName: 'Highway Patrol Controller',
+    text: '🚨 24/7 Roadside Emergency & Recovery Unit on standby. In case of tire blowout or highway breakdown, alert immediately via this channel.',
+    timestamp: '07:30 AM',
+    messageType: 'text',
+  },
+  {
+    id: 'msg-s2',
+    requisitionId: 'emergency_sos',
+    senderRole: 'driver',
+    senderName: 'Mofizur Rahman (Driver)',
+    text: '⚠️ Roadside Notice: Minor tire pressure sensor alert on Tanker TA-19-4401 near Nimtoli Toll Plaza. Safe in emergency layby, valve checked.',
+    timestamp: '08:15 AM',
+    messageType: 'text',
+  },
+  {
+    id: 'msg-s3',
+    requisitionId: 'emergency_sos',
+    senderRole: 'admin',
+    senderName: 'Central Logistics Dispatch',
+    text: 'Understood Mofizur. Nimtoli backup support on standby. Only proceed once tire gauge shows safe 110 PSI.',
+    timestamp: '08:18 AM',
+    messageType: 'text',
   },
 ];
 
@@ -895,7 +1041,30 @@ class FleetStore {
     this.notify();
   }
 
-  sendChatMessage(requisitionId: string, senderRole: 'employee' | 'driver' | 'admin', senderName: string, text: string): TripChatMessage {
+  sendChatMessage(
+    requisitionId: string,
+    senderRole: 'employee' | 'driver' | 'admin' | 'system',
+    senderName: string,
+    text: string,
+    metadata?: {
+      messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event';
+      tollData?: {
+        tollName: string;
+        amount: number;
+        receiptNo: string;
+        approved?: boolean;
+        approvedBy?: string;
+        approvedAt?: string;
+      };
+      locationData?: {
+        title: string;
+        address: string;
+        coordinates?: string;
+      };
+      actionType?: 'gate_out_authorized' | 'toll_approved' | 'route_deviation';
+      actionLabel?: string;
+    }
+  ): TripChatMessage {
     const newMsg: TripChatMessage = {
       id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       requisitionId,
@@ -903,23 +1072,62 @@ class FleetStore {
       senderName,
       text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      ...metadata,
     };
     this.chatMessages = [...this.chatMessages, newMsg];
 
     // Auto-create notification for counterpart
-    const targetRole: 'employee' | 'admin' | 'all' = senderRole === 'employee' ? 'admin' : 'employee';
-    this.addNotification({
-      type: 'chat_message',
-      title: `Trip Chat: ${senderName}`,
-      message: text.length > 55 ? text.slice(0, 52) + '...' : text,
-      time: 'Just now',
-      targetRole,
-      requisitionId,
-      unread: true,
-    });
+    if (senderRole !== 'system') {
+      const targetRole: 'employee' | 'admin' | 'all' = senderRole === 'employee' ? 'admin' : 'employee';
+      this.addNotification({
+        type: 'chat_message',
+        title: `Trip Chat: ${senderName}`,
+        message: text.length > 55 ? text.slice(0, 52) + '...' : text,
+        time: 'Just now',
+        targetRole,
+        requisitionId,
+        unread: true,
+      });
+    }
 
     this.notify();
     return newMsg;
+  }
+
+  approveTollExpense(messageId: string, reqId: string, approvedBy: string = 'Md. Kamruzzaman (Transport Admin)'): void {
+    const targetMsg = this.chatMessages.find(m => m.id === messageId);
+    if (!targetMsg || !targetMsg.tollData) return;
+
+    const { tollName, amount, receiptNo } = targetMsg.tollData;
+
+    this.chatMessages = this.chatMessages.map(m => {
+      if (m.id === messageId && m.tollData) {
+        return {
+          ...m,
+          tollData: {
+            ...m.tollData,
+            approved: true,
+            approvedBy,
+            approvedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          }
+        };
+      }
+      return m;
+    });
+
+    this.addTollExpense(reqId, tollName, amount, receiptNo);
+    this.sendChatMessage(
+      reqId,
+      'system',
+      'Central Transport Audit',
+      `✓ Official Verification: Toll claim for ${tollName} (৳${amount}) approved by ${approvedBy}. Account credited.`,
+      {
+        messageType: 'system_event',
+        actionType: 'toll_approved',
+        actionLabel: 'Toll Approved ৳' + amount
+      }
+    );
+    this.notify();
   }
 
   addNotification(notif: Omit<FleetNotification, 'id'>): FleetNotification {
@@ -944,6 +1152,35 @@ class FleetStore {
       }
       return n;
     });
+    this.notify();
+  }
+
+  addTollExpense(reqId: string, tollName: string, amount: number, receiptNo: string): void {
+    this.requisitions = this.requisitions.map(r => {
+      if (r.id === reqId) {
+        const existing = r.tollExpenses || [];
+        const newExpense = { id: `toll-${Date.now()}`, tollName, amount, receiptNo };
+        const updatedTolls = [...existing, newExpense];
+        const updatedCost = (r.estimatedCost || 1200) + amount;
+        return {
+          ...r,
+          tollExpenses: updatedTolls,
+          estimatedCost: updatedCost,
+        };
+      }
+      return r;
+    });
+
+    this.addNotification({
+      type: 'toll_claimed',
+      title: 'Toll Expense Claimed',
+      message: `${tollName} (৳${amount}) recorded for Requisition ${reqId}. Receipt: ${receiptNo}.`,
+      time: 'Just now',
+      targetRole: 'admin',
+      requisitionId: reqId,
+      unread: true,
+    });
+
     this.notify();
   }
 
@@ -1011,5 +1248,7 @@ export function useFleetStore() {
     getNotifications: fleetStore.getNotifications.bind(fleetStore),
     markNotificationRead: fleetStore.markNotificationRead.bind(fleetStore),
     markAllNotificationsRead: fleetStore.markAllNotificationsRead.bind(fleetStore),
+    addTollExpense: fleetStore.addTollExpense.bind(fleetStore),
+    approveTollExpense: fleetStore.approveTollExpense.bind(fleetStore),
   };
 }
