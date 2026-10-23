@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ViewProps, t } from '../types';
 import { showToast } from '../App';
-import { useFleetStore, Driver, Vehicle, VehicleRequisition } from '../store/fleetStore';
+import { useFleetStore, Driver, Vehicle, VehicleRequisition, TripChatMessage, FleetNotification } from '../store/fleetStore';
 import {
   Truck, Car, Fuel, MapPin, CheckCircle, Clock, AlertCircle,
   Plus, Users, Navigation, QrCode, FileText, Sparkles, Award,
@@ -10,23 +10,33 @@ import {
   Maximize2, Activity, Cpu, Check, Compass, PhoneCall, Zap,
   UserCheck, Shield, Key, Calendar, Printer, Search, RotateCcw,
   UserPlus, Star, ThumbsUp, X, ChevronRight, Share2, Phone,
-  AlertOctagon, RefreshCw, Filter, Layers, Download, CheckCircle2
+  AlertOctagon, RefreshCw, Filter, Layers, Download, CheckCircle2,
+  MessageSquare, Bell, Send, MessageCircle, CheckCheck, Wrench
 } from 'lucide-react';
 import RegisterVehicleModal from '../components/fleet/RegisterVehicleModal';
 import EnrollDriverModal from '../components/fleet/EnrollDriverModal';
+import TripChatModal from '../components/fleet/TripChatModal';
+import FleetNotificationsDrawer from '../components/fleet/FleetNotificationsDrawer';
 
 export default function FleetView({ role, lang }: ViewProps) {
   const {
     drivers,
     vehicles,
     requisitions,
+    chatMessages,
+    notifications,
     addRequisition,
     assignRequisition,
     startTrip,
     completeTrip,
     rejectRequisition,
     poolRequisitions,
-    recordBreathalyzer
+    recordBreathalyzer,
+    updateDriverStatus,
+    updateVehicleStatus,
+    sendChatMessage,
+    markNotificationRead,
+    markAllNotificationsRead
   } = useFleetStore();
 
   // Strict Role-Based Access Control (RBAC)
@@ -38,6 +48,17 @@ export default function FleetView({ role, lang }: ViewProps) {
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
+  const [driverStatusFilter, setDriverStatusFilter] = useState<'all' | 'available' | 'on_trip' | 'sick_leave' | 'on_leave' | 'rest_required'>('all');
+  const [vehicleStatusFilter, setVehicleStatusFilter] = useState<'all' | 'available' | 'in_transit' | 'maintenance'>('all');
+
+  // Tri-Party Chat State
+  const [activeChatReq, setActiveChatReq] = useState<VehicleRequisition | null>(null);
+  const [chatInputText, setChatInputText] = useState('');
+  const [chatSimulatedRole, setChatSimulatedRole] = useState<'employee' | 'driver' | 'admin'>(isEmployee ? 'employee' : 'admin');
+
+  // Notifications Drawer State
+  const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
+  const [notifCategoryFilter, setNotifCategoryFilter] = useState<'all' | 'assignment' | 'driver_status' | 'maintenance' | 'chat'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'assigned' | 'in_transit' | 'completed'>('all');
 
   // Selected telemetry vehicle (Admin only)
@@ -216,7 +237,15 @@ export default function FleetView({ role, lang }: ViewProps) {
   const inTransitCount = requisitions.filter(r => r.status === 'in_transit').length;
   const completedCount = requisitions.filter(r => r.status === 'completed').length;
   const availableVehiclesCount = vehicles.filter(v => v.status === 'available').length;
+  const maintenanceVehiclesCount = vehicles.filter(v => v.status === 'maintenance').length;
   const availableDriversCount = drivers.filter(d => d.status === 'available').length;
+  const onTripDriversCount = drivers.filter(d => d.status === 'on_trip').length;
+  const sickLeaveDriversCount = drivers.filter(d => d.status === 'sick_leave').length;
+  const onLeaveDriversCount = drivers.filter(d => d.status === 'on_leave').length;
+
+  // Role-filtered notifications
+  const roleNotifications = notifications.filter(n => n.targetRole === 'all' || (isEmployee ? n.targetRole === 'employee' : n.targetRole === 'admin'));
+  const unreadNotifCount = roleNotifications.filter(n => n.unread).length;
 
   return (
     <div className="view-container view-transition-wrapper">
@@ -255,6 +284,31 @@ export default function FleetView({ role, lang }: ViewProps) {
 
         {/* Action Controls - Strictly Guarded by RBAC */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Fleet Notification Bell Button */}
+          <button
+            className="btn-outline"
+            style={{
+              fontSize: '11px',
+              padding: '6px 12px',
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderColor: unreadNotifCount > 0 ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
+              background: unreadNotifCount > 0 ? 'rgba(165, 28, 48, 0.05)' : 'var(--brand-card-bg)',
+            }}
+            onClick={() => setShowNotificationsDrawer(prev => !prev)}
+            title={t('Fleet Logistics Notifications', 'ফ্লিট নোটিফিকেশন', lang)}
+          >
+            <Bell size={13} color={unreadNotifCount > 0 ? 'var(--brand-crimson)' : 'var(--brand-slate-600)'} />
+            <span>{t('Alerts', 'নোটিফিকেশন', lang)}</span>
+            {unreadNotifCount > 0 && (
+              <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '10px' }}>
+                {unreadNotifCount}
+              </span>
+            )}
+          </button>
+
           {/* Admin-Only Registration Buttons */}
           {isTransportAdmin && (
             <>
@@ -287,6 +341,54 @@ export default function FleetView({ role, lang }: ViewProps) {
           </button>
         </div>
       </div>
+
+      {/* ─── Live Fleet & Crew Availability Pulse (For Staff Transparency) ── */}
+      {isEmployee && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '8px',
+          background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.25)',
+          borderRadius: '10px',
+          padding: '8px 14px',
+          marginBottom: '14px',
+          fontSize: '11.5px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 800, color: 'var(--brand-slate-900)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Activity size={14} color="#10B981" />
+              {t('Live Fleet & Crew Availability Pulse:', 'ফ্লিট ও চালক উপস্থিতি লাইভ স্ট্যাটাস:', lang)}
+            </span>
+            <span className="badge success" style={{ fontSize: '10.5px' }}>
+              🟢 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
+            </span>
+            <span className="badge info" style={{ fontSize: '10.5px' }}>
+              🚙 {availableDriversCount} {t('Drivers on Duty', 'চালক উপস্থিত', lang)}
+            </span>
+            {maintenanceVehiclesCount > 0 && (
+              <span className="badge warn" style={{ fontSize: '10.5px' }}>
+                🔧 {maintenanceVehiclesCount} {t('in Workshop', 'গাড়ি ওয়ার্কশপে', lang)}
+              </span>
+            )}
+            {sickLeaveDriversCount > 0 && (
+              <span className="badge" style={{ fontSize: '10.5px', background: '#FCE7F3', color: '#BE185D' }}>
+                💊 {sickLeaveDriversCount} {t('Driver on Sick Leave', 'চালক অসুস্থতাজনিত ছুটিতে', lang)}
+              </span>
+            )}
+            {onLeaveDriversCount > 0 && (
+              <span className="badge" style={{ fontSize: '10.5px', background: '#F3E8FF', color: '#7E22CE' }}>
+                ✈️ {onLeaveDriversCount} {t('on Annual Leave', 'বার্ষিক ছুটিতে', lang)}
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 600 }}>
+            {t('Transport Cell:', 'পরিবহন সেল:', lang)} <strong style={{ color: 'var(--brand-crimson)' }}>+880 1711-229944</strong>
+          </div>
+        </div>
+      )}
 
       {/* ─── Informational Callout Strip ────────────────────────────── */}
       {isEmployee ? (
@@ -853,6 +955,26 @@ export default function FleetView({ role, lang }: ViewProps) {
                                   ★ {r.rating || 5}.0 · {t('View Pass', 'পাস দেখুন', lang)}
                                 </button>
                               )}
+
+                              {/* ─── Tri-Party Trip Chat Button (Staff & Admin) ─── */}
+                              <button
+                                className="btn-outline"
+                                style={{
+                                  fontSize: '10.5px',
+                                  padding: '4px 8px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  color: '#1D4ED8',
+                                  borderColor: '#93C5FD',
+                                  background: 'rgba(29, 78, 216, 0.05)',
+                                }}
+                                onClick={() => setActiveChatReq(r)}
+                                title={t('Open Tri-Party Dispatch Chat', 'ত্রিপক্ষীয় চ্যাট খুলুন', lang)}
+                              >
+                                <MessageSquare size={11} />
+                                <span>{t('Trip Chat', 'চ্যাট', lang)}</span>
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -879,56 +1001,179 @@ export default function FleetView({ role, lang }: ViewProps) {
                 <div className="card-subtitle">{t('BRTA Commercial Licensing, Breathalyzer Logs & Shift Hours', 'বিআরটিএ লাইসেন্স যাচাই, ব্রেথলাইজার টেস্ট ও দৈনিক ড্রাইভিং আওয়ার', lang)}</div>
               </div>
             </div>
-            <span className="badge success">{availableDriversCount} Drivers Ready for Dispatch</span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span className="badge success">{availableDriversCount} Available</span>
+              {sickLeaveDriversCount > 0 && (
+                <span className="badge" style={{ background: '#FCE7F3', color: '#BE185D' }}>
+                  💊 {sickLeaveDriversCount} Sick Leave
+                </span>
+              )}
+              {onLeaveDriversCount > 0 && (
+                <span className="badge" style={{ background: '#F3E8FF', color: '#7E22CE' }}>
+                  ✈️ {onLeaveDriversCount} On Leave
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="card-body">
-            <div className="responsive-col-3" style={{ gap: '12px' }}>
-              {drivers.map(d => (
-                <div key={d.id} style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '14px', background: 'var(--brand-card-bg)', position: 'relative' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--brand-slate-900)', color: 'var(--brand-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
-                        {d.initials}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>{d.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>📞 {d.phone}</div>
-                      </div>
-                    </div>
-                    <span className={`badge ${d.status === 'available' ? 'present' : d.status === 'on_trip' ? 'meeting' : 'warn'}`}>
-                      {d.status === 'available' ? 'AVAILABLE' : d.status === 'on_trip' ? 'ON TRIP' : 'REST REQUIRED'}
+            {/* Driver Status Filter Pills */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+              {(['all', 'available', 'on_trip', 'sick_leave', 'on_leave', 'rest_required'] as const).map(f => {
+                const count = f === 'all' ? drivers.length : drivers.filter(d => d.status === f).length;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setDriverStatusFilter(f)}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: driverStatusFilter === f ? '1.5px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                      background: driverStatusFilter === f ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
+                      color: driverStatusFilter === f ? '#fff' : 'var(--brand-slate-600)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px'
+                    }}
+                  >
+                    <span>{f.replace('_', ' ').toUpperCase()}</span>
+                    <span style={{
+                      fontSize: '9.5px',
+                      background: driverStatusFilter === f ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-100)',
+                      padding: '1px 5px',
+                      borderRadius: '10px'
+                    }}>
+                      {count}
                     </span>
-                  </div>
+                  </button>
+                );
+              })}
+            </div>
 
-                  <div style={{ background: 'var(--brand-slate-100)', padding: '10px', borderRadius: '6px', fontSize: '11.5px', marginBottom: '10px' }}>
-                    <div><strong>License:</strong> {d.licenseNo} ({d.licenseType})</div>
-                    <div><strong>Valid Until:</strong> {d.licenseExpiry}</div>
-                    <div style={{ marginTop: '4px', color: 'var(--status-success)', fontWeight: 700 }}>
-                      ✓ Breathalyzer: {d.breathalyzerToday}
+            <div className="responsive-col-3" style={{ gap: '12px' }}>
+              {drivers
+                .filter(d => driverStatusFilter === 'all' || d.status === driverStatusFilter)
+                .map(d => {
+                  const isAvailable = d.status === 'available';
+                  const isOnTrip = d.status === 'on_trip';
+                  const isSick = d.status === 'sick_leave';
+                  const isOnLeave = d.status === 'on_leave';
+                  const isRest = d.status === 'rest_required';
+
+                  return (
+                    <div key={d.id} style={{
+                      border: isSick ? '1.5px solid #F43F5E' : isOnLeave ? '1.5px solid #A855F7' : '1px solid var(--brand-slate-200)',
+                      borderRadius: '8px',
+                      padding: '14px',
+                      background: isSick ? '#FFF5F5' : isOnLeave ? '#FAF5FF' : 'var(--brand-card-bg)',
+                      position: 'relative'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--brand-slate-900)', color: 'var(--brand-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
+                            {d.initials}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>{d.name}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>📞 {d.phone}</div>
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        {isAvailable && <span className="badge success">AVAILABLE</span>}
+                        {isOnTrip && <span className="badge info">ON TRIP</span>}
+                        {isSick && (
+                          <span className="badge" style={{ background: '#FCE7F3', color: '#BE185D', fontWeight: 800 }}>
+                            💊 SICK LEAVE
+                          </span>
+                        )}
+                        {isOnLeave && (
+                          <span className="badge" style={{ background: '#F3E8FF', color: '#7E22CE', fontWeight: 800 }}>
+                            ✈️ ON LEAVE
+                          </span>
+                        )}
+                        {isRest && <span className="badge warn">REST REQUIRED</span>}
+                      </div>
+
+                      {/* Leave Notice Banner */}
+                      {(isSick || isOnLeave) && d.leaveReason && (
+                        <div style={{
+                          background: isSick ? '#FFE4E6' : '#EDE9FE',
+                          border: `1px solid ${isSick ? '#FECDD3' : '#DDD6FE'}`,
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          color: isSick ? '#9F1239' : '#5B21B6',
+                          marginBottom: '8px'
+                        }}>
+                          <strong>{isSick ? 'Medical Certificate Rx:' : 'HR Approved Leave:'}</strong> {d.leaveReason}
+                          {d.leaveUntil && (
+                            <div style={{ fontSize: '10px', marginTop: '2px', opacity: 0.85 }}>
+                              Expected Return: <strong>{d.leaveUntil}</strong>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div style={{ background: 'var(--brand-slate-100)', padding: '10px', borderRadius: '6px', fontSize: '11.5px', marginBottom: '10px' }}>
+                        <div><strong>License:</strong> {d.licenseNo} ({d.licenseType})</div>
+                        <div><strong>Valid Until:</strong> {d.licenseExpiry}</div>
+                        <div style={{ marginTop: '4px', color: isSick ? '#9F1239' : 'var(--status-success)', fontWeight: 700 }}>
+                          {isSick ? '⚠ Sobriety Audit Suspended (Medical Rest)' : `✓ Breathalyzer: ${d.breathalyzerToday}`}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                        <span>Duty Today: <strong>{d.dutyHoursToday} hrs</strong></span>
+                        <span>Blood: <strong>{d.bloodGroup}</strong></span>
+                        <span>Rating: <strong>★ {d.rating}</strong></span>
+                      </div>
+
+                      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {/* Admin Status Changer */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '10.5px', color: '#64748B', fontWeight: 600 }}>Status:</span>
+                          <select
+                            style={{ fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff' }}
+                            value={d.status}
+                            onChange={(e) => {
+                              const newStatus = e.target.value as Driver['status'];
+                              updateDriverStatus(
+                                d.id,
+                                newStatus,
+                                newStatus === 'sick_leave' ? 'Doctor prescribed medical rest (Viral fever)' : newStatus === 'on_leave' ? 'HR Approved Annual Earned Leave' : undefined,
+                                newStatus === 'sick_leave' ? 'Tomorrow, 08:00 AM' : undefined
+                              );
+                              showToast(`Driver ${d.name} status updated to ${newStatus.toUpperCase()}`, 'info');
+                            }}
+                          >
+                            <option value="available">Available (Active)</option>
+                            <option value="on_trip">On Trip</option>
+                            <option value="sick_leave">Sick Leave (Medical)</option>
+                            <option value="on_leave">On Annual Leave</option>
+                            <option value="rest_required">Rest Required</option>
+                          </select>
+                        </div>
+
+                        {!isSick && (
+                          <button
+                            className="btn-sm-ghost"
+                            style={{ fontSize: '10.5px' }}
+                            onClick={() => {
+                              recordBreathalyzer(d.id, '0.00% BAC (PASSED)');
+                              showToast(`Breathalyzer test verified for ${d.name}: 0.00% Zero-Alcohol.`, 'success');
+                            }}
+                          >
+                            ✓ Breathalyzer
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                    <span>Duty Today: <strong>{d.dutyHoursToday} hrs</strong></span>
-                    <span>Blood Group: <strong>{d.bloodGroup}</strong></span>
-                    <span>Rating: <strong>★ {d.rating}</strong></span>
-                  </div>
-
-                  <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-200)', display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-                    <button
-                      className="btn-sm-ghost"
-                      style={{ fontSize: '10.5px' }}
-                      onClick={() => {
-                        recordBreathalyzer(d.id, '0.00% BAC (PASSED)');
-                        showToast(`Breathalyzer test verified for ${d.name}: 0.00% Zero-Alcohol.`, 'success');
-                      }}
-                    >
-                      ✓ Log Sobriety Test
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  );
+                })}
             </div>
           </div>
         </div>
@@ -998,12 +1243,41 @@ export default function FleetView({ role, lang }: ViewProps) {
 
           {/* All Vehicles List */}
           <div className="card mb-4">
-            <div className="card-hd">
+            <div className="card-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div className="card-hd-left">
                 <div className="card-hd-icon"><Truck size={18} /></div>
-                <div className="card-title">All Fleet Vehicles Telemetry Index</div>
+                <div>
+                  <div className="card-title">All Fleet Vehicles Telemetry & Maintenance Index</div>
+                  <div className="card-subtitle">Real-time status, workshop job orders, and speed telematics</div>
+                </div>
+              </div>
+
+              {/* Vehicle Status Filter Pills */}
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {(['all', 'available', 'in_transit', 'maintenance'] as const).map(f => {
+                  const count = f === 'all' ? vehicles.length : vehicles.filter(v => v.status === f).length;
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => setVehicleStatusFilter(f)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '5px',
+                        fontSize: '10.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        border: vehicleStatusFilter === f ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                        background: vehicleStatusFilter === f ? 'var(--brand-crimson)' : 'transparent',
+                        color: vehicleStatusFilter === f ? '#fff' : 'var(--brand-slate-600)',
+                      }}
+                    >
+                      {f.replace('_', ' ').toUpperCase()} ({count})
+                    </button>
+                  );
+                })}
               </div>
             </div>
+
             <div className="card-body" style={{ padding: 0 }}>
               <div className="table-responsive">
                 <table className="fleet-table" style={{ margin: 0, fontSize: '12px' }}>
@@ -1011,42 +1285,91 @@ export default function FleetView({ role, lang }: ViewProps) {
                     <tr>
                       <th>Plate</th>
                       <th>Model & Type</th>
-                      <th>Location</th>
+                      <th>Location / Workshop Status</th>
                       <th>Driver</th>
                       <th>Speed</th>
                       <th>Fuel</th>
                       <th>Status</th>
-                      <th>Select</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {vehicles.map(v => (
-                      <tr key={v.id} onClick={() => setSelectedVehicleTelemetry(v)} style={{ cursor: 'pointer' }}>
-                        <td><strong>{v.plate}</strong></td>
-                        <td>{v.model}</td>
-                        <td>{v.location}</td>
-                        <td>{v.driverName || 'Unassigned'}</td>
-                        <td>{v.speed} km/h</td>
-                        <td>{v.fuelPct}%</td>
-                        <td>
-                          <span className={`badge ${v.status === 'available' ? 'success' : v.status === 'in_transit' ? 'info' : 'warn'}`}>
-                            {v.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            className="btn-sm-ghost"
-                            style={{ fontSize: '10.5px' }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedVehicleTelemetry(v);
-                            }}
-                          >
-                            HUD View
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {vehicles
+                      .filter(v => vehicleStatusFilter === 'all' || v.status === vehicleStatusFilter)
+                      .map(v => (
+                        <tr key={v.id} onClick={() => setSelectedVehicleTelemetry(v)} style={{ cursor: 'pointer' }}>
+                          <td>
+                            <strong>{v.plate}</strong>
+                            <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
+                              {v.type}
+                            </div>
+                          </td>
+                          <td>{v.model}</td>
+                          <td>
+                            <div>{v.location}</div>
+                            {v.maintenanceDetails && (
+                              <div style={{ fontSize: '10.5px', color: '#D97706', fontWeight: 600, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Wrench size={11} /> {v.maintenanceDetails}
+                              </div>
+                            )}
+                          </td>
+                          <td>{v.driverName || 'Unassigned'}</td>
+                          <td>{v.speed} km/h</td>
+                          <td>{v.fuelPct}%</td>
+                          <td>
+                            {v.status === 'available' && <span className="badge success">AVAILABLE</span>}
+                            {v.status === 'in_transit' && <span className="badge info">IN TRANSIT</span>}
+                            {v.status === 'maintenance' && (
+                              <span className="badge warn" style={{ background: '#FEF3C7', color: '#B45309', fontWeight: 800 }}>
+                                🔧 WORKSHOP
+                              </span>
+                            )}
+                            {v.status === 'loading' && <span className="badge">LOADING</span>}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
+                              <button
+                                className="btn-sm-ghost"
+                                style={{ fontSize: '10.5px' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedVehicleTelemetry(v);
+                                }}
+                              >
+                                HUD View
+                              </button>
+
+                              {v.status === 'maintenance' ? (
+                                <button
+                                  className="btn-sm-ghost"
+                                  style={{ fontSize: '10.5px', color: '#059669', borderColor: '#A7F3D0', background: '#ECFDF5' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateVehicleStatus(v.plate, 'available');
+                                    showToast(`${v.plate} workshop inspection completed. Marked AVAILABLE.`, 'success');
+                                  }}
+                                  title="Mark maintenance complete and return to service"
+                                >
+                                  ✓ Mark Ready
+                                </button>
+                              ) : v.status === 'available' ? (
+                                <button
+                                  className="btn-sm-ghost"
+                                  style={{ fontSize: '10.5px', color: '#D97706', borderColor: '#FDE68A' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateVehicleStatus(v.plate, 'maintenance', 'Scheduled workshop maintenance & fluid inspection');
+                                    showToast(`${v.plate} checked into Workshop Maintenance.`, 'info');
+                                  }}
+                                  title="Send vehicle to workshop maintenance"
+                                >
+                                  🔧 Workshop
+                                </button>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -1784,6 +2107,18 @@ export default function FleetView({ role, lang }: ViewProps) {
             </div>
 
             <div className="modal-ft">
+              <button
+                className="btn-outline"
+                style={{ borderColor: '#3B82F6', color: '#1D4ED8', display: 'flex', alignItems: 'center', gap: '5px' }}
+                onClick={() => {
+                  const targetReq = selectedTripPassReq;
+                  setSelectedTripPassReq(null);
+                  setActiveChatReq(targetReq);
+                }}
+              >
+                <MessageSquare size={14} />
+                {t('Open Trip Chat', 'ট্রিপ চ্যাট খুলুন', lang)}
+              </button>
               <button className="btn-sm-ghost" onClick={() => setSelectedTripPassReq(null)}>{t('Close', 'বন্ধ করুন', lang)}</button>
               <button
                 className="btn-primary"
@@ -1882,6 +2217,31 @@ export default function FleetView({ role, lang }: ViewProps) {
           />
         </>
       )}
+
+      {/* ─── Tri-Party Trip Chat Modal ─────────────────────────────── */}
+      <TripChatModal
+        isOpen={Boolean(activeChatReq)}
+        onClose={() => setActiveChatReq(null)}
+        requisition={activeChatReq}
+        userRole={isEmployee ? 'employee' : 'admin'}
+        lang={lang}
+      />
+
+      {/* ─── Fleet Logistics Notifications Drawer ──────────────────── */}
+      <FleetNotificationsDrawer
+        isOpen={showNotificationsDrawer}
+        onClose={() => setShowNotificationsDrawer(false)}
+        userRole={isEmployee ? 'employee' : 'admin'}
+        lang={lang}
+        onSelectRequisition={(reqId) => {
+          const req = requisitions.find(r => r.id === reqId);
+          if (req) setSelectedTripPassReq(req);
+        }}
+        onOpenChat={(reqId) => {
+          const req = requisitions.find(r => r.id === reqId);
+          if (req) setActiveChatReq(req);
+        }}
+      />
     </div>
   );
 }

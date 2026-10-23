@@ -7,7 +7,9 @@ export interface Driver {
   licenseNo: string;
   licenseType: 'Heavy Commercial (HAZMAT)' | 'Light Commercial' | 'PSV Microbus';
   licenseExpiry: string;
-  status: 'available' | 'on_trip' | 'off_duty' | 'rest_required';
+  status: 'available' | 'on_trip' | 'off_duty' | 'rest_required' | 'sick_leave' | 'on_leave';
+  leaveReason?: string;
+  leaveUntil?: string;
   breathalyzerToday: '0.00% BAC (PASSED)' | 'PENDING' | 'FAILED';
   dutyHoursToday: number; // e.g. 4.5 hours
   assignedVehiclePlate?: string;
@@ -32,12 +34,33 @@ export interface Vehicle {
   bitumenCargoTemp?: number; // Celsius
   fuelPct: number;
   fuelSlipNo: string;
-  status: 'available' | 'in_transit' | 'loading' | 'maintenance';
+  status: 'available' | 'in_transit' | 'loading' | 'maintenance' | 'grounded';
+  maintenanceDetails?: string;
   nextServiceKm: number;
   hazmatCertified: boolean;
   routeProgress?: number;
   routeOrigin?: string;
   routeDestination?: string;
+}
+
+export interface TripChatMessage {
+  id: string;
+  requisitionId: string;
+  senderRole: 'employee' | 'driver' | 'admin';
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface FleetNotification {
+  id: string;
+  type: 'assignment' | 'requisition_created' | 'gate_out' | 'gate_in' | 'chat_message' | 'driver_status' | 'maintenance';
+  title: string;
+  message: string;
+  time: string;
+  targetRole: 'employee' | 'admin' | 'all';
+  requisitionId?: string;
+  unread: boolean;
 }
 
 export interface VehicleRequisition {
@@ -173,6 +196,40 @@ export const INITIAL_DRIVERS: Driver[] = [
     totalTrips: 1490,
     initials: 'NH',
   },
+  {
+    id: 'DRV-07',
+    name: 'Md. Delwar Hossain',
+    phone: '+880 1817-223344',
+    licenseNo: 'DK-BRTA-2019-3321',
+    licenseType: 'Light Commercial',
+    licenseExpiry: '15 Aug 2029',
+    status: 'sick_leave',
+    leaveReason: 'Viral Fever & Medical Rest (Doctor Rx submitted to HR/Admin)',
+    leaveUntil: 'Tomorrow, 08:00 AM',
+    breathalyzerToday: '0.00% BAC (PASSED)',
+    dutyHoursToday: 0,
+    bloodGroup: 'O+',
+    rating: 4.8,
+    totalTrips: 870,
+    initials: 'DH',
+  },
+  {
+    id: 'DRV-08',
+    name: 'Rabiul Awal',
+    phone: '+880 1718-445566',
+    licenseNo: 'DK-BRTA-2017-5512',
+    licenseType: 'Heavy Commercial (HAZMAT)',
+    licenseExpiry: '20 Sep 2028',
+    status: 'on_leave',
+    leaveReason: 'Annual Earned Leave approved by HR Corporate Services',
+    leaveUntil: '26 Oct 2026',
+    breathalyzerToday: '0.00% BAC (PASSED)',
+    dutyHoursToday: 0,
+    bloodGroup: 'A+',
+    rating: 4.9,
+    totalTrips: 1320,
+    initials: 'RA',
+  },
 ];
 
 export const INITIAL_VEHICLES: Vehicle[] = [
@@ -289,6 +346,23 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     fuelPct: 20,
     fuelSlipNo: 'BOGCL-FUEL-2026-870',
     status: 'maintenance',
+    maintenanceDetails: 'Brake Pad Overhaul & Air Bleed (Scheduled Workshop Work Order #WO-88)',
+    nextServiceKm: 0,
+    hazmatCertified: true,
+  },
+  {
+    id: 'V-07',
+    plate: 'DHAKA METRO GHA-11-2299',
+    model: 'Toyota Corolla Altis (Executive Pool)',
+    type: 'executive',
+    capacitySeats: 4,
+    location: 'Bashundhara Central Garage, Baridhara',
+    speed: 0,
+    engineTemp: 26,
+    fuelPct: 58,
+    fuelSlipNo: 'BOGCL-FUEL-2026-892',
+    status: 'maintenance',
+    maintenanceDetails: 'AC Compressor Gas Refill & Cabin Filter Replacement',
     nextServiceKm: 0,
     hazmatCertified: true,
   },
@@ -418,11 +492,89 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
   },
 ];
 
+export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
+  {
+    id: 'msg-1',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'admin',
+    senderName: 'Md. Kamruzzaman (Transport Admin)',
+    text: 'Vehicle Prado GHA-13-8821 assigned for Meghna Ghat transit. Driver Shahidul has cleared 0.00% BAC breathalyzer audit.',
+    timestamp: '09:20 AM',
+  },
+  {
+    id: 'msg-2',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'driver',
+    senderName: 'Md. Shahidul Islam (Driver)',
+    text: 'Assalamu Alaikum Tanvir Sir. Car is fueled with 82% Octane and stationed at Baridhara Gate-1 porch.',
+    timestamp: '09:25 AM',
+  },
+  {
+    id: 'msg-3',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'employee',
+    senderName: 'Tanvir Ahmed (Staff)',
+    text: 'Thank you Shahidul Bhai. I am bringing the asphalt test batch certificates down in 5 mins.',
+    timestamp: '09:28 AM',
+  },
+  {
+    id: 'msg-4',
+    requisitionId: 'REQ-2026-441',
+    senderRole: 'admin',
+    senderName: 'Md. Kamruzzaman (Transport Admin)',
+    text: 'Requisition REQ-2026-441 is prioritized in the dispatch queue. Awaiting sedan return from Keraniganj.',
+    timestamp: '11:40 AM',
+  },
+];
+
+export const INITIAL_FLEET_NOTIFICATIONS: FleetNotification[] = [
+  {
+    id: 'fnotif-1',
+    type: 'assignment',
+    title: 'Vehicle & Driver Allocated',
+    message: 'Toyota Prado TXL (DHAKA METRO GHA-13-8821) & Driver Md. Shahidul Islam allocated to REQ-2026-435. Digital Trip Pass is active.',
+    time: '12m ago',
+    targetRole: 'employee',
+    requisitionId: 'REQ-2026-435',
+    unread: true,
+  },
+  {
+    id: 'fnotif-2',
+    type: 'driver_status',
+    title: 'Driver Medical Leave Logged',
+    message: 'Driver Md. Delwar Hossain reported sick (Viral Fever - Doctor Rx submitted). Marked on Sick Leave.',
+    time: '45m ago',
+    targetRole: 'admin',
+    unread: true,
+  },
+  {
+    id: 'fnotif-3',
+    type: 'maintenance',
+    title: 'Vehicle Sent to Maintenance',
+    message: 'Corolla Altis (GHA-11-2299) checked into Central Workshop for scheduled AC compressor overhaul.',
+    time: '1h ago',
+    targetRole: 'admin',
+    unread: false,
+  },
+  {
+    id: 'fnotif-4',
+    type: 'requisition_created',
+    title: 'New Vehicle Requisition Submitted',
+    message: 'Tanvir Ahmed submitted duty trip request REQ-2026-441 to Keraniganj Bitumen Refinery Complex.',
+    time: '2h ago',
+    targetRole: 'admin',
+    requisitionId: 'REQ-2026-441',
+    unread: false,
+  },
+];
+
 // In-Memory Shared Store Singleton
 class FleetStore {
   private drivers: Driver[] = [...INITIAL_DRIVERS];
   private vehicles: Vehicle[] = [...INITIAL_VEHICLES];
   private requisitions: VehicleRequisition[] = [...INITIAL_REQUISITIONS];
+  private chatMessages: TripChatMessage[] = [...INITIAL_CHAT_MESSAGES];
+  private notifications: FleetNotification[] = [...INITIAL_FLEET_NOTIFICATIONS];
   private listeners: (() => void)[] = [];
 
   getDrivers(): Driver[] {
@@ -437,6 +589,16 @@ class FleetStore {
     return this.requisitions;
   }
 
+  getChatMessages(reqId?: string): TripChatMessage[] {
+    if (!reqId) return this.chatMessages;
+    return this.chatMessages.filter(m => m.requisitionId === reqId);
+  }
+
+  getNotifications(role?: 'employee' | 'admin'): FleetNotification[] {
+    if (!role) return this.notifications;
+    return this.notifications.filter(n => n.targetRole === 'all' || n.targetRole === role);
+  }
+
   addRequisition(req: Omit<VehicleRequisition, 'id' | 'createdAt' | 'status'>): VehicleRequisition {
     const newReq: VehicleRequisition = {
       ...req,
@@ -446,6 +608,18 @@ class FleetStore {
       createdAt: 'Just Now',
     };
     this.requisitions = [newReq, ...this.requisitions];
+
+    // Trigger Admin Notification
+    this.addNotification({
+      type: 'requisition_created',
+      title: 'New Vehicle Requisition',
+      message: `${newReq.requesterName} (${newReq.dept}) submitted requisition for ${newReq.to}.`,
+      time: 'Just now',
+      targetRole: 'admin',
+      requisitionId: newReq.id,
+      unread: true,
+    });
+
     this.notify();
     return newReq;
   }
@@ -481,6 +655,17 @@ class FleetStore {
       return v;
     });
 
+    // Trigger Notification for Employee & Driver
+    this.addNotification({
+      type: 'assignment',
+      title: 'Vehicle & Driver Allocated!',
+      message: `Vehicle ${vehiclePlate} & Driver ${driver?.name || 'Assigned Driver'} allocated to your requisition ${reqId}. Digital Trip Pass is active.`,
+      time: 'Just now',
+      targetRole: 'employee',
+      requisitionId: reqId,
+      unread: true,
+    });
+
     this.notify();
   }
 
@@ -496,6 +681,17 @@ class FleetStore {
       }
       return r;
     });
+
+    this.addNotification({
+      type: 'gate_out',
+      title: 'Trip Started (Gate Outward Clearance)',
+      message: `Requisition ${reqId} has cleared security gate outward at ${gateOutTime} (Odometer: ${startKm} km). Live telematics active.`,
+      time: 'Just now',
+      targetRole: 'all',
+      requisitionId: reqId,
+      unread: true,
+    });
+
     this.notify();
   }
 
@@ -540,6 +736,16 @@ class FleetStore {
         return d;
       });
     }
+
+    this.addNotification({
+      type: 'gate_in',
+      title: 'Trip Completed (Gate Inward Clearance)',
+      message: `Requisition ${reqId} returned safely at ${gateInTime} (End Odometer: ${endKm} km). Please rate your experience.`,
+      time: 'Just now',
+      targetRole: 'all',
+      requisitionId: reqId,
+      unread: true,
+    });
 
     this.notify();
   }
@@ -658,8 +864,86 @@ class FleetStore {
     this.notify();
   }
 
-  updateDriverStatus(driverId: string, status: Driver['status']): void {
-    this.drivers = this.drivers.map(d => d.id === driverId ? { ...d, status } : d);
+  updateVehicleStatus(plate: string, status: Vehicle['status'], maintenanceDetails?: string): void {
+    this.vehicles = this.vehicles.map(v => v.plate === plate ? { ...v, status, maintenanceDetails: maintenanceDetails || v.maintenanceDetails } : v);
+    if (status === 'maintenance') {
+      this.addNotification({
+        type: 'maintenance',
+        title: `Vehicle Maintenance: ${plate}`,
+        message: maintenanceDetails || 'Vehicle moved to workshop for maintenance inspection.',
+        time: 'Just now',
+        targetRole: 'admin',
+        unread: true,
+      });
+    }
+    this.notify();
+  }
+
+  updateDriverStatus(driverId: string, status: Driver['status'], leaveReason?: string, leaveUntil?: string): void {
+    const driver = this.drivers.find(d => d.id === driverId);
+    this.drivers = this.drivers.map(d => d.id === driverId ? { ...d, status, leaveReason, leaveUntil } : d);
+    if (status === 'sick_leave' || status === 'on_leave') {
+      this.addNotification({
+        type: 'driver_status',
+        title: `Driver Leave: ${driver?.name || driverId}`,
+        message: `Marked as ${status === 'sick_leave' ? 'Sick Leave' : 'On Leave'}. Reason: ${leaveReason || 'Doctor rest prescribed'}.`,
+        time: 'Just now',
+        targetRole: 'admin',
+        unread: true,
+      });
+    }
+    this.notify();
+  }
+
+  sendChatMessage(requisitionId: string, senderRole: 'employee' | 'driver' | 'admin', senderName: string, text: string): TripChatMessage {
+    const newMsg: TripChatMessage = {
+      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      requisitionId,
+      senderRole,
+      senderName,
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    this.chatMessages = [...this.chatMessages, newMsg];
+
+    // Auto-create notification for counterpart
+    const targetRole: 'employee' | 'admin' | 'all' = senderRole === 'employee' ? 'admin' : 'employee';
+    this.addNotification({
+      type: 'chat_message',
+      title: `Trip Chat: ${senderName}`,
+      message: text.length > 55 ? text.slice(0, 52) + '...' : text,
+      time: 'Just now',
+      targetRole,
+      requisitionId,
+      unread: true,
+    });
+
+    this.notify();
+    return newMsg;
+  }
+
+  addNotification(notif: Omit<FleetNotification, 'id'>): FleetNotification {
+    const newNotif: FleetNotification = {
+      ...notif,
+      id: `fnotif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    };
+    this.notifications = [newNotif, ...this.notifications];
+    this.notify();
+    return newNotif;
+  }
+
+  markNotificationRead(id: string): void {
+    this.notifications = this.notifications.map(n => n.id === id ? { ...n, unread: false } : n);
+    this.notify();
+  }
+
+  markAllNotificationsRead(role?: 'employee' | 'admin'): void {
+    this.notifications = this.notifications.map(n => {
+      if (!role || n.targetRole === 'all' || n.targetRole === role) {
+        return { ...n, unread: false };
+      }
+      return n;
+    });
     this.notify();
   }
 
@@ -689,12 +973,16 @@ export function useFleetStore() {
   const [drivers, setDrivers] = React.useState<Driver[]>(fleetStore.getDrivers());
   const [vehicles, setVehicles] = React.useState<Vehicle[]>(fleetStore.getVehicles());
   const [requisitions, setRequisitions] = React.useState<VehicleRequisition[]>(fleetStore.getRequisitions());
+  const [chatMessages, setChatMessages] = React.useState<TripChatMessage[]>(fleetStore.getChatMessages());
+  const [notifications, setNotifications] = React.useState<FleetNotification[]>(fleetStore.getNotifications());
 
   React.useEffect(() => {
     const unsubscribe = fleetStore.subscribe(() => {
       setDrivers([...fleetStore.getDrivers()]);
       setVehicles([...fleetStore.getVehicles()]);
       setRequisitions([...fleetStore.getRequisitions()]);
+      setChatMessages([...fleetStore.getChatMessages()]);
+      setNotifications([...fleetStore.getNotifications()]);
     });
     return unsubscribe;
   }, []);
@@ -703,6 +991,8 @@ export function useFleetStore() {
     drivers,
     vehicles,
     requisitions,
+    chatMessages,
+    notifications,
     addRequisition: fleetStore.addRequisition.bind(fleetStore),
     assignRequisition: fleetStore.assignRequisition.bind(fleetStore),
     startTrip: fleetStore.startTrip.bind(fleetStore),
@@ -714,6 +1004,12 @@ export function useFleetStore() {
     addVehicle: fleetStore.addVehicle.bind(fleetStore),
     addDriver: fleetStore.addDriver.bind(fleetStore),
     retireVehicle: fleetStore.retireVehicle.bind(fleetStore),
+    updateVehicleStatus: fleetStore.updateVehicleStatus.bind(fleetStore),
     updateDriverStatus: fleetStore.updateDriverStatus.bind(fleetStore),
+    sendChatMessage: fleetStore.sendChatMessage.bind(fleetStore),
+    getChatMessages: fleetStore.getChatMessages.bind(fleetStore),
+    getNotifications: fleetStore.getNotifications.bind(fleetStore),
+    markNotificationRead: fleetStore.markNotificationRead.bind(fleetStore),
+    markAllNotificationsRead: fleetStore.markAllNotificationsRead.bind(fleetStore),
   };
 }
