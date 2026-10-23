@@ -18,6 +18,9 @@ import EnrollDriverModal from '../components/fleet/EnrollDriverModal';
 import TripChatModal from '../components/fleet/TripChatModal';
 import FleetNotificationsDrawer from '../components/fleet/FleetNotificationsDrawer';
 import FleetChatCenter from '../components/fleet/FleetChatCenter';
+import NewRequisitionModal from '../components/fleet/NewRequisitionModal';
+import AssignVehicleModal from '../components/fleet/AssignVehicleModal';
+import DriverConsole from '../components/fleet/DriverConsole';
 
 export default function FleetView({ role, lang }: ViewProps) {
   const {
@@ -42,11 +45,13 @@ export default function FleetView({ role, lang }: ViewProps) {
 
   // Strict Role-Based Access Control (RBAC)
   const isEmployee = role === 'employee';
+  const isDriver = role === 'driver';
   const isTransportAdmin = role === 'transport_admin' || role === 'plant_gm' || role === 'chairman';
 
-  // Active Tab: Employees have requisitions and dedicated chat center. Admins have full module tabs + chat center.
+  // Active Tab: Employees have requisitions and dedicated chat center. Admins have full module tabs + chat center. Drivers have mission cockpit + chat center.
   const [activeAdminTab, setActiveAdminTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel' | 'gate_manifest' | 'chat_center'>('requisitions');
   const [employeeTab, setEmployeeTab] = useState<'requisitions' | 'chat_center'>('requisitions');
+  const [driverTab, setDriverTab] = useState<'console' | 'chat_center'>('console');
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -271,21 +276,29 @@ export default function FleetView({ role, lang }: ViewProps) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 className="section-title" style={{ margin: 0 }}>
-              🚗 {isEmployee
+              🚗 {isDriver
+                ? t('Duty Driver Terminal & Mission Cockpit', 'ডিউটি ড্রাইভার টার্মিনাল ও ট্রিপ কন্ট্রোল', lang)
+                : isEmployee
                 ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
                 : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
             </h2>
             <span className="badge info" style={{ fontSize: '10px' }}>
-              {isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
+              {isDriver ? 'Driver Terminal' : isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
             </span>
-            {!isEmployee && (
+            {!isEmployee && !isDriver && (
               <span className="badge success" style={{ fontSize: '10px' }}>
                 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
               </span>
             )}
           </div>
           <p className="section-subtitle" style={{ marginTop: '4px' }}>
-            {isEmployee
+            {isDriver
+              ? t(
+                  'Active Mission Execution • Gate-Out & Gate-In Odometer Logging • Direct Passenger & Dispatch VoIP • Toll Voucher Claims',
+                  'সক্রিয় মিশন পরিচালনা • গেট আউট ও গেট ইন ওডোমিটার লগ • যাত্রী ও ডেসপ্যাচ সরাসরি কল • হাইওয়ে টোল ভাউচার',
+                  lang
+                )
+              : isEmployee
               ? t(
                   'Submit duty travel requests, track your assigned vehicle & driver, download digital trip challans, and rate trip completion.',
                   'দাপ্তরিক যাতায়াত রিকুইজিশন জমা দিন, ড্রাইভার ও গাড়ির অবস্থান ট্র্যাক করুন এবং ডিজিটাল ট্রিপ চালান ডাউনলোড করুন।',
@@ -347,15 +360,17 @@ export default function FleetView({ role, lang }: ViewProps) {
             </>
           )}
 
-          {/* New Requisition Button Available to All Authorized Users */}
-          <button
-            className="btn-primary"
-            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
-            onClick={() => setShowNewRequisitionModal(true)}
-          >
-            <Plus size={15} />
-            {t('New Duty Vehicle Requisition', 'নতুন গাড়ির আবেদন', lang)}
-          </button>
+          {/* New Requisition Button Available to Employees and Admins only */}
+          {!isDriver && (
+            <button
+              className="btn-primary"
+              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
+              onClick={() => setShowNewRequisitionModal(true)}
+            >
+              <Plus size={15} />
+              {t('New Duty Vehicle Requisition', 'নতুন গাড়ির আবেদন', lang)}
+            </button>
+          )}
         </div>
       </div>
 
@@ -408,7 +423,35 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── Informational Callout Strip ────────────────────────────── */}
-      {isEmployee ? (
+      {isDriver ? (
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.08)',
+          border: '1.5px solid #10B981',
+          padding: '9px 14px',
+          borderRadius: '10px',
+          marginBottom: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '11.5px',
+          color: 'var(--brand-slate-900)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <UserCheck size={16} color="#059669" />
+            <div>
+              <strong>{t('Driver Mission Cockpit (Md. Rafiqul Islam - DRV-01):', 'ডিউটি ড্রাইভার ককপিট:', lang)}</strong>{' '}
+              {t(
+                'Execute assigned duty travel missions, log departure/arrival odometers, communicate via direct VoIP & tri-party chat, and submit highway toll claims.',
+                'বরাদ্দকৃত ট্রিপ সম্পন্ন করুন, ওডোমিটার রিডিং প্রদান করুন, ভিওআইপি ও ট্রাই-পার্টি চ্যাটে সংযুক্ত থাকুন এবং হাইওয়ে টোল ভাউচার জমা দিন।',
+                lang
+              )}
+            </div>
+          </div>
+          <span className="badge success" style={{ whiteSpace: 'nowrap' }}>
+            {t('Duty Driver Terminal', 'ড্রাইভার টার্মিনাল', lang)}
+          </span>
+        </div>
+      ) : isEmployee ? (
         <div style={{
           background: 'rgba(59, 130, 246, 0.06)',
           border: '1px solid rgba(59, 130, 246, 0.2)',
@@ -466,8 +509,8 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─── Metric Cards ───────────────────────────────────────────── */}
-      {isEmployee ? (
+      {/* ─── Metric Cards (Staff & Admin only) ───────────────────────── */}
+      {!isDriver && (isEmployee ? (
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
@@ -563,7 +606,7 @@ export default function FleetView({ role, lang }: ViewProps) {
             </div>
           </div>
         </div>
-      )}
+      ))}
 
       {/* ─── AI Smart Pooling Opportunity Box (Admin Only) ─────────── */}
       {isTransportAdmin && (
@@ -783,10 +826,75 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
+      {/* ─── Driver Navigation Tabs ─── */}
+      {isDriver && (
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px' }}>
+          <button
+            onClick={() => setDriverTab('console')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: driverTab === 'console' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
+              padding: '7px 14px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: driverTab === 'console' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Gauge size={14} />
+            <span>{t('My Assigned Missions & Duty Terminal', 'আমার ডিউটি ও ট্রিপ ককপিট', lang)}</span>
+          </button>
+
+          <button
+            onClick={() => setDriverTab('chat_center')}
+            style={{
+              background: 'none',
+              border: 'none',
+              borderBottom: driverTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
+              padding: '7px 14px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              color: driverTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <MessageSquare size={14} />
+            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
+            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live Channels</span>
+          </button>
+        </div>
+      )}
+
+      {/* ─── Driver Terminal Mode Views ─── */}
+      {isDriver && driverTab === 'console' && (
+        <DriverConsole
+          lang={lang}
+          onOpenChat={(req) => {
+            setActiveChatReq(req);
+            setDriverTab('chat_center');
+          }}
+        />
+      )}
+
+      {isDriver && driverTab === 'chat_center' && (
+        <FleetChatCenter
+          userRole="driver"
+          lang={lang}
+          onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
+        />
+      )}
+
       {/* ══════════════════════════════════════════════════════════════
           TAB 1: REQUISITIONS DISPATCH QUEUE & TRAVEL DESK
           ══════════════════════════════════════════════════════════════ */}
-      {((isEmployee && employeeTab === 'requisitions') || (!isEmployee && activeAdminTab === 'requisitions')) && (
+      {!isDriver && ((isEmployee && employeeTab === 'requisitions') || (!isEmployee && activeAdminTab === 'requisitions')) && (
         <div className="card mb-4">
           <div className="card-hd">
             <div className="card-hd-left">
@@ -1595,269 +1703,26 @@ export default function FleetView({ role, lang }: ViewProps) {
         />
       )}
 
-      {/* ─── MODAL 1: NEW VEHICLE REQUISITION ────────────────────────── */}
-      {showNewRequisitionModal && (
-        <div className="modal-bg" onClick={() => setShowNewRequisitionModal(false)}>
-          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd">
-              <h3>
-                <Car size={18} />
-                {t('Official Duty Travel Vehicle Requisition Form', 'দাপ্তরিক যাতায়াত যানবাহন রিকুইজিশন ফর্ম', lang)}
-              </h3>
-              <button className="modal-close" onClick={() => setShowNewRequisitionModal(false)}>×</button>
-            </div>
-
-            <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              {/* Trip Mode Switch */}
-              <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Trip Mode & Route Type', 'যাতায়াতের ধরন', lang)}</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <button
-                    type="button"
-                    style={{
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: tripType === 'round_trip' ? '2px solid #1D4ED8' : '1px solid #CBD5E1',
-                      background: tripType === 'round_trip' ? '#EFF6FF' : '#FFF',
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                    onClick={() => setTripType('round_trip')}
-                  >
-                    <div style={{ fontWeight: 800, fontSize: '13px', color: tripType === 'round_trip' ? '#1D4ED8' : '#0F172A' }}>
-                      🔄 Round Trip (Return Transit)
-                    </div>
-                    <div style={{ fontSize: '10.5px', color: '#64748B' }}>Driver waits and returns passengers to origin office</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    style={{
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: tripType === 'one_way' ? '2px solid #1D4ED8' : '1px solid #CBD5E1',
-                      background: tripType === 'one_way' ? '#EFF6FF' : '#FFF',
-                      cursor: 'pointer',
-                      textAlign: 'left'
-                    }}
-                    onClick={() => setTripType('one_way')}
-                  >
-                    <div style={{ fontWeight: 800, fontSize: '13px', color: tripType === 'one_way' ? '#1D4ED8' : '#0F172A' }}>
-                      ➡️ One-Way Transit Drop-off
-                    </div>
-                    <div style={{ fontSize: '10.5px', color: '#64748B' }}>Drop passengers at target destination only</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Required Vehicle Class */}
-              <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Required Vehicle Capacity / Class', 'প্রয়োজনীয় গাড়ির ধরন', lang)}</label>
-                <div className="responsive-col-4" style={{ gap: '8px' }}>
-                  {[
-                    { id: 'sedan_4', label: 'Sedan (4-Seats)', desc: 'Executive / Meeting' },
-                    { id: 'microbus_7', label: 'HiAce (7-Seats)', desc: 'Team Delegation' },
-                    { id: 'pickup_4x4', label: 'Pickup 4x4', desc: 'Refinery Emergency' },
-                    { id: 'tanker_heavy', label: 'Tanker (Bulk)', desc: 'Industrial Bitumen' },
-                  ].map(vClass => (
-                    <button
-                      key={vClass.id}
-                      type="button"
-                      style={{
-                        padding: '8px 6px',
-                        borderRadius: '6px',
-                        border: requiredCapacity === vClass.id ? '2px solid #1D4ED8' : '1px solid #CBD5E1',
-                        background: requiredCapacity === vClass.id ? '#EFF6FF' : '#FFF',
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                      onClick={() => setRequiredCapacity(vClass.id as any)}
-                    >
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: requiredCapacity === vClass.id ? '#1D4ED8' : '#0F172A' }}>
-                        {vClass.label}
-                      </div>
-                      <div style={{ fontSize: '9.5px', color: '#64748B' }}>{vClass.desc}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Route: From & To */}
-              <div className="form-row mb-3">
-                <div className="form-group">
-                  <label>{t('Pickup Location / Origin Office', 'যাত্রার প্রারম্ভিক স্থান', lang)}</label>
-                  <select value={fromLoc} onChange={(e) => setFromLoc(e.target.value)}>
-                    <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
-                    <option value="Keraniganj Bitumen Refinery Complex">Keraniganj Bitumen Refinery Complex</option>
-                    <option value="Bashundhara City, Panthapath">Bashundhara City, Panthapath Office</option>
-                    <option value="Chittagong Terminal Office">Chittagong Terminal Office</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>{t('Target Destination', 'গন্তব্য স্থান', lang)}</label>
-                  <input
-                    type="text"
-                    value={toLoc}
-                    onChange={(e) => setToLoc(e.target.value)}
-                    placeholder="e.g. Keraniganj Bitumen Plant Gate #1 / Bangladesh Bank"
-                  />
-                </div>
-              </div>
-
-              {/* Multi-Stop Itinerary Route Builder */}
-              <div className="form-group mb-3" style={{ background: '#F8FAFC', border: '1px dashed #CBD5E1', padding: '10px 12px', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', margin: 0, display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <MapPin size={13} color="#2563EB" />
-                    {t('Multi-Stop Itinerary & Via Waypoints (Optional)', 'ভায়া স্টপ / মধ্যবর্তী বিরতিসমূহ', lang)}
-                  </label>
-                  <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
-                    {intermediateStops.length} {t('stops added', 'স্টপ যোগ করা হয়েছে', lang)}
-                  </span>
-                </div>
-
-                {intermediateStops.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
-                    {intermediateStops.map((stop, idx) => (
-                      <div key={idx} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: '#FFF',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: '6px',
-                        padding: '6px 10px',
-                        fontSize: '11.5px',
-                      }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--brand-slate-800)' }}>
-                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#EFF6FF', color: '#1D4ED8', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                            {idx + 1}
-                          </span>
-                          <span>{stop}</span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setIntermediateStops(intermediateStops.filter((_, i) => i !== idx))}
-                          style={{ border: 'none', background: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
-                          title="Remove Stop"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <input
-                    type="text"
-                    value={newStopInput}
-                    onChange={(e) => setNewStopInput(e.target.value)}
-                    placeholder="e.g. Sonali Bank Motijheel / Ministry Secretariat..."
-                    style={{ flex: 1, fontSize: '11px', height: '30px' }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (newStopInput.trim()) {
-                          setIntermediateStops([...intermediateStops, newStopInput.trim()]);
-                          setNewStopInput('');
-                        }
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="btn-outline"
-                    style={{ fontSize: '11px', padding: '0 10px', height: '30px', whiteSpace: 'nowrap' }}
-                    onClick={() => {
-                      if (newStopInput.trim()) {
-                        setIntermediateStops([...intermediateStops, newStopInput.trim()]);
-                        setNewStopInput('');
-                      }
-                    }}
-                  >
-                    + {t('Add Via Stop', 'স্টপ যোগ করুন', lang)}
-                  </button>
-                </div>
-              </div>
-
-              {/* Date & Time */}
-              <div className="form-row mb-3">
-                <div className="form-group">
-                  <label>{t('Departure Date & Time', 'যাত্রার সময়', lang)}</label>
-                  <input
-                    type="text"
-                    value={departureTime}
-                    onChange={(e) => setDepartureTime(e.target.value)}
-                  />
-                </div>
-
-                {tripType === 'round_trip' && (
-                  <div className="form-group">
-                    <label>{t('Expected Return Time', 'প্রত্যাবর্তনের সময়', lang)}</label>
-                    <input
-                      type="text"
-                      value={returnTime}
-                      onChange={(e) => setReturnTime(e.target.value)}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Passengers */}
-              <div className="form-row mb-3">
-                <div className="form-group">
-                  <label>{t('Number of Passengers', 'যাত্রী সংখ্যা', lang)}</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={12}
-                    value={passengersCount}
-                    onChange={(e) => setPassengersCount(Number(e.target.value))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>{t('Passenger Names & Designations', 'যাত্রীদের নাম ও পদবি', lang)}</label>
-                  <input
-                    type="text"
-                    value={passengerNames}
-                    onChange={(e) => setPassengerNames(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Official Purpose & Cost Center */}
-              <div className="form-group mb-3">
-                <label>{t('Official Business Purpose / Justification', 'দাপ্তরিক কাজের উদ্দেশ্য ও যৌক্তিকতা', lang)}</label>
-                <textarea
-                  rows={2}
-                  value={purpose}
-                  onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="Specify client meeting, refinery engineering inspection, or ministry tender submission..."
-                />
-              </div>
-
-              <div className="form-group">
-                <label>{t('Cost Center / Department Billing Code', 'বিভাগীয় কস্ট সেন্টার কোড', lang)}</label>
-                <input
-                  type="text"
-                  value={costCenter}
-                  onChange={(e) => setCostCenter(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setShowNewRequisitionModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
-              <button className="btn-primary" onClick={handleCreateRequisition}>
-                <Car size={14} />
-                {t('Submit Requisition to Transport Admin', 'পরিবহন প্রশাসনে আবেদন দাখিল করুন', lang)}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ─── MODAL 1: NEW VEHICLE REQUISITION (Enterprise Dropdown, No Vehicle Selector for Staff) ─── */}
+      <NewRequisitionModal
+        isOpen={showNewRequisitionModal}
+        onClose={() => setShowNewRequisitionModal(false)}
+        onSubmit={(reqData) => {
+          const created = addRequisition(reqData);
+          setShowNewRequisitionModal(false);
+          showToast(
+            t(
+              `✓ Duty Travel Requisition ${created.id} submitted! Transferred to Central Transport Admin for vehicle allocation.`,
+              `✓ যানবাহন রিকুইজিশন ${created.id} দাখিল সম্পন্ন! পরিবহন প্রশাসকের নিকট প্রেরিত হয়েছে।`,
+              lang
+            ),
+            'success'
+          );
+        }}
+        lang={lang}
+        currentUserName={isEmployee ? 'Tanvir Ahmed' : 'Engr. Harunur Rashid'}
+        currentUserDept={isEmployee ? 'Sales & Distribution' : 'Plant Operations'}
+      />
 
       {/* ─── MODAL 2: SMART POOLING CONSOLIDATION DIALOG (Admin only) ── */}
       {isTransportAdmin && showSmartPoolModal && (
@@ -1937,109 +1802,27 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─── MODAL 3: TRANSPORT ADMIN VEHICLE + DRIVER ASSIGNMENT ─────── */}
-      {isTransportAdmin && assigningReq && (
-        <div className="modal-bg" onClick={() => setAssigningReq(null)}>
-          <div className="modal" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
-              <div>
-                <h3 style={{ color: '#fff', margin: 0 }}>
-                  {t('Dispatch Desk: Assign Vehicle & Driver', 'গাড়ি ও চালক বরাদ্দ করণ', lang)}
-                </h3>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>
-                  Requisition ID: <strong>{assigningReq.id}</strong> • Requester: <strong>{assigningReq.requesterName}</strong>
-                </div>
-              </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setAssigningReq(null)}>×</button>
-            </div>
-
-            <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px 14px', borderRadius: '6px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                  <span><strong>Route:</strong> {assigningReq.from.split(',')[0]} ➔ {assigningReq.to.split(',')[0]}</span>
-                  <span className="badge info">{assigningReq.tripType === 'round_trip' ? 'Round Trip' : 'One-Way'}</span>
-                </div>
-                <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '4px' }}>
-                  Departure: <strong>{assigningReq.departureTime}</strong> • Passengers: <strong>{assigningReq.passengersCount} ({assigningReq.passengerNames})</strong>
-                </div>
-                <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-700)', marginTop: '4px' }}>
-                  Purpose: <em>{assigningReq.purpose}</em>
-                </div>
-              </div>
-
-              {/* Vehicle Selection */}
-              <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 800 }}>1. Select Roadworthy Vehicle from Fleet:</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {vehicles.map(v => (
-                    <div
-                      key={v.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 12px',
-                        borderRadius: '6px',
-                        border: assignCarPlate === v.plate ? '2px solid #1D4ED8' : '1px solid #CBD5E1',
-                        background: assignCarPlate === v.plate ? '#EFF6FF' : '#FFF',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setAssignCarPlate(v.plate)}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '12.5px' }}>{v.plate}</div>
-                        <div style={{ fontSize: '11px', color: '#64748B' }}>{v.model} • Seats: {v.capacitySeats} • Location: {v.location.split('(')[0]}</div>
-                      </div>
-                      <span className={`badge ${v.status === 'available' ? 'present' : 'warn'}`}>
-                        {v.status.toUpperCase()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Driver Selection */}
-              <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 800 }}>2. Select Certified Driver (Sobriety & License Verified):</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {drivers.map(d => (
-                    <div
-                      key={d.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 12px',
-                        borderRadius: '6px',
-                        border: assignDriverId === d.id ? '2px solid #059669' : '1px solid #CBD5E1',
-                        background: assignDriverId === d.id ? '#ECFDF5' : '#FFF',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setAssignDriverId(d.id)}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '12.5px' }}>{d.name} ({d.phone})</div>
-                        <div style={{ fontSize: '11px', color: '#64748B' }}>License: {d.licenseNo} • Breathalyzer: <strong style={{ color: '#059669' }}>{d.breathalyzerToday}</strong></div>
-                      </div>
-                      <span className={`badge ${d.status === 'available' ? 'present' : 'warn'}`}>
-                        {d.status.toUpperCase()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setAssigningReq(null)}>{t('Cancel', 'বাতিল', lang)}</button>
-              <button className="btn-gold" style={{ fontWeight: 800 }} onClick={handleConfirmAssignment}>
-                <Check size={14} />
-                {t('Confirm Assignment & Dispatch Challan', 'বরাদ্দ ও ট্রিপ চালান ইস্যু করুন', lang)}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ─── MODAL 3: TRANSPORT ADMIN VEHICLE + DRIVER ASSIGNMENT (Clean Dropdowns, Only Available Assets) ─── */}
+      <AssignVehicleModal
+        isOpen={!!assigningReq}
+        onClose={() => setAssigningReq(null)}
+        requisition={assigningReq}
+        vehicles={vehicles}
+        drivers={drivers}
+        onConfirm={(reqId, vehiclePlate, driverId) => {
+          assignRequisition(reqId, vehiclePlate, driverId);
+          showToast(
+            t(
+              `✓ Vehicle ${vehiclePlate} & Driver allocated to Requisition ${reqId}! Digital Trip Challan Pass generated.`,
+              `✓ গাড়ি ও চালক সফলভাবে বরাদ্দ করা হয়েছে! ডিজিটাল ট্রিপ পাস তৈরি সম্পন্ন।`,
+              lang
+            ),
+            'gold'
+          );
+          setAssigningReq(null);
+        }}
+        lang={lang}
+      />
 
       {/* ─── MODAL 4: TRIP COMPLETION & ODOMETER LOGGING (Admin only) ── */}
       {isTransportAdmin && completingReq && (

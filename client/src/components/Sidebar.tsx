@@ -180,6 +180,26 @@ const HR_ADMIN_NAV: NavSection[] = [
   },
 ];
 
+const DRIVER_NAV: NavSection[] = [
+  {
+    title: 'Duty Terminal',
+    titleBn: 'ডিউটি টার্মিনাল',
+    items: [
+      { view: 'fleet',         icon: <Truck size={16} />,          label: 'My Assigned Missions',         labelBn: 'আমার দায়িত্বপ্রাপ্ত ট্রিপ', badge: 'Active', badgeType: 'success' },
+      { view: 'attendance',    icon: <MapPin size={16} />,         label: 'Driver Duty & Breathalyzer',   labelBn: 'ডিউটি ও ফিটনেস অডিট' },
+      { view: 'claims',        icon: <Receipt size={16} />,        label: 'Toll & Conveyance Slips',      labelBn: 'টোল ও যাতায়াত ভাউচার', badge: '৳1.2k', badgeType: 'info' },
+    ],
+  },
+  {
+    title: 'Support & Safety',
+    titleBn: 'সহায়তা ও নিরাপত্তা',
+    items: [
+      { view: 'incident',      icon: <AlertTriangle size={16} />,  label: 'Highway Emergency SOS',        labelBn: 'জরুরি রোডসাইড সহায়তা' },
+      { view: 'parcel',        icon: <Package size={16} />,        label: 'Cargo Waybill & Manifest',     labelBn: 'কার্গো চালান ও ডেলিভারি' },
+    ],
+  },
+];
+
 const ROLE_NAV: Record<AppRole, NavSection[]> = {
   chairman: CHAIRMAN_NAV,
   plant_gm: PLANT_GM_NAV,
@@ -187,6 +207,7 @@ const ROLE_NAV: Record<AppRole, NavSection[]> = {
   hr_admin: HR_ADMIN_NAV,
   hod: HOD_NAV,
   employee: EMPLOYEE_NAV,
+  driver: DRIVER_NAV,
 };
 
 export default function Sidebar({

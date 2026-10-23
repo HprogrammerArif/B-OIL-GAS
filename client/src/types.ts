@@ -1,4 +1,4 @@
-export type AppRole = 'chairman' | 'plant_gm' | 'hr_admin' | 'transport_admin' | 'hod' | 'employee';
+export type AppRole = 'chairman' | 'plant_gm' | 'hr_admin' | 'transport_admin' | 'hod' | 'employee' | 'driver';
 export type AppView =
   | 'dashboard'
   | 'inner_circle'   // Chairman's secure messaging
@@ -72,6 +72,14 @@ export const ROLE_META: Record<AppRole, { label: string; labelBn: string; name: 
     initials: 'TA',
     avatarColor: '#D97706',
   },
+  driver: {
+    label: 'Duty Driver Terminal',
+    labelBn: 'ডিউটি ড্রাইভার টার্মিনাল',
+    name: 'Md. Rafiqul Islam',
+    dept: 'Fleet Operations & Heavy Transit',
+    initials: 'RI',
+    avatarColor: '#059669',
+  },
 };
 
-export const t = (en: string, bn: string, lang: Lang) => lang === 'en' ? en : bn;
+export const t = (en: string, bn: string = en, lang: Lang = 'en') => lang === 'bn' ? bn : en;

@@ -27,6 +27,7 @@ const PERSONAS: PersonaOption[] = [
   { role: 'transport_admin',email: 'kamruzzaman@bashundhara.com',     shortLabel: 'Transport Super',     shortLabelBn: 'পরিবহন সুপার' },
   { role: 'hod',            email: 'farida.begum@bashundhara.com',    shortLabel: 'Finance HOD',         shortLabelBn: 'অর্থ প্রধান' },
   { role: 'employee',       email: 'tanvir.ahmed@bashundhara.com',    shortLabel: 'Staff Self-Service',  shortLabelBn: 'কর্মী সেলফ-সার্ভিস' },
+  { role: 'driver',         email: 'rafiqul.driver@bashundhara.com',  shortLabel: 'Duty Driver Terminal',shortLabelBn: 'ডিউটি ড্রাইভার' },
 ];
 
 export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProps) {

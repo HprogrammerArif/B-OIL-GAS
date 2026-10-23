@@ -60,6 +60,12 @@ const ROLE_BOTTOM_TABS: Record<AppRole, BottomTab[]> = {
     { view: 'claims',          label: 'Claims',    labelBn: 'দাবি বিল',  icon: <Receipt size={19} /> },
     { view: 'vehicle_request', label: 'Transport', labelBn: 'গাড়ি বুক', icon: <Car size={19} /> },
   ],
+  driver: [
+    { view: 'fleet',           label: 'Missions',   labelBn: 'মিশন',        icon: <Car size={19} />, badge: '1', badgeType: 'warn' },
+    { view: 'attendance',      label: 'Sobriety',   labelBn: 'উপস্থিতি',    icon: <MapPin size={19} /> },
+    { view: 'claims',          label: 'Toll Slips', labelBn: 'টোল দাবি',   icon: <Receipt size={19} /> },
+    { view: 'dashboard',       label: 'Terminal',   labelBn: 'টার্মিনাল',    icon: <Briefcase size={19} /> },
+  ],
 };
 
 export default function MobileBottomNav({

@@ -45,6 +45,7 @@ const USER_CREDENTIALS: Record<AppRole, { email: string; pernr: string; clearanc
   transport_admin:{ email: 'kamruzzaman@bashundhara.com',     pernr: 'PERNR-002410', clearance: 'Level-3 Dispatch' },
   hod:            { email: 'farida.begum@bashundhara.com',    pernr: 'PERNR-001088', clearance: 'Level-4 Signatory' },
   employee:       { email: 'tanvir.ahmed@bashundhara.com',    pernr: 'PERNR-004119', clearance: 'Level-2 Staff' },
+  driver:         { email: 'rafiqul.driver@bashundhara.com',  pernr: 'PERNR-008821', clearance: 'Level-1 Duty Transit' },
 };
 
 interface TopbarProps {

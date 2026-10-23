@@ -103,6 +103,12 @@ export const ROLE_STATS: Record<AppRole, StatDef[]> = {
     { label: 'My Parcel', labelBn: 'আমার পার্সেল', value: '1 In Transit', sub: 'From Head Office → Keraniganj', type: 'blue', icon: <Package size={16}/>, sparkline: [0, 1, 1], sparkColor: '#0284C7' },
     { label: 'Bus Seat', labelBn: 'বাস সিট', value: 'Seat #7', sub: 'Route 3 — Mirpur ↔ Plant', type: 'green', icon: <Bus size={16}/>, sparkline: [7, 7, 7], sparkColor: '#059669' },
   ],
+  driver: [
+    { label: 'Assigned Mission', labelBn: 'বরাদ্দকৃত ট্রিপ', value: '1 Active', sub: 'Baridhara HQ ➔ Keraniganj', type: 'green', icon: <Truck size={16}/>, sparkline: [1, 2, 1, 2, 1], sparkColor: '#059669' },
+    { label: 'Sobriety BAC', labelBn: 'অ্যালকোহল টেস্ট', value: '0.00%', sub: 'Zero Alcohol Cleared Today', type: 'blue', icon: <CheckCircle size={16}/>, sparkline: [0, 0, 0, 0, 0], sparkColor: '#0284C7' },
+    { label: 'Toll Slips Claimed', labelBn: 'টোল দাবি স্লিপ', value: '৳410', sub: '2 claims awaiting reimbursement', type: 'warn', icon: <Receipt size={16}/>, sparkline: [150, 260, 410], sparkColor: '#D97706' },
+    { label: 'Safety Rating', labelBn: 'নিরাপত্তা স্কোর', value: '4.9/5.0', sub: 'Top Chauffeur Category', type: 'green', icon: <TrendingUp size={16}/>, sparkline: [4.7, 4.8, 4.8, 4.9, 4.9], sparkColor: '#059669' },
+  ],
 };
 
 function ShieldCheckIcon() {

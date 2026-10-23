@@ -103,6 +103,19 @@ const EXTENDED_ROLE_DATA: Record<AppRole, {
     bloodGroup: 'B+ (Positive)',
     emergencyContact: 'Spouse (+880 1711-002155)',
     sapRole: 'SAP_ESS_MSS_USER / S4H_EMPLOYEE_SELF_SERVICE'
+  },
+  driver: {
+    email: 'rafiqul.driver@bashundhara.com',
+    pernr: 'BOGCL-005201',
+    grade: 'Grade T-1 (Duty Executive Chauffeur)',
+    clearance: 'Level-2 Fleet Logistics & Safe Transit',
+    location: 'Bashundhara Corporate HQ Driver Pool, Gate-1',
+    phone: '+880 1718-445566',
+    reportingTo: 'Md. Kamruzzaman (Transport Admin)',
+    joinDate: '10 Feb 2019',
+    bloodGroup: 'O+ (Positive)',
+    emergencyContact: 'Mrs. Rafiqul (+880 1718-445577)',
+    sapRole: 'SAP_FLEET_DRIVER / S4H_TRIP_DISPATCH'
   }
 };
 
