@@ -412,7 +412,7 @@ export default function TripChatModal({
 
         {/* ─── 4. MESSAGES STREAM (WHATSAPP/TELEGRAM BUBBLE FEED) ─── */}
         <div
-          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/60 dark:bg-slate-950/40"
+          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/60 dark:bg-slate-950/40"
           style={{ backgroundImage: 'radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 0)', backgroundSize: '24px 24px' }}
         >
           {/* Day Divider */}

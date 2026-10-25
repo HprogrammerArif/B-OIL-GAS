@@ -765,7 +765,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {isDriver && driverTab === 'chat_center' && (
-        <div className="flex h-[calc(100vh-140px)] min-h-[640px] w-full flex-col overflow-hidden rounded-2xl shadow-xl">
+        <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 mb-1">
           <FleetChatCenter
             userRole="driver"
             lang={lang}
@@ -1587,7 +1587,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           TAB 6: DEDICATED DISPATCH COMMUNICATIONS DESK (Staff & Admin)
           ══════════════════════════════════════════════════════════════ */}
       {((isEmployee && employeeTab === 'chat_center') || (!isEmployee && activeAdminTab === 'chat_center')) && (
-        <div className="flex h-[calc(100vh-140px)] min-h-[640px] w-full flex-col overflow-hidden rounded-2xl shadow-xl">
+        <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 mb-1">
           <FleetChatCenter
             userRole={isEmployee ? 'employee' : 'admin'}
             lang={lang}

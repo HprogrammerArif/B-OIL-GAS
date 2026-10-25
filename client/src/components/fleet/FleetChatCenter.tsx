@@ -5,7 +5,7 @@ import { showToast } from '../../App';
 import {
   MessageSquare, Send, Car, MapPin, Clock, ShieldCheck, CheckCircle2,
   Radio, Search, Navigation, QrCode, Receipt, Check, PhoneCall,
-  AlertTriangle, CheckCheck, X, Fuel, ArrowLeft, Lock, Users,
+  AlertTriangle, CheckCheck, X, Fuel, ArrowLeft, Lock, Users, User,
   Mic, Play, Pause, FileText, CornerDownLeft, Volume2,
   Compass, Phone, Activity
 } from 'lucide-react';
@@ -498,11 +498,11 @@ export default function FleetChatCenter({
         </div>
 
         {/* Conversation Items List */}
-        <div className="flex-1 space-y-1.5 overflow-y-auto p-2">
+        <div className="flex-1 min-h-0 space-y-2 overflow-y-auto p-2.5">
           {/* Trip Rooms (Tri-Party: Driver ↔ Staff ↔ Admin) */}
           {(channelFilterTab === 'all' || channelFilterTab === 'trips') && (
             <div>
-              <div className="flex items-center justify-between px-2 pb-1 pt-1.5 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <div className="flex items-center justify-between px-2 pb-1.5 pt-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 <span>{t('Active Duty Trips (3-Party)', 'সক্রিয় ডিউটি ট্রিপ চ্যানেল', lang)}</span>
                 <span className="rounded bg-blue-50 px-1.5 text-[10px] font-bold text-blue-600 dark:bg-blue-950">Tri-Party</span>
               </div>
@@ -513,46 +513,152 @@ export default function FleetChatCenter({
                 const lastMsg = msgs[msgs.length - 1];
                 const sm = statusMeta(r.status, lang);
 
+                const isEnRoute = r.status === 'in_transit';
+                const isAssigned = r.status === 'assigned';
+                const isPending = r.status === 'pending';
+                const isDone = r.status === 'completed';
+
                 return (
                   <div
                     key={r.id}
                     onClick={() => handleSelectChannel(r.id)}
-                    className={`cursor-pointer rounded-2xl border p-3 text-xs transition ${
+                    className={`group relative mb-2 cursor-pointer rounded-2xl border p-2.5 text-xs transition-all duration-150 ${
                       isSelected
-                        ? 'border-l-4 border-l-[#A51C30] border-rose-300 bg-gradient-to-r from-rose-50/90 to-white shadow-xs dark:border-rose-900 dark:from-rose-950/40 dark:to-slate-900'
-                        : 'border-slate-200/80 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-slate-700'
+                        ? 'border-l-[5px] border-l-[#A51C30] border-rose-300 bg-gradient-to-r from-rose-50/95 via-rose-50/40 to-white shadow-sm ring-1 ring-rose-300/50 dark:border-rose-900 dark:from-rose-950/60 dark:to-slate-900'
+                        : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-2xs dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-800/80'
                     }`}
                   >
-                    <div className="mb-1 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="font-mono text-xs font-bold text-slate-900 dark:text-white">#{r.id}</span>
-                        <span className="text-[10px] text-slate-400">•</span>
-                        <span className="max-w-[130px] truncate font-bold text-slate-800 dark:text-slate-100">
-                          {r.to.split(',')[0]}
-                        </span>
-                      </div>
-                      <span className={`rounded-full border px-2 py-0.5 text-[9px] font-extrabold ${sm.cls}`}>
-                        {sm.label}
-                      </span>
-                    </div>
+                    <div className="flex items-start gap-2.5">
+                      {/* Leading Visual Avatar with Presence Indicator */}
+                      <div className="relative shrink-0">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl font-bold shadow-xs transition-transform group-hover:scale-105 ${
+                            isEnRoute
+                              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-500/20'
+                              : isAssigned
+                              ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20'
+                              : isDone
+                              ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-emerald-500/20'
+                              : 'bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-amber-500/20'
+                          }`}
+                        >
+                          {isEnRoute ? (
+                            <Navigation className="h-5 w-5 animate-pulse" />
+                          ) : isDone ? (
+                            <CheckCircle2 className="h-5 w-5" />
+                          ) : isPending ? (
+                            <Clock className="h-5 w-5" />
+                          ) : (
+                            <Car className="h-5 w-5" />
+                          )}
+                        </div>
 
-                    <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                      <div className="flex items-center gap-1 truncate">
-                        <Car size={12} className="shrink-0 text-emerald-600" />
-                        <span className="truncate font-medium text-slate-700 dark:text-slate-300">
-                          {r.assignedDriverName ? r.assignedDriverName.replace(/\s*\(.*\)/, '') : 'Awaiting Driver'}
-                        </span>
-                        <span className="text-slate-400">•</span>
-                        <span className="truncate">{r.requesterName.split(' ')[0]}</span>
+                        {/* Live Presence / Frequency Dot */}
+                        <span
+                          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                            isEnRoute
+                              ? 'bg-emerald-500 ring-2 ring-emerald-400/40 animate-pulse'
+                              : isAssigned
+                              ? 'bg-blue-500'
+                              : isDone
+                              ? 'bg-emerald-600'
+                              : 'bg-amber-400'
+                          }`}
+                          title={sm.label}
+                        />
                       </div>
-                      {lastMsg && <span className="shrink-0 text-[10px] text-slate-400">{lastMsg.timestamp}</span>}
-                    </div>
 
-                    {lastMsg && (
-                      <div className="mt-1.5 truncate border-t border-slate-100 pt-1.5 text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                        <strong className="text-slate-700 dark:text-slate-200">{lastMsg.senderName.split(' ')[0]}:</strong> {lastMsg.text}
+                      {/* Content Column */}
+                      <div className="min-w-0 flex-1">
+                        {/* Top Line: Destination & Active / Status Badge */}
+                        <div className="flex items-center justify-between gap-1.5">
+                          <h4
+                            className={`truncate text-[12.5px] font-extrabold transition-colors ${
+                              isSelected
+                                ? 'text-[#A51C30] dark:text-rose-400'
+                                : 'text-slate-900 dark:text-white group-hover:text-slate-950'
+                            }`}
+                            title={r.to}
+                          >
+                            {r.to.split(',')[0]}
+                          </h4>
+
+                          {isSelected ? (
+                            <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#A51C30] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-white shadow-2xs">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                              Active
+                            </span>
+                          ) : (
+                            <span className={`shrink-0 rounded-full border px-1.5 py-0.2 text-[9px] font-bold ${sm.cls}`}>
+                              {sm.label}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Line 2: Requisition ID & Route */}
+                        <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                          <span className="rounded bg-slate-100 px-1 py-px font-mono text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            #{r.id}
+                          </span>
+                          <span className="text-slate-300 dark:text-slate-600">•</span>
+                          <span className="truncate text-[10.5px]">
+                            {r.from.split(',')[0].replace('Bashundhara Corporate HQ', 'HQ')} ➔ {r.to.split(',')[0]}
+                          </span>
+                        </div>
+
+                        {/* Line 3: Crew Badges (Driver & Passenger) */}
+                        <div className="mt-1 flex items-center gap-1.5 overflow-hidden text-[10.5px]">
+                          <span
+                            className="inline-flex items-center gap-1 truncate rounded-md bg-slate-100/90 px-1.5 py-0.5 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            title={`Staff Passenger: ${r.requesterName}`}
+                          >
+                            <Users size={10} className="shrink-0 text-blue-500" />
+                            <span className="truncate">{r.requesterName.split(' ')[0]}</span>
+                          </span>
+
+                          <span className="text-slate-300 dark:text-slate-600">➔</span>
+
+                          {r.assignedDriverName ? (
+                            <span
+                              className="inline-flex items-center gap-1 truncate rounded-md bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                              title={`Assigned Driver: ${r.assignedDriverName}`}
+                            >
+                              <Car size={10} className="shrink-0 text-emerald-600" />
+                              <span className="truncate">{r.assignedDriverName.replace(/\s*\(.*\)/, '').split(' ')[0]}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                              <Clock size={10} className="shrink-0 text-amber-500" />
+                              <span>Awaiting Driver</span>
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Line 4: Last Message Snippet */}
+                        {lastMsg && (
+                          <div className="mt-1.5 flex items-center justify-between border-t border-slate-100 pt-1 text-[11px] text-slate-500 dark:border-slate-800/80 dark:text-slate-400">
+                            <div className="flex min-w-0 items-center gap-1 truncate">
+                              <strong className="shrink-0 text-slate-700 dark:text-slate-200">
+                                {lastMsg.senderName.split(' ')[0]}:
+                              </strong>
+                              <span className="truncate text-slate-500 dark:text-slate-400">
+                                {lastMsg.voiceData
+                                  ? '🎙️ Voice note dispatch'
+                                  : lastMsg.tollData
+                                  ? `🧾 Toll claim: ৳${lastMsg.tollData.amount}`
+                                  : lastMsg.locationPin
+                                  ? '📍 GPS pickup pin'
+                                  : lastMsg.text}
+                              </span>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-1 pl-1 text-[10px] text-slate-400">
+                              <CheckCheck size={11} className="text-blue-500" />
+                              <span>{lastMsg.timestamp}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -562,7 +668,7 @@ export default function FleetChatCenter({
           {/* Direct & Hotline Channels */}
           {(channelFilterTab === 'all' || channelFilterTab === 'direct') && (
             <div className="pt-2">
-              <div className="px-2 pb-1 pt-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <div className="px-2 pb-1.5 pt-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 {t('Dedicated Hotlines & SOS', 'সরাসরি হটলাইন ও এসওএস', lang)}
               </div>
 
@@ -572,49 +678,105 @@ export default function FleetChatCenter({
                 const lastMsg = msgs[msgs.length - 1];
                 const IconComponent = c.icon;
 
+                const isSos = c.id === 'emergency_sos';
+                const isBroadcast = c.id === 'broadcast';
+
                 return (
                   <div
                     key={c.id}
                     onClick={() => handleSelectChannel(c.id)}
-                    className={`mb-1.5 cursor-pointer rounded-2xl border p-3 text-xs transition ${
+                    className={`group relative mb-2 cursor-pointer rounded-2xl border p-2.5 text-xs transition-all duration-150 ${
                       isSelected
-                        ? c.id === 'emergency_sos'
-                          ? 'border-l-4 border-l-rose-600 border-rose-300 bg-rose-50/90 shadow-xs dark:border-rose-800 dark:bg-rose-950/40'
-                          : 'border-l-4 border-l-indigo-600 border-indigo-300 bg-indigo-50/90 shadow-xs dark:border-indigo-800 dark:bg-indigo-950/40'
-                        : 'border-slate-200/80 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/70'
+                        ? isSos
+                          ? 'border-l-[5px] border-l-rose-600 border-rose-300 bg-gradient-to-r from-rose-50/95 via-rose-50/40 to-white shadow-sm ring-1 ring-rose-300/40 dark:border-rose-900 dark:from-rose-950/50 dark:to-slate-900'
+                          : isBroadcast
+                          ? 'border-l-[5px] border-l-blue-600 border-blue-300 bg-gradient-to-r from-blue-50/95 via-blue-50/40 to-white shadow-sm ring-1 ring-blue-300/40 dark:border-blue-900 dark:from-blue-950/50 dark:to-slate-900'
+                          : 'border-l-[5px] border-l-indigo-600 border-indigo-300 bg-gradient-to-r from-indigo-50/95 via-indigo-50/40 to-white shadow-sm ring-1 ring-indigo-300/40 dark:border-indigo-900 dark:from-indigo-950/50 dark:to-slate-900'
+                        : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-2xs dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-800/80'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-                        c.id === 'emergency_sos'
-                          ? 'bg-rose-100 text-rose-600 dark:bg-rose-950 dark:text-rose-400'
-                          : c.id === 'broadcast'
-                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400'
-                          : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400'
-                      }`}>
-                        <IconComponent className="h-4 w-4" />
+                    <div className="flex items-start gap-2.5">
+                      <div className="relative shrink-0">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-xs transition-transform group-hover:scale-105 ${
+                            isSos
+                              ? 'bg-gradient-to-br from-rose-600 to-red-700 text-white shadow-rose-500/20'
+                              : isBroadcast
+                              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-500/20'
+                              : 'bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-indigo-500/20'
+                          }`}
+                        >
+                          <IconComponent className={`h-5 w-5 ${isSos ? 'animate-bounce' : ''}`} />
+                        </div>
+
+                        <span
+                          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                            isSos
+                              ? 'bg-rose-500 animate-ping ring-2 ring-rose-400'
+                              : isBroadcast
+                              ? 'bg-blue-500 ring-1 ring-blue-300'
+                              : 'bg-emerald-500 ring-1 ring-emerald-300'
+                          }`}
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="truncate text-[12.5px] font-bold text-slate-900 dark:text-white">{c.name}</span>
-                          <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${
-                            c.id === 'emergency_sos'
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950'
-                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950'
-                          }`}>
-                            {c.badge}
-                          </span>
+                        <div className="flex items-center justify-between gap-1.5">
+                          <h4
+                            className={`truncate text-[12.5px] font-extrabold ${
+                              isSelected
+                                ? isSos
+                                  ? 'text-rose-700 dark:text-rose-400'
+                                  : isBroadcast
+                                  ? 'text-blue-700 dark:text-blue-400'
+                                  : 'text-indigo-700 dark:text-indigo-400'
+                                : 'text-slate-900 dark:text-white'
+                            }`}
+                          >
+                            {c.name}
+                          </h4>
+
+                          {isSelected ? (
+                            <span
+                              className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-white shadow-2xs ${
+                                isSos ? 'bg-rose-600' : isBroadcast ? 'bg-blue-600' : 'bg-indigo-600'
+                              }`}
+                            >
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                              Active
+                            </span>
+                          ) : (
+                            <span
+                              className={`shrink-0 rounded-full px-1.5 py-0.2 text-[9px] font-extrabold ${
+                                isSos
+                                  ? 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                                  : isBroadcast
+                                  ? 'border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                  : 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                              }`}
+                            >
+                              {c.badge}
+                            </span>
+                          )}
                         </div>
-                        <div className="mt-0.5 truncate text-[10.5px] text-slate-500">{c.sub}</div>
+
+                        <div className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
+                          {c.sub}
+                        </div>
+
+                        {lastMsg && (
+                          <div className="mt-1.5 flex items-center justify-between border-t border-slate-100 pt-1 text-[11px] text-slate-500 dark:border-slate-800/80 dark:text-slate-400">
+                            <div className="flex min-w-0 items-center gap-1 truncate">
+                              <strong className="shrink-0 text-slate-700 dark:text-slate-200">
+                                {lastMsg.senderName.split(' ')[0]}:
+                              </strong>
+                              <span className="truncate text-slate-500 dark:text-slate-400">{lastMsg.text}</span>
+                            </div>
+                            <span className="shrink-0 pl-1 text-[10px] text-slate-400">{lastMsg.timestamp}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {lastMsg && (
-                      <div className="mt-1.5 truncate border-t border-slate-100 pt-1.5 text-[11px] text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                        <strong className="text-slate-700 dark:text-slate-200">{lastMsg.senderName.split(' ')[0]}:</strong> {lastMsg.text}
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -627,7 +789,7 @@ export default function FleetChatCenter({
           COLUMN 2: LIVE CONVERSATION STREAM (ALWAYS VISIBLE ON DESKTOP)
           ══════════════════════════════════════════════════════════════ */}
       <section
-        className={`relative flex min-w-0 flex-1 flex-col bg-white dark:bg-slate-900 ${
+        className={`relative flex min-w-0 flex-1 min-h-0 flex-col bg-white dark:bg-slate-900 ${
           mobileActiveView === 'inbox' ? 'max-md:hidden' : 'flex'
         }`}
       >
@@ -771,7 +933,7 @@ export default function FleetChatCenter({
         {/* ─── MESSAGE FEED VIEWPORT ─── */}
         <div
           ref={streamScrollRef}
-          className="flex-1 space-y-4 overflow-y-auto bg-slate-50/60 p-4 sm:p-6 dark:bg-slate-950/40"
+          className="flex-1 min-h-0 space-y-4 overflow-y-auto bg-slate-50/60 p-4 sm:p-6 dark:bg-slate-950/40"
           style={{ backgroundImage: 'radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 0)', backgroundSize: '24px 24px' }}
         >
           {/* Day Divider */}
