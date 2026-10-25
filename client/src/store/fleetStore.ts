@@ -1082,7 +1082,7 @@ class FleetStore {
     senderName: string,
     text: string,
     metadata?: {
-      messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event';
+      messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event' | 'voice_note' | 'attachment';
       tollData?: {
         tollName: string;
         amount: number;
@@ -1095,6 +1095,15 @@ class FleetStore {
         title: string;
         address: string;
         coordinates?: string;
+      };
+      voiceData?: {
+        duration: string;
+        audioUrl?: string;
+      };
+      attachmentData?: {
+        fileName: string;
+        fileSize: string;
+        fileType: 'image' | 'pdf' | 'document';
       };
       actionType?: 'gate_out_authorized' | 'toll_approved' | 'route_deviation';
       actionLabel?: string;

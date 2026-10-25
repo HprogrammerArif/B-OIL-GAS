@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ChevronRight, Plus, Eye, Pin, CheckCircle2, Megaphone, Search, X } from 'lucide-react';
 import { t } from '../../types';
 import { showToast } from '../../App';
 import Pagination from '../../components/Pagination';
 import { DetailDrawerData } from '../../components/DetailDrawer';
-import { DashboardSubViewProps } from './types';
+import { DashboardSubViewProps, NoticeItem } from './types';
 import { INNER_CIRCLE, PENDING_APPROVALS, NOTICE_BOARD } from './dashboardData';
+import PublishNoticeModal from './PublishNoticeModal';
+import NoticeDetailModal from './NoticeDetailModal';
 
 export default function ChairmanDashboard({
   lang,
@@ -16,12 +18,38 @@ export default function ChairmanDashboard({
   const [innerCirclePage, setInnerCirclePage] = useState(1);
   const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
   const [noticesPage, setNoticesPage] = useState(1);
-  const [notices, setNotices] = useState(NOTICE_BOARD);
+  const [notices, setNotices] = useState<NoticeItem[]>(NOTICE_BOARD);
+  const [noticeFilter, setNoticeFilter] = useState<string>('all');
+  const [noticeSearch, setNoticeSearch] = useState<string>('');
+  const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
+  const [selectedNoticeForDetail, setSelectedNoticeForDetail] = useState<NoticeItem | null>(null);
 
   const filteredInnerCircle = INNER_CIRCLE.filter(p => {
     if (innerCircleFilter === 'all') return true;
     return p.status === innerCircleFilter;
   });
+
+  const filteredNotices = useMemo(() => {
+    return notices.filter(n => {
+      if (noticeFilter === 'pinned' && !n.pinned) return false;
+      if (noticeFilter === 'safety' && !n.tag?.toLowerCase().includes('safety') && n.category !== 'safety') return false;
+      if (noticeFilter === 'hr' && !n.tag?.toLowerCase().includes('hr') && n.category !== 'hr') return false;
+      if (noticeFilter === 'operational' && !n.tag?.toLowerCase().includes('operations') && !n.tag?.toLowerCase().includes('hse') && n.category !== 'operational') return false;
+
+      if (noticeSearch.trim()) {
+        const q = noticeSearch.toLowerCase().trim();
+        return (
+          n.title.toLowerCase().includes(q) ||
+          (n.title_bn && n.title_bn.toLowerCase().includes(q)) ||
+          (n.body && n.body.toLowerCase().includes(q)) ||
+          n.tag.toLowerCase().includes(q) ||
+          (n.author && n.author.toLowerCase().includes(q)) ||
+          (n.referenceNo && n.referenceNo.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+  }, [notices, noticeFilter, noticeSearch]);
 
   const handleRowClick = (item: DetailDrawerData) => {
     if (onOpenDetailDrawer) onOpenDetailDrawer(item);
@@ -190,7 +218,7 @@ export default function ChairmanDashboard({
       )}
 
       {/* ═══════════════════════════════════════════
-          CHAIRMAN: TAB "notices" (Paginated)
+          CHAIRMAN: TAB "notices" (Paginated & Filterable)
           ═══════════════════════════════════════════ */}
       {activeTab === 'notices' && (
         <div className="card mb-5 tab-pane-fade">
@@ -203,68 +231,255 @@ export default function ChairmanDashboard({
               </div>
             </div>
             <button
-              className="btn-outline"
-              style={{ fontSize: '11px', padding: '4px 10px' }}
-              onClick={() => {
-                const titleInput = prompt('Enter new corporate circular headline / নোটিশ শিরোনাম লিখুন:');
-                if (!titleInput) return;
-                const newNotice = {
-                  title: titleInput,
-                  title_bn: titleInput,
-                  tag: 'URGENT CIRCULAR',
-                  date: 'Today, Just Now',
-                  read: false,
-                  pinned: true
-                };
-                setNotices([newNotice, ...notices]);
-                showToast('📢 New company-wide notice published & pushed to all 1,240 employees via App & SMS.', 'gold');
-              }}
+              className="btn-gold flex items-center gap-1.5 shadow-xs"
+              style={{ fontSize: '11.5px', padding: '6px 14px' }}
+              onClick={() => setShowPublishModal(true)}
             >
-              + {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}
+              <Plus size={13} />
+              <span>+ {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}</span>
             </button>
           </div>
           <div className="card-body">
-            {/* Pinned Chairman Message */}
-            <div className="notice-card gold-pin" style={{ marginBottom: '12px' }}>
-              <div className="notice-hd">
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-gold-dark)' }}>
-                  👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
-                </div>
-                <span className="badge gold">Pinned</span>
+            {/* Filter Pills & Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+                {[
+                  { id: 'all', label: `All Circulars (${notices.length})` },
+                  { id: 'pinned', label: `📌 Pinned (${notices.filter(n => n.pinned).length})` },
+                  { id: 'safety', label: `⚠️ Safety Critical (${notices.filter(n => n.tag?.toLowerCase().includes('safety') || n.category === 'safety').length})` },
+                  { id: 'hr', label: `📋 HR & Admin (${notices.filter(n => n.tag?.toLowerCase().includes('hr') || n.category === 'hr').length})` },
+                  { id: 'operational', label: `🏭 Refinery Operations (${notices.filter(n => n.tag?.toLowerCase().includes('operations') || n.category === 'operational').length})` },
+                ].map(pill => (
+                  <button
+                    key={pill.id}
+                    onClick={() => { setNoticeFilter(pill.id); setNoticesPage(1); }}
+                    className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition ${
+                      noticeFilter === pill.id
+                        ? 'bg-[#A51C30] text-white shadow-2xs'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    }`}
+                  >
+                    {pill.label}
+                  </button>
+                ))}
               </div>
-              <div className="notice-meta">Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman</div>
-              <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-600)' }}>
-                {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
+
+              {/* Search Box */}
+              <div className="relative min-w-[200px] sm:w-60">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={noticeSearch}
+                  onChange={(e) => { setNoticeSearch(e.target.value); setNoticesPage(1); }}
+                  placeholder={t('Search notices, circulars...', 'নোটিশ খুঁজুন...', lang)}
+                  className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500"
+                />
+                {noticeSearch && (
+                  <button onClick={() => setNoticeSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X size={12} />
+                  </button>
+                )}
               </div>
             </div>
 
-            <div className="notice-list">
-              {notices.slice((noticesPage - 1) * 2, noticesPage * 2).map((notice, i) => (
-                <div key={i} className={`notice-card${notice.pinned ? ' pinned' : ''}`}>
-                  <div className="notice-hd">
-                    <div className="notice-title">{t(notice.title, notice.title_bn, lang)}</div>
-                    <span className={`badge ${notice.pinned ? 'danger' : 'info'}`}>{notice.tag}</span>
+            {/* Flagship Pinned Chairman Message */}
+            {noticeFilter === 'all' && !noticeSearch && (
+              <div
+                className="notice-card gold-pin mb-3 cursor-pointer hover:shadow-md transition"
+                onClick={() => setSelectedNoticeForDetail({
+                  id: 'NOT-CHAIRMAN-EID',
+                  title: "Chairman's Message — Eid ul-Adha 2026",
+                  title_bn: "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬",
+                  tag: "👑 CHAIRMAN'S MESSAGE",
+                  category: "executive",
+                  priority: "high",
+                  date: "Jun 17, 2026",
+                  author: "Ahmed Akbar Sobhan",
+                  authorRole: "Chairman & Managing Director",
+                  targetAudience: "All Employees & Families of Bashundhara Group",
+                  body: "On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure, maintaining zero-incident safety standards, and powering the nation's energy future is the pride of our group. May this blessed occasion bring joy, health, and renewed determination to all.",
+                  read: true,
+                  pinned: true,
+                  referenceNo: "BOGCL/CHAIR/EID-2026"
+                })}
+              >
+                <div className="notice-hd">
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-gold-dark)' }}>
+                    👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
                   </div>
-                  <div className="notice-meta">{notice.date}</div>
-                  {!notice.read && (
-                    <button className="btn-sm-ghost" style={{ fontSize: '11px' }} onClick={() => showToast('Notice acknowledged.', 'success')}>
-                      ✅ {t('Acknowledge', 'পড়েছি', lang)}
-                    </button>
-                  )}
+                  <span className="badge gold">👑 Pinned by Chairman</span>
                 </div>
-              ))}
-            </div>
+                <div className="notice-meta">Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span className="font-mono text-amber-700">BOGCL/CHAIR/EID-2026</span></div>
+                <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-600)' }}>
+                  {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
+                </div>
+              </div>
+            )}
+
+            {/* Paginated Notices List */}
+            {filteredNotices.length === 0 ? (
+              <div className="py-12 text-center text-slate-400">
+                <Megaphone className="mx-auto mb-2 h-10 w-10 text-slate-300 dark:text-slate-600" />
+                <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                  {t('No corporate notices found matching this filter', 'কোনো নোটিশ পাওয়া যায়নি', lang)}
+                </div>
+              </div>
+            ) : (
+              <div className="notice-list">
+                {filteredNotices.slice((noticesPage - 1) * 4, noticesPage * 4).map((notice, i) => {
+                  const isSafety = notice.tag.includes('SAFETY') || notice.category === 'safety';
+                  const isChairman = notice.tag.includes('CHAIRMAN') || notice.category === 'executive';
+
+                  return (
+                    <div
+                      key={notice.id || i}
+                      className={`notice-card${notice.pinned ? (isChairman ? ' gold-pin' : ' pinned') : ''} group relative transition-all hover:shadow-md cursor-pointer`}
+                      onClick={() => setSelectedNoticeForDetail(notice)}
+                    >
+                      <div className="notice-hd">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm">{isChairman ? '👑' : isSafety ? '⚠️' : '📢'}</span>
+                          <div className="notice-title text-[13.5px] font-bold text-slate-900 dark:text-white">
+                            {t(notice.title, notice.title_bn, lang)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {notice.pinned && (
+                            <span className={`badge ${isChairman ? 'gold' : 'danger'}`}>
+                              {isChairman ? '👑 Chairman Pinned' : '📌 Pinned'}
+                            </span>
+                          )}
+                          <span className={`badge ${isSafety ? 'danger' : notice.tag.includes('HR') ? 'info' : 'secondary'}`}>
+                            {notice.tag}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="notice-meta text-[11px] text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+                        <span>{notice.date}</span>
+                        {notice.author && (
+                          <>
+                            <span>•</span>
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">By {notice.author}</span>
+                          </>
+                        )}
+                        {notice.targetAudience && (
+                          <>
+                            <span>•</span>
+                            <span className="text-slate-500">Audience: {notice.targetAudience}</span>
+                          </>
+                        )}
+                        {notice.referenceNo && (
+                          <>
+                            <span>•</span>
+                            <span className="font-mono text-slate-400">{notice.referenceNo}</span>
+                          </>
+                        )}
+                      </div>
+
+                      {notice.body && (
+                        <div className="notice-body text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2 leading-relaxed">
+                          {t(notice.body, notice.body_bn || notice.body, lang)}
+                        </div>
+                      )}
+
+                      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2 text-[11px]" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2">
+                          {notice.requiresAck && (
+                            <span className="text-slate-500 flex items-center gap-1">
+                              <CheckCircle2 size={12} className="text-emerald-600" />
+                              <span>
+                                {notice.acknowledgedCount || 184}/{notice.totalRecipients || 218} Read ({Math.round(((notice.acknowledgedCount || 184) / (notice.totalRecipients || 218)) * 100)}%)
+                              </span>
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className="btn-sm-ghost flex items-center gap-1 text-[11px] text-slate-600 hover:text-slate-900"
+                            onClick={() => setSelectedNoticeForDetail(notice)}
+                          >
+                            <Eye size={12} />
+                            <span>{t('View Full Circular', 'বিস্তারিত দেখুন', lang)}</span>
+                          </button>
+
+                          {!notice.read ? (
+                            <button
+                              type="button"
+                              className="btn-sm-ghost text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md"
+                              onClick={() => {
+                                setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, read: true, acknowledgedCount: (n.acknowledgedCount || 0) + 1 } : n));
+                                showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
+                              }}
+                            >
+                              ✅ {t('Acknowledge', 'পড়েছি', lang)}
+                            </button>
+                          ) : (
+                            <span className="text-[10.5px] font-bold text-emerald-600 flex items-center gap-1">
+                              <CheckCircle2 size={12} />
+                              <span>Acknowledged</span>
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            className="text-slate-400 hover:text-amber-600 p-1 rounded transition"
+                            title={notice.pinned ? "Unpin notice" : "Pin notice"}
+                            onClick={() => {
+                              setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, pinned: !n.pinned } : n));
+                              showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
+                            }}
+                          >
+                            <Pin size={13} className={notice.pinned ? "fill-amber-500 text-amber-500" : ""} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <Pagination
               currentPage={noticesPage}
-              totalItems={notices.length}
-              pageSize={2}
+              totalItems={filteredNotices.length}
+              pageSize={4}
               onPageChange={setNoticesPage}
               lang={lang}
             />
           </div>
         </div>
       )}
+
+      {/* ─── MODAL 1: PUBLISH ENTERPRISE NOTICE ─── */}
+      <PublishNoticeModal
+        isOpen={showPublishModal}
+        onClose={() => setShowPublishModal(false)}
+        lang={lang}
+        onPublish={(newNotice) => {
+          setNotices([newNotice, ...notices]);
+          showToast(
+            t(
+              `👑 Executive Circular published! Pushed to 1,240 employees via App & SMS.`,
+              `👑 নতুন কর্পোরেট নোটিশ প্রকাশিত ও ১,২৪০ কর্মকর্তা-কর্মচারীদের নিকট প্রেরিত হয়েছে।`,
+              lang
+            ),
+            'gold'
+          );
+        }}
+      />
+
+      {/* ─── MODAL 2: NOTICE DETAIL LETTERHEAD INSPECTION ─── */}
+      <NoticeDetailModal
+        notice={selectedNoticeForDetail}
+        onClose={() => setSelectedNoticeForDetail(null)}
+        lang={lang}
+        onAcknowledge={(noticeId) => {
+          setNotices(prev => prev.map(n => n.id === noticeId || n.title === selectedNoticeForDetail?.title ? { ...n, read: true, acknowledgedCount: (n.acknowledgedCount || 0) + 1 } : n));
+        }}
+      />
     </>
   );
 }

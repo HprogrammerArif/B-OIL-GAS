@@ -35,12 +35,24 @@ export interface InnerCircleMember {
 }
 
 export interface NoticeItem {
+  id?: string;
   title: string;
   title_bn: string;
   tag: string;
   date: string;
   read: boolean;
   pinned: boolean;
+  body?: string;
+  body_bn?: string;
+  category?: 'safety' | 'operational' | 'hr' | 'executive' | 'urgent';
+  targetAudience?: string;
+  priority?: 'critical' | 'high' | 'normal';
+  author?: string;
+  authorRole?: string;
+  requiresAck?: boolean;
+  acknowledgedCount?: number;
+  totalRecipients?: number;
+  referenceNo?: string;
 }
 
 export interface DcsAlarmItem {

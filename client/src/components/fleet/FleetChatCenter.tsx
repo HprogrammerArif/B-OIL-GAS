@@ -646,7 +646,7 @@ export default function FleetChatCenter({
                                   ? '🎙️ Voice note dispatch'
                                   : lastMsg.tollData
                                   ? `🧾 Toll claim: ৳${lastMsg.tollData.amount}`
-                                  : lastMsg.locationPin
+                                  : lastMsg.locationData
                                   ? '📍 GPS pickup pin'
                                   : lastMsg.text}
                               </span>
