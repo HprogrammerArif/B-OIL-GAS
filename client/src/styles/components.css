@@ -1377,6 +1377,64 @@
   background: #FFFFFF !important;
 }
 
+/* ─── ENTERPRISE FLEET & LOGISTICS MODAL SUITE ───────────────────────────────── */
+.fleet-modal-dialog {
+  max-width: 780px !important;
+  width: 95% !important;
+  max-height: 92vh !important;
+  border-radius: 18px !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+  background: #FFFFFF !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  animation: modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both !important;
+}
+
+.fleet-modal-hd {
+  flex: 0 0 auto !important;
+  padding: 18px 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #871424 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-sizing: border-box !important;
+}
+
+.fleet-modal-body {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 26px 32px !important;
+  background: #FFFFFF !important;
+  box-sizing: border-box !important;
+}
+
+.fleet-modal-ft {
+  flex: 0 0 auto !important;
+  padding: 16px 28px !important;
+  background: #F8FAFC !important;
+  border-top: 1px solid #E2E8F0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.fleet-letterhead-paper {
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1 !important;
+  border-radius: 14px !important;
+  padding: 34px 38px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+
 
 input[type="text"], input[type="email"], textarea, select {
   width:100%; padding:9px 12px; border:1px solid var(--brand-slate-200);

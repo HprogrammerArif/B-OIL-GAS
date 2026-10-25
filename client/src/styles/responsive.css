@@ -780,7 +780,8 @@
   .sap-modal,
   .broadcast-modal,
   .official-doc-modal,
-  .notice-modal-dialog {
+  .notice-modal-dialog,
+  .fleet-modal-dialog {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;

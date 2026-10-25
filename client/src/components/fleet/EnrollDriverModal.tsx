@@ -35,9 +35,9 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
     }
 
     const created = addDriver({
-      name,
-      phone,
-      licenseNo,
+      name: name.trim(),
+      phone: phone.trim(),
+      licenseNo: licenseNo.trim(),
       licenseType,
       licenseExpiry,
       bloodGroup,
@@ -54,83 +54,264 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
   };
 
   return (
-    <div className="modal-bg" style={{ zIndex: 1000 }}>
-      <div className="modal" style={{ maxWidth: '600px' }}>
-        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #0A1227 0%, #111E3D 100%)', borderBottom: '2px solid var(--brand-crimson)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(225,29,72,0.2)', color: 'var(--brand-crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <UserPlus size={18} />
+    <div
+      className="modal-bg"
+      onClick={onClose}
+      style={{
+        zIndex: 99999,
+        padding: '20px',
+        boxSizing: 'border-box',
+      }}
+    >
+      <div
+        className="fleet-modal-dialog"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '680px',
+          width: '95%',
+          maxHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '18px',
+          overflow: 'hidden',
+          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="fleet-modal-hd"
+          style={{
+            padding: '18px 28px',
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #871424 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                flexShrink: 0,
+              }}
+            >
+              <UserPlus size={20} color="#FFFFFF" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', color: '#F8FAFC' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
                 {t('Enroll New Commercial Fleet Driver', 'নতুন বাণিজ্যিক চালক তালিকাভুক্তি', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>BRTA Commercial Fitness · Sobriety Baseline · Shift Verification</div>
+              <div style={{ fontSize: '12px', color: '#CBD5E1', marginTop: '2px' }}>
+                BRTA Commercial Fitness · Sobriety Baseline · Shift Verification
+              </div>
             </div>
           </div>
-          <button className="modal-close" onClick={onClose}><X size={18} /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              color: '#CBD5E1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <X size={16} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
-              <div className="form-group">
-                <label>{t('Driver Full Legal Name *', 'চালকের পুরো নাম *', lang)}</label>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflowY: 'auto' }}>
+          <div
+            className="fleet-modal-body"
+            style={{
+              flex: '1 1 auto',
+              overflowY: 'auto',
+              padding: '26px 32px',
+              backgroundColor: '#FFFFFF',
+              boxSizing: 'border-box',
+            }}
+          >
+            {/* 2-column legal name & mobile */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px',
+                marginBottom: '18px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('Driver Full Legal Name *', 'চালকের পুরো নাম *', lang)}</span>
+                </div>
                 <input
                   type="text"
                   required
+                  className="notice-input"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                  }}
                   placeholder="e.g. Md. Anowar Hossain"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t('Contact Phone Number *', 'মোবাইল নম্বর *', lang)}</label>
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('Contact Phone Number *', 'মোবাইল নম্বর *', lang)}</span>
+                </div>
                 <input
                   type="text"
                   required
+                  className="notice-input"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    boxSizing: 'border-box',
+                  }}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
-              <div className="form-group">
-                <label>{t('BRTA License Number *', 'বিআরটিএ লাইসেন্স নম্বর *', lang)}</label>
+            {/* 2-column BRTA license & expiry */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '16px',
+                marginBottom: '18px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('BRTA License Number *', 'বিআরটিএ লাইসেন্স নম্বর *', lang)}</span>
+                </div>
                 <input
                   type="text"
                   required
-                  style={{ fontFamily: 'monospace', fontWeight: 700 }}
+                  className="notice-input"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    fontFamily: 'monospace',
+                    fontWeight: 800,
+                    letterSpacing: '0.5px',
+                    boxSizing: 'border-box',
+                  }}
                   value={licenseNo}
                   onChange={(e) => setLicenseNo(e.target.value)}
                 />
               </div>
 
-              <div className="form-group">
-                <label>{t('License Expiry Date', 'মেয়াদ উত্তীর্ণের তারিখ', lang)}</label>
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('License Expiry Date', 'মেয়াদ উত্তীর্ণের তারিখ', lang)}</span>
+                </div>
                 <input
                   type="text"
+                  className="notice-input"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                  }}
                   value={licenseExpiry}
                   onChange={(e) => setLicenseExpiry(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '14px' }}>
-              <div className="form-group">
-                <label>{t('Commercial License Class *', 'লাইসেন্স শ্রেণি *', lang)}</label>
-                <select value={licenseType} onChange={(e) => setLicenseType(e.target.value as Driver['licenseType'])}>
+            {/* 2-column class & blood group */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.4fr 0.6fr',
+                gap: '16px',
+                marginBottom: '18px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('Commercial License Class *', 'লাইসেন্স শ্রেণি *', lang)}</span>
+                </div>
+                <select
+                  value={licenseType}
+                  onChange={(e) => setLicenseType(e.target.value as Driver['licenseType'])}
+                  className="notice-select"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                  }}
+                >
                   <option value="Heavy Commercial (HAZMAT)">Heavy Commercial (HAZMAT Bitumen/Petroleum)</option>
                   <option value="PSV Microbus">PSV Microbus (Passenger Service Vehicle)</option>
                   <option value="Light Commercial">Light Commercial (Sedan/Pickup)</option>
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>{t('Emergency Blood Group *', 'রক্তের গ্রুপ *', lang)}</label>
-                <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}>
+              <div>
+                <div className="notice-field-label">
+                  <span>{t('Emergency Blood *', 'রক্তের গ্রুপ *', lang)}</span>
+                </div>
+                <select
+                  value={bloodGroup}
+                  onChange={(e) => setBloodGroup(e.target.value)}
+                  className="notice-select"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    boxSizing: 'border-box',
+                  }}
+                >
                   <option value="A+">A+</option>
                   <option value="B+">B+</option>
                   <option value="O+">O+</option>
@@ -143,9 +324,24 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               </div>
             </div>
 
-            <div className="form-group">
-              <label>{t('Primary Assigned Vehicle (Optional)', 'প্রাথমিক বরাদ্দকৃত গাড়ি', lang)}</label>
-              <select value={assignedVehiclePlate} onChange={(e) => setAssignedVehiclePlate(e.target.value)}>
+            {/* Assigned vehicle */}
+            <div className="notice-field-group" style={{ marginBottom: '18px' }}>
+              <div className="notice-field-label">
+                <span>{t('Primary Assigned Vehicle (Optional)', 'প্রাথমিক বরাদ্দকৃত গাড়ি', lang)}</span>
+              </div>
+              <select
+                value={assignedVehiclePlate}
+                onChange={(e) => setAssignedVehiclePlate(e.target.value)}
+                className="notice-select"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13px',
+                  boxSizing: 'border-box',
+                }}
+              >
                 <option value="">Unassigned (General Pool Driver)</option>
                 {vehicles.map((v) => (
                   <option key={v.id} value={v.plate}>
@@ -155,17 +351,93 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               </select>
             </div>
 
-            <div style={{ background: 'var(--brand-slate-100)', border: '1px solid var(--brand-slate-200)', padding: '10px', borderRadius: 'var(--radius-sm)', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-              🔒 <strong>Sobriety Baseline Initialized:</strong> Daily breathalyzer audit records will automatically bind to this driver before duty trip pass dispatch is authorized.
+            {/* Sobriety & Security Compliance Card */}
+            <div
+              style={{
+                padding: '14px 18px',
+                background: '#F0FDF4',
+                borderRadius: '12px',
+                border: '1px solid #BBF7D0',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: '#DCFCE7',
+                  color: '#16A34A',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '2px',
+                }}
+              >
+                <ShieldCheck size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#166534' }}>
+                  Sobriety & Road Safety Compliance Protocol
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#15803D', marginTop: '2px', lineHeight: 1.5 }}>
+                  Daily breathalyzer audit records (0.00% BAC) and fitness checks automatically bind to this driver's digital profile before official trip challan passes can be dispatched.
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="modal-ft">
-            <button type="button" className="btn-sm-ghost" onClick={onClose}>
+          {/* Footer */}
+          <div
+            className="fleet-modal-ft"
+            style={{
+              padding: '16px 28px',
+              backgroundColor: '#F8FAFC',
+              borderTop: '1px solid #E2E8F0',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              boxSizing: 'border-box',
+            }}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '9px 18px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#475569',
+                backgroundColor: '#FFFFFF',
+                border: '1.5px solid #CBD5E1',
+                cursor: 'pointer',
+              }}
+            >
               {t('Cancel', 'বাতিল', lang)}
             </button>
-            <button type="submit" className="btn-primary" style={{ fontWeight: 800 }}>
-              <Check size={14} />
+            <button
+              type="submit"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 22px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',
+              }}
+            >
+              <Check size={15} />
               {t('Enroll Driver into Roster', 'চালক অন্তর্ভুক্ত করুন', lang)}
             </button>
           </div>

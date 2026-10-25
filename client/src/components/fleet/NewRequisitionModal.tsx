@@ -3,10 +3,23 @@ import { VehicleRequisition } from '../../store/fleetStore';
 import { t } from '../../types';
 import { showToast } from '../../App';
 import {
-  Car, MapPin, Calendar, Clock, Users, FileText,
-  X, Check, Plus, AlertCircle, Sparkles, Building2,
-  ChevronDown, Search, ArrowRight, CornerDownRight,
-  ShieldCheck
+  Car,
+  MapPin,
+  Calendar,
+  Clock,
+  Users,
+  FileText,
+  X,
+  Check,
+  Plus,
+  AlertCircle,
+  Sparkles,
+  Building2,
+  ChevronDown,
+  Search,
+  ArrowRight,
+  CornerDownRight,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface NewRequisitionModalProps {
@@ -84,12 +97,12 @@ export default function NewRequisitionModal({
   };
 
   const togglePassenger = (colleague: CompanyColleague) => {
-    if (selectedPassengers.some(p => p.id === colleague.id)) {
+    if (selectedPassengers.some((p) => p.id === colleague.id)) {
       if (selectedPassengers.length === 1) {
         showToast(t('At least 1 passenger required', 'কমপক্ষে একজন যাত্রী আবশ্যক', lang), 'info');
         return;
       }
-      setSelectedPassengers(selectedPassengers.filter(p => p.id !== colleague.id));
+      setSelectedPassengers(selectedPassengers.filter((p) => p.id !== colleague.id));
     } else {
       setSelectedPassengers([...selectedPassengers, colleague]);
     }
@@ -98,25 +111,20 @@ export default function NewRequisitionModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!purpose.trim()) {
-      showToast(t('Please specify the official business purpose.', 'অনুগ্রহ করে দাপ্তরিক কাজের উদ্দেশ্য লিখুন।', lang), 'info');
+      showToast(t('Please state the official purpose of travel', 'দয়া করে যাতায়াতের উদ্দেশ্য লিখুন', lang), 'warn');
       return;
     }
 
-    const passengerNamesString = selectedPassengers
-      .map(p => `${p.name} (${p.designation})`)
-      .join(', ');
+    const passengerNamesString = selectedPassengers.map((p) => p.name).join(', ');
 
     onSubmit({
       requesterName: currentUserName,
-      requesterRole: 'Sr. Sales & Distribution Specialist',
       dept: currentUserDept,
-      phone: '+880 1712-334455',
+      tripType,
       from: fromLoc,
       to: toLoc,
-      tripType,
       departureTime,
       returnTime: tripType === 'round_trip' ? returnTime : undefined,
-      requiredCapacity: selectedPassengers.length > 4 ? 'microbus_7' : 'sedan_4',
       passengersCount: selectedPassengers.length,
       passengerNames: passengerNamesString,
       purpose,
@@ -124,113 +132,286 @@ export default function NewRequisitionModal({
       intermediateStops: intermediateStops.map((stop, idx) => ({
         id: `STP-${Date.now()}-${idx + 1}`,
         location: stop,
-        waitDurationMins: 15
+        waitDurationMins: 15,
       })),
-      estimatedCost: 1400 + (intermediateStops.length * 350),
+      estimatedCost: 1400 + intermediateStops.length * 350,
     });
 
     onClose();
   };
 
-  const filteredColleagues = COMPANY_COLLEAGUES.filter(c =>
-    c.name.toLowerCase().includes(passengerSearchQuery.toLowerCase()) ||
-    c.dept.toLowerCase().includes(passengerSearchQuery.toLowerCase()) ||
-    c.designation.toLowerCase().includes(passengerSearchQuery.toLowerCase())
+  const filteredColleagues = COMPANY_COLLEAGUES.filter(
+    (c) =>
+      c.name.toLowerCase().includes(passengerSearchQuery.toLowerCase()) ||
+      c.dept.toLowerCase().includes(passengerSearchQuery.toLowerCase()) ||
+      c.designation.toLowerCase().includes(passengerSearchQuery.toLowerCase())
   );
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 overflow-y-auto"
+      className="modal-bg"
       onClick={onClose}
+      style={{
+        zIndex: 99999,
+        padding: '20px',
+        boxSizing: 'border-box',
+      }}
     >
       <div
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh] transition-all"
+        className="fleet-modal-dialog"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '800px',
+          width: '95%',
+          maxHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '18px',
+          overflow: 'hidden',
+          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
+          boxSizing: 'border-box',
+        }}
       >
-        {/* ─── 1. FIXED MODAL HEADER ─── */}
-        <div className="shrink-0 px-6 py-4.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/40 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 flex items-center justify-center font-bold">
-              <Car className="w-5 h-5 text-rose-600" />
+        {/* ─── 1. MODAL HEADER ─── */}
+        <div
+          className="fleet-modal-hd"
+          style={{
+            padding: '18px 28px',
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #871424 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #E11D48 0%, #BE123C 100%)',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(225, 29, 72, 0.35)',
+                flexShrink: 0,
+              }}
+            >
+              <Car size={22} color="#FFFFFF" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-slate-900 dark:text-white text-base">
-                {t('Official Duty Travel Requisition Form', 'দাপ্তরিক যাতায়াত যানবাহন রিকুইজিশন ফর্ম', lang)}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {t('Vehicle & Driver will be allocated by the Central Transport Supervisor', 'যানবাহন ও চালক কেন্দ্রীয় পরিবহন সুপারভাইজার কর্তৃক বরাদ্দ হবে', lang)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.2px',
+                  }}
+                >
+                  {t('Official Duty Travel Requisition Form', 'দাপ্তরিক যাতায়াত যানবাহন রিকুইজিশন ফর্ম', lang)}
+                </h3>
+                <span
+                  style={{
+                    backgroundColor: '#F59E0B',
+                    color: '#0F172A',
+                    fontSize: '10px',
+                    fontWeight: 900,
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Transport Directorate
+                </span>
+              </div>
+              <p
+                style={{
+                  margin: '3px 0 0 0',
+                  fontSize: '12px',
+                  color: '#CBD5E1',
+                  lineHeight: 1.4,
+                }}
+              >
+                {t(
+                  'Vehicle & Driver will be allocated by the Central Transport Supervisor',
+                  'যানবাহন ও চালক কেন্দ্রীয় পরিবহন সুপারভাইজার কর্তৃক বরাদ্দ হবে • ডিজিটাল চালান তৈরি হবে',
+                  lang
+                )}
               </p>
             </div>
           </div>
+
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition"
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '10px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              color: '#CBD5E1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+              e.currentTarget.style.color = '#CBD5E1';
+            }}
+            title="Close"
           >
-            <X className="w-5 h-5" />
+            <X size={18} />
           </button>
         </div>
 
         {/* ─── 2. SCROLLABLE FORM BODY ─── */}
-        <form id="new-requisition-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        <form
+          id="new-requisition-form"
+          onSubmit={handleSubmit}
+          className="fleet-modal-body"
+          style={{
+            flex: '1 1 auto',
+            overflowY: 'auto',
+            padding: '28px 32px',
+            backgroundColor: '#FFFFFF',
+            boxSizing: 'border-box',
+          }}
+        >
           {/* Transit Mode Selection */}
-          <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">
-              {t('Transit Mode', 'যাতায়াতের ধরন', lang)}
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="notice-field-group" style={{ marginBottom: '22px' }}>
+            <div className="notice-field-label">
+              <span>{t('Transit Mode Selection', 'যাতায়াতের ধরন নির্বাচন', lang)}</span>
+              <span style={{ fontSize: '11px', color: '#64748B', textTransform: 'none', fontWeight: 500 }}>
+                Select mission operational format
+              </span>
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '14px',
+                boxSizing: 'border-box',
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setTripType('round_trip')}
-                className={`p-3.5 rounded-xl border text-left transition flex items-center justify-between ${
-                  tripType === 'round_trip'
-                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/30 dark:border-blue-500 ring-1 ring-blue-500'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300'
-                }`}
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: '12px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  border: tripType === 'round_trip' ? '2px solid #2563EB' : '1.5px solid #CBD5E1',
+                  backgroundColor: tripType === 'round_trip' ? '#EFF6FF' : '#F8FAFC',
+                  boxShadow: tripType === 'round_trip' ? '0 2px 8px rgba(37, 99, 235, 0.15)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxSizing: 'border-box',
+                }}
               >
                 <div>
-                  <div className={`font-bold text-xs ${tripType === 'round_trip' ? 'text-blue-700 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      color: tripType === 'round_trip' ? '#1E40AF' : '#0F172A',
+                    }}
+                  >
                     🔄 {t('Round Trip (Return Transit)', 'রাউন্ড ট্রিপ (প্রত্যাবর্তন সহ)', lang)}
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    {t('Driver returns officials back to origin office', 'চালক কাজ শেষে যাত্রীদের মূল অফিসে ফেরত আনবেন', lang)}
+                  <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px', lineHeight: 1.4 }}>
+                    {t('Driver stays on site & returns officials to origin office', 'চালক কাজ শেষে যাত্রীদের মূল অফিসে ফেরত আনবেন', lang)}
                   </div>
                 </div>
-                {tripType === 'round_trip' && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />}
+                {tripType === 'round_trip' && <Check size={18} color="#2563EB" style={{ flexShrink: 0 }} />}
               </button>
 
               <button
                 type="button"
                 onClick={() => setTripType('one_way')}
-                className={`p-3.5 rounded-xl border text-left transition flex items-center justify-between ${
-                  tripType === 'one_way'
-                    ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/30 dark:border-blue-500 ring-1 ring-blue-500'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300'
-                }`}
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: '12px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  border: tripType === 'one_way' ? '2px solid #2563EB' : '1.5px solid #CBD5E1',
+                  backgroundColor: tripType === 'one_way' ? '#EFF6FF' : '#F8FAFC',
+                  boxShadow: tripType === 'one_way' ? '0 2px 8px rgba(37, 99, 235, 0.15)' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxSizing: 'border-box',
+                }}
               >
                 <div>
-                  <div className={`font-bold text-xs ${tripType === 'one_way' ? 'text-blue-700 dark:text-blue-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                  <div
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 800,
+                      color: tripType === 'one_way' ? '#1E40AF' : '#0F172A',
+                    }}
+                  >
                     ➡️ {t('One-Way Transit Only', 'একমুখী যাত্রা (ড্রপ-অফ)', lang)}
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    {t('Drop-off at destination, vehicle returns to yard', 'শুধুমাত্র গন্তব্যে নামিয়ে দেওয়া হবে', lang)}
+                  <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px', lineHeight: 1.4 }}>
+                    {t('Drop-off at destination, vehicle returns to central yard', 'শুধুমাত্র গন্তব্যে নামিয়ে দেওয়া হবে, গাড়ি ইয়ার্ডে ফিরবে', lang)}
                   </div>
                 </div>
-                {tripType === 'one_way' && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />}
+                {tripType === 'one_way' && <Check size={18} color="#2563EB" style={{ flexShrink: 0 }} />}
               </button>
             </div>
           </div>
 
-          {/* Origin and Destination */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Origin & Destination Row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '18px',
+              marginBottom: '20px',
+              boxSizing: 'border-box',
+            }}
+          >
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                <span>{t('Departure Hub / Origin Office', 'যাত্রা শুরুর অফিস / স্থান', lang)}</span>
-              </label>
+              <div className="notice-field-label">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <MapPin size={14} color="#2563EB" />
+                  {t('Departure Hub / Origin Office', 'যাত্রা শুরুর অফিস / স্থান', lang)}
+                </span>
+              </div>
               <select
                 value={fromLoc}
                 onChange={(e) => setFromLoc(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-blue-600 focus:bg-white"
+                className="notice-select"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13.5px',
+                  fontWeight: 600,
+                  color: '#0F172A',
+                  backgroundColor: '#FFFFFF',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               >
                 <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
                 <option value="Bashundhara Industrial Complex, South Keraniganj">Bashundhara Industrial Complex, South Keraniganj</option>
@@ -241,35 +422,76 @@ export default function NewRequisitionModal({
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-rose-600" />
-                <span>{t('Destination / Inspection Venue', 'গন্তব্য অফিস / পরিদর্শন এলাকা', lang)}</span>
-              </label>
+              <div className="notice-field-label">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <MapPin size={14} color="#E11D48" />
+                  {t('Destination / Inspection Venue', 'গন্তব্য অফিস / পরিদর্শন এলাকা', lang)}{' '}
+                  <span style={{ color: '#E11D48' }}>*</span>
+                </span>
+              </div>
               <input
                 type="text"
                 required
                 value={toLoc}
                 onChange={(e) => setToLoc(e.target.value)}
                 placeholder="e.g. Keraniganj Bitumen Refinery Complex"
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-blue-600 focus:bg-white"
-              >
-              </input>
+                className="notice-input"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13.5px',
+                  fontWeight: 600,
+                  color: '#0F172A',
+                  backgroundColor: '#FFFFFF',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
             </div>
           </div>
 
-          {/* Via Stops / Waypoints */}
-          <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <CornerDownRight className="w-3.5 h-3.5 text-blue-500" />
+          {/* Via Intermediate Stops (Waypoints) */}
+          <div
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              backgroundColor: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              marginBottom: '20px',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '10px',
+              }}
+            >
+              <label
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: '#334155',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <CornerDownRight size={14} color="#2563EB" />
                 <span>{t('Via Stops / Intermediate Waypoints (Optional)', 'যাত্রাপথের বিরতি বা স্টপ (ঐচ্ছিক)', lang)}</span>
               </label>
-              <span className="text-[11px] text-slate-400">
-                {intermediateStops.length} {t('stops added', 'টি বিরতি', lang)}
+              <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 600 }}>
+                {intermediateStops.length} {t('stops added', 'টি বিরতি যুক্ত', lang)}
               </span>
             </div>
 
-            <div className="flex gap-2">
+            <div style={{ display: 'flex', gap: '10px' }}>
               <input
                 type="text"
                 value={stopInput}
@@ -281,34 +503,90 @@ export default function NewRequisitionModal({
                   }
                 }}
                 placeholder="e.g. Sonali Bank Motijheel Head Office / Ministry Secretariat"
-                className="flex-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13px',
+                  backgroundColor: '#FFFFFF',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
               <button
                 type="button"
                 onClick={handleAddStop}
-                className="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 transition"
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  backgroundColor: '#E2E8F0',
+                  color: '#0F172A',
+                  fontWeight: 700,
+                  fontSize: '12.5px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'background-color 0.15s ease',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#CBD5E1')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#E2E8F0')}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus size={14} />
                 <span>{t('Add Stop', 'যুক্ত করুন', lang)}</span>
               </button>
             </div>
 
             {intermediateStops.length > 0 && (
-              <div className="space-y-1.5 pt-1">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
                 {intermediateStops.map((stop, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs">
-                    <span className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-bold text-[10px] flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <span className="font-medium text-slate-800 dark:text-slate-200">{stop}</span>
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '12px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        backgroundColor: '#EFF6FF',
+                        color: '#1E40AF',
+                        fontWeight: 800,
+                        fontSize: '10.5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {idx + 1}
                     </span>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>{stop}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveStop(idx)}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94A3B8',
+                        cursor: 'pointer',
+                        padding: '2px',
+                        display: 'flex',
+                      }}
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X size={13} />
                     </button>
                   </div>
                 ))}
@@ -316,133 +594,273 @@ export default function NewRequisitionModal({
             )}
           </div>
 
-          {/* Departure & Expected Return Date & Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Departure Date/Time and Return Time Row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '18px',
+              marginBottom: '20px',
+              boxSizing: 'border-box',
+            }}
+          >
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-blue-600" />
-                <span>{t('Departure Date & Time', 'যাত্রার সময় ও তারিখ', lang)}</span>
-              </label>
+              <div className="notice-field-label">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Clock size={14} color="#2563EB" />
+                  {t('Departure Date & Time', 'যাত্রার সময় ও তারিখ', lang)}
+                </span>
+              </div>
               <input
                 type="text"
                 required
                 value={departureTime}
                 onChange={(e) => setDepartureTime(e.target.value)}
                 placeholder="e.g. Today, 02:30 PM"
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-blue-600 focus:bg-white"
+                className="notice-input"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13.5px',
+                  fontWeight: 600,
+                  color: '#0F172A',
+                  backgroundColor: '#FFFFFF',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
 
             {tripType === 'round_trip' && (
               <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-600" />
-                  <span>{t('Expected Return Time', 'প্রত্যাবর্তনের সম্ভাব্য সময়', lang)}</span>
-                </label>
+                <div className="notice-field-label">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Clock size={14} color="#2563EB" />
+                    {t('Expected Return Time', 'প্রত্যাবর্তনের সম্ভাব্য সময়', lang)}
+                  </span>
+                </div>
                 <input
                   type="text"
                   required
                   value={returnTime}
                   onChange={(e) => setReturnTime(e.target.value)}
                   placeholder="e.g. Today, 06:30 PM"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-medium focus:outline-none focus:border-blue-600 focus:bg-white"
+                  className="notice-input"
+                  style={{
+                    width: '100%',
+                    padding: '11px 16px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: '13.5px',
+                    fontWeight: 600,
+                    color: '#0F172A',
+                    backgroundColor: '#FFFFFF',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
             )}
           </div>
 
-          {/* Passengers Selection & Directory Multi-select */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-slate-600" />
-                <span>{t('Passenger Names & Designations', 'যাত্রীদের তালিকা ও পদবী', lang)}</span>
-              </label>
-              <span className="text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-900">
+          {/* Accompanying Passengers Multi-Select */}
+          <div className="notice-field-group" style={{ marginBottom: '22px' }}>
+            <div className="notice-field-label">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Users size={14} color="#059669" />
+                {t('Passenger Names & Official Designations', 'যাত্রীদের তালিকা ও পদবী', lang)}
+              </span>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: '#1E40AF',
+                  backgroundColor: '#EFF6FF',
+                  padding: '2px 10px',
+                  borderRadius: '999px',
+                  border: '1px solid #BFDBFE',
+                }}
+              >
                 {selectedPassengers.length} {t('Official Passengers', 'জন কর্মকর্তা', lang)}
               </span>
             </div>
 
-            {/* Selected Passenger Tag Chips */}
-            <div className="flex flex-wrap items-center gap-2 mb-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 min-h-[46px]">
+            {/* Selected Passenger Tags */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                border: '1.5px solid #CBD5E1',
+                backgroundColor: '#F8FAFC',
+                minHeight: '48px',
+                boxSizing: 'border-box',
+              }}
+            >
               {selectedPassengers.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs text-xs"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    fontSize: '12px',
+                  }}
                 >
                   <div
-                    className="w-6 h-6 rounded-lg text-white font-bold text-[10px] flex items-center justify-center shrink-0"
-                    style={{ background: p.avatarColor }}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '6px',
+                      backgroundColor: p.avatarColor,
+                      color: '#FFFFFF',
+                      fontWeight: 800,
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
                   >
                     {p.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900 dark:text-white text-[11px]">{p.name}</div>
-                    <div className="text-[9.5px] text-slate-500">{p.designation.split(' ')[0]}</div>
+                    <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '11.5px' }}>{p.name}</div>
+                    <div style={{ fontSize: '10px', color: '#64748B' }}>{p.dept}</div>
                   </div>
                   <button
                     type="button"
                     onClick={() => togglePassenger(p)}
-                    className="text-slate-400 hover:text-rose-600 ml-1 p-0.5"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#94A3B8',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      display: 'flex',
+                    }}
                     title="Remove Passenger"
                   >
-                    <X className="w-3 h-3" />
+                    <X size={12} />
                   </button>
                 </div>
               ))}
 
-              {/* Add Passenger Button */}
+              {/* Add Colleague Button */}
               <button
                 type="button"
                 onClick={() => setShowPassengerDropdown(!showPassengerDropdown)}
-                className="px-3 py-1.5 rounded-xl border border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-bold flex items-center gap-1 transition"
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1.5px dashed #3B82F6',
+                  color: '#2563EB',
+                  backgroundColor: '#EFF6FF',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease',
+                }}
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus size={13} />
                 <span>{t('Select Colleagues', 'সহকর্মী যোগ করুন', lang)}</span>
-                <ChevronDown className="w-3 h-3 ml-0.5" />
+                <ChevronDown size={12} />
               </button>
             </div>
 
             {/* Dropdown Directory List */}
             {showPassengerDropdown && (
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg space-y-2 mt-1">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <div
+                style={{
+                  marginTop: '6px',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #CBD5E1',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <div style={{ position: 'relative', marginBottom: '8px' }}>
+                  <Search size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '10px' }} />
                   <input
                     type="text"
                     value={passengerSearchQuery}
                     onChange={(e) => setPassengerSearchQuery(e.target.value)}
-                    placeholder={t('Search employee directory...', 'সহকর্মী খুঁজুন...', lang)}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none"
+                    placeholder={t('Search employee directory by name or department...', 'সহকর্মী খুঁজুন...', lang)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 32px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '12px',
+                      backgroundColor: '#F8FAFC',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
 
-                <div className="max-h-40 overflow-y-auto space-y-1">
+                <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
                   {filteredColleagues.map((c) => {
-                    const isSelected = selectedPassengers.some(p => p.id === c.id);
+                    const isSelected = selectedPassengers.some((p) => p.id === c.id);
                     return (
                       <div
                         key={c.id}
                         onClick={() => togglePassenger(c)}
-                        className={`p-2 rounded-lg cursor-pointer flex items-center justify-between text-xs transition ${
-                          isSelected
-                            ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold'
-                            : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'
-                        }`}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          fontSize: '12px',
+                          backgroundColor: isSelected ? '#EFF6FF' : 'transparent',
+                          color: isSelected ? '#1E40AF' : '#334155',
+                          fontWeight: isSelected ? 700 : 500,
+                          transition: 'background-color 0.1s ease',
+                        }}
                       >
-                        <div className="flex items-center gap-2">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <div
-                            className="w-6 h-6 rounded-md text-white font-bold text-[10px] flex items-center justify-center shrink-0"
-                            style={{ background: c.avatarColor }}
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '6px',
+                              backgroundColor: c.avatarColor,
+                              color: '#FFFFFF',
+                              fontWeight: 800,
+                              fontSize: '10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                            }}
                           >
                             {c.name.slice(0, 2).toUpperCase()}
                           </div>
                           <div>
                             <div>{c.name}</div>
-                            <div className="text-[10px] text-slate-400 font-normal">{c.designation} • {c.dept}</div>
+                            <div style={{ fontSize: '10.5px', color: '#64748B', fontWeight: 400 }}>
+                              {c.designation} • {c.dept}
+                            </div>
                           </div>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                        {isSelected && <Check size={14} color="#2563EB" />}
                       </div>
                     );
                   })}
@@ -452,69 +870,177 @@ export default function NewRequisitionModal({
           </div>
 
           {/* Official Purpose */}
-          <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-slate-500" />
-              <span>{t('Official Purpose / Transit Justification', 'দাপ্তরিক কাজের উদ্দেশ্য ও যৌক্তিকতা', lang)}</span>
-            </label>
+          <div className="notice-field-group" style={{ marginBottom: '22px' }}>
+            <div className="notice-field-label">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <FileText size={14} color="#64748B" />
+                {t('Official Purpose / Transit Justification', 'দাপ্তরিক কাজের উদ্দেশ্য ও যৌক্তিকতা', lang)}{' '}
+                <span style={{ color: '#E11D48' }}>*</span>
+              </span>
+              <span style={{ fontSize: '11px', color: '#64748B', textTransform: 'none', fontWeight: 500 }}>
+                {purpose.length} characters
+              </span>
+            </div>
             <textarea
               required
-              rows={2}
+              rows={3}
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               placeholder="e.g. Official refinery site inspection, delivery of asphalt laboratory batch dossiers, and meeting Plant GM"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 focus:bg-white resize-none leading-relaxed"
+              className="notice-textarea"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: '10px',
+                border: '1.5px solid #CBD5E1',
+                fontSize: '13.5px',
+                lineHeight: 1.6,
+                color: '#0F172A',
+                backgroundColor: '#FFFFFF',
+                outline: 'none',
+                boxSizing: 'border-box',
+                resize: 'vertical',
+                minHeight: '80px',
+              }}
             />
           </div>
 
-          {/* Cost Center and Special Luggage */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Cost Center & Special Luggage Notes */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '18px',
+              boxSizing: 'border-box',
+            }}
+          >
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                {t('Cost Center / Department Code', 'বিভাগীয় কস্ট সেন্টার কোড', lang)}
-              </label>
+              <div className="notice-field-label">
+                <span>{t('Cost Center / Department Code', 'বিভাগীয় কস্ট সেন্টার কোড', lang)}</span>
+              </div>
               <input
                 type="text"
                 required
                 value={costCenter}
                 onChange={(e) => setCostCenter(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                className="notice-input"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13px',
+                  fontFamily: 'monospace',
+                  fontWeight: 700,
+                  color: '#0F172A',
+                  backgroundColor: '#F8FAFC',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                {t('Special Luggage / Cargo Notes (Optional)', 'বিশেষ লাগেজ / মালামাল বিবরণ (ঐচ্ছিক)', lang)}
-              </label>
+              <div className="notice-field-label">
+                <span>{t('Special Luggage / Cargo Notes (Optional)', 'বিশেষ লাগেজ / মালামাল বিবরণ (ঐচ্ছিক)', lang)}</span>
+              </div>
               <input
                 type="text"
                 value={specialRequirements}
                 onChange={(e) => setSpecialRequirements(e.target.value)}
                 placeholder="e.g. 2 asphalt batch test cylinders in trunk"
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-600"
+                className="notice-input"
+                style={{
+                  width: '100%',
+                  padding: '11px 16px',
+                  borderRadius: '10px',
+                  border: '1.5px solid #CBD5E1',
+                  fontSize: '13px',
+                  color: '#0F172A',
+                  backgroundColor: '#FFFFFF',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
           </div>
         </form>
 
-        {/* ─── 3. FIXED MODAL FOOTER (ALWAYS VISIBLE WITH GENEROUS PADDING) ─── */}
-        <div className="shrink-0 px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 flex items-center justify-end gap-3 rounded-b-2xl">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          >
-            {t('Cancel', 'বাতিল', lang)}
-          </button>
-          <button
-            type="submit"
-            form="new-requisition-form"
-            className="px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-md shadow-rose-600/20 hover:opacity-95 transition flex items-center gap-2"
-            style={{ background: 'var(--brand-crimson, #A51C30)' }}
-          >
-            <Car className="w-4 h-4" />
-            <span>{t('Submit Requisition to Transport Admin', 'পরিবহন প্রশাসনে আবেদন দাখিল করুন', lang)}</span>
-          </button>
+        {/* ─── 3. MODAL FOOTER ─── */}
+        <div
+          className="fleet-modal-ft"
+          style={{
+            padding: '16px 28px',
+            backgroundColor: '#F8FAFC',
+            borderTop: '1px solid #E2E8F0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748B' }}>
+            <ShieldCheck size={16} color="#059669" />
+            <span>Digital Trip Pass generated upon Transport Admin approval</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '9px 18px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#475569',
+                backgroundColor: '#FFFFFF',
+                border: '1.5px solid #CBD5E1',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#F1F5F9';
+                e.currentTarget.style.borderColor = '#94A3B8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#FFFFFF';
+                e.currentTarget.style.borderColor = '#CBD5E1';
+              }}
+            >
+              {t('Cancel', 'বাতিল', lang)}
+            </button>
+            <button
+              type="submit"
+              form="new-requisition-form"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 22px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 700,
+                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 18px rgba(165, 28, 48, 0.45)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 14px rgba(165, 28, 48, 0.35)';
+              }}
+            >
+              <Car size={15} />
+              <span>{t('Submit Requisition to Transport Admin', 'পরিবহন প্রশাসনে আবেদন দাখিল করুন', lang)}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
