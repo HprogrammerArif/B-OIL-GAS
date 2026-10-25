@@ -50,7 +50,7 @@ export interface TripChatMessage {
   senderName: string;
   text: string;
   timestamp: string;
-  messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event';
+  messageType?: 'text' | 'toll_claim' | 'location_share' | 'system_event' | 'voice_note' | 'attachment';
   tollData?: {
     tollName: string;
     amount: number;
@@ -63,6 +63,15 @@ export interface TripChatMessage {
     title: string;
     address: string;
     coordinates?: string;
+  };
+  voiceData?: {
+    duration: string;
+    audioUrl?: string;
+  };
+  attachmentData?: {
+    fileName: string;
+    fileSize: string;
+    fileType: 'image' | 'pdf' | 'document';
   };
   actionType?: 'gate_out_authorized' | 'toll_approved' | 'route_deviation';
   actionLabel?: string;
@@ -569,6 +578,32 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
       amount: 260,
       receiptNo: 'TOL-2026-8819',
       approved: false
+    }
+  },
+  {
+    id: 'msg-voice-1',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'driver',
+    senderName: 'Md. Shahidul Islam (Driver)',
+    text: 'Audio voice dispatch: Arrived at reception porch. AC is pre-cooled.',
+    timestamp: '09:48 AM',
+    messageType: 'voice_note',
+    voiceData: {
+      duration: '0:24',
+    }
+  },
+  {
+    id: 'msg-doc-1',
+    requisitionId: 'REQ-2026-435',
+    senderRole: 'admin',
+    senderName: 'Md. Kamruzzaman (Transport Admin)',
+    text: 'Official Security Gate Outward Manifest Pass #TC-2026-9042',
+    timestamp: '09:50 AM',
+    messageType: 'attachment',
+    attachmentData: {
+      fileName: 'Gate_Clearance_Pass_TC-9042.pdf',
+      fileSize: '1.2 MB',
+      fileType: 'pdf'
     }
   },
 

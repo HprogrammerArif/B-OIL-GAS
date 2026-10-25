@@ -472,6 +472,33 @@
   flex: 1 1 0;
 }
 
+/* ─── DEDICATED FULL VIEWPORT LOCK FOR FLEET CHAT DESK ─────────────────── */
+.page-content:has(.fleet-chat-active) {
+  padding: 8px 16px 0 !important;
+  overflow: hidden !important;
+  height: calc(100vh - var(--topbar-height, 60px)) !important;
+  max-height: calc(100vh - var(--topbar-height, 60px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.page-content:has(.fleet-chat-active) .view-transition-wrapper {
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body:has(.fleet-chat-active) {
+  overflow: hidden !important;
+}
+
 /* ─── EXECUTIVE ALERT RIBBON ─────────────────────────────────────────────── */
 .exec-ribbon {
   background:linear-gradient(90deg, var(--brand-slate-900) 0%, var(--brand-slate-800) 100%);

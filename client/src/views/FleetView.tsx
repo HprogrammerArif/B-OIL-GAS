@@ -18,6 +18,7 @@ import EnrollDriverModal from '../components/fleet/EnrollDriverModal';
 import TripChatModal from '../components/fleet/TripChatModal';
 import FleetNotificationsDrawer from '../components/fleet/FleetNotificationsDrawer';
 import FleetChatCenter from '../components/fleet/FleetChatCenter';
+import FleetTabs from '../components/fleet/FleetTabs';
 import NewRequisitionModal from '../components/fleet/NewRequisitionModal';
 import AssignVehicleModal from '../components/fleet/AssignVehicleModal';
 import DriverConsole from '../components/fleet/DriverConsole';
@@ -48,10 +49,12 @@ export default function FleetView({ role, lang }: ViewProps) {
   const isDriver = role === 'driver';
   const isTransportAdmin = role === 'transport_admin' || role === 'plant_gm' || role === 'chairman';
 
-  // Active Tab: Employees have requisitions and dedicated chat center. Admins have full module tabs + chat center. Drivers have mission cockpit + chat center.
   const [activeAdminTab, setActiveAdminTab] = useState<'requisitions' | 'drivers' | 'telematics' | 'fuel' | 'gate_manifest' | 'chat_center'>('requisitions');
   const [employeeTab, setEmployeeTab] = useState<'requisitions' | 'chat_center'>('requisitions');
   const [driverTab, setDriverTab] = useState<'console' | 'chat_center'>('console');
+
+  // Check if dedicated chat center tab is active across roles to lock viewport and maximize chat area
+  const isChatTabActive = (isEmployee && employeeTab === 'chat_center') || (!isEmployee && !isDriver && activeAdminTab === 'chat_center') || (isDriver && driverTab === 'chat_center');
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,6 +62,7 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [vehicleStatusFilter, setVehicleStatusFilter] = useState<'all' | 'available' | 'in_transit' | 'maintenance'>('all');
 
   // Tri-Party Chat State
+  const [selectedChatChannelId, setSelectedChatChannelId] = useState<string | undefined>(undefined);
   const [activeChatReq, setActiveChatReq] = useState<VehicleRequisition | null>(null);
   const [chatInputText, setChatInputText] = useState('');
   const [chatSimulatedRole, setChatSimulatedRole] = useState<'employee' | 'driver' | 'admin'>(isEmployee ? 'employee' : 'admin');
@@ -270,93 +274,92 @@ export default function FleetView({ role, lang }: ViewProps) {
   const unreadNotifCount = roleNotifications.filter(n => n.unread).length;
 
   return (
-    <div className="view-container view-transition-wrapper">
+    <div
+      className={`view-container view-transition-wrapper ${
+        isChatTabActive ? 'fleet-chat-active flex h-full max-h-full min-h-0 flex-col overflow-hidden pb-0' : ''
+      }`}
+    >
       {/* ─── View Header ────────────────────────────────────────────── */}
-      <div className="section-header" style={{ marginBottom: '14px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Car size={20} color="var(--brand-crimson)" />
+      <div className={`flex shrink-0 flex-wrap items-start justify-between gap-3 ${isChatTabActive ? 'mb-1' : 'mb-3.5'}`}>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="m-0 flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+              <Car size={20} className="text-[#A51C30]" aria-hidden />
               {isDriver
                 ? t('Duty Driver Terminal & Mission Cockpit', 'ডিউটি ড্রাইভার টার্মিনাল ও ট্রিপ কন্ট্রোল', lang)
                 : isEmployee
                 ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
                 : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
             </h2>
-            <span className="badge info" style={{ fontSize: '10px' }}>
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
               {isDriver ? 'Driver Terminal' : isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
             </span>
             {!isEmployee && !isDriver && (
-              <span className="badge success" style={{ fontSize: '10px' }}>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
               </span>
             )}
           </div>
-          <p className="section-subtitle" style={{ marginTop: '4px' }}>
-            {isDriver
-              ? t(
-                  'Active Mission Execution • Gate-Out & Gate-In Odometer Logging • Direct Passenger & Dispatch VoIP • Toll Voucher Claims',
-                  'সক্রিয় মিশন পরিচালনা • গেট আউট ও গেট ইন ওডোমিটার লগ • যাত্রী ও ডেসপ্যাচ সরাসরি কল • হাইওয়ে টোল ভাউচার',
-                  lang
-                )
-              : isEmployee
-              ? t(
-                  'Submit duty travel requests, track your assigned vehicle & driver, download digital trip challans, and rate trip completion.',
-                  'দাপ্তরিক যাতায়াত রিকুইজিশন জমা দিন, ড্রাইভার ও গাড়ির অবস্থান ট্র্যাক করুন এবং ডিজিটাল ট্রিপ চালান ডাউনলোড করুন।',
-                  lang
-                )
-              : t(
-                  'End-to-End Duty Travel Lifecycle • Driver Roster & Sobriety Audit • Live Tanker GPS Telematics • Digital Trip Gate Passes',
-                  'দাপ্তরিক যাতায়াত রিকুইজিশন • চালক তথ্য ও ফিটনেস অডিট • রিয়েল-টাইম জিপিএস ট্র্যাকিং • ডিজিটাল ট্রিপ পাস',
-                  lang
-                )}
-          </p>
+          {!isChatTabActive && (
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {isDriver
+                ? t(
+                    'Active Mission Execution • Gate-Out & Gate-In Odometer Logging • Direct Passenger & Dispatch VoIP • Toll Voucher Claims',
+                    'সক্রিয় মিশন পরিচালনা • গেট আউট ও গেট ইন ওডোমিটার লগ • যাত্রী ও ডেসপ্যাচ সরাসরি কল • হাইওয়ে টোল ভাউচার',
+                    lang
+                  )
+                : isEmployee
+                ? t(
+                    'Submit duty travel requests, track your assigned vehicle & driver, download digital trip challans, and rate trip completion.',
+                    'দাপ্তরিক যাতায়াত রিকুইজিশন জমা দিন, ড্রাইভার ও গাড়ির অবস্থান ট্র্যাক করুন এবং ডিজিটাল ট্রিপ চালান ডাউনলোড করুন।',
+                    lang
+                  )
+                : t(
+                    'End-to-End Duty Travel Lifecycle • Driver Roster & Sobriety Audit • Live Tanker GPS Telematics • Digital Trip Gate Passes',
+                    'দাপ্তরিক যাতায়াত রিকুইজিশন • চালক তথ্য ও ফিটনেস অডিট • রিয়েল-টাইম জিপিএস ট্র্যাকিং • ডিজিটাল ট্রিপ পাস',
+                    lang
+                  )}
+            </p>
+          )}
         </div>
 
         {/* Action Controls - Strictly Guarded by RBAC */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap items-center gap-2">
           {/* Fleet Notification Bell Button */}
           <button
-            className="btn-outline"
-            style={{
-              fontSize: '11px',
-              padding: '6px 12px',
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              borderColor: unreadNotifCount > 0 ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-              background: unreadNotifCount > 0 ? 'rgba(165, 28, 48, 0.05)' : 'var(--brand-card-bg)',
-            }}
+            type="button"
             onClick={() => setShowNotificationsDrawer(prev => !prev)}
             title={t('Fleet Logistics Notifications', 'ফ্লিট নোটিফিকেশন', lang)}
+            className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              unreadNotifCount > 0
+                ? 'border-[#A51C30] bg-[#A51C30]/5 text-[#A51C30]'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800'
+            }`}
           >
-            <Bell size={13} color={unreadNotifCount > 0 ? 'var(--brand-crimson)' : 'var(--brand-slate-600)'} />
+            <Bell size={14} aria-hidden />
             <span>{t('Alerts', 'নোটিফিকেশন', lang)}</span>
             {unreadNotifCount > 0 && (
-              <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '10px' }}>
-                {unreadNotifCount}
-              </span>
+              <span className="rounded-full bg-[#A51C30] px-1.5 py-px text-[11px] font-bold text-white">{unreadNotifCount}</span>
             )}
           </button>
 
-          {/* Admin-Only Registration Buttons */}
-          {isTransportAdmin && (
+          {/* Admin-Only Registration Buttons (Hidden in Chat mode to maximize workspace) */}
+          {!isChatTabActive && isTransportAdmin && (
             <>
               <button
-                className="btn-outline"
-                style={{ fontSize: '11px', padding: '5px 10px' }}
+                type="button"
                 onClick={() => setShowRegisterVehicleModal(true)}
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               >
-                <Truck size={13} /> {t('Register Vehicle', 'গাড়ি যুক্ত করুন', lang)}
+                <Truck size={14} aria-hidden /> {t('Register Vehicle', 'গাড়ি যুক্ত করুন', lang)}
               </button>
 
               <button
-                className="btn-outline"
-                style={{ fontSize: '11px', padding: '5px 10px' }}
+                type="button"
                 onClick={() => setShowEnrollDriverModal(true)}
+                className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
               >
-                <UserCheck size={13} /> {t('Enroll Driver', 'চালক যুক্ত করুন', lang)}
+                <UserCheck size={14} aria-hidden /> {t('Enroll Driver', 'চালক যুক্ত করুন', lang)}
               </button>
             </>
           )}
@@ -364,19 +367,19 @@ export default function FleetView({ role, lang }: ViewProps) {
           {/* New Requisition Button Available to Employees and Admins only */}
           {!isDriver && (
             <button
-              className="btn-primary"
-              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 14px' }}
+              type="button"
               onClick={() => setShowNewRequisitionModal(true)}
+              className="flex h-8 items-center gap-1.5 rounded-lg bg-[#A51C30] px-3 text-[12px] font-extrabold text-white shadow-sm transition hover:bg-[#8F1A2B] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              <Plus size={15} />
-              {t('New Duty Vehicle Requisition', 'নতুন গাড়ির আবেদন', lang)}
+              <Plus size={14} aria-hidden />
+              {t('New Requisition', 'নতুন আবেদন', lang)}
             </button>
           )}
         </div>
       </div>
 
       {/* ─── Live Fleet & Crew Availability Pulse (For Staff Transparency) ── */}
-      {isEmployee && (
+      {!isChatTabActive && isEmployee && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -429,7 +432,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── Informational Callout Strip ────────────────────────────── */}
-      {isDriver ? (
+      {!isChatTabActive && (isDriver ? (
         <div style={{
           background: 'rgba(16, 185, 129, 0.08)',
           border: '1.5px solid #10B981',
@@ -513,10 +516,10 @@ export default function FleetView({ role, lang }: ViewProps) {
             {t('Transport Command Room', 'কমান্ড রুম', lang)}
           </span>
         </div>
-      )}
+      ))}
 
       {/* ─── Compact KPI Stat Bar (Staff & Admin) ───────────────────────── */}
-      {!isDriver && (
+      {!isChatTabActive && !isDriver && (
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
@@ -668,7 +671,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── AI Smart Pooling Opportunity Box (Admin Only) ─────────── */}
-      {isTransportAdmin && (
+      {!isChatTabActive && isTransportAdmin && (
         <div className="pool-suggestion mb-3" style={{
           background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.08) 0%, rgba(212, 175, 55, 0.08) 100%)',
           border: '1.5px solid #3B82F6',
@@ -706,229 +709,48 @@ export default function FleetView({ role, lang }: ViewProps) {
 
       {/* ─── Administrative Tabs Navigation (HIDDEN FOR EMPLOYEES) ──── */}
       {isTransportAdmin && (
-        <div style={{ display: 'flex', gap: '6px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px', overflowX: 'auto' }}>
-          <button
-            onClick={() => setActiveAdminTab('requisitions')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'requisitions' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Car size={14} />
-            <span>{t('Requisitions Dispatch Queue', 'রিকুইজিশন ডেসপ্যাচ সারি', lang)}</span>
-            <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px' }}>{requisitions.length}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveAdminTab('drivers')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'drivers' ? '3px solid #D4AF37' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'drivers' ? '#B45309' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Users size={14} />
-            <span>{t('Driver Pool & Sobriety Audit', 'চালক তালিকা ও ফিটনেস অডিট', lang)}</span>
-            <span className="badge gold" style={{ fontSize: '9px', padding: '1px 5px' }}>{drivers.length}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveAdminTab('telematics')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'telematics' ? '3px solid #2563EB' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'telematics' ? '#2563EB' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Navigation size={14} />
-            <span>{t('Tankers & GPS Telematics HUD', 'ট্যাংকার ও জিপিএস ট্র্যাকিং', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveAdminTab('fuel')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'fuel' ? '3px solid #059669' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'fuel' ? '#059669' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Fuel size={14} />
-            <span>{t('Fuel Station & QR Vouchers', 'ফুয়েল ও ডিজিটাল ভাউচার', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveAdminTab('gate_manifest')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'gate_manifest' ? '3px solid #7C3AED' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'gate_manifest' ? '#7C3AED' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <FileText size={14} />
-            <span>{t('Security Gate Roster & Odometers', 'গেট ক্লিয়ারেন্স ও ওডোমিটার', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => setActiveAdminTab('chat_center')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeAdminTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
-              padding: '7px 12px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: activeAdminTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <MessageSquare size={14} />
-            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
-            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live</span>
-          </button>
-        </div>
+        <FleetTabs
+          compact={isChatTabActive}
+          ariaLabel={t('Fleet sections', 'ফ্লিট বিভাগ', lang)}
+          active={activeAdminTab}
+          onChange={(id) => setActiveAdminTab(id as typeof activeAdminTab)}
+          tabs={[
+            { id: 'requisitions', label: t('Requisitions Dispatch Queue', 'রিকুইজিশন ডেসপ্যাচ সারি', lang), icon: Car, tone: 'crimson', badge: requisitions.length, badgeTone: 'danger' },
+            { id: 'drivers', label: t('Driver Pool & Sobriety Audit', 'চালক তালিকা ও ফিটনেস অডিট', lang), icon: Users, tone: 'gold', badge: drivers.length, badgeTone: 'gold' },
+            { id: 'telematics', label: t('Tankers & GPS Telematics HUD', 'ট্যাংকার ও জিপিএস ট্র্যাকিং', lang), icon: Navigation, tone: 'blue' },
+            { id: 'fuel', label: t('Fuel Station & QR Vouchers', 'ফুয়েল ও ডিজিটাল ভাউচার', lang), icon: Fuel, tone: 'emerald' },
+            { id: 'gate_manifest', label: t('Security Gate Roster & Odometers', 'গেট ক্লিয়ারেন্স ও ওডোমিটার', lang), icon: FileText, tone: 'violet' },
+            { id: 'chat_center', label: t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang), icon: MessageSquare, tone: 'indigo', badge: 'Live', badgeTone: 'info' },
+          ]}
+        />
       )}
 
       {/* ─── Employee Navigation Tabs ─── */}
       {isEmployee && (
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px' }}>
-          <button
-            onClick={() => setEmployeeTab('requisitions')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: employeeTab === 'requisitions' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
-              padding: '7px 14px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: employeeTab === 'requisitions' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Car size={14} />
-            <span>{t('My Official Duty Travel Requisitions', 'আমার রিকুইজিশনসমূহ', lang)}</span>
-            <span className="badge danger" style={{ fontSize: '9px', padding: '1px 5px' }}>{filteredRequisitions.length}</span>
-          </button>
-
-          <button
-            onClick={() => setEmployeeTab('chat_center')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: employeeTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
-              padding: '7px 14px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: employeeTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <MessageSquare size={14} />
-            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
-            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live Channels</span>
-          </button>
-        </div>
+        <FleetTabs
+          compact={isChatTabActive}
+          ariaLabel={t('Travel desk sections', 'ট্রাভেল ডেস্ক বিভাগ', lang)}
+          active={employeeTab}
+          onChange={(id) => setEmployeeTab(id as typeof employeeTab)}
+          tabs={[
+            { id: 'requisitions', label: t('My Official Duty Travel Requisitions', 'আমার রিকুইজিশনসমূহ', lang), icon: Car, tone: 'crimson', badge: filteredRequisitions.length, badgeTone: 'danger' },
+            { id: 'chat_center', label: t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang), icon: MessageSquare, tone: 'indigo', badge: 'Live Channels', badgeTone: 'info' },
+          ]}
+        />
       )}
 
       {/* ─── Driver Navigation Tabs ─── */}
       {isDriver && (
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', marginBottom: '14px' }}>
-          <button
-            onClick={() => setDriverTab('console')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: driverTab === 'console' ? '3px solid var(--brand-crimson)' : '3px solid transparent',
-              padding: '7px 14px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: driverTab === 'console' ? 'var(--brand-crimson)' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Gauge size={14} />
-            <span>{t('My Assigned Missions & Duty Terminal', 'আমার ডিউটি ও ট্রিপ ককপিট', lang)}</span>
-          </button>
-
-          <button
-            onClick={() => setDriverTab('chat_center')}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: driverTab === 'chat_center' ? '3px solid #1D4ED8' : '3px solid transparent',
-              padding: '7px 14px',
-              fontSize: '12.5px',
-              fontWeight: 700,
-              color: driverTab === 'chat_center' ? '#1D4ED8' : 'var(--brand-slate-600)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <MessageSquare size={14} />
-            <span>{t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang)}</span>
-            <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>Live Channels</span>
-          </button>
-        </div>
+        <FleetTabs
+          compact={isChatTabActive}
+          ariaLabel={t('Driver terminal sections', 'ড্রাইভার টার্মিনাল বিভাগ', lang)}
+          active={driverTab}
+          onChange={(id) => setDriverTab(id as typeof driverTab)}
+          tabs={[
+            { id: 'console', label: t('My Assigned Missions & Duty Terminal', 'আমার ডিউটি ও ট্রিপ ককপিট', lang), icon: Gauge, tone: 'crimson' },
+            { id: 'chat_center', label: t('Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক', lang), icon: MessageSquare, tone: 'indigo', badge: 'Live Channels', badgeTone: 'info' },
+          ]}
+        />
       )}
 
       {/* ─── Driver Terminal Mode Views ─── */}
@@ -936,18 +758,21 @@ export default function FleetView({ role, lang }: ViewProps) {
         <DriverConsole
           lang={lang}
           onOpenChat={(req) => {
-            setActiveChatReq(req);
+            setSelectedChatChannelId(req.id);
             setDriverTab('chat_center');
           }}
         />
       )}
 
       {isDriver && driverTab === 'chat_center' && (
-        <FleetChatCenter
-          userRole="driver"
-          lang={lang}
-          onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
-        />
+        <div className="flex h-[calc(100vh-140px)] min-h-[640px] w-full flex-col overflow-hidden rounded-2xl shadow-xl">
+          <FleetChatCenter
+            userRole="driver"
+            lang={lang}
+            initialChannelId={selectedChatChannelId}
+            onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
+          />
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════
@@ -1217,30 +1042,29 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 </button>
                               )}
 
-                              {/* ─── Dedicated Dispatch Communications Desk (Staff & Admin) ─── */}
+                              {/* ─── Dedicated Tri-Party Mission Coordination Chat (Driver ↔ Employee ↔ Admin) ─── */}
                               <button
                                 className="btn-outline"
                                 style={{
-                                  fontSize: '10.5px',
-                                  padding: '4px 8px',
+                                  fontSize: '11px',
+                                  padding: '4px 9px',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  gap: '4px',
+                                  gap: '5px',
                                   color: '#1D4ED8',
                                   borderColor: '#93C5FD',
-                                  background: 'rgba(29, 78, 216, 0.05)',
+                                  background: 'rgba(29, 78, 216, 0.06)',
+                                  fontWeight: 700,
+                                  borderRadius: '8px',
                                 }}
                                 onClick={() => {
-                                  if (isEmployee) {
-                                    setEmployeeTab('chat_center');
-                                  } else {
-                                    setActiveAdminTab('chat_center');
-                                  }
+                                  setActiveChatReq(r);
+                                  setSelectedChatChannelId(r.id);
                                 }}
-                                title={t('Open Dedicated Dispatch Communications Desk', 'ডেসপ্যাচ কমিউনিকেশন ডেস্ক খুলুন', lang)}
+                                title={t('Open Tri-Party Mission Chat (Driver ↔ Staff ↔ Admin)', 'চালক, কর্মকর্তা ও ডেসপ্যাচ ত্রি-পক্ষীয় চ্যাট খুলুন', lang)}
                               >
-                                <MessageSquare size={11} />
-                                <span>{t('Chat Desk', 'চ্যাট ডেস্ক', lang)}</span>
+                                <MessageSquare size={12} className="text-blue-600" />
+                                <span>{t('Tri-Party Chat', 'ত্রি-পক্ষীয় চ্যাট', lang)}</span>
                               </button>
                             </div>
                           </td>
@@ -1763,11 +1587,14 @@ export default function FleetView({ role, lang }: ViewProps) {
           TAB 6: DEDICATED DISPATCH COMMUNICATIONS DESK (Staff & Admin)
           ══════════════════════════════════════════════════════════════ */}
       {((isEmployee && employeeTab === 'chat_center') || (!isEmployee && activeAdminTab === 'chat_center')) && (
-        <FleetChatCenter
-          userRole={isEmployee ? 'employee' : 'admin'}
-          lang={lang}
-          onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
-        />
+        <div className="flex h-[calc(100vh-140px)] min-h-[640px] w-full flex-col overflow-hidden rounded-2xl shadow-xl">
+          <FleetChatCenter
+            userRole={isEmployee ? 'employee' : 'admin'}
+            lang={lang}
+            initialChannelId={selectedChatChannelId}
+            onNavigateToTripPass={(req) => setSelectedTripPassReq(req)}
+          />
+        </div>
       )}
 
       {/* ─── MODAL 1: NEW VEHICLE REQUISITION (Enterprise Dropdown, No Vehicle Selector for Staff) ─── */}
@@ -2253,8 +2080,15 @@ export default function FleetView({ role, lang }: ViewProps) {
         isOpen={Boolean(activeChatReq)}
         onClose={() => setActiveChatReq(null)}
         requisition={activeChatReq}
-        userRole={isEmployee ? 'employee' : 'admin'}
+        userRole={isEmployee ? 'employee' : isDriver ? 'driver' : 'admin'}
         lang={lang}
+        onOpenFullDesk={(req) => {
+          setActiveChatReq(null);
+          setSelectedChatChannelId(req.id);
+          if (isEmployee) setEmployeeTab('chat_center');
+          else if (isDriver) setDriverTab('chat_center');
+          else setActiveAdminTab('chat_center');
+        }}
       />
 
       {/* ─── Fleet Logistics Notifications Drawer ──────────────────── */}
