@@ -397,7 +397,7 @@ export default function AssignVehicleModal({
                         {selectedVehicle.model} ({selectedVehicle.plate})
                       </div>
                       <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '2px' }}>
-                        {selectedVehicle.location} • Odometer: {selectedVehicle.odometerKm?.toLocaleString() || '42,350'} km • Fuel: {selectedVehicle.fuelPct}%
+                        {selectedVehicle.location} • Odometer: {((selectedVehicle as any).odometerKm || selectedVehicle.nextServiceKm || 42350).toLocaleString()} km • Fuel: {selectedVehicle.fuelPct}%
                       </div>
                     </div>
                     <span

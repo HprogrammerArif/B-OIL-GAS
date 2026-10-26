@@ -1,9 +1,7 @@
-@import "tailwindcss";
-
 /* ==========================================================================
    BOGCL OneOps — Enterprise Modular Design System
    Brand: Bashundhara Group (Heritage Crimson · Industrial Slate · Champagne Gold)
-   Architecture: Scalable Tokenized Modular Styles
+   Architecture: Scalable Tokenized Modular Styles (100% Vanilla Custom CSS)
    ========================================================================== */
 
 @import './styles/variables.css';
@@ -12,4 +10,5 @@
 @import './styles/dark.css';
 @import './styles/modules.css';
 @import './styles/chat.css';
+@import './styles/fleet-chat.css';
 @import './styles/responsive.css';

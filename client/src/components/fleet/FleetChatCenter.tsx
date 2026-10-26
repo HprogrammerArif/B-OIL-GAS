@@ -5,9 +5,8 @@ import { showToast } from '../../App';
 import {
   MessageSquare, Send, Car, MapPin, Clock, ShieldCheck, CheckCircle2,
   Radio, Search, Navigation, QrCode, Receipt, Check, PhoneCall,
-  AlertTriangle, CheckCheck, X, Fuel, ArrowLeft, Lock, Users, User,
-  Mic, Play, Pause, FileText, CornerDownLeft, Volume2,
-  Compass, Phone, Activity
+  AlertTriangle, CheckCheck, X, Fuel, ArrowLeft, Lock, Users,
+  Mic, Play, Pause, FileText, Compass
 } from 'lucide-react';
 import DriverCallModal from './DriverCallModal';
 
@@ -27,27 +26,27 @@ function statusMeta(status: string, lang: 'en' | 'bn') {
     case 'completed':
       return {
         label: t('Completed', 'সম্পন্ন', lang),
-        cls: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+        cls: 'completed'
       };
     case 'in_transit':
       return {
         label: t('En Route', 'পথে', lang),
-        cls: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
+        cls: 'in_transit'
       };
     case 'assigned':
       return {
         label: t('Assigned', 'বরাদ্দকৃত', lang),
-        cls: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800'
+        cls: 'assigned'
       };
     case 'pending':
       return {
         label: t('Pending', 'অপেক্ষমান', lang),
-        cls: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800'
+        cls: 'pending'
       };
     default:
       return {
         label: status.replace(/_/g, ' ').toUpperCase(),
-        cls: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+        cls: 'default'
       };
   }
 }
@@ -407,71 +406,58 @@ export default function FleetChatCenter({
   );
 
   return (
-    <div className="flex h-full w-full min-h-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
+    <div className="fleet-chat-center-container">
       {/* ══════════════════════════════════════════════════════════════
-          COLUMN 1: MESSAGES DIRECTORY / CHAT INBOX (FIXED 340px ON DESKTOP)
+          COLUMN 1: MESSAGES DIRECTORY / CHAT INBOX (FIXED 340px)
           ══════════════════════════════════════════════════════════════ */}
       <aside
-        className={`flex flex-col border-r border-slate-200 bg-slate-50/90 dark:border-slate-800 dark:bg-slate-950/70 ${
-          mobileActiveView === 'conversation' ? 'max-md:hidden' : 'flex'
-        }`}
-        style={{ width: '340px', minWidth: '340px', maxWidth: '340px', flexShrink: 0 }}
+        className="fleet-chat-sidebar"
+        style={{
+          display: mobileActiveView === 'conversation' ? undefined : 'flex',
+        }}
       >
         {/* App Bar / Current User Capsule */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex min-w-0 items-center gap-3">
-            <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black text-white shadow-xs"
-              style={{ background: 'var(--brand-crimson, #A51C30)' }}
-            >
+        <div className="fleet-chat-user-strip">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+            <div className="fleet-chat-user-medallion">
               {initials(personaName)}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-slate-900 dark:text-white">
-                <span className="truncate">{personaName.replace(/\s*\(.*\)/, '')}</span>
-                <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-500" title="Active on Fleet Frequency" />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 800 }}>
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {personaName.replace(/\s*\(.*\)/, '')}
+                </span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                <span>{activePersona === 'employee' ? 'Staff Passenger' : activePersona === 'driver' ? 'Duty Driver' : 'Central Dispatch'}</span>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500, #64748B)' }}>
+                {activePersona === 'employee' ? 'Staff Passenger' : activePersona === 'driver' ? 'Duty Driver' : 'Central Dispatch'}
               </div>
             </div>
           </div>
 
-          <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+          <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '10px', fontWeight: 800, background: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1' }}>
             {activePersona.toUpperCase()}
           </span>
         </div>
 
         {/* Filter Tabs (All, Trips, Direct Hotlines) */}
-        <div className="border-b border-slate-200 bg-slate-100/70 px-3 py-2 dark:border-slate-800 dark:bg-slate-900/60">
-          <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-200/80 p-0.5 dark:bg-slate-800">
+        <div style={{ padding: '8px 12px', background: '#F1F5F9', borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)' }}>
+          <div style={{ display: 'flex', background: '#E2E8F0', padding: '2px', borderRadius: '10px', gap: '2px' }}>
             <button
               onClick={() => setChannelFilterTab('all')}
-              className={`rounded-lg py-1 text-center text-xs font-bold transition ${
-                channelFilterTab === 'all'
-                  ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-              }`}
+              className={`fleet-chat-tab-pill ${channelFilterTab === 'all' ? 'active' : ''}`}
             >
               {t('All', 'সকল', lang)} ({relevantRequisitions.length + directChannels.length})
             </button>
             <button
               onClick={() => setChannelFilterTab('trips')}
-              className={`rounded-lg py-1 text-center text-xs font-bold transition ${
-                channelFilterTab === 'trips'
-                  ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-              }`}
+              className={`fleet-chat-tab-pill ${channelFilterTab === 'trips' ? 'active' : ''}`}
             >
               🚗 {t('Trips', 'ট্রিপ', lang)} ({relevantRequisitions.length})
             </button>
             <button
               onClick={() => setChannelFilterTab('direct')}
-              className={`rounded-lg py-1 text-center text-xs font-bold transition ${
-                channelFilterTab === 'direct'
-                  ? 'bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-              }`}
+              className={`fleet-chat-tab-pill ${channelFilterTab === 'direct' ? 'active' : ''}`}
             >
               🛡️ {t('Hotlines', 'হটলাইন', lang)} ({directChannels.length})
             </button>
@@ -479,32 +465,35 @@ export default function FleetChatCenter({
         </div>
 
         {/* Real-time Search Box */}
-        <div className="border-b border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="relative flex items-center">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+        <div className="fleet-chat-search-wrap">
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search size={14} style={{ position: 'absolute', left: '10px', pointerEvents: 'none', color: '#94A3B8' }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('Search trips, drivers, plates...', 'ট্রিপ, চালক বা গাড়ি খুঁজুন...', lang)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-8 text-xs text-slate-900 placeholder:text-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700/80 dark:bg-slate-800 dark:text-white dark:focus:bg-slate-800"
+              className="fleet-chat-search-input"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 text-slate-400 hover:text-slate-600">
-                <X className="h-3.5 w-3.5" />
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: '10px', border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}
+              >
+                <X size={14} />
               </button>
             )}
           </div>
         </div>
 
         {/* Conversation Items List */}
-        <div className="flex-1 min-h-0 space-y-2 overflow-y-auto p-2.5">
+        <div className="fleet-chat-channel-list">
           {/* Trip Rooms (Tri-Party: Driver ↔ Staff ↔ Admin) */}
           {(channelFilterTab === 'all' || channelFilterTab === 'trips') && (
             <div>
-              <div className="flex items-center justify-between px-2 pb-1.5 pt-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94A3B8' }}>
                 <span>{t('Active Duty Trips (3-Party)', 'সক্রিয় ডিউটি ট্রিপ চ্যানেল', lang)}</span>
-                <span className="rounded bg-blue-50 px-1.5 text-[10px] font-bold text-blue-600 dark:bg-blue-950">Tri-Party</span>
+                <span style={{ background: '#EFF6FF', color: '#1D4ED8', padding: '1px 6px', borderRadius: '4px', fontSize: '9.5px', fontWeight: 800 }}>Tri-Party</span>
               </div>
 
               {filteredRequisitions.map((r) => {
@@ -513,146 +502,130 @@ export default function FleetChatCenter({
                 const lastMsg = msgs[msgs.length - 1];
                 const sm = statusMeta(r.status, lang);
 
-                const isEnRoute = r.status === 'in_transit';
-                const isAssigned = r.status === 'assigned';
-                const isPending = r.status === 'pending';
-                const isDone = r.status === 'completed';
-
                 return (
                   <div
                     key={r.id}
                     onClick={() => handleSelectChannel(r.id)}
-                    className={`group relative mb-2 cursor-pointer rounded-2xl border p-2.5 text-xs transition-all duration-150 ${
-                      isSelected
-                        ? 'border-l-[5px] border-l-[#A51C30] border-rose-300 bg-gradient-to-r from-rose-50/95 via-rose-50/40 to-white shadow-sm ring-1 ring-rose-300/50 dark:border-rose-900 dark:from-rose-950/60 dark:to-slate-900'
-                        : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-2xs dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-800/80'
-                    }`}
+                    className={`fleet-chat-channel-card ${isSelected ? 'active' : ''}`}
                   >
-                    <div className="flex items-start gap-2.5">
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       {/* Leading Visual Avatar with Presence Indicator */}
-                      <div className="relative shrink-0">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl font-bold shadow-xs transition-transform group-hover:scale-105 ${
-                            isEnRoute
-                              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-500/20'
-                              : isAssigned
-                              ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20'
-                              : isDone
-                              ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-emerald-500/20'
-                              : 'bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-amber-500/20'
-                          }`}
-                        >
-                          {isEnRoute ? (
-                            <Navigation className="h-5 w-5 animate-pulse" />
-                          ) : isDone ? (
-                            <CheckCircle2 className="h-5 w-5" />
-                          ) : isPending ? (
-                            <Clock className="h-5 w-5" />
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div className={`fleet-channel-avatar ${r.status}`}>
+                          {r.status === 'in_transit' ? (
+                            <Navigation size={20} />
+                          ) : r.status === 'completed' ? (
+                            <CheckCircle2 size={20} />
+                          ) : r.status === 'pending' ? (
+                            <Clock size={20} />
                           ) : (
-                            <Car className="h-5 w-5" />
+                            <Car size={20} />
                           )}
                         </div>
 
-                        {/* Live Presence / Frequency Dot */}
+                        {/* Live Presence Dot */}
                         <span
-                          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
-                            isEnRoute
-                              ? 'bg-emerald-500 ring-2 ring-emerald-400/40 animate-pulse'
-                              : isAssigned
-                              ? 'bg-blue-500'
-                              : isDone
-                              ? 'bg-emerald-600'
-                              : 'bg-amber-400'
+                          className={`fleet-presence-dot ${
+                            r.status === 'in_transit'
+                              ? 'green'
+                              : r.status === 'completed'
+                              ? 'green'
+                              : r.status === 'assigned'
+                              ? 'blue'
+                              : 'amber'
                           }`}
                           title={sm.label}
                         />
                       </div>
 
                       {/* Content Column */}
-                      <div className="min-w-0 flex-1">
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         {/* Top Line: Destination & Active / Status Badge */}
-                        <div className="flex items-center justify-between gap-1.5">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                           <h4
-                            className={`truncate text-[12.5px] font-extrabold transition-colors ${
-                              isSelected
-                                ? 'text-[#A51C30] dark:text-rose-400'
-                                : 'text-slate-900 dark:text-white group-hover:text-slate-950'
-                            }`}
+                            style={{
+                              margin: 0,
+                              fontSize: '12.5px',
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              color: isSelected ? 'var(--brand-crimson, #A51C30)' : undefined
+                            }}
                             title={r.to}
                           >
                             {r.to.split(',')[0]}
                           </h4>
 
                           {isSelected ? (
-                            <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#A51C30] px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-white shadow-2xs">
-                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: 'var(--brand-crimson, #A51C30)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: '#FFFFFF', flexShrink: 0 }}>
                               Active
                             </span>
                           ) : (
-                            <span className={`shrink-0 rounded-full border px-1.5 py-0.2 text-[9px] font-bold ${sm.cls}`}>
+                            <span className={`fleet-status-badge ${sm.cls}`}>
                               {sm.label}
                             </span>
                           )}
                         </div>
 
                         {/* Line 2: Requisition ID & Route */}
-                        <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          <span className="rounded bg-slate-100 px-1 py-px font-mono text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                        <div style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#64748B' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 700, padding: '1px 4px', background: '#F1F5F9', borderRadius: '4px' }}>
                             #{r.id}
                           </span>
-                          <span className="text-slate-300 dark:text-slate-600">•</span>
-                          <span className="truncate text-[10.5px]">
+                          <span>•</span>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {r.from.split(',')[0].replace('Bashundhara Corporate HQ', 'HQ')} ➔ {r.to.split(',')[0]}
                           </span>
                         </div>
 
                         {/* Line 3: Crew Badges (Driver & Passenger) */}
-                        <div className="mt-1 flex items-center gap-1.5 overflow-hidden text-[10.5px]">
+                        <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px' }}>
                           <span
-                            className="inline-flex items-center gap-1 truncate rounded-md bg-slate-100/90 px-1.5 py-0.5 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F1F5F9', padding: '2px 6px', borderRadius: '6px', fontWeight: 600, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                             title={`Staff Passenger: ${r.requesterName}`}
                           >
-                            <Users size={10} className="shrink-0 text-blue-500" />
-                            <span className="truncate">{r.requesterName.split(' ')[0]}</span>
+                            <Users size={11} color="#3B82F6" style={{ flexShrink: 0 }} />
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.requesterName.split(' ')[0]}</span>
                           </span>
 
-                          <span className="text-slate-300 dark:text-slate-600">➔</span>
+                          <span style={{ color: '#CBD5E1' }}>➔</span>
 
                           {r.assignedDriverName ? (
                             <span
-                              className="inline-flex items-center gap-1 truncate rounded-md bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#ECFDF5', color: '#047857', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                               title={`Assigned Driver: ${r.assignedDriverName}`}
                             >
-                              <Car size={10} className="shrink-0 text-emerald-600" />
-                              <span className="truncate">{r.assignedDriverName.replace(/\s*\(.*\)/, '').split(' ')[0]}</span>
+                              <Car size={11} color="#059669" style={{ flexShrink: 0 }} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.assignedDriverName.replace(/\s*\(.*\)/, '').split(' ')[0]}</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                              <Clock size={10} className="shrink-0 text-amber-500" />
-                              <span>Awaiting Driver</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#FFFBEB', color: '#B45309', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>
+                              <Clock size={11} color="#D97706" style={{ flexShrink: 0 }} />
+                              <span>Awaiting</span>
                             </span>
                           )}
                         </div>
 
                         {/* Line 4: Last Message Snippet */}
                         {lastMsg && (
-                          <div className="mt-1.5 flex items-center justify-between border-t border-slate-100 pt-1 text-[11px] text-slate-500 dark:border-slate-800/80 dark:text-slate-400">
-                            <div className="flex min-w-0 items-center gap-1 truncate">
-                              <strong className="shrink-0 text-slate-700 dark:text-slate-200">
+                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748B' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                              <strong style={{ color: 'var(--brand-slate-700)', flexShrink: 0 }}>
                                 {lastMsg.senderName.split(' ')[0]}:
                               </strong>
-                              <span className="truncate text-slate-500 dark:text-slate-400">
+                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {lastMsg.voiceData
                                   ? '🎙️ Voice note dispatch'
                                   : lastMsg.tollData
-                                  ? `🧾 Toll claim: ৳${lastMsg.tollData.amount}`
+                                  ? `🧾 Toll: ৳${lastMsg.tollData.amount}`
                                   : lastMsg.locationData
                                   ? '📍 GPS pickup pin'
                                   : lastMsg.text}
                               </span>
                             </div>
-                            <div className="flex shrink-0 items-center gap-1 pl-1 text-[10px] text-slate-400">
-                              <CheckCheck size={11} className="text-blue-500" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: '#94A3B8', flexShrink: 0, paddingLeft: '4px' }}>
+                              <CheckCheck size={11} color="#3B82F6" />
                               <span>{lastMsg.timestamp}</span>
                             </div>
                           </div>
@@ -667,8 +640,8 @@ export default function FleetChatCenter({
 
           {/* Direct & Hotline Channels */}
           {(channelFilterTab === 'all' || channelFilterTab === 'direct') && (
-            <div className="pt-2">
-              <div className="px-2 pb-1.5 pt-1 text-[10.5px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <div style={{ paddingTop: '8px' }}>
+              <div style={{ padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94A3B8' }}>
                 {t('Dedicated Hotlines & SOS', 'সরাসরি হটলাইন ও এসওএস', lang)}
               </div>
 
@@ -677,102 +650,62 @@ export default function FleetChatCenter({
                 const msgs = chatMessages.filter(m => m.requisitionId === c.id);
                 const lastMsg = msgs[msgs.length - 1];
                 const IconComponent = c.icon;
-
                 const isSos = c.id === 'emergency_sos';
-                const isBroadcast = c.id === 'broadcast';
 
                 return (
                   <div
                     key={c.id}
                     onClick={() => handleSelectChannel(c.id)}
-                    className={`group relative mb-2 cursor-pointer rounded-2xl border p-2.5 text-xs transition-all duration-150 ${
-                      isSelected
-                        ? isSos
-                          ? 'border-l-[5px] border-l-rose-600 border-rose-300 bg-gradient-to-r from-rose-50/95 via-rose-50/40 to-white shadow-sm ring-1 ring-rose-300/40 dark:border-rose-900 dark:from-rose-950/50 dark:to-slate-900'
-                          : isBroadcast
-                          ? 'border-l-[5px] border-l-blue-600 border-blue-300 bg-gradient-to-r from-blue-50/95 via-blue-50/40 to-white shadow-sm ring-1 ring-blue-300/40 dark:border-blue-900 dark:from-blue-950/50 dark:to-slate-900'
-                          : 'border-l-[5px] border-l-indigo-600 border-indigo-300 bg-gradient-to-r from-indigo-50/95 via-indigo-50/40 to-white shadow-sm ring-1 ring-indigo-300/40 dark:border-indigo-900 dark:from-indigo-950/50 dark:to-slate-900'
-                        : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-2xs dark:border-slate-800 dark:bg-slate-900/70 dark:hover:bg-slate-800/80'
-                    }`}
+                    className={`fleet-chat-channel-card ${isSelected ? 'active' : ''}`}
                   >
-                    <div className="flex items-start gap-2.5">
-                      <div className="relative shrink-0">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-xs transition-transform group-hover:scale-105 ${
-                            isSos
-                              ? 'bg-gradient-to-br from-rose-600 to-red-700 text-white shadow-rose-500/20'
-                              : isBroadcast
-                              ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-blue-500/20'
-                              : 'bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-indigo-500/20'
-                          }`}
-                        >
-                          <IconComponent className={`h-5 w-5 ${isSos ? 'animate-bounce' : ''}`} />
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div className={`fleet-channel-avatar ${isSos ? 'sos' : c.id === 'broadcast' ? 'broadcast' : 'hotline'}`}>
+                          <IconComponent size={20} />
                         </div>
-
-                        <span
-                          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
-                            isSos
-                              ? 'bg-rose-500 animate-ping ring-2 ring-rose-400'
-                              : isBroadcast
-                              ? 'bg-blue-500 ring-1 ring-blue-300'
-                              : 'bg-emerald-500 ring-1 ring-emerald-300'
-                          }`}
-                        />
+                        <span className={`fleet-presence-dot ${isSos ? 'red' : 'green'}`} />
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-1.5">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
                           <h4
-                            className={`truncate text-[12.5px] font-extrabold ${
-                              isSelected
-                                ? isSos
-                                  ? 'text-rose-700 dark:text-rose-400'
-                                  : isBroadcast
-                                  ? 'text-blue-700 dark:text-blue-400'
-                                  : 'text-indigo-700 dark:text-indigo-400'
-                                : 'text-slate-900 dark:text-white'
-                            }`}
+                            style={{
+                              margin: 0,
+                              fontSize: '12.5px',
+                              fontWeight: 800,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              color: isSelected ? 'var(--brand-crimson, #A51C30)' : undefined
+                            }}
                           >
                             {c.name}
                           </h4>
 
                           {isSelected ? (
-                            <span
-                              className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-white shadow-2xs ${
-                                isSos ? 'bg-rose-600' : isBroadcast ? 'bg-blue-600' : 'bg-indigo-600'
-                              }`}
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: isSos ? '#DC2626' : 'var(--brand-crimson, #A51C30)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: '#FFFFFF', flexShrink: 0 }}>
                               Active
                             </span>
                           ) : (
-                            <span
-                              className={`shrink-0 rounded-full px-1.5 py-0.2 text-[9px] font-extrabold ${
-                                isSos
-                                  ? 'border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                                  : isBroadcast
-                                  ? 'border border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                  : 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                              }`}
-                            >
+                            <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '9px', fontWeight: 800, background: isSos ? '#FEE2E2' : '#EFF6FF', color: isSos ? '#DC2626' : '#1D4ED8', flexShrink: 0 }}>
                               {c.badge}
                             </span>
                           )}
                         </div>
 
-                        <div className="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">
+                        <div style={{ marginTop: '2px', fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {c.sub}
                         </div>
 
                         {lastMsg && (
-                          <div className="mt-1.5 flex items-center justify-between border-t border-slate-100 pt-1 text-[11px] text-slate-500 dark:border-slate-800/80 dark:text-slate-400">
-                            <div className="flex min-w-0 items-center gap-1 truncate">
-                              <strong className="shrink-0 text-slate-700 dark:text-slate-200">
+                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748B' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                              <strong style={{ color: 'var(--brand-slate-700)', flexShrink: 0 }}>
                                 {lastMsg.senderName.split(' ')[0]}:
                               </strong>
-                              <span className="truncate text-slate-500 dark:text-slate-400">{lastMsg.text}</span>
+                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastMsg.text}</span>
                             </div>
-                            <span className="shrink-0 pl-1 text-[10px] text-slate-400">{lastMsg.timestamp}</span>
+                            <span style={{ fontSize: '10px', color: '#94A3B8', flexShrink: 0, paddingLeft: '4px' }}>{lastMsg.timestamp}</span>
                           </div>
                         )}
                       </div>
@@ -789,31 +722,40 @@ export default function FleetChatCenter({
           COLUMN 2: LIVE CONVERSATION STREAM (ALWAYS VISIBLE ON DESKTOP)
           ══════════════════════════════════════════════════════════════ */}
       <section
-        className={`relative flex min-w-0 flex-1 min-h-0 flex-col bg-white dark:bg-slate-900 ${
-          mobileActiveView === 'inbox' ? 'max-md:hidden' : 'flex'
-        }`}
+        className="fleet-chat-main-section"
+        style={{
+          display: mobileActiveView === 'inbox' ? undefined : 'flex',
+        }}
       >
         {/* Thread Header Bar */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 py-3 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="fleet-chat-main-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
             <button
               onClick={() => setMobileActiveView('inbox')}
-              className="rounded-lg border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-100 md:hidden dark:border-slate-700"
+              style={{
+                borderRadius: '8px',
+                border: '1px solid var(--brand-slate-200, #E2E8F0)',
+                padding: '6px',
+                background: 'transparent',
+                cursor: 'pointer',
+                display: 'none'
+              }}
+              className="fleet-mobile-back-btn"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft size={16} />
             </button>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="flex items-center gap-2 truncate text-sm font-extrabold text-slate-900 sm:text-base dark:text-white">
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--brand-slate-900, #0F172A)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentRequisition ? (
                     <>
-                      <Car className="h-4 w-4 shrink-0 text-rose-600" />
+                      <Car size={18} style={{ color: '#A51C30', flexShrink: 0 }} />
                       <span>{currentRequisition.to.split(',')[0]} (Trip #{currentRequisition.id})</span>
                     </>
                   ) : currentDirectChannel ? (
                     <>
-                      <currentDirectChannel.icon className="h-4 w-4 shrink-0 text-blue-600" />
+                      <currentDirectChannel.icon size={18} style={{ color: '#2563EB', flexShrink: 0 }} />
                       <span>{currentDirectChannel.name}</span>
                     </>
                   ) : (
@@ -822,17 +764,17 @@ export default function FleetChatCenter({
                 </h3>
 
                 {currentRequisition && (
-                  <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusMeta(currentRequisition.status, lang).cls}`}>
+                  <span className={`fleet-status-badge ${statusMeta(currentRequisition.status, lang).cls}`}>
                     {statusMeta(currentRequisition.status, lang).label}
                   </span>
                 )}
               </div>
 
               {/* Subtitle Telemetry */}
-              <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {currentRequisition ? (
                   <span>
-                    Vehicle: <strong className="text-slate-800 dark:text-slate-200">{currentRequisition.assignedVehiclePlate || 'Awaiting Allocation'}</strong> • Driver: <strong className="text-slate-800 dark:text-slate-200">{currentRequisition.assignedDriverName || 'Pending'}</strong> • Passenger: <strong className="text-slate-800 dark:text-slate-200">{currentRequisition.requesterName}</strong>
+                    Vehicle: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedVehiclePlate || 'Awaiting Allocation'}</strong> • Driver: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedDriverName || 'Pending'}</strong> • Passenger: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.requesterName}</strong>
                   </span>
                 ) : (
                   <span>{currentDirectChannel?.sub}</span>
@@ -842,7 +784,7 @@ export default function FleetChatCenter({
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex shrink-0 items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             {currentRequisition?.assignedDriverPhone && (
               <button
                 onClick={() => triggerDirectCall(
@@ -850,41 +792,42 @@ export default function FleetChatCenter({
                   `Assigned Driver • ${currentRequisition.assignedVehiclePlate || 'Duty Car'}`,
                   currentRequisition.assignedDriverPhone || EMERGENCY_PHONE
                 )}
-                className="flex h-9 items-center gap-1.5 rounded-xl bg-emerald-600 px-3 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-500"
+                className="trip-chat-btn-call"
                 title="VoIP Audio Call with Driver"
               >
-                <PhoneCall className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">{t('Call Driver', 'কল চালক', lang)}</span>
+                <PhoneCall size={14} />
+                <span>{t('Call Driver', 'কল চালক', lang)}</span>
               </button>
             )}
 
             {currentRequisition && (
               <button
                 onClick={() => setActiveDrawer(activeDrawer === 'radar' ? 'none' : 'radar')}
-                className={`flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition ${
-                  activeDrawer === 'radar'
-                    ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
-                }`}
+                className="trip-chat-tool-btn"
+                style={{
+                  background: activeDrawer === 'radar' ? '#EFF6FF' : undefined,
+                  borderColor: activeDrawer === 'radar' ? '#3B82F6' : undefined,
+                  color: activeDrawer === 'radar' ? '#1D4ED8' : undefined,
+                }}
                 title="Toggle Live Route & GPS Radar"
               >
-                <Compass className="h-3.5 w-3.5 text-blue-600" />
-                <span className="hidden md:inline">{t('Live Radar', 'লাইভ রাডার', lang)}</span>
+                <Compass size={15} style={{ color: '#2563EB' }} />
+                <span>{t('Live Radar', 'লাইভ রাডার', lang)}</span>
               </button>
             )}
 
             {currentRequisition && (
               <button
                 onClick={() => setActiveDrawer(activeDrawer === 'dossier' ? 'none' : 'dossier')}
-                className={`flex h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition ${
-                  activeDrawer === 'dossier'
-                    ? 'border-slate-900 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'
-                }`}
+                className="trip-chat-tool-btn"
+                style={{
+                  background: activeDrawer === 'dossier' ? '#0F172A' : undefined,
+                  color: activeDrawer === 'dossier' ? '#FFFFFF' : undefined,
+                }}
                 title="Toggle Trip Details & Gate Pass"
               >
-                <FileText className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{t('Dossier', 'চালান তথ্য', lang)}</span>
+                <FileText size={15} />
+                <span>{t('Dossier', 'চালান তথ্য', lang)}</span>
               </button>
             )}
           </div>
@@ -892,39 +835,45 @@ export default function FleetChatCenter({
 
         {/* ─── TRI-PARTY MISSION ROSTER & LIFECYCLE BANNER ─── */}
         {currentRequisition && (
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50/90 px-5 py-2.5 text-xs dark:border-slate-800 dark:bg-slate-950/60">
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-none">
-              <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                <Users className="h-3.5 w-3.5 text-blue-600" />
+          <div className="trip-chat-roster-bar">
+            <div className="trip-chat-roster-pills">
+              <span className="trip-chat-roster-tag">
+                <Users size={14} style={{ color: '#2563EB' }} />
                 <span>{t('Tri-Party Mission Roster:', 'ত্রি-পক্ষীয় রুম:', lang)}</span>
               </span>
 
               {/* 1. Requesting Employee */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 shadow-2xs dark:border-slate-700 dark:bg-slate-800">
-                <span className="h-2 w-2 rounded-full bg-blue-500" />
-                <span className="max-w-[120px] truncate text-[11px] font-bold text-slate-900 dark:text-white">{currentRequisition.requesterName}</span>
-                <span className="rounded bg-blue-50 px-1 text-[9.5px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Staff Pax</span>
+              <div className="trip-chat-presence-chip">
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
+                <span className="trip-chat-presence-name">{currentRequisition.requesterName}</span>
+                <span className="trip-chat-presence-role staff">Staff Pax</span>
               </div>
 
               {/* 2. Assigned Driver */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 shadow-2xs dark:border-slate-700 dark:bg-slate-800">
-                <span className={`h-2 w-2 rounded-full ${currentRequisition.assignedDriverName ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-                <span className="max-w-[120px] truncate text-[11px] font-bold text-slate-900 dark:text-white">
+              <div className="trip-chat-presence-chip">
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: currentRequisition.assignedDriverName ? '#10B981' : '#F59E0B',
+                  flexShrink: 0
+                }} />
+                <span className="trip-chat-presence-name">
                   {currentRequisition.assignedDriverName || t('Awaiting Driver', 'চালক অপেক্ষমান', lang)}
                 </span>
-                <span className="rounded bg-emerald-50 px-1 text-[9.5px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Duty Driver</span>
+                <span className="trip-chat-presence-role driver">Duty Driver</span>
               </div>
 
               {/* 3. Vehicle Admin */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 py-1 shadow-2xs dark:border-slate-700 dark:bg-slate-800">
-                <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                <span className="text-[11px] font-bold text-slate-900 dark:text-white">Md. Kamruzzaman</span>
-                <span className="rounded bg-indigo-50 px-1 text-[9.5px] font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400">Dispatch Admin</span>
+              <div className="trip-chat-presence-chip">
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366F1', flexShrink: 0 }} />
+                <span className="trip-chat-presence-name">Md. Kamruzzaman</span>
+                <span className="trip-chat-presence-role admin">Dispatch Admin</span>
               </div>
             </div>
 
-            <div className="ml-3 hidden shrink-0 items-center gap-1.5 text-[11px] font-bold text-emerald-600 lg:flex dark:text-emerald-400">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#059669', flexShrink: 0 }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
               <span>{t('Active 3-Way Frequency', 'সক্রিয় ফ্রিকোয়েন্সি', lang)}</span>
             </div>
           </div>
@@ -933,23 +882,22 @@ export default function FleetChatCenter({
         {/* ─── MESSAGE FEED VIEWPORT ─── */}
         <div
           ref={streamScrollRef}
-          className="flex-1 min-h-0 space-y-4 overflow-y-auto bg-slate-50/60 p-4 sm:p-6 dark:bg-slate-950/40"
-          style={{ backgroundImage: 'radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 0)', backgroundSize: '24px 24px' }}
+          className="trip-chat-stream"
         >
           {/* Day Divider */}
-          <div className="my-3 flex justify-center">
-            <span className="rounded-full border border-slate-200 bg-white px-3.5 py-1 text-[10.5px] font-bold text-slate-500 shadow-2xs dark:border-slate-700 dark:bg-slate-800">
+          <div className="trip-chat-day-divider">
+            <span className="trip-chat-day-pill">
               TODAY • OFFICIAL DISPATCH LOG
             </span>
           </div>
 
           {activeConversationMessages.length === 0 ? (
-            <div className="py-20 text-center text-slate-400">
-              <MessageSquare className="mx-auto mb-2 h-12 w-12 text-slate-300 dark:text-slate-600" />
-              <div className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--brand-slate-400, #94A3B8)' }}>
+              <MessageSquare size={44} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
+              <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--brand-slate-700, #334155)' }}>
                 {t('No messages in this frequency yet', 'এই চ্যানেলে এখনও কোনো বার্তা নেই', lang)}
               </div>
-              <p className="mt-1 text-xs text-slate-500">
+              <p style={{ fontSize: '12px', marginTop: '4px', color: 'var(--brand-slate-500, #64748B)' }}>
                 {isReadOnlyBroadcast
                   ? t('Central Transport announcements and fleet advisories will appear here.', 'কেন্দ্রীয় পরিবহন বিভাগের নির্দেশনা ও ঘোষণা এখানে দেখতে পাবেন।', lang)
                   : t('Send a coordination update or check-in to begin dispatch conversation.', 'কথোপকথন শুরু করতে একটি বার্তা পাঠান বা স্ট্যাটাস আপডেট দিন।', lang)}
@@ -960,17 +908,16 @@ export default function FleetChatCenter({
               const isMine = m.senderRole === activePersona;
               const isDriverMsg = m.senderRole === 'driver';
               const isAdminMsg = m.senderRole === 'admin';
-              const isStaffMsg = m.senderRole === 'employee';
               const isSystem = m.senderRole === 'system' || m.messageType === 'system_event';
 
-              // System Event Pills (Gate clearance, odometer, etc.)
+              // System Event Pills
               if (isSystem) {
                 return (
-                  <div key={m.id} className="my-2 flex justify-center">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-300/60 bg-slate-200/90 px-4 py-1.5 text-xs text-slate-700 shadow-2xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                      <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-                      <span className="font-semibold">{m.actionLabel || m.text}</span>
-                      <span className="text-[11px] text-slate-400">• {m.timestamp}</span>
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
+                    <div className="trip-chat-system-pill">
+                      <ShieldCheck size={14} style={{ color: '#2563EB' }} />
+                      <span>{m.actionLabel || m.text}</span>
+                      <span style={{ opacity: 0.7 }}>• {m.timestamp}</span>
                     </div>
                   </div>
                 );
@@ -979,192 +926,186 @@ export default function FleetChatCenter({
               return (
                 <div
                   key={m.id}
-                  className={`flex w-full ${isMine ? 'justify-end' : 'justify-start items-start gap-2.5'}`}
+                  className={`trip-chat-row ${isMine ? 'mine' : 'theirs'}`}
                 >
                   {/* Incoming Sender Avatar */}
                   {!isMine && (
-                    <div
-                      className={`h-8 w-8 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs mt-1 ${
-                        isDriverMsg ? 'bg-emerald-600' : isAdminMsg ? 'bg-indigo-600' : 'bg-blue-600'
-                      }`}
-                    >
+                    <div className={`trip-chat-avatar ${isDriverMsg ? 'driver' : isAdminMsg ? 'admin' : 'staff'}`}>
                       {initials(m.senderName)}
                     </div>
                   )}
 
-                  <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[82%] sm:max-w-[75%]`}>
+                  <div className={`trip-chat-msg-column ${isMine ? 'mine' : 'theirs'}`}>
                     {/* Sender Label for Incoming */}
                     {!isMine && (
-                      <div className="mb-1 flex items-center gap-1.5 px-1 text-[11px] font-bold text-slate-600 dark:text-slate-400">
-                        <span className="text-slate-900 dark:text-white">{m.senderName}</span>
-                        <span className={`rounded-full border px-2 py-0.2 text-[9px] font-extrabold ${
-                          isDriverMsg
-                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                            : isAdminMsg
-                            ? 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                            : 'border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                        }`}>
+                      <div className="trip-chat-sender-header">
+                        <span className="trip-chat-sender-title">{m.senderName}</span>
+                        <span className={`trip-chat-role-badge ${isDriverMsg ? 'driver' : isAdminMsg ? 'admin' : 'staff'}`}>
                           {isDriverMsg ? 'Driver' : isAdminMsg ? 'Dispatch' : 'Staff'}
                         </span>
-                        <span className="font-normal text-[9.5px] text-slate-400">{m.timestamp}</span>
+                        <span className="trip-chat-timestamp">{m.timestamp}</span>
                       </div>
                     )}
 
                     {/* Rich Toll Voucher Card */}
                     {m.messageType === 'toll_claim' && m.tollData ? (
-                      <div className="w-full space-y-2.5 rounded-2xl border-2 border-amber-300 bg-white p-3.5 shadow-sm dark:border-amber-700 dark:bg-slate-800">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 dark:border-slate-700">
-                          <span className="flex items-center gap-1.5 text-xs font-black text-amber-700 dark:text-amber-400">
-                            <Receipt className="h-4 w-4" />
+                      <div className="trip-chat-toll-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #FEF3C7', paddingBottom: '6px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 900, color: '#B45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Receipt size={16} />
                             <span>HIGHWAY TOLL VOUCHER</span>
                           </span>
-                          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ${
-                            m.tollData.approved
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                          }`}>
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            background: m.tollData.approved ? '#D1FAE5' : '#FEF3C7',
+                            color: m.tollData.approved ? '#047857' : '#B45309'
+                          }}>
                             {m.tollData.approved ? '✓ Approved' : '⏳ Pending Audit'}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5 text-xs dark:border-slate-800 dark:bg-slate-900/60">
+                        <div className="trip-chat-toll-grid">
                           <div>
-                            <span className="block text-[10px] font-medium text-slate-400">Plaza Name:</span>
-                            <span className="font-bold text-slate-900 dark:text-white">{m.tollData.tollName}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Plaza Name:</span>
+                            <strong style={{ color: 'var(--brand-slate-900)' }}>{m.tollData.tollName}</strong>
                           </div>
                           <div>
-                            <span className="block text-[10px] font-medium text-slate-400">Amount:</span>
-                            <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">৳{m.tollData.amount}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Amount:</span>
+                            <span style={{ fontSize: '14px', fontWeight: 900, color: '#059669' }}>৳{m.tollData.amount}</span>
                           </div>
                           <div>
-                            <span className="block text-[10px] font-medium text-slate-400">Slip Voucher:</span>
-                            <span className="font-mono text-slate-700 dark:text-slate-300 text-[11px]">{m.tollData.receiptNo}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Slip Voucher:</span>
+                            <span style={{ fontFamily: 'monospace', fontSize: '11px' }}>{m.tollData.receiptNo}</span>
                           </div>
                           <div>
-                            <span className="block text-[10px] font-medium text-slate-400">Cost Center:</span>
-                            <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Cost Center:</span>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563EB' }}>
                               {currentRequisition?.costCenter || 'CC-SALES-DHAKA-102'}
                             </span>
                           </div>
                         </div>
 
-                        {/* RBAC: ONLY VEHICLE ADMIN CAN APPROVE TOLLS */}
+                        {/* RBAC: ONLY ADMIN CAN APPROVE */}
                         {activePersona === 'admin' && !m.tollData.approved && (
-                          <div className="flex justify-end border-t border-slate-100 pt-1.5 dark:border-slate-700">
+                          <div style={{ paddingTop: '6px', borderTop: '1px solid #FEF3C7', display: 'flex', justifyContent: 'flex-end' }}>
                             <button
                               onClick={() => approveTollExpense(m.id, m.requisitionId, personaName)}
-                              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-500"
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '10px',
+                                background: '#059669',
+                                color: '#FFFFFF',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
                             >
-                              <Check className="h-4 w-4" />
+                              <Check size={14} />
                               <span>Approve ৳{m.tollData.amount} Claim</span>
                             </button>
                           </div>
                         )}
 
                         {activePersona !== 'admin' && !m.tollData.approved && (
-                          <div className="text-[10.5px] italic text-amber-700 dark:text-amber-400">
+                          <div style={{ fontSize: '11px', fontStyle: 'italic', color: '#B45309' }}>
                             Awaiting Transport Supervisor authorization.
                           </div>
                         )}
                       </div>
                     ) : m.messageType === 'location_share' && m.locationData ? (
                       /* Rich Location Pin Card */
-                      <div className="w-full space-y-2 rounded-2xl border border-blue-200 bg-white p-3.5 shadow-sm dark:border-blue-800 dark:bg-slate-800">
-                        <div className="flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
+                      <div className="trip-chat-location-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#2563EB', fontWeight: 800, fontSize: '12px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <MapPin size={16} />
                             <span>PASSENGER PICKUP PIN</span>
                           </span>
                           <button
                             onClick={() => setActiveDrawer('radar')}
-                            className="text-[11px] font-extrabold text-blue-600 hover:underline"
+                            style={{ fontSize: '11px', fontWeight: 800, color: '#2563EB', border: 'none', background: 'transparent', cursor: 'pointer', textDecoration: 'underline' }}
                           >
                             View Radar ➔
                           </button>
                         </div>
-                        <div className="text-sm font-bold text-slate-900 dark:text-white">
+                        <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
                           {m.locationData.title}
                         </div>
-                        <div className="text-xs text-slate-600 dark:text-slate-300">
+                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
                           {m.locationData.address}
                         </div>
                         {m.locationData.coordinates && (
-                          <div className="inline-block rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 font-mono text-[11px] font-bold text-blue-700 dark:border-blue-900 dark:bg-blue-950/60 dark:text-blue-300">
+                          <div className="trip-chat-gps-badge">
                             GPS: {m.locationData.coordinates}
                           </div>
                         )}
                       </div>
                     ) : m.messageType === 'voice_note' && m.voiceData ? (
-                      /* Voice Note Audio Bubble */
-                      <div
-                        className={`w-fit min-w-[180px] p-3 rounded-2xl flex items-center gap-2.5 shadow-xs ${
-                          isMine
-                            ? 'text-white rounded-br-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-xs'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
+                      /* Playable Voice Note Bubble */
+                      <div className={`trip-chat-voice-bubble ${isMine ? 'mine' : 'theirs'}`}>
                         <button
                           onClick={() => setPlayingVoiceId(playingVoiceId === m.id ? null : m.id)}
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold shadow-2xs transition ${
-                            isMine ? 'bg-white text-rose-800' : 'bg-rose-600 text-white'
-                          }`}
+                          className="trip-chat-voice-play-btn"
                         >
-                          {playingVoiceId === m.id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                          {playingVoiceId === m.id ? <Pause size={15} /> : <Play size={15} style={{ marginLeft: '2px' }} />}
                         </button>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-0.5 py-0.5">
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '2px 0' }}>
                             {[40, 75, 50, 90, 60, 80, 45, 95, 30, 65].map((h, i) => (
                               <span
                                 key={i}
-                                className={`w-1 rounded-full transition-all ${
-                                  isMine ? 'bg-white/80' : 'bg-slate-400'
-                                } ${playingVoiceId === m.id ? 'animate-pulse' : ''}`}
-                                style={{ height: `${Math.max(4, (h / 100) * 16)}px` }}
+                                style={{
+                                  width: '3px',
+                                  borderRadius: '9999px',
+                                  height: `${Math.max(4, (h / 100) * 16)}px`,
+                                  background: isMine ? 'rgba(255, 255, 255, 0.85)' : '#94A3B8',
+                                  display: 'inline-block'
+                                }}
                               />
                             ))}
                           </div>
-                          <div className={`mt-0.5 flex items-center justify-between text-[10px] ${isMine ? 'text-white/80' : 'text-slate-400'}`}>
+                          <div style={{ fontSize: '10px', marginTop: '2px', display: 'flex', justifyContent: 'space-between', opacity: 0.85 }}>
                             <span>Voice Note ({m.voiceData.duration})</span>
-                            <span className="font-bold">1.0x</span>
+                            <span style={{ fontWeight: 800 }}>1.0x</span>
                           </div>
                         </div>
                       </div>
                     ) : m.messageType === 'attachment' && m.attachmentData ? (
-                      /* Document Attachment Bubble */
-                      <div
-                        className={`w-fit min-w-[200px] p-3 rounded-2xl flex items-center gap-2.5 shadow-xs ${
-                          isMine
-                            ? 'text-white rounded-br-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-xs'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-bold ${
-                          isMine ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600 dark:bg-blue-950'
-                        }`}>
-                          <FileText className="h-4 w-4" />
+                      /* Document Attachment Card */
+                      <div className={`trip-chat-bubble ${isMine ? 'mine' : 'theirs'}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: isMine ? 'rgba(255, 255, 255, 0.2)' : '#EFF6FF',
+                          color: isMine ? '#FFFFFF' : '#2563EB',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <FileText size={18} />
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-xs font-bold">{m.attachmentData.fileName}</div>
-                          <div className={`text-[10px] ${isMine ? 'text-white/80' : 'text-slate-400'}`}>{m.attachmentData.fileSize} • Gate Pass</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {m.attachmentData.fileName}
+                          </div>
+                          <div style={{ fontSize: '10px', opacity: 0.8 }}>{m.attachmentData.fileSize} • Gate Pass</div>
                         </div>
                       </div>
                     ) : (
-                      /* Standard Chat Bubble (w-fit, never clips, proper margins) */
-                      <div
-                        className={`w-fit min-w-[100px] max-w-full px-4 py-2.5 text-[12.5px] leading-relaxed shadow-xs break-words ${
-                          isMine
-                            ? 'rounded-2xl rounded-br-xs text-white shadow-sm mr-2'
-                            : 'rounded-2xl rounded-tl-xs border border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
-                        <div className="whitespace-pre-wrap">{m.text}</div>
-                        <div className={`mt-1 flex items-center justify-end gap-1 text-[9.5px] ${isMine ? 'text-white/85' : 'text-slate-400'}`}>
+                      /* Standard Speech Bubble */
+                      <div className={`trip-chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+                        <div className="trip-chat-bubble-footer">
                           <span>{m.timestamp}</span>
-                          {isMine && <CheckCheck className="h-3.5 w-3.5 text-white" />}
+                          {isMine && <CheckCheck size={13} color="#FFFFFF" />}
                         </div>
                       </div>
                     )}
@@ -1176,68 +1117,56 @@ export default function FleetChatCenter({
 
           {/* Typing Indicator */}
           {isTypingUser && (
-            <div className="flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs italic text-slate-500 shadow-xs dark:border-slate-700 dark:bg-slate-800">
-              <span className="flex gap-1">
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-rose-600" style={{ animationDelay: '0ms' }} />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-rose-600" style={{ animationDelay: '150ms' }} />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-rose-600" style={{ animationDelay: '300ms' }} />
+            <div className="trip-chat-typing-pill">
+              <span style={{ display: 'inline-flex', gap: '4px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
               </span>
               <span>{isTypingUser} is typing...</span>
             </div>
           )}
         </div>
 
-        {/* ─── ROLE PERSONA SWITCHER BAR (INTERACTIVE RBAC TESTING) ─── */}
-        <div className="flex shrink-0 items-center justify-between border-t border-slate-200 bg-slate-100/90 px-5 py-2 text-xs dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-500">
+        {/* ─── ROLE PERSONA SWITCHER BAR ─── */}
+        <div className="trip-chat-persona-bar">
+          <div className="trip-chat-persona-controls">
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
               {t('Testing Persona:', 'প্রেরক মোড:', lang)}
             </span>
-            <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800">
+            <div className="trip-chat-persona-group">
               <button
                 type="button"
                 onClick={() => setActivePersona('employee')}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
-                  activePersona === 'employee'
-                    ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
               >
                 👤 Staff (Tanvir)
               </button>
               <button
                 type="button"
                 onClick={() => setActivePersona('driver')}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
-                  activePersona === 'driver'
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
               >
                 🚗 Driver (Shahidul)
               </button>
               <button
                 type="button"
                 onClick={() => setActivePersona('admin')}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
-                  activePersona === 'admin'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
               >
                 🛡️ Admin (Kamruzzaman)
               </button>
             </div>
           </div>
 
-          <span className="hidden text-[10.5px] text-slate-400 md:inline">
+          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)' }}>
             Press <strong>Enter</strong> to send • <strong>Shift+Enter</strong> for newline
           </span>
         </div>
 
         {/* Role-Specific Quick Reply Suggestion Chips */}
         {!isReadOnlyBroadcast && (
-          <div className="flex shrink-0 gap-2 overflow-x-auto border-t border-slate-200 bg-slate-50 px-5 py-2 scrollbar-none dark:border-slate-800 dark:bg-slate-900">
+          <div className="trip-chat-quick-bar">
             {smartChips.map((chip, idx) => {
               const IconComp = chip.icon;
               return (
@@ -1247,9 +1176,10 @@ export default function FleetChatCenter({
                     setMessageText(chip.text);
                     composerTextareaRef.current?.focus();
                   }}
-                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="trip-chat-quick-pill"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <IconComp className="h-3.5 w-3.5 text-slate-400" />
+                  <IconComp size={14} style={{ color: '#94A3B8' }} />
                   <span>{chip.text}</span>
                 </button>
               );
@@ -1257,73 +1187,72 @@ export default function FleetChatCenter({
           </div>
         )}
 
-        {/* ─── REAL COMPOSER BAR (VOICE, LOCATION, TOLL & INPUT) ─── */}
-        <div className="shrink-0 border-t border-slate-200 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+        {/* ─── REAL COMPOSER BAR ─── */}
+        <div className="trip-chat-composer">
           {isReadOnlyBroadcast ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-100 p-3 text-xs text-slate-500 dark:bg-slate-800">
-              <Lock className="h-4 w-4 text-slate-400" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px', background: '#F1F5F9', padding: '12px', fontSize: '12px', color: '#64748B' }}>
+              <Lock size={16} style={{ color: '#94A3B8' }} />
               <span>{t('Fleet Broadcast is read-only. Only Central Transport Admins can post announcements.', 'এই চ্যানেলটি শুধুমাত্র প্রশাসকদের ঘোষণার জন্য সংরক্ষিত।', lang)}</span>
             </div>
           ) : isRecordingVoice ? (
-            /* Voice Note Recording State */
-            <div className="flex items-center justify-between rounded-xl border border-rose-300 bg-rose-50 p-2.5 dark:border-rose-900 dark:bg-rose-950/40">
-              <div className="flex items-center gap-3">
-                <span className="h-3 w-3 animate-ping rounded-full bg-rose-600" />
-                <span className="font-mono text-xs font-black text-rose-700 dark:text-rose-300">
+            <div className="trip-chat-recording-box">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E11D48', display: 'inline-block' }} />
+                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 900, color: '#BE123C' }}>
                   Recording audio dispatch... 0:{recordSeconds < 10 ? '0' : ''}{recordSeconds}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setIsRecordingVoice(false)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-100"
+                  style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'transparent', fontSize: '12px', fontWeight: 700, color: '#475569', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSendVoiceNote}
-                  className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-500"
+                  style={{ padding: '6px 14px', borderRadius: '8px', border: 'none', background: '#A51C30', color: '#FFFFFF', fontSize: '12px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <Send className="h-3.5 w-3.5" />
+                  <Send size={13} />
                   <span>Send Voice Note</span>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-end gap-2">
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
               {/* Action Buttons: Pin, Toll, Voice */}
               {currentRequisition && (
-                <div className="flex shrink-0 items-center gap-1 pb-0.5">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingBottom: '2px', flexShrink: 0 }}>
                   <button
                     onClick={handleShareLocationPin}
-                    className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-bold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="trip-chat-tool-btn"
                     title={t('Share Current GPS Pickup Pin', 'জিপিএস লোকেশন পিন পাঠান', lang)}
                   >
-                    <MapPin className="h-4 w-4 text-blue-600" />
-                    <span className="hidden md:inline">{t('Pin', 'পিন', lang)}</span>
+                    <MapPin size={15} style={{ color: '#2563EB' }} />
+                    <span>{t('Pin', 'পিন', lang)}</span>
                   </button>
 
                   <button
                     onClick={() => setActiveDrawer('toll')}
-                    className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-bold text-slate-700 transition hover:border-amber-300 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="trip-chat-tool-btn"
                     title={t('Upload Highway Toll Voucher', 'টোল স্লিপ দাবি করুন', lang)}
                   >
-                    <Receipt className="h-4 w-4 text-amber-600" />
-                    <span className="hidden md:inline">{t('Toll Slip', 'টোল', lang)}</span>
+                    <Receipt size={15} style={{ color: '#D97706' }} />
+                    <span>{t('Toll Slip', 'টোল', lang)}</span>
                   </button>
 
                   <button
                     onClick={() => setIsRecordingVoice(true)}
-                    className="flex h-10 items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-xs font-bold text-slate-700 transition hover:border-rose-300 hover:bg-rose-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    className="trip-chat-tool-btn"
                     title="Record Voice Note"
                   >
-                    <Mic className="h-4 w-4 text-rose-600" />
+                    <Mic size={15} style={{ color: '#E11D48' }} />
                   </button>
                 </div>
               )}
 
               {/* Expanding Input Textarea */}
-              <div className="relative flex-1">
+              <div style={{ flex: 1, position: 'relative' }}>
                 <textarea
                   ref={composerTextareaRef}
                   rows={1}
@@ -1337,7 +1266,7 @@ export default function FleetChatCenter({
                       ? t('Broadcast announcement to all fleet drivers and vehicles...', 'সকল যানবাহনের জন্য ঘোষণা লিখুন...', lang)
                       : t(`Type message as ${personaName.split(' ')[0]}...`, `বার্তা লিখুন...`, lang)
                   }
-                  className="max-h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs leading-relaxed text-slate-900 placeholder:text-slate-400 transition focus:border-rose-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800/90 dark:text-white"
+                  className="fleet-chat-composer-textarea"
                 />
               </div>
 
@@ -1345,11 +1274,10 @@ export default function FleetChatCenter({
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!messageText.trim()}
-                className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' }}
+                className="trip-chat-btn-send"
               >
                 <span>{t('Send', 'পাঠান', lang)}</span>
-                <Send className="h-3.5 w-3.5" />
+                <Send size={14} />
               </button>
             </div>
           )}
@@ -1361,54 +1289,54 @@ export default function FleetChatCenter({
           ══════════════════════════════════════════════════════════════ */}
       {/* 1. Live GPS Radar Drawer */}
       {activeDrawer === 'radar' && currentRequisition && (
-        <aside className="flex w-80 shrink-0 flex-col space-y-4 overflow-y-auto border-l border-slate-200 bg-slate-50/95 p-4 shadow-xl lg:w-88 dark:border-slate-800 dark:bg-slate-950/70">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
-            <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
-              <Compass className="h-4 w-4" />
+        <aside className="fleet-chat-drawer">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#2563EB' }}>
+              <Compass size={16} />
               <span>{t('Live Route Radar HUD', 'লাইভ রুট রাডার', lang)}</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} className="rounded-lg p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700">
-              <X className="h-4 w-4" />
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+              <X size={16} />
             </button>
           </div>
 
           {/* Telemetry KPIs */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="block text-[10px] font-bold text-slate-400">SPEED TELEMETRY</span>
-              <span className="text-lg font-black text-blue-600">42 km/h</span>
-              <span className="block text-[10.5px] text-emerald-600 font-semibold">Normal Corridor</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px', marginBottom: '14px' }}>
+            <div className="fleet-hud-card">
+              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>SPEED TELEMETRY</span>
+              <span style={{ fontSize: '18px', fontWeight: 900, color: '#2563EB', display: 'block', margin: '2px 0' }}>42 km/h</span>
+              <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 600 }}>Normal Corridor</span>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="block text-[10px] font-bold text-slate-400">FUEL STATUS</span>
-              <span className="text-lg font-black text-emerald-600">82%</span>
-              <span className="block text-[10.5px] text-slate-500">Octane 95</span>
+            <div className="fleet-hud-card">
+              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>FUEL STATUS</span>
+              <span style={{ fontSize: '18px', fontWeight: 900, color: '#059669', display: 'block', margin: '2px 0' }}>82%</span>
+              <span style={{ fontSize: '10.5px', color: '#64748B' }}>Octane 95</span>
             </div>
           </div>
 
           {/* Route Visualizer */}
-          <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900 text-xs">
-            <div className="flex items-center justify-between font-bold text-slate-900 dark:text-white">
+          <div className="fleet-hud-card" style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 800, fontSize: '12px', marginBottom: '8px' }}>
               <span>Transit Corridor</span>
-              <span className="text-blue-600">64% Completed</span>
+              <span style={{ color: '#2563EB' }}>64% Completed</span>
             </div>
 
-            <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden dark:bg-slate-800">
-              <div className="h-full bg-blue-600 rounded-full" style={{ width: '64%' }} />
+            <div style={{ height: '8px', width: '100%', borderRadius: '9999px', background: '#F1F5F9', overflow: 'hidden', marginBottom: '12px' }}>
+              <div style={{ height: '100%', background: '#2563EB', borderRadius: '9999px', width: '64%' }} />
             </div>
 
-            <div className="space-y-2 border-l-2 border-blue-600 pl-3 pt-1 text-[11px]">
+            <div style={{ borderLeft: '2px solid #2563EB', paddingLeft: '12px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div>
-                <span className="block font-bold text-slate-900 dark:text-white">Origin:</span>
-                <span className="text-slate-500">{currentRequisition.from}</span>
+                <span style={{ fontWeight: 800, display: 'block' }}>Origin:</span>
+                <span style={{ color: '#64748B' }}>{currentRequisition.from}</span>
               </div>
               <div>
-                <span className="block font-bold text-blue-600">Current Position:</span>
-                <span className="text-slate-700 dark:text-slate-300">Approaching Jatrabari Flyover Exit (45 km/h)</span>
+                <span style={{ fontWeight: 800, color: '#2563EB', display: 'block' }}>Current Position:</span>
+                <span style={{ color: 'var(--brand-slate-700)' }}>Approaching Jatrabari Flyover Exit (45 km/h)</span>
               </div>
               <div>
-                <span className="block font-bold text-slate-900 dark:text-white">Destination:</span>
-                <span className="text-slate-500">{currentRequisition.to}</span>
+                <span style={{ fontWeight: 800, display: 'block' }}>Destination:</span>
+                <span style={{ color: '#64748B' }}>{currentRequisition.to}</span>
               </div>
             </div>
           </div>
@@ -1420,9 +1348,10 @@ export default function FleetChatCenter({
               `Assigned Driver • ${currentRequisition.assignedVehiclePlate || 'Duty Car'}`,
               currentRequisition.assignedDriverPhone || EMERGENCY_PHONE
             )}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-500"
+            className="trip-chat-btn-call"
+            style={{ width: '100%', justifyContent: 'center', height: '38px' }}
           >
-            <PhoneCall className="h-4 w-4" />
+            <PhoneCall size={16} />
             <span>VoIP Call Driver</span>
           </button>
         </aside>
@@ -1430,34 +1359,34 @@ export default function FleetChatCenter({
 
       {/* 2. Mission Dossier Drawer */}
       {activeDrawer === 'dossier' && currentRequisition && (
-        <aside className="flex w-80 shrink-0 flex-col space-y-4 overflow-y-auto border-l border-slate-200 bg-slate-50/95 p-4 shadow-xl lg:w-88 dark:border-slate-800 dark:bg-slate-950/70">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
-            <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              <FileText className="h-4 w-4 text-blue-600" />
+        <aside className="fleet-chat-drawer">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <FileText size={16} style={{ color: '#2563EB' }} />
               <span>{t('Mission Dossier', 'মিশন চালান তথ্য', lang)}</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} className="rounded-lg p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700">
-              <X className="h-4 w-4" />
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+              <X size={16} />
             </button>
           </div>
 
           {/* Route Summary */}
-          <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-white p-3.5 text-xs shadow-2xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-between">
-              <span className="font-mono font-bold text-slate-900 dark:text-white">#{currentRequisition.id}</span>
-              <span className={`rounded-full border px-2 py-0.5 text-[9.5px] font-bold ${statusMeta(currentRequisition.status, lang).cls}`}>
+          <div className="fleet-hud-card" style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontFamily: 'monospace', fontWeight: 800 }}>#{currentRequisition.id}</span>
+              <span className={`fleet-status-badge ${statusMeta(currentRequisition.status, lang).cls}`}>
                 {statusMeta(currentRequisition.status, lang).label}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 pt-1 font-bold text-slate-900 dark:text-slate-100">
-              <MapPin className="h-4 w-4 shrink-0 text-rose-600" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '12px', marginTop: '4px' }}>
+              <MapPin size={15} style={{ color: '#A51C30', flexShrink: 0 }} />
               <span>{currentRequisition.to}</span>
             </div>
-            <div className="pl-5 text-[11px] text-slate-500">
+            <div style={{ paddingLeft: '21px', fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
               From: {currentRequisition.from.split(',')[0]}
             </div>
-            <div className="flex justify-between border-t border-slate-100 pt-2 text-[11px] font-semibold text-slate-600 dark:border-slate-800 dark:text-slate-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #F1F5F9', marginTop: '10px', paddingTop: '8px', fontSize: '11px', fontWeight: 600, color: '#64748B' }}>
               <span>Dept: {currentRequisition.departureTime}</span>
               <span>{currentRequisition.passengersCount} Pax</span>
             </div>
@@ -1465,16 +1394,16 @@ export default function FleetChatCenter({
 
           {/* Assigned Driver Profile */}
           {currentRequisition.assignedDriverName ? (
-            <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3.5 shadow-2xs dark:border-emerald-800 dark:bg-emerald-950/30">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-xs font-black text-white shadow-sm">
+            <div className="fleet-hud-card" style={{ background: '#ECFDF5', borderColor: '#A7F3D0', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#059669', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '13px', flexShrink: 0 }}>
                   {initials(currentRequisition.assignedDriverName)}
                 </div>
-                <div className="min-w-0">
-                  <div className="truncate text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 800, fontSize: '12.5px', color: '#064E3B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentRequisition.assignedDriverName}
                   </div>
-                  <div className="truncate text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  <div style={{ fontWeight: 600, fontSize: '11px', color: '#047857' }}>
                     {currentRequisition.assignedVehiclePlate || 'Duty Car Allocated'}
                   </div>
                 </div>
@@ -1486,15 +1415,16 @@ export default function FleetChatCenter({
                   `Assigned Driver • ${currentRequisition.assignedVehiclePlate || 'Duty Car'}`,
                   currentRequisition.assignedDriverPhone || EMERGENCY_PHONE
                 )}
-                className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-500"
+                className="trip-chat-btn-call"
+                style={{ width: '100%', justifyContent: 'center' }}
               >
-                <PhoneCall className="h-3.5 w-3.5" />
+                <PhoneCall size={14} />
                 <span>Call Driver ({currentRequisition.assignedDriverPhone?.slice(-4) || 'Dial'})</span>
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-              <Clock className="h-4 w-4 shrink-0 text-amber-600" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', border: '1px solid #FDE68A', background: '#FFFBEB', padding: '12px', fontSize: '12px', color: '#B45309', marginBottom: '14px' }}>
+              <Clock size={16} style={{ color: '#D97706', flexShrink: 0 }} />
               <span>Awaiting driver assignment by transport supervisor</span>
             </div>
           )}
@@ -1502,9 +1432,24 @@ export default function FleetChatCenter({
           {/* Security Gate Pass */}
           <button
             onClick={() => onNavigateToTripPass?.(currentRequisition)}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-xs font-bold text-blue-700 shadow-2xs transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              borderRadius: '12px',
+              border: '1px solid #BFDBFE',
+              background: '#EFF6FF',
+              padding: '10px',
+              fontSize: '12px',
+              fontWeight: 800,
+              color: '#1D4ED8',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
           >
-            <QrCode className="h-4 w-4 text-blue-600" />
+            <QrCode size={16} />
             <span>{t('View Security Gate Pass', 'গেট পাস প্রদর্শন', lang)}</span>
           </button>
         </aside>
@@ -1512,24 +1457,24 @@ export default function FleetChatCenter({
 
       {/* 3. Highway Toll Claim Drawer */}
       {activeDrawer === 'toll' && currentRequisition && (
-        <aside className="flex w-80 shrink-0 flex-col space-y-4 overflow-y-auto border-l border-slate-200 bg-slate-50/95 p-4 shadow-xl lg:w-88 dark:border-slate-800 dark:bg-slate-950/70">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-slate-800">
-            <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-400">
-              <Receipt className="h-4 w-4" />
+        <aside className="fleet-chat-drawer">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#D97706' }}>
+              <Receipt size={16} />
               <span>Submit Highway Toll</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} className="rounded-lg p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700">
-              <X className="h-4 w-4" />
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+              <X size={16} />
             </button>
           </div>
 
-          <form onSubmit={handleSubmitTollClaim} className="space-y-3 text-xs">
+          <form onSubmit={handleSubmitTollClaim} style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px' }}>
             <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-700 dark:text-slate-300">Toll Plaza Name</label>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, marginBottom: '4px' }}>Toll Plaza Name</label>
               <select
                 value={tollPlaza}
                 onChange={(e) => setTollPlaza(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', background: '#FFFFFF', boxSizing: 'border-box' }}
               >
                 <option value="Mayor Hanif Flyover">Mayor Hanif Flyover</option>
                 <option value="Second Buriganga Bridge">Second Buriganga Bridge (Babubazar)</option>
@@ -1539,28 +1484,40 @@ export default function FleetChatCenter({
             </div>
 
             <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-700 dark:text-slate-300">Amount (৳ BDT)</label>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, marginBottom: '4px' }}>Amount (৳ BDT)</label>
               <input
                 type="number"
                 value={tollAmount}
                 onChange={(e) => setTollAmount(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-bold"
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', fontWeight: 800, background: '#FFFFFF', boxSizing: 'border-box' }}
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-[11px] font-bold text-slate-700 dark:text-slate-300">Voucher / Receipt Slip No.</label>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, marginBottom: '4px' }}>Voucher / Receipt Slip No.</label>
               <input
                 type="text"
                 value={tollSlipNo}
                 onChange={(e) => setTollSlipNo(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-mono"
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', fontFamily: 'monospace', background: '#FFFFFF', boxSizing: 'border-box' }}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-amber-500"
+              style={{
+                width: '100%',
+                borderRadius: '12px',
+                background: '#D97706',
+                color: '#FFFFFF',
+                padding: '10px',
+                fontSize: '12px',
+                fontWeight: 800,
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)',
+                marginTop: '6px'
+              }}
             >
               Post Toll Claim to Chat Feed
             </button>

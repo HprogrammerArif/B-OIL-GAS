@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { VehicleRequisition, useFleetStore, TripChatMessage } from '../../store/fleetStore';
+import { VehicleRequisition, useFleetStore } from '../../store/fleetStore';
 import { t } from '../../types';
 import { showToast } from '../../App';
 import {
-  MessageSquare, Send, X, Users, Phone, Car, MapPin,
-  Clock, Shield, User, CheckCircle2, Sparkles, PhoneCall,
-  Receipt, Check, CheckCheck, UserCheck, ShieldCheck,
-  Navigation, Info, Mic, Play, Pause, FileText, ExternalLink,
-  ChevronRight, CornerDownLeft, Volume2
+  MessageSquare, Send, X, Users, Car, MapPin,
+  Clock, ShieldCheck, Check, CheckCheck,
+  Receipt, PhoneCall, ExternalLink, Play, Pause, FileText,
+  Mic
 } from 'lucide-react';
 import DriverCallModal from './DriverCallModal';
 
@@ -19,8 +18,6 @@ interface TripChatModalProps {
   lang: 'en' | 'bn';
   onOpenFullDesk?: (req: VehicleRequisition) => void;
 }
-
-const EMERGENCY_PHONE = '+880 1711-229944';
 
 function initials(name: string) {
   return name
@@ -259,45 +256,45 @@ export default function TripChatModal({
       ];
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-5 overflow-y-auto" onClick={onClose}>
+    <div className="modal-bg" onClick={onClose}>
       <div
-        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col h-[88vh] max-h-[780px] my-auto transition-all"
+        className="trip-chat-dialog"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ─── 1. PREMIUM HEADER ─── */}
-        <div className="shrink-0 px-5 py-4 border-b border-slate-200/90 dark:border-slate-800 bg-slate-900 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
-              <Car className="w-5 h-5 text-white" />
+        <div className="trip-chat-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+            <div className="trip-chat-header-icon">
+              <Car size={22} color="#FFFFFF" />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-sm sm:text-base text-white truncate">
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 className="trip-chat-header-title">
                   {t('Tri-Party Mission Coordination Desk', 'ত্রি-পক্ষীয় ট্রিপ সমন্বয় ডায়ালগ', lang)}
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-400 text-slate-950 shrink-0">
+                <span className="trip-chat-id-badge">
                   #{requisition.id}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 truncate mt-0.5 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+              <p className="trip-chat-header-sub">
+                <MapPin size={13} style={{ color: '#F43F5E', flexShrink: 0 }} />
                 <span>{requisition.from.split(',')[0]} ➔ <strong>{requisition.to.split(',')[0]}</strong></span>
                 {requisition.assignedVehiclePlate && (
-                  <span className="font-mono text-amber-300 ml-1">({requisition.assignedVehiclePlate})</span>
+                  <span style={{ fontFamily: 'monospace', color: '#FCD34D', marginLeft: '6px' }}>({requisition.assignedVehiclePlate})</span>
                 )}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="trip-chat-header-actions">
             {requisition.assignedDriverPhone && (
               <button
                 onClick={() => setShowCallModal(true)}
-                className="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-xs"
+                className="trip-chat-btn-call"
                 title="VoIP Audio Call"
               >
-                <PhoneCall className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t('Call', 'কল', lang)}</span>
+                <PhoneCall size={14} />
+                <span>{t('Call Driver', 'কল চালক', lang)}</span>
               </button>
             )}
 
@@ -307,142 +304,137 @@ export default function TripChatModal({
                   onClose();
                   onOpenFullDesk(requisition);
                 }}
-                className="h-8 px-2.5 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1 transition"
+                className="trip-chat-btn-tool"
                 title="Open full-screen communications desk"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">{t('Full Desk', 'পূর্ণ ডেস্ক', lang)}</span>
+                <ExternalLink size={14} />
+                <span>{t('Full Desk', 'পূর্ণ ডেস্ক', lang)}</span>
               </button>
             )}
 
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+              className="trip-chat-btn-close"
+              title="Close"
             >
-              <X className="w-4 h-4" />
+              <X size={16} />
             </button>
           </div>
         </div>
 
         {/* ─── 2. TRI-PARTY PRESENCE ROSTER STRIP ─── */}
-        <div className="shrink-0 px-5 py-2.5 bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-blue-600" />
+        <div className="trip-chat-roster-bar">
+          <div className="trip-chat-roster-pills">
+            <span className="trip-chat-roster-tag">
+              <Users size={14} style={{ color: '#2563EB' }} />
               <span>{t('Live 3-Way Frequency:', '৩-পক্ষীয় লাইভ:', lang)}</span>
             </span>
 
             {/* 1. Requesting Employee */}
-            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate max-w-[110px]">{requisition.requesterName}</span>
-              <span className="text-[9px] text-blue-700 dark:text-blue-300 font-extrabold bg-blue-50 dark:bg-blue-950 px-1 rounded">Staff</span>
+            <div className="trip-chat-presence-chip">
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
+              <span className="trip-chat-presence-name">{requisition.requesterName}</span>
+              <span className="trip-chat-presence-role staff">Staff</span>
             </div>
 
             {/* 2. Assigned Driver */}
-            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${requisition.assignedDriverName ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px] truncate max-w-[110px]">
+            <div className="trip-chat-presence-chip">
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: requisition.assignedDriverName ? '#10B981' : '#F59E0B',
+                flexShrink: 0
+              }} />
+              <span className="trip-chat-presence-name">
                 {requisition.assignedDriverName ? requisition.assignedDriverName.replace(/\s*\(.*\)/, '') : 'Awaiting Driver'}
               </span>
-              <span className="text-[9px] text-emerald-700 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-950 px-1 rounded">Driver</span>
+              <span className="trip-chat-presence-role driver">Driver</span>
             </div>
 
             {/* 3. Vehicle Admin */}
-            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">Kamruzzaman</span>
-              <span className="text-[9px] text-indigo-700 dark:text-indigo-400 font-extrabold bg-indigo-50 dark:bg-indigo-950 px-1 rounded">Admin</span>
+            <div className="trip-chat-presence-chip">
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366F1', flexShrink: 0 }} />
+              <span className="trip-chat-presence-name">Kamruzzaman</span>
+              <span className="trip-chat-presence-role admin">Admin</span>
             </div>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0 ml-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#059669' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
             <span>Connected</span>
           </div>
         </div>
 
-        {/* ─── 3. INTERACTIVE PERSONA SWITCHER BAR (TEST ALL 3 ROLES) ─── */}
-        <div className="shrink-0 px-5 py-2 bg-slate-100/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-500">
+        {/* ─── 3. INTERACTIVE PERSONA SWITCHER BAR ─── */}
+        <div className="trip-chat-persona-bar">
+          <div className="trip-chat-persona-controls">
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
               {t('Testing Persona:', 'প্রেরক মোড:', lang)}
             </span>
-            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="trip-chat-persona-group">
               <button
                 type="button"
                 onClick={() => setActivePersona('employee')}
-                className={`px-2.5 py-0.5 rounded-lg text-xs font-bold transition ${
-                  activePersona === 'employee'
-                    ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
               >
                 👤 Staff (Tanvir)
               </button>
               <button
                 type="button"
                 onClick={() => setActivePersona('driver')}
-                className={`px-2.5 py-0.5 rounded-lg text-xs font-bold transition ${
-                  activePersona === 'driver'
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
               >
                 🚗 Driver (Shahidul)
               </button>
               <button
                 type="button"
                 onClick={() => setActivePersona('admin')}
-                className={`px-2.5 py-0.5 rounded-lg text-xs font-bold transition ${
-                  activePersona === 'admin'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
-                }`}
+                className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
               >
                 🛡️ Admin (Kamruzzaman)
               </button>
             </div>
           </div>
 
-          <span className="text-[10px] text-slate-400 hidden sm:inline">
+          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)' }}>
             Enter sends • Shift+Enter for newline
           </span>
         </div>
 
-        {/* ─── 4. MESSAGES STREAM (WHATSAPP/TELEGRAM BUBBLE FEED) ─── */}
-        <div
-          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/60 dark:bg-slate-950/40"
-          style={{ backgroundImage: 'radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 0)', backgroundSize: '24px 24px' }}
-        >
+        {/* ─── 4. MESSAGES STREAM ─── */}
+        <div className="trip-chat-stream">
           {/* Day Divider */}
-          <div className="flex justify-center my-1">
-            <span className="px-3 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 shadow-2xs">
+          <div className="trip-chat-day-divider">
+            <span className="trip-chat-day-pill">
               TODAY • OFFICIAL DISPATCH LOG
             </span>
           </div>
 
           {reqMessages.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <MessageSquare className="w-10 h-10 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
-              <div className="font-bold text-sm text-slate-700 dark:text-slate-300">{t('No messages in this trip channel yet', 'এই ট্রিপে এখনও কোনো বার্তা নেই', lang)}</div>
-              <p className="text-xs text-slate-500 mt-1">{t('Coordinate pickup point, AC preferences, or baggage requirements.', 'পিকআপ স্থান ও যাত্রা সংক্রান্ত বার্তা পাঠিয়ে আলোচনা শুরু করুন।', lang)}</p>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--brand-slate-400, #94A3B8)' }}>
+              <MessageSquare size={40} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
+              <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--brand-slate-700, #334155)' }}>
+                {t('No messages in this trip channel yet', 'এই ট্রিপে এখনও কোনো বার্তা নেই', lang)}
+              </div>
+              <p style={{ fontSize: '12px', marginTop: '4px', color: 'var(--brand-slate-500, #64748B)' }}>
+                {t('Coordinate pickup point, AC preferences, or baggage requirements.', 'পিকআপ স্থান ও যাত্রা সংক্রান্ত বার্তা পাঠিয়ে আলোচনা শুরু করুন।', lang)}
+              </p>
             </div>
           ) : (
             reqMessages.map((m) => {
               const isMine = m.senderRole === activePersona;
-              const isStaff = m.senderRole === 'employee';
               const isDriverMsg = m.senderRole === 'driver';
               const isAdminMsg = m.senderRole === 'admin';
               const isSystem = m.senderRole === 'system' || m.messageType === 'system_event';
 
               if (isSystem) {
                 return (
-                  <div key={m.id} className="flex justify-center my-2">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200/80 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 border border-slate-300/50 dark:border-slate-700 shadow-2xs">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="font-medium">{m.actionLabel || m.text}</span>
-                      <span className="text-slate-400">• {m.timestamp}</span>
+                  <div key={m.id} style={{ display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
+                    <div className="trip-chat-system-pill">
+                      <ShieldCheck size={14} style={{ color: '#2563EB' }} />
+                      <span>{m.actionLabel || m.text}</span>
+                      <span style={{ opacity: 0.7 }}>• {m.timestamp}</span>
                     </div>
                   </div>
                 );
@@ -451,70 +443,63 @@ export default function TripChatModal({
               return (
                 <div
                   key={m.id}
-                  className={`flex w-full ${isMine ? 'justify-end' : 'justify-start items-start gap-2.5'}`}
+                  className={`trip-chat-row ${isMine ? 'mine' : 'theirs'}`}
                 >
                   {/* Incoming Sender Avatar */}
                   {!isMine && (
-                    <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs mt-1 ${
-                        isDriverMsg ? 'bg-emerald-600' : isAdminMsg ? 'bg-indigo-600' : 'bg-blue-600'
-                      }`}
-                    >
+                    <div className={`trip-chat-avatar ${isDriverMsg ? 'driver' : isAdminMsg ? 'admin' : 'staff'}`}>
                       {initials(m.senderName)}
                     </div>
                   )}
 
-                  <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} max-w-[82%] sm:max-w-[75%]`}>
+                  <div className={`trip-chat-msg-column ${isMine ? 'mine' : 'theirs'}`}>
                     {/* Sender Label for Incoming */}
                     {!isMine && (
-                      <div className="text-[11px] font-bold mb-1 flex items-center gap-1.5 px-1 text-slate-600 dark:text-slate-400">
-                        <span className="text-slate-900 dark:text-white">{m.senderName}</span>
-                        <span className={`px-2 py-0.2 rounded-full text-[9px] font-extrabold border ${
-                          isDriverMsg
-                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200'
-                            : isAdminMsg
-                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200'
-                            : 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200'
-                        }`}>
+                      <div className="trip-chat-sender-header">
+                        <span className="trip-chat-sender-title">{m.senderName}</span>
+                        <span className={`trip-chat-role-badge ${isDriverMsg ? 'driver' : isAdminMsg ? 'admin' : 'staff'}`}>
                           {isDriverMsg ? 'Driver' : isAdminMsg ? 'Dispatch' : 'Staff'}
                         </span>
-                        <span className="text-[9.5px] text-slate-400 font-normal">{m.timestamp}</span>
+                        <span className="trip-chat-timestamp">{m.timestamp}</span>
                       </div>
                     )}
 
                     {/* Rich Toll Voucher Card */}
                     {m.messageType === 'toll_claim' && m.tollData ? (
-                      <div className="w-full bg-white dark:bg-slate-800 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-3.5 shadow-xs space-y-2.5">
-                        <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-700">
-                          <span className="text-xs font-black text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                            <Receipt className="w-4 h-4" />
+                      <div className="trip-chat-toll-card">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #FEF3C7', paddingBottom: '6px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 900, color: '#B45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Receipt size={16} />
                             <span>HIGHWAY TOLL VOUCHER</span>
                           </span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                            m.tollData.approved
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                              : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                          }`}>
+                          <span style={{
+                            padding: '2px 8px',
+                            borderRadius: '9999px',
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            background: m.tollData.approved ? '#D1FAE5' : '#FEF3C7',
+                            color: m.tollData.approved ? '#047857' : '#B45309'
+                          }}>
                             {m.tollData.approved ? '✓ Approved' : '⏳ Pending Audit'}
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                        <div className="trip-chat-toll-grid">
                           <div>
-                            <span className="text-[10px] text-slate-400 block font-medium">Plaza Name:</span>
-                            <span className="font-bold text-slate-900 dark:text-white">{m.tollData.tollName}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Plaza Name:</span>
+                            <strong style={{ color: 'var(--brand-slate-900)' }}>{m.tollData.tollName}</strong>
                           </div>
                           <div>
-                            <span className="text-[10px] text-slate-400 block font-medium">Amount:</span>
-                            <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">৳{m.tollData.amount}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Amount:</span>
+                            <span style={{ fontSize: '14px', fontWeight: 900, color: '#059669' }}>৳{m.tollData.amount}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] text-slate-400 block font-medium">Slip Voucher:</span>
-                            <span className="font-mono text-slate-700 dark:text-slate-300 text-[11px]">{m.tollData.receiptNo}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Slip Voucher:</span>
+                            <span style={{ fontFamily: 'monospace', fontSize: '11px' }}>{m.tollData.receiptNo}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] text-slate-400 block font-medium">Status:</span>
-                            <span className="font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                            <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Status:</span>
+                            <span style={{ fontSize: '11px', fontWeight: 600 }}>
                               {m.tollData.approved ? 'Reimbursed' : 'Awaiting Audit'}
                             </span>
                           </div>
@@ -522,106 +507,110 @@ export default function TripChatModal({
 
                         {/* RBAC: ONLY ADMIN CAN APPROVE */}
                         {activePersona === 'admin' && !m.tollData.approved && (
-                          <div className="pt-1.5 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                          <div style={{ paddingTop: '6px', borderTop: '1px solid #FEF3C7', display: 'flex', justifyContent: 'flex-end' }}>
                             <button
                               onClick={() => approveTollExpense(m.id, m.requisitionId, personaName)}
-                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition"
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '10px',
+                                background: '#059669',
+                                color: '#FFFFFF',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
                             >
-                              <Check className="w-3.5 h-3.5" />
+                              <Check size={14} />
                               <span>Approve ৳{m.tollData.amount} Claim</span>
                             </button>
                           </div>
                         )}
 
                         {activePersona !== 'admin' && !m.tollData.approved && (
-                          <div className="text-[10.5px] italic text-amber-700 dark:text-amber-400">
+                          <div style={{ fontSize: '11px', fontStyle: 'italic', color: '#B45309' }}>
                             Awaiting Central Transport Admin authorization.
                           </div>
                         )}
                       </div>
                     ) : m.messageType === 'location_share' && m.locationData ? (
                       /* Rich Location Pin Card */
-                      <div className="w-full bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 rounded-2xl p-3.5 shadow-xs space-y-2">
-                        <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-bold text-xs">
-                          <MapPin className="w-4 h-4" />
+                      <div className="trip-chat-location-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2563EB', fontWeight: 800, fontSize: '12px' }}>
+                          <MapPin size={16} />
                           <span>PASSENGER PICKUP PIN</span>
                         </div>
-                        <div className="font-bold text-xs text-slate-900 dark:text-white">{m.locationData.title}</div>
-                        <div className="text-[11.5px] text-slate-600 dark:text-slate-300">{m.locationData.address}</div>
+                        <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>{m.locationData.title}</div>
+                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>{m.locationData.address}</div>
                         {m.locationData.coordinates && (
-                          <div className="text-[10.5px] font-mono text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-900 inline-block font-bold">
+                          <div className="trip-chat-gps-badge">
                             GPS: {m.locationData.coordinates}
                           </div>
                         )}
                       </div>
                     ) : m.messageType === 'voice_note' && m.voiceData ? (
                       /* Playable Voice Note Bubble */
-                      <div
-                        className={`w-fit min-w-[180px] p-3 rounded-2xl flex items-center gap-2.5 shadow-xs ${
-                          isMine
-                            ? 'text-white rounded-br-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-xs'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
+                      <div className={`trip-chat-voice-bubble ${isMine ? 'mine' : 'theirs'}`}>
                         <button
                           onClick={() => setPlayingVoiceId(playingVoiceId === m.id ? null : m.id)}
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold shadow-2xs transition ${
-                            isMine ? 'bg-white text-rose-800' : 'bg-rose-600 text-white'
-                          }`}
+                          className="trip-chat-voice-play-btn"
                         >
-                          {playingVoiceId === m.id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                          {playingVoiceId === m.id ? <Pause size={15} /> : <Play size={15} style={{ marginLeft: '2px' }} />}
                         </button>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-0.5 py-0.5">
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', padding: '2px 0' }}>
                             {[40, 75, 50, 90, 60, 80, 45, 95, 30, 65].map((h, i) => (
                               <span
                                 key={i}
-                                className={`w-1 rounded-full transition-all ${
-                                  isMine ? 'bg-white/80' : 'bg-slate-400'
-                                } ${playingVoiceId === m.id ? 'animate-pulse' : ''}`}
-                                style={{ height: `${Math.max(4, (h / 100) * 16)}px` }}
+                                style={{
+                                  width: '3px',
+                                  borderRadius: '9999px',
+                                  height: `${Math.max(4, (h / 100) * 16)}px`,
+                                  background: isMine ? 'rgba(255, 255, 255, 0.85)' : '#94A3B8',
+                                  display: 'inline-block'
+                                }}
                               />
                             ))}
                           </div>
-                          <div className={`text-[10px] mt-0.5 flex justify-between ${isMine ? 'text-white/80' : 'text-slate-400'}`}>
+                          <div style={{ fontSize: '10px', marginTop: '2px', display: 'flex', justifyContent: 'space-between', opacity: 0.85 }}>
                             <span>Voice Note ({m.voiceData.duration})</span>
-                            <span className="font-bold">1.0x</span>
+                            <span style={{ fontWeight: 800 }}>1.0x</span>
                           </div>
                         </div>
                       </div>
                     ) : m.messageType === 'attachment' && m.attachmentData ? (
                       /* Document Attachment Card */
-                      <div
-                        className={`w-fit min-w-[200px] p-3 rounded-2xl flex items-center gap-2.5 shadow-xs ${
-                          isMine
-                            ? 'text-white rounded-br-xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-xs'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold ${isMine ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600'}`}>
-                          <FileText className="w-4 h-4" />
+                      <div className={`trip-chat-bubble ${isMine ? 'mine' : 'theirs'}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: isMine ? 'rgba(255, 255, 255, 0.2)' : '#EFF6FF',
+                          color: isMine ? '#FFFFFF' : '#2563EB',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <FileText size={18} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-xs truncate">{m.attachmentData.fileName}</div>
-                          <div className={`text-[10px] ${isMine ? 'text-white/80' : 'text-slate-400'}`}>{m.attachmentData.fileSize} • Gate Clearance</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 800, fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {m.attachmentData.fileName}
+                          </div>
+                          <div style={{ fontSize: '10px', opacity: 0.8 }}>{m.attachmentData.fileSize} • Gate Clearance</div>
                         </div>
                       </div>
                     ) : (
-                      /* Standard Speech Bubble (Fixed geometry, no clipping, w-fit) */
-                      <div
-                        className={`w-fit min-w-[100px] max-w-full px-4 py-2.5 rounded-2xl text-[12.5px] leading-relaxed shadow-xs break-words ${
-                          isMine
-                            ? 'text-white rounded-br-xs shadow-sm'
-                            : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-700 rounded-tl-xs'
-                        }`}
-                        style={isMine ? { background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' } : {}}
-                      >
-                        <div className="whitespace-pre-wrap">{m.text}</div>
-                        <div className={`flex items-center gap-1 justify-end mt-1 text-[9.5px] ${isMine ? 'text-white/85' : 'text-slate-400'}`}>
+                      /* Standard Speech Bubble */
+                      <div className={`trip-chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+                        <div className="trip-chat-bubble-footer">
                           <span>{m.timestamp}</span>
-                          {isMine && <CheckCheck className="w-3.5 h-3.5 text-white" />}
+                          {isMine && <CheckCheck size={13} color="#FFFFFF" />}
                         </div>
                       </div>
                     )}
@@ -632,11 +621,11 @@ export default function TripChatModal({
           )}
 
           {isTyping && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 italic bg-white dark:bg-slate-800 px-3.5 py-1.5 rounded-full shadow-2xs border border-slate-200 dark:border-slate-700 w-fit">
-              <span className="flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="trip-chat-typing-pill">
+              <span style={{ display: 'inline-flex', gap: '4px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
               </span>
               <span>{isTyping} is typing...</span>
             </div>
@@ -647,19 +636,19 @@ export default function TripChatModal({
 
         {/* ─── 5. TOLL CLAIM FORM DRAWER IN MODAL ─── */}
         {showTollForm && (
-          <div className="px-5 py-3 bg-amber-50 dark:bg-amber-950/40 border-t border-amber-200 dark:border-amber-900 shrink-0">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                <Receipt className="w-4 h-4 text-amber-600" />
+          <div style={{ padding: '12px 20px', background: '#FFFBEB', borderTop: '1px solid #FDE68A', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Receipt size={16} color="#D97706" />
                 <span>Submit Official Highway Toll Slip</span>
               </span>
-              <button onClick={() => setShowTollForm(false)} className="text-amber-700 hover:text-amber-950 text-xs font-bold">✕</button>
+              <button onClick={() => setShowTollForm(false)} style={{ border: 'none', background: 'transparent', color: '#92400E', cursor: 'pointer', fontWeight: 800 }}>✕</button>
             </div>
-            <form onSubmit={handleSubmitTollClaim} className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <form onSubmit={handleSubmitTollClaim} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '12px' }}>
               <select
                 value={tollPlaza}
                 onChange={(e) => setTollPlaza(e.target.value)}
-                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white"
+                style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', background: '#FFFFFF', fontSize: '12px' }}
               >
                 <option value="Mayor Hanif Flyover">Mayor Hanif Flyover</option>
                 <option value="Second Buriganga Bridge">Second Buriganga Bridge</option>
@@ -670,11 +659,20 @@ export default function TripChatModal({
                 value={tollAmount}
                 onChange={(e) => setTollAmount(e.target.value)}
                 placeholder="Amount ৳"
-                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl p-2 text-xs text-slate-900 dark:text-white font-bold"
+                style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #CBD5E1', background: '#FFFFFF', fontSize: '12px', fontWeight: 800 }}
               />
               <button
                 type="submit"
-                className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-xl py-2 shadow-xs transition"
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  background: '#D97706',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
               >
                 Post Toll to Chat
               </button>
@@ -683,12 +681,12 @@ export default function TripChatModal({
         )}
 
         {/* ─── 6. ROLE-SPECIFIC QUICK REPLIES ─── */}
-        <div className="px-5 py-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800 flex gap-2 overflow-x-auto scrollbar-none shrink-0">
+        <div className="trip-chat-quick-bar">
           {quickReplies.map((q, idx) => (
             <button
               key={idx}
               onClick={() => handleSendMessage(q)}
-              className="px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:bg-slate-50 transition shadow-2xs shrink-0"
+              className="trip-chat-quick-pill"
             >
               <span>{q}</span>
             </button>
@@ -696,59 +694,59 @@ export default function TripChatModal({
         </div>
 
         {/* ─── 7. MODERN INPUT COMPOSER BAR ─── */}
-        <div className="p-3.5 border-t border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+        <div className="trip-chat-composer">
           {isRecordingVoice ? (
-            <div className="flex items-center justify-between rounded-xl border border-rose-300 bg-rose-50 p-2.5 dark:border-rose-900 dark:bg-rose-950/40">
-              <div className="flex items-center gap-3">
-                <span className="h-3 w-3 animate-ping rounded-full bg-rose-600" />
-                <span className="font-mono text-xs font-black text-rose-700 dark:text-rose-300">
+            <div className="trip-chat-recording-box">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E11D48', display: 'inline-block' }} />
+                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 900, color: '#BE123C' }}>
                   Recording audio dispatch... 0:{recordSeconds < 10 ? '0' : ''}{recordSeconds}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setIsRecordingVoice(false)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-rose-100"
+                  style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'transparent', fontSize: '12px', fontWeight: 700, color: '#475569', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSendVoiceNote}
-                  className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-500"
+                  style={{ padding: '6px 14px', borderRadius: '8px', border: 'none', background: '#A51C30', color: '#FFFFFF', fontSize: '12px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <Send className="h-3.5 w-3.5" />
+                  <Send size={13} />
                   <span>Send Voice Note</span>
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="trip-chat-composer-row">
               {/* Quick Action Tools */}
-              <div className="flex items-center gap-1 shrink-0">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                 <button
                   onClick={handleShareLocationPin}
-                  className="h-10 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1 transition"
+                  className="trip-chat-tool-btn"
                   title="Share Pickup Pin"
                 >
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span className="hidden sm:inline">Pin</span>
+                  <MapPin size={15} style={{ color: '#2563EB' }} />
+                  <span>Pin</span>
                 </button>
 
                 <button
                   onClick={() => setShowTollForm(!showTollForm)}
-                  className="h-10 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-amber-50 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1 transition"
+                  className="trip-chat-tool-btn"
                   title="Toll Voucher"
                 >
-                  <Receipt className="w-4 h-4 text-amber-600" />
-                  <span className="hidden sm:inline">Toll</span>
+                  <Receipt size={15} style={{ color: '#D97706' }} />
+                  <span>Toll</span>
                 </button>
 
                 <button
                   onClick={() => setIsRecordingVoice(true)}
-                  className="h-10 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1 transition"
+                  className="trip-chat-tool-btn"
                   title="Voice Note"
                 >
-                  <Mic className="w-4 h-4 text-rose-600" />
+                  <Mic size={15} style={{ color: '#E11D48' }} />
                 </button>
               </div>
 
@@ -766,18 +764,17 @@ export default function TripChatModal({
                     ? t('Message passenger & dispatch as Driver Shahidul...', 'চালক হিসেবে বার্তা দিন...', lang)
                     : t('Send official dispatch instruction as Kamruzzaman...', 'ডেসপ্যাচ নির্দেশনা দিন...', lang)
                 }
-                className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-600 focus:bg-white transition"
+                className="trip-chat-input-field"
               />
 
               {/* Send Button */}
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputText.trim()}
-                className="h-10 px-4 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition disabled:opacity-40 shrink-0"
-                style={{ background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)' }}
+                className="trip-chat-btn-send"
               >
                 <span>{t('Send', 'পাঠান', lang)}</span>
-                <Send className="w-3.5 h-3.5" />
+                <Send size={14} />
               </button>
             </div>
           )}

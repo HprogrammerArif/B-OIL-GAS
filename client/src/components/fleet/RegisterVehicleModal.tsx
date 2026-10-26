@@ -44,7 +44,10 @@ export default function RegisterVehicleModal({
       location,
       driverName: 'Awaiting Assignment',
       driverPhone: 'N/A',
-      odometerKm: 12000,
+      speed: 0,
+      engineTemp: 85,
+      fuelSlipNo: 'FS-INITIAL-101',
+      nextServiceKm: 15000,
       hazmatCertified,
     };
 

@@ -119,12 +119,15 @@ export default function NewRequisitionModal({
 
     onSubmit({
       requesterName: currentUserName,
+      requesterRole: 'Executive Staff',
       dept: currentUserDept,
+      phone: '+880 1711-009988',
       tripType,
       from: fromLoc,
       to: toLoc,
       departureTime,
       returnTime: tripType === 'round_trip' ? returnTime : undefined,
+      requiredCapacity: selectedPassengers.length > 4 ? 'microbus_7' : 'sedan_4',
       passengersCount: selectedPassengers.length,
       passengerNames: passengerNamesString,
       purpose,

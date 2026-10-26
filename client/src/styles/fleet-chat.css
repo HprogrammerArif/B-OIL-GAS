@@ -1,0 +1,1296 @@
+/* ==========================================================================
+   BOGCL OneOps — Fleet Tri-Party Communications & Coordination Desk
+   Brand: Bashundhara Group (Heritage Crimson · Industrial Slate · Champagne Gold)
+   100% Pure Custom Vanilla CSS — Zero Tailwind Dependency
+   ========================================================================== */
+
+/* ─── 1. MODAL COORDINATION DESK (TripChatModal) ─── */
+.trip-chat-dialog {
+  background: var(--brand-card-bg, #FFFFFF);
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 820px;
+  box-shadow: 0 25px 65px -12px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 88vh;
+  max-height: 780px;
+  margin: auto;
+  box-sizing: border-box;
+  position: relative;
+  transition: all var(--transition-normal, 0.2s ease);
+}
+
+[data-theme="dark"] .trip-chat-dialog {
+  background: #0B132B;
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.75);
+}
+
+.trip-chat-header {
+  flex-shrink: 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #0A1128 0%, #162447 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.trip-chat-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #A51C30 0%, #7F1424 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(165, 28, 48, 0.35);
+  flex-shrink: 0;
+}
+
+.trip-chat-header-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-chat-id-badge {
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 900;
+  background: var(--brand-gold, #D4AF37);
+  color: #060D1F;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.trip-chat-header-sub {
+  font-size: 12px;
+  color: #CBD5E1;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trip-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.trip-chat-btn-call {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: #059669;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+  transition: all 0.15s ease;
+}
+.trip-chat-btn-call:hover {
+  background: #10B981;
+}
+
+.trip-chat-btn-tool {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.trip-chat-btn-tool:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.trip-chat-btn-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.trip-chat-btn-close:hover {
+  background: rgba(239, 68, 68, 0.4);
+}
+
+/* ─── 2. TRI-PARTY PRESENCE ROSTER STRIP ─── */
+.trip-chat-roster-bar {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  background: #F8FAFC;
+  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-roster-bar {
+  background: #070D1E;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-roster-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.trip-chat-roster-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-slate-400, #94A3B8);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trip-chat-presence-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  font-size: 11px;
+}
+
+[data-theme="dark"] .trip-chat-presence-chip {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-presence-name {
+  font-weight: 700;
+  color: var(--brand-slate-900, #0F172A);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .trip-chat-presence-name {
+  color: #F8FAFC;
+}
+
+.trip-chat-presence-role {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.trip-chat-presence-role.staff {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+[data-theme="dark"] .trip-chat-presence-role.staff {
+  background: #1E3A8A;
+  color: #93C5FD;
+}
+.trip-chat-presence-role.driver {
+  background: #ECFDF5;
+  color: #047857;
+}
+[data-theme="dark"] .trip-chat-presence-role.driver {
+  background: #064E3B;
+  color: #6EE7B7;
+}
+.trip-chat-presence-role.admin {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+[data-theme="dark"] .trip-chat-presence-role.admin {
+  background: #312E81;
+  color: #A5B4FC;
+}
+
+/* ─── 3. PERSONA SWITCHER STRIP ─── */
+.trip-chat-persona-bar {
+  flex-shrink: 0;
+  padding: 8px 20px;
+  background: #F1F5F9;
+  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-persona-bar {
+  background: #0D162B;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-persona-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-chat-persona-group {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  padding: 2px;
+  border-radius: 10px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  gap: 2px;
+}
+
+[data-theme="dark"] .trip-chat-persona-group {
+  background: #162238;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-persona-btn {
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--brand-slate-600, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .trip-chat-persona-btn {
+  color: #94A3B8;
+}
+
+.trip-chat-persona-btn.active-employee {
+  background: #2563EB;
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+}
+
+.trip-chat-persona-btn.active-driver {
+  background: #059669;
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.35);
+}
+
+.trip-chat-persona-btn.active-admin {
+  background: #4F46E5;
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
+}
+
+/* ─── 4. MESSAGES STREAM FEED ─── */
+.trip-chat-stream {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: #F8FAFC;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 0);
+  background-size: 24px 24px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-stream {
+  background-color: #060A17;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+}
+
+.trip-chat-day-divider {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+
+.trip-chat-day-pill {
+  padding: 3px 12px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--brand-slate-500, #64748B);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .trip-chat-day-pill {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+/* Message Rows */
+.trip-chat-row {
+  display: flex;
+  width: 100%;
+}
+.trip-chat-row.mine {
+  justify-content: flex-end;
+}
+.trip-chat-row.theirs {
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.trip-chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  margin-top: 2px;
+}
+.trip-chat-avatar.staff {
+  background: #2563EB;
+}
+.trip-chat-avatar.driver {
+  background: #059669;
+}
+.trip-chat-avatar.admin {
+  background: #4F46E5;
+}
+
+.trip-chat-msg-column {
+  display: flex;
+  flex-direction: column;
+  max-width: 82%;
+}
+.trip-chat-msg-column.mine {
+  align-items: flex-end;
+}
+.trip-chat-msg-column.theirs {
+  align-items: flex-start;
+}
+
+.trip-chat-sender-header {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  color: var(--brand-slate-600, #475569);
+}
+
+[data-theme="dark"] .trip-chat-sender-header {
+  color: #94A3B8;
+}
+
+.trip-chat-sender-title {
+  font-weight: 800;
+  color: var(--brand-slate-900, #0F172A);
+}
+
+[data-theme="dark"] .trip-chat-sender-title {
+  color: #FFFFFF;
+}
+
+.trip-chat-role-badge {
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 9px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+.trip-chat-role-badge.driver {
+  background: #ECFDF5;
+  color: #047857;
+  border-color: #A7F3D0;
+}
+[data-theme="dark"] .trip-chat-role-badge.driver {
+  background: #064E3B;
+  color: #6EE7B7;
+  border-color: #047857;
+}
+.trip-chat-role-badge.admin {
+  background: #EEF2FF;
+  color: #4338CA;
+  border-color: #C7D2FE;
+}
+[data-theme="dark"] .trip-chat-role-badge.admin {
+  background: #312E81;
+  color: #A5B4FC;
+  border-color: #4338CA;
+}
+.trip-chat-role-badge.staff {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border-color: #BFDBFE;
+}
+[data-theme="dark"] .trip-chat-role-badge.staff {
+  background: #1E3A8A;
+  color: #93C5FD;
+  border-color: #1D4ED8;
+}
+
+.trip-chat-timestamp {
+  font-size: 9.5px;
+  font-weight: normal;
+  color: var(--brand-slate-400, #94A3B8);
+}
+
+/* Speech Bubble */
+.trip-chat-bubble {
+  width: fit-content;
+  min-width: 90px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.trip-chat-bubble.mine {
+  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
+  color: #FFFFFF;
+  border-bottom-right-radius: 3px;
+  box-shadow: 0 2px 8px rgba(165, 28, 48, 0.28);
+}
+
+.trip-chat-bubble.theirs {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border-top-left-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .trip-chat-bubble.theirs {
+  background: #111C35;
+  color: #E2E8F0;
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+.trip-chat-bubble-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 9.5px;
+}
+.trip-chat-bubble.mine .trip-chat-bubble-footer {
+  color: rgba(255, 255, 255, 0.85);
+}
+.trip-chat-bubble.theirs .trip-chat-bubble-footer {
+  color: var(--brand-slate-400, #94A3B8);
+}
+
+/* System Pill */
+.trip-chat-system-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #E2E8F0;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .trip-chat-system-pill {
+  background: #162447;
+  color: #CBD5E1;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Rich Cards in Stream */
+.trip-chat-toll-card {
+  width: 100%;
+  background: #FFFFFF;
+  border: 2px solid #FCD34D;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-toll-card {
+  background: #141E38;
+  border-color: #B45309;
+}
+
+.trip-chat-toll-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  background: #F8FAFC;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+}
+
+[data-theme="dark"] .trip-chat-toll-grid {
+  background: #0B132B;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.trip-chat-location-card {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-location-card {
+  background: #111C35;
+  border-color: #1E40AF;
+}
+
+.trip-chat-gps-badge {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1D4ED8;
+  background: #EFF6FF;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #BFDBFE;
+  width: fit-content;
+}
+
+[data-theme="dark"] .trip-chat-gps-badge {
+  background: #1E3A8A;
+  color: #93C5FD;
+  border-color: #1D4ED8;
+}
+
+/* Audio Voice Bubble */
+.trip-chat-voice-bubble {
+  width: fit-content;
+  min-width: 190px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+.trip-chat-voice-bubble.mine {
+  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
+  color: #FFFFFF;
+  border-bottom-right-radius: 3px;
+}
+.trip-chat-voice-bubble.theirs {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border-top-left-radius: 3px;
+}
+[data-theme="dark"] .trip-chat-voice-bubble.theirs {
+  background: #111C35;
+  color: #F8FAFC;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-voice-play-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease;
+}
+.trip-chat-voice-bubble.mine .trip-chat-voice-play-btn {
+  background: #FFFFFF;
+  color: #A51C30;
+}
+.trip-chat-voice-bubble.theirs .trip-chat-voice-play-btn {
+  background: #A51C30;
+  color: #FFFFFF;
+}
+
+/* Typing Indicator Pill */
+.trip-chat-typing-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--brand-slate-500, #64748B);
+  font-style: italic;
+  background: #FFFFFF;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  width: fit-content;
+}
+
+[data-theme="dark"] .trip-chat-typing-pill {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+}
+
+/* ─── 5. QUICK REPLIES BAR ─── */
+.trip-chat-quick-bar {
+  padding: 10px 20px;
+  background: #F8FAFC;
+  border-top: 1px solid var(--brand-slate-200, #E2E8F0);
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-quick-bar {
+  background: #091024;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-quick-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #FFFFFF;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brand-slate-700, #334155);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .trip-chat-quick-pill {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+}
+
+.trip-chat-quick-pill:hover {
+  background: var(--brand-slate-100, #F1F5F9);
+  border-color: var(--brand-slate-300, #CBD5E1);
+  color: var(--brand-slate-900, #0F172A);
+}
+
+[data-theme="dark"] .trip-chat-quick-pill:hover {
+  background: #162447;
+  color: #FFFFFF;
+}
+
+/* ─── 6. COMPOSER BAR ─── */
+.trip-chat-composer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #FFFFFF;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-composer {
+  background: #0B132B;
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.trip-chat-composer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-chat-tool-btn {
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 11px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #F8FAFC;
+  color: var(--brand-slate-700, #334155);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .trip-chat-tool-btn {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+}
+
+.trip-chat-tool-btn:hover {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.trip-chat-input-field {
+  flex: 1 1 0;
+  background: #F8FAFC;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 12.5px;
+  color: var(--brand-slate-900, #0F172A);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .trip-chat-input-field {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.trip-chat-input-field:focus {
+  outline: none;
+  border-color: var(--brand-crimson, #A51C30);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(165, 28, 48, 0.1);
+}
+
+[data-theme="dark"] .trip-chat-input-field:focus {
+  background: #162447;
+}
+
+.trip-chat-btn-send {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
+  color: #FFFFFF;
+  font-size: 12.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(165, 28, 48, 0.3);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.trip-chat-btn-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Recording Bar */
+.trip-chat-recording-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 12px;
+  border: 1px solid #FDA4AF;
+  background: #FFF1F2;
+  padding: 10px 14px;
+}
+
+[data-theme="dark"] .trip-chat-recording-box {
+  background: #3B0D14;
+  border-color: #881337;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   7. FULL-SCREEN FLEET CHAT CENTER (FleetChatCenter)
+   ═══════════════════════════════════════════════════════════════════ */
+.fleet-chat-center-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #FFFFFF;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .fleet-chat-center-container {
+  background: #0B132B;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+}
+
+/* Sidebar Column */
+.fleet-chat-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #F8FAFC;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .fleet-chat-sidebar {
+  background: #070D1E;
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+.fleet-chat-user-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #FFFFFF;
+}
+
+[data-theme="dark"] .fleet-chat-user-strip {
+  background: #0B132B;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.fleet-chat-user-medallion {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--brand-crimson, #A51C30);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(165, 28, 48, 0.25);
+  flex-shrink: 0;
+}
+
+.fleet-chat-channel-list {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.fleet-chat-channel-card {
+  position: relative;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  padding: 10px 12px;
+  font-size: 12px;
+  background: #FFFFFF;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .fleet-chat-channel-card {
+  background: #0D162B;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.fleet-chat-channel-card:hover {
+  background: #F1F5F9;
+  border-color: var(--brand-slate-300, #CBD5E1);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .fleet-chat-channel-card:hover {
+  background: #111C35;
+}
+
+.fleet-chat-channel-card.active {
+  border-left: 5px solid var(--brand-crimson, #A51C30);
+  background: linear-gradient(90deg, rgba(255, 241, 242, 0.95) 0%, #FFFFFF 100%);
+  border-color: #FECDD3;
+  box-shadow: 0 2px 8px rgba(165, 28, 48, 0.08);
+}
+
+[data-theme="dark"] .fleet-chat-channel-card.active {
+  background: linear-gradient(90deg, rgba(76, 5, 25, 0.4) 0%, #0D162B 100%);
+  border-color: #881337;
+}
+
+/* Main Stream Column */
+.fleet-chat-main-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  background: #FFFFFF;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .fleet-chat-main-section {
+  background: #0B132B;
+}
+
+.fleet-chat-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #FFFFFF;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .fleet-chat-main-header {
+  background: #0B132B;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Slide-Over Drawers (Radar, Dossier, Toll) */
+.fleet-chat-drawer {
+  display: flex;
+  flex-direction: column;
+  width: 330px;
+  min-width: 330px;
+  max-width: 330px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #F8FAFC;
+  padding: 16px;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .fleet-chat-drawer {
+  background: #070D1E;
+  border-left-color: rgba(255, 255, 255, 0.08);
+  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Responsive Adjustments ─── */
+@media (max-width: 768px) {
+  .trip-chat-dialog {
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+  .trip-chat-header {
+    padding: 12px 14px;
+  }
+  .trip-chat-stream {
+    padding: 14px;
+  }
+  .trip-chat-composer {
+    padding: 10px 14px;
+  }
+  .fleet-chat-sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .fleet-chat-drawer {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+  }
+}
+
+/* ─── 8. FLEET STATUS BADGES & HELPERS ─── */
+.fleet-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+.fleet-status-badge.completed {
+  background: #ECFDF5;
+  color: #047857;
+  border-color: #A7F3D0;
+}
+[data-theme="dark"] .fleet-status-badge.completed {
+  background: #064E3B;
+  color: #6EE7B7;
+  border-color: #047857;
+}
+.fleet-status-badge.in_transit {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border-color: #BFDBFE;
+}
+[data-theme="dark"] .fleet-status-badge.in_transit {
+  background: #1E3A8A;
+  color: #93C5FD;
+  border-color: #1D4ED8;
+}
+.fleet-status-badge.assigned {
+  background: #EEF2FF;
+  color: #4338CA;
+  border-color: #C7D2FE;
+}
+[data-theme="dark"] .fleet-status-badge.assigned {
+  background: #312E81;
+  color: #A5B4FC;
+  border-color: #4338CA;
+}
+.fleet-status-badge.pending {
+  background: #FFFBEB;
+  color: #B45309;
+  border-color: #FDE68A;
+}
+[data-theme="dark"] .fleet-status-badge.pending {
+  background: #78350F;
+  color: #FDE68A;
+  border-color: #B45309;
+}
+.fleet-status-badge.default {
+  background: #F1F5F9;
+  color: #475569;
+  border-color: #CBD5E1;
+}
+[data-theme="dark"] .fleet-status-badge.default {
+  background: #1E293B;
+  color: #94A3B8;
+  border-color: #334155;
+}
+
+.fleet-chat-tab-pill {
+  flex: 1;
+  padding: 6px 4px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--brand-slate-600, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+[data-theme="dark"] .fleet-chat-tab-pill {
+  color: #94A3B8;
+}
+.fleet-chat-tab-pill.active {
+  background: #FFFFFF;
+  color: var(--brand-slate-900, #0F172A);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+[data-theme="dark"] .fleet-chat-tab-pill.active {
+  background: #162447;
+  color: #FFFFFF;
+}
+
+.fleet-chat-search-wrap {
+  padding: 10px 14px;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  box-sizing: border-box;
+}
+[data-theme="dark"] .fleet-chat-search-wrap {
+  background: #0B132B;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.fleet-chat-search-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #F8FAFC;
+  padding: 8px 30px 8px 32px;
+  font-size: 12px;
+  color: var(--brand-slate-900, #0F172A);
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.15s ease;
+}
+[data-theme="dark"] .fleet-chat-search-input {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+.fleet-chat-search-input:focus {
+  border-color: var(--brand-crimson, #A51C30);
+  background: #FFFFFF;
+}
+[data-theme="dark"] .fleet-chat-search-input:focus {
+  background: #162447;
+}
+
+.fleet-channel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease;
+}
+.fleet-channel-avatar.in_transit {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+}
+.fleet-channel-avatar.assigned {
+  background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+}
+.fleet-channel-avatar.completed {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+.fleet-channel-avatar.pending {
+  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+}
+.fleet-channel-avatar.sos {
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+}
+.fleet-channel-avatar.broadcast {
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+}
+.fleet-channel-avatar.hotline {
+  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+}
+
+.fleet-presence-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+}
+[data-theme="dark"] .fleet-presence-dot {
+  border-color: #0B132B;
+}
+.fleet-presence-dot.green {
+  background: #10B981;
+}
+.fleet-presence-dot.blue {
+  background: #3B82F6;
+}
+.fleet-presence-dot.amber {
+  background: #F59E0B;
+}
+.fleet-presence-dot.red {
+  background: #EF4444;
+}
+
+.fleet-chat-composer-textarea {
+  width: 100%;
+  max-height: 130px;
+  resize: none;
+  border-radius: 12px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #F8FAFC;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--brand-slate-900, #0F172A);
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.15s ease;
+}
+[data-theme="dark"] .fleet-chat-composer-textarea {
+  background: #111C35;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+.fleet-chat-composer-textarea:focus {
+  border-color: var(--brand-crimson, #A51C30);
+  background: #FFFFFF;
+}
+[data-theme="dark"] .fleet-chat-composer-textarea:focus {
+  background: #162447;
+}
+
+.fleet-hud-card {
+  border-radius: 14px;
+  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: #FFFFFF;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+[data-theme="dark"] .fleet-hud-card {
+  background: #0B132B;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
