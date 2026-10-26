@@ -276,7 +276,7 @@ export default function FleetView({ role, lang }: ViewProps) {
   return (
     <div
       className={`view-container view-transition-wrapper ${
-        isChatTabActive ? 'fleet-chat-active flex h-full max-h-full min-h-0 flex-col overflow-hidden pb-0' : ''
+        isChatTabActive ? 'fleet-chat-active' : ''
       }`}
     >
       {/* ─── View Header ────────────────────────────────────────────── */}
@@ -831,7 +831,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {isDriver && driverTab === 'chat_center' && (
-        <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 mb-1">
+        <div className="fleet-chat-desk-container">
           <FleetChatCenter
             userRole="driver"
             lang={lang}
@@ -1129,7 +1129,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 }}
                                 title={t('Open Tri-Party Mission Chat (Driver ↔ Staff ↔ Admin)', 'চালক, কর্মকর্তা ও ডেসপ্যাচ ত্রি-পক্ষীয় চ্যাট খুলুন', lang)}
                               >
-                                <MessageSquare size={12} className="text-blue-600" />
+                                <MessageSquare size={12} color="#2563EB" />
                                 <span>{t('Tri-Party Chat', 'ত্রি-পক্ষীয় চ্যাট', lang)}</span>
                               </button>
                             </div>
@@ -1653,7 +1653,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           TAB 6: DEDICATED DISPATCH COMMUNICATIONS DESK (Staff & Admin)
           ══════════════════════════════════════════════════════════════ */}
       {((isEmployee && employeeTab === 'chat_center') || (!isEmployee && activeAdminTab === 'chat_center')) && (
-        <div className="flex flex-1 min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 mb-1">
+        <div className="fleet-chat-desk-container">
           <FleetChatCenter
             userRole={isEmployee ? 'employee' : 'admin'}
             lang={lang}

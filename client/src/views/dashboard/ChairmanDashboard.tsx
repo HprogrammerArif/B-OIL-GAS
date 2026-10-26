@@ -231,8 +231,8 @@ export default function ChairmanDashboard({
               </div>
             </div>
             <button
-              className="btn-gold flex items-center gap-1.5 shadow-xs"
-              style={{ fontSize: '11.5px', padding: '6px 14px' }}
+              className="btn-gold"
+              style={{ fontSize: '11.5px', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               onClick={() => setShowPublishModal(true)}
             >
               <Plus size={13} />
@@ -241,8 +241,8 @@ export default function ChairmanDashboard({
           </div>
           <div className="card-body">
             {/* Filter Pills & Search */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+            <div className="notice-filter-toolbar" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+              <div className="notice-filter-pills" style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', fontSize: '12px' }}>
                 {[
                   { id: 'all', label: `All Circulars (${notices.length})` },
                   { id: 'pinned', label: `📌 Pinned (${notices.filter(n => n.pinned).length})` },
@@ -253,11 +253,7 @@ export default function ChairmanDashboard({
                   <button
                     key={pill.id}
                     onClick={() => { setNoticeFilter(pill.id); setNoticesPage(1); }}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap transition ${
-                      noticeFilter === pill.id
-                        ? 'bg-[#A51C30] text-white shadow-2xs'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                    }`}
+                    className={`notice-filter-btn ${noticeFilter === pill.id ? 'active' : ''}`}
                   >
                     {pill.label}
                   </button>
@@ -265,18 +261,20 @@ export default function ChairmanDashboard({
               </div>
 
               {/* Search Box */}
-              <div className="relative min-w-[200px] sm:w-60">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <div className="notice-search-box">
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)', pointerEvents: 'none' }} />
                 <input
                   type="text"
                   value={noticeSearch}
                   onChange={(e) => { setNoticeSearch(e.target.value); setNoticesPage(1); }}
                   placeholder={t('Search notices, circulars...', 'নোটিশ খুঁজুন...', lang)}
-                  className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500"
                 />
                 {noticeSearch && (
-                  <button onClick={() => setNoticeSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <X size={12} />
+                  <button
+                    onClick={() => setNoticeSearch('')}
+                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-slate-400)' }}
+                  >
+                    <X size={13} />
                   </button>
                 )}
               </div>
@@ -285,7 +283,8 @@ export default function ChairmanDashboard({
             {/* Flagship Pinned Chairman Message */}
             {noticeFilter === 'all' && !noticeSearch && (
               <div
-                className="notice-card gold-pin mb-3 cursor-pointer hover:shadow-md transition"
+                className="notice-card gold-pin"
+                style={{ marginBottom: '12px', cursor: 'pointer' }}
                 onClick={() => setSelectedNoticeForDetail({
                   id: 'NOT-CHAIRMAN-EID',
                   title: "Chairman's Message — Eid ul-Adha 2026",
@@ -304,13 +303,15 @@ export default function ChairmanDashboard({
                 })}
               >
                 <div className="notice-hd">
-                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-gold-dark)' }}>
+                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-gold-dark)' }}>
                     👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
                   </div>
                   <span className="badge gold">👑 Pinned by Chairman</span>
                 </div>
-                <div className="notice-meta">Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span className="font-mono text-amber-700">BOGCL/CHAIR/EID-2026</span></div>
-                <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-600)' }}>
+                <div className="notice-meta" style={{ fontSize: '11.5px', marginTop: '4px' }}>
+                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#B45309' }}>BOGCL/CHAIR/EID-2026</span>
+                </div>
+                <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-700)', marginTop: '8px', lineHeight: 1.5 }}>
                   {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
                 </div>
               </div>
@@ -318,9 +319,9 @@ export default function ChairmanDashboard({
 
             {/* Paginated Notices List */}
             {filteredNotices.length === 0 ? (
-              <div className="py-12 text-center text-slate-400">
-                <Megaphone className="mx-auto mb-2 h-10 w-10 text-slate-300 dark:text-slate-600" />
-                <div className="text-xs font-bold text-slate-600 dark:text-slate-300">
+              <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--brand-slate-400)' }}>
+                <Megaphone size={38} color="var(--brand-slate-300)" style={{ margin: '0 auto 8px' }} />
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-600)' }}>
                   {t('No corporate notices found matching this filter', 'কোনো নোটিশ পাওয়া যায়নি', lang)}
                 </div>
               </div>
@@ -333,17 +334,18 @@ export default function ChairmanDashboard({
                   return (
                     <div
                       key={notice.id || i}
-                      className={`notice-card${notice.pinned ? (isChairman ? ' gold-pin' : ' pinned') : ''} group relative transition-all hover:shadow-md cursor-pointer`}
+                      className={`notice-card${notice.pinned ? (isChairman ? ' gold-pin' : ' pinned') : ''}`}
+                      style={{ cursor: 'pointer' }}
                       onClick={() => setSelectedNoticeForDetail(notice)}
                     >
                       <div className="notice-hd">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm">{isChairman ? '👑' : isSafety ? '⚠️' : '📢'}</span>
-                          <div className="notice-title text-[13.5px] font-bold text-slate-900 dark:text-white">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '14px' }}>{isChairman ? '👑' : isSafety ? '⚠️' : '📢'}</span>
+                          <div className="notice-title" style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                             {t(notice.title, notice.title_bn, lang)}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                           {notice.pinned && (
                             <span className={`badge ${isChairman ? 'gold' : 'danger'}`}>
                               {isChairman ? '👑 Chairman Pinned' : '📌 Pinned'}
@@ -355,39 +357,39 @@ export default function ChairmanDashboard({
                         </div>
                       </div>
 
-                      <div className="notice-meta text-[11px] text-slate-400 mt-1 flex items-center gap-2 flex-wrap">
+                      <div className="notice-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
                         <span>{notice.date}</span>
                         {notice.author && (
                           <>
                             <span>•</span>
-                            <span className="text-slate-600 dark:text-slate-300 font-medium">By {notice.author}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--brand-slate-700)' }}>By {notice.author}</span>
                           </>
                         )}
                         {notice.targetAudience && (
                           <>
                             <span>•</span>
-                            <span className="text-slate-500">Audience: {notice.targetAudience}</span>
+                            <span>Audience: {notice.targetAudience}</span>
                           </>
                         )}
                         {notice.referenceNo && (
                           <>
                             <span>•</span>
-                            <span className="font-mono text-slate-400">{notice.referenceNo}</span>
+                            <span style={{ fontFamily: 'monospace' }}>{notice.referenceNo}</span>
                           </>
                         )}
                       </div>
 
                       {notice.body && (
-                        <div className="notice-body text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2 leading-relaxed">
+                        <div className="notice-body" style={{ marginTop: '8px', fontSize: '12px', lineHeight: 1.5, color: 'var(--brand-slate-600)' }}>
                           {t(notice.body, notice.body_bn || notice.body, lang)}
                         </div>
                       )}
 
-                      <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2 text-[11px]" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-2">
+                      <div className="notice-card-footer" onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {notice.requiresAck && (
-                            <span className="text-slate-500 flex items-center gap-1">
-                              <CheckCircle2 size={12} className="text-emerald-600" />
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--brand-slate-500)' }}>
+                              <CheckCircle2 size={13} color="#059669" />
                               <span>
                                 {notice.acknowledgedCount || 184}/{notice.totalRecipients || 218} Read ({Math.round(((notice.acknowledgedCount || 184) / (notice.totalRecipients || 218)) * 100)}%)
                               </span>
@@ -395,10 +397,11 @@ export default function ChairmanDashboard({
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <button
                             type="button"
-                            className="btn-sm-ghost flex items-center gap-1 text-[11px] text-slate-600 hover:text-slate-900"
+                            className="btn-sm-ghost"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px' }}
                             onClick={() => setSelectedNoticeForDetail(notice)}
                           >
                             <Eye size={12} />
@@ -408,7 +411,8 @@ export default function ChairmanDashboard({
                           {!notice.read ? (
                             <button
                               type="button"
-                              className="btn-sm-ghost text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md"
+                              className="btn-sm-ghost"
+                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '6px' }}
                               onClick={() => {
                                 setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, read: true, acknowledgedCount: (n.acknowledgedCount || 0) + 1 } : n));
                                 showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
@@ -417,7 +421,7 @@ export default function ChairmanDashboard({
                               ✅ {t('Acknowledge', 'পড়েছি', lang)}
                             </button>
                           ) : (
-                            <span className="text-[10.5px] font-bold text-emerald-600 flex items-center gap-1">
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <CheckCircle2 size={12} />
                               <span>Acknowledged</span>
                             </span>
@@ -425,14 +429,14 @@ export default function ChairmanDashboard({
 
                           <button
                             type="button"
-                            className="text-slate-400 hover:text-amber-600 p-1 rounded transition"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? '#D97706' : 'var(--brand-slate-400)' }}
                             title={notice.pinned ? "Unpin notice" : "Pin notice"}
                             onClick={() => {
                               setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, pinned: !n.pinned } : n));
                               showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
                             }}
                           >
-                            <Pin size={13} className={notice.pinned ? "fill-amber-500 text-amber-500" : ""} />
+                            <Pin size={13} fill={notice.pinned ? '#D97706' : 'none'} />
                           </button>
                         </div>
                       </div>
