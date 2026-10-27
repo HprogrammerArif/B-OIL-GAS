@@ -410,8 +410,8 @@ export default function SubmitClaimModal({
           </div>
 
           {/* Quick Preset Buttons */}
-          <div style={{ background: '#F8FAFC', padding: '10px 14px', borderRadius: '12px', border: '1px solid var(--brand-slate-200, #E2E8F0)' }}>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500, #64748B)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div className="claims-preset-bar">
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500, #64748B)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Sparkles size={13} style={{ color: '#D97706' }} />
               <span>{t('Quick Presets / Recent Tour Orders:', 'দ্রুত টেমপ্লেট ও সাম্প্রতিক সফর অর্ডার:', lang)}</span>
             </div>
@@ -421,21 +421,9 @@ export default function SubmitClaimModal({
                   key={idx}
                   type="button"
                   onClick={() => handleApplyPreset(p)}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--brand-slate-300, #CBD5E1)',
-                    background: '#FFFFFF',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: 'var(--brand-slate-700, #334155)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--brand-crimson, #A51C30)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--brand-slate-300, #CBD5E1)'; }}
+                  className="claims-preset-chip"
                 >
-                  {p.label.split('—')[0].slice(0, 32)}...
+                  {p.label.split('—')[0].slice(0, 36)}...
                 </button>
               ))}
             </div>
@@ -617,14 +605,14 @@ export default function SubmitClaimModal({
                           type="date"
                           value={it.date}
                           onChange={(e) => handleUpdateItem(it.id, 'date', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-200, #E2E8F0)', fontSize: '11px', background: 'transparent' }}
+                          className="claims-table-control"
                         />
                       </td>
                       <td>
                         <select
                           value={it.category}
                           onChange={(e) => handleUpdateItem(it.id, 'category', e.target.value)}
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-200, #E2E8F0)', fontSize: '11px', background: 'transparent' }}
+                          className="claims-table-control"
                         >
                           <option value="Daily Allowance (DA)">Daily Allowance (DA)</option>
                           <option value="Hotel Accommodation">Hotel Accommodation</option>
@@ -643,7 +631,7 @@ export default function SubmitClaimModal({
                           value={it.desc}
                           onChange={(e) => handleUpdateItem(it.id, 'desc', e.target.value)}
                           placeholder="e.g. Hotel Peninsula 3 nights bill"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-200, #E2E8F0)', fontSize: '11.5px', background: 'transparent', boxSizing: 'border-box' }}
+                          className="claims-table-control"
                         />
                       </td>
                       <td>
@@ -652,7 +640,8 @@ export default function SubmitClaimModal({
                           value={it.voucherNo}
                           onChange={(e) => handleUpdateItem(it.id, 'voucherNo', e.target.value)}
                           placeholder="INV-1234"
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-200, #E2E8F0)', fontSize: '11px', fontFamily: 'monospace', background: 'transparent', boxSizing: 'border-box' }}
+                          className="claims-table-control"
+                          style={{ fontFamily: 'monospace' }}
                         />
                       </td>
                       <td>
@@ -660,7 +649,8 @@ export default function SubmitClaimModal({
                           type="number"
                           value={it.amount}
                           onChange={(e) => handleUpdateItem(it.id, 'amount', parseFloat(e.target.value) || 0)}
-                          style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-200, #E2E8F0)', fontSize: '12px', fontWeight: 700, textAlign: 'right', background: 'transparent', boxSizing: 'border-box' }}
+                          className="claims-table-control"
+                          style={{ fontWeight: 700, textAlign: 'right' }}
                         />
                       </td>
                       <td style={{ textAlign: 'center' }}>
@@ -682,7 +672,7 @@ export default function SubmitClaimModal({
 
           {/* Section D: Advance Reconciliation (Tour / Event) */}
           {claimType === 'tour_event' && (
-            <div style={{ background: '#FFFBEB', padding: '14px 18px', borderRadius: '14px', border: '1.5px solid #FCD34D' }}>
+            <div className="claims-advance-box">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: '#92400E', marginBottom: '8px' }}>
                 <DollarSign size={16} />
                 <span>Advance Reconciliation & Settlement</span>
@@ -700,7 +690,8 @@ export default function SubmitClaimModal({
                     type="number"
                     value={advanceTaken}
                     onChange={(e) => setAdvanceTaken(parseFloat(e.target.value) || 0)}
-                    style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 800, width: '100%', boxSizing: 'border-box' }}
+                    className="form-input"
+                    style={{ fontWeight: 800 }}
                   />
                 </div>
 
@@ -727,19 +718,7 @@ export default function SubmitClaimModal({
             </label>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               {vouchers.map((v, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px 12px',
-                    borderRadius: '10px',
-                    background: '#F1F5F9',
-                    border: '1px solid var(--brand-slate-200, #E2E8F0)',
-                    fontSize: '11px',
-                  }}
-                >
+                <div key={i} className="claims-voucher-chip">
                   <FileText size={14} style={{ color: '#2563EB' }} />
                   <span style={{ fontWeight: 600, color: 'var(--brand-slate-800, #1E293B)' }}>{v.name}</span>
                   <span style={{ color: '#94A3B8', fontSize: '10px' }}>({v.size})</span>
@@ -755,14 +734,7 @@ export default function SubmitClaimModal({
             </div>
 
             <div
-              style={{
-                border: '1.5px dashed var(--brand-slate-300, #CBD5E1)',
-                borderRadius: '12px',
-                padding: '16px',
-                textAlign: 'center',
-                background: '#FAFAFA',
-                cursor: 'pointer',
-              }}
+              className="claims-dropzone"
               onClick={() => {
                 const sampleName = `Voucher_Slip_${Math.floor(1000 + Math.random() * 9000)}.pdf`;
                 setVouchers([...vouchers, { name: sampleName, size: '820 KB' }]);
