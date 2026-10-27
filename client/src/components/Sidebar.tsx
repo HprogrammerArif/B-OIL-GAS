@@ -185,7 +185,8 @@ const DRIVER_NAV: NavSection[] = [
     title: 'Duty Terminal',
     titleBn: 'ডিউটি টার্মিনাল',
     items: [
-      { view: 'fleet',         icon: <Truck size={16} />,          label: 'My Assigned Missions',         labelBn: 'আমার দায়িত্বপ্রাপ্ত ট্রিপ', badge: 'Active', badgeType: 'success' },
+      { view: 'dashboard',     icon: <Gauge size={16} />,          label: 'Driver Duty Cockpit',          labelBn: 'ডিউটি কক্পিট টার্মিনাল', badge: 'Active', badgeType: 'success' },
+      { view: 'fleet',         icon: <Truck size={16} />,          label: 'My Assigned Missions',         labelBn: 'আমার দায়িত্বপ্রাপ্ত ট্রিপ' },
       { view: 'attendance',    icon: <MapPin size={16} />,         label: 'Driver Duty & Breathalyzer',   labelBn: 'ডিউটি ও ফিটনেস অডিট' },
       { view: 'claims',        icon: <Receipt size={16} />,        label: 'Toll & Conveyance Slips',      labelBn: 'টোল ও যাতায়াত ভাউচার', badge: '৳1.2k', badgeType: 'info' },
     ],

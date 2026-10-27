@@ -7,138 +7,7 @@ import {
   ChevronRight, ArrowRight, ShieldAlert, Check, X, Filter
 } from 'lucide-react';
 import SubmitClaimModal, { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
-
-interface ClaimItem {
-  id: string;
-  claimant: string;
-  designation: string;
-  dept: string;
-  type: 'tada' | 'conveyance' | 'tour_event';
-  purpose: string;
-  destination?: string;
-  period: string;
-  amount: number;
-  advanceTaken?: number;
-  netSettlement?: number;
-  status: 'pending_hod' | 'pending_finance' | 'approved' | 'settled' | 'rejected';
-  dateSubmitted: string;
-  sapVoucher?: string;
-  items?: { desc: string; date: string; amount: number; category: string }[];
-}
-
-const INITIAL_CLAIMS: ClaimItem[] = [
-  {
-    id: 'TOUR-2026-008',
-    claimant: 'Engr. Md. Harunur Rashid',
-    designation: 'Plant General Manager',
-    dept: 'Keraniganj Refinery',
-    type: 'tour_event',
-    purpose: 'Chittagong Coastal Oil Terminal Turnaround Delegation Tour & Jetty Audit',
-    destination: 'Patenga Terminal & BIWTA Jetty',
-    period: 'Oct 05 – Oct 08, 2026 (4 days)',
-    amount: 114500,
-    advanceTaken: 120000,
-    netSettlement: -5500, // Refund to BOGCL Treasury
-    status: 'approved',
-    dateSubmitted: '11 Oct 2026',
-    sapVoucher: 'SAP-TR-2026-10492',
-    items: [
-      { desc: 'Official Technical Delegation Airfare (4 Engineers)', date: '05, 08 Oct', amount: 56000, category: 'Airfare' },
-      { desc: 'Port Area Hotel Agrabad (3 Rooms, 3 Nights)', date: '05-07 Oct', amount: 38500, category: 'Accommodation' },
-      { desc: 'Local Speedboat & River Jetty Inspection Logistics', date: '06-07 Oct', amount: 20000, category: 'River Logistics' },
-    ],
-  },
-  {
-    id: 'SPRT-2026-003',
-    claimant: 'Md. Kamruzzaman',
-    designation: 'Transport & Admin Supervisor',
-    dept: 'Admin & Transport',
-    type: 'tour_event',
-    purpose: 'BOGCL Annual Inter-Plant Sports & Cricket Tournament (Keraniganj Ground)',
-    destination: 'Keraniganj Refinery Ground',
-    period: 'Oct 12 – Oct 14, 2026',
-    amount: 362400,
-    advanceTaken: 350000,
-    netSettlement: 12400, // Reimbursement Payable to Admin
-    status: 'pending_hod',
-    dateSubmitted: '16 Oct 2026',
-    items: [
-      { desc: 'Refinery Ground Preparation, Tents & Sound System', date: '12 Oct', amount: 145000, category: 'Event Setup' },
-      { desc: 'Player Jerseys & Sports Equipment for 8 Plant Teams', date: '12 Oct', amount: 98400, category: 'Sports Kit' },
-      { desc: 'Player Catering & Refreshment (350 Staff for 3 Days)', date: '12-14 Oct', amount: 119000, category: 'Catering' },
-    ],
-  },
-  {
-    id: 'TADA-2026-0419',
-    claimant: 'Tanvir Ahmed',
-    designation: 'Sales Officer, Grade 8',
-    dept: 'Sales & Distribution',
-    type: 'tada',
-    purpose: 'Chittagong Depot Dealer Network Inspection & Quality Audit',
-    destination: 'Chittagong & Sitakunda',
-    period: 'Oct 10 – Oct 13, 2026 (4 days)',
-    amount: 14850,
-    status: 'pending_hod',
-    dateSubmitted: '14 Oct 2026',
-    items: [
-      { desc: 'Daily Allowance (4 days @ ৳1,500/day)', date: '10-13 Oct', amount: 6000, category: 'DA' },
-      { desc: 'Hotel Peninsula CTG (3 nights with GST invoice)', date: '10-12 Oct', amount: 7200, category: 'Accommodation' },
-      { desc: 'Inter-district AC Bus (Dhaka-CTG-Dhaka)', date: '10, 13 Oct', amount: 1650, category: 'Travel' },
-    ],
-  },
-  {
-    id: 'CNV-2026-1002',
-    claimant: 'Tanvir Ahmed',
-    designation: 'Sales Officer, Grade 8',
-    dept: 'Sales & Distribution',
-    type: 'conveyance',
-    purpose: 'Local Client Visits — Motijheel, Tejgaon & Narayanganj Outlets',
-    period: 'Oct 01 – Oct 15, 2026',
-    amount: 5420,
-    status: 'pending_hod',
-    dateSubmitted: '15 Oct 2026',
-    items: [
-      { desc: 'Gulshan HQ to Motijheel BSEC (Uber CNG)', date: '02 Oct', amount: 480, category: 'CNG' },
-      { desc: 'Motijheel to Tejgaon Industrial Zone (Local CNG)', date: '05 Oct', amount: 350, category: 'CNG' },
-      { desc: 'HQ to Narayanganj River Depot & Return', date: '08 Oct', amount: 1250, category: 'Ride Share' },
-      { desc: 'Uttara Dealer Meet & Sample Delivery', date: '11 Oct', amount: 840, category: 'CNG' },
-      { desc: 'Mirpur DOHS Transport Logistics Coordination', date: '14 Oct', amount: 600, category: 'Rickshaw/CNG' },
-      { desc: 'Tejgaon BSTI Office Document Handover', date: '15 Oct', amount: 400, category: 'CNG' },
-    ],
-  },
-  {
-    id: 'TADA-2026-0398',
-    claimant: 'Engr. Tariq Ahmed',
-    designation: 'Senior Plant Maintenance Engineer',
-    dept: 'Keraniganj Refinery',
-    type: 'tada',
-    purpose: 'Siemens Gas Turbine Sensor Calibration Testing',
-    destination: 'Ashuganj Power Hub',
-    period: 'Oct 02 – Oct 04, 2026',
-    amount: 18200,
-    status: 'approved',
-    dateSubmitted: '05 Oct 2026',
-    sapVoucher: 'SAP-FI-2026-88092',
-    items: [
-      { desc: 'DA Grade 6 Senior Specialist (3 days)', date: '02-04 Oct', amount: 7500, category: 'DA' },
-      { desc: 'Guest House Accommodation', date: '02-03 Oct', amount: 4500, category: 'Accommodation' },
-      { desc: 'Express Transport & Testing Kit Baggage', date: '02-04 Oct', amount: 6200, category: 'Logistics' },
-    ],
-  },
-  {
-    id: 'CNV-2026-0941',
-    claimant: 'Farida Begum',
-    designation: 'CFO & Head of Finance',
-    dept: 'Corporate Finance',
-    type: 'conveyance',
-    purpose: 'NBR Large Taxpayers Unit (LTU) Hearing & Bangladesh Bank Meeting',
-    period: 'Sep 15 – Sep 30, 2026',
-    amount: 8500,
-    status: 'settled',
-    dateSubmitted: '01 Oct 2026',
-    sapVoucher: 'SAP-FI-2026-87114',
-  },
-];
+import { useApprovalStore, ClaimItem } from '../store/approvalStore';
 
 const GRADE_POLICY = [
   { grade: 'Grade 1-2 (C-Suite / Chairman / MD)', daDhaka: 'Actuals / ৳5,000', daDistrict: 'Actuals / ৳6,000', hotelLimit: '5-Star / Direct Billing', travelMode: 'Executive Chauffeur / Air Business' },
@@ -149,10 +18,13 @@ const GRADE_POLICY = [
 ];
 
 export default function ClaimsView({ role, lang }: ViewProps) {
-  const [claims, setClaims] = useState<ClaimItem[]>(INITIAL_CLAIMS);
+  const { claims, addClaim, updateClaimStatus } = useApprovalStore();
   const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'policy'>('all');
-  const [selectedClaim, setSelectedClaim] = useState<ClaimItem | null>(INITIAL_CLAIMS[0]);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+
+  const selectedClaim = claims.find(c => c.id === selectedClaimId) || claims[0];
+  const setSelectedClaim = (claim: ClaimItem | null) => setSelectedClaimId(claim ? claim.id : null);
 
   const filteredClaims = claims.filter(c => {
     if (activeTab === 'tada') return c.type === 'tada';
@@ -162,13 +34,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   });
 
   const handleApprove = (id: string) => {
-    setClaims(prev => prev.map(c => {
-      if (c.id === id) {
-        const nextStatus = role === 'hod' ? 'pending_finance' : 'approved';
-        return { ...c, status: nextStatus, sapVoucher: nextStatus === 'approved' ? `SAP-FI-2026-${Math.floor(10000 + Math.random() * 90000)}` : undefined };
-      }
-      return c;
-    }));
+    const nextStatus = role === 'hod' ? 'pending_finance' : 'approved';
+    updateClaimStatus(id, nextStatus);
     showToast(
       lang === 'en'
         ? `Claim ${id} approved and routed for payment disbursement.`
@@ -178,31 +45,20 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   };
 
   const handleReject = (id: string) => {
-    setClaims(prev => prev.map(c => c.id === id ? { ...c, status: 'rejected' } : c));
+    updateClaimStatus(id, 'rejected');
     showToast(lang === 'en' ? `Claim ${id} returned to employee with notes.` : `দাবি ${id} সংশোধনের জন্য ফেরত পাঠানো হয়েছে।`, 'info');
   };
 
   const handleCreateClaim = (data: ClaimSubmissionData) => {
-    const newClaim: ClaimItem = {
-      id: data.id,
-      claimant: data.claimant,
-      designation: data.designation,
-      dept: data.dept,
-      type: data.type,
-      purpose: data.purpose,
-      destination: data.destination,
-      period: data.period,
-      amount: data.amount,
-      advanceTaken: data.advanceTaken,
-      netSettlement: data.netSettlement,
-      status: 'pending_hod',
-      dateSubmitted: data.dateSubmitted,
-      items: data.items,
-    };
-    setClaims([newClaim, ...claims]);
-    setSelectedClaim(newClaim);
+    const newClaim = addClaim(data);
+    setSelectedClaimId(newClaim.id);
     setActiveTab('all');
-    showToast(lang === 'en' ? `Claim ${data.id} submitted for HOD approval.` : `দাবি ${data.id} বিভাগীয় প্রধানের অনুমোদনের জন্য দাখিল করা হয়েছে।`, 'success');
+    showToast(
+      lang === 'en'
+        ? `Claim ${data.id} submitted for HOD approval (Synchronized with Omni-Queue).`
+        : `দাবি ${data.id} বিভাগীয় প্রধানের অনুমোদনের জন্য দাখিল করা হয়েছে (ওমনি-কিউতে সিঙ্ক সম্পন্ন)।`,
+      'success'
+    );
   };
 
   const getStatusBadge = (status: ClaimItem['status']) => {

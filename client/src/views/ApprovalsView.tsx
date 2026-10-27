@@ -7,108 +7,12 @@ import {
   ShieldCheck, ArrowRight, Eye, RefreshCw, Sparkles, Building
 } from 'lucide-react';
 
-interface ApprovalItem {
-  id: string;
-  category: 'finance' | 'procurement' | 'fleet' | 'leave' | 'hr';
-  title: string;
-  titleBn: string;
-  requester: string;
-  designation: string;
-  dept: string;
-  amount?: string;
-  costTk?: number;
-  date: string;
-  slaHoursLeft: number;
-  urgency: 'critical' | 'high' | 'normal';
-  sapDocRef: string;
-  details: string;
-}
-
-const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
-  {
-    id: 'APR-2026-0894',
-    category: 'procurement',
-    title: 'Emergency Bitumen Reactor Safety Relief Valves (Class 600)',
-    titleBn: 'জরুরি বিটুমিন রিঅ্যাক্টর সেফটি রিলিফ ভালভ সংগ্রহ',
-    requester: 'Engr. Tariq Ahmed',
-    designation: 'Senior Plant Maintenance Lead',
-    dept: 'Plant Maintenance',
-    amount: '৳48,50,000',
-    costTk: 4850000,
-    date: 'Today, 09:30 AM',
-    slaHoursLeft: 6,
-    urgency: 'critical',
-    sapDocRef: 'SAP-PR-2026-90412',
-    details: '4 units of High-Pressure Relief Valves required to avert plant shutdown prior to peak asphalt paving season.',
-  },
-  {
-    id: 'APR-2026-1042',
-    category: 'finance',
-    title: 'TA/DA Tour Claim — Chittagong Depot & Patenga Marine Terminal',
-    titleBn: 'টিএ/ডিএ ভ্রমণ বিল — চট্টগ্রাম ডিপো ও পতেঙ্গা টার্মিনাল',
-    requester: 'Tanvir Ahmed',
-    designation: 'Sr. Sales & Distribution Specialist',
-    dept: 'Sales & Distribution',
-    amount: '৳14,850',
-    costTk: 14850,
-    date: 'Yesterday',
-    slaHoursLeft: 18,
-    urgency: 'normal',
-    sapDocRef: 'SAP-FI-CLM-0419',
-    details: '4-day dealer quality network inspection and bulk asphalt delivery reconciliation with Peninsula hotel invoices.',
-  },
-  {
-    id: 'APR-2026-0312',
-    category: 'fleet',
-    title: 'Heavy Duty Pool Car Booking — Baridhara HQ to Keraniganj Plant',
-    titleBn: 'অফিসিয়াল পরিবহন বরাদ্দ — হেডকোয়ার্টার হতে প্ল্যান্ট',
-    requester: 'Engr. Md. Harunur Rashid',
-    designation: 'Plant General Manager',
-    dept: 'Plant Operations',
-    amount: '৳0 (In-House Fleet)',
-    costTk: 0,
-    date: 'Today, 10:15 AM',
-    slaHoursLeft: 3,
-    urgency: 'critical',
-    sapDocRef: 'VR-2026-144',
-    details: 'Round-trip inspection with French technical delegates from Axens for Euro-V Base Oil project site inspection.',
-  },
-  {
-    id: 'APR-2026-0211',
-    category: 'finance',
-    title: 'Q4 Natural Gas Industrial Steam Co-Generation Tariff Adjustment',
-    titleBn: 'চতুর্থ ত্রৈমাসিক প্রাকৃতিক গ্যাস ইউটিলিটি ট্যারিফ সমন্বয়',
-    requester: 'Farida Begum',
-    designation: 'CFO & Head of Finance',
-    dept: 'Corporate Finance',
-    amount: '৳1,20,00,000',
-    costTk: 12000000,
-    date: '14 Oct 2026',
-    slaHoursLeft: 22,
-    urgency: 'high',
-    sapDocRef: 'SAP-FI-BUD-0211',
-    details: 'Refinery steam boiler natural gas tariff recalculation as gazetted by BERC.',
-  },
-  {
-    id: 'APR-2026-0744',
-    category: 'leave',
-    title: 'Medical Sick Leave — Post-Surgical Recovery (5 Days)',
-    titleBn: 'চিকিৎসাজনিত ছুটি — অপারেশন পরবর্তী বিশ্রাম (৫ দিন)',
-    requester: 'Rahim Uddin',
-    designation: 'Boiler Instrumentation Tech',
-    dept: 'Refinery Utilities',
-    amount: 'N/A',
-    costTk: 0,
-    date: 'Today, 08:45 AM',
-    slaHoursLeft: 42,
-    urgency: 'normal',
-    sapDocRef: 'SAP-HCM-LV-089',
-    details: 'Official medical certificate from Apollo/Evercare Hospital attached. Shift cover arranged with Kamrul Hasan.',
-  },
-];
+import { useApprovalStore, ApprovalItem } from '../store/approvalStore';
+import { useFleetStore } from '../store/fleetStore';
 
 export default function ApprovalsView({ role, lang }: ViewProps) {
-  const [items, setItems] = useState<ApprovalItem[]>(INITIAL_APPROVAL_ITEMS);
+  const { approvalItems, approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
+  const { endorseHOD } = useFleetStore();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -126,12 +30,15 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleApproveSingle = (item: ApprovalItem) => {
-    setItems((prev) => prev.filter((x) => x.id !== item.id));
+    const res = approveApprovalItem(item.id);
+    if (item.sourceType === 'requisition' && item.sourceId) {
+      endorseHOD(item.sourceId, 'approved');
+    }
     setSelectedIds((prev) => prev.filter((x) => x !== item.id));
     showToast(
       t(
-        `✓ Authorized ${item.id}: ${item.title}. Synced to SAP S/4HANA (${item.sapDocRef}).`,
-        `✓ অনুমোদিত ${item.id}: ${item.titleBn}। এসএপি ডাটাবেজে সিঙ্ক সম্পন্ন (${item.sapDocRef})।`,
+        `✓ Authorized ${item.id}: ${item.title}. Synced to SAP S/4HANA (Voucher: ${res.sapVoucher}).`,
+        `✓ অনুমোদিত ${item.id}: ${item.titleBn}। এসএপি ডাটাবেজে সিঙ্ক সম্পন্ন (${res.sapVoucher})।`,
         lang
       ),
       'gold'
@@ -139,7 +46,10 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleRejectSingle = (item: ApprovalItem) => {
-    setItems((prev) => prev.filter((x) => x.id !== item.id));
+    rejectApprovalItem(item.id);
+    if (item.sourceType === 'requisition' && item.sourceId) {
+      endorseHOD(item.sourceId, 'rejected');
+    }
     setSelectedIds((prev) => prev.filter((x) => x !== item.id));
     showToast(
       t(`Returned ${item.id} to ${item.requester} with inquiry note.`, `${item.id} সংশোধনের জন্য ফেরত পাঠানো হয়েছে।`, lang),
@@ -149,24 +59,25 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
 
   const handleBatchApprove = () => {
     if (selectedIds.length === 0) return;
-    const selectedCount = selectedIds.length;
-    const totalCost = items
-      .filter((i) => selectedIds.includes(i.id))
-      .reduce((sum, i) => sum + (i.costTk || 0), 0);
-
-    setItems((prev) => prev.filter((i) => !selectedIds.includes(i.id)));
+    const res = batchApproveItems(selectedIds);
+    selectedIds.forEach((id) => {
+      const it = approvalItems.find((a) => a.id === id);
+      if (it?.sourceType === 'requisition' && it.sourceId) {
+        endorseHOD(it.sourceId, 'approved');
+      }
+    });
     setSelectedIds([]);
     showToast(
       t(
-        `✓ Batch Approved ${selectedCount} items (৳${totalCost.toLocaleString()} debited). SAP FI/CO Journal Vouchers created.`,
-        `✓ একযোগে ${selectedCount}টি আবেদন অনুমোদিত (৳${totalCost.toLocaleString()} কর্তিত)। এসএপিতে ভাউচার প্রস্তুত।`,
+        `✓ Batch Authorized ${res.count} items (৳${res.totalCost.toLocaleString()} debited). SAP FI/CO Journal Vouchers created.`,
+        `✓ একযোগে ${res.count}টি আবেদন অনুমোদিত (৳${res.totalCost.toLocaleString()} কর্তিত)। এসএপিতে ভাউচার প্রস্তুত।`,
         lang
       ),
       'gold'
     );
   };
 
-  const filteredItems = items.filter((item) => {
+  const filteredItems = approvalItems.filter((item) => {
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -176,7 +87,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
     return matchesCategory && matchesSearch;
   });
 
-  const totalPendingCost = items.reduce((sum, i) => sum + (i.costTk || 0), 0);
+  const totalPendingCost = approvalItems.reduce((sum, i) => sum + (i.costTk || 0), 0);
 
   return (
     <div>
@@ -216,7 +127,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
             <span className="stat-label">{t('Pending In Queue', 'অনুমোদনের অপেক্ষায়', lang)}</span>
             <div className="stat-icon-wrap"><ClipboardCheck size={16} /></div>
           </div>
-          <div className="stat-value">{items.length}</div>
+          <div className="stat-value">{approvalItems.length}</div>
           <div className="stat-sub">
             <span className="sub-warn">2 Approaching SLA Breach</span>
           </div>
@@ -254,7 +165,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
               style={{ background: selectedCategory === 'all' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'all' ? '#fff' : 'inherit' }}
               onClick={() => setSelectedCategory('all')}
             >
-              {t('All Items', 'সকল আবেদন', lang)} ({items.length})
+              {t('All Items', 'সকল আবেদন', lang)} ({approvalItems.length})
             </button>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'procurement' ? 'active' : ''}`}

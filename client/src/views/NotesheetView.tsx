@@ -12,6 +12,7 @@ import InitiateNotesheetModal, {
   NewNotesheetData,
   AVAILABLE_OFFICERS,
 } from '../components/notesheet/InitiateNotesheetModal';
+import { approvalStore } from '../store/approvalStore';
 
 interface NoteItem {
   id: number;
@@ -370,6 +371,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     setActiveFileId(newFile.id);
     setActiveTab('sheet');
     clearCanvas();
+
+    // Mirror to Omni-Approval Queue so HOD / Approvers see it
+    approvalStore.addNotesheetApproval(data.fileNo, data.title, data.initiatorName, data.dept, data.amount);
     showToast(
       t(
         `✓ Note-Sheet ${data.fileNo} created! Routed to ${data.signatoryRoute[0].officerName}.`,

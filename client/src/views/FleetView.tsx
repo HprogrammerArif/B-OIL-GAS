@@ -22,6 +22,7 @@ import FleetTabs from '../components/fleet/FleetTabs';
 import NewRequisitionModal from '../components/fleet/NewRequisitionModal';
 import AssignVehicleModal from '../components/fleet/AssignVehicleModal';
 import DriverConsole from '../components/fleet/DriverConsole';
+import { approvalStore } from '../store/approvalStore';
 
 export default function FleetView({ role, lang }: ViewProps) {
   const {
@@ -180,6 +181,7 @@ export default function FleetView({ role, lang }: ViewProps) {
     setIntermediateStops([]);
     setNewStopInput('');
     setShowNewRequisitionModal(false);
+    approvalStore.addRequisitionApproval(created.id, created.requesterName, created.dept, created.from, created.to, created.purpose);
     showToast(t(
       `✓ Duty Travel Requisition ${created.id} submitted! Transferred to Transport Admin (Md. Kamruzzaman) for driver allocation.`,
       `✓ যানবাহন রিকুইজিশন ${created.id} দাখিল সম্পন্ন! পরিবহন প্রশাসকের নিকট প্রেরিত হয়েছে।`,
@@ -1669,6 +1671,7 @@ export default function FleetView({ role, lang }: ViewProps) {
         onClose={() => setShowNewRequisitionModal(false)}
         onSubmit={(reqData) => {
           const created = addRequisition(reqData);
+          approvalStore.addRequisitionApproval(created.id, created.requesterName, created.dept, created.from, created.to, created.purpose);
           setShowNewRequisitionModal(false);
           showToast(
             t(

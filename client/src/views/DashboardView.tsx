@@ -27,6 +27,7 @@ import TransportAdminDashboard from './dashboard/TransportAdminDashboard';
 import HrAdminDashboard from './dashboard/HrAdminDashboard';
 import HodDashboard from './dashboard/HodDashboard';
 import EmployeeDashboard from './dashboard/EmployeeDashboard';
+import DriverDashboard from './dashboard/DriverDashboard';
 
 export default function DashboardView({ role, lang }: ViewProps) {
   const [selectedDrawerItem, setSelectedDrawerItem] = useState<DetailDrawerData | null>(null);
@@ -73,6 +74,12 @@ export default function DashboardView({ role, lang }: ViewProps) {
           { id: 'overview',  label: 'Workforce Cockpit',     labelBn: 'কর্মী কক্পিট',      icon: <Users size={15} /> },
           { id: 'clearance', label: 'Exit Clearances',       labelBn: 'ছাড়পত্র অডিট',     icon: <UserCheck size={15} />, badge: '1', badgeType: 'warn' as const },
           { id: 'sites',     label: 'Site Deployment Nodes', labelBn: 'আঞ্চলিক নোড',      icon: <Building2Icon size={15} /> },
+        ];
+      case 'driver':
+        return [
+          { id: 'overview', label: 'Duty Cockpit',     labelBn: 'ডিউটি কক্পিট',  icon: <Gauge size={15} /> },
+          { id: 'mission',  label: 'Active Mission',   labelBn: 'বর্তমান ট্রিপ',   icon: <Navigation size={15} />, badge: 'LIVE', badgeType: 'info' as const },
+          { id: 'tolls',    label: 'Toll & Slips',     labelBn: 'টোল ও স্লিপ',   icon: <Receipt size={15} /> },
         ];
       case 'employee':
       default:
@@ -187,6 +194,22 @@ export default function DashboardView({ role, lang }: ViewProps) {
               </div>
             </>
           )}
+          {role === 'driver' && (
+            <>
+              <div className="roi-stat-item">
+                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="0.00% BAC" /></div>
+                <div className="lbl">{t('Pre-Trip Breathalyzer Verified', 'ব্রিদলাইজার অ্যালকোহল টেস্ট উত্তীর্ণ', lang)}</div>
+              </div>
+              <div className="roi-stat-item divider">
+                <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="4.2 / 8.0 Hrs" /></div>
+                <div className="lbl">{t('Duty Hours Logged Today', 'দৈনিক ড্রাইভিং কর্মঘণ্টা', lang)}</div>
+              </div>
+              <div className="roi-stat-item divider">
+                <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="4.9 / 5.0 ★" /></div>
+                <div className="lbl">{t('Passenger Safety & Punctuality Rating', 'যাত্রী নিরাপত্তা ও সময়ানুবর্তিতা রেটিং', lang)}</div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Action button inside banner */}
@@ -223,6 +246,15 @@ export default function DashboardView({ role, lang }: ViewProps) {
               onClick={() => setShowGatePassModal(true)}>
               <QrCode size={13} style={{ display: 'inline', marginRight: '5px' }} />
               {t('Digital Gate Pass', 'ডিজিটাল গেট পাস', lang)}
+            </button>
+          </div>
+        )}
+
+        {role === 'driver' && (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
+              onClick={() => showToast(t('🚨 Central Dispatch notified: GPS location locked and assistance alerted.', 'জরুরি সংকেত ডিসপ্যাচ ডেস্কে পাঠানো হয়েছে।', lang), 'danger')}>
+              🚨 {t('Emergency SOS Alert', 'জরুরি রোডসাইড এসওএস', lang)}
             </button>
           </div>
         )}
@@ -666,6 +698,15 @@ export default function DashboardView({ role, lang }: ViewProps) {
           setActiveTab={setActiveTab}
           showGatePassModal={showGatePassModal}
           setShowGatePassModal={setShowGatePassModal}
+        />
+      )}
+
+      {role === 'driver' && (
+        <DriverDashboard
+          role={role}
+          lang={lang}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
         />
       )}
 
