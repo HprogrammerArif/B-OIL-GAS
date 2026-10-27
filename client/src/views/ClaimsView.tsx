@@ -6,6 +6,7 @@ import {
   DollarSign, MapPin, Calendar, FileText, Send, UserCheck,
   ChevronRight, ArrowRight, ShieldAlert, Check, X, Filter
 } from 'lucide-react';
+import SubmitClaimModal, { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
 
 interface ClaimItem {
   id: string;
@@ -149,17 +150,9 @@ const GRADE_POLICY = [
 
 export default function ClaimsView({ role, lang }: ViewProps) {
   const [claims, setClaims] = useState<ClaimItem[]>(INITIAL_CLAIMS);
-  const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'submit' | 'policy'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'policy'>('all');
   const [selectedClaim, setSelectedClaim] = useState<ClaimItem | null>(INITIAL_CLAIMS[0]);
-  
-  // New Claim Form State
-  const [formType, setFormType] = useState<'tada' | 'conveyance' | 'tour_event'>('tada');
-  const [formPurpose, setFormPurpose] = useState('');
-  const [formDestination, setFormDestination] = useState('');
-  const [formStartDate, setFormStartDate] = useState('');
-  const [formEndDate, setFormEndDate] = useState('');
-  const [formAmount, setFormAmount] = useState('');
-  const [formAdvanceTaken, setFormAdvanceTaken] = useState('0');
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   const filteredClaims = claims.filter(c => {
     if (activeTab === 'tada') return c.type === 'tada';
@@ -189,47 +182,27 @@ export default function ClaimsView({ role, lang }: ViewProps) {
     showToast(lang === 'en' ? `Claim ${id} returned to employee with notes.` : `দাবি ${id} সংশোধনের জন্য ফেরত পাঠানো হয়েছে।`, 'info');
   };
 
-  const handleCreateClaim = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formPurpose || !formAmount) {
-      showToast(lang === 'en' ? 'Please fill in purpose and amount.' : 'অনুগ্রহ করে উদ্দেশ্য এবং টাকার পরিমাণ লিখুন।', 'warn');
-      return;
-    }
-    const newId = formType === 'tada'
-      ? `TADA-2026-${Math.floor(1000 + Math.random() * 9000)}`
-      : formType === 'tour_event'
-      ? `TOUR-2026-${Math.floor(1000 + Math.random() * 9000)}`
-      : `CNV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const totalAmt = parseFloat(formAmount);
-    const advanceAmt = parseFloat(formAdvanceTaken) || 0;
-    const netSettlementAmt = formType === 'tour_event' ? totalAmt - advanceAmt : undefined;
-
+  const handleCreateClaim = (data: ClaimSubmissionData) => {
     const newClaim: ClaimItem = {
-      id: newId,
-      claimant: 'Tanvir Ahmed',
-      designation: 'Sales Officer, Grade 8',
-      dept: 'Sales & Distribution',
-      type: formType,
-      purpose: formPurpose,
-      destination: formType === 'tada' || formType === 'tour_event' ? formDestination : 'Dhaka Metro Area',
-      period: formStartDate && formEndDate ? `${formStartDate} to ${formEndDate}` : 'Oct 2026',
-      amount: totalAmt,
-      advanceTaken: advanceAmt > 0 ? advanceAmt : undefined,
-      netSettlement: netSettlementAmt,
+      id: data.id,
+      claimant: data.claimant,
+      designation: data.designation,
+      dept: data.dept,
+      type: data.type,
+      purpose: data.purpose,
+      destination: data.destination,
+      period: data.period,
+      amount: data.amount,
+      advanceTaken: data.advanceTaken,
+      netSettlement: data.netSettlement,
       status: 'pending_hod',
-      dateSubmitted: 'Today, 21:20',
-      items: [
-        { desc: formPurpose, date: formStartDate || 'Today', amount: totalAmt, category: formType === 'tada' ? 'Tour Expense' : formType === 'tour_event' ? 'Event / Delegation Advance' : 'Local Travel' }
-      ]
+      dateSubmitted: data.dateSubmitted,
+      items: data.items,
     };
     setClaims([newClaim, ...claims]);
     setSelectedClaim(newClaim);
     setActiveTab('all');
-    setFormPurpose('');
-    setFormAmount('');
-    setFormAdvanceTaken('0');
-    showToast(lang === 'en' ? `Claim ${newId} submitted for HOD approval.` : `দাবি ${newId} বিভাগীয় প্রধানের অনুমোদনের জন্য দাখিল করা হয়েছে।`, 'success');
+    showToast(lang === 'en' ? `Claim ${data.id} submitted for HOD approval.` : `দাবি ${data.id} বিভাগীয় প্রধানের অনুমোদনের জন্য দাখিল করা হয়েছে।`, 'success');
   };
 
   const getStatusBadge = (status: ClaimItem['status']) => {
@@ -265,8 +238,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
         </div>
         <div className="btn-group">
           <button
-            className={`btn-primary ${activeTab === 'submit' ? 'active' : ''}`}
-            onClick={() => setActiveTab('submit')}
+            className="btn-primary"
+            onClick={() => setShowSubmitModal(true)}
           >
             <Plus size={15} /> {t('Submit New Claim', 'নতুন দাবি দাখিল', lang)}
           </button>
@@ -361,115 +334,6 @@ export default function ClaimsView({ role, lang }: ViewProps) {
               </tbody>
             </table>
             </div>
-          </div>
-        </div>
-      ) : activeTab === 'submit' ? (
-        <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon">📝</div>
-              <div>
-                <div className="card-title">{t('Submit Travel & Expense Claim', 'ভ্রমণ ও খরচ দাবি দাখিল করুন', lang)}</div>
-                <div className="card-subtitle">{t('Directly routes to HOD for approval, then Finance for automatic BEFTN transfer', 'বিভাগীয় প্রধানের অনুমোদন শেষে স্বয়ংক্রিয় ব্যাংক ট্রান্সফারের জন্য প্রস্তুত হবে', lang)}</div>
-              </div>
-            </div>
-          </div>
-          <div className="card-body">
-            <form onSubmit={handleCreateClaim}>
-              <div className="responsive-col-2-eq" style={{ marginBottom: '16px' }}>
-                <div>
-                  <label className="form-label">{t('Claim Type', 'দাবির ধরন', lang)}</label>
-                  <select
-                    className="form-select"
-                    value={formType}
-                    onChange={(e) => setFormType(e.target.value as any)}
-                  >
-                    <option value="tada">✈️ TA / DA Tour Expense (Outstation Individual)</option>
-                    <option value="conveyance">🚕 Local Conveyance (City Metro Trips)</option>
-                    <option value="tour_event">🏆 Tour, Sports & Corporate Event Advance Settlement</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="form-label">{t('Claim claimant Profile', 'দাবিদার প্রোফাইল', lang)}</label>
-                  <input className="form-input" disabled value="Tanvir Ahmed (Sales Officer, Grade 8)" />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label className="form-label">{t('Official Purpose / Event Ref', 'দাপ্তরিক উদ্দেশ্য / ইভেন্ট তথ্য', lang)}</label>
-                <input
-                  className="form-input"
-                  placeholder={formType === 'tour_event' ? 'e.g. Annual Inter-plant Sports Meet or Chittagong Riverine Terminal Technical Delegation' : 'e.g. Factory maintenance inspection or Chittagong dealer visit'}
-                  value={formPurpose}
-                  onChange={(e) => setFormPurpose(e.target.value)}
-                  required
-                />
-              </div>
-
-              {(formType === 'tada' || formType === 'tour_event') && (
-                <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
-                  <div>
-                    <label className="form-label">{t('Destination / Location', 'গন্তব্য / স্থান', lang)}</label>
-                    <input
-                      className="form-input"
-                      placeholder="e.g. Keraniganj Ground / Sitakunda Depot"
-                      value={formDestination}
-                      onChange={(e) => setFormDestination(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label">{t('Start Date', 'শুরুর তারিখ', lang)}</label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={formStartDate}
-                      onChange={(e) => setFormStartDate(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="form-label">{t('End Date', 'শেষের তারিখ', lang)}</label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={formEndDate}
-                      onChange={(e) => setFormEndDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="responsive-col-2-eq" style={{ marginBottom: '20px' }}>
-                <div>
-                  <label className="form-label">{t('Total Claim Amount (৳ BDT)', 'মোট দাবি (টাকা)', lang)}</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    placeholder="e.g. 14850"
-                    value={formAmount}
-                    onChange={(e) => setFormAmount(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="form-label">{t('Advance Received (if any)', 'অগ্রিম গ্রহণ (যদি থাকে)', lang)}</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formAdvanceTaken}
-                    onChange={(e) => setFormAdvanceTaken(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
-                <button type="button" className="btn-outline" onClick={() => setActiveTab('all')}>
-                  {t('Cancel', 'বাতিল', lang)}
-                </button>
-                <button type="submit" className="btn-primary">
-                  <Send size={15} /> {t('Submit Claim with Receipts', 'রসিদসহ দাখিল করুন', lang)}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       ) : (
@@ -647,6 +511,14 @@ export default function ClaimsView({ role, lang }: ViewProps) {
           )}
         </div>
       )}
+
+      {/* Submit Claim Modal */}
+      <SubmitClaimModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        lang={lang}
+        onSubmit={handleCreateClaim}
+      />
     </div>
   );
 }
