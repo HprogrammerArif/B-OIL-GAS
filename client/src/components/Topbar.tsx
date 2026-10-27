@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award, Sparkles
 } from 'lucide-react';
 import { showToast } from '../App';
 import SapGatewayModal from './SapGatewayModal';
@@ -68,7 +68,7 @@ export default function Topbar({
   lang,
   view,
   theme,
-  onRoleChange: _onRoleChange, // Role is solely switched from login page per requirements
+  onRoleChange,
   onLangToggle,
   onToggleTheme,
   onOpenSearch,
@@ -256,6 +256,106 @@ export default function Topbar({
                     {creds.clearance}
                   </span>
                   <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{creds.pernr}</span>
+                </div>
+              </div>
+
+              {/* Presentation & Demo Persona Quick Switcher */}
+              <div
+                style={{
+                  padding: '10px 14px',
+                  background: 'rgba(0, 0, 0, 0.03)',
+                  borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '8px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    color: 'var(--brand-slate-600, #475569)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Sparkles size={12} color="var(--brand-gold, #D97706)" />
+                    {t('Switch Persona (Demo Mode)', 'রোল পরিবর্তন (ডেমো মূল্যায়ন)', lang)}
+                  </span>
+                  <span style={{ fontSize: '9.5px', color: 'var(--brand-gold, #D97706)', fontWeight: 700 }}>
+                    7 RBAC Roles
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                  {(Object.keys(ROLE_META) as AppRole[]).map((r) => {
+                    const rMeta = ROLE_META[r];
+                    const isCurrent = r === role;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => {
+                          setShowDropdown(false);
+                          onRoleChange(r);
+                          showToast(
+                            t(
+                              `Switched persona to: ${rMeta.name} (${t(rMeta.label, rMeta.labelBn, lang)})`,
+                              `পদবি পরিবর্তন: ${rMeta.name}`,
+                              lang
+                            ),
+                            'gold'
+                          );
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '5px 8px',
+                          borderRadius: '6px',
+                          border: isCurrent
+                            ? '1.5px solid var(--brand-crimson, #A51C30)'
+                            : '1px solid var(--brand-slate-200, #E2E8F0)',
+                          background: isCurrent
+                            ? 'rgba(165, 28, 48, 0.08)'
+                            : 'var(--brand-card-bg, #FFFFFF)',
+                          color: isCurrent
+                            ? 'var(--brand-crimson, #A51C30)'
+                            : 'var(--brand-slate-700, #334155)',
+                          fontSize: '11px',
+                          fontWeight: isCurrent ? 800 : 600,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.15s ease',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: '18px',
+                            height: '18px',
+                            borderRadius: '4px',
+                            background: rMeta.avatarColor,
+                            color: '#fff',
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}
+                        >
+                          {rMeta.initials}
+                        </span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                          {rMeta.name.split(' ')[0]}
+                        </span>
+                        {isCurrent && <span style={{ fontSize: '10px', color: 'var(--brand-crimson)' }}>✓</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

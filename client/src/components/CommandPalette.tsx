@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppRole, AppView, Lang, t } from '../types';
+import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Search, LayoutDashboard, FileSignature, ShieldCheck, Truck, Bus,
-  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck
+  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck, Sparkles
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -19,7 +19,7 @@ interface CommandItem {
   id: string;
   title: string;
   titleBn: string;
-  category: 'Views' | 'Quick Actions' | 'Records & Assets' | 'Security';
+  category: 'Views' | 'Switch Persona' | 'Quick Actions' | 'Records & Assets' | 'Security';
   icon: React.ReactNode;
   action: () => void;
   shortcut?: string;
@@ -163,6 +163,23 @@ export default function CommandPalette({
       icon: <Users size={15} />,
       action: () => { onNavigate('workforce'); onClose(); },
     },
+
+    // Switch Persona (RBAC Evaluation)
+    ...(onRoleChange ? (Object.keys(ROLE_META) as AppRole[]).map((r) => {
+      const meta = ROLE_META[r];
+      return {
+        id: `switch-role-${r}`,
+        title: `Switch Persona: ${meta.name} (${t(meta.label, meta.labelBn, lang)})`,
+        titleBn: `রোল পরিবর্তন: ${meta.name} (${t(meta.label, meta.labelBn, lang)})`,
+        category: 'Switch Persona' as const,
+        icon: <Users size={15} color={meta.avatarColor} />,
+        action: () => {
+          onRoleChange(r);
+          onClose();
+        },
+        shortcut: meta.initials,
+      };
+    }) : []),
 
     // Quick Actions
     {
