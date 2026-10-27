@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ViewProps, t } from '../types';
+import { AppRole, ViewProps, t } from '../types';
 import { showToast } from '../App';
 import {
   FileSignature, CheckCircle, Clock, AlertTriangle, ShieldCheck,
   Send, PenTool, Hash, Download, ArrowRight, UserCheck, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw, Crown
+  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw, Crown, Plus, Sparkles
 } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
+import InitiateNotesheetModal, {
+  SignatoryStep,
+  NewNotesheetData,
+  AVAILABLE_OFFICERS,
+} from '../components/notesheet/InitiateNotesheetModal';
 
 interface NoteItem {
   id: number;
@@ -28,9 +33,14 @@ interface NoteFile {
   dept: string;
   amount: string;
   urgency: 'urgent' | 'high' | 'normal';
-  status: 'pending_chairman' | 'approved' | 'in_review';
+  status: 'pending_chairman' | 'approved' | 'in_review' | 'pending_approval';
   date: string;
   sapRef: string;
+  initiatorName?: string;
+  initiatorRole?: string;
+  initiatorDept?: string;
+  finalApproverRole?: AppRole;
+  signatoryRoute?: SignatoryStep[];
   notes: NoteItem[];
 }
 
@@ -45,6 +55,31 @@ const FILES_DATABASE: NoteFile[] = [
     status: 'pending_chairman',
     date: '14 Oct 2026',
     sapRef: 'SAP-PR-2026-90412',
+    initiatorName: 'Engr. Tariq Ahmed',
+    initiatorRole: 'Senior Plant Maintenance Engineer',
+    initiatorDept: 'Keraniganj Bitumen Plant',
+    finalApproverRole: 'chairman',
+    signatoryRoute: [
+      {
+        ...AVAILABLE_OFFICERS[0], // Plant GM
+        id: 's1',
+        status: 'signed',
+        signedAt: '14 Oct 2026, 02:45 PM',
+        hash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
+      },
+      {
+        ...AVAILABLE_OFFICERS[1], // CFO Farida Begum
+        id: 's2',
+        status: 'signed',
+        signedAt: '15 Oct 2026, 11:15 AM',
+        hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      },
+      {
+        ...AVAILABLE_OFFICERS[4], // Chairman Ahmed Akbar Sobhan
+        id: 's3',
+        status: 'pending',
+      },
+    ],
     notes: [
       {
         id: 1,
@@ -88,9 +123,22 @@ const FILES_DATABASE: NoteFile[] = [
     dept: 'Corporate Finance & Energy Economics',
     amount: '৳1,20,00,000',
     urgency: 'high',
-    status: 'in_review',
+    status: 'approved',
     date: '12 Oct 2026',
     sapRef: 'SAP-FI-BUD-0211',
+    initiatorName: 'Farida Begum',
+    initiatorRole: 'CFO & Head of Finance',
+    initiatorDept: 'Corporate Finance & Accounts',
+    finalApproverRole: 'hod',
+    signatoryRoute: [
+      {
+        ...AVAILABLE_OFFICERS[1], // CFO Farida Begum
+        id: 's1',
+        status: 'signed',
+        signedAt: '12 Oct 2026, 10:00 AM',
+        hash: 'SHA256: 41b2c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b112',
+      },
+    ],
     notes: [
       {
         id: 1,
@@ -112,9 +160,22 @@ const FILES_DATABASE: NoteFile[] = [
     dept: 'Human Resources Directorate',
     amount: 'Statutory Policy',
     urgency: 'normal',
-    status: 'in_review',
+    status: 'approved',
     date: '10 Oct 2026',
     sapRef: 'SAP-HR-POL-0342',
+    initiatorName: 'Nusrat Jahan',
+    initiatorRole: 'GM, Human Resources',
+    initiatorDept: 'HR Suite, Dhaka HQ',
+    finalApproverRole: 'hr_admin',
+    signatoryRoute: [
+      {
+        ...AVAILABLE_OFFICERS[2], // GM HR Afroza Sultana
+        id: 's1',
+        status: 'signed',
+        signedAt: '10 Oct 2026, 03:20 PM',
+        hash: 'SHA256: a1e0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b774',
+      },
+    ],
     notes: [
       {
         id: 1,
@@ -251,7 +312,75 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     );
   };
 
-  const handleQuickSignChairman = () => {
+  const [showInitiateModal, setShowInitiateModal] = useState(false);
+
+  // Identify currently pending signatory in route
+  const currentPendingStepIndex = currentFile.signatoryRoute
+    ? currentFile.signatoryRoute.findIndex((s) => s.status === 'pending')
+    : -1;
+  const currentPendingStep = currentPendingStepIndex >= 0 && currentFile.signatoryRoute
+    ? currentFile.signatoryRoute[currentPendingStepIndex]
+    : null;
+  const isFinalStep = currentFile.signatoryRoute && currentPendingStepIndex >= 0
+    ? currentPendingStepIndex === currentFile.signatoryRoute.length - 1
+    : currentFile.status !== 'approved';
+
+  const activeSignatoryName = currentPendingStep
+    ? currentPendingStep.officerName
+    : (currentFile.finalApproverRole === 'chairman' ? 'Ahmed Akbar Sobhan' : (currentFile.notes[currentFile.notes.length - 1]?.author || 'Executive Authority'));
+  const activeSignatoryRole = currentPendingStep
+    ? currentPendingStep.roleName
+    : (currentFile.finalApproverRole === 'chairman' ? 'Chairman & Managing Director' : 'Executive Approver');
+  const activeSignatoryDept = currentPendingStep
+    ? currentPendingStep.dept
+    : (currentFile.dept || "Corporate Secretariat");
+
+  const handleCreateNotesheet = (data: NewNotesheetData) => {
+    const newFile: NoteFile = {
+      id: `f-${Date.now()}`,
+      fileNo: data.fileNo,
+      title: data.title,
+      dept: data.dept,
+      amount: data.amount,
+      urgency: data.urgency,
+      status: 'pending_approval',
+      date: 'Today, Just Now',
+      sapRef: data.sapRef,
+      initiatorName: data.initiatorName,
+      initiatorRole: data.initiatorRole,
+      initiatorDept: data.initiatorDept,
+      finalApproverRole: data.finalApproverRole,
+      signatoryRoute: data.signatoryRoute,
+      notes: [
+        {
+          id: 1,
+          para: 1,
+          author: data.initiatorName,
+          role: data.initiatorRole,
+          dept: data.initiatorDept,
+          date: 'Today, Just Now',
+          body: data.initialNote,
+          status: 'approved',
+          hash: 'SHA256: ' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+        },
+      ],
+    };
+
+    setFiles((prev) => [newFile, ...prev]);
+    setActiveFileId(newFile.id);
+    setActiveTab('sheet');
+    clearCanvas();
+    showToast(
+      t(
+        `✓ Note-Sheet ${data.fileNo} created! Routed to ${data.signatoryRoute[0].officerName}.`,
+        `✓ নতুন নোট-শীট ${data.fileNo} তৈরি ও প্রথম অনুমোদনকারীর নিকট প্রেরিত।`,
+        lang
+      ),
+      'gold'
+    );
+  };
+
+  const handleQuickSignActiveOfficer = () => {
     const generatedHash =
       'SHA256: ' +
       Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -264,8 +393,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#1E293B';
-        ctx.font = 'italic 700 24px "Outfit", "Times New Roman", serif';
-        ctx.fillText('Ahmed Akbar Sobhan', 25, 75);
+        ctx.font = 'italic 700 22px "Outfit", "Times New Roman", serif';
+        ctx.fillText(activeSignatoryName, 25, 75);
         ctx.beginPath();
         ctx.moveTo(20, 88);
         ctx.bezierCurveTo(70, 105, 180, 65, 270, 80);
@@ -274,15 +403,15 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     }
     showToast(
       t(
-        'Executive cryptographic token applied for Ahmed Akbar Sobhan.',
-        'চেয়ারম্যান মহোদয়ের ক্রিপ্টোগ্রাফিক টোকেন সংযুক্ত হয়েছে।',
+        `Cryptographic digital signature token applied for ${activeSignatoryName}.`,
+        `${activeSignatoryName}-এর ডিজিটাল স্বাক্ষর টোকেন প্রয়োগ করা হয়েছে।`,
         lang
       ),
       'gold'
     );
   };
 
-  const handleApproveChairman = () => {
+  const handleSignAndAdvance = () => {
     if (!isSigned) {
       showToast(
         t('Please sign or stamp your digital signature first.', 'অনুগ্রহ করে প্রথমে ডিজিটাল স্বাক্ষর করুন।', lang),
@@ -290,43 +419,75 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       );
       return;
     }
-    const chairmanNote: NoteItem = {
+
+    const defaultRemark = isFinalStep
+      ? (currentPendingStep?.roleId === 'chairman'
+          ? 'Approved as recommended in preceding paragraphs. Expedite procurement before peak asphalt refining run. Zero plant downtime authorized.'
+          : `Approved under delegated authority as ${activeSignatoryRole}. Financial and technical scope verified compliant. Work execution authorized.`)
+      : `Reviewed and vetted from technical and administrative standpoint. Recommended for final authorization by ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName : 'Next Authority'}.`;
+
+    const newNotePara: NoteItem = {
       id: currentFile.notes.length + 1,
       para: currentFile.notes.length + 1,
-      author: 'Ahmed Akbar Sobhan',
-      role: 'Chairman & Managing Director',
-      dept: "Chairman's Secretariat, Bashundhara Group",
-      date: 'Today, 22:04 (Real-Time Sign-Off)',
-      body:
-        newNoteText.trim() ||
-        'Approved as recommended in Para 2 and 3. Expedite procurement before the onset of the bitumen supply schedule for the national highway expansion project. Maintain zero plant downtime.',
+      author: activeSignatoryName,
+      role: activeSignatoryRole,
+      dept: activeSignatoryDept,
+      date: 'Today, Just Now (Real-Time Sign-Off)',
+      body: newNoteText.trim() || defaultRemark,
       status: 'approved',
-      hash: signatureHash || 'SHA256: c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2',
-      isChairman: true,
+      hash: signatureHash || ('SHA256: ' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')),
+      isChairman: currentPendingStep?.roleId === 'chairman',
     };
 
     setFiles((prev) =>
       prev.map((f) => {
         if (f.id === currentFile.id) {
+          const updatedRoute = f.signatoryRoute ? f.signatoryRoute.map((s, idx) => {
+            if (idx === currentPendingStepIndex) {
+              return { ...s, status: 'signed' as const, signedAt: 'Today, Just Now', hash: signatureHash || undefined };
+            }
+            if (idx === currentPendingStepIndex + 1) {
+              return { ...s, status: 'pending' as const };
+            }
+            return s;
+          }) : undefined;
+
           return {
             ...f,
-            status: 'approved',
-            notes: [...f.notes, chairmanNote],
+            status: isFinalStep ? ('approved' as const) : ('in_review' as const),
+            signatoryRoute: updatedRoute,
+            notes: [...f.notes, newNotePara],
           };
         }
         return f;
       })
     );
+
     setNewNoteText('');
-    showToast(
-      t(
-        'Note Sheet approved with Executive Chairman Seal & routed to SAP!',
-        'চেয়ারম্যান মহোদয়ের চূড়ান্ত সিলসহ নোটশীট অনুমোদিত হয়েছে!',
-        lang
-      ),
-      'gold'
-    );
-    setShowCertModal(true);
+    setIsSigned(false);
+    clearCanvas();
+
+    if (isFinalStep) {
+      showToast(
+        t(
+          `✓ File ${currentFile.fileNo} received FINAL APPROVAL from ${activeSignatoryName}! Process Complete.`,
+          `✓ নথি ${currentFile.fileNo} ${activeSignatoryName} কর্তৃক চূড়ান্ত অনুমোদিত হয়েছে!`,
+          lang
+        ),
+        'success'
+      );
+      setShowCertModal(true);
+    } else {
+      const nextOfficer = currentFile.signatoryRoute ? currentFile.signatoryRoute[currentPendingStepIndex + 1] : null;
+      showToast(
+        t(
+          `✓ Endorsed by ${activeSignatoryName} and forwarded to ${nextOfficer ? nextOfficer.officerName : 'next authority'}.`,
+          `✓ ${activeSignatoryName} কর্তৃক স্বাক্ষরিত ও পরবর্তী কর্মকর্তার নিকট প্রেরিত।`,
+          lang
+        ),
+        'info'
+      );
+    }
   };
 
   const officialDocData: DocumentData = {
@@ -335,8 +496,12 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     title: currentFile.title,
     date: currentFile.date,
     department: currentFile.dept,
-    authorizedBy: currentFile.notes.find((n) => n.isChairman)?.author || 'Ahmed Akbar Sobhan',
-    authorizerRole: 'Chairman & Managing Director, Bashundhara Group',
+    authorizedBy: currentFile.finalApproverRole
+      ? (AVAILABLE_OFFICERS.find((o) => o.roleId === currentFile.finalApproverRole)?.officerName || 'Ahmed Akbar Sobhan')
+      : 'Ahmed Akbar Sobhan',
+    authorizerRole: currentFile.finalApproverRole
+      ? (AVAILABLE_OFFICERS.find((o) => o.roleId === currentFile.finalApproverRole)?.roleName || 'Chairman & Managing Director')
+      : 'Chairman & Managing Director, Bashundhara Group',
     amountOrValue: currentFile.amount,
     sapReference: currentFile.sapRef,
     paragraphs: currentFile.notes.map((n) => ({
@@ -432,6 +597,22 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
           {/* Quick Actions */}
           <button
+            className="btn-primary"
+            onClick={() => setShowInitiateModal(true)}
+            style={{
+              fontSize: '11.5px',
+              padding: '5px 12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
+              fontWeight: 700,
+              boxShadow: '0 2px 6px rgba(165,28,48,0.2)'
+            }}
+          >
+            <Plus size={13} /> {t('+ Start Note-Sheet', '+ নতুন নোট-শীট', lang)}
+          </button>
+          <button
             className="btn-outline"
             onClick={() => setShowOfficialDoc(true)}
             style={{ fontSize: '11.5px', padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
@@ -439,7 +620,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             <Printer size={13} /> {t('Print', 'প্রিন্ট', lang)}
           </button>
           <button
-            className="btn-primary"
+            className="btn-outline"
             onClick={() => setShowCertModal(true)}
             style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
@@ -448,15 +629,36 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         </div>
       </div>
 
-      {/* ─── SLEEK MINIMAL DOSSIER BAR & STEPPER ─── */}
+      {/* ─── SLEEK MINIMAL DOSSIER BAR & DYNAMIC STEPPER ─── */}
       <div className="card mb-4" style={{ padding: '10px 16px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-border)', borderRadius: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           
-          {/* Clean Dossier Pill Selector */}
+          {/* Clean Dossier Pill Selector with '+ New' Trigger */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', maxWidth: '100%' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px' }}>
               Dossier:
             </span>
+            <button
+              onClick={() => setShowInitiateModal(true)}
+              style={{
+                border: '1px dashed var(--brand-crimson)',
+                background: 'rgba(165, 28, 48, 0.05)',
+                color: 'var(--brand-crimson)',
+                padding: '4px 10px',
+                borderRadius: '16px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease'
+              }}
+              title={t('Initiate a new note-sheet document', 'নতুন নোট-শীট প্রস্তুত করুন', lang)}
+            >
+              <Plus size={12} /> {t('New Note', 'নতুন নোট', lang)}
+            </button>
             {files.map((file) => {
               const isSelected = activeFileId === file.id;
               return (
@@ -500,36 +702,67 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             })}
           </div>
 
-          {/* Minimal Inline Authorization Pipeline */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
-              <CheckCircle size={12} />
-              <span>Plant Engr</span>
-            </div>
-            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
-              <CheckCircle size={12} />
-              <span>Plant GM</span>
-            </div>
-            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
-              <CheckCircle size={12} />
-              <span>CFO</span>
-            </div>
-            <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '2px 8px',
-              borderRadius: '10px',
-              background: currentFile.status === 'approved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(212, 175, 55, 0.15)',
-              color: currentFile.status === 'approved' ? '#059669' : '#B45309',
-              fontWeight: 700
-            }}>
-              <span>{currentFile.status === 'approved' ? '✓' : '👑'}</span>
-              <span>Chairman {currentFile.status === 'approved' ? 'Signed' : 'Sign-Off'}</span>
-            </div>
+          {/* Dynamic Signatory Authorization Route Pipeline */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', flexWrap: 'wrap' }}>
+            {currentFile.initiatorName && (
+              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginRight: '2px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#64748B' }}></span>
+                <span style={{ fontWeight: 600 }}>{currentFile.initiatorName.split(' ')[0]}</span> (Initiator) ➔
+              </span>
+            )}
+            {currentFile.signatoryRoute && currentFile.signatoryRoute.length > 0 ? (
+              currentFile.signatoryRoute.map((step, idx) => {
+                const isSigned = step.status === 'signed';
+                const isPending = step.status === 'pending';
+                const isFinal = idx === (currentFile.signatoryRoute?.length || 0) - 1;
+                const isChairman = step.roleId === 'chairman';
+
+                return (
+                  <React.Fragment key={step.id}>
+                    {idx > 0 && <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                        background: isSigned
+                          ? 'rgba(16, 185, 129, 0.1)'
+                          : isPending
+                          ? isChairman ? 'rgba(212, 175, 55, 0.18)' : 'rgba(165, 28, 48, 0.1)'
+                          : 'rgba(148, 163, 184, 0.1)',
+                        color: isSigned
+                          ? '#059669'
+                          : isPending
+                          ? isChairman ? '#B45309' : 'var(--brand-crimson)'
+                          : 'var(--brand-slate-400)',
+                        fontWeight: isPending ? 700 : 600,
+                        border: isPending ? (isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-crimson)') : '1px solid transparent',
+                        fontSize: '11px'
+                      }}
+                      title={`${step.officerName} (${step.roleName}) - Status: ${step.status}`}
+                    >
+                      {isSigned ? (
+                        <CheckCircle size={12} color="#059669" />
+                      ) : isPending ? (
+                        <span>{isChairman ? '👑' : '✍️'}</span>
+                      ) : (
+                        <Clock size={11} />
+                      )}
+                      <span>
+                        {step.officerName.split(' ')[0]} {isFinal ? '★' : ''}
+                      </span>
+                    </div>
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
+                <CheckCircle size={12} />
+                <span>Authorized</span>
+              </div>
+            )}
           </div>
 
         </div>
@@ -620,10 +853,79 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 </div>
               </div>
               <div className="card-body" style={{ padding: '16px' }}>
-                {/* 1-Click Quick Sign Action */}
+                {/* File Status Alert if Fully Approved */}
+                {currentFile.status === 'approved' && (
+                  <div style={{
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    background: '#ECFDF5',
+                    border: '1px solid #10B981',
+                    color: '#065F46',
+                    marginBottom: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <ShieldCheck size={18} color="#059669" />
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '12px' }}>
+                        {t('File Finalized & Authorized', 'নথি চূড়ান্ত অনুমোদিত ও সিলমোহরকৃত', lang)}
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#047857', marginTop: '1px' }}>
+                        {t('All route signatories approved. Cryptographic certificate issued.', 'অনুমোদন প্রক্রিয়া সম্পূর্ণ। ডিজিটাল সনদ তৈরি হয়েছে।', lang)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Active Pending Signatory Header */}
+                <div style={{
+                  padding: '9px 12px',
+                  background: isFinalStep ? 'rgba(212, 175, 55, 0.1)' : 'rgba(165, 28, 48, 0.05)',
+                  border: isFinalStep ? '1px solid #D4AF37' : '1px solid rgba(165, 28, 48, 0.2)',
+                  borderRadius: '6px',
+                  marginBottom: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '50%',
+                      background: isFinalStep ? '#D4AF37' : 'var(--brand-crimson)',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px'
+                    }}>
+                      {currentPendingStep?.roleId === 'chairman' ? '👑' : <Stamp size={13} />}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>
+                        {isFinalStep ? t('Final Sanction Authority', 'চূড়ান্ত অনুমোদনকারী', lang) : t('Pending Reviewer / Signatory', 'বর্তমান অনুমোদনকারী', lang)}
+                      </div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                        {activeSignatoryName}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)' }}>
+                        {activeSignatoryRole}
+                      </div>
+                    </div>
+                  </div>
+                  {isFinalStep && (
+                    <span style={{ fontSize: '9px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                      FINAL
+                    </span>
+                  )}
+                </div>
+
+                {/* 1-Click Quick Sign Action for Active Officer */}
                 <button
                   type="button"
-                  onClick={handleQuickSignChairman}
+                  onClick={handleQuickSignActiveOfficer}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -631,7 +933,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     border: '1px dashed #D4AF37',
                     background: 'rgba(212, 175, 55, 0.08)',
                     color: '#B45309',
-                    fontSize: '12px',
+                    fontSize: '11.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
                     display: 'flex',
@@ -642,8 +944,14 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  <Crown size={14} color="#D4AF37" />
-                  <span>{t('⚡ 1-Click Executive Token: Ahmed Akbar Sobhan', '⚡ চেয়ারম্যান টোকেন সিল প্রয়োগ করুন', lang)}</span>
+                  {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="#D4AF37" /> : <Stamp size={14} color="#B45309" />}
+                  <span>
+                    {t(
+                      `⚡ 1-Click Digital Token: ${activeSignatoryName}`,
+                      `⚡ ডিজিটাল স্বাক্ষর টোকেন প্রয়োগ: ${activeSignatoryName}`,
+                      lang
+                    )}
+                  </span>
                 </button>
 
                 {/* Canvas Drawing Box */}
@@ -680,11 +988,18 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 </div>
 
                 <div style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 600 }}>{t("Directive Note / Sanction Remarks", 'নির্বাহী মন্তব্য', lang)}</label>
+                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 600 }}>
+                    {isFinalStep
+                      ? t('Final Executive Sanction Directive', 'চূড়ান্ত নির্বাহী পর্যবেক্ষণ ও অনুমোদন মন্তব্য', lang)
+                      : t('Review / Recommendation Remarks', 'পর্যালোচনা ও অগ্রগমন মন্তব্য', lang)}
+                  </label>
                   <textarea
                     className="form-input"
                     rows={2}
-                    placeholder="Enter directive or approved remarks..."
+                    placeholder={isFinalStep
+                      ? t('Enter final executive approval directive or sanction remarks...', 'চূড়ান্ত অনুমোদন নির্দেশনা লিখুন...', lang)
+                      : t('Enter endorsement remarks to forward to next officer...', 'পরবর্তী কর্মকর্তার জন্য মন্তব্য লিখুন...', lang)
+                    }
                     value={newNoteText}
                     onChange={(e) => setNewNoteText(e.target.value)}
                     style={{ fontSize: '12px', padding: '8px 10px' }}
@@ -694,10 +1009,31 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     className="btn-primary"
-                    style={{ flex: 1.5, justifyContent: 'center', padding: '9px 12px', background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)', fontSize: '12px', fontWeight: 700 }}
-                    onClick={handleApproveChairman}
+                    style={{
+                      flex: 1.5,
+                      justifyContent: 'center',
+                      padding: '9px 12px',
+                      background: isFinalStep
+                        ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                        : 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
+                      fontSize: '12px',
+                      fontWeight: 700
+                    }}
+                    onClick={handleSignAndAdvance}
                   >
-                    <Stamp size={14} /> {t('Authorize & Seal', 'অনুমোদন ও সিল', lang)}
+                    {isFinalStep ? (
+                      <>
+                        <ShieldCheck size={14} /> {t('Authorize & Grant Final Approval', 'চূড়ান্ত অনুমোদন ও সিল', lang)}
+                      </>
+                    ) : (
+                      <>
+                        <Send size={14} /> {t(
+                          `Sign & Forward ➔ ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName.split(' ')[0] : 'Next'}`,
+                          'স্বাক্ষর ও পরবর্তী ধাপে প্রেরণ',
+                          lang
+                        )}
+                      </>
+                    )}
                   </button>
                   <button
                     className="btn-outline"
@@ -1016,6 +1352,15 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         onClose={() => setShowOfficialDoc(false)}
         lang={lang}
         docData={officialDocData}
+      />
+
+      {/* Dynamic Note-Sheet Initiator Studio Modal */}
+      <InitiateNotesheetModal
+        isOpen={showInitiateModal}
+        onClose={() => setShowInitiateModal(false)}
+        onSubmit={handleCreateNotesheet}
+        lang={lang}
+        currentRole={role}
       />
     </div>
   );
