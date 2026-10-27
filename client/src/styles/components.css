@@ -407,8 +407,18 @@
 }
 .fleet-tabs-bar::-webkit-scrollbar { display: none; }
 .fleet-tabs-bar.compact {
-  margin-bottom: 8px;
-  padding-bottom: 4px;
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+}
+.fleet-tabs-bar.compact .fleet-tab-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  gap: 6px;
+  border-radius: 6px 6px 0 0;
+}
+.fleet-tabs-bar.compact .fleet-tab-badge {
+  padding: 1px 6px;
+  font-size: 9.5px;
 }
 
 .fleet-tab-btn {

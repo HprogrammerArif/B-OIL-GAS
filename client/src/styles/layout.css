@@ -474,7 +474,7 @@
 
 /* ─── DEDICATED FULL VIEWPORT LOCK FOR FLEET CHAT DESK ─────────────────── */
 .page-content:has(.fleet-chat-active) {
-  padding: 8px 16px 0 !important;
+  padding: 4px 14px 0 !important;
   overflow: hidden !important;
   height: calc(100vh - var(--topbar-height, 60px)) !important;
   max-height: calc(100vh - var(--topbar-height, 60px)) !important;

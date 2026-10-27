@@ -441,23 +441,26 @@ export default function FleetChatCenter({
         </div>
 
         {/* Filter Tabs (All, Trips, Direct Hotlines) */}
-        <div style={{ padding: '8px 12px', background: '#F1F5F9', borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)' }}>
-          <div style={{ display: 'flex', background: '#E2E8F0', padding: '2px', borderRadius: '10px', gap: '2px' }}>
+        <div style={{ padding: '4px 10px', background: '#F1F5F9', borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)' }}>
+          <div style={{ display: 'flex', background: '#E2E8F0', padding: '2px', borderRadius: '8px', gap: '2px' }}>
             <button
               onClick={() => setChannelFilterTab('all')}
               className={`fleet-chat-tab-pill ${channelFilterTab === 'all' ? 'active' : ''}`}
+              style={{ fontSize: '11px', padding: '3px 8px' }}
             >
               {t('All', 'সকল', lang)} ({relevantRequisitions.length + directChannels.length})
             </button>
             <button
               onClick={() => setChannelFilterTab('trips')}
               className={`fleet-chat-tab-pill ${channelFilterTab === 'trips' ? 'active' : ''}`}
+              style={{ fontSize: '11px', padding: '3px 8px' }}
             >
               🚗 {t('Trips', 'ট্রিপ', lang)} ({relevantRequisitions.length})
             </button>
             <button
               onClick={() => setChannelFilterTab('direct')}
               className={`fleet-chat-tab-pill ${channelFilterTab === 'direct' ? 'active' : ''}`}
+              style={{ fontSize: '11px', padding: '3px 8px' }}
             >
               🛡️ {t('Hotlines', 'হটলাইন', lang)} ({directChannels.length})
             </button>
@@ -746,16 +749,16 @@ export default function FleetChatCenter({
             </button>
 
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--brand-slate-900, #0F172A)', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900, #0F172A)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentRequisition ? (
                     <>
-                      <Car size={18} style={{ color: '#A51C30', flexShrink: 0 }} />
+                      <Car size={16} style={{ color: '#A51C30', flexShrink: 0 }} />
                       <span>{currentRequisition.to.split(',')[0]} (Trip #{currentRequisition.id})</span>
                     </>
                   ) : currentDirectChannel ? (
                     <>
-                      <currentDirectChannel.icon size={18} style={{ color: '#2563EB', flexShrink: 0 }} />
+                      <currentDirectChannel.icon size={16} style={{ color: '#2563EB', flexShrink: 0 }} />
                       <span>{currentDirectChannel.name}</span>
                     </>
                   ) : (
@@ -771,7 +774,7 @@ export default function FleetChatCenter({
               </div>
 
               {/* Subtitle Telemetry */}
-              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ margin: '1px 0 0', fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {currentRequisition ? (
                   <span>
                     Vehicle: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedVehiclePlate || 'Awaiting Allocation'}</strong> • Driver: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedDriverName || 'Pending'}</strong> • Passenger: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.requesterName}</strong>

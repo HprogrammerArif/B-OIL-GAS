@@ -286,26 +286,26 @@ export default function FleetView({ role, lang }: ViewProps) {
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '16px',
-          marginBottom: isChatTabActive ? '8px' : '18px',
+          gap: isChatTabActive ? '8px' : '16px',
+          marginBottom: isChatTabActive ? '4px' : '18px',
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ flex: '1 1 500px', minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-              <Car size={22} color="var(--brand-crimson)" aria-hidden />
+        <div style={{ flex: '1 1 400px', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: isChatTabActive ? '6px' : '10px' }}>
+            <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: isChatTabActive ? '6px' : '8px', fontSize: isChatTabActive ? '14px' : '18px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+              <Car size={isChatTabActive ? 16 : 22} color="var(--brand-crimson)" aria-hidden />
               {isDriver
                 ? t('Duty Driver Terminal & Mission Cockpit', 'ডিউটি ড্রাইভার টার্মিনাল ও ট্রিপ কন্ট্রোল', lang)
                 : isEmployee
                 ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
                 : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
             </h2>
-            <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>
+            <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>
               {isDriver ? 'Driver Terminal' : isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
             </span>
             {!isEmployee && !isDriver && (
-              <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }}>
+              <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }}>
                 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
               </span>
             )}
@@ -334,32 +334,32 @@ export default function FleetView({ role, lang }: ViewProps) {
         </div>
 
         {/* Action Controls - Strictly Guarded by RBAC */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isChatTabActive ? '6px' : '10px', flexWrap: 'wrap', flexShrink: 0 }}>
           {/* Fleet Notification Bell Button */}
           <button
             type="button"
             onClick={() => setShowNotificationsDrawer(prev => !prev)}
             title={t('Fleet Logistics Notifications', 'ফ্লিট নোটিফিকেশন', lang)}
             style={{
-              height: '36px',
-              padding: '0 12px',
+              height: isChatTabActive ? '28px' : '36px',
+              padding: isChatTabActive ? '0 10px' : '0 12px',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              borderRadius: '9px',
+              borderRadius: isChatTabActive ? '7px' : '9px',
               border: unreadNotifCount > 0 ? '1.5px solid #A51C30' : '1px solid #CBD5E1',
               backgroundColor: unreadNotifCount > 0 ? 'rgba(165, 28, 48, 0.06)' : '#FFFFFF',
               color: unreadNotifCount > 0 ? '#A51C30' : '#475569',
-              fontSize: '12px',
+              fontSize: isChatTabActive ? '11px' : '12px',
               fontWeight: 700,
               cursor: 'pointer',
               boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
             }}
           >
-            <Bell size={14} aria-hidden />
+            <Bell size={isChatTabActive ? 12 : 14} aria-hidden />
             <span>{t('Alerts', 'নোটিফিকেশন', lang)}</span>
             {unreadNotifCount > 0 && (
-              <span style={{ backgroundColor: '#A51C30', color: '#fff', borderRadius: '999px', padding: '1px 6px', fontSize: '10.5px', fontWeight: 800 }}>
+              <span style={{ backgroundColor: '#A51C30', color: '#fff', borderRadius: '999px', padding: '1px 5px', fontSize: '9.5px', fontWeight: 800 }}>
                 {unreadNotifCount}
               </span>
             )}
@@ -422,22 +422,22 @@ export default function FleetView({ role, lang }: ViewProps) {
               type="button"
               onClick={() => setShowNewRequisitionModal(true)}
               style={{
-                height: '36px',
-                padding: '0 18px',
+                height: isChatTabActive ? '28px' : '36px',
+                padding: isChatTabActive ? '0 12px' : '0 18px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                borderRadius: '9px',
+                gap: isChatTabActive ? '5px' : '8px',
+                borderRadius: isChatTabActive ? '7px' : '9px',
                 border: 'none',
                 background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
                 color: '#FFFFFF',
-                fontSize: '12.5px',
+                fontSize: isChatTabActive ? '11px' : '12.5px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                boxShadow: '0 3px 10px rgba(165, 28, 48, 0.35)',
+                boxShadow: '0 2px 8px rgba(165, 28, 48, 0.25)',
               }}
             >
-              <Plus size={15} aria-hidden />
+              <Plus size={isChatTabActive ? 13 : 15} aria-hidden />
               <span>{t('New Requisition', 'নতুন আবেদন', lang)}</span>
             </button>
           )}
