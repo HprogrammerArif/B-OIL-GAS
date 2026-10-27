@@ -49,8 +49,8 @@ const FILES_DATABASE: NoteFile[] = [
   {
     id: 'f1',
     fileNo: 'BOGCL/PROC/KER-2026/0894',
-    title: 'Emergency Procurement for Keraniganj Bitumen Reactor Safety Relief Valves & Chemical Batch',
-    dept: 'Plant Maintenance & Reliability',
+    title: 'Emergency Power Generator Overhaul & Critical Plant Spare Parts Procurement',
+    dept: 'Plant Operations & Maintenance',
     amount: '৳48,50,000',
     urgency: 'urgent',
     status: 'pending_chairman',
@@ -58,7 +58,7 @@ const FILES_DATABASE: NoteFile[] = [
     sapRef: 'SAP-PR-2026-90412',
     initiatorName: 'Engr. Tariq Ahmed',
     initiatorRole: 'Senior Plant Maintenance Engineer',
-    initiatorDept: 'Keraniganj Bitumen Plant',
+    initiatorDept: 'Keraniganj Plant Operations',
     finalApproverRole: 'chairman',
     signatoryRoute: [
       {
@@ -87,9 +87,9 @@ const FILES_DATABASE: NoteFile[] = [
         para: 1,
         author: 'Engr. Tariq Ahmed',
         role: 'Senior Plant Maintenance Engineer',
-        dept: 'Keraniganj Bitumen Plant',
+        dept: 'Keraniganj Plant Operations',
         date: '14 Oct 2026, 09:30 AM',
-        body: 'Submitted for kind perusal and administrative approval. As per scheduled maintenance protocol for Bitumen Unit-2 reactor lines, 4 units of High-Pressure Safety Relief Valves (Class 600, ASTM A216) and 2,500 kg of cationic rapid-setting emulsifier agent require immediate procurement to prevent shutdown during the forthcoming peak asphalt season.',
+        body: 'Submitted for kind perusal and administrative approval. Urgent procurement of heavy-duty replacement components and complete overhaul service for the 1,200 kVA emergency backup power generator at Keraniganj Plant. This backup generator is critical to ensure 24/7 continuous factory operations, plant electrical safety, and prevent production stoppage during the upcoming manufacturing season.',
         status: 'approved',
         hash: 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
       },
@@ -98,9 +98,9 @@ const FILES_DATABASE: NoteFile[] = [
         para: 2,
         author: 'Engr. Md. Harunur Rashid',
         role: 'Plant General Manager',
-        dept: 'Keraniganj Refinery Complex',
+        dept: 'Keraniganj Plant Operations',
         date: '14 Oct 2026, 02:45 PM',
-        body: 'Forwarded with strong recommendation. The existing relief valves were inspected during the DoE & Explosives joint audit on 10 Oct 2026 and flagged for mandatory replacement before 30 Nov 2026. Three competitive quotations from authorized European OEM vendors have been obtained by plant procurement. Lowest vetted quote is ৳48,50,000 (inclusive of import duty and BSTI testing fee).',
+        body: 'Forwarded with strong recommendation. Routine plant inspection identified wear on generator cooling water pumps and alternator seals. Three competitive quotations from authorized engineering vendors were evaluated. The lowest compliant vetted quote is ৳48,50,000 from Energypac Power (Cummins OEM), inclusive of 1-year on-site comprehensive warranty and certified installation.',
         status: 'approved',
         hash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
       },
@@ -111,7 +111,7 @@ const FILES_DATABASE: NoteFile[] = [
         role: 'CFO & Head of Finance',
         dept: 'Corporate Finance & Accounts',
         date: '15 Oct 2026, 11:15 AM',
-        body: 'Vetted from budgetary standpoint. Provision exists under CAPEX Head: Plant Safety & Reliability (GL Code 4102-KER). Financial viability and tax deductions (5% AIT + 7.5% VAT) have been adjusted. Subject to formal approval of Honourable Chairman & Managing Director, L/C can be established through Bashundhara Corporate Bank branch within 48 hours.',
+        body: 'Vetted from budgetary standpoint. Provision exists under CAPEX Head: Plant Maintenance & Reliability (GL Code 4102-KER). Financial viability and tax deductions (5% AIT + 7.5% VAT) have been adjusted. Subject to formal approval of the Honourable Chairman & Managing Director, purchase order will be issued immediately.',
         status: 'approved',
         hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       },
@@ -119,14 +119,14 @@ const FILES_DATABASE: NoteFile[] = [
   },
   {
     id: 'f2',
-    fileNo: 'BOGCL/FIN/2026/0211',
-    title: 'Q4 Natural Gas Industrial Steam Co-Generation Tariff Adjustment',
-    dept: 'Corporate Finance & Energy Economics',
-    amount: '৳1,20,00,000',
+    fileNo: 'BOGCL/IT/2026/0211',
+    title: 'Annual Corporate IT Cloud ERP & Business Software License Renewal (2026-2027)',
+    dept: 'Information Technology & Systems',
+    amount: '৳18,50,000',
     urgency: 'high',
     status: 'approved',
     date: '12 Oct 2026',
-    sapRef: 'SAP-FI-BUD-0211',
+    sapRef: 'SAP-IT-LIC-0211',
     initiatorName: 'Farida Begum',
     initiatorRole: 'CFO & Head of Finance',
     initiatorDept: 'Corporate Finance & Accounts',
@@ -148,7 +148,7 @@ const FILES_DATABASE: NoteFile[] = [
         role: 'CFO & Head of Finance',
         dept: 'Finance Directorate',
         date: '12 Oct 2026, 10:00 AM',
-        body: 'In accordance with Bangladesh Energy Regulatory Commission (BERC) gazette #402/2026, natural gas tariff for captive co-generation plants has been adjusted. Financial impact for Q4 is estimated at ৳1.20 Cr.',
+        body: 'Submitted and approved under departmental delegated authority. Annual license renewal for corporate SAP S/4HANA cloud system, secure business email accounts, and automated database backups for 750 staff across Head Office and factory sites. Budget verified compliant.',
         status: 'approved',
         hash: 'SHA256: 41b2c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b112',
       },
@@ -157,9 +157,9 @@ const FILES_DATABASE: NoteFile[] = [
   {
     id: 'f3',
     fileNo: 'BOGCL/HR/2026/0342',
-    title: 'Grade 7-10 Refinery Technical Staff Annual Shift Increment Policy',
+    title: 'Annual Factory Shift Staff & Operations Team Salary Increment Policy',
     dept: 'Human Resources Directorate',
-    amount: 'Statutory Policy',
+    amount: 'Approved HR Policy',
     urgency: 'normal',
     status: 'approved',
     date: '10 Oct 2026',
@@ -185,7 +185,7 @@ const FILES_DATABASE: NoteFile[] = [
         role: 'GM, Human Resources',
         dept: 'HR Suite, Dhaka HQ',
         date: '10 Oct 2026, 03:20 PM',
-        body: 'Submitted for approval. Annual statutory increment framework covering 482 shift technicians, boiler operators, and safety marshals. Budget impact factored into 2026-2027 OPEX.',
+        body: 'Submitted for approval. Annual statutory performance salary increment framework covering 482 shift technicians, boiler operators, logistics drivers, and field support personnel. Financial commitment is fully covered under the approved 2026-2027 corporate payroll budget.',
         status: 'approved',
         hash: 'SHA256: a1e0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b774',
       },
@@ -1086,13 +1086,13 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--brand-slate-900)' }}>
-                {t('Commercial & Technical Tender Comparison (3 OEM Bids)', 'বাণিজ্যিক ও কারিগরি দরপত্র তুলনা (৩টি ওইএম দরপত্র)', lang)}
+                {t('Commercial & Technical Tender Comparison (3 Engineering Bids)', 'বাণিজ্যিক ও কারিগরি দরপত্র তুলনা (৩টি দরপত্র)', lang)}
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-                Dossier {currentFile.fileNo} · ASME Section VIII Div 1 Safety Relief Valves (Class 600)
+                Dossier {currentFile.fileNo} · 1,200 kVA Emergency Generator Overhaul & Spare Parts Supply
               </p>
             </div>
-            <span className="badge success">3/3 Bids Vetted & BSTI Compliant</span>
+            <span className="badge success">3/3 Bids Vetted & Technical Compliant</span>
           </div>
 
           <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
@@ -1101,61 +1101,61 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
                 RECOMMENDED & LOWEST BID
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#065F46' }}>KSB Valves SE & Co.</div>
-              <div style={{ fontSize: '11px', color: '#047857' }}>Frankenthal, Germany (OEM Authorized)</div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: '#065F46' }}>Energypac Power Generation Ltd</div>
+              <div style={{ fontSize: '11px', color: '#047857' }}>Dhaka, Bangladesh (Authorized Cummins Partner)</div>
               
               <div style={{ margin: '14px 0', borderTop: '1px solid #A7F3D0', borderBottom: '1px solid #A7F3D0', padding: '10px 0' }}>
                 <div style={{ fontSize: '22px', fontWeight: 900, color: '#065F46' }}>৳48,50,000</div>
-                <div style={{ fontSize: '10.5px', color: '#059669' }}>Inclusive of C&F, Import Duty & BSTI Fee</div>
+                <div style={{ fontSize: '10.5px', color: '#059669' }}>Inclusive of Delivery, Installation, 5% AIT & 7.5% VAT</div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#064E3B' }}>
-                <div><strong>Lead Time:</strong> 14 Calendar Days (Air Freight)</div>
-                <div><strong>Warranty:</strong> 36 Months Comprehensive</div>
-                <div><strong>Material:</strong> ASTM A216 WCB / Stellite Trim</div>
-                <div><strong>Quality Score:</strong> 98.4% (Highest Technical Rating)</div>
+                <div><strong>Delivery & Setup:</strong> 7 Calendar Days (Ex-Stock Dhaka)</div>
+                <div><strong>Warranty:</strong> 24 Months Full Warranty + 4 Free Servicing</div>
+                <div><strong>Model:</strong> Cummins QSK23-G3 Industrial Package</div>
+                <div><strong>Technical Rating:</strong> 98.4% (Highest Technical Rating)</div>
               </div>
             </div>
 
             {/* Vendor 2 */}
             <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Flowserve SAS</div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Arnhem, France</div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Bangla CAT (Caterpillar)</div>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Mohakhali, Dhaka (Authorized CAT Dealer)</div>
               
               <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
                 <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳52,10,000</div>
-                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳3,60,000 variance vs lowest bid</div>
+                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳3,60,000 higher than lowest bid</div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                <div><strong>Lead Time:</strong> 21 Calendar Days (Sea Freight)</div>
-                <div><strong>Warranty:</strong> 24 Months Standard</div>
-                <div><strong>Material:</strong> ASME Class 600 Carbon Steel</div>
-                <div><strong>Quality Score:</strong> 92.1%</div>
+                <div><strong>Delivery & Setup:</strong> 21 Calendar Days</div>
+                <div><strong>Warranty:</strong> 12 Months Standard Warranty</div>
+                <div><strong>Model:</strong> CAT C32 Industrial Power Package</div>
+                <div><strong>Technical Rating:</strong> 94.2%</div>
               </div>
             </div>
 
             {/* Vendor 3 */}
             <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Velan Inc.</div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Montreal, Canada / Tokyo Depot</div>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Orient Energy Systems Ltd</div>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Gulshan, Dhaka (Perkins Diesel Agent)</div>
               
               <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
                 <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳54,80,000</div>
-                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳6,30,000 variance vs lowest bid</div>
+                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳6,30,000 higher than lowest bid</div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                <div><strong>Lead Time:</strong> 30 Calendar Days</div>
-                <div><strong>Warranty:</strong> 24 Months Standard</div>
-                <div><strong>Material:</strong> ASME Class 600 Monel Trim</div>
-                <div><strong>Quality Score:</strong> 94.0%</div>
+                <div><strong>Delivery & Setup:</strong> 30 Calendar Days</div>
+                <div><strong>Warranty:</strong> 12 Months Standard Warranty</div>
+                <div><strong>Model:</strong> Perkins 4012-46TWG2A Package</div>
+                <div><strong>Technical Rating:</strong> 91.5%</div>
               </div>
             </div>
           </div>
 
           <div style={{ padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '6px', borderLeft: '3px solid #059669', fontSize: '12px', color: 'var(--brand-slate-700)' }}>
-            ✓ <strong>Procurement Committee Resolution:</strong> KSB Valves SE & Co. complies 100% with technical parameters and saves <strong>৳3,60,000</strong> compared to the second lowest bidder. Recommended for immediate Chairman sanction and SAP PO release.
+            ✓ <strong>Procurement Committee Resolution:</strong> Energypac Power Generation Ltd complies 100% with technical requirements and saves <strong>৳3,60,000</strong> compared to the second lowest bidder. Recommended for immediate Chairman sanction and SAP PO release.
           </div>
         </div>
       )}

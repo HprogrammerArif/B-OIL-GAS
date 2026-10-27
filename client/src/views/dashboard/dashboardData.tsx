@@ -26,37 +26,37 @@ export const INNER_CIRCLE: InnerCircleMember[] = [
 
 export const PENDING_APPROVALS: DetailDrawerData[] = [
   {
-    id: 'BOGCL/PROC/2026/0894',
-    title: 'Safety Valve Procurement — Keraniganj Plant',
+    id: 'BOGCL/PROC/KER-2026/0894',
+    title: 'Emergency Power Generator Overhaul — Keraniganj Plant',
     amount: '৳48,50,000',
     dept: 'Plant Maintenance',
     urgency: 'urgent',
     time: '2h pending',
     initiator: 'Engr. Md. Harunur Rashid',
-    description: 'Procurement of 12 ASME Section VIII safety relief valves for Bitumen Distillation Column C-102. Verified in SAP S/4HANA PO #90412.',
+    description: 'Urgent overhaul of 1,200 kVA emergency backup power generator and replacement spare parts to prevent factory downtime during upcoming peak manufacturing season.',
     sapRef: 'SAP-PR-2026-90412',
   },
   {
     id: 'BOGCL/HR/2026/0342',
-    title: 'Annual Increment Policy — Grade 7-10 Staff',
-    amount: 'Policy',
+    title: 'Annual Staff Salary Increment Policy — Operations Team',
+    amount: 'HR Policy',
     dept: 'Human Resources',
     urgency: 'normal',
     time: '1d pending',
     initiator: 'Nusrat Jahan',
-    description: 'Performance-indexed statutory grade revision covering 482 refinery shift technicians and field operators.',
+    description: 'Annual statutory performance increment framework covering 482 factory shift workers, technicians, and transport drivers.',
     sapRef: 'SAP-HR-POL-0342',
   },
   {
-    id: 'BOGCL/FIN/2026/0211',
-    title: 'Q4 Fuel & Utility Budget Revision',
-    amount: '৳1,20,00,000',
-    dept: 'Finance',
+    id: 'BOGCL/IT/2026/0211',
+    title: 'Annual Office IT Cloud ERP & Software License Renewal',
+    amount: '৳18,50,000',
+    dept: 'Information Technology',
     urgency: 'normal',
     time: '3h pending',
     initiator: 'Farida Begum',
-    description: 'Refinery natural gas utility feed tariff recalculation as gazetted by BERC for industrial steam co-generation boilers.',
-    sapRef: 'SAP-FI-BUD-0211',
+    description: 'Annual enterprise SAP S/4HANA cloud system, corporate email accounts, and database cybersecurity licenses for 750 employees.',
+    sapRef: 'SAP-IT-LIC-0211',
   },
 ];
 
@@ -197,13 +197,13 @@ export const INITIAL_VEHICLE_REQUESTS: VehicleRequestItem[] = [
 ];
 
 export const INITIAL_HOD_QUEUE: HodQueueItem[] = [
-  { id: 'APR-001', type: 'Leave', icon: '📅', title: 'Annual Leave — Tanvir Ahmed', detail: 'Oct 20-24, 2026 (5 days)', dept: 'Sales', time: '2h ago', urgency: 'normal', costTk: 0 },
-  { id: 'APR-002', type: 'Expense', icon: '💰', title: 'Travel Expense Claim — Chittagong Visit', detail: 'Chittagong client visit, Oct 10-12', dept: 'Sales', time: '1d ago', urgency: 'normal', costTk: 12400 },
-  { id: 'APR-003', type: 'Conveyance', icon: '🚌', title: 'Monthly Conveyance — Sep 2026', detail: '22 working days × ৳191/day', dept: 'Finance', time: '3d ago', urgency: 'overdue', costTk: 4200 },
-  { id: 'APR-004', type: 'TA/DA', icon: '✈️', title: 'TA/DA Request — Sylhet Site Visit', detail: 'Oct 25-27, ৳18,500 estimated', dept: 'Sales', time: '4h ago', urgency: 'normal', costTk: 18500 },
-  { id: 'APR-005', type: 'Purchase', icon: '🛒', title: 'Stationery & Consumables Requisition — Q4', detail: 'High-speed printer toners + secure pouches', dept: 'Finance', time: '2d ago', urgency: 'normal', costTk: 8700 },
-  { id: 'APR-006', type: 'Document', icon: '📄', title: 'Policy Amendment — WFH Guidelines', detail: 'Updated remote work policy draft', dept: 'HR', time: '5h ago', urgency: 'normal', costTk: 0 },
-  { id: 'APR-007', type: 'Leave', icon: '📅', title: 'Sick Leave — Rahim Uddin (Backdated)', detail: 'Oct 14, medical certificate attached', dept: 'Finance', time: '1d ago', urgency: 'overdue', costTk: 0 },
+  { id: 'APR-001', type: 'Leave', icon: '📅', title: 'Annual Leave Application — Tanvir Ahmed (5 Days)', detail: 'Oct 20-24, 2026 — Sales duty handed over to Kabir', dept: 'Sales', time: '2h ago', urgency: 'normal', costTk: 0 },
+  { id: 'APR-002', type: 'Expense', icon: '💰', title: 'Sales Tour Expense Claim — Chittagong Depot Visit', detail: '4-day dealer network audit, hotel & travel vouchers verified', dept: 'Sales', time: '1d ago', urgency: 'normal', costTk: 14850 },
+  { id: 'APR-003', type: 'Conveyance', icon: '🚌', title: 'Monthly Local Travel Allowance — September 2026', detail: '22 field client visits across Dhaka, Motijheel & Tejgaon', dept: 'Sales', time: '3d ago', urgency: 'overdue', costTk: 5420 },
+  { id: 'APR-004', type: 'Transport', icon: '🚗', title: 'Official Duty Pool Car Booking — Head Office to Factory', detail: 'Executive site visit with visiting financial auditors (Oct 18)', dept: 'Finance', time: '4h ago', urgency: 'normal', costTk: 0 },
+  { id: 'APR-005', type: 'Purchase', icon: '🛒', title: 'Quarterly Office Stationery & Laser Printer Toners', detail: 'A4 paper (150 reams) + high-speed printer toner cartridges', dept: 'Admin', time: '2d ago', urgency: 'normal', costTk: 85000 },
+  { id: 'APR-006', type: 'Document', icon: '📄', title: 'Corporate Flexible Hours & Work From Home Guidelines', detail: 'Updated HR policy draft for corporate head office staff', dept: 'HR', time: '5h ago', urgency: 'normal', costTk: 0 },
+  { id: 'APR-007', type: 'Leave', icon: '📅', title: 'Medical Sick Leave — Md. Rahim Uddin (5 Days)', detail: 'Post-surgery recovery, Evercare Hospital certificate attached', dept: 'Finance', time: '1d ago', urgency: 'overdue', costTk: 0 },
 ];
 
 export const MY_RECENT_ACTIVITY = [

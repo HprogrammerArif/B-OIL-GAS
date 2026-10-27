@@ -294,8 +294,8 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="ribbon-text">
                   <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
                   <p>{t(
-                    '1. Keraniganj Output: 5,000 MT/Day (96.3%) • 2. Net Cash Outflow Pending: ৳ 48.5L • 3. Explosives License Due: 18 Days',
-                    '১. কেরানীগঞ্জ উৎপাদন: ৫,০০০ মে.টন/দিন (৯৬.৩%) • ২. বকেয়া অনুমোদন: ৪৮.৫ লাখ • ৩. বিস্ফোরক লাইসেন্স: ১৮ দিন বাকি',
+                    '1. Factory Production: 5,000 MT/Day (On Target) • 2. Urgent Generator Overhaul Sanction: ৳ 48.5L • 3. Annual Plant Safety License Due: 18 Days',
+                    '১. কারখানা উৎপাদন: ৫,০০০ মে.টন/দিন (অন-টার্গেট) • ২. জরুরি জেনারেটর মেরামত অনুমোদন: ৪৮.৫ লাখ • ৩. বার্ষিক কারখানা লাইসেন্স: ১৮ দিন বাকি',
                     lang
                   )}</p>
                 </div>
@@ -315,7 +315,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div className="ribbon-icon">🔴</div>
                 <div className="ribbon-text">
                   <h4>{t('DCS SCADA Alarm Console — Keraniganj Complex Unit-1 & Unit-2', 'ডিসিএস স্ক্যাডা অ্যালার্ম কনসোল', lang)}</h4>
-                  <p>{t('Column C-102 top temp 342°C (Set Point 335°C). Reflux pump P-102 operating at 85% capacity. All vacuum seals nominal.', 'কলাম C-102 তাপমাত্রা ৩৪২°C। রিফ্লাক্স পাম্প ৮৫% গতিতে সক্রিয়।', lang)}</p>
+                  <p>{t('Distillation Column C-102 cooling alert: Temperature 342°C (Normal 335°C). Automatic cooling water pump activated at 85% capacity. All backup safety systems operating normally.', 'কলাম C-102 কুলিং সতর্কতা: তাপমাত্রা ৩৪২°C (স্বাভাবিক ৩৩৫°C)। স্বয়ংক্রিয় কুলিং ওয়াটার পাম্প ৮৫% গতিতে সক্রিয়। সকল ব্যাকআপ নিরাপত্তা ব্যবস্থা স্বাভাবিক।', lang)}</p>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -438,7 +438,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                     <span className="badge danger">3 {t('Pending', 'অপেক্ষমান', lang)}</span>
                   </div>
                   <div className="tab-jump-desc">
-                    {t('High-value files awaiting Chairman\'s signature: ASME Safety Valves (৳48.5L), Grade 7-10 HR Policy, and Q4 Utility Budget (৳1.2 Cr).', 'চেয়ারম্যান মহোদয়ের স্বাক্ষরের অপেক্ষায় ৩টি উচ্চমূল্যের ফাইল: সেফটি ভালভ (৪৮.৫ লাখ), এইচআর নীতিমালা ও কিউ৪ ইউটিলিটি বাজেট।', lang)}
+                    {t('High-value files awaiting Chairman\'s signature: Factory Generator Overhaul (৳48.5L), Shift Staff Salary Policy, and Corporate IT ERP Renewal (৳18.5L).', 'চেয়ারম্যান মহোদয়ের স্বাক্ষরের অপেক্ষায় ৩টি উচ্চমূল্যের ফাইল: কারখানা জেনারেটর মেরামত (৪৮.৫ লাখ), কর্মী বেতন নীতি ও কর্পোরেট আইটি ইআরপি নবায়ন (১৮.৫ লাখ)।', lang)}
                   </div>
                   <div className="tab-jump-footer">
                     <span>{t('Open Approval Queue', 'অনুমোদন সারি দেখুন', lang)}</span>
