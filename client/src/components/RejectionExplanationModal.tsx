@@ -210,18 +210,7 @@ export default function RejectionExplanationModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div
-          className="modal-hd"
-          style={{
-            background: 'linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%)',
-            color: '#FFFFFF',
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-          }}
-        >
+        <div className="modal-hd danger">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
@@ -238,7 +227,7 @@ export default function RejectionExplanationModal({
               <RotateCcw size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
                 {title || t('Return / Query for Correction', 'সংশোধন ও পর্যালোচনার জন্য ফেরত', lang)}
               </h3>
               <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
@@ -248,24 +237,11 @@ export default function RejectionExplanationModal({
           </div>
           <button
             type="button"
+            className="modal-close"
             onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              border: 'none',
-              color: '#FFFFFF',
-              width: '30px',
-              height: '30px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.28)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)')}
+            title={t('Close', 'বন্ধ করুন', lang)}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
