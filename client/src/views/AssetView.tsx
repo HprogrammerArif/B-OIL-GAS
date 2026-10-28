@@ -5,8 +5,9 @@ import {
   Wrench, ShieldCheck, AlertTriangle, Calendar, Search, Filter,
   Download, Plus, RefreshCw, Barcode, CheckCircle, Clock,
   Cpu, Truck, Gauge, Shield, ChevronRight, Layers, DollarSign,
-  X, QrCode, Printer
+  X, QrCode, Printer, RotateCcw
 } from 'lucide-react';
+import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 
 interface AssetRecord {
   id: string;
@@ -23,6 +24,13 @@ interface AssetRecord {
   daysToService: number;
   serialNo: string;
   specs: string;
+  defectQuery?: {
+    reason: string;
+    observation: string;
+    improvementsRequired: string;
+    reportedBy: string;
+    reportedAt: string;
+  };
 }
 
 const INITIAL_ASSETS: AssetRecord[] = [
@@ -117,6 +125,7 @@ export default function AssetView({ role, lang }: ViewProps) {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPassportModal, setShowPassportModal] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   // New Asset Form State
   const [newTag, setNewTag] = useState('BOGCL-KER-PMP-105');
@@ -185,15 +194,45 @@ export default function AssetView({ role, lang }: ViewProps) {
           status: 'operational',
           nextServiceDate: '17 Apr 2027',
           daysToService: 180,
+          defectQuery: undefined,
         };
       }
       return a;
     }));
+    if (selectedAsset?.id === id) {
+      setSelectedAsset(prev => prev ? { ...prev, status: 'operational', daysToService: 180, defectQuery: undefined } : null);
+    }
     showToast(
       lang === 'en'
         ? `Preventive maintenance & calibration certified for ${id}. Next audit scheduled in 180 days.`
         : `${id}-এর রক্ষণাবেক্ষণ ও ক্যালিব্রেশন সফলভাবে লিপিবদ্ধ হয়েছে।`,
       'success'
+    );
+  };
+
+  const handleConfirmAssetReject = (data: RejectionData) => {
+    if (!selectedAsset) return;
+    const updatedAsset: AssetRecord = {
+      ...selectedAsset,
+      status: 'maintenance',
+      defectQuery: {
+        reason: data.reasonCategory,
+        observation: data.observation,
+        improvementsRequired: data.improvementsRequired,
+        reportedBy: role === 'plant_gm' ? 'Engr. Md. Harunur Rashid (Plant GM)' : 'Technical Audit Team',
+        reportedAt: 'Today, Just Now',
+      },
+    };
+    setAssets((prev) => prev.map((a) => (a.id === selectedAsset.id ? updatedAsset : a)));
+    setSelectedAsset(updatedAsset);
+    setShowRejectModal(false);
+    showToast(
+      t(
+        `Calibration deficiency flagged on ${selectedAsset.tag}: "${data.reasonCategory}". Maintenance team notified.`,
+        `${selectedAsset.tag}-এ ক্যালিব্রেশন ত্রুটি ও নির্দেশনা রেকর্ড করা হয়েছে।`,
+        lang
+      ),
+      'warn'
     );
   };
 
@@ -425,6 +464,46 @@ export default function AssetView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
+              {/* Active Calibration / Service Deficiency Alert */}
+              {selectedAsset.defectQuery && (
+                <div
+                  style={{
+                    background: '#FEF2F2',
+                    border: '1.5px solid #FCA5A5',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#991B1B', fontWeight: 800, fontSize: '12.5px' }}>
+                    <AlertTriangle size={15} />
+                    <span>{t('Active Maintenance / Calibration Deficiency', 'ক্যালিব্রেশন ত্রুটি বা আপত্তি সক্রিয়', lang)}</span>
+                    <span style={{ fontSize: '10.5px', color: '#B91C1C', marginLeft: 'auto', fontWeight: 500 }}>
+                      {selectedAsset.defectQuery.reportedBy} • {selectedAsset.defectQuery.reportedAt}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#7F1D1D', marginTop: '6px' }}>
+                    <strong>{t('Objection:', 'প্রধান কারণ:', lang)}</strong> {selectedAsset.defectQuery.reason}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#991B1B', marginTop: '3px' }}>
+                    <strong>{t('Observation:', 'পর্যবেক্ষণ:', lang)}</strong> {selectedAsset.defectQuery.observation}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '11px',
+                      color: '#065F46',
+                      background: '#ECFDF5',
+                      padding: '6px 8px',
+                      borderRadius: '4px',
+                      border: '1px solid #A7F3D0',
+                      marginTop: '6px',
+                    }}
+                  >
+                    <strong>{t('Action Required:', 'প্রয়োজনীয় সংস্কার:', lang)}</strong> {selectedAsset.defectQuery.improvementsRequired}
+                  </div>
+                </div>
+              )}
+
               {/* Maintenance & Calibration Action */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button
@@ -433,6 +512,13 @@ export default function AssetView({ role, lang }: ViewProps) {
                   onClick={() => handleLogService(selectedAsset.id)}
                 >
                   <CheckCircle size={15} /> {t('Certify Calibration & Service Log', 'ক্যালিব্রেশন ও সার্ভিস প্রত্যয়ন করুন', lang)}
+                </button>
+                <button
+                  className="btn-outline"
+                  style={{ width: '100%', justifyContent: 'center', borderColor: '#DC2626', color: '#DC2626' }}
+                  onClick={() => setShowRejectModal(true)}
+                >
+                  <RotateCcw size={15} /> {t('Flag Deficiency / Reject Work Order', 'ক্যালিব্রেশন ত্রুটি বা আপত্তি উত্থাপন করুন', lang)}
                 </button>
                 <button
                   className="btn-outline"
@@ -788,6 +874,23 @@ export default function AssetView({ role, lang }: ViewProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Calibration Deficiency / Work Order Rejection Modal */}
+      {selectedAsset && (
+        <RejectionExplanationModal
+          isOpen={showRejectModal}
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={handleConfirmAssetReject}
+          lang={lang}
+          title={t('Flag Calibration Deficiency / Reject Work Order', 'ক্যালিব্রেশন ত্রুটি বা আপত্তি উত্থাপন করুন', lang)}
+          itemId={selectedAsset.tag}
+          itemTitle={selectedAsset.name}
+          requesterName={selectedAsset.custodian}
+          department={selectedAsset.location}
+          amount={selectedAsset.currentBookValue}
+          categoryType="asset"
+        />
       )}
     </div>
   );

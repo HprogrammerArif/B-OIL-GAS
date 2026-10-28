@@ -4,11 +4,12 @@ import { showToast } from '../App';
 import {
   ClipboardCheck, Check, X, CheckSquare, Square, Filter, Search,
   Clock, AlertTriangle, FileText, DollarSign, Car, Calendar,
-  ShieldCheck, ArrowRight, Eye, RefreshCw, Sparkles, Building
+  ShieldCheck, ArrowRight, Eye, RefreshCw, Sparkles, Building, RotateCcw
 } from 'lucide-react';
 
 import { useApprovalStore, ApprovalItem } from '../store/approvalStore';
 import { useFleetStore } from '../store/fleetStore';
+import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 
 export default function ApprovalsView({ role, lang }: ViewProps) {
   const { approvalItems, approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
@@ -16,6 +17,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [itemToReject, setItemToReject] = useState<ApprovalItem | null>(null);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -46,15 +48,32 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleRejectSingle = (item: ApprovalItem) => {
-    rejectApprovalItem(item.id);
-    if (item.sourceType === 'requisition' && item.sourceId) {
-      endorseHOD(item.sourceId, 'rejected');
+    setItemToReject(item);
+  };
+
+  const handleConfirmReject = (data: RejectionData) => {
+    if (!itemToReject) return;
+    const reviewer = role === 'chairman' ? 'Ahmed Akbar Sobhan (Chairman & MD)' : 'Farida Begum (HOD Finance)';
+    rejectApprovalItem(
+      itemToReject.id,
+      data.reasonCategory,
+      data.observation,
+      data.improvementsRequired,
+      reviewer
+    );
+    if (itemToReject.sourceType === 'requisition' && itemToReject.sourceId) {
+      endorseHOD(itemToReject.sourceId, 'rejected');
     }
-    setSelectedIds((prev) => prev.filter((x) => x !== item.id));
+    setSelectedIds((prev) => prev.filter((x) => x !== itemToReject.id));
     showToast(
-      t(`Returned ${item.id} to ${item.requester} with inquiry note.`, `${item.id} সংশোধনের জন্য ফেরত পাঠানো হয়েছে।`, lang),
+      t(
+        `File ${itemToReject.id} returned to ${itemToReject.requester} with inquiry: "${data.reasonCategory}".`,
+        `${itemToReject.id} আপত্তি ও নির্দেশনাসহ ${itemToReject.requester}-এর নিকট ফেরত পাঠানো হয়েছে।`,
+        lang
+      ),
       'warn'
     );
+    setItemToReject(null);
   };
 
   const handleBatchApprove = () => {
@@ -320,6 +339,31 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Rejection & Inquiry Explanation Modal */}
+      {itemToReject && (
+        <RejectionExplanationModal
+          isOpen={!!itemToReject}
+          onClose={() => setItemToReject(null)}
+          onConfirm={handleConfirmReject}
+          lang={lang}
+          title={t('Return Approval Request with Query', 'আপত্তি ও নির্দেশনাসহ আবেদন ফেরত', lang)}
+          itemId={itemToReject.id}
+          itemTitle={itemToReject.title}
+          requesterName={itemToReject.requester}
+          department={itemToReject.dept}
+          amount={itemToReject.amount}
+          categoryType={
+            itemToReject.sourceType === 'claim'
+              ? 'claim'
+              : itemToReject.sourceType === 'requisition'
+              ? 'requisition'
+              : itemToReject.sourceType === 'notesheet'
+              ? 'notesheet'
+              : 'general'
+          }
+        />
+      )}
     </div>
   );
 }

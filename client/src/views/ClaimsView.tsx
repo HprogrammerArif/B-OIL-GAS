@@ -7,6 +7,7 @@ import {
   ChevronRight, ArrowRight, ShieldAlert, Check, X, Filter
 } from 'lucide-react';
 import SubmitClaimModal, { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
+import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 import { useApprovalStore, ClaimItem } from '../store/approvalStore';
 
 const GRADE_POLICY = [
@@ -18,10 +19,11 @@ const GRADE_POLICY = [
 ];
 
 export default function ClaimsView({ role, lang }: ViewProps) {
-  const { claims, addClaim, updateClaimStatus } = useApprovalStore();
+  const { claims, addClaim, updateClaimStatus, rejectClaim, resubmitClaim } = useApprovalStore();
   const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'policy'>('all');
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   const selectedClaim = claims.find(c => c.id === selectedClaimId) || claims[0];
   const setSelectedClaim = (claim: ClaimItem | null) => setSelectedClaimId(claim ? claim.id : null);
@@ -44,9 +46,37 @@ export default function ClaimsView({ role, lang }: ViewProps) {
     );
   };
 
-  const handleReject = (id: string) => {
-    updateClaimStatus(id, 'rejected');
-    showToast(lang === 'en' ? `Claim ${id} returned to employee with notes.` : `দাবি ${id} সংশোধনের জন্য ফেরত পাঠানো হয়েছে।`, 'info');
+  const handleReject = () => {
+    setShowRejectModal(true);
+  };
+
+  const handleConfirmReject = (data: RejectionData) => {
+    if (!selectedClaim) return;
+    const reviewer = role === 'chairman' ? 'Ahmed Akbar Sobhan (Chairman & MD)' : 'Farida Begum (HOD Finance)';
+    rejectClaim(
+      selectedClaim.id,
+      data.reasonCategory,
+      data.observation,
+      data.improvementsRequired,
+      reviewer
+    );
+    setShowRejectModal(false);
+    showToast(
+      lang === 'en'
+        ? `Claim ${selectedClaim.id} returned with inquiry: "${data.reasonCategory}". Guidance dispatched to ${selectedClaim.claimant}.`
+        : `দাবি ${selectedClaim.id} আপত্তি ও নির্দেশনাসহ ফেরত পাঠানো হয়েছে।`,
+      'warn'
+    );
+  };
+
+  const handleResubmit = (claimId: string) => {
+    resubmitClaim(claimId, 'Scanned original VAT vouchers and recalculated per-diem attached');
+    showToast(
+      lang === 'en'
+        ? `Claim ${claimId} revised & resubmitted for HOD review.`
+        : `দাবি ${claimId} সংশোধনপূর্বক পুনরায় অনুমোদনের জন্য দাখিল করা হয়েছে।`,
+      'success'
+    );
   };
 
   const handleCreateClaim = (data: ClaimSubmissionData) => {
@@ -344,6 +374,75 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   </div>
                 )}
 
+                {/* Returned for Revision Inquiry Callout Banner */}
+                {selectedClaim.status === 'rejected' && (
+                  <div
+                    style={{
+                      background: '#FEF2F2',
+                      border: '1.5px solid #FCA5A5',
+                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#991B1B', fontWeight: 800, fontSize: '13px' }}>
+                      <AlertTriangle size={16} />
+                      <span>{t('Returned for Correction & Revision', 'সংশোধন ও পর্যালোচনার জন্য ফেরত পাঠানো হয়েছে', lang)}</span>
+                      <span style={{ fontSize: '11px', color: '#B91C1C', marginLeft: 'auto', fontWeight: 500 }}>
+                        {selectedClaim.rejectedBy || 'Audit Approver'} • {selectedClaim.rejectedAt || 'Recent'}
+                      </span>
+                    </div>
+
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#7F1D1D' }}>
+                      <strong>{t('Primary Objection:', 'প্রধান আপত্তি:', lang)}</strong> {selectedClaim.rejectionReason || 'Voucher Incomplete'}
+                    </div>
+
+                    {selectedClaim.rejectionObservation && (
+                      <div
+                        style={{
+                          marginTop: '6px',
+                          fontSize: '11.5px',
+                          color: '#991B1B',
+                          background: 'rgba(255,255,255,0.7)',
+                          padding: '6px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #FECACA',
+                        }}
+                      >
+                        <strong>{t('Audit Observation:', 'নিরীক্ষা পর্যবেক্ষণ:', lang)}</strong> {selectedClaim.rejectionObservation}
+                      </div>
+                    )}
+
+                    {selectedClaim.rejectionImprovementNotes && (
+                      <div
+                        style={{
+                          marginTop: '6px',
+                          fontSize: '11.5px',
+                          color: '#065F46',
+                          background: '#ECFDF5',
+                          padding: '6px 10px',
+                          borderRadius: '4px',
+                          border: '1px solid #A7F3D0',
+                        }}
+                      >
+                        <strong>{t('Action Required by Staff (How to Fix):', 'কর্মচারীর করণীয় সংশোধন:', lang)}</strong> {selectedClaim.rejectionImprovementNotes}
+                      </div>
+                    )}
+
+                    {/* Resubmit button for employee */}
+                    <div style={{ marginTop: '12px', textAlign: 'right' }}>
+                      <button
+                        className="btn-primary"
+                        style={{ fontSize: '11.5px', padding: '6px 14px', background: '#059669', borderColor: '#059669', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => handleResubmit(selectedClaim.id)}
+                      >
+                        <Check size={14} />
+                        {t('Attach Fixes & Resubmit to HOD', 'সংশোধন সংযুক্ত করে পুনরায় দাখিল করুন', lang)}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Role-based action controls */}
                 {(role === 'hod' || role === 'chairman') && selectedClaim.status.includes('pending') && (
                   <div style={{ display: 'flex', gap: '10px' }}>
@@ -356,7 +455,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                     </button>
                     <button
                       className="btn-outline-danger"
-                      onClick={() => handleReject(selectedClaim.id)}
+                      onClick={handleReject}
                     >
                       <X size={16} /> {t('Return with Query', 'জিজ্ঞাসাসহ ফেরত', lang)}
                     </button>
@@ -366,6 +465,23 @@ export default function ClaimsView({ role, lang }: ViewProps) {
             </div>
           )}
         </div>
+      )}
+
+      {/* Rejection & Inquiry Explanation Modal */}
+      {selectedClaim && (
+        <RejectionExplanationModal
+          isOpen={showRejectModal}
+          onClose={() => setShowRejectModal(false)}
+          onConfirm={handleConfirmReject}
+          lang={lang}
+          title={t('Return Travel & Conveyance Claim with Query', 'ভ্রমণ বিল সংশোধনের জন্য ফেরত পাঠান', lang)}
+          itemId={selectedClaim.id}
+          itemTitle={selectedClaim.purpose}
+          requesterName={selectedClaim.claimant}
+          department={selectedClaim.dept}
+          amount={selectedClaim.amount}
+          categoryType="claim"
+        />
       )}
 
       {/* Submit Claim Modal */}

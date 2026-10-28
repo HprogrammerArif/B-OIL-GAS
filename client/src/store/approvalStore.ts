@@ -17,6 +17,11 @@ export interface ClaimItem {
   dateSubmitted: string;
   sapVoucher?: string;
   items?: { desc: string; date: string; amount: number; category: string }[];
+  rejectionReason?: string;
+  rejectionObservation?: string;
+  rejectionImprovementNotes?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
 }
 
 export interface ApprovalItem {
@@ -36,6 +41,11 @@ export interface ApprovalItem {
   details: string;
   sourceType?: 'claim' | 'requisition' | 'notesheet' | 'generic';
   sourceId?: string;
+  rejectionReason?: string;
+  rejectionObservation?: string;
+  rejectionImprovementNotes?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
 }
 
 const INITIAL_CLAIMS: ClaimItem[] = [
@@ -374,22 +384,113 @@ class ApprovalStore {
     };
   }
 
-  // 5. Reject an Item in the Omni-Approval Queue
-  rejectApprovalItem(itemId: string) {
+  // 5. Reject an Item in the Omni-Approval Queue with formal inquiry observation
+  rejectApprovalItem(
+    itemId: string,
+    reasonCategory?: string,
+    observation?: string,
+    improvementsRequired?: string,
+    reviewer?: string
+  ) {
     const item = this.approvalItems.find((a) => a.id === itemId);
+    const timestamp = 'Today, Just Now';
+    const reviewerName = reviewer || 'Executive Approver';
+
     if (item && item.sourceType === 'claim' && item.sourceId) {
       this.claims = this.claims.map((c) => {
         if (c.id === item.sourceId) {
-          return { ...c, status: 'rejected' };
+          return {
+            ...c,
+            status: 'rejected',
+            rejectionReason: reasonCategory || 'Observation Query Raised',
+            rejectionObservation: observation || 'Audit inspection required additional documentation.',
+            rejectionImprovementNotes: improvementsRequired || 'Please revise and attach verified tax invoices.',
+            rejectedBy: reviewerName,
+            rejectedAt: timestamp,
+          };
         }
         return c;
       });
     }
+
     this.approvalItems = this.approvalItems.filter((a) => a.id !== itemId);
     this.notify();
   }
 
-  // 6. Batch Approve selected Items in the Omni-Approval Queue
+  // 6. Direct Claim Rejection with Observation & Improvement Guidance
+  rejectClaim(
+    id: string,
+    reasonCategory: string,
+    observation: string,
+    improvementsRequired: string,
+    reviewer?: string
+  ) {
+    const timestamp = 'Today, Just Now';
+    const reviewerName = reviewer || 'Department Head / Approver';
+
+    this.claims = this.claims.map((c) => {
+      if (c.id === id) {
+        return {
+          ...c,
+          status: 'rejected',
+          rejectionReason: reasonCategory,
+          rejectionObservation: observation,
+          rejectionImprovementNotes: improvementsRequired,
+          rejectedBy: reviewerName,
+          rejectedAt: timestamp,
+        };
+      }
+      return c;
+    });
+
+    this.approvalItems = this.approvalItems.filter((a) => a.sourceId !== id);
+    this.notify();
+  }
+
+  // 7. Resubmit a Returned Claim with revisions
+  resubmitClaim(id: string, revisionNotes?: string) {
+    this.claims = this.claims.map((c) => {
+      if (c.id === id) {
+        return {
+          ...c,
+          status: 'pending_hod',
+          rejectionReason: undefined,
+          rejectionObservation: undefined,
+          rejectionImprovementNotes: undefined,
+        };
+      }
+      return c;
+    });
+
+    const updatedClaim = this.claims.find((c) => c.id === id);
+    if (updatedClaim) {
+      this.approvalItems = [
+        {
+          id: `APR-${updatedClaim.id}`,
+          category: 'finance',
+          title: `${updatedClaim.type.toUpperCase()} Claim (Resubmitted) — ${updatedClaim.purpose}`,
+          titleBn: `${updatedClaim.purpose} (সংশোধিত দাখিল)`,
+          requester: updatedClaim.claimant,
+          designation: updatedClaim.designation,
+          dept: updatedClaim.dept,
+          amount: `৳${updatedClaim.amount.toLocaleString()}`,
+          costTk: updatedClaim.amount,
+          date: 'Today, Resubmitted',
+          slaHoursLeft: 24,
+          urgency: 'high',
+          sapDocRef: `SAP-FI-${updatedClaim.id}`,
+          details: `Corrected claim resubmitted with requested revisions: ${revisionNotes || 'All required VAT receipts and tax vouchers attached'}. Ready for re-audit.`,
+          sourceType: 'claim',
+          sourceId: updatedClaim.id,
+        },
+        ...this.approvalItems,
+      ];
+    }
+
+    this.notify();
+  }
+
+  // 8. Batch Approve selected Items in the Omni-Approval Queue
   batchApproveItems(itemIds: string[]): { count: number; totalCost: number; vouchers: string[] } {
     let totalCost = 0;
     const vouchers: string[] = [];
@@ -407,7 +508,7 @@ class ApprovalStore {
     return { count: itemIds.length, totalCost, vouchers };
   }
 
-  // 7. Direct Claim Status Updater (from ClaimsView)
+  // 9. Direct Claim Status Updater (from ClaimsView)
   updateClaimStatus(id: string, status: ClaimItem['status'], sapVoucher?: string) {
     this.claims = this.claims.map((c) => {
       if (c.id === id) {
@@ -452,6 +553,8 @@ export function useApprovalStore() {
     addNotesheetApproval: approvalStore.addNotesheetApproval.bind(approvalStore),
     approveApprovalItem: approvalStore.approveApprovalItem.bind(approvalStore),
     rejectApprovalItem: approvalStore.rejectApprovalItem.bind(approvalStore),
+    rejectClaim: approvalStore.rejectClaim.bind(approvalStore),
+    resubmitClaim: approvalStore.resubmitClaim.bind(approvalStore),
     batchApproveItems: approvalStore.batchApproveItems.bind(approvalStore),
   };
 }

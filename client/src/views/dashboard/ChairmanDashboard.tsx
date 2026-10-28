@@ -5,7 +5,8 @@ import { showToast } from '../../App';
 import Pagination from '../../components/Pagination';
 import { DetailDrawerData } from '../../components/DetailDrawer';
 import { DashboardSubViewProps, NoticeItem } from './types';
-import { INNER_CIRCLE, PENDING_APPROVALS, NOTICE_BOARD } from './dashboardData';
+import { INNER_CIRCLE, PENDING_APPROVALS } from './dashboardData';
+import { useNoticeStore } from '../../store/noticeStore';
 import PublishNoticeModal from './PublishNoticeModal';
 import NoticeDetailModal from './NoticeDetailModal';
 
@@ -14,12 +15,12 @@ export default function ChairmanDashboard({
   activeTab,
   onOpenDetailDrawer
 }: DashboardSubViewProps) {
+  const { notices, addNotice, acknowledgeNotice, togglePin } = useNoticeStore();
   const [approvalsList, setApprovalsList] = useState(PENDING_APPROVALS);
   const [approvalsPage, setApprovalsPage] = useState(1);
   const [innerCirclePage, setInnerCirclePage] = useState(1);
   const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
   const [noticesPage, setNoticesPage] = useState(1);
-  const [notices, setNotices] = useState<NoticeItem[]>(NOTICE_BOARD);
   const [noticeFilter, setNoticeFilter] = useState<string>('all');
   const [noticeSearch, setNoticeSearch] = useState<string>('');
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
@@ -433,7 +434,7 @@ export default function ChairmanDashboard({
                               className="btn-sm-ghost"
                               style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '6px' }}
                               onClick={() => {
-                                setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, read: true, acknowledgedCount: (n.acknowledgedCount || 0) + 1 } : n));
+                                acknowledgeNotice(notice.id || notice.title);
                                 showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
                               }}
                             >
@@ -451,7 +452,7 @@ export default function ChairmanDashboard({
                             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? '#D97706' : 'var(--brand-slate-400)' }}
                             title={notice.pinned ? "Unpin notice" : "Pin notice"}
                             onClick={() => {
-                              setNotices(prev => prev.map(n => n.id === notice.id || n.title === notice.title ? { ...n, pinned: !n.pinned } : n));
+                              togglePin(notice.id || notice.title);
                               showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
                             }}
                           >
@@ -482,7 +483,7 @@ export default function ChairmanDashboard({
         onClose={() => setShowPublishModal(false)}
         lang={lang}
         onPublish={(newNotice) => {
-          setNotices([newNotice, ...notices]);
+          addNotice(newNotice);
           showToast(
             t(
               `👑 Executive Circular published! Pushed to 1,240 employees via App & SMS.`,
@@ -500,7 +501,7 @@ export default function ChairmanDashboard({
         onClose={() => setSelectedNoticeForDetail(null)}
         lang={lang}
         onAcknowledge={(noticeId) => {
-          setNotices(prev => prev.map(n => n.id === noticeId || n.title === selectedNoticeForDetail?.title ? { ...n, read: true, acknowledgedCount: (n.acknowledgedCount || 0) + 1 } : n));
+          if (noticeId) acknowledgeNotice(noticeId);
         }}
       />
     </>

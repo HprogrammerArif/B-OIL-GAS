@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import { t, Lang } from '../types';
 import { showToast } from '../App';
-import { Megaphone, X } from 'lucide-react';
+import { Megaphone, X, Sparkles, Bell } from 'lucide-react';
+import { useNoticeStore } from '../store/noticeStore';
 
 export default function BroadcastModal({ onClose }: { onClose: () => void }) {
+  const { addBroadcast } = useNoticeStore();
   const [title, setTitle] = useState('BOGCL Q4 Refinery Milestone & Safety Commendation');
   const [body, setBody] = useState('Alhamdulillah, Bashundhara Oil & Gas has reached 180 consecutive days of zero Lost-Time Injury (LTI) at Keraniganj Plant. Every employee\'s commitment to safety reflects the core legacy of Bashundhara Group. May Allah bless our continued journey of excellence.');
   const [ack, setAck] = useState(true);
   const [sms, setSms] = useState(true);
 
   const handleBroadcast = () => {
+    addBroadcast({
+      title,
+      body,
+      requireAck: ack,
+      sendSms: sms,
+      author: 'Ahmed Akbar Sobhan',
+      authorRole: 'Chairman & Managing Director, Bashundhara Group',
+    });
     onClose();
-    setTimeout(() => showToast('✅ Chairman Broadcast published to all 847 BOGCL employees across 6 locations.', 'gold'), 200);
+    setTimeout(() => {
+      showToast('✅ Chairman Broadcast dispatched to 847 employees & pinned to the Corporate Notice Board.', 'gold');
+    }, 200);
   };
 
   return (
@@ -23,8 +35,8 @@ export default function BroadcastModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="modal-body">
           <p style={{ fontSize: '12px', color: 'var(--brand-slate-500)', marginBottom: '16px', lineHeight: 1.5 }}>
-            This broadcast will appear as a <strong>priority full-screen modal</strong> on every employee's app and desktop portal across all BOGCL plants, depots, and corporate offices. 
-            Sent to <strong style={{ color: 'var(--brand-crimson)' }}>847 employees</strong> across 6 locations.
+            This broadcast will appear as a <strong>priority full-screen push alert</strong> on every employee's terminal and mobile device.
+            It will also be <strong>automatically archived at the top of the Corporate Notice Board</strong> for permanent institutional reference.
           </p>
 
           <div className="form-group">
@@ -49,7 +61,7 @@ export default function BroadcastModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div style={{ background: 'var(--brand-gold-muted)', border: '1px solid var(--brand-gold)', borderRadius: 'var(--radius-sm)', padding: '10px 13px', marginTop: '10px', fontSize: '12px', color: 'var(--brand-gold-dark)' }}>
-            🛡️ This broadcast will be sealed with a cryptographic timestamp and stored permanently in the Chairman's Message Archive.
+            🛡️ <strong>Sync Guaranteed:</strong> This broadcast will immediately be indexed with a cryptographic timestamp and pinned to the Corporate Notice List.
           </div>
         </div>
         <div className="modal-ft">
@@ -63,3 +75,4 @@ export default function BroadcastModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+

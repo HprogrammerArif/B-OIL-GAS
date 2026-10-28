@@ -10,12 +10,12 @@ import AnimatedCounter from '../components/AnimatedCounter';
 import Sparkline from '../components/Sparkline';
 import DetailDrawer, { DetailDrawerData } from '../components/DetailDrawer';
 import { useFleetStore } from '../store/fleetStore';
+import { useNoticeStore } from '../store/noticeStore';
 
 import {
   ROLE_STATS,
   PENDING_APPROVALS,
   INNER_CIRCLE,
-  NOTICE_BOARD,
   DCS_ALARMS,
   INITIAL_LOTO_PERMITS,
   INITIAL_HOD_QUEUE
@@ -41,6 +41,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   const [approvedAmountSum, setApprovedAmountSum] = useState(0);
 
   const { requisitions: sharedRequisitions } = useFleetStore();
+  const { notices: sharedNotices } = useNoticeStore();
   const stats = ROLE_STATS[role] || ROLE_STATS.chairman;
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           { id: 'overview',     label: 'Strategic Cockpit',    labelBn: 'কক্পিট সংক্ষিপ্ত', icon: <Crown size={15} /> },
           { id: 'approvals',    label: 'Priority Approvals',   labelBn: 'জরুরি অনুমোদন',    icon: <FileCheck size={15} />, badge: PENDING_APPROVALS.length, badgeType: 'danger' as const },
           { id: 'inner_circle', label: 'Inner Circle Roster',  labelBn: 'ইনার সার্কেল',      icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' as const },
-          { id: 'notices',      label: 'Corporate Notices',    labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: NOTICE_BOARD.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
+          { id: 'notices',      label: 'Corporate Notices',    labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: sharedNotices.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
         ];
       case 'plant_gm':
         return [
@@ -473,7 +474,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                       <Bell size={18} color="#0284C7" />
                       <span>{t('Enterprise Notices', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</span>
                     </div>
-                    <span className="badge gold">{NOTICE_BOARD.length} {t('Circulars', 'বিজ্ঞপ্তি', lang)}</span>
+                    <span className="badge gold">{sharedNotices.length} {t('Circulars', 'বিজ্ঞপ্তি', lang)}</span>
                   </div>
                   <div className="tab-jump-desc">
                     {t('Latest circulars & announcements: Chairman\'s Eid Message, Mandatory Q4 Plant Safety Briefing, HSE Incident protocol.', 'সর্বশেষ নোটিশ ও ঘোষণা: চেয়ারম্যানের বার্তা, চতুর্থ ত্রৈমাসিক নিরাপত্তা ব্রিফিং ও এইচএসই প্রটোকল।', lang)}
