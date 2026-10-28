@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, RotateCcw, AlertTriangle, FileText, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Lang, t } from '../types';
 
@@ -164,32 +165,70 @@ export default function RejectionExplanationModal({
     });
   };
 
-  return (
-    <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 9999 }}>
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="modal-bg"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'rgba(15, 23, 42, 0.75)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 999999,
+        padding: '16px',
+        boxSizing: 'border-box',
+      }}
+    >
       <div
-        className="modal-container"
-        style={{ maxWidth: '580px', width: '94vw', borderRadius: '12px', overflow: 'hidden' }}
+        className="modal"
+        style={{
+          maxWidth: '620px',
+          width: '100%',
+          maxHeight: '92vh',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: '16px',
+          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08)',
+          overflow: 'hidden',
+          background: '#FFFFFF',
+          margin: 'auto',
+          animation: 'modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div
-          className="modal-header"
+          className="modal-hd"
           style={{
             background: 'linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%)',
-            color: '#fff',
+            color: '#FFFFFF',
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: '32px',
-                height: '32px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '8px',
-                background: 'rgba(255,255,255,0.15)',
+                background: 'rgba(255,255,255,0.18)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -199,7 +238,7 @@ export default function RejectionExplanationModal({
               <RotateCcw size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#fff' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
                 {title || t('Return / Query for Correction', 'সংশোধন ও পর্যালোচনার জন্য ফেরত', lang)}
               </h3>
               <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
@@ -208,23 +247,31 @@ export default function RejectionExplanationModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             style={{
-              background: 'transparent',
+              background: 'rgba(255, 255, 255, 0.15)',
               border: 'none',
-              color: '#fff',
-              fontSize: '20px',
+              color: '#FFFFFF',
+              width: '30px',
+              height: '30px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: 'pointer',
-              lineHeight: 1,
+              transition: 'background 0.15s ease',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.28)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)')}
           >
-            ×
+            <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleFormSubmit} style={{ margin: 0 }}>
-          <div className="modal-body" style={{ padding: '20px' }}>
+        <form onSubmit={handleFormSubmit} style={{ margin: 0, display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'hidden' }}>
+          <div className="modal-body" style={{ padding: '20px', overflowY: 'auto', flex: '1 1 auto', maxHeight: 'calc(92vh - 135px)' }}>
             {/* Target Item Dossier Card */}
             <div
               style={{
@@ -274,7 +321,7 @@ export default function RejectionExplanationModal({
                       onClick={() => handleSelectPreset(p)}
                       style={{
                         fontSize: '11px',
-                        padding: '5px 10px',
+                        padding: '6px 11px',
                         borderRadius: '6px',
                         border: isSelected ? '1.5px solid #DC2626' : '1px solid #CBD5E1',
                         background: isSelected ? '#FEF2F2' : '#FFFFFF',
@@ -309,9 +356,10 @@ export default function RejectionExplanationModal({
                   border: '1px solid #CBD5E1',
                   background: '#FFFFFF',
                   color: '#0F172A',
+                  boxSizing: 'border-box',
                 }}
                 placeholder={t(
-                  'e.g. Hotel invoice from Peninsula Chittagong does not show verified VAT BIN registration. Furthermore, the daily allowance exceeds Grade 7 ceiling by ৳500/day...',
+                  'e.g. Invoices lack official Mushak-6.3 tax registration, and per diem requested exceeds the standard grade policy limits...',
                   'যেমন: মূল ভ্যাট রসিদ সংযুক্ত নেই, দৈনিক ভাতার পরিমাণ গ্রেড সীমার অতিরিক্ত দাখিল করা হয়েছে...',
                   lang
                 )}
@@ -337,6 +385,7 @@ export default function RejectionExplanationModal({
                   border: '1px solid #A7F3D0',
                   background: '#F0FDF4',
                   color: '#065F46',
+                  boxSizing: 'border-box',
                 }}
                 placeholder={t(
                   'e.g. Please collect the revised tax invoice from hotel, recalculate daily allowance at ৳1,500/day, and upload the signed tour approval memo.',
@@ -373,6 +422,7 @@ export default function RejectionExplanationModal({
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '10px',
+              flexShrink: 0,
             }}
           >
             <button
@@ -395,6 +445,7 @@ export default function RejectionExplanationModal({
                 alignItems: 'center',
                 gap: '6px',
                 fontWeight: 700,
+                color: '#FFFFFF',
               }}
             >
               <RotateCcw size={14} />
@@ -403,6 +454,7 @@ export default function RejectionExplanationModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

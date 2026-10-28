@@ -1505,6 +1505,16 @@
   color: #0F172A !important;
   border-bottom: 1px solid #E2E8F0 !important;
 }
+.modal-hd.danger,
+.modal-hd-danger {
+  background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%) !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15) !important;
+}
+.modal-hd.danger h3,
+.modal-hd-danger h3 {
+  color: #FFFFFF !important;
+}
 .modal-hd h3 {
   font-size: 15px !important;
   font-weight: 800 !important;
@@ -1533,6 +1543,18 @@
   background: #F1F5F9 !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
+}
+.modal-hd.danger .modal-close,
+.modal-hd-danger .modal-close {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+}
+.modal-hd.danger .modal-close:hover,
+.modal-hd-danger .modal-close:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #FFFFFF !important;
 }
 .modal-body {
   flex: 1 1 auto !important;
