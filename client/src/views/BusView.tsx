@@ -13,191 +13,20 @@ import {
   HelpCircle, AlertOctagon
 } from 'lucide-react';
 
-export interface Seat {
-  num: number;
-  row: number;
-  col: 'left_win' | 'left_aisle' | 'right_aisle' | 'right_win';
-  assignedTo: string | null;
-  staffId?: string;
-  dept: string | null;
-  phone?: string;
-  pickupPoint?: string;
-  pickupTime?: string;
-  status: 'occupied' | 'vacated' | 'empty';
-  vacatedReason?: string;
-  isStandbyPromoted?: boolean;
-  bloodGroup?: string;
-  boarded?: boolean;
-  category?: 'executive' | 'lady_priority' | 'regular';
-  bookingType?: 'permanent' | 'shift_pass' | 'guest';
-}
+import type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle } from '../components/bus/busTypes';
+export type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle };
 
-export interface WaitlistEntry {
-  rank: number;
-  staffId: string;
-  name: string;
-  dept: string;
-  pickupPoint: string;
-  phone: string;
-  joinedAt: string;
-  priority: 'Shift' | 'Emergency' | 'Overtime';
-  shift: string;
-  isCurrentUser?: boolean;
-}
+import {
+  INITIAL_BUSES,
+  INITIAL_ROUTES,
+  generateSeatsForRoute,
+} from '../components/bus/busData';
+import RegisterBusModal from '../components/bus/RegisterBusModal';
+import RouteBuilderModal from '../components/bus/RouteBuilderModal';
+import SupervisorSeatModal from '../components/bus/SupervisorSeatModal';
+import ReassignBusRouteModal from '../components/bus/ReassignBusRouteModal';
+import BusFleetOverviewGrid from '../components/bus/BusFleetOverviewGrid';
 
-export interface RouteStop {
-  id: string;
-  name: string;
-  nameBn: string;
-  scheduledTime: string;
-  passengers: number;
-  status: 'passed' | 'active' | 'upcoming';
-  distanceKm: string;
-}
-
-export interface RouteInfo {
-  id: string;
-  name: string;
-  nameBn: string;
-  coachNo: string;
-  model: string;
-  driverName: string;
-  driverPhone: string;
-  conductorName: string;
-  conductorPhone: string;
-  speed: string;
-  nextStop: string;
-  nextEta: string;
-  progressPercent: number;
-  capacity: number;
-  inboundStops: RouteStop[];
-  outboundStops: RouteStop[];
-}
-
-const ROUTES_DATA: Record<string, RouteInfo> = {
-  'route-1': {
-    id: 'route-1',
-    name: 'Route-1: Mirpur-10 ➔ Farmgate ➔ Shahbagh ➔ Babubazar ➔ Plant',
-    nameBn: 'রুট-১: মিরপুর-১০ ➔ ফার্মগেট ➔ শাহবাগ ➔ বাবুবাজার ➔ প্ল্যান্ট',
-    coachNo: 'DHAKA METRO-BA 15-4421',
-    model: 'Hino RM2 Luxury AC (52-Seater)',
-    driverName: 'Master Rafiqul Islam',
-    driverPhone: '+880 1712-334499',
-    conductorName: 'Jalal Uddin Mia',
-    conductorPhone: '+880 1819-223344',
-    speed: '42 km/h',
-    nextStop: 'Babubazar Bridge Overpass',
-    nextEta: '8 mins (07:38 AM)',
-    progressPercent: 70,
-    capacity: 52,
-    inboundStops: [
-      { id: 's1', name: 'Mirpur-10 Circle', nameBn: 'মিরপুর-১০ গোলচত্বর', scheduledTime: '06:45 AM', passengers: 12, status: 'passed', distanceKm: '0.0 km' },
-      { id: 's2', name: 'Agargaon Metro Gate', nameBn: 'আগারগাঁও মেট্রো গেট', scheduledTime: '07:00 AM', passengers: 8, status: 'passed', distanceKm: '4.2 km' },
-      { id: 's3', name: 'Farmgate Overbridge', nameBn: 'ফার্মগেট ওভারব্রিজ', scheduledTime: '07:18 AM', passengers: 14, status: 'passed', distanceKm: '8.5 km' },
-      { id: 's4', name: 'Shahbagh Square', nameBn: 'শাহবাগ চত্বর', scheduledTime: '07:30 AM', passengers: 9, status: 'active', distanceKm: '12.0 km' },
-      { id: 's5', name: 'Babubazar Bridge', nameBn: 'বাবুবাজার ব্রিজ', scheduledTime: '07:42 AM', passengers: 6, status: 'upcoming', distanceKm: '16.5 km' },
-      { id: 's6', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '08:00 AM', passengers: 0, status: 'upcoming', distanceKm: '22.8 km' },
-    ],
-    outboundStops: [
-      { id: 's101', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '05:15 PM', passengers: 49, status: 'upcoming', distanceKm: '0.0 km' },
-      { id: 's102', name: 'Babubazar Bridge Ramp', nameBn: 'বাবুবাজার ব্রিজ র‍্যাম্প', scheduledTime: '05:35 PM', passengers: 6, status: 'upcoming', distanceKm: '6.3 km' },
-      { id: 's103', name: 'Shahbagh Square', nameBn: 'শাহবাগ চত্বর', scheduledTime: '05:50 PM', passengers: 9, status: 'upcoming', distanceKm: '10.8 km' },
-      { id: 's104', name: 'Farmgate Overbridge', nameBn: 'ফার্মগেট ওভারব্রিজ', scheduledTime: '06:05 PM', passengers: 14, status: 'upcoming', distanceKm: '14.3 km' },
-      { id: 's105', name: 'Agargaon Metro Gate', nameBn: 'আগারগাঁও মেট্রো গেট', scheduledTime: '06:18 PM', passengers: 8, status: 'upcoming', distanceKm: '18.6 km' },
-      { id: 's106', name: 'Mirpur-10 Circle', nameBn: 'মিরপুর-১০ গোলচত্বর', scheduledTime: '06:35 PM', passengers: 12, status: 'upcoming', distanceKm: '22.8 km' },
-    ]
-  },
-  'route-2': {
-    id: 'route-2',
-    name: 'Route-2: Uttara-Azampur ➔ Airport ➔ Mohakhali ➔ Maghbazar ➔ Plant',
-    nameBn: 'রুট-২: উত্তরা-আজমপুর ➔ বিমানবন্দর ➔ মহাখালী ➔ মগবাজার ➔ প্ল্যান্ট',
-    coachNo: 'DHAKA METRO-BA 14-8832',
-    model: 'Scania Touring HD 52-Seater',
-    driverName: 'Kabir Hossain',
-    driverPhone: '+880 1715-998811',
-    conductorName: 'Shumon Ali',
-    conductorPhone: '+880 1822-445566',
-    speed: '38 km/h',
-    nextStop: 'Mohakhali Flyover North',
-    nextEta: '12 mins (07:40 AM)',
-    progressPercent: 48,
-    capacity: 52,
-    inboundStops: [
-      { id: 's21', name: 'Uttara House Building', nameBn: 'উত্তরা হাউস বিল্ডিং', scheduledTime: '06:30 AM', passengers: 15, status: 'passed', distanceKm: '0.0 km' },
-      { id: 's22', name: 'Airport Station', nameBn: 'বিমানবন্দর রেলওয়ে স্টেশন', scheduledTime: '06:45 AM', passengers: 10, status: 'passed', distanceKm: '5.1 km' },
-      { id: 's23', name: 'Mohakhali Flyover', nameBn: 'মহাখালী ফ্লাইওভার', scheduledTime: '07:15 AM', passengers: 14, status: 'active', distanceKm: '14.2 km' },
-      { id: 's24', name: 'Maghbazar Crossing', nameBn: 'মগবাজার ক্রসিং', scheduledTime: '07:32 AM', passengers: 8, status: 'upcoming', distanceKm: '18.7 km' },
-      { id: 's25', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '08:05 AM', passengers: 0, status: 'upcoming', distanceKm: '28.4 km' },
-    ],
-    outboundStops: [
-      { id: 's201', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '05:15 PM', passengers: 47, status: 'upcoming', distanceKm: '0.0 km' },
-      { id: 's202', name: 'Maghbazar Crossing', nameBn: 'মগবাজার ক্রসিং', scheduledTime: '05:45 PM', passengers: 8, status: 'upcoming', distanceKm: '9.7 km' },
-      { id: 's203', name: 'Mohakhali Flyover', nameBn: 'মহাখালী ফ্লাইওভার', scheduledTime: '06:05 PM', passengers: 14, status: 'upcoming', distanceKm: '14.2 km' },
-      { id: 's204', name: 'Airport Station', nameBn: 'বিমানবন্দর রেলওয়ে স্টেশন', scheduledTime: '06:25 PM', passengers: 10, status: 'upcoming', distanceKm: '23.3 km' },
-      { id: 's205', name: 'Uttara House Building', nameBn: 'উত্তরা হাউস বিল্ডিং', scheduledTime: '06:45 PM', passengers: 15, status: 'upcoming', distanceKm: '28.4 km' },
-    ]
-  },
-  'route-3': {
-    id: 'route-3',
-    name: 'Route-3: Narayanganj-Chashara ➔ Signboard ➔ Jatrabari ➔ Plant',
-    nameBn: 'রুট-৩: নারায়ণগঞ্জ-চাষাড়া ➔ সাইনবোর্ড ➔ যাত্রাবাড়ী ➔ প্ল্যান্ট',
-    coachNo: 'DHAKA METRO-BA 16-1109',
-    model: 'Hyundai Universe Express (52-Seater)',
-    driverName: 'Alamgir Hossain',
-    driverPhone: '+880 1718-223388',
-    conductorName: 'Mintu Sarker',
-    conductorPhone: '+880 1914-778899',
-    speed: '45 km/h',
-    nextStop: 'Postogola Toll Plaza',
-    nextEta: '6 mins (07:35 AM)',
-    progressPercent: 78,
-    capacity: 52,
-    inboundStops: [
-      { id: 's31', name: 'Chashara Terminal', nameBn: 'চাষাড়া টার্মিনাল', scheduledTime: '06:50 AM', passengers: 18, status: 'passed', distanceKm: '0.0 km' },
-      { id: 's32', name: 'Signboard Link Road', nameBn: 'সাইনবোর্ড লিংক রোড', scheduledTime: '07:08 AM', passengers: 12, status: 'passed', distanceKm: '7.8 km' },
-      { id: 's33', name: 'Jatrabari Flyover Ramp', nameBn: 'যাত্রাবাড়ী ফ্লাইওভার র‍্যাম্প', scheduledTime: '07:22 AM', passengers: 11, status: 'passed', distanceKm: '13.5 km' },
-      { id: 's34', name: 'Postogola Bridge', nameBn: 'পোস্তগোলা ব্রিজ', scheduledTime: '07:34 AM', passengers: 7, status: 'active', distanceKm: '17.2 km' },
-      { id: 's35', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '07:55 AM', passengers: 0, status: 'upcoming', distanceKm: '24.0 km' },
-    ],
-    outboundStops: [
-      { id: 's301', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '05:15 PM', passengers: 48, status: 'upcoming', distanceKm: '0.0 km' },
-      { id: 's302', name: 'Postogola Bridge', nameBn: 'পোস্তগোলা ব্রিজ', scheduledTime: '05:32 PM', passengers: 7, status: 'upcoming', distanceKm: '6.8 km' },
-      { id: 's303', name: 'Jatrabari Flyover Ramp', nameBn: 'যাত্রাবাড়ী ফ্লাইওভার র‍্যাম্প', scheduledTime: '05:48 PM', passengers: 11, status: 'upcoming', distanceKm: '10.5 km' },
-      { id: 's304', name: 'Signboard Link Road', nameBn: 'সাইনবোর্ড লিংক রোড', scheduledTime: '06:05 PM', passengers: 12, status: 'upcoming', distanceKm: '16.2 km' },
-      { id: 's305', name: 'Chashara Terminal', nameBn: 'চাষাড়া টার্মিনাল', scheduledTime: '06:25 PM', passengers: 18, status: 'upcoming', distanceKm: '24.0 km' },
-    ]
-  },
-  'route-4': {
-    id: 'route-4',
-    name: 'Route-4: Dhanmondi-27 ➔ Science Lab ➔ New Market ➔ Azimpur ➔ Plant',
-    nameBn: 'রুট-৪: ধানমন্ডি-২৭ ➔ সায়েন্স ল্যাব ➔ নিউ মার্কেট ➔ আজিমপুর ➔ প্ল্যান্ট',
-    coachNo: 'DHAKA METRO-BA 13-9021',
-    model: 'Ashok Leyland Falcon Intercity',
-    driverName: 'Selim Reza',
-    driverPhone: '+880 1711-447700',
-    conductorName: 'Nasir Uddin',
-    conductorPhone: '+880 1813-665544',
-    speed: '32 km/h',
-    nextStop: 'New Market Overbridge',
-    nextEta: '9 mins (07:37 AM)',
-    progressPercent: 62,
-    capacity: 52,
-    inboundStops: [
-      { id: 's41', name: 'Dhanmondi-27 (Shatmasjid Rd)', nameBn: 'ধানমন্ডি-২৭ (সাতমসজিদ রোড)', scheduledTime: '06:55 AM', passengers: 14, status: 'passed', distanceKm: '0.0 km' },
-      { id: 's42', name: 'Science Laboratory', nameBn: 'সায়েন্স ল্যাবরেটরি', scheduledTime: '07:12 AM', passengers: 11, status: 'passed', distanceKm: '3.6 km' },
-      { id: 's43', name: 'New Market Footbridge', nameBn: 'নিউ মার্কেট ফুটওভারব্রিজ', scheduledTime: '07:25 AM', passengers: 13, status: 'active', distanceKm: '5.9 km' },
-      { id: 's44', name: 'Azimpur Maternity Gate', nameBn: 'আজিমপুর মাতৃসদন গেট', scheduledTime: '07:36 AM', passengers: 8, status: 'upcoming', distanceKm: '7.8 km' },
-      { id: 's45', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '08:00 AM', passengers: 0, status: 'upcoming', distanceKm: '16.5 km' },
-    ],
-    outboundStops: [
-      { id: 's401', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '05:15 PM', passengers: 46, status: 'upcoming', distanceKm: '0.0 km' },
-      { id: 's402', name: 'Azimpur Maternity Gate', nameBn: 'আজিমপুর মাতৃসদন গেট', scheduledTime: '05:38 PM', passengers: 8, status: 'upcoming', distanceKm: '8.7 km' },
-      { id: 's403', name: 'New Market Footbridge', nameBn: 'নিউ মার্কেট ফুটওভারব্রিজ', scheduledTime: '05:50 PM', passengers: 13, status: 'upcoming', distanceKm: '10.6 km' },
-      { id: 's404', name: 'Science Laboratory', nameBn: 'সায়েন্স ল্যাবরেটরি', scheduledTime: '06:05 PM', passengers: 11, status: 'upcoming', distanceKm: '12.9 km' },
-      { id: 's405', name: 'Dhanmondi-27 (Shatmasjid Rd)', nameBn: 'ধানমন্ডি-২৭ (সাতমসজিদ রোড)', scheduledTime: '06:25 PM', passengers: 14, status: 'upcoming', distanceKm: '16.5 km' },
-    ]
-  }
-};
 
 const INITIAL_SEATS: Seat[] = [
   // Row 1 - Executive / Lead Engineers
@@ -297,9 +126,40 @@ export default function BusView({ role, lang }: ViewProps) {
   const [commuteDirection, setCommuteDirection] = useState<'inbound' | 'outbound'>('inbound');
   const [selectedDate, setSelectedDate] = useState<string>('2026-10-22');
 
+  // Bus Fleet and Routes State (All 10 Commuter Buses)
+  const [buses, setBuses] = useState<BusVehicle[]>(INITIAL_BUSES);
+  const [routes, setRoutes] = useState<Record<string, RouteInfo>>(INITIAL_ROUTES);
+  const [routeSeats, setRouteSeats] = useState<Record<string, Seat[]>>(() => {
+    const initial: Record<string, Seat[]> = {
+      'route-1': INITIAL_SEATS,
+    };
+    Object.keys(INITIAL_ROUTES).forEach(k => {
+      if (k !== 'route-1') {
+        initial[k] = generateSeatsForRoute(k, INITIAL_ROUTES[k]?.capacity || 52);
+      }
+    });
+    return initial;
+  });
+
+  // Supervisor deck sub-tab: 'fleet' (10-bus grid) vs 'seats' (52-seater layout)
+  const [supervisorSubTab, setSupervisorSubTab] = useState<'fleet' | 'seats'>('fleet');
+
   // Routes & Seats State
   const [selectedRouteKey, setSelectedRouteKey] = useState<string>('route-1');
-  const [seats, setSeats] = useState<Seat[]>(INITIAL_SEATS);
+  const [seats, setSeatsState] = useState<Seat[]>(INITIAL_SEATS);
+
+  // Synchronized setter for seats that maintains routeSeats map
+  const setSeats = (action: React.SetStateAction<Seat[]>) => {
+    setSeatsState(prev => {
+      const nextVal = typeof action === 'function' ? action(prev) : action;
+      setRouteSeats(rPrev => ({
+        ...rPrev,
+        [selectedRouteKey]: nextVal,
+      }));
+      return nextVal;
+    });
+  };
+
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>(INITIAL_WAITLIST);
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(INITIAL_SEATS[4]); // Seat #5 Tanvir Ahmed
 
@@ -322,6 +182,14 @@ export default function BusView({ role, lang }: ViewProps) {
   const [showManifestModal, setShowManifestModal] = useState<boolean>(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState<boolean>(false);
   const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
+
+  // Supervisor Dedicated Modals
+  const [showRegisterBusModal, setShowRegisterBusModal] = useState<boolean>(false);
+  const [showRouteBuilderModal, setShowRouteBuilderModal] = useState<boolean>(false);
+  const [routeToEdit, setRouteToEdit] = useState<RouteInfo | null>(null);
+  const [showSupervisorSeatModal, setShowSupervisorSeatModal] = useState<boolean>(false);
+  const [showReassignBusModal, setShowReassignBusModal] = useState<boolean>(false);
+  const [reassignBusTarget, setReassignBusTarget] = useState<BusVehicle | null>(null);
 
   // Form States
   const [vacateReason, setVacateReason] = useState<string>('Working from Corporate HQ Dhaka');
@@ -379,7 +247,11 @@ export default function BusView({ role, lang }: ViewProps) {
     showSwapModal ||
     showManifestModal ||
     showBroadcastModal ||
-    showPolicyModal;
+    showPolicyModal ||
+    showRegisterBusModal ||
+    showRouteBuilderModal ||
+    showSupervisorSeatModal ||
+    showReassignBusModal;
 
   useEffect(() => {
     if (isAnyModalOpen) {
@@ -391,8 +263,8 @@ export default function BusView({ role, lang }: ViewProps) {
     }
   }, [isAnyModalOpen]);
 
-  const activeRoute = ROUTES_DATA[selectedRouteKey] || ROUTES_DATA['route-1'];
-  const activeStops = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
+  const activeRoute: RouteInfo = routes[selectedRouteKey] || routes['route-1'] || INITIAL_ROUTES['route-1'];
+  const activeStops: RouteStop[] = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
 
   // Current logged-in user profile (Tanvir Ahmed, Seat #5)
   const mySeat = seats.find(s => s.num === 5);
@@ -750,6 +622,132 @@ export default function BusView({ role, lang }: ViewProps) {
     );
   };
 
+  // Switch active route and load that route's seat map
+  const handleSelectRoute = (routeKey: string) => {
+    setSelectedRouteKey(routeKey);
+    const targetSeats = routeSeats[routeKey] || generateSeatsForRoute(routeKey, routes[routeKey]?.capacity || 52);
+    setSeatsState(targetSeats);
+    setSelectedSeat(targetSeats[0] || null);
+  };
+
+  // Supervisor: List/Register New Bus
+  const handleSaveNewBus = (newBus: BusVehicle) => {
+    setBuses(prev => [newBus, ...prev]);
+    if (!routeSeats[newBus.assignedRouteId]) {
+      setRouteSeats(prev => ({
+        ...prev,
+        [newBus.assignedRouteId]: generateSeatsForRoute(newBus.assignedRouteId, newBus.capacity)
+      }));
+    }
+    showToast(
+      t(
+        `✓ New Bus ${newBus.coachNo} (${newBus.plateNo}) registered & assigned to ${newBus.assignedRoadName}!`,
+        `✓ নতুন বাস ${newBus.coachNo} সফলভাবে যুক্ত ও রুটে বরাদ্দ করা হয়েছে!`,
+        lang
+      ),
+      'gold'
+    );
+  };
+
+  // Supervisor: Save / Update Road Corridor & Timetable
+  const handleSaveRoute = (updatedRoute: RouteInfo) => {
+    setRoutes(prev => ({
+      ...prev,
+      [updatedRoute.id]: updatedRoute,
+    }));
+    setBuses(prev => prev.map(b => {
+      if (b.assignedRouteId === updatedRoute.id) {
+        return {
+          ...b,
+          assignedRoadName: updatedRoute.name.split(':')[1]?.trim() || updatedRoute.name,
+          driverName: updatedRoute.driverName,
+          driverPhone: updatedRoute.driverPhone,
+          conductorName: updatedRoute.conductorName,
+          conductorPhone: updatedRoute.conductorPhone,
+        };
+      }
+      return b;
+    }));
+    showToast(
+      t(
+        `✓ Road Corridor "${updatedRoute.name}" path & stoppages saved successfully!`,
+        `✓ রোড করিডোর ও স্টপেজ সময়সূচী সংরক্ষণ সম্পন্ন হয়েছে!`,
+        lang
+      ),
+      'gold'
+    );
+  };
+
+  // Supervisor: Save Custom Seat Reservation for Specific Employee
+  const handleSupervisorSaveSeat = (updatedSeat: Seat) => {
+    setSeats(prev => prev.map(s => (s.num === updatedSeat.num ? updatedSeat : s)));
+    if (selectedSeat?.num === updatedSeat.num) {
+      setSelectedSeat(updatedSeat);
+    }
+    showToast(
+      t(
+        `✓ Supervisor: Seat #${updatedSeat.num} reserved for ${updatedSeat.assignedTo || 'Unassigned'} (${updatedSeat.category})!`,
+        `✓ সুপারভাইজার: সিট #${updatedSeat.num} সংরক্ষিত করা হয়েছে (${updatedSeat.assignedTo})!`,
+        lang
+      ),
+      'gold'
+    );
+  };
+
+  // Supervisor: Vacate a seat for standby promotion
+  const handleSupervisorVacateSeat = (seatNum: number, reason: string) => {
+    setSeats(prev => prev.map(s => s.num === seatNum ? {
+      ...s,
+      status: 'vacated',
+      vacatedReason: reason,
+      boarded: false,
+    } : s));
+    showToast(t(`Seat #${seatNum} placed into FIFO standby pool.`, `সিট #${seatNum} স্ট্যান্ডবাই পুলে পাঠানো হয়েছে।`, lang), 'gold');
+  };
+
+  // Supervisor: Clear a seat back to empty
+  const handleSupervisorClearSeat = (seatNum: number) => {
+    setSeats(prev => prev.map(s => s.num === seatNum ? {
+      ...s,
+      assignedTo: null,
+      staffId: undefined,
+      dept: null,
+      phone: undefined,
+      pickupPoint: undefined,
+      status: 'empty',
+      vacatedReason: undefined,
+      boarded: false,
+      isStandbyPromoted: false,
+    } : s));
+    showToast(t(`Seat #${seatNum} reset to empty state.`, `সিট #${seatNum} খালি করা হয়েছে।`, lang), 'info');
+  };
+
+  // Supervisor: Reassign Bus to another Route
+  const handleReassignBusRoute = (busId: string, newRouteId: string, reason: string) => {
+    const targetRoute = routes[newRouteId];
+    if (!targetRoute) return;
+
+    setBuses(prev => prev.map(b => {
+      if (b.id === busId) {
+        return {
+          ...b,
+          assignedRouteId: newRouteId,
+          assignedRoadName: targetRoute.name.split(':')[1]?.trim() || targetRoute.name,
+        };
+      }
+      return b;
+    }));
+
+    showToast(
+      t(
+        `✓ Bus reallocated to ${targetRoute.name}. Real-time passenger SMS & Dispatch notice fired: "${reason}"`,
+        `✓ বাস নতুন রুটে স্থানান্তরিত হয়েছে। যাত্রীদের সতর্কবার্তা প্রেরণ করা হয়েছে।`,
+        lang
+      ),
+      'gold'
+    );
+  };
+
   return (
     <div className="view-container view-transition-wrapper">
       {/* ─── Top Header with Perspective Switcher & Enterprise Quick Tools ── */}
@@ -985,50 +983,246 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
         </div>
       ) : (
-        <div style={{
-          background: 'rgba(212, 175, 55, 0.08)',
-          border: '1.5px solid #D4AF37',
-          padding: '9px 14px',
-          borderRadius: '10px',
-          marginBottom: '14px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          fontSize: '11.5px',
-          color: 'var(--brand-slate-900)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={16} color="#B45309" />
-            <div>
-              <strong>{t('Plant Transport Supervisor Administrative Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক প্রশাসনিক মোড:', lang)}</strong>{' '}
-              {t(
-                'Full authority to execute automated FIFO standby seat promotions, allocate empty seats, swap seating assignments, manage conductor door gates, and broadcast delay dispatches.',
-                'স্বয়ংক্রিয় ফিফো আসন বণ্টন, সিট পুনর্বিন্যাস, কন্ডাক্টর গেট মনিটরিং এবং বিলম্ব নোটিশ সম্প্রচারের সম্পূর্ণ প্রশাসনিক ক্ষমতা।',
-                lang
-              )}
+        <>
+          {/* Supervisor Status Banner */}
+          <div style={{
+            background: 'rgba(212, 175, 55, 0.08)',
+            border: '1.5px solid #D4AF37',
+            padding: '9px 14px',
+            borderRadius: '10px',
+            marginBottom: '10px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '11.5px',
+            color: 'var(--brand-slate-900)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Shield size={16} color="#B45309" />
+              <div>
+                <strong>{t('Plant Transport Supervisor Administrative Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক প্রশাসনিক মোড:', lang)}</strong>{' '}
+                {t(
+                  'Full operational control to register buses, define road paths & sequential stops, assign drivers, reserve specific seats for any employee, and execute automated FIFO promotions.',
+                  'বাস নিবন্ধন, রোড ও স্টপেজ নির্ধারণ, চালক নিয়োগ, কর্মচারীদের আসন বরাদ্দ এবং স্বয়ংক্রিয় ফিফো বণ্টনের সম্পূর্ণ প্রশাসনিক ক্ষমতা।',
+                  lang
+                )}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '10.5px', padding: '4px 9px', borderColor: '#D4AF37', color: '#B45309' }}
+                onClick={() => setShowBroadcastModal(true)}
+              >
+                <Send size={11} /> {t('Broadcast Delay', 'বিলম্ব বিজ্ঞপ্তি', lang)}
+              </button>
+              <button
+                className="btn-gold"
+                style={{ fontSize: '10.5px', padding: '4px 10px', whiteSpace: 'nowrap' }}
+                onClick={handleSupervisorAutoFIFO}
+              >
+                <Sparkles size={12} /> {t('⚡ Run Auto-FIFO Engine', 'স্বয়ংক্রিয় ফিফো রান', lang)}
+              </button>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              className="btn-outline"
-              style={{ fontSize: '10.5px', padding: '4px 9px', borderColor: '#D4AF37', color: '#B45309' }}
-              onClick={() => setShowBroadcastModal(true)}
-            >
-              <Send size={11} /> {t('Broadcast Delay', 'বিলম্ব বিজ্ঞপ্তি', lang)}
-            </button>
-            <button
-              className="btn-gold"
-              style={{ fontSize: '10.5px', padding: '4px 10px', whiteSpace: 'nowrap' }}
-              onClick={handleSupervisorAutoFIFO}
-            >
-              <Sparkles size={12} /> {t('⚡ Run Auto-FIFO Engine', 'স্বয়ংক্রিয় ফিফো রান', lang)}
-            </button>
+
+          {/* Supervisor Command Sub-Tabs & Direct Actions */}
+          <div style={{
+            background: 'linear-gradient(135deg, #091024 0%, #1e293b 100%)',
+            border: '1.5px solid rgba(212, 175, 55, 0.6)',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            marginBottom: '14px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '10px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
+          }}>
+            {/* View Sub-Tabs */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {t('Supervisor View:', 'সুপারভাইজার ভিউ:', lang)}
+              </span>
+              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', padding: '3px', borderRadius: '8px', gap: '3px' }}>
+                <button
+                  onClick={() => setSupervisorSubTab('fleet')}
+                  style={{
+                    background: supervisorSubTab === 'fleet' ? '#D4AF37' : 'transparent',
+                    color: supervisorSubTab === 'fleet' ? '#000000' : '#E2E8F0',
+                    border: 'none',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Bus size={13} />
+                  <span>{t('10-Bus Fleet & Road Corridors', '১০টি বাস ও রোড করিডোর তালিকা', lang)}</span>
+                  <span style={{
+                    fontSize: '10px',
+                    background: supervisorSubTab === 'fleet' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+                    padding: '1px 5px',
+                    borderRadius: '10px'
+                  }}>
+                    {buses.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setSupervisorSubTab('seats')}
+                  style={{
+                    background: supervisorSubTab === 'seats' ? '#D4AF37' : 'transparent',
+                    color: supervisorSubTab === 'seats' ? '#000000' : '#E2E8F0',
+                    border: 'none',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <Users size={13} />
+                  <span>{t('Interactive 52-Seat Coach & FIFO Desk', '৫২-সিটার বাস লেআউট ও ফিফো', lang)}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Direct Supervisor Action Triggers */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setShowRegisterBusModal(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                }}
+              >
+                <UserPlus size={13} />
+                <span>+ {t('Enlist New Bus', 'নতুন বাস যুক্ত করুন', lang)}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setRouteToEdit(activeRoute);
+                  setShowRouteBuilderModal(true);
+                }}
+                style={{
+                  background: 'rgba(212, 175, 55, 0.18)',
+                  border: '1.5px solid #D4AF37',
+                  color: '#FDE68A',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                <MapPin size={13} />
+                <span>{t('Define Road & Stops', 'রোড ও স্টপেজ তৈরি', lang)}</span>
+              </button>
+
+              <button
+                onClick={() => setShowSupervisorSeatModal(true)}
+                style={{
+                  background: 'rgba(59, 130, 246, 0.18)',
+                  border: '1.5px solid #60A5FA',
+                  color: '#93C5FD',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                <Award size={13} />
+                <span>{t('Reserve Seat for Staff', 'স্টাফের জন্য সিট রিজার্ভ', lang)}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
+                  setReassignBusTarget(b);
+                  setShowReassignBusModal(true);
+                }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  color: '#F1F5F9',
+                  padding: '5px 11px',
+                  borderRadius: '6px',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                <RefreshCw size={13} />
+                <span>{t('Reassign Bus', 'বাস পরিবর্তন', lang)}</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
-      {/* ─── Unified Sleek Commuter & Fleet Command Bar ─────────────── */}
-      <div className="card mb-3" style={{
+      {/* ─── Conditionally Render: Fleet Overview Grid vs. Coach Fuselage View ─── */}
+      {activePerspective === 'supervisor' && supervisorSubTab === 'fleet' ? (
+        <BusFleetOverviewGrid
+          buses={buses}
+          routes={routes}
+          routeSeats={routeSeats}
+          selectedRouteKey={selectedRouteKey}
+          onSelectRoute={(routeId: string) => {
+            handleSelectRoute(routeId);
+            setSupervisorSubTab('seats');
+          }}
+          onOpenAddBus={() => setShowRegisterBusModal(true)}
+          onOpenRouteBuilder={(route?: RouteInfo) => {
+            setRouteToEdit(route || activeRoute);
+            setShowRouteBuilderModal(true);
+          }}
+          onOpenReassign={() => {
+            const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
+            setReassignBusTarget(b);
+            setShowReassignBusModal(true);
+          }}
+          onOpenSupervisorSeat={(routeKey: string) => {
+            handleSelectRoute(routeKey);
+            setShowSupervisorSeatModal(true);
+          }}
+          lang={lang}
+        />
+      ) : (
+        <>
+          {/* ─── Unified Sleek Commuter & Fleet Command Bar ─────────────── */}
+          <div className="card mb-3" style={{
         background: 'linear-gradient(135deg, #091024 0%, #111D3B 100%)',
         color: '#FFFFFF',
         border: '1px solid #1E293B',
@@ -1112,14 +1306,14 @@ export default function BusView({ role, lang }: ViewProps) {
 
           {/* Sub-card 2: Route Selector & Live Beacon */}
           <div>
-            {/* Route Selector Tabs */}
-            <div style={{ display: 'flex', gap: '5px', marginBottom: '6px' }}>
-              {Object.values(ROUTES_DATA).map(route => {
+            {/* Route Selector Tabs (All 10 Routes) */}
+            <div style={{ display: 'flex', gap: '5px', marginBottom: '6px', overflowX: 'auto', paddingBottom: '3px' }}>
+              {Object.values(routes).map((route: RouteInfo) => {
                 const isSelected = route.id === selectedRouteKey;
                 return (
                   <button
                     key={route.id}
-                    onClick={() => setSelectedRouteKey(route.id)}
+                    onClick={() => handleSelectRoute(route.id)}
                     style={{
                       background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255, 255, 255, 0.06)',
                       border: isSelected ? '1.5px solid #D4AF37' : '1px solid rgba(255, 255, 255, 0.12)',
@@ -1131,10 +1325,14 @@ export default function BusView({ role, lang }: ViewProps) {
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      gap: '4px',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0
                     }}
+                    title={`${route.coachNo} - ${route.name}`}
                   >
-                    <span>{route.name.split(':')[0]}</span>
+                    <span>{route.coachNo}</span>
+                    <span style={{ opacity: 0.65, fontSize: '9.5px' }}>({route.name.split(':')[0]})</span>
                     {isSelected && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#34D399' }} />}
                   </button>
                 );
@@ -2088,7 +2286,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
               <div className="card-body">
                 <div className="route-stop-timeline">
-                  {activeStops.map(stop => {
+                  {activeStops.map((stop: RouteStop) => {
                     const isPassed = stop.status === 'passed';
                     const isActive = stop.status === 'active';
 
@@ -2270,6 +2468,8 @@ export default function BusView({ role, lang }: ViewProps) {
           )}
         </div>
       </div>
+    </>
+  )}
 
       {/* ─── MODAL 1: Voluntary Seat Release Dialog ─────────────────── */}
       {showVacateDialog && createPortal(
@@ -2466,7 +2666,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       value={bookForm.pickupPoint}
                       onChange={e => setBookForm({ ...bookForm, pickupPoint: e.target.value })}
                     >
-                      {activeStops.map(s => (
+                      {activeStops.map((s: RouteStop) => (
                         <option key={s.id} value={s.name}>
                           {s.name} ({s.scheduledTime})
                         </option>
@@ -3207,7 +3407,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     value={joinForm.pickupPoint}
                     onChange={e => setJoinForm({ ...joinForm, pickupPoint: e.target.value })}
                   >
-                    {activeStops.map(s => (
+                    {activeStops.map((s: RouteStop) => (
                       <option key={s.id} value={s.name}>
                         {s.name} ({s.scheduledTime})
                       </option>
@@ -3278,6 +3478,64 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
         </div>,
         document.body
+      )}
+
+      {/* ─── SUPERVISOR MODAL 1: Register New Bus into Fleet ─────────── */}
+      {showRegisterBusModal && (
+        <RegisterBusModal
+          isOpen={showRegisterBusModal}
+          onClose={() => setShowRegisterBusModal(false)}
+          onRegister={handleSaveNewBus}
+          routes={routes}
+          lang={lang}
+        />
+      )}
+
+      {/* ─── SUPERVISOR MODAL 2: Route Builder (Corridor, Stops, Timetable) ─── */}
+      {showRouteBuilderModal && (
+        <RouteBuilderModal
+          isOpen={showRouteBuilderModal}
+          onClose={() => {
+            setShowRouteBuilderModal(false);
+            setRouteToEdit(null);
+          }}
+          onSaveRoute={handleSaveRoute}
+          existingRoute={routeToEdit || activeRoute}
+          buses={buses}
+          lang={lang}
+        />
+      )}
+
+      {/* ─── SUPERVISOR MODAL 3: Supervisor Reserve Seat for Staff ───── */}
+      {showSupervisorSeatModal && (
+        <SupervisorSeatModal
+          isOpen={showSupervisorSeatModal}
+          onClose={() => setShowSupervisorSeatModal(false)}
+          seat={selectedSeat}
+          allSeats={seats}
+          activeRoute={activeRoute}
+          onAssignSeat={handleSupervisorSaveSeat}
+          onVacateSeat={handleSupervisorVacateSeat}
+          onClearSeat={handleSupervisorClearSeat}
+          lang={lang}
+        />
+      )}
+
+      {/* ─── SUPERVISOR MODAL 4: Dynamic Bus-to-Route Reassignment ──── */}
+      {showReassignBusModal && (
+        <ReassignBusRouteModal
+          isOpen={showReassignBusModal}
+          onClose={() => {
+            setShowReassignBusModal(false);
+            setReassignBusTarget(null);
+          }}
+          buses={buses}
+          routes={routes}
+          onReassign={(busId: string, targetRouteId: string) => {
+            handleReassignBusRoute(busId, targetRouteId, 'Dynamic Fleet Route Reallocation');
+          }}
+          lang={lang}
+        />
       )}
     </div>
   );
