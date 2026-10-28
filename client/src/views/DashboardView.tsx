@@ -29,7 +29,11 @@ import HodDashboard from './dashboard/HodDashboard';
 import EmployeeDashboard from './dashboard/EmployeeDashboard';
 import DriverDashboard from './dashboard/DriverDashboard';
 
-export default function DashboardView({ role, lang }: ViewProps) {
+interface DashboardViewProps extends ViewProps {
+  onNavigate?: (view: any) => void;
+}
+
+export default function DashboardView({ role, lang, onNavigate }: DashboardViewProps) {
   const [selectedDrawerItem, setSelectedDrawerItem] = useState<DetailDrawerData | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [showBatchReleaseModal, setShowBatchReleaseModal] = useState(false);
@@ -333,7 +337,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #BFDBFE', background: '#EFF6FF' }}
-                  onClick={() => showToast('📍 Geofence verified: Punched In at South Gate Keraniganj Complex (08:52 AM)', 'success')}
+                  onClick={() => onNavigate ? onNavigate('attendance') : showToast('📍 Geofence verified: South Gate Keraniganj Complex', 'success')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <MapPin size={20} />
@@ -345,7 +349,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--brand-gold-muted)', background: 'var(--brand-card-bg)' }}
-                  onClick={() => showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
+                  onClick={() => onNavigate ? onNavigate('fleet') : showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F59E0B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Car size={20} />
@@ -357,7 +361,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #A7F3D0', background: '#ECFDF5' }}
-                  onClick={() => showToast('🚌 Commuter Shuttle Pass: Seat #7, Mirpur-Keraniganj Express Active', 'success')}
+                  onClick={() => onNavigate ? onNavigate('bus') : showToast('🚌 Commuter Shuttle Pass: Seat #7 Active', 'success')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Bus size={20} />
@@ -369,7 +373,7 @@ export default function DashboardView({ role, lang }: ViewProps) {
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #DDD6FE', background: '#F5F3FF' }}
-                  onClick={() => showToast('🧾 Local Conveyance & Tour Claim form ready.', 'info')}
+                  onClick={() => onNavigate ? onNavigate('claims') : showToast('🧾 Opening Claim Submission...', 'info')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#8B5CF6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Receipt size={20} />

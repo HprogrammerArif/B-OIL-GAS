@@ -149,7 +149,7 @@ export default function App() {
 
         <main className={`page-content${view === 'inner_circle' ? ' no-padding-chat' : ''}`}>
           <div key={view} className="view-transition-wrapper">
-            {view === 'dashboard'      && <DashboardView      role={role} lang={lang} />}
+            {view === 'dashboard'      && <DashboardView      role={role} lang={lang} onNavigate={setView} />}
             {view === 'inner_circle'   && <InnerCircleChat    role={role} lang={lang} />}
             {view === 'notesheet'      && <NotesheetView      role={role} lang={lang} />}
             {view === 'compliance'     && <ComplianceView     role={role} lang={lang} />}

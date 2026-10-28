@@ -4,7 +4,8 @@ import { showToast } from '../App';
 import {
   Wrench, ShieldCheck, AlertTriangle, Calendar, Search, Filter,
   Download, Plus, RefreshCw, Barcode, CheckCircle, Clock,
-  Cpu, Truck, Gauge, Shield, ChevronRight, Layers, DollarSign
+  Cpu, Truck, Gauge, Shield, ChevronRight, Layers, DollarSign,
+  X, QrCode, Printer
 } from 'lucide-react';
 
 interface AssetRecord {
@@ -113,6 +114,57 @@ export default function AssetView({ role, lang }: ViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAsset, setSelectedAsset] = useState<AssetRecord | null>(INITIAL_ASSETS[0]);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showPassportModal, setShowPassportModal] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
+
+  // New Asset Form State
+  const [newTag, setNewTag] = useState('BOGCL-KER-PMP-105');
+  const [newName, setNewName] = useState('');
+  const [newCategory, setNewCategory] = useState<'plant' | 'vehicle' | 'it' | 'safety'>('plant');
+  const [newLocation, setNewLocation] = useState('Keraniganj Refinery — Column Farm Unit 2');
+  const [newCustodian, setNewCustodian] = useState('Engr. Md. Harunur Rashid');
+  const [newCost, setNewCost] = useState('4500000');
+  const [newSpecs, setNewSpecs] = useState('High-Pressure Bitumen Circulation Booster Pump (24 Bar, Explosion-Proof)');
+  const [newSerial, setNewSerial] = useState('SLZ-BPP-2026-BD');
+  const [newDaysToService, setNewDaysToService] = useState('90');
+
+  const handleRegisterAsset = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName.trim()) {
+      showToast(lang === 'en' ? 'Please specify asset equipment name.' : 'অনুগ্রহ করে সম্পদের নাম উল্লেখ করুন।', 'warn');
+      return;
+    }
+    const costNum = Number(newCost) || 1000000;
+    const newRecord: AssetRecord = {
+      id: `AST-${String(assets.length + 1).padStart(3, '0')}`,
+      tag: newTag.trim() || `BOGCL-EQ-${Date.now().toString().slice(-4)}`,
+      name: newName.trim(),
+      category: newCategory,
+      location: newLocation,
+      custodian: newCustodian,
+      procurementDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      purchaseCost: costNum,
+      currentBookValue: costNum,
+      status: 'operational',
+      nextServiceDate: '28 Apr 2027',
+      daysToService: Number(newDaysToService) || 90,
+      serialNo: newSerial.trim() || `SN-${Date.now().toString().slice(-6)}`,
+      specs: newSpecs.trim() || 'Industrial heavy machinery specification certified for refinery operations',
+    };
+
+    setAssets(prev => [newRecord, ...prev]);
+    setSelectedAsset(newRecord);
+    setShowRegisterModal(false);
+    // Reset form
+    setNewName('');
+    showToast(
+      lang === 'en'
+        ? `✓ Asset Tag ${newRecord.tag} registered in ERP database with QR barcode passport.`
+        : `✓ সম্পদ ট্যাগ ${newRecord.tag} সফলভাবে ডেটাবেজে নিবন্ধিত হয়েছে।`,
+      'success'
+    );
+  };
 
   const filteredAssets = assets.filter(a => {
     const matchesCat = categoryFilter === 'all' || a.category === categoryFilter;
@@ -177,13 +229,13 @@ export default function AssetView({ role, lang }: ViewProps) {
         <div className="btn-group">
           <button
             className="btn-primary"
-            onClick={() => showToast(t('Asset registration modal opened.', 'নতুন সম্পদ নিবন্ধন উইন্ডো উন্মুক্ত।', lang), 'info')}
+            onClick={() => setShowRegisterModal(true)}
           >
             <Plus size={15} /> {t('Register Asset Tag', 'নতুন সম্পদ নিবন্ধন', lang)}
           </button>
           <button
             className="btn-outline"
-            onClick={() => showToast(t('QR / Barcode audit scanner active.', 'কিউআর/বারকোড অডিট স্ক্যানার সক্রিয়।', lang), 'info')}
+            onClick={() => setShowScanModal(true)}
           >
             <Barcode size={15} /> {t('Scan Asset Tag', 'ট্যাগ স্ক্যান', lang)}
           </button>
@@ -385,7 +437,7 @@ export default function AssetView({ role, lang }: ViewProps) {
                 <button
                   className="btn-outline"
                   style={{ width: '100%', justifyContent: 'center' }}
-                  onClick={() => showToast(t(`Generated Asset QR Passport for ${selectedAsset.tag}`, `কিউআর পাসপোর্ট জেনারেট সম্পন্ন`, lang), 'info')}
+                  onClick={() => setShowPassportModal(true)}
                 >
                   <Barcode size={15} /> {t('Print High-Durability Metal QR Tag', 'ধাতব কিউআর ট্যাগ প্রিন্ট করুন', lang)}
                 </button>
@@ -394,6 +446,350 @@ export default function AssetView({ role, lang }: ViewProps) {
           </div>
         )}
       </div>
+
+      {/* ══════════════════════════════════════════════════
+          MODAL 1: REGISTER NEW ASSET TAG
+          ══════════════════════════════════════════════════ */}
+      {showRegisterModal && (
+        <div className="modal-bg" onClick={() => setShowRegisterModal(false)}>
+          <div className="modal" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd">
+              <div className="modal-hd-left">
+                <div className="modal-hd-icon" style={{ background: '#EFF6FF', color: '#1D4ED8' }}>
+                  <Plus size={18} />
+                </div>
+                <div>
+                  <h3 className="modal-title">{t('Register Heavy Asset / Plant Equipment', 'নতুন মূলধনী সম্পদ নিবন্ধন', lang)}</h3>
+                  <div className="modal-subtitle">SAP S/4HANA Asset Accounting (FI-AA) • ASME Sec VIII Class</div>
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => setShowRegisterModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterAsset}>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label className="form-label">{t('Asset Tag Identifier', 'অ্যাসেট ট্যাগ কোড', lang)} *</label>
+                    <input
+                      className="form-input"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      placeholder="e.g. BOGCL-KER-PMP-105"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">{t('Equipment Category', 'সরঞ্জাম শ্রেণী', lang)} *</label>
+                    <select
+                      className="form-input"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value as any)}
+                    >
+                      <option value="plant">⚙️ Refinery Plant & Columns</option>
+                      <option value="vehicle">🚛 Fleet & Tankers</option>
+                      <option value="it">💻 SCADA / DCS IT Master</option>
+                      <option value="safety">🛡️ Safety & Gas Detection</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="form-label">{t('Equipment / Machine Title', 'যন্ত্রপাতির পূর্ণ নাম', lang)} *</label>
+                  <input
+                    className="form-input"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="e.g. Sulzer Multiphase Feed Pump Unit 3"
+                    required
+                  />
+                </div>
+
+                <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label className="form-label">{t('Assigned Location', 'স্থাপনের অবস্থান', lang)}</label>
+                    <input
+                      className="form-input"
+                      value={newLocation}
+                      onChange={(e) => setNewLocation(e.target.value)}
+                      placeholder="e.g. Keraniganj Complex Unit 2"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">{t('Custodian Engineer / Officer', 'দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}</label>
+                    <input
+                      className="form-input"
+                      value={newCustodian}
+                      onChange={(e) => setNewCustodian(e.target.value)}
+                      placeholder="e.g. Engr. Md. Harunur Rashid"
+                    />
+                  </div>
+                </div>
+
+                <div className="responsive-col-2-eq" style={{ gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label className="form-label">{t('Procurement Cost (BDT ৳)', 'ক্রয়মূল্য (টাকা)', lang)}</label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      value={newCost}
+                      onChange={(e) => setNewCost(e.target.value)}
+                      placeholder="4500000"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">{t('Calibration Cycle (Days)', 'ক্যালিব্রেশন মেয়াদ (দিন)', lang)}</label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      value={newDaysToService}
+                      onChange={(e) => setNewDaysToService(e.target.value)}
+                      placeholder="90"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="form-label">{t('Serial Number & Manufacturer Model', 'সিরিয়াল নম্বর ও মডেল', lang)}</label>
+                  <input
+                    className="form-input"
+                    value={newSerial}
+                    onChange={(e) => setNewSerial(e.target.value)}
+                    placeholder="e.g. SLZ-BPP-2026-BD"
+                  />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="form-label">{t('Technical Operating Specifications', 'প্রযুক্তিগত বৈশিষ্ট্য', lang)}</label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    value={newSpecs}
+                    onChange={(e) => setNewSpecs(e.target.value)}
+                    placeholder="Operating Temp, Pressure, Voltage, explosion-proof rating..."
+                  />
+                </div>
+              </div>
+
+              <div className="modal-ft">
+                <button type="button" className="btn-sm-ghost" onClick={() => setShowRegisterModal(false)}>
+                  {t('Cancel', 'বাতিল', lang)}
+                </button>
+                <button type="submit" className="btn-primary">
+                  <CheckCircle size={15} /> {t('Commit Asset Register & Gen Tag', 'সংরক্ষণ ও ট্যাগ তৈরি', lang)}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          MODAL 2: HIGH-DURABILITY ASSET QR PASSPORT
+          ══════════════════════════════════════════════════ */}
+      {showPassportModal && selectedAsset && (
+        <div className="modal-bg" onClick={() => setShowPassportModal(false)}>
+          <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div className="modal-hd-left">
+                <div className="modal-hd-icon" style={{ background: 'rgba(255,255,255,0.15)', color: '#FCD34D' }}>
+                  <QrCode size={18} />
+                </div>
+                <div>
+                  <h3 className="modal-title" style={{ color: '#fff' }}>
+                    {t('Digital Equipment Passport & Metal QR Tag', 'ডিজিটাল সরঞ্জাম পাসপোর্ট ও মেটাল কিউআর ট্যাগ', lang)}
+                  </h3>
+                  <div className="modal-subtitle" style={{ color: '#94A3B8' }}>
+                    ISO 55001 Asset Management • Tamper-Evident Anodized Metal Seal
+                  </div>
+                </div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowPassportModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* Simulated Brushed Stainless Steel Nameplate */}
+              <div style={{
+                background: 'linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 50%, #94A3B8 100%)',
+                padding: '18px',
+                borderRadius: '10px',
+                border: '2px solid #64748B',
+                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.15)',
+                color: '#0F172A',
+                fontFamily: 'monospace',
+                marginBottom: '16px',
+                position: 'relative',
+              }}>
+                {/* 4 Screws on Plate Corners */}
+                <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
+                <div style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
+                <div style={{ position: 'absolute', bottom: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
+                <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
+
+                <div style={{ textAlign: 'center', borderBottom: '1.5px solid #475569', paddingBottom: '8px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '13px', letterSpacing: '1px', color: '#7F1424' }}>
+                    BASHUNDHARA OIL & GAS CO. LTD.
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#334155', fontWeight: 700 }}>
+                    KERANIGANJ BITUMEN COMPLEX • CAPITAL ASSET IDENTIFIER
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  {/* QR Graphic Box */}
+                  <div style={{
+                    width: '100px',
+                    height: '100px',
+                    background: '#fff',
+                    borderRadius: '8px',
+                    padding: '6px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px solid #000'
+                  }}>
+                    <QrCode size={78} color="#0F172A" />
+                    <span style={{ fontSize: '7px', fontWeight: 900, color: '#000' }}>{selectedAsset.tag}</span>
+                  </div>
+
+                  {/* Metadata */}
+                  <div style={{ flex: 1, fontSize: '11px', lineHeight: 1.5 }}>
+                    <div><strong>TAG:</strong> <span style={{ color: '#7F1424', fontWeight: 800 }}>{selectedAsset.tag}</span></div>
+                    <div><strong>SERIAL:</strong> {selectedAsset.serialNo}</div>
+                    <div><strong>CLASS:</strong> {selectedAsset.category.toUpperCase()} • ZONE 0 ATEX</div>
+                    <div><strong>COMMISSIONED:</strong> {selectedAsset.procurementDate}</div>
+                    <div><strong>NEXT CAL:</strong> <span style={{ color: selectedAsset.daysToService <= 15 ? '#DC2626' : '#059669', fontWeight: 800 }}>{selectedAsset.nextServiceDate}</span></div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed #64748B', fontSize: '10px', color: '#1E293B' }}>
+                  SPEC: {selectedAsset.specs}
+                </div>
+              </div>
+
+              <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', lineHeight: 1.5 }}>
+                ℹ️ <strong>Field Technician Instructions:</strong> Scan tag using any ATEX Zone-1 intrinsically safe tablet to instantly verify ultrasonic calibration thickness reports and update SCADA telemetry.
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowPassportModal(false)}>
+                {t('Close', 'বন্ধ করুন', lang)}
+              </button>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  showToast(t(`Metal QR plate command dispatched to Keraniganj Laser Etcher for ${selectedAsset.tag}.`, `লেজার প্রিন্টারে প্রেরণ করা হয়েছে।`, lang), 'success');
+                  setShowPassportModal(false);
+                }}
+              >
+                <Printer size={15} /> {t('Print Anodized Aluminum Plate', 'অ্যালুমিনিয়াম প্লেট প্রিন্ট', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          MODAL 3: SIMULATED AUDIT BARCODE/QR SCANNER
+          ══════════════════════════════════════════════════ */}
+      {showScanModal && (
+        <div className="modal-bg" onClick={() => setShowScanModal(false)}>
+          <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div className="modal-hd-left">
+                <div className="modal-hd-icon" style={{ background: 'rgba(255,255,255,0.15)', color: '#34D399' }}>
+                  <Barcode size={18} />
+                </div>
+                <div>
+                  <h3 className="modal-title" style={{ color: '#fff' }}>
+                    {t('Laser Barcode & RFID Scanner', 'লেজার বারকোড ও কিউআর স্ক্যানার', lang)}
+                  </h3>
+                  <div className="modal-subtitle" style={{ color: '#94A3B8' }}>
+                    Optical Recognition Active • Aim at machinery nameplate
+                  </div>
+                </div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowScanModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              {/* Camera Viewfinder */}
+              <div style={{
+                height: '200px',
+                background: '#020617',
+                borderRadius: '10px',
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #334155',
+                marginBottom: '16px',
+              }}>
+                {/* Viewfinder Target */}
+                <div style={{ width: '130px', height: '130px', border: '2px dashed #10B981', borderRadius: '8px', position: 'relative' }}>
+                  {/* Laser Scan line */}
+                  <div style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: '#EF4444',
+                    boxShadow: '0 0 8px #EF4444',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                  }} />
+                </div>
+                <div style={{ position: 'absolute', bottom: '10px', fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
+                  CAMERA: BACK 4K SENSOR • 60 FPS
+                </div>
+              </div>
+
+              <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginBottom: '14px' }}>
+                Select a tag to simulate optical scan detection:
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {assets.slice(0, 3).map((a) => (
+                  <button
+                    key={a.id}
+                    className="btn-outline"
+                    style={{ justifyContent: 'space-between', padding: '8px 12px', fontSize: '12px' }}
+                    onClick={() => {
+                      setSelectedAsset(a);
+                      setShowScanModal(false);
+                      showToast(
+                        lang === 'en'
+                          ? `✓ Scanned ${a.tag} (${a.name}). Loaded calibration dossier.`
+                          : `✓ ট্যাগ ${a.tag} স্ক্যান সম্পন্ন। বিবরণ লোড করা হয়েছে।`,
+                        'success'
+                      );
+                    }}
+                  >
+                    <span><strong>{a.tag}</strong> — {a.name.slice(0, 24)}...</span>
+                    <span className="badge success">Scan Tag</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="modal-ft">
+              <button className="btn-sm-ghost" onClick={() => setShowScanModal(false)}>
+                {t('Close', 'বন্ধ করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -14,6 +14,7 @@ export default function ChairmanDashboard({
   activeTab,
   onOpenDetailDrawer
 }: DashboardSubViewProps) {
+  const [approvalsList, setApprovalsList] = useState(PENDING_APPROVALS);
   const [approvalsPage, setApprovalsPage] = useState(1);
   const [innerCirclePage, setInnerCirclePage] = useState(1);
   const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
@@ -23,6 +24,16 @@ export default function ChairmanDashboard({
   const [noticeSearch, setNoticeSearch] = useState<string>('');
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedNoticeForDetail, setSelectedNoticeForDetail] = useState<NoticeItem | null>(null);
+
+  const handleAuthorize = (item: any) => {
+    setApprovalsList(prev => prev.filter(x => x.id !== item.id));
+    showToast(
+      lang === 'en'
+        ? `👑 Chairman authorized: ${item.id} (${item.amount}). Forwarded to SAP S/4HANA for disbursement.`
+        : `👑 চেয়ারম্যান মহোদয় কর্তৃক অনুমোদিত: ${item.id} (${item.amount})। অর্থছাড়ের জন্য পাঠানো হয়েছে।`,
+      'gold'
+    );
+  };
 
   const filteredInnerCircle = INNER_CIRCLE.filter(p => {
     if (innerCircleFilter === 'all') return true;
@@ -70,47 +81,55 @@ export default function ChairmanDashboard({
                 <div className="card-subtitle">{t('High-value files escalated to Chairman\'s office', 'উচ্চ-মূল্যের ফাইল চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
               </div>
             </div>
-            <span className="badge danger">{PENDING_APPROVALS.length} {t('items', 'টি ফাইল', lang)}</span>
+            <span className="badge danger">{approvalsList.length} {t('items', 'টি ফাইল', lang)}</span>
           </div>
           <div className="card-body">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {PENDING_APPROVALS.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => (
-                <div
-                  key={i}
-                  className="approval-interactive-card"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`
-                  }}
-                  onClick={() => handleRowClick(item)}
-                >
-                  <div>
-                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{item.title}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                      {item.id} · {item.dept} · <strong style={{ color: 'var(--brand-gold-dark)' }}>{item.amount}</strong>
+              {approvalsList.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--brand-slate-500)', fontSize: '13px' }}>
+                  ✓ {t('All high-priority authorizations cleared by Chairman.', 'চেয়ারম্যান কর্তৃক সকল জরুরি ফাইল অনুমোদিত সম্পন্ন হয়েছে।', lang)}
+                </div>
+              ) : (
+                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => (
+                  <div
+                    key={item.id || i}
+                    className="approval-interactive-card"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`
+                    }}
+                    onClick={() => handleRowClick(item)}
+                  >
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{item.title}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
+                        {item.id} · {item.dept} · <strong style={{ color: 'var(--brand-gold-dark)' }}>{item.amount}</strong>
+                      </div>
+                    </div>
+                    <div className="flex-gap" onClick={(e) => e.stopPropagation()}>
+                      <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }} onClick={() => handleAuthorize(item)}>
+                        👑 {t('Authorize', 'অনুমোদন', lang)}
+                      </button>
+                      <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => handleRowClick(item)}>
+                        {t('Inspect File', 'নথি দেখুন', lang)}
+                      </button>
                     </div>
                   </div>
-                  <div className="flex-gap" onClick={(e) => e.stopPropagation()}>
-                    <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }} onClick={() => showToast(`👑 Chairman authorized: ${item.id}`, 'gold')}>
-                      👑 {t('Authorize', 'অনুমোদন', lang)}
-                    </button>
-                    <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => handleRowClick(item)}>
-                      {t('Inspect File', 'নথি দেখুন', lang)}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
-            <Pagination
-              currentPage={approvalsPage}
-              totalItems={PENDING_APPROVALS.length}
-              pageSize={2}
-              onPageChange={setApprovalsPage}
-              lang={lang}
-            />
+            {approvalsList.length > 2 && (
+              <Pagination
+                currentPage={approvalsPage}
+                totalItems={approvalsList.length}
+                pageSize={2}
+                onPageChange={setApprovalsPage}
+                lang={lang}
+              />
+            )}
           </div>
         </div>
       )}
