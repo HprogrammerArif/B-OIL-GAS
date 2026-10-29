@@ -8,7 +8,8 @@ import {
   Printer, Smartphone, ShieldCheck, Send, Sparkles,
   HardHat, Eye, MapPin, Compass, AlertCircle, Share2,
   ExternalLink, Key, CheckSquare, RefreshCw, ChevronRight,
-  Flame, Radio, UserX, MessageSquare
+  Flame, Radio, UserX, MessageSquare, Scan, Camera, Coffee,
+  FileCheck, CheckCircle2, Navigation, Mail, MessageCircle
 } from 'lucide-react';
 
 export interface PermittedZone {
@@ -17,6 +18,14 @@ export interface PermittedZone {
   nameBn: string;
   level: 'green' | 'yellow' | 'red';
   escortRequired: boolean;
+}
+
+export interface InspectionFindingItem {
+  id?: string;
+  focusArea: string;
+  observation: string;
+  status: 'passed' | 'observation' | 'critical';
+  signOffDate: string;
 }
 
 export interface VisitorRecord {
@@ -54,6 +63,14 @@ export interface VisitorRecord {
   idProofType?: 'National ID' | 'Passport' | 'Official Govt Badge' | 'Company ID';
   idProofNumber?: string;
   emergencyContact?: string;
+  // VIP & Inspection Enhancements
+  vipTier?: 'VVIP - Level 1' | 'VIP - Level 2' | 'Official Delegation';
+  escortOfficer?: string;
+  executiveSuite?: string;
+  parkingBay?: string;
+  dietaryPreferences?: string;
+  inspectionFindings?: InspectionFindingItem[];
+  isEvacuatedSafe?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -100,6 +117,17 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     idProofType: 'Official Govt Badge',
     idProofNumber: 'DOE-HQ-9902',
     emergencyContact: 'Dept of Explosives Control: 02-9552144',
+    vipTier: 'VIP - Level 2',
+    escortOfficer: 'Major (Retd.) Tariqul Islam (Security Lead)',
+    executiveSuite: 'Refinery Executive Briefing Suite (Ground Floor)',
+    parkingBay: 'VIP Portico Bay #02',
+    dietaryPreferences: 'Executive High Tea & Green Tea',
+    isEvacuatedSafe: true,
+    inspectionFindings: [
+      { focusArea: 'Tanks 1-8 Nitrogen Blanketing Pressure', observation: 'Pressure maintained at 2.45 bar nominal. Zero leakage detected.', status: 'passed', signOffDate: 'Today, 11:15 AM' },
+      { focusArea: 'Bitumen Relief Valves Hydro-Testing Seals', observation: 'Calibration seals validated against National Metrology Lab standards.', status: 'passed', signOffDate: 'Today, 11:45 AM' },
+      { focusArea: 'Flare Stack Continuous Pilot Scanner', observation: 'Optical pilot flame scanner active with dual igniter redundancy.', status: 'passed', signOffDate: 'Today, 12:10 PM' },
+    ],
   },
 
   // ── 2. INTERNATIONAL VIP DIGNITARY (Pre-Registered - Chairman Escort) ──
@@ -139,6 +167,15 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     idProofType: 'Passport',
     idProofNumber: 'FR-88914022',
     emergencyContact: 'French Embassy Diplomatic Security: 02-55668600',
+    vipTier: 'VVIP - Level 1',
+    escortOfficer: 'Director Technical / Plant General Manager',
+    executiveSuite: 'Chairman Executive Suite & Boardroom (Level 12)',
+    parkingBay: 'Chairman Private Portico Bay #01',
+    dietaryPreferences: 'French Press Espresso & Continental Executive Lunch',
+    isEvacuatedSafe: false,
+    inspectionFindings: [
+      { focusArea: 'Euro-V Hydrocracker Catalyst Space Velocity', observation: 'Technical review of high-sulfur atmospheric residue conversion kinetics.', status: 'passed', signOffDate: 'Scheduled 03:00 PM' },
+    ],
   },
 
   // ── 3. ROADS & HIGHWAYS (RHD) EXECUTIVE (Pre-Registered - Host: TANVIR AHMED) ──
@@ -178,6 +215,15 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     idProofType: 'Official Govt Badge',
     idProofNumber: 'RHD-EE-4190',
     emergencyContact: 'RHD Dhaka Division: 02-48119830',
+    vipTier: 'VIP - Level 2',
+    escortOfficer: 'Tanvir Ahmed (Sales & Commercial Lead)',
+    executiveSuite: 'Commercial Executive Conference Room B (Level 4)',
+    parkingBay: 'Reserved Commercial Portico Bay #04',
+    dietaryPreferences: 'Traditional High Tea & Snacks',
+    isEvacuatedSafe: false,
+    inspectionFindings: [
+      { focusArea: 'Penetration Grade 60/70 Ductility Test', observation: 'Lab tests confirm ductility > 100 cm and softening point 52°C.', status: 'passed', signOffDate: 'Scheduled 03:45 PM' },
+    ],
   },
 
   // ── 4. MAJOR ROAD CONTRACTOR (Checked In - Host: TANVIR AHMED) ──
@@ -217,6 +263,11 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     idProofType: 'National ID',
     idProofNumber: '19842691234567890',
     emergencyContact: 'Corporate HQ: 01819-001122',
+    vipTier: 'Official Delegation',
+    executiveSuite: 'Commercial Meeting Room B',
+    parkingBay: 'Visitor Bay #08',
+    dietaryPreferences: 'Tea & Coffee',
+    isEvacuatedSafe: true,
   },
 
   // ── 5. TECHNICAL VENDOR (Checked In - High Hazards SCADA PLC Checks) ──
@@ -257,6 +308,9 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     idProofType: 'Company ID',
     idProofNumber: 'SIE-BD-8841',
     emergencyContact: 'Siemens Dispatch Control: 02-9883300',
+    escortOfficer: 'Engr. Tariq Ahmed (Process Instrumentation)',
+    parkingBay: 'Technical Contractor Lot Bay #12',
+    isEvacuatedSafe: false,
   },
 
   // ── 6. STATUTORY STANDARDS OFFICER (Checked Out) ──
@@ -292,6 +346,11 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     phone: '+880 1819-876543',
     idProofType: 'Official Govt Badge',
     idProofNumber: 'BSTI-CHEM-092',
+    vipTier: 'VIP - Level 2',
+    inspectionFindings: [
+      { focusArea: 'BDS 1238 Batch Audit for Dhaka-Sylhet Highway', observation: 'Flash point > 240°C verified, fully compliant with BSTI standards.', status: 'passed', signOffDate: 'Today, 10:15 AM' },
+    ],
+    isEvacuatedSafe: true,
   },
 ];
 
@@ -311,8 +370,8 @@ export default function GuestView({ role, lang }: ViewProps) {
   // Scope Toggle: Staff defaults to 'my_guests' or 'all'
   const [scopeMode, setScopeMode] = useState<'my_guests' | 'all'>(isStaff ? 'my_guests' : 'all');
 
-  // Cockpit Internal Sub-Views: 'pass' | 'ppe' | 'alpr' | 'zones'
-  const [cockpitSubTab, setCockpitSubTab] = useState<'pass' | 'ppe' | 'alpr' | 'zones'>('pass');
+  // Cockpit Internal Sub-Views: 'pass' | 'protocol' | 'inspection' | 'ppe' | 'alpr' | 'zones'
+  const [cockpitSubTab, setCockpitSubTab] = useState<'pass' | 'protocol' | 'inspection' | 'ppe' | 'alpr' | 'zones'>('pass');
 
   // Modals
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -320,6 +379,19 @@ export default function GuestView({ role, lang }: ViewProps) {
   const [showALPRModal, setShowALPRModal] = useState(false);
   const [showMusterModal, setShowMusterModal] = useState(false);
   const [showSMSModal, setShowSMSModal] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+
+  // Quick QR Scanner state
+  const [scannerTargetId, setScannerTargetId] = useState('VIS-2026-0812');
+  const [isScanningAnimation, setIsScanningAnimation] = useState(false);
+
+  // Live Inspection findings form state
+  const [newFindingFocus, setNewFindingFocus] = useState('');
+  const [newFindingObs, setNewFindingObs] = useState('');
+  const [newFindingStatus, setNewFindingStatus] = useState<'passed' | 'observation' | 'critical'>('passed');
+
+  // Multi-channel Pass Dispatch State
+  const [dispatchChannel, setDispatchChannel] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp');
 
   // Barrier simulator state
   const [barrierOpen, setBarrierOpen] = useState(false);
@@ -471,6 +543,64 @@ export default function GuestView({ role, lang }: ViewProps) {
     }, 4000);
   };
 
+  const handleToggleEvacuated = (id: string) => {
+    setVisitors(prev => prev.map(v => v.id === id ? { ...v, isEvacuatedSafe: !v.isEvacuatedSafe } : v));
+    const target = visitors.find(v => v.id === id);
+    showToast(t(`Evacuation safety status updated for ${target?.name || 'visitor'}.`, `ইভাকুয়েশন স্ট্যাটাস আপডেট করা হয়েছে।`, lang), 'info');
+  };
+
+  const handleBroadcastEvacuationAlert = () => {
+    const insideCount = visitors.filter(v => v.status === 'checked_in').length;
+    showToast(
+      lang === 'en'
+        ? `🚨 EMERGENCY BROADCAST SENT: Urgent evacuation SMS dispatched to all ${insideCount} visitors on campus!`
+        : `🚨 জরুরি সতর্কতা প্রেরণ: ক্যাম্পাসে উপস্থিত ${insideCount} জন অতিথির মোবাইলে ইভাকুয়েশন এসএমএস পাঠানো হয়েছে!`,
+      'danger'
+    );
+  };
+
+  const handleNotifyChairmanVIP = (v: VisitorRecord) => {
+    showToast(
+      lang === 'en'
+        ? `👑 VIP PROTOCOL ALERT: Arrival notification for ${v.name} (${v.organization}) dispatched to Chairman's Inner Circle & Plant GM!`
+        : `👑 ভিআইপি প্রটোকল সতর্কতা: ${v.name}-এর আগমন বার্তা চেয়ারম্যান সচিবালয় ও প্ল্যান্ট জিএম-কে পাঠানো হয়েছে!`,
+      'gold'
+    );
+  };
+
+  const handleAddInspectionFinding = () => {
+    if (!newFindingFocus.trim() || !newFindingObs.trim()) {
+      showToast(t('Please enter both focus area and observation notes.', 'অনুগ্রহ করে পরিদর্শনের বিষয় ও পর্যবেক্ষণ লিখুন।', lang), 'warn');
+      return;
+    }
+    if (!selectedVisitor) return;
+
+    const newFinding: InspectionFindingItem = {
+      focusArea: newFindingFocus.trim(),
+      observation: newFindingObs.trim(),
+      status: newFindingStatus,
+      signOffDate: 'Just Now',
+    };
+
+    const updatedFindings = [...(selectedVisitor.inspectionFindings || []), newFinding];
+    setVisitors(prev => prev.map(v => v.id === selectedVisitor.id ? { ...v, inspectionFindings: updatedFindings } : v));
+    setNewFindingFocus('');
+    setNewFindingObs('');
+    showToast(t('Inspection observation recorded and counter-signed.', 'পরিদর্শন পর্যবেক্ষণ সফলভাবে লিপিবদ্ধ হয়েছে।', lang), 'success');
+  };
+
+  const handleExecuteQuickScan = (targetId: string) => {
+    setIsScanningAnimation(true);
+    setTimeout(() => {
+      setIsScanningAnimation(false);
+      handleCheckIn(targetId);
+      setSelectedVisitorId(targetId);
+      setShowScannerModal(false);
+      setBarrierOpen(true);
+      setTimeout(() => setBarrierOpen(false), 4000);
+    }, 1000);
+  };
+
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formOrg.trim() || !formPurpose.trim()) {
@@ -578,6 +708,17 @@ export default function GuestView({ role, lang }: ViewProps) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Quick QR Scanner Simulator */}
+          <button
+            className="btn-gold"
+            style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
+            onClick={() => setShowScannerModal(true)}
+            title="Open Live Gate QR Scanner & ALPR Reader"
+          >
+            <Scan size={14} />
+            {t('Quick QR Gate Scanner', 'গেট কিউআর স্ক্যানার', lang)}
+          </button>
+
           {/* Emergency Muster Button */}
           <button
             className="btn-outline-danger"
@@ -1052,28 +1193,42 @@ export default function GuestView({ role, lang }: ViewProps) {
               </div>
 
               {/* ── COCKPIT SUB-NAVIGATION ── */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', padding: '12px 20px', background: 'var(--brand-slate-50)' }}>
-                <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', padding: '12px 20px', background: 'var(--brand-slate-50)', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', maxWidth: '100%', paddingBottom: '2px' }}>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'pass' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('pass')}
                   >
                     <User size={13} />
-                    {t('Visit & Host Details', 'সাক্ষাৎ ও স্বাগতিক বিবরণ', lang)}
+                    {t('Visit & Host', 'সাক্ষাৎ ও স্বাগতিক', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'protocol' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('protocol')}
+                  >
+                    <Crown size={13} />
+                    {t('VIP Protocol & Lounge', 'ভিআইপি প্রটোকল ও লাউঞ্জ', lang)}
+                  </button>
+                  <button
+                    className={`parcel-pill-tab ${cockpitSubTab === 'inspection' ? 'active' : ''}`}
+                    onClick={() => setCockpitSubTab('inspection')}
+                  >
+                    <FileCheck size={13} />
+                    {t('Inspection & Debrief', 'পরিদর্শন ও মূল্যায়ন', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'ppe' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('ppe')}
                   >
                     <HardHat size={13} />
-                    {t('HSE Gear & Safety Induction', 'এইচএসই গিয়ার ও নিরাপত্তা সম্মতি', lang)}
+                    {t('HSE Gear Allotment', 'এইচএসই গিয়ার', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'alpr' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('alpr')}
                   >
                     <Car size={13} />
-                    {t('ALPR Vehicle Entry & Barrier', 'গাড়ি এন্ট্রি ও গেট বেরিয়ার', lang)}
+                    {t('ALPR Vehicle Gate', 'নম্বরপ্লেট ও বেরিয়ার', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'zones' ? 'active' : ''}`}
@@ -1173,6 +1328,277 @@ export default function GuestView({ role, lang }: ViewProps) {
                         Emergency: {selectedVisitor.emergencyContact || 'Direct Contact via Reception'}
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TAB: VIP PROTOCOL & EXECUTIVE ESCORT ── */}
+              {cockpitSubTab === 'protocol' && (
+                <div style={{ padding: '24px' }}>
+                  {/* VIP Status Banner */}
+                  <div style={{
+                    background: selectedVisitor.category === 'vip' || selectedVisitor.category === 'govt'
+                      ? 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)'
+                      : '#F8FAFC',
+                    border: `1px solid ${selectedVisitor.category === 'vip' ? '#FCD34D' : '#E2E8F0'}`,
+                    padding: '16px 20px',
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ background: '#F59E0B', color: '#fff', padding: '10px', borderRadius: '8px', display: 'flex' }}>
+                        <Crown size={22} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {selectedVisitor.vipTier || 'VIP Tier-2 Dignitary Protocol'}
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 900, color: '#78350F' }}>
+                          {selectedVisitor.name} — {selectedVisitor.organization}
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: '#92400E', marginTop: '2px' }}>
+                          {t('Priority Diplomatic / Statutory Access Granted • Dedicated Security Detail', 'বিশেষ ভিআইপি অগ্রাধিকার ও সার্বক্ষণিক নিরাপত্তা প্রটোকল সক্রিয়', lang)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      className="btn-gold"
+                      style={{ fontSize: '12px', padding: '7px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      onClick={() => handleNotifyChairmanVIP(selectedVisitor)}
+                    >
+                      <Send size={13} />
+                      {t('Alert Chairman Secretariat & GM', 'চেয়ারম্যান সচিবালয়ে সতর্কতা প্রেরণ', lang)}
+                    </button>
+                  </div>
+
+                  {/* 4 Protocol Matrix Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                    {/* Protocol Escort Officer */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
+                        {t('Designated Protocol Officer', 'নির্ধারিত প্রটোকল কর্মকর্তা', lang)}
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
+                        {selectedVisitor.escortOfficer || 'Major (Retd.) Tariqul Islam (Security Lead)'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                        Corporate Security & VIP Detail Division
+                      </div>
+                      <div style={{ marginTop: '10px' }}>
+                        <button
+                          className="btn-sm-ghost"
+                          style={{ fontSize: '11px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          onClick={() => showToast(t(`Connecting to Escort Officer radio dispatch...`, `প্রটোকল অফিসারের সাথে সংযোগ স্থাপন হচ্ছে...`, lang), 'info')}
+                        >
+                          <Phone size={12} /> {t('Call Escort Detail', 'এসকর্ট কল করুন', lang)}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Allocated Executive Suite */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
+                        {t('Executive Lounge & Suite', 'এক্সিকিউটিভ স্যুট ও লাউঞ্জ', lang)}
+                      </div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
+                        {selectedVisitor.executiveSuite || 'Level 12 Chairman VIP Boardroom'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '2px' }}>
+                        ✓ Sanitized & Video Conference Enabled
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '6px' }}>
+                        VIP WiFi SSID: <code style={{ color: '#0369A1' }}>BOGCL-VIP-5G</code>
+                      </div>
+                    </div>
+
+                    {/* Reserved Parking Portico */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
+                        {t('Portico Parking Bay', 'নির্ধারিত ভিআইপি পার্কিং বে', lang)}
+                      </div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0369A1', marginTop: '4px' }}>
+                        {selectedVisitor.parkingBay || 'Reserved VIP Portico Bay #01'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                        Vehicle: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{selectedVisitor.vehiclePlate}</span>
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#059669', marginTop: '6px' }}>
+                        ✓ Valet Driver Security Clearance Passed
+                      </div>
+                    </div>
+
+                    {/* Hospitality & Catering Preferences */}
+                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
+                        {t('Hospitality & Catering Protocol', 'আপ্যায়ন ও খাবার পছন্দ', lang)}
+                      </div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
+                        {selectedVisitor.dietaryPreferences || 'Executive High Tea & Fresh Brew'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                        Corporate Butler Service On Standby
+                      </div>
+                      <div style={{ marginTop: '10px' }}>
+                        <button
+                          className="btn-sm-ghost"
+                          style={{ fontSize: '11px', padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          onClick={() => showToast(t(`Executive hospitality team notified for ${selectedVisitor.name}`, `আপ্যায়ন টিমকে অবহিত করা হয়েছে`, lang), 'success')}
+                        >
+                          <Coffee size={12} /> {t('Alert Dining Protocol', 'আপ্যায়ন টিমকে জানান', lang)}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── TAB: STATUTORY INSPECTION FINDINGS & DEBRIEF ── */}
+              {cockpitSubTab === 'inspection' && (
+                <div style={{ padding: '24px' }}>
+                  {/* Inspection Overview Header */}
+                  <div style={{
+                    background: '#F0F9FF',
+                    border: '1px solid #BAE6FD',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: 800, color: '#0369A1', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        {t('STATUTORY REGULATORY INSPECTION COCKPIT', 'বিধিবদ্ধ সরকারি পরিদর্শন ককপিট', lang)}
+                      </div>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: '#0C4A6E', marginTop: '2px' }}>
+                        {selectedVisitor.name} — {selectedVisitor.organization}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: '#0284C7', marginTop: '2px' }}>
+                        Facility: <strong>{selectedVisitor.facility}</strong> • Purpose: {selectedVisitor.purpose}
+                      </div>
+                    </div>
+
+                    <button
+                      className="btn-primary"
+                      style={{ fontSize: '12px', padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      onClick={() => showToast(t(`Joint Inspection Memo PDF exported for ${selectedVisitor.name}.`, `যৌথ পরিদর্শন মেমো প্রস্তুত সম্পন্ন।`, lang), 'success')}
+                    >
+                      <Download size={13} />
+                      {t('Export Joint Debrief Memo (PDF)', 'পরিদর্শন মেমো ডাউনলোড', lang)}
+                    </button>
+                  </div>
+
+                  {/* Findings Log List */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle2 size={16} color="#059669" />
+                      {t('On-Site Technical Observations & Compliance Checkpoints:', 'সরেজমিন পর্যবেক্ষণ ও কমপ্লায়েন্স পয়েন্ট:', lang)}
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {(!selectedVisitor.inspectionFindings || selectedVisitor.inspectionFindings.length === 0) ? (
+                        <div style={{ padding: '24px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', border: '1px dashed #CBD5E1', color: 'var(--brand-slate-500)', fontSize: '12px' }}>
+                          {t('No inspection findings recorded yet. Use the form below to log technical observations.', 'এখনও কোনো পর্যবেক্ষণ লিপিবদ্ধ হয়নি। নিচের ফর্ম ব্যবহার করুন।', lang)}
+                        </div>
+                      ) : (
+                        selectedVisitor.inspectionFindings.map((finding, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              justifyContent: 'space-between',
+                              padding: '12px 16px',
+                              background: '#fff',
+                              border: '1px solid var(--brand-slate-200)',
+                              borderRadius: '8px',
+                              gap: '12px'
+                            }}
+                          >
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{
+                                  fontSize: '10px',
+                                  fontWeight: 800,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  background: finding.status === 'passed' ? '#DCFCE7' : finding.status === 'observation' ? '#FEF3C7' : '#FEE2E2',
+                                  color: finding.status === 'passed' ? '#166534' : finding.status === 'observation' ? '#92400E' : '#991B1B'
+                                }}>
+                                  {finding.status === 'passed' ? '✓ PASSED' : finding.status === 'observation' ? '⚠️ ADVISORY' : '🔴 CRITICAL'}
+                                </span>
+                                <strong style={{ fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                                  {finding.focusArea}
+                                </strong>
+                              </div>
+                              <div style={{ fontSize: '12px', color: 'var(--brand-slate-700)', marginTop: '4px', lineHeight: 1.4 }}>
+                                {finding.observation}
+                              </div>
+                              <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', marginTop: '4px' }}>
+                                Verified: {finding.signOffDate}
+                              </div>
+                            </div>
+                            <CheckCircle size={16} color="#059669" style={{ flexShrink: 0, marginTop: '2px' }} />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Add New Finding Form */}
+                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)', marginBottom: '10px' }}>
+                      {t('+ Record Live Inspection Observation / Checkpoint', '+ নতুন পরিদর্শন পর্যবেক্ষণ যোগ করুন', lang)}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)' }}>{t('Focus Area / Equipment', 'যন্ত্রাংশ বা বিভাগ', lang)}</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Tank 1-8 Nitrogen Blanketing Pressure"
+                          value={newFindingFocus}
+                          onChange={(e) => setNewFindingFocus(e.target.value)}
+                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)' }}>{t('Compliance Verdict', 'মূল্যায়ন ফলাফল', lang)}</label>
+                        <select
+                          value={newFindingStatus}
+                          onChange={(e) => setNewFindingStatus(e.target.value as any)}
+                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                        >
+                          <option value="passed">✓ Passed / Fully Compliant</option>
+                          <option value="observation">⚠️ Advisory Observation Note</option>
+                          <option value="critical">🔴 Critical Action Item</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)' }}>{t('Detailed Inspector Observations & Notes', 'পর্যবেক্ষণ বিবরণ', lang)}</label>
+                      <textarea
+                        rows={2}
+                        placeholder="e.g. Pressure verified at 2.5 bar, nitrogen seal intact, no odor or venting detected..."
+                        value={newFindingObs}
+                        onChange={(e) => setNewFindingObs(e.target.value)}
+                        style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                      />
+                    </div>
+                    <button
+                      className="btn-primary"
+                      style={{ fontSize: '11.5px', padding: '6px 14px' }}
+                      onClick={handleAddInspectionFinding}
+                    >
+                      {t('Save & Counter-Sign Observation', 'সংরক্ষণ ও স্বাক্ষর করুন', lang)}
+                    </button>
                   </div>
                 </div>
               )}
@@ -1639,72 +2065,162 @@ export default function GuestView({ role, lang }: ViewProps) {
       )}
 
       {/* Emergency Evacuation Muster List Modal */}
-      {showMusterModal && (
-        <div className="modal-bg" onClick={() => setShowMusterModal(false)}>
-          <div className="modal" style={{ maxWidth: '720px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Flame size={20} color="#FCA5A5" />
-                <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
-                    {t('Emergency Evacuation Muster List (HSE Roll-Call)', 'জরুরি ইভাকুয়েশন মাস্টার রোল-কল তালিকা', lang)}
-                  </h3>
-                  <div style={{ fontSize: '11px', color: '#FEE2E2' }}>
-                    Live count of all {stats.totalInside} external visitors currently on campus
+      {showMusterModal && (() => {
+        const insideVisitors = visitors.filter(v => v.status === 'checked_in');
+        const safeCount = insideVisitors.filter(v => v.isEvacuatedSafe).length;
+        const totalInside = insideVisitors.length;
+        const isAllSafe = totalInside > 0 && safeCount === totalInside;
+
+        return (
+          <div className="modal-bg" onClick={() => setShowMusterModal(false)}>
+            <div className="modal" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Flame size={22} color="#FCA5A5" />
+                  <div>
+                    <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {t('Emergency Evacuation Muster List (HSE Roll-Call)', 'জরুরি ইভাকুয়েশন মাস্টার রোল-কল তালিকা', lang)}
+                      <span style={{ fontSize: '11px', background: isAllSafe ? '#059669' : '#EF4444', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: 800 }}>
+                        {safeCount} / {totalInside} {t('Accounted Safe', 'নিরাপদ চিহ্নিত', lang)}
+                      </span>
+                    </h3>
+                    <div style={{ fontSize: '11px', color: '#FEE2E2', marginTop: '2px' }}>
+                      Live count of all {totalInside} external visitors currently logged inside refinery/HQ gates
+                    </div>
                   </div>
                 </div>
-              </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowMusterModal(false)}>×</button>
-            </div>
-
-            <div className="modal-body">
-              <div style={{ background: '#FEF2F2', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: '#991B1B', marginBottom: '14px' }}>
-                🚨 In the event of a plant emergency or fire drill, all safety wardens must verify visitor headcounts at <strong>Evacuation Assembly Point #3 (Main Security Gate Ground)</strong>.
+                <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowMusterModal(false)}>×</button>
               </div>
 
-              <div className="table-responsive">
-                <table className="fleet-table">
-                  <thead>
-                    <tr>
-                      <th>Guest Name</th>
-                      <th>Organization</th>
-                      <th>Facility & Location</th>
-                      <th>Host Officer</th>
-                      <th>Contact Phone</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visitors.filter(v => v.status === 'checked_in').map(v => (
-                      <tr key={v.id}>
-                        <td><strong>{v.name}</strong></td>
-                        <td>{v.organization}</td>
-                        <td><span className="badge info">{v.facility.split(',')[0]}</span></td>
-                        <td>{v.hostEmployee}</td>
-                        <td><a href={`tel:${v.phone}`}>{v.phone}</a></td>
+              <div className="modal-body">
+                {/* Emergency Control Bar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FEF2F2', border: '1px solid #FECACA', padding: '12px 16px', borderRadius: '8px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: '#991B1B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <AlertTriangle size={15} />
+                      {t('Muster Point: Evacuation Assembly Point #3 (Main Security Gate Ground)', 'মাস্টার পয়েন্ট: ইভাকুয়েশন অ্যাসেম্বলি পয়েন্ট ৩ (প্রধান নিরাপত্তা গেট প্রাঙ্গণ)', lang)}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#7F1D1D', marginTop: '2px' }}>
+                      Safety wardens must tick off each visitor upon physical verification at muster point.
+                    </div>
+                  </div>
+                  <button
+                    className="btn-primary"
+                    style={{ background: '#DC2626', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px' }}
+                    onClick={handleBroadcastEvacuationAlert}
+                  >
+                    <Radio size={14} />
+                    {t('Broadcast Siren SMS Alert', 'সাইরেন এসএমএস ব্রডকাস্ট করুন', lang)}
+                  </button>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="fleet-table">
+                    <thead>
+                      <tr>
+                        <th>Guest Name & Org</th>
+                        <th>Facility & Location</th>
+                        <th>Host Officer</th>
+                        <th>Emergency Contact</th>
+                        <th style={{ textAlign: 'center' }}>Roll-Call Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {insideVisitors.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: 'var(--brand-slate-500)' }}>
+                            No external visitors currently logged inside.
+                          </td>
+                        </tr>
+                      ) : (
+                        insideVisitors.map(v => (
+                          <tr key={v.id} style={{ background: v.isEvacuatedSafe ? '#F0FDF4' : 'inherit' }}>
+                            <td>
+                              <strong>{v.name}</strong>
+                              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{v.organization}</div>
+                            </td>
+                            <td>
+                              <span className="badge info">{v.facility.split(',')[0]}</span>
+                              {v.executiveSuite && (
+                                <div style={{ fontSize: '10.5px', color: '#6366F1', marginTop: '2px' }}>{v.executiveSuite}</div>
+                              )}
+                            </td>
+                            <td>
+                              <div>{v.hostEmployee}</div>
+                              <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>{v.hostDept}</div>
+                            </td>
+                            <td>
+                              <a href={`tel:${v.phone}`} style={{ fontWeight: 600, color: '#0284C7', textDecoration: 'none' }}>{v.phone}</a>
+                              {v.emergencyContact && (
+                                <div style={{ fontSize: '10px', color: '#DC2626' }}>{v.emergencyContact}</div>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <button
+                                style={{
+                                  border: 'none',
+                                  borderRadius: '20px',
+                                  padding: '5px 12px',
+                                  fontSize: '11.5px',
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  background: v.isEvacuatedSafe ? '#DCFCE7' : '#FEE2E2',
+                                  color: v.isEvacuatedSafe ? '#15803D' : '#B91C1C',
+                                  boxShadow: v.isEvacuatedSafe ? '0 1px 3px rgba(34,197,94,0.2)' : '0 1px 3px rgba(239,68,68,0.2)',
+                                  transition: 'all 0.15s ease'
+                                }}
+                                onClick={() => handleToggleEvacuated(v.id)}
+                              >
+                                {v.isEvacuatedSafe ? (
+                                  <>
+                                    <CheckCircle2 size={13} color="#15803D" />
+                                    {t('Safe at Muster Point', 'নিরাপদ চিহ্নিত', lang)}
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertTriangle size={13} color="#B91C1C" />
+                                    {t('Unaccounted (Mark Safe)', 'অনুপস্থিত (নিরাপদ করুন)', lang)}
+                                  </>
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
 
-            <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setShowMusterModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
-              <button
-                className="btn-primary"
-                style={{ background: '#991B1B' }}
-                onClick={() => {
-                  showToast(t('HSE Evacuation Muster PDF generated for Incident Commander.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
-                  setShowMusterModal(false);
-                }}
-              >
-                <Download size={14} />
-                {t('Export Muster Roll-Call PDF', 'মাস্টার শিট ডাউনলোড', lang)}
-              </button>
+              <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '11.5px', color: isAllSafe ? '#15803D' : '#991B1B', fontWeight: 700 }}>
+                  {isAllSafe
+                    ? '✅ 100% headcount verified at Assembly Point #3.'
+                    : `⚠️ ${totalInside - safeCount} visitor(s) pending physical roll-call verification.`
+                  }
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button className="btn-sm-ghost" onClick={() => setShowMusterModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+                  <button
+                    className="btn-primary"
+                    style={{ background: '#991B1B' }}
+                    onClick={() => {
+                      showToast(t('HSE Evacuation Muster PDF generated for Incident Commander.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
+                      setShowMusterModal(false);
+                    }}
+                  >
+                    <Download size={14} />
+                    {t('Export Muster Roll-Call PDF', 'মাস্টার শিট ডাউনলোড', lang)}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ALPR Camera & Gate Scanner Simulator Modal */}
       {showALPRModal && (
@@ -1766,43 +2282,331 @@ export default function GuestView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* SMS QR Pass Dispatch Modal */}
+      {/* Multi-Channel Digital Pass Dispatch Modal */}
       {showSMSModal && selectedVisitor && (
         <div className="modal-bg" onClick={() => setShowSMSModal(false)}>
-          <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#059669', color: '#fff' }}>
+          <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Smartphone size={18} color="#fff" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
-                  {t('Send Digital QR Pass via SMS / WhatsApp', 'এসএমএস/হোয়াটসঅ্যাপে কিউআর পাস প্রেরণ', lang)}
+                <Share2 size={18} color="#38BDF8" />
+                <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+                  {t('Dispatch Digital QR Pass to Guest', 'অতিথির মোবাইলে ডিজিটাল কিউআর পাস প্রেরণ', lang)}
                 </h3>
               </div>
               <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowSMSModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginBottom: '12px' }}>
-                Recipient Phone: <strong>{selectedVisitor.phone}</strong>
+              {/* Channel Selector Tabs */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: '#F1F5F9', padding: '4px', borderRadius: '8px' }}>
+                <button
+                  type="button"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: dispatchChannel === 'whatsapp' ? '#25D366' : 'transparent',
+                    color: dispatchChannel === 'whatsapp' ? '#FFF' : '#475569',
+                    boxShadow: dispatchChannel === 'whatsapp' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onClick={() => setDispatchChannel('whatsapp')}
+                >
+                  <MessageCircle size={14} />
+                  WhatsApp
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: dispatchChannel === 'sms' ? '#0284C7' : 'transparent',
+                    color: dispatchChannel === 'sms' ? '#FFF' : '#475569',
+                    boxShadow: dispatchChannel === 'sms' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onClick={() => setDispatchChannel('sms')}
+                >
+                  <Smartphone size={14} />
+                  SMS Direct
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 10px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    background: dispatchChannel === 'email' ? '#4F46E5' : 'transparent',
+                    color: dispatchChannel === 'email' ? '#FFF' : '#475569',
+                    boxShadow: dispatchChannel === 'email' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onClick={() => setDispatchChannel('email')}
+                >
+                  <Mail size={14} />
+                  Secure Email
+                </button>
               </div>
 
-              <div style={{ background: '#DCF8C6', border: '1px solid #C4E2B1', borderRadius: '8px', padding: '14px', fontSize: '12px', color: '#075E54', lineHeight: 1.5 }}>
-                "Dear {selectedVisitor.name}, your Digital Gate Pass for Bashundhara Oil & Gas Co. Ltd. is confirmed! Pass ID: {selectedVisitor.id}. Click link to view your QR Pass & Google Maps Gate directions: https://oneops.bashundhara.com/pass/{selectedVisitor.id}"
-              </div>
+              {/* Channel-Specific Preview */}
+              {dispatchChannel === 'whatsapp' && (
+                <div style={{ background: '#ECE5DD', border: '1px solid #D5CCC3', borderRadius: '10px', padding: '14px', position: 'relative' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#075E54', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: 800 }}>
+                      BOG
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#075E54' }}>Bashundhara Oil & Gas Visitor Desk</div>
+                      <div style={{ fontSize: '10px', color: '#128C7E' }}>Official Verified Business Account</div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#DCF8C6', border: '1px solid #C4E2B1', borderRadius: '8px', padding: '12px', fontSize: '12px', color: '#075E54', lineHeight: 1.55 }}>
+                    <p style={{ margin: '0 0 6px 0' }}>
+                      🌟 <strong>Official VIP & Visitor Pass: Bashundhara Oil & Gas Co. Ltd.</strong>
+                    </p>
+                    <p style={{ margin: '0 0 4px 0' }}>Dear <strong>{selectedVisitor.name}</strong> ({selectedVisitor.organization}),</p>
+                    <p style={{ margin: '0 0 6px 0' }}>Your entry clearance for <strong>{selectedVisitor.facility}</strong> has been confirmed.</p>
+                    <div style={{ background: 'rgba(255,255,255,0.7)', padding: '8px 10px', borderRadius: '6px', fontSize: '11px', margin: '8px 0', fontFamily: 'monospace' }}>
+                      <div>🎫 PASS ID: <strong>{selectedVisitor.id}</strong></div>
+                      <div>🚗 PARKING: <strong>{selectedVisitor.parkingBay || 'Designated Bay'}</strong></div>
+                      <div>🛡️ ESCORT: <strong>{selectedVisitor.escortOfficer || selectedVisitor.hostEmployee}</strong></div>
+                    </div>
+                    <p style={{ margin: '0', fontSize: '11px', color: '#0369A1' }}>
+                      📲 Tap here to view live QR Pass & Turn-by-Turn Gate GPS: <br />
+                      <span style={{ textDecoration: 'underline' }}>https://oneops.bashundhara.com/pass/{selectedVisitor.id}</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {dispatchChannel === 'sms' && (
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px' }}>
+                    Telco Route: BOGCL-SMS-GATEWAY · Recipient: <strong>{selectedVisitor.phone}</strong>
+                  </div>
+                  <div style={{ background: '#E0F2FE', border: '1px solid #BAE6FD', borderRadius: '8px', padding: '12px', fontSize: '12px', color: '#0369A1', lineHeight: 1.5 }}>
+                    [BASHUNDHARA OIL & GAS] Gate Pass confirmed for {selectedVisitor.name}. Pass ID: {selectedVisitor.id}. Host: {selectedVisitor.hostEmployee}. Show this SMS/QR at Gate 1: https://oneops.bashundhara.com/pass/{selectedVisitor.id}
+                  </div>
+                </div>
+              )}
+
+              {dispatchChannel === 'email' && (
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px' }}>
+                    Subject: <strong>Official Security Gate Clearance · Pass ID {selectedVisitor.id}</strong>
+                  </div>
+                  <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '12px', fontSize: '11.5px', color: '#334155', lineHeight: 1.5 }}>
+                    <div style={{ fontWeight: 800, color: 'var(--brand-crimson)', marginBottom: '4px' }}>Bashundhara Oil & Gas Company Ltd.</div>
+                    <div>Dear {selectedVisitor.name},</div>
+                    <div style={{ marginTop: '4px' }}>Attached is your encrypted digital badge and refinery safety compliance dossier. Please present your QR badge at the security turnstiles upon arrival.</div>
+                    <div style={{ marginTop: '8px', fontSize: '10.5px', color: '#64748B' }}>To: {selectedVisitor.email || `${selectedVisitor.name.toLowerCase().replace(/\s+/g, '.')}@partner.com`}</div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="modal-ft">
               <button className="btn-sm-ghost" onClick={() => setShowSMSModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
               <button
                 className="btn-primary"
-                style={{ background: '#059669' }}
+                style={{
+                  background: dispatchChannel === 'whatsapp' ? '#25D366' : dispatchChannel === 'sms' ? '#0284C7' : '#4F46E5',
+                  color: '#fff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
                 onClick={() => {
-                  showToast(t(`Digital QR Gate Pass dispatched to ${selectedVisitor.phone}!`, `ডিজিটাল পাস সফলভাবে পাঠানো হয়েছে!`, lang), 'success');
+                  const channelName = dispatchChannel === 'whatsapp' ? 'WhatsApp' : dispatchChannel === 'sms' ? 'SMS' : 'Email';
+                  showToast(t(`Digital QR Gate Pass dispatched via ${channelName} to ${selectedVisitor.name}!`, `ডিজিটাল পাস ${channelName}-এর মাধ্যমে পাঠানো হয়েছে!`, lang), 'success');
                   setShowSMSModal(false);
                 }}
               >
                 <Send size={14} />
-                {t('Dispatch Pass to Phone', 'মোবাইলে প্রেরণ করুন', lang)}
+                {t(`Dispatch Pass via ${dispatchChannel.toUpperCase()}`, `পাস প্রেরণ করুন`, lang)}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fast QR Gate Scanner & ALPR Reader Simulator Modal */}
+      {showScannerModal && (
+        <div className="modal-bg" onClick={() => setShowScannerModal(false)}>
+          <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Scan size={20} color="#38BDF8" />
+                <div>
+                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+                    {t('Fast Optical QR Gate Scanner & ALPR Reader', 'দ্রুত অপটিক্যাল কিউআর স্ক্যানার ও বেরিয়ার সেন্সর', lang)}
+                  </h3>
+                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                    Automated terminal check-in · Direct sync with barrier access controller
+                  </div>
+                </div>
+              </div>
+              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowScannerModal(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              {/* Camera Scanner Viewport */}
+              <div style={{
+                position: 'relative',
+                background: '#020617',
+                border: '2px solid #1E293B',
+                borderRadius: '10px',
+                padding: '24px',
+                color: '#fff',
+                overflow: 'hidden'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', fontSize: '11px', color: '#64748B' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Camera size={13} color="#38BDF8" />
+                    CAM-GATE-OPTICAL-02 (MAIN REFINERY INGRESS)
+                  </span>
+                  <span style={{ color: '#10B981', fontWeight: 800 }}>● 60 FPS ULTRA-HD ACTIVE</span>
+                </div>
+
+                {/* Laser Reticle Frame */}
+                <div style={{
+                  position: 'relative',
+                  border: '2px dashed #0EA5E9',
+                  borderRadius: '12px',
+                  height: '180px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'radial-gradient(ellipse at center, rgba(14, 165, 233, 0.12) 0%, rgba(2, 6, 23, 0.8) 100%)',
+                  overflow: 'hidden'
+                }}>
+                  {/* Laser Scan Animation Line */}
+                  <div style={{
+                    position: 'absolute',
+                    top: isScanningAnimation ? '85%' : '15%',
+                    left: '5%',
+                    right: '5%',
+                    height: '3px',
+                    background: 'linear-gradient(90deg, transparent, #22C55E, #4ADE80, #22C55E, transparent)',
+                    boxShadow: '0 0 12px #22C55E, 0 0 24px #4ADE80',
+                    transition: isScanningAnimation ? 'top 0.8s ease-in-out' : 'top 2s ease-in-out infinite alternate',
+                    zIndex: 2
+                  }} />
+
+                  <QrCode size={70} color={isScanningAnimation ? '#4ADE80' : '#38BDF8'} style={{ opacity: 0.85, transition: 'all 0.3s' }} />
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: isScanningAnimation ? '#4ADE80' : '#E2E8F0', marginTop: '10px', letterSpacing: '1px' }}>
+                    {isScanningAnimation ? t('DECRYPTING CREDENTIAL PAYLOAD...', 'কিউআর কোড ডিক্রিপ্ট করা হচ্ছে...', lang) : t('AIM CAMERA AT VISITOR QR PASS OR SMARTPHONE', 'ভিজিটর কিউআর পাস ক্যামেরার সম্মুখে প্রদর্শন করুন', lang)}
+                  </div>
+                  <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '4px' }}>
+                    Optical ALPR sensor simultaneously captures vehicle registration plate
+                  </div>
+                </div>
+
+                {/* Visitor Selection for Quick Scan Simulation */}
+                <div style={{ marginTop: '16px', background: '#0F172A', padding: '12px 14px', borderRadius: '8px', border: '1px solid #334155' }}>
+                  <label style={{ fontSize: '11.5px', color: '#94A3B8', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
+                    {t('Select Pre-Registered Visitor / Incoming Vehicle to Simulate Gate Arrival:', 'গেটে আগমনকারী ভিজিটর অথবা গাড়ি নির্বাচন করুন:', lang)}
+                  </label>
+                  <select
+                    value={scannerTargetId}
+                    onChange={(e) => setScannerTargetId(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#1E293B',
+                      color: '#F8FAFC',
+                      border: '1px solid #475569',
+                      borderRadius: '6px',
+                      padding: '8px 12px',
+                      fontSize: '13px',
+                      fontWeight: 600
+                    }}
+                  >
+                    {visitors.map(v => (
+                      <option key={v.id} value={v.id}>
+                        [{v.status.toUpperCase()}] {v.name} · {v.organization} ({v.vehiclePlate || 'No Vehicle'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Target Visitor Info Preview */}
+                {(() => {
+                  const target = visitors.find(v => v.id === scannerTargetId);
+                  if (!target) return null;
+                  return (
+                    <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '11px', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px' }}>
+                      <div>
+                        <span style={{ color: '#64748B' }}>Category:</span>
+                        <div style={{ fontWeight: 700, color: target.category === 'vip' ? '#F59E0B' : target.category === 'govt' ? '#60A5FA' : '#CBD5E1' }}>
+                          {target.vipTier || target.category.toUpperCase()}
+                        </div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748B' }}>Vehicle Plate:</span>
+                        <div style={{ fontWeight: 700, color: '#38BDF8', fontFamily: 'monospace' }}>
+                          {target.vehiclePlate || 'Pedestrian Entry'}
+                        </div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748B' }}>Host Officer:</span>
+                        <div style={{ fontWeight: 700, color: '#F1F5F9' }}>{target.hostEmployee}</div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748B' }}>Status:</span>
+                        <div style={{ fontWeight: 800, color: target.status === 'checked_in' ? '#34D399' : '#FBBF24' }}>
+                          {target.status.toUpperCase()}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
+                Boom Barrier #1 auto-triggers on valid cryptographic token match.
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="btn-sm-ghost" onClick={() => setShowScannerModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+                <button
+                  className="btn-primary"
+                  style={{ background: '#0284C7', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+                  disabled={isScanningAnimation}
+                  onClick={() => handleExecuteQuickScan(scannerTargetId)}
+                >
+                  <Scan size={15} />
+                  {isScanningAnimation ? t('Scanning & Authorizing...', 'যাচাই করা হচ্ছে...', lang) : t('Simulate QR Fast Scan & Open Barrier', 'কিউআর স্ক্যান ও বেরিয়ার উন্মুক্ত করুন', lang)}
+                </button>
+              </div>
             </div>
           </div>
         </div>

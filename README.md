@@ -21,6 +21,7 @@ While BOGCL leadership originally asked for a prototype based on a high-level di
 | **[03. Traceability Ledger & Matrix](file:///e:/B-OIL-GAS/docs/03_REQUIREMENTS_TRACEABILITY_LEDGER_AND_MATRIX.md)** | Comprehensive Requirements Ledger | Module-by-module matrix covering triggers, business rules, multi-tier approvals, outputs, prototype scope, phase delivery, and risk assessment. |
 | **[04. Client Playbook & Discovery Guide](file:///e:/B-OIL-GAS/docs/04_CLIENT_CONVERSATION_AND_DISCOVERY_PLAYBOOK.md)** | Meeting & Interview Playbook | 30-minute boardroom presentation script, stakeholder questionnaires (Chairman, HR, Legal, HSE, Fleet, Finance), tough objection handling. |
 | **[05. Prototype Blueprint & Demo Script](file:///e:/B-OIL-GAS/docs/05_PROTOTYPE_BLUEPRINT_AND_DEMO_SCRIPT.md)** | Design System & Demonstration Guide | Bashundhara brand styling tokens (`#A51C30` Crimson, `#D4AF37` Gold), 6 live demonstration acts, psychological closing tactics to seal the deal. |
+| **[06. Asset Lifetime Tracking & EAM System](file:///e:/B-OIL-GAS/docs/06_ASSET_LIFETIME_TRACKING_AND_EAM_SYSTEM.md)** | Cradle-to-Grave Asset Lifecycle Blueprint | ISO 55001 / ISO 14224 taxonomy, 8-stage lifecycle state machine, IAS 16 depreciation & TCO engine, statutory calibration, HR custody interlock & RBAC matrix. |
 
 ---
 

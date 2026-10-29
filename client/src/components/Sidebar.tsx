@@ -54,6 +54,7 @@ const CHAIRMAN_NAV: NavSection[] = [
     title: 'Oversight & Risk',
     titleBn: 'তত্ত্বাবধান ও ঝুঁকি',
     items: [
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Asset Lifecycle & Valuation',  labelBn: 'সম্পদ জীবনচক্র ও মূল্যায়ন', badge: '1 EoL', badgeType: 'warn' },
       { view: 'compliance',    icon: <ShieldCheck size={16} />,    label: 'License & Regulatory Risk',    labelBn: 'লাইসেন্স ও নিয়ন্ত্রক ঝুঁকি', badge: '5', badgeType: 'warn' },
       { view: 'guest',         icon: <Users size={16} />,          label: 'VIP Protocol & Inspections',   labelBn: 'ভিআইপি ও পরিদর্শক প্রটোকল', badge: '1 VIP', badgeType: 'danger' },
       { view: 'incident',      icon: <AlertTriangle size={16} />, label: 'HSE Incident Monitor',         labelBn: 'এইচএসই ইনসিডেন্ট মনিটর',     badge: '1', badgeType: 'danger' },
@@ -69,7 +70,7 @@ const PLANT_GM_NAV: NavSection[] = [
     titleBn: 'প্ল্যান্ট অপারেশন',
     items: [
       { view: 'dashboard',     icon: <Gauge size={16} />,          label: 'Plant Operations Console',     labelBn: 'প্ল্যান্ট অপারেশন কনসোল',   badge: '4', badgeType: 'warn' },
-      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Plant Assets & Reliability',   labelBn: 'প্ল্যান্ট সম্পদ ও রক্ষণাবেক্ষণ', badge: '28d', badgeType: 'warn' },
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Asset Lifecycle & Reliability',labelBn: 'সম্পদ জীবনচক্র ও রক্ষণাবেক্ষণ', badge: '3 Cal', badgeType: 'warn' },
       { view: 'notesheet',     icon: <FileSignature size={16} />,  label: 'Work Orders & Documents',      labelBn: 'কার্যাদেশ ও নথি' },
       { view: 'incident',      icon: <AlertTriangle size={16} />, label: 'HSE & Safety CAPA',            labelBn: 'এইচএসই ও নিরাপত্তা',         badge: '1', badgeType: 'danger' },
     ],
@@ -94,7 +95,7 @@ const TRANSPORT_ADMIN_NAV: NavSection[] = [
       { view: 'dashboard',     icon: <Truck size={16} />,          label: 'Fleet Command Center',         labelBn: 'ফ্লিট কমান্ড সেন্টার',       badge: '5', badgeType: 'warn' },
       { view: 'fleet',         icon: <Car size={16} />,            label: 'Vehicle Dispatch & Assign',    labelBn: 'গাড়ি প্রেরণ ও বরাদ্দ' },
       { view: 'bus',           icon: <Bus size={16} />,            label: 'Bus Routes & Seat FIFO',       labelBn: 'বাস রুট ও সিট ওয়েটলিস্ট',   badge: '14', badgeType: 'info' },
-      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Heavy Fleet Asset Register',   labelBn: 'ভারী বহর সম্পদ তালিকা' },
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Fleet & Tanker Asset Lifecycle',labelBn: 'ভারী বহর সম্পদ জীবনচক্র',     badge: 'BRTA', badgeType: 'info' },
     ],
   },
   {
@@ -125,6 +126,7 @@ const HOD_NAV: NavSection[] = [
     title: 'Team & Finance',
     titleBn: 'দল ও অর্থায়ন',
     items: [
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Fixed Assets & Depreciation',  labelBn: 'স্থায়ী সম্পদ ও অবচয় খতিয়ান', badge: 'IAS 16', badgeType: 'info' },
       { view: 'claims',        icon: <Receipt size={16} />,        label: 'Team TA/DA & Conveyance',      labelBn: 'দলীয় টিএ/ডিএ ও যাতায়াত',     badge: '৳20.2k', badgeType: 'warn' },
       { view: 'attendance',    icon: <UserCheck size={16} />,      label: 'Team Attendance & Leave',      labelBn: 'দলীয় উপস্থিতি ও ছুটি' },
       { view: 'workforce',     icon: <Users size={16} />,          label: 'Dept Staff Directory',         labelBn: 'বিভাগীয় কর্মী তালিকা' },
@@ -149,6 +151,7 @@ const EMPLOYEE_NAV: NavSection[] = [
     title: 'Services',
     titleBn: 'সেবাসমূহ',
     items: [
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'My Assigned Assets',           labelBn: 'আমার বরাদ্দকৃত সম্পদ',       badge: '1 Sign', badgeType: 'warn' },
       { view: 'fleet',         icon: <Car size={16} />,            label: 'Request Vehicle',              labelBn: 'গাড়ির অনুরোধ' },
       { view: 'bus',           icon: <Bus size={16} />,            label: 'Bus Seat & Waitlist',          labelBn: 'বাস সিট ও ওয়েটলিস্ট' },
       { view: 'guest',         icon: <Users size={16} />,          label: 'Pre-Register My Guest',        labelBn: 'আমার অতিথি প্রাক-নিবন্ধন' },
@@ -172,6 +175,7 @@ const HR_ADMIN_NAV: NavSection[] = [
     title: 'Governance & Services',
     titleBn: 'গভর্ন্যান্স ও সেবাসমূহ',
     items: [
+      { view: 'asset',         icon: <Wrench size={16} />,         label: 'Corporate & Staff Asset Custody', labelBn: 'করপোরেট ও কর্মী সম্পদ',   badge: '1 Pool', badgeType: 'info' },
       { view: 'notesheet',     icon: <FileSignature size={16} />,  label: 'HR Policy & Note-Sheets',      labelBn: 'এইচআর পলিসি ও নোট-শীট' },
       { view: 'compliance',    icon: <ShieldCheck size={16} />,    label: 'Labor Law & Statutory Audit',  labelBn: 'শ্রম আইন ও বিধিবদ্ধ অডিট' },
       { view: 'inner_circle',  icon: <MessageSquare size={16} />,  label: 'Executive Leadership Comm',    labelBn: 'শীর্ষ নেতৃত্ব যোগাযোগ' },

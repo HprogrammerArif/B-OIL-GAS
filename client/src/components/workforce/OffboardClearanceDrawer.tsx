@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../../types';
 import { Employee, useEmployeeStore } from '../../store/employeeStore';
+import { useAssetStore } from '../../store/assetStore';
 import { showToast } from '../../App';
-import { X, ShieldAlert, CheckCircle, AlertTriangle, RotateCcw, FileText, Check, Lock, Laptop, Key, CreditCard, DollarSign } from 'lucide-react';
+import { X, ShieldAlert, CheckCircle, AlertTriangle, RotateCcw, FileText, Check, Lock, Laptop, Key, CreditCard, DollarSign, Wrench } from 'lucide-react';
 
 interface OffboardClearanceDrawerProps {
   employee: Employee | null;
@@ -12,12 +13,20 @@ interface OffboardClearanceDrawerProps {
 
 export default function OffboardClearanceDrawer({ employee, onClose, lang }: OffboardClearanceDrawerProps) {
   const { updateClearanceItem, finalizeOffboarding, reactivateEmployee } = useEmployeeStore();
+  const { assets, reclaimEmployeeAssets } = useAssetStore();
 
   const [exitDate, setExitDate] = useState('Today, 05:00 PM');
   const [exitReason, setExitReason] = useState('Voluntary resignation for personal and professional career transition.');
   const [clearanceNotes, setClearanceNotes] = useState('');
 
   if (!employee) return null;
+
+  const heldAssets = assets.filter(
+    (a) =>
+      a.lifecycleStage !== 'disposed' &&
+      a.lifecycleStage !== 'in_stock' &&
+      (a.custodianEmpId === employee.id || a.custodian.toLowerCase() === employee.name.toLowerCase())
+  );
 
   const isOffboarded = employee.status === 'offboarded';
   const clearance = employee.clearance || {
@@ -38,7 +47,33 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
     updateClearanceItem(employee.id, key, !clearance[key]);
   };
 
+  const handleReclaimAssets = () => {
+    const count = reclaimEmployeeAssets(employee.id, employee.name, 'Sayeda Afroza Sultana (GM HR)');
+    if (count > 0) {
+      updateClearanceItem(employee.id, 'itAccessRevoked', true);
+      showToast(
+        t(
+          `✓ ${count} assigned asset(s) reclaimed from ${employee.name} into Central Store Pool with SHA-256 custody log!`,
+          `✓ ${employee.name}-এর কাছ থেকে ${count}টি সম্পদ কেন্দ্রীয় স্টোরে পুনরুদ্ধার করা হয়েছে!`,
+          lang
+        ),
+        'success'
+      );
+    }
+  };
+
   const handleFinalize = () => {
+    if (heldAssets.length > 0) {
+      showToast(
+        t(
+          `Custody Interlock Blocked: ${employee.name} still holds ${heldAssets.length} active capital/IT asset(s). Reclaim custody to Central Store Pool first.`,
+          `সতর্কতা: ${employee.name}-এর হেফাজতে এখনো ${heldAssets.length}টি প্রাতিষ্ঠানিক সম্পদ রয়েছে। প্রথমে সম্পদ পুনরুদ্ধার করুন।`,
+          lang
+        ),
+        'warn'
+      );
+      return;
+    }
     if (!allCleared) {
       showToast(t('Please complete all 4 departmental clearance items first.', 'অনুগ্রহ করে চারটি বিভাগের ছাড়পত্র নিশ্চিত করুন।', lang), 'info');
       return;
@@ -135,6 +170,88 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
               </div>
             </div>
           )}
+
+          {/* Enterprise Asset Custody Interlock (ISO 55001 / ITAM) */}
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: heldAssets.length > 0 ? '1.5px solid #F59E0B' : '1px solid rgba(16, 185, 129, 0.35)',
+              background: heldAssets.length > 0 ? 'rgba(245, 158, 11, 0.08)' : 'rgba(16, 185, 129, 0.07)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: heldAssets.length > 0 ? '10px' : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wrench size={15} color={heldAssets.length > 0 ? '#D97706' : '#059669'} />
+                <div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                    {t('Enterprise Asset Custody Interlock (ISO 55001 / ITAM)', 'প্রাতিষ্ঠানিক সম্পদ হেফাজত অডিট ও পুনরুদ্ধার', lang)}
+                  </div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
+                    {heldAssets.length > 0
+                      ? t(
+                          `${heldAssets.length} active capital/IT asset(s) currently assigned to ${employee.name}. Must be reclaimed before final exit.`,
+                          `${employee.name}-এর হেফাজতে ${heldAssets.length}টি সক্রিয় সম্পদ রয়েছে যা ছাড়পত্রের পূর্বে জমা দিতে হবে।`,
+                          lang
+                        )
+                      : t(
+                          'Zero active assets held in custody — Central Asset Register cleared for separation.',
+                          'হেফাজতে কোনো বকেয়া প্রাতিষ্ঠানিক সম্পদ নেই — সম্পদ রেজিস্টার ক্লিয়ার।',
+                          lang
+                        )}
+                  </div>
+                </div>
+              </div>
+              {heldAssets.length > 0 && !isOffboarded ? (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  style={{ fontSize: '11px', padding: '6px 11px', fontWeight: 700 }}
+                  onClick={handleReclaimAssets}
+                >
+                  <RotateCcw size={12} />
+                  {t('Reclaim Custody to Central Store Pool', 'কেন্দ্রীয় স্টোরে সম্পদ পুনরুদ্ধার করুন', lang)}
+                </button>
+              ) : (
+                <span className="badge success">{t('0 ASSETS HELD', 'সম্পদ মুক্ত', lang)}</span>
+              )}
+            </div>
+
+            {heldAssets.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {heldAssets.map((ast) => (
+                  <div
+                    key={ast.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      padding: '7px 10px',
+                      borderRadius: '6px',
+                      background: 'var(--brand-card-bg)',
+                      border: '1px solid var(--brand-slate-200)',
+                      fontSize: '11.5px',
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-crimson)', marginRight: '6px' }}>
+                        {ast.tag}
+                      </span>
+                      <strong style={{ color: 'var(--brand-slate-900)' }}>{ast.name}</strong>
+                      <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', marginTop: '1px' }}>
+                        SAP: {ast.sapAssetNo} · {ast.functionalLocation}
+                      </div>
+                    </div>
+                    <span className="badge warn" style={{ flexShrink: 0 }}>
+                      ৳{ast.purchaseCost.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* 4-Way Departmental Exit Clearance Checklist */}
           <div style={{ marginBottom: '16px' }}>

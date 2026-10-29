@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Search, LayoutDashboard, FileSignature, ShieldCheck, Truck, Bus,
-  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck, Sparkles
+  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck, Sparkles, Wrench
 } from 'lucide-react';
 
 interface CommandPaletteProps {
@@ -141,10 +141,10 @@ export default function CommandPalette({
     },
     {
       id: 'view-asset',
-      title: 'Asset Lifecycle & Plant Reliability',
-      titleBn: 'সম্পদ জীবনচক্র ও প্ল্যান্ট রক্ষণাবেক্ষণ',
+      title: 'Enterprise Asset Lifetime, Valuation & EAM (ISO 55001 / IAS 16)',
+      titleBn: 'সম্পদ জীবনচক্র, অবচয় ও রক্ষণাবেক্ষণ (ইএএম)',
       category: 'Views',
-      icon: <ShieldCheck size={15} />,
+      icon: <Wrench size={15} />,
       action: () => { onNavigate('asset'); onClose(); },
     },
     {
@@ -224,6 +224,30 @@ export default function CommandPalette({
       category: 'Records & Assets',
       icon: <MapPin size={15} color="#7C3AED" />,
       action: () => { onNavigate('attendance'); onClose(); },
+    },
+    {
+      id: 'rec-asset-pmp-102',
+      title: 'BOGCL-KER-PMP-102: Sulzer Multiphase Crude Oil Feed Pump (IAS 16 UoP)',
+      titleBn: 'মূলধনী সম্পদ: সালজার মাল্টিফেজ ক্রুড অয়েল পাম্প',
+      category: 'Records & Assets',
+      icon: <Wrench size={15} color="#0369A1" />,
+      action: () => { onNavigate('asset'); onClose(); },
+    },
+    {
+      id: 'rec-asset-gen-01',
+      title: 'BOGCL-KER-GEN-01: Caterpillar 1500kVA Generator — Write-Off & Condemnation Dossier',
+      titleBn: 'অবলোপন নথি: ক্যাটারপিলার ১৫০০ কেভিএ জেনারেটর',
+      category: 'Records & Assets',
+      icon: <Wrench size={15} color="#DC2626" />,
+      action: () => { onNavigate('asset'); onClose(); },
+    },
+    {
+      id: 'rec-asset-lap-204',
+      title: 'BOGCL-IT-LAP-204: MacBook Pro M3 — Staff Custody Handover & ITAM',
+      titleBn: 'কর্মী সম্পদ হেফাজত: ম্যাকবুক প্রো এম৩',
+      category: 'Records & Assets',
+      icon: <Wrench size={15} color="#059669" />,
+      action: () => { onNavigate('asset'); onClose(); },
     },
   ];
 
