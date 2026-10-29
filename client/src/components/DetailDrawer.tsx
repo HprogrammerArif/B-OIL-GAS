@@ -1,7 +1,8 @@
 import React from 'react';
 import { Lang, t } from '../types';
-import { X, CheckCircle, ShieldAlert, FileText, Calendar, DollarSign, UserCheck, ArrowRight, CornerDownRight } from 'lucide-react';
+import { X, CheckCircle, ShieldAlert, FileText, Calendar, DollarSign, UserCheck, ArrowRight, CornerDownRight, Clock } from 'lucide-react';
 import { showToast } from '../App';
+import { DepartmentApprovalStep } from '../store/approvalStore';
 
 export interface DetailDrawerData {
   id: string;
@@ -13,6 +14,7 @@ export interface DetailDrawerData {
   description?: string;
   initiator?: string;
   sapRef?: string;
+  approvalTrail?: DepartmentApprovalStep[];
 }
 
 interface DetailDrawerProps {
@@ -103,27 +105,57 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
           <div className="drawer-section">
             <h4>{t('Approval Flow & Digital Audit Chain', 'অনুমোদন প্রক্রিয়া ও অডিট ট্রেইল', lang)}</h4>
             <div className="drawer-timeline">
-              <div className="timeline-step done">
-                <div className="timeline-dot" />
-                <div className="timeline-content">
-                  <div className="timeline-name">Engr. Md. Harunur Rashid (Plant GM)</div>
-                  <div className="timeline-sub">Verified Technical Specs · SHA-256 Signed · 4h ago</div>
-                </div>
-              </div>
-              <div className="timeline-step done">
-                <div className="timeline-dot" />
-                <div className="timeline-content">
-                  <div className="timeline-name">Farida Begum (CFO & Finance Director)</div>
-                  <div className="timeline-sub">Budget Verified in SAP S/4HANA · 2h ago</div>
-                </div>
-              </div>
-              <div className="timeline-step current">
-                <div className="timeline-dot" />
-                <div className="timeline-content">
-                  <div className="timeline-name">Chairman & Managing Director</div>
-                  <div className="timeline-sub">Awaiting Final Executive Authorisation</div>
-                </div>
-              </div>
+              {data.approvalTrail && data.approvalTrail.length > 0 ? (
+                <>
+                  {data.approvalTrail.map((step, idx) => (
+                    <div key={idx} className="timeline-step done">
+                      <div className="timeline-dot" />
+                      <div className="timeline-content">
+                        <div className="timeline-name" style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>
+                          {step.officerName} ({step.roleName} · {step.department})
+                        </div>
+                        <div className="timeline-sub" style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                          <span style={{ color: '#059669', fontWeight: 600 }}>✓ Endorsed:</span> "{step.note}"
+                        </div>
+                        <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Clock size={10} /> {step.timestamp} {step.signatureHash && <span style={{ fontFamily: 'monospace' }}>• {step.signatureHash.slice(0, 24)}...</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="timeline-step current">
+                    <div className="timeline-dot" />
+                    <div className="timeline-content">
+                      <div className="timeline-name">👑 Ahmed Akbar Sobhan (Chairman & Managing Director)</div>
+                      <div className="timeline-sub">Awaiting Final Executive Sanction & Sanction Directive</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="timeline-step done">
+                    <div className="timeline-dot" />
+                    <div className="timeline-content">
+                      <div className="timeline-name">Engr. Md. Harunur Rashid (Plant GM)</div>
+                      <div className="timeline-sub">Verified Technical Specs · OEM Quotes Evaluated · 4h ago</div>
+                    </div>
+                  </div>
+                  <div className="timeline-step done">
+                    <div className="timeline-dot" />
+                    <div className="timeline-content">
+                      <div className="timeline-name">Farida Begum (CFO & Finance Director)</div>
+                      <div className="timeline-sub">Pre-Audited & Budget Provision Verified in SAP S/4HANA · 2h ago</div>
+                    </div>
+                  </div>
+                  <div className="timeline-step current">
+                    <div className="timeline-dot" />
+                    <div className="timeline-content">
+                      <div className="timeline-name">Chairman & Managing Director</div>
+                      <div className="timeline-sub">Awaiting Final Executive Authorisation & Directive</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

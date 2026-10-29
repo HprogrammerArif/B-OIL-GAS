@@ -24,6 +24,17 @@ export interface ClaimItem {
   rejectedAt?: string;
 }
 
+export interface DepartmentApprovalStep {
+  stepNo: number;
+  officerName: string;
+  roleName: string;
+  department: string;
+  status: 'completed' | 'pending' | 'reviewing';
+  timestamp: string;
+  note: string; // The specific reason / justification why this department approved or vetted
+  signatureHash?: string;
+}
+
 export interface ApprovalItem {
   id: string;
   category: 'finance' | 'procurement' | 'fleet' | 'leave' | 'hr';
@@ -41,6 +52,10 @@ export interface ApprovalItem {
   details: string;
   sourceType?: 'claim' | 'requisition' | 'notesheet' | 'generic';
   sourceId?: string;
+  approvalTrail?: DepartmentApprovalStep[];
+  executiveDirective?: string;
+  authorizedBy?: string;
+  authorizedAt?: string;
   rejectionReason?: string;
   rejectionObservation?: string;
   rejectionImprovementNotes?: string;
@@ -146,6 +161,38 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     details: 'Urgent maintenance and replacement parts for the 1,200 kVA emergency backup generator at Keraniganj Plant to ensure 24/7 continuous factory power.',
     sourceType: 'notesheet',
     sourceId: 'f1',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'Engr. Tariq Ahmed',
+        roleName: 'Senior Plant Maintenance Engineer',
+        department: 'Keraniganj Plant Operations',
+        status: 'completed',
+        timestamp: '14 Oct 2026, 09:30 AM',
+        note: 'Emergency diagnostic revealed 1,200 kVA backup alternator rotor thermal imbalance. Overhaul mandatory before continuous bitumen peak refining run.',
+        signatureHash: 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Engr. Md. Harunur Rashid',
+        roleName: 'Plant General Manager',
+        department: 'Plant Operations & Maintenance',
+        status: 'completed',
+        timestamp: '14 Oct 2026, 02:45 PM',
+        note: 'Technically vetted & endorsed. Energypac Cummins OEM quote verified against 2 competitor bids. Scope includes 12-month on-site warranty.',
+        signatureHash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
+      },
+      {
+        stepNo: 3,
+        officerName: 'Farida Begum',
+        roleName: 'CFO & Head of Finance',
+        department: 'Corporate Finance & Accounts',
+        status: 'completed',
+        timestamp: '15 Oct 2026, 11:15 AM',
+        note: 'Pre-audited from budgetary standpoint. Provision exists under CAPEX Plant Maintenance (GL-4102-KER). Recommended for Chairman sanction.',
+        signatureHash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      },
+    ],
   },
   {
     id: 'APR-2026-1042',
@@ -164,6 +211,35 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     details: '4-day dealer network visit and customer account reconciliation with verified hotel invoices and travel receipts attached.',
     sourceType: 'claim',
     sourceId: 'TADA-2026-0419',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'Tanvir Ahmed',
+        roleName: 'Senior Sales Executive',
+        department: 'Sales & Marketing',
+        status: 'completed',
+        timestamp: '14 Oct 2026, 04:30 PM',
+        note: 'Traveled 4 days for Chittagong dealer network inspection, credit recovery audit, and new bitumen distributor onboarding.',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Kazi M. Rahman',
+        roleName: 'General Manager, Sales',
+        department: 'Commercial Division',
+        status: 'completed',
+        timestamp: '15 Oct 2026, 09:15 AM',
+        note: 'Endorsed. Regional depot sales collection increased by 14% post-visit. Hotel and travel vouchers checked against travel policy limits.',
+      },
+      {
+        stepNo: 3,
+        officerName: 'Md. Rahim Uddin',
+        roleName: 'Senior Accounts Manager',
+        department: 'Corporate Accounts & Audit',
+        status: 'completed',
+        timestamp: '15 Oct 2026, 03:00 PM',
+        note: 'Pre-audited with verified Mushak-6.3 hotel tax invoice. Budget clearance under GL-6201 (Sales TA/DA). Ready for final authorization.',
+      },
+    ],
   },
   {
     id: 'APR-2026-0312',
@@ -182,6 +258,26 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     details: 'Official pool car booking for executive site audit and monthly financial stock verification (Car: Dhaka Metro-Ga 13-4412).',
     sourceType: 'requisition',
     sourceId: 'REQ-2026-435',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'Farida Begum',
+        roleName: 'CFO & Head of Finance',
+        department: 'Corporate Finance',
+        status: 'completed',
+        timestamp: 'Today, 10:00 AM',
+        note: 'Official transport requisition for mid-month physical crude bitumen stock verification and tax compliance inspection at plant.',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Md. Kamruzzaman',
+        roleName: 'Transport & Admin Supervisor',
+        department: 'Corporate Admin & Fleet',
+        status: 'completed',
+        timestamp: 'Today, 10:15 AM',
+        note: 'Executive pool sedan (Dhaka Metro-Ga 13-4412) allocated with certified driver Md. Al-Amin. Gate pass and toll card issued.',
+      },
+    ],
   },
   {
     id: 'APR-2026-0211',
@@ -200,6 +296,26 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     details: 'Annual enterprise license renewal for corporate SAP S/4HANA cloud, employee email system, and automated database backups for 750 staff.',
     sourceType: 'notesheet',
     sourceId: 'f2',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'S. M. Mahbubur Rahman',
+        roleName: 'Head of IT & Digital Systems',
+        department: 'Information Technology',
+        status: 'completed',
+        timestamp: '14 Oct 2026, 10:00 AM',
+        note: 'SAP S/4HANA Enterprise Cloud, AWS disaster-recovery hosting, and cyber-defense subscription renewal for FY 2026-27.',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Farida Begum',
+        roleName: 'CFO & Head of Finance',
+        department: 'Corporate Finance & Accounts',
+        status: 'completed',
+        timestamp: '14 Oct 2026, 04:30 PM',
+        note: 'Commercial terms verified. 8% multi-year discount secured with SAP SEA. Verified under OPEX Software budget (GL-520101).',
+      },
+    ],
   },
   {
     id: 'APR-2026-0744',
@@ -217,6 +333,26 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     sapDocRef: 'SAP-HCM-LV-089',
     details: 'Official medical certificate from Evercare Hospital Dhaka attached. Daily accounting duty handover completed with Farzana Akhter.',
     sourceType: 'generic',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'Md. Rahim Uddin',
+        roleName: 'Senior Accounts Executive',
+        department: 'Finance & Accounts',
+        status: 'completed',
+        timestamp: 'Today, 08:30 AM',
+        note: 'Medical leave requested for post-surgery recuperation. Medical fitness certificate and hospital admission summary submitted.',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Sayeda Afroza',
+        roleName: 'HR & Medical Benefits Manager',
+        department: 'Human Resources',
+        status: 'completed',
+        timestamp: 'Today, 08:45 AM',
+        note: 'Medical documents vetted. 14 days sick leave balance available in FY26 quota. Duty handover verified with colleague Farzana Akhter.',
+      },
+    ],
   },
   {
     id: 'APR-2026-0518',
@@ -234,6 +370,26 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     sapDocRef: 'SAP-MM-PO-0518',
     details: 'Supply of A4 printing paper (150 reams), official envelopes, and laser printer toner cartridges for Q4 administrative operations.',
     sourceType: 'generic',
+    approvalTrail: [
+      {
+        stepNo: 1,
+        officerName: 'Md. Kamruzzaman',
+        roleName: 'Admin Supervisor',
+        department: 'Corporate Admin',
+        status: 'completed',
+        timestamp: 'Today, 11:00 AM',
+        note: 'Quarterly paper and consumables requisition for 5 HQ divisions. 3 market quotations gathered.',
+      },
+      {
+        stepNo: 2,
+        officerName: 'Kazi M. Rahman',
+        roleName: 'Head of Corporate Admin',
+        department: 'Corporate Admin',
+        status: 'completed',
+        timestamp: 'Today, 11:30 AM',
+        note: 'Lowest compliant bidder (M/S Prime Paper) selected. Rates within group approved price schedule.',
+      },
+    ],
   },
 ];
 
@@ -357,7 +513,11 @@ class ApprovalStore {
   }
 
   // 4. Approve an Item in the Omni-Approval Queue
-  approveApprovalItem(itemId: string): { sapVoucher: string; sourceId?: string; sourceType?: string } {
+  approveApprovalItem(
+    itemId: string,
+    directive?: string,
+    authorizedBy?: string
+  ): { sapVoucher: string; sourceId?: string; sourceType?: string; directive?: string } {
     const item = this.approvalItems.find((a) => a.id === itemId);
     const generatedVoucher = `SAP-FI-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
@@ -381,6 +541,7 @@ class ApprovalStore {
       sapVoucher: generatedVoucher,
       sourceId: item?.sourceId,
       sourceType: item?.sourceType,
+      directive: directive || item?.executiveDirective,
     };
   }
 

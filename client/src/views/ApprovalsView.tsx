@@ -10,6 +10,7 @@ import {
 import { useApprovalStore, ApprovalItem } from '../store/approvalStore';
 import { useFleetStore } from '../store/fleetStore';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
+import AuthorizeDirectiveModal, { AuthorizeData } from '../components/AuthorizeDirectiveModal';
 
 export default function ApprovalsView({ role, lang }: ViewProps) {
   const { approvalItems, approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
@@ -18,9 +19,15 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [itemToReject, setItemToReject] = useState<ApprovalItem | null>(null);
+  const [itemToAuthorize, setItemToAuthorize] = useState<ApprovalItem | null>(null);
+  const [expandedTrails, setExpandedTrails] = useState<Record<string, boolean>>({});
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const toggleTrail = (id: string) => {
+    setExpandedTrails((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const selectAll = () => {
@@ -31,20 +38,34 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
     }
   };
 
-  const handleApproveSingle = (item: ApprovalItem) => {
-    const res = approveApprovalItem(item.id);
-    if (item.sourceType === 'requisition' && item.sourceId) {
-      endorseHOD(item.sourceId, 'approved');
+  const handleOpenAuthorize = (item: ApprovalItem) => {
+    setItemToAuthorize(item);
+  };
+
+  const handleConfirmAuthorize = (data: AuthorizeData) => {
+    if (!itemToAuthorize) return;
+    const reviewer =
+      role === 'chairman'
+        ? 'Ahmed Akbar Sobhan (Chairman & Managing Director)'
+        : 'Farida Begum (CFO & Head of Finance)';
+
+    const res = approveApprovalItem(itemToAuthorize.id, data.directive, reviewer);
+    if (itemToAuthorize.sourceType === 'requisition' && itemToAuthorize.sourceId) {
+      endorseHOD(itemToAuthorize.sourceId, 'approved');
     }
-    setSelectedIds((prev) => prev.filter((x) => x !== item.id));
+
+    setSelectedIds((prev) => prev.filter((x) => x !== itemToAuthorize.id));
+
+    const directiveSnippet =
+      data.directive.length > 55 ? `${data.directive.slice(0, 55)}...` : data.directive;
+
     showToast(
-      t(
-        `✓ Authorized ${item.id}: ${item.title}. Synced to SAP S/4HANA (Voucher: ${res.sapVoucher}).`,
-        `✓ অনুমোদিত ${item.id}: ${item.titleBn}। এসএপি ডাটাবেজে সিঙ্ক সম্পন্ন (${res.sapVoucher})।`,
-        lang
-      ),
+      lang === 'en'
+        ? `👑 Authorized ${itemToAuthorize.id} (${itemToAuthorize.amount || 'Approved'}). Directive: "${directiveSnippet}". Synced to SAP (Voucher: ${res.sapVoucher}).`
+        : `👑 অনুমোদিত ${itemToAuthorize.id}: বিশেষ নির্দেশনাসহ এসএপিতে পোস্ট করা হয়েছে (${res.sapVoucher})।`,
       'gold'
     );
+    setItemToAuthorize(null);
   };
 
   const handleRejectSingle = (item: ApprovalItem) => {
@@ -272,7 +293,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                     const isChecked = selectedIds.includes(item.id);
                     return (
                       <tr key={item.id} className={isChecked ? 'row-selected' : ''}>
-                        <td>
+                        <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                           <button
                             type="button"
                             className="btn-link-plain"
@@ -282,21 +303,113 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                             {isChecked ? <CheckSquare size={16} color="var(--brand-crimson)" /> : <Square size={16} color="var(--brand-slate-400)" />}
                           </button>
                         </td>
-                        <td>
+                        <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                           <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
                             {t(item.title, item.titleBn, lang)}
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px', lineHeight: 1.4 }}>
                             Ref: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> • {item.details}
                           </div>
+
+                          {/* Departmental Endorsement Trail & Notes (Who approved and why) */}
+                          {item.approvalTrail && item.approvalTrail.length > 0 && (
+                            <div style={{ marginTop: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleTrail(item.id)}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '3px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: 700,
+                                    background: expandedTrails[item.id] ? '#EEF2FF' : '#F1F5F9',
+                                    color: expandedTrails[item.id] ? '#4338CA' : '#475569',
+                                    border: expandedTrails[item.id] ? '1px solid #C7D2FE' : '1px solid #E2E8F0',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease',
+                                  }}
+                                  title={t('Click to inspect detailed departmental notes', 'বিভাগীয় অনুমোদনের কারণ দেখতে ক্লিক করুন', lang)}
+                                >
+                                  <ShieldCheck size={13} color={expandedTrails[item.id] ? '#4338CA' : '#059669'} />
+                                  <span>{t('Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length} {t('Notes', 'টি নোট', lang)})</span>
+                                  <span style={{ fontSize: '9px' }}>{expandedTrails[item.id] ? '▲' : '▼'}</span>
+                                </button>
+
+                                {/* Compact inline breadcrumb preview when collapsed */}
+                                {!expandedTrails[item.id] && (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', color: '#64748B', flexWrap: 'wrap' }}>
+                                    {item.approvalTrail.map((st, idx) => (
+                                      <React.Fragment key={idx}>
+                                        {idx > 0 && <span style={{ color: '#CBD5E1', fontSize: '9px' }}>➔</span>}
+                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                          <span style={{ width: '13px', height: '13px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8.5px', fontWeight: 800 }}>✓</span>
+                                          <strong style={{ color: '#334155' }}>{st.officerName.split(' ')[0]}</strong>
+                                          <span style={{ color: '#94A3B8', fontSize: '9.5px' }}>({st.department.split(' ')[0]})</span>
+                                        </span>
+                                      </React.Fragment>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Expanded Department Justifications & Why Approved */}
+                              {expandedTrails[item.id] && (
+                                <div
+                                  style={{
+                                    marginTop: '8px',
+                                    background: '#F8FAFC',
+                                    border: '1px solid #CBD5E1',
+                                    borderRadius: '8px',
+                                    padding: '10px 12px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                                  }}
+                                >
+                                  <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 800, color: '#475569', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <span>📋</span> {t('Department Endorsement Trail & Approval Justifications:', 'বিভাগীয় সুপারিশ ও অনুমোদনের কারণ:', lang)}
+                                  </div>
+                                  {item.approvalTrail.map((step, idx) => (
+                                    <div
+                                      key={idx}
+                                      style={{
+                                        background: '#FFFFFF',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '6px',
+                                        padding: '8px 10px',
+                                        fontSize: '11.5px',
+                                      }}
+                                    >
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px', flexWrap: 'wrap', gap: '4px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>✓</span>
+                                          <strong style={{ color: '#0F172A' }}>{step.officerName}</strong>
+                                          <span style={{ color: '#64748B' }}>({step.roleName} · {step.department})</span>
+                                        </div>
+                                        <span style={{ fontSize: '10px', color: '#94A3B8' }}>{step.timestamp}</span>
+                                      </div>
+                                      <div style={{ paddingLeft: '22px', color: '#334155', fontStyle: 'italic', lineHeight: 1.45 }}>
+                                        "{step.note}"
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </td>
-                        <td>
+                        <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                           <strong style={{ fontSize: '12.5px' }}>{item.requester}</strong>
                           <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
                             {item.designation} • {item.dept}
                           </div>
                         </td>
-                        <td>
+                        <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                           <strong style={{ fontSize: '13px', color: item.costTk ? 'var(--brand-crimson)' : 'var(--brand-slate-700)' }}>
                             {item.amount || 'N/A'}
                           </strong>
@@ -304,7 +417,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                             {item.sapDocRef}
                           </div>
                         </td>
-                        <td>
+                        <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                           <span className={`badge ${item.slaHoursLeft < 12 ? 'danger' : item.slaHoursLeft < 24 ? 'warn' : 'info'}`}>
                             <Clock size={11} style={{ marginRight: '4px' }} />
                             {item.slaHoursLeft}h SLA
@@ -313,22 +426,23 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                             Submitted: {item.date}
                           </div>
                         </td>
-                        <td style={{ textAlign: 'right' }}>
+                        <td style={{ textAlign: 'right', verticalAlign: 'top', paddingTop: '14px' }}>
                           <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
                             <button
                               className="btn-sm-ghost"
                               style={{ color: '#DC2626', borderColor: 'rgba(220,38,38,0.2)' }}
                               onClick={() => handleRejectSingle(item)}
-                              title="Return with note"
+                              title={t('Return with Query Note', 'আপত্তিসহ ফেরত', lang)}
                             >
                               <X size={13} />
                             </button>
                             <button
                               className="btn-primary"
-                              style={{ padding: '5px 12px', fontSize: '11.5px', fontWeight: 700 }}
-                              onClick={() => handleApproveSingle(item)}
+                              style={{ padding: '6px 14px', fontSize: '11.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}
+                              onClick={() => handleOpenAuthorize(item)}
+                              title={t('Authorize with Executive Directive & Seal', 'অনুমোদন ও নির্দেশিকা প্রদান', lang)}
                             >
-                              <Check size={13} />
+                              <Check size={14} />
                               {t('Authorize', 'অনুমোদন', lang)}
                             </button>
                           </div>
@@ -375,6 +489,51 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                     </div>
                   </div>
 
+                  {/* Mobile Endorsement Trail Accordion */}
+                  {item.approvalTrail && item.approvalTrail.length > 0 && (
+                    <div style={{ background: '#F8FAFC', borderRadius: '6px', padding: '8px 10px', border: '1px solid #E2E8F0' }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleTrail(item.id)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          color: '#4338CA',
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <ShieldCheck size={13} color="#059669" />
+                          {t('Department Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length})
+                        </span>
+                        <span>{expandedTrails[item.id] ? '▲' : '▼'}</span>
+                      </button>
+
+                      {expandedTrails[item.id] && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                          {item.approvalTrail.map((st, idx) => (
+                            <div key={idx} style={{ background: '#FFFFFF', padding: '6px 8px', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '10.5px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#0F172A' }}>
+                                <span>✓ {st.officerName}</span>
+                                <span style={{ color: '#94A3B8', fontSize: '9.5px' }}>{st.department}</span>
+                              </div>
+                              <div style={{ color: '#475569', fontStyle: 'italic', marginTop: '2px' }}>
+                                "{st.note}"
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '11px', color: 'var(--brand-slate-500)', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '8px' }}>
                     <div>
                       <strong style={{ color: 'var(--brand-slate-800)' }}>{item.requester}</strong> · {item.dept}
@@ -398,8 +557,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ padding: '8px', fontSize: '11.5px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                      onClick={() => handleApproveSingle(item)}
+                      style={{ padding: '8px', fontSize: '11.5px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      onClick={() => handleOpenAuthorize(item)}
                     >
                       <Check size={14} />
                       {t('Authorize', 'অনুমোদন', lang)}
@@ -411,6 +570,24 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Authorize Directive & Executive Sanction Modal */}
+      {itemToAuthorize && (
+        <AuthorizeDirectiveModal
+          isOpen={!!itemToAuthorize}
+          onClose={() => setItemToAuthorize(null)}
+          onConfirm={handleConfirmAuthorize}
+          lang={lang}
+          itemId={itemToAuthorize.id}
+          itemTitle={itemToAuthorize.title}
+          requesterName={itemToAuthorize.requester}
+          department={itemToAuthorize.dept}
+          amount={itemToAuthorize.amount}
+          sapDocRef={itemToAuthorize.sapDocRef}
+          approvalTrail={itemToAuthorize.approvalTrail}
+          roleTitle={role === 'chairman' ? 'Chairman & Managing Director' : 'CFO & Head of Finance'}
+        />
+      )}
 
       {/* Rejection & Inquiry Explanation Modal */}
       {itemToReject && (

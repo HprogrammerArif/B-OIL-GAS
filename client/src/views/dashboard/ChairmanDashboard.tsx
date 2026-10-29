@@ -9,6 +9,8 @@ import { INNER_CIRCLE, PENDING_APPROVALS } from './dashboardData';
 import { useNoticeStore } from '../../store/noticeStore';
 import PublishNoticeModal from './PublishNoticeModal';
 import NoticeDetailModal from './NoticeDetailModal';
+import AuthorizeDirectiveModal, { AuthorizeData } from '../../components/AuthorizeDirectiveModal';
+import { ShieldCheck, Clock } from 'lucide-react';
 
 export default function ChairmanDashboard({
   lang,
@@ -25,15 +27,32 @@ export default function ChairmanDashboard({
   const [noticeSearch, setNoticeSearch] = useState<string>('');
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedNoticeForDetail, setSelectedNoticeForDetail] = useState<NoticeItem | null>(null);
+  const [itemToAuthorize, setItemToAuthorize] = useState<any | null>(null);
+  const [expandedTrails, setExpandedTrails] = useState<Record<string, boolean>>({});
+
+  const toggleTrail = (id: string) => {
+    setExpandedTrails(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const handleAuthorize = (item: any) => {
+    setItemToAuthorize(item);
+  };
+
+  const handleConfirmAuthorize = (data: AuthorizeData) => {
+    if (!itemToAuthorize) return;
+    const item = itemToAuthorize;
     setApprovalsList(prev => prev.filter(x => x.id !== item.id));
+
+    const directiveSnippet =
+      data.directive.length > 55 ? `${data.directive.slice(0, 55)}...` : data.directive;
+
     showToast(
       lang === 'en'
-        ? `👑 Chairman authorized: ${item.id} (${item.amount}). Forwarded to SAP S/4HANA for disbursement.`
-        : `👑 চেয়ারম্যান মহোদয় কর্তৃক অনুমোদিত: ${item.id} (${item.amount})। অর্থছাড়ের জন্য পাঠানো হয়েছে।`,
+        ? `👑 Chairman sanctioned ${item.id} (${item.amount}). Directive: "${directiveSnippet}". Forwarded to SAP S/4HANA.`
+        : `👑 চেয়ারম্যান মহোদয় কর্তৃক অনুমোদিত: ${item.id} (${item.amount})। নির্দেশনাসহ অর্থছাড়ের জন্য পাঠানো হয়েছে।`,
       'gold'
     );
+    setItemToAuthorize(null);
   };
 
   const filteredInnerCircle = INNER_CIRCLE.filter(p => {
@@ -91,34 +110,134 @@ export default function ChairmanDashboard({
                   ✓ {t('All high-priority authorizations cleared by Chairman.', 'চেয়ারম্যান কর্তৃক সকল জরুরি ফাইল অনুমোদিত সম্পন্ন হয়েছে।', lang)}
                 </div>
               ) : (
-                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => (
-                  <div
-                    key={item.id || i}
-                    className="approval-interactive-card"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`
-                    }}
-                    onClick={() => handleRowClick(item)}
-                  >
-                    <div>
-                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{item.title}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                        {item.id} · {item.dept} · <strong style={{ color: 'var(--brand-gold-dark)' }}>{item.amount}</strong>
+                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => {
+                  const hasTrail = item.approvalTrail && item.approvalTrail.length > 0;
+                  const isExpanded = !!expandedTrails[item.id];
+
+                  return (
+                    <div
+                      key={item.id || i}
+                      className="approval-interactive-card"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`,
+                        cursor: 'default',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                        }}
+                      >
+                        <div style={{ flex: '1 1 300px' }}>
+                          <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                            {item.title}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> · {item.dept} ·{' '}
+                            <strong style={{ color: 'var(--brand-gold-dark)', fontSize: '12px' }}>{item.amount}</strong>
+                            {item.sapRef && (
+                              <span className="badge info" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
+                                SAP: {item.sapRef}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex-gap" style={{ alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="btn-gold"
+                            style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                            onClick={() => handleAuthorize(item)}
+                            title={t('Authorize with Executive Directive & Seal', 'অনুমোদন ও নির্দেশিকা প্রদান', lang)}
+                          >
+                            👑 {t('Authorize', 'অনুমোদন', lang)}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-outline"
+                            style={{ fontSize: '11px', padding: '6px 12px' }}
+                            onClick={() => handleRowClick(item)}
+                          >
+                            {t('Inspect File', 'নথি দেখুন', lang)}
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Departmental Endorsement Path Preview & Accordion */}
+                      {item.approvalTrail && item.approvalTrail.length > 0 && (
+                        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '8px 12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => toggleTrail(item.id)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontSize: '11.5px',
+                                fontWeight: 700,
+                                color: '#4338CA',
+                              }}
+                            >
+                              <ShieldCheck size={14} color="#059669" />
+                              <span>
+                                {t('Department Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length} {t('Notes', 'টি নোট', lang)})
+                              </span>
+                              <span style={{ fontSize: '9px' }}>{isExpanded ? '▲' : '▼'}</span>
+                            </button>
+
+                            {!isExpanded && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: '#64748B' }}>
+                                {item.approvalTrail.map((st: any, idx: number) => (
+                                  <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                    {idx > 0 && <span style={{ color: '#CBD5E1', fontSize: '9px' }}>➔</span>}
+                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
+                                    <span>{st.officerName.split(' ')[0]}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Expanded list of departmental justification notes */}
+                          {isExpanded && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E2E8F0' }}>
+                              {item.approvalTrail.map((step: any, idx: number) => (
+                                <div key={idx} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
+                                      <strong style={{ color: '#0F172A' }}>{step.officerName}</strong>
+                                      <span style={{ color: '#64748B', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
+                                    </div>
+                                    <span style={{ fontSize: '9.5px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                      <Clock size={10} /> {step.timestamp}
+                                    </span>
+                                  </div>
+                                  <div style={{ paddingLeft: '19px', color: '#334155', fontStyle: 'italic', lineHeight: 1.4 }}>
+                                    "{step.note}"
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-gap" onClick={(e) => e.stopPropagation()}>
-                      <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }} onClick={() => handleAuthorize(item)}>
-                        👑 {t('Authorize', 'অনুমোদন', lang)}
-                      </button>
-                      <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px' }} onClick={() => handleRowClick(item)}>
-                        {t('Inspect File', 'নথি দেখুন', lang)}
-                      </button>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
@@ -504,6 +623,24 @@ export default function ChairmanDashboard({
           if (noticeId) acknowledgeNotice(noticeId);
         }}
       />
+
+      {/* ─── MODAL 3: CHAIRMAN AUTHORIZATION DIRECTIVE MODAL ─── */}
+      {itemToAuthorize && (
+        <AuthorizeDirectiveModal
+          isOpen={!!itemToAuthorize}
+          onClose={() => setItemToAuthorize(null)}
+          onConfirm={handleConfirmAuthorize}
+          lang={lang}
+          itemId={itemToAuthorize.id}
+          itemTitle={itemToAuthorize.title}
+          requesterName={itemToAuthorize.initiator || itemToAuthorize.requester}
+          department={itemToAuthorize.dept}
+          amount={itemToAuthorize.amount}
+          sapDocRef={itemToAuthorize.sapRef || itemToAuthorize.sapDocRef}
+          approvalTrail={itemToAuthorize.approvalTrail}
+          roleTitle="Chairman & Managing Director"
+        />
+      )}
     </>
   );
 }

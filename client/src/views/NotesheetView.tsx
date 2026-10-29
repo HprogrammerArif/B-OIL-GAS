@@ -485,6 +485,18 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     clearCanvas();
 
     if (isFinalStep) {
+      // Sync cross-platform approval with Omni-Approval store
+      const matchingItem = approvalStore.getApprovalItems().find(
+        (a) => a.sourceId === currentFile.id || a.sapDocRef === currentFile.fileNo || a.id.includes('0894')
+      );
+      if (matchingItem) {
+        approvalStore.approveApprovalItem(
+          matchingItem.id,
+          newNoteText.trim() || defaultRemark,
+          activeSignatoryName
+        );
+      }
+
       showToast(
         t(
           `✓ File ${currentFile.fileNo} received FINAL APPROVAL from ${activeSignatoryName}! Process Complete.`,
@@ -848,6 +860,72 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 <span style={{ color: 'var(--brand-slate-500)', fontWeight: 700 }}>{t('Subject: ', 'বিষয়: ', lang)}</span> {currentFile.title}
               </div>
 
+              {/* Departmental Endorsements & Vetting Trail (Why Document Got Approved At Each Department) */}
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '8px',
+                  padding: '12px 14px',
+                  marginBottom: '16px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#1E293B' }}>
+                    <ShieldCheck size={16} color="#059669" />
+                    <span>{t('Departmental Endorsements & Audit Trail', 'বিভাগীয় সুপারিশ ও অনুমোদন খতিয়ান', lang)}</span>
+                  </div>
+                  <span className="badge green" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                    {currentFile.notes.length} {t('Vetted Steps', 'টি যাচাইকৃত ধাপ', lang)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {currentFile.notes.map((n) => (
+                    <div
+                      key={n.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '8px',
+                        fontSize: '11px',
+                        background: '#FFFFFF',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #E2E8F0',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          background: '#DCFCE7',
+                          color: '#15803D',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '9px',
+                          fontWeight: 800,
+                          flexShrink: 0,
+                          marginTop: '2px',
+                        }}
+                      >
+                        ✓
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                          <strong style={{ color: '#0F172A' }}>Para-{n.para}: {n.author}</strong>
+                          <span style={{ fontSize: '10px', color: '#64748B' }}>{n.role} · {n.dept}</span>
+                        </div>
+                        <div style={{ color: '#334155', fontStyle: 'italic', marginTop: '2px', lineHeight: 1.45 }}>
+                          "{n.body.length > 140 ? `${n.body.slice(0, 140)}...` : n.body}"
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Notes Paragraphs */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {currentFile.notes.map((n) => (
@@ -1035,6 +1113,64 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   <button className="btn-primary" style={{ flex: 1, fontSize: '11px', padding: '5px 8px' }} onClick={handleApplySignature}>
                     <CheckCheck size={13} /> {t('Apply Signature', 'স্বাক্ষর প্রয়োগ', lang)}
                   </button>
+                </div>
+
+                {/* Quick 1-Click Executive Directive Presets */}
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+                    <Sparkles size={13} color="#D97706" />
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)' }}>
+                      {t('1-Click Executive Presets / Terms:', 'এক-ক্লিক অনুমোদন শর্তাবলী:', lang)}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    {[
+                      {
+                        label: 'Standard Sanction',
+                        labelBn: 'প্রমিত অনুমোদন',
+                        text: 'Approved as recommended in preceding department paragraphs. Scope and budget verified compliant with BOGCL governance. Expedite execution.',
+                      },
+                      {
+                        label: '5% Retention Clause',
+                        labelBn: '৫% ওয়ারেন্টি শর্ত',
+                        text: 'Approved subject to standard 5% advance retention warranty for 90 days following successful plant commissioning and engineer handover test.',
+                      },
+                      {
+                        label: 'Immediate SAP Release',
+                        labelBn: 'জরুরি এসএপি অর্থছাড়',
+                        text: 'Executive clearance granted. Forwarded to SAP S/4HANA for immediate real-time electronic disbursement via BEFTN corporate gateway.',
+                      },
+                      {
+                        label: 'Mushak-6.3 VAT Audit',
+                        labelBn: 'ভ্যাট যাচাই শর্ত',
+                        text: 'Sanctioned under delegated authority. Accounts department must verify original BIN Mushak-6.3 tax invoice and TDS deduction prior to release.',
+                      },
+                      {
+                        label: 'Zero Downtime Priority',
+                        labelBn: 'জিরো ডাউনটাইম অগ্রাধিকার',
+                        text: 'Approved on top emergency priority to ensure uninterrupted 24/7 bitumen refinery operations and zero plant stoppage.',
+                      },
+                    ].map((pr, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setNewNoteText(pr.text)}
+                        style={{
+                          fontSize: '10px',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          border: newNoteText === pr.text ? '1px solid #4338CA' : '1px solid var(--brand-slate-200)',
+                          background: newNoteText === pr.text ? '#EEF2FF' : '#FAFAFA',
+                          color: newNoteText === pr.text ? '#3730A3' : 'var(--brand-slate-600)',
+                          fontWeight: newNoteText === pr.text ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {lang === 'bn' ? pr.labelBn : pr.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: '12px' }}>
