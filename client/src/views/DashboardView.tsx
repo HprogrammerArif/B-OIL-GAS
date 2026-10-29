@@ -28,6 +28,9 @@ import HrAdminDashboard from './dashboard/HrAdminDashboard';
 import HodDashboard from './dashboard/HodDashboard';
 import EmployeeDashboard from './dashboard/EmployeeDashboard';
 import DriverDashboard from './dashboard/DriverDashboard';
+import ExecutiveROIDossierModal from '../components/dashboard/ExecutiveROIDossierModal';
+import SendVoiceBriefingModal from '../components/dashboard/SendVoiceBriefingModal';
+import { useVoiceBriefingStore } from '../store/voiceBriefingStore';
 
 interface DashboardViewProps extends ViewProps {
   onNavigate?: (view: any) => void;
@@ -38,11 +41,35 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [showBatchReleaseModal, setShowBatchReleaseModal] = useState(false);
   const [showGatePassModal, setShowGatePassModal] = useState(false);
+  const [showROIDossierModal, setShowROIDossierModal] = useState(false);
+  const [showVoiceBriefingModal, setShowVoiceBriefingModal] = useState(false);
   const [approvedAmountSum, setApprovedAmountSum] = useState(0);
 
+  const { activeBriefing, isPlaying, setIsPlaying } = useVoiceBriefingStore();
   const { requisitions: sharedRequisitions } = useFleetStore();
   const { notices: sharedNotices } = useNoticeStore();
   const stats = ROLE_STATS[role] || ROLE_STATS.chairman;
+
+  const handleToggleRibbonPlay = () => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    } else {
+      setIsPlaying(true);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window && activeBriefing) {
+        window.speechSynthesis.cancel();
+        const textToSpeak = lang === 'bn' ? activeBriefing.transcriptBn : activeBriefing.transcript;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.rate = 1.0;
+        utterance.pitch = 0.95;
+        utterance.onend = () => setIsPlaying(false);
+        utterance.onerror = () => setIsPlaying(false);
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+  };
 
   useEffect(() => {
     setActiveTab('overview');
@@ -220,9 +247,15 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         {/* Action button inside banner */}
         {role === 'chairman' && (
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 12px' }}
-              onClick={() => showToast(t('Executive Audit Report generated.', 'অডিট রিপোর্ট প্রস্তুত', lang), 'gold')}>
-              📊 {t('Executive ROI Dossier', 'আরওআই বিবরণী', lang)}
+            <button
+              type="button"
+              className="btn-gold"
+              style={{ fontSize: '11px', padding: '6px 14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+              onClick={() => setShowROIDossierModal(true)}
+              title={t('Open Comprehensive Executive ROI & Loss Mitigation Dossier', 'বোর্ড আরওআই বিবরণী দেখুন', lang)}
+            >
+              <span>📊</span>
+              <span>{t('Executive ROI Dossier', 'আরওআই বিবরণী', lang)}</span>
             </button>
           </div>
         )}
@@ -291,25 +324,115 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           ═══════════════════════════════════════════ */}
       {activeTab === 'overview' && (
         <div className="tab-pane-fade">
-          {/* CHAIRMAN: Executive Ribbon */}
+          {/* CHAIRMAN: Executive Ribbon with Active Voice Memo HUD */}
           {role === 'chairman' && (
-            <div className="exec-ribbon">
-              <div className="ribbon-left">
-                <div className="ribbon-icon">👑</div>
-                <div className="ribbon-text">
-                  <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
-                  <p>{t(
-                    '1. Factory Production: 5,000 MT/Day (On Target) • 2. Urgent Generator Overhaul Sanction: ৳ 48.5L • 3. Annual Plant Safety License Due: 18 Days',
-                    '১. কারখানা উৎপাদন: ৫,০০০ মে.টন/দিন (অন-টার্গেট) • ২. জরুরি জেনারেটর মেরামত অনুমোদন: ৪৮.৫ লাখ • ৩. বার্ষিক কারখানা লাইসেন্স: ১৮ দিন বাকি',
-                    lang
-                  )}</p>
+            <div className="exec-ribbon" style={{ flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div className="ribbon-left">
+                  <div className="ribbon-icon">👑</div>
+                  <div className="ribbon-text">
+                    <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
+                    <p>{t(
+                      '1. Factory Production: 5,000 MT/Day (On Target) • 2. Urgent Generator Overhaul Sanction: ৳ 48.5L • 3. Annual Plant Safety License Due: 18 Days',
+                      '১. কারখানা উৎপাদন: ৫,০০০ মে.টন/দিন (অন-টার্গেট) • ২. জরুরি জেনারেটর মেরামত অনুমোদন: ৪৮.৫ লাখ • ৩. বার্ষিক কারখানা লাইসেন্স: ১৮ দিন বাকি',
+                      lang
+                    )}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="btn-ribbon"
+                    onClick={() => setShowVoiceBriefingModal(true)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
+                  >
+                    🎙️ {t('Send Voice Briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-ribbon" onClick={() => showToast('60-Sec Voice Memo delivered.', 'gold')}>
-                  🎙️ {t('Send Voice Briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
-                </button>
-              </div>
+
+              {/* Active Voice Briefing Broadcast Player HUD */}
+              {activeBriefing && (
+                <div
+                  style={{
+                    background: 'rgba(0, 0, 0, 0.35)',
+                    border: '1px solid rgba(212, 175, 55, 0.35)',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 320px' }}>
+                    <button
+                      type="button"
+                      onClick={handleToggleRibbonPlay}
+                      style={{
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '50%',
+                        background: isPlaying ? '#10B981' : '#D4AF37',
+                        border: 'none',
+                        color: '#000000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontWeight: 900,
+                        fontSize: '13px',
+                        flexShrink: 0,
+                        boxShadow: isPlaying ? '0 0 12px rgba(16, 185, 129, 0.6)' : '0 2px 6px rgba(0,0,0,0.3)',
+                      }}
+                      title={isPlaying ? 'Pause voice briefing' : 'Listen to voice briefing'}
+                    >
+                      {isPlaying ? '⏸' : '▶'}
+                    </button>
+
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#FDE047' }}>
+                          🎙️ {t(activeBriefing.title, activeBriefing.titleBn, lang)}
+                        </span>
+                        <span className="badge" style={{ background: '#DC2626', color: '#fff', fontSize: '9px', padding: '1px 5px' }}>
+                          LIVE MEMO
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px', fontStyle: 'italic', maxWidth: '580px' }}>
+                        "{t(activeBriefing.transcript, activeBriefing.transcriptBn, lang)}"
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Equalizer & Timer */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', height: '18px' }}>
+                      {[12, 18, 8, 22, 14, 20, 10, 16].map((h, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            width: '2.5px',
+                            height: isPlaying ? `${Math.max(4, (h * (1 + Math.sin(i + Date.now() / 150))) % 20)}px` : '4px',
+                            background: isPlaying ? '#34D399' : '#64748B',
+                            borderRadius: '1px',
+                            transition: 'height 0.15s ease',
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: '11.5px', fontFamily: 'monospace', color: '#94A3B8' }}>
+                      00:{activeBriefing.durationSeconds < 10 ? `0${activeBriefing.durationSeconds}` : activeBriefing.durationSeconds}
+                    </div>
+
+                    <span style={{ fontSize: '10px', color: '#64748B' }}>
+                      • {activeBriefing.recordedAt}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -719,6 +842,20 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
       <DetailDrawer
         data={selectedDrawerItem}
         onClose={() => setSelectedDrawerItem(null)}
+        lang={lang}
+      />
+
+      {/* Executive Board ROI Dossier Modal */}
+      <ExecutiveROIDossierModal
+        isOpen={showROIDossierModal}
+        onClose={() => setShowROIDossierModal(false)}
+        lang={lang}
+      />
+
+      {/* Chairman Send Voice Briefing Studio Modal */}
+      <SendVoiceBriefingModal
+        isOpen={showVoiceBriefingModal}
+        onClose={() => setShowVoiceBriefingModal(false)}
         lang={lang}
       />
     </div>
