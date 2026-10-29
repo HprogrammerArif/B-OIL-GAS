@@ -1209,5 +1209,165 @@
   }
 }
 
+/* ─── APPROVALS MOBILE CARD & QUEUE STYLING ─── */
+.approvals-mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+.approvals-desktop-table {
+  display: block;
+}
 
+@media (max-width: 768px) {
+  .approvals-desktop-table {
+    display: none !important;
+  }
+  .approvals-mobile-cards {
+    display: flex !important;
+  }
+}
 
+.approval-mobile-card {
+  background: var(--brand-card-bg, #FFFFFF);
+  border: 1px solid var(--brand-slate-200);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.approval-mobile-card.selected {
+  border-color: var(--brand-crimson);
+  background: rgba(165, 28, 48, 0.03);
+}
+[data-theme="dark"] .approval-mobile-card {
+  background: #0E1834;
+  border-color: #1E293B;
+}
+
+/* ─── CLAIMS MOBILE CARD STYLING ─── */
+.claims-mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.claims-desktop-table {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .claims-desktop-table {
+    display: none !important;
+  }
+  .claims-mobile-cards {
+    display: flex !important;
+  }
+}
+
+.claim-mobile-card {
+  background: var(--brand-card-bg, #FFFFFF);
+  border: 1px solid var(--brand-slate-200);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.claim-mobile-card.active {
+  border-color: var(--brand-crimson);
+  background: rgba(165, 28, 48, 0.04);
+}
+[data-theme="dark"] .claim-mobile-card {
+  background: #0E1834;
+  border-color: #1E293B;
+}
+
+/* ─── ASSET MOBILE CARD STYLING ─── */
+.assets-mobile-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+.assets-desktop-table {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .assets-desktop-table {
+    display: none !important;
+  }
+  .assets-mobile-cards {
+    display: flex !important;
+  }
+}
+
+.asset-mobile-card {
+  background: var(--brand-card-bg, #FFFFFF);
+  border: 1px solid var(--brand-slate-200);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.asset-mobile-card.active {
+  border-color: var(--brand-crimson);
+  background: rgba(165, 28, 48, 0.04);
+}
+[data-theme="dark"] .asset-mobile-card {
+  background: #0E1834;
+  border-color: #1E293B;
+}
+
+/* ─── MOBILE SEGMENTED VIEW SWITCHER BUTTONS ─── */
+.mobile-view-toggle {
+  display: none;
+  width: 100%;
+  margin-bottom: 14px;
+}
+@media (max-width: 768px) {
+  .mobile-view-toggle {
+    display: flex !important;
+    gap: 6px;
+    background: var(--brand-slate-100);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--brand-slate-200);
+  }
+  .mobile-view-toggle button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--brand-slate-600);
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mobile-view-toggle button.active {
+    background: #FFFFFF;
+    color: var(--brand-crimson);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  [data-theme="dark"] .mobile-view-toggle {
+    background: #0B132B;
+    border-color: #1E293B;
+  }
+  [data-theme="dark"] .mobile-view-toggle button.active {
+    background: #16254C;
+    color: #FFFFFF;
+  }
+  .mobile-hide {
+    display: none !important;
+  }
+}

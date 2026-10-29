@@ -5,7 +5,7 @@ import {
   Wrench, ShieldCheck, AlertTriangle, Calendar, Search, Filter,
   Download, Plus, RefreshCw, Barcode, CheckCircle, Clock,
   Cpu, Truck, Gauge, Shield, ChevronRight, Layers, DollarSign,
-  X, QrCode, Printer, RotateCcw
+  X, QrCode, Printer, RotateCcw, ArrowLeft, FileText
 } from 'lucide-react';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 
@@ -121,6 +121,7 @@ export default function AssetView({ role, lang }: ViewProps) {
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'plant' | 'vehicle' | 'it' | 'safety'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAsset, setSelectedAsset] = useState<AssetRecord | null>(INITIAL_ASSETS[0]);
+  const [mobileTab, setMobileTab] = useState<'list' | 'detail'>('list');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPassportModal, setShowPassportModal] = useState(false);
@@ -327,11 +328,11 @@ export default function AssetView({ role, lang }: ViewProps) {
           </button>
         </div>
 
-        <div style={{ position: 'relative', width: '280px' }}>
+        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '180px' }}>
           <Search size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--brand-slate-400)' }} />
           <input
             className="form-input"
-            style={{ paddingLeft: '32px', fontSize: '13px' }}
+            style={{ paddingLeft: '32px', fontSize: '13px', width: '100%' }}
             placeholder={t('Search by tag, name, serial...', 'ট্যাগ, নাম বা সিরিয়াল খুঁজুন...', lang)}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -339,10 +340,30 @@ export default function AssetView({ role, lang }: ViewProps) {
         </div>
       </div>
 
+      {/* Mobile Tab Switcher (<= 768px) */}
+      <div className="mobile-view-toggle">
+        <button
+          type="button"
+          className={mobileTab === 'list' ? 'active' : ''}
+          onClick={() => setMobileTab('list')}
+        >
+          <Wrench size={14} />
+          {t('Equipment List', 'সরঞ্জাম তালিকা', lang)} ({filteredAssets.length})
+        </button>
+        <button
+          type="button"
+          className={mobileTab === 'detail' ? 'active' : ''}
+          onClick={() => setMobileTab('detail')}
+        >
+          <FileText size={14} />
+          {t('Diagnostics & Specs', 'ডায়াগনস্টিক বিবরণ', lang)} {selectedAsset ? `(${selectedAsset.tag})` : ''}
+        </button>
+      </div>
+
       {/* Main Grid: Asset Register Table + Inspector */}
       <div className="responsive-col-2">
-        {/* Asset Table */}
-        <div className="card">
+        {/* Asset Table & Mobile Cards */}
+        <div className={`card ${mobileTab === 'detail' ? 'mobile-hide' : ''}`}>
           <div className="card-hd">
             <div className="card-hd-left">
               <div className="card-hd-icon"><Wrench size={16} /></div>
@@ -359,59 +380,100 @@ export default function AssetView({ role, lang }: ViewProps) {
             </button>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
-            <div className="table-responsive">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>{t('Tag / Name', 'ট্যাগ ও নাম', lang)}</th>
-                    <th>{t('Location & Custodian', 'স্থান ও দায়িত্বপ্রাপ্ত', lang)}</th>
-                    <th>{t('Valuation', 'বর্তমান মূল্য', lang)}</th>
-                    <th>{t('Service Due', 'সার্ভিস বাকি', lang)}</th>
-                    <th>{t('Status', 'অবস্থা', lang)}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAssets.map(item => (
-                    <tr
-                      key={item.id}
-                      onClick={() => setSelectedAsset(item)}
-                      style={{
-                        cursor: 'pointer',
-                        background: selectedAsset?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
-                      }}
-                    >
-                      <td>
-                        <div style={{ fontWeight: 600, fontSize: '13px' }}>{item.name}</div>
-                        <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-crimson)', fontWeight: 600 }}>
-                          🏷️ {item.tag}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '12px' }}>{item.location}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.custodian}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700 }}>৳{(item.currentBookValue / 100000).toFixed(1)}L</div>
-                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Orig: ৳{(item.purchaseCost / 100000).toFixed(1)}L</div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: item.daysToService <= 15 ? 'var(--brand-crimson)' : 'inherit' }}>
-                          {item.daysToService} days
-                        </div>
-                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{item.nextServiceDate}</div>
-                      </td>
-                      <td>{getStatusBadge(item.status)}</td>
+            {/* Desktop Table (> 768px) */}
+            <div className="assets-desktop-table">
+              <div className="table-responsive">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>{t('Tag / Name', 'ট্যাগ ও নাম', lang)}</th>
+                      <th>{t('Location & Custodian', 'স্থান ও দায়িত্বপ্রাপ্ত', lang)}</th>
+                      <th>{t('Valuation', 'বর্তমান মূল্য', lang)}</th>
+                      <th>{t('Service Due', 'সার্ভিস বাকি', lang)}</th>
+                      <th>{t('Status', 'অবস্থা', lang)}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredAssets.map(item => (
+                      <tr
+                        key={item.id}
+                        onClick={() => setSelectedAsset(item)}
+                        style={{
+                          cursor: 'pointer',
+                          background: selectedAsset?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
+                        }}
+                      >
+                        <td>
+                          <div style={{ fontWeight: 600, fontSize: '13px' }}>{item.name}</div>
+                          <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-crimson)', fontWeight: 600 }}>
+                            🏷️ {item.tag}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '12px' }}>{item.location}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.custodian}</div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 700 }}>৳{(item.currentBookValue / 100000).toFixed(1)}L</div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>Orig: ৳{(item.purchaseCost / 100000).toFixed(1)}L</div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '12px', fontWeight: 600, color: item.daysToService <= 15 ? 'var(--brand-crimson)' : 'inherit' }}>
+                            {item.daysToService} days
+                          </div>
+                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{item.nextServiceDate}</div>
+                        </td>
+                        <td>{getStatusBadge(item.status)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Cards View (<= 768px) */}
+            <div className="assets-mobile-cards">
+              {filteredAssets.map(item => (
+                <div
+                  key={item.id}
+                  className={`asset-mobile-card ${selectedAsset?.id === item.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setSelectedAsset(item);
+                    setMobileTab('detail');
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '11.5px', color: 'var(--brand-crimson)' }}>
+                      🏷️ {item.tag}
+                    </span>
+                    {getStatusBadge(item.status)}
+                  </div>
+
+                  <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)', marginBottom: '3px' }}>
+                    {item.name}
+                  </div>
+
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginBottom: '6px' }}>
+                    📍 {item.location}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px' }}>
+                    <span style={{ color: 'var(--brand-slate-600)' }}>
+                      Val: <strong>৳{(item.currentBookValue / 100000).toFixed(1)}L</strong>
+                    </span>
+                    <span style={{ fontWeight: 600, color: item.daysToService <= 15 ? 'var(--brand-crimson)' : 'var(--brand-slate-600)' }}>
+                      ⏱️ Service in {item.daysToService}d
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Selected Asset Details / Calibration Card */}
         {selectedAsset && (
-          <div className="card">
+          <div className={`card ${mobileTab === 'list' ? 'mobile-hide' : ''}`}>
             <div className="card-hd">
               <div className="card-hd-left">
                 <div className="card-hd-icon"><Barcode size={16} /></div>
@@ -423,6 +485,17 @@ export default function AssetView({ role, lang }: ViewProps) {
               {getStatusBadge(selectedAsset.status)}
             </div>
             <div className="card-body">
+              {/* Mobile Back Button */}
+              <div style={{ marginBottom: '14px' }}>
+                <button
+                  type="button"
+                  className="btn-outline mobile-view-toggle"
+                  style={{ padding: '6px 12px', fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto' }}
+                  onClick={() => setMobileTab('list')}
+                >
+                  <ArrowLeft size={13} /> {t('Back to Equipment Register', 'সরঞ্জাম তালিকায় ফিরুন', lang)}
+                </button>
+              </div>
               <div style={{ background: 'var(--brand-slate-50)', padding: '12px 14px', borderRadius: '8px', marginBottom: '16px' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', textTransform: 'uppercase', fontWeight: 600 }}>
                   {t('Technical Specifications', 'প্রযুক্তিগত বৈশিষ্ট্য', lang)}

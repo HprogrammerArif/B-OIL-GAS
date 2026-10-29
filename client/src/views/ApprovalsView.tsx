@@ -216,7 +216,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
             </button>
           </div>
 
-          <div style={{ position: 'relative', width: '260px' }}>
+          <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '180px' }}>
             <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)' }} />
             <input
               type="text"
@@ -224,16 +224,16 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
               placeholder={t('Search queue by keyword or requester...', 'অনুসন্ধান...', lang)}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: '34px', fontSize: '12px' }}
+              style={{ paddingLeft: '34px', fontSize: '12px', width: '100%' }}
             />
           </div>
         </div>
       </div>
 
-      {/* Main Approvals Table */}
+      {/* Main Approvals Table & Mobile Cards */}
       <div className="card">
         <div className="card-hd flex-between">
-          <div className="flex-gap">
+          <div className="flex-gap" style={{ alignItems: 'center' }}>
             <button className="btn-sm-ghost" onClick={selectAll} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {selectedIds.length === filteredItems.length && filteredItems.length > 0 ? (
                 <CheckSquare size={16} color="var(--brand-crimson)" />
@@ -253,89 +253,161 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
         </div>
 
         <div className="card-body no-padding">
-          <div className="table-responsive">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '40px' }}></th>
-                  <th>{t('Request Details', 'আবেদনের বিবরণ', lang)}</th>
-                  <th>{t('Requester & Department', 'আবেদনকারী ও বিভাগ', lang)}</th>
-                  <th>{t('Financial Impact', 'আর্থিক পরিমাণ', lang)}</th>
-                  <th>{t('SLA & Urgency', 'এসএলএ সময়সীমা', lang)}</th>
-                  <th style={{ textAlign: 'right' }}>{t('Authority Action', 'পদক্ষেপ', lang)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => {
-                  const isChecked = selectedIds.includes(item.id);
-                  return (
-                    <tr key={item.id} className={isChecked ? 'row-selected' : ''}>
-                      <td>
-                        <button
-                          type="button"
-                          className="btn-link-plain"
-                          onClick={() => toggleSelect(item.id)}
-                          style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}
-                        >
-                          {isChecked ? <CheckSquare size={16} color="var(--brand-crimson)" /> : <Square size={16} color="var(--brand-slate-400)" />}
-                        </button>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
-                          {t(item.title, item.titleBn, lang)}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                          Ref: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> • {item.details}
-                        </div>
-                      </td>
-                      <td>
-                        <strong style={{ fontSize: '12.5px' }}>{item.requester}</strong>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                          {item.designation} • {item.dept}
-                        </div>
-                      </td>
-                      <td>
-                        <strong style={{ fontSize: '13px', color: item.costTk ? 'var(--brand-crimson)' : 'var(--brand-slate-700)' }}>
-                          {item.amount || 'N/A'}
-                        </strong>
-                        <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--brand-slate-400)' }}>
-                          {item.sapDocRef}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${item.slaHoursLeft < 12 ? 'danger' : item.slaHoursLeft < 24 ? 'warn' : 'info'}`}>
-                          <Clock size={11} style={{ marginRight: '4px' }} />
-                          {item.slaHoursLeft}h SLA
-                        </span>
-                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
-                          Submitted: {item.date}
-                        </div>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
+          {/* Desktop Table View (> 768px) */}
+          <div className="approvals-desktop-table">
+            <div className="table-responsive">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '40px' }}></th>
+                    <th>{t('Request Details', 'আবেদনের বিবরণ', lang)}</th>
+                    <th>{t('Requester & Department', 'আবেদনকারী ও বিভাগ', lang)}</th>
+                    <th>{t('Financial Impact', 'আর্থিক পরিমাণ', lang)}</th>
+                    <th>{t('SLA & Urgency', 'এসএলএ সময়সীমা', lang)}</th>
+                    <th style={{ textAlign: 'right' }}>{t('Authority Action', 'পদক্ষেপ', lang)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredItems.map((item) => {
+                    const isChecked = selectedIds.includes(item.id);
+                    return (
+                      <tr key={item.id} className={isChecked ? 'row-selected' : ''}>
+                        <td>
                           <button
-                            className="btn-sm-ghost"
-                            style={{ color: '#DC2626', borderColor: 'rgba(220,38,38,0.2)' }}
-                            onClick={() => handleRejectSingle(item)}
-                            title="Return with note"
+                            type="button"
+                            className="btn-link-plain"
+                            onClick={() => toggleSelect(item.id)}
+                            style={{ cursor: 'pointer', background: 'transparent', border: 'none' }}
                           >
-                            <X size={13} />
+                            {isChecked ? <CheckSquare size={16} color="var(--brand-crimson)" /> : <Square size={16} color="var(--brand-slate-400)" />}
                           </button>
-                          <button
-                            className="btn-primary"
-                            style={{ padding: '5px 12px', fontSize: '11.5px', fontWeight: 700 }}
-                            onClick={() => handleApproveSingle(item)}
-                          >
-                            <Check size={13} />
-                            {t('Authorize', 'অনুমোদন', lang)}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                            {t(item.title, item.titleBn, lang)}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                            Ref: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> • {item.details}
+                          </div>
+                        </td>
+                        <td>
+                          <strong style={{ fontSize: '12.5px' }}>{item.requester}</strong>
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                            {item.designation} • {item.dept}
+                          </div>
+                        </td>
+                        <td>
+                          <strong style={{ fontSize: '13px', color: item.costTk ? 'var(--brand-crimson)' : 'var(--brand-slate-700)' }}>
+                            {item.amount || 'N/A'}
+                          </strong>
+                          <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--brand-slate-400)' }}>
+                            {item.sapDocRef}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge ${item.slaHoursLeft < 12 ? 'danger' : item.slaHoursLeft < 24 ? 'warn' : 'info'}`}>
+                            <Clock size={11} style={{ marginRight: '4px' }} />
+                            {item.slaHoursLeft}h SLA
+                          </span>
+                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
+                            Submitted: {item.date}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
+                            <button
+                              className="btn-sm-ghost"
+                              style={{ color: '#DC2626', borderColor: 'rgba(220,38,38,0.2)' }}
+                              onClick={() => handleRejectSingle(item)}
+                              title="Return with note"
+                            >
+                              <X size={13} />
+                            </button>
+                            <button
+                              className="btn-primary"
+                              style={{ padding: '5px 12px', fontSize: '11.5px', fontWeight: 700 }}
+                              onClick={() => handleApproveSingle(item)}
+                            >
+                              <Check size={13} />
+                              {t('Authorize', 'অনুমোদন', lang)}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Cards View (<= 768px) */}
+          <div className="approvals-mobile-cards">
+            {filteredItems.map((item) => {
+              const isChecked = selectedIds.includes(item.id);
+              return (
+                <div key={item.id} className={`approval-mobile-card ${isChecked ? 'selected' : ''}`}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className="btn-link-plain"
+                        onClick={() => toggleSelect(item.id)}
+                        style={{ cursor: 'pointer', background: 'transparent', border: 'none', padding: 0 }}
+                      >
+                        {isChecked ? <CheckSquare size={18} color="var(--brand-crimson)" /> : <Square size={18} color="var(--brand-slate-400)" />}
+                      </button>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '11.5px', color: 'var(--brand-crimson)' }}>
+                        {item.id}
+                      </span>
+                    </div>
+                    <span className="badge" style={{ fontWeight: 800, fontSize: '11.5px', background: item.costTk ? '#FEE2E2' : '#F1F5F9', color: item.costTk ? '#991B1B' : '#475569' }}>
+                      {item.amount || 'N/A'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                      {t(item.title, item.titleBn, lang)}
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '2px', lineHeight: 1.4 }}>
+                      {item.details}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '11px', color: 'var(--brand-slate-500)', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '8px' }}>
+                    <div>
+                      <strong style={{ color: 'var(--brand-slate-800)' }}>{item.requester}</strong> · {item.dept}
+                    </div>
+                    <span className={`badge ${item.slaHoursLeft < 12 ? 'danger' : item.slaHoursLeft < 24 ? 'warn' : 'info'}`} style={{ fontSize: '10px' }}>
+                      <Clock size={10} style={{ marginRight: '3px' }} />
+                      {item.slaHoursLeft}h SLA
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '4px' }}>
+                    <button
+                      type="button"
+                      className="btn-outline"
+                      style={{ padding: '8px', fontSize: '11.5px', color: '#DC2626', borderColor: '#FCA5A5', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      onClick={() => handleRejectSingle(item)}
+                    >
+                      <X size={14} />
+                      {t('Return Query', 'আপত্তি', lang)}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      style={{ padding: '8px', fontSize: '11.5px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                      onClick={() => handleApproveSingle(item)}
+                    >
+                      <Check size={14} />
+                      {t('Authorize', 'অনুমোদন', lang)}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

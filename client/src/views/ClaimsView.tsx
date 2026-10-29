@@ -4,7 +4,7 @@ import { showToast } from '../App';
 import {
   Receipt, Plus, CheckCircle, Clock, AlertTriangle, Download,
   DollarSign, MapPin, Calendar, FileText, Send, UserCheck,
-  ChevronRight, ArrowRight, ShieldAlert, Check, X, Filter
+  ChevronRight, ArrowRight, ArrowLeft, ShieldAlert, Check, X, Filter
 } from 'lucide-react';
 import SubmitClaimModal, { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
@@ -22,6 +22,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const { claims, addClaim, updateClaimStatus, rejectClaim, resubmitClaim } = useApprovalStore();
   const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'policy'>('all');
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<'list' | 'detail'>('list');
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
 
@@ -223,87 +224,161 @@ export default function ClaimsView({ role, lang }: ViewProps) {
           </div>
         </div>
       ) : (
-        <div className="responsive-col-2">
-          {/* Claims List Table */}
-          <div className="card">
-            <div className="card-hd">
-              <div className="card-hd-left">
-                <div className="card-hd-icon"><Receipt size={16} /></div>
-                <div>
-                  <div className="card-title">{t('Requisition & Claim Queue', 'দাবি তালিকা', lang)}</div>
-                  <div className="card-subtitle">{t('Click any item to inspect breakdowns and vouchers', 'বিস্তারিত ও ভাউচার দেখতে আইটেমে ক্লিক করুন', lang)}</div>
-                </div>
-              </div>
-            </div>
-            <div className="card-body" style={{ padding: 0 }}>
-              <div className="table-responsive">
-                <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>{t('ID / Date', 'আইডি / তারিখ', lang)}</th>
-                    <th>{t('Claimant', 'দাবিদার', lang)}</th>
-                    <th>{t('Type / Purpose', 'ধরন ও বিবরণ', lang)}</th>
-                    <th>{t('Amount', 'পরিমাণ', lang)}</th>
-                    <th>{t('Status', 'অবস্থা', lang)}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredClaims.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => setSelectedClaim(item)}
-                      style={{
-                        cursor: 'pointer',
-                        background: selectedClaim?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
-                      }}
-                    >
-                      <td>
-                        <div style={{ fontWeight: 600, fontFamily: 'monospace' }}>{item.id}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.dateSubmitted}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{item.claimant}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.dept}</div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`}>
-                            {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour & Event' : '🚕 Conveyance'}
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '12px', marginTop: '3px', maxWidth: '220px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {item.purpose}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontWeight: 700, fontSize: '13px' }}>৳{item.amount.toLocaleString()}</div>
-                        {item.destination && (
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.destination}</div>
-                        )}
-                      </td>
-                      <td>{getStatusBadge(item.status)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              </div>
-            </div>
+        <>
+          {/* Mobile Tab Switcher (<= 768px) */}
+          <div className="mobile-view-toggle">
+            <button
+              type="button"
+              className={mobileTab === 'list' ? 'active' : ''}
+              onClick={() => setMobileTab('list')}
+            >
+              <Receipt size={14} />
+              {t('Claims Queue', 'দাবি তালিকা', lang)} ({filteredClaims.length})
+            </button>
+            <button
+              type="button"
+              className={mobileTab === 'detail' ? 'active' : ''}
+              onClick={() => setMobileTab('detail')}
+            >
+              <FileText size={14} />
+              {t('Inspection Details', 'ভাউচার বিবরণ', lang)} {selectedClaim ? `(${selectedClaim.id})` : ''}
+            </button>
           </div>
 
-          {/* Selected Claim Inspector Panel */}
-          {selectedClaim && (
-            <div className="card">
+          <div className="responsive-col-2">
+            {/* Claims List Table & Mobile Cards */}
+            <div className={`card ${mobileTab === 'detail' ? 'mobile-hide' : ''}`}>
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon">📄</div>
+                  <div className="card-hd-icon"><Receipt size={16} /></div>
                   <div>
-                    <div className="card-title">{selectedClaim.id}</div>
-                    <div className="card-subtitle">{selectedClaim.claimant} · {selectedClaim.designation}</div>
+                    <div className="card-title">{t('Requisition & Claim Queue', 'দাবি তালিকা', lang)}</div>
+                    <div className="card-subtitle">{t('Click any item to inspect breakdowns and vouchers', 'বিস্তারিত ও ভাউচার দেখতে আইটেমে ক্লিক করুন', lang)}</div>
                   </div>
                 </div>
-                {getStatusBadge(selectedClaim.status)}
               </div>
-              <div className="card-body">
+              <div className="card-body" style={{ padding: 0 }}>
+                {/* Desktop Table View (> 768px) */}
+                <div className="claims-desktop-table">
+                  <div className="table-responsive">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>{t('ID / Date', 'আইডি / তারিখ', lang)}</th>
+                          <th>{t('Claimant', 'দাবিদার', lang)}</th>
+                          <th>{t('Type / Purpose', 'ধরন ও বিবরণ', lang)}</th>
+                          <th>{t('Amount', 'পরিমাণ', lang)}</th>
+                          <th>{t('Status', 'অবস্থা', lang)}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredClaims.map((item) => (
+                          <tr
+                            key={item.id}
+                            onClick={() => setSelectedClaim(item)}
+                            style={{
+                              cursor: 'pointer',
+                              background: selectedClaim?.id === item.id ? 'var(--brand-gold-glow, rgba(165,28,48,0.06))' : undefined,
+                            }}
+                          >
+                            <td>
+                              <div style={{ fontWeight: 600, fontFamily: 'monospace' }}>{item.id}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.dateSubmitted}</div>
+                            </td>
+                            <td>
+                              <div style={{ fontWeight: 600 }}>{item.claimant}</div>
+                              <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.dept}</div>
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`}>
+                                  {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour & Event' : '🚕 Conveyance'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '12px', marginTop: '3px', maxWidth: '220px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.purpose}
+                              </div>
+                            </td>
+                            <td>
+                              <div style={{ fontWeight: 700, fontSize: '13px' }}>৳{item.amount.toLocaleString()}</div>
+                              {item.destination && (
+                                <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.destination}</div>
+                              )}
+                            </td>
+                            <td>{getStatusBadge(item.status)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Mobile Cards View (<= 768px) */}
+                <div className="claims-mobile-cards">
+                  {filteredClaims.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`claim-mobile-card ${selectedClaim?.id === item.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedClaim(item);
+                        setMobileTab('detail');
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontWeight: 800, fontFamily: 'monospace', fontSize: '11.5px', color: 'var(--brand-crimson)' }}>
+                            {item.id}
+                          </span>
+                          <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`} style={{ fontSize: '9.5px', padding: '1px 5px' }}>
+                            {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour' : '🚕 Conveyance'}
+                          </span>
+                        </div>
+                        <span style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>
+                          ৳{item.amount.toLocaleString()}
+                        </span>
+                      </div>
+
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)', marginBottom: '3px' }}>
+                        {item.purpose}
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid var(--brand-slate-100)' }}>
+                        <div>
+                          <strong>{item.claimant}</strong> · {item.dept}
+                        </div>
+                        {getStatusBadge(item.status)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Claim Inspector Panel */}
+            {selectedClaim && (
+              <div className={`card ${mobileTab === 'list' ? 'mobile-hide' : ''}`}>
+                <div className="card-hd">
+                  <div className="card-hd-left">
+                    <div className="card-hd-icon">📄</div>
+                    <div>
+                      <div className="card-title">{selectedClaim.id}</div>
+                      <div className="card-subtitle">{selectedClaim.claimant} · {selectedClaim.designation}</div>
+                    </div>
+                  </div>
+                  {getStatusBadge(selectedClaim.status)}
+                </div>
+                <div className="card-body">
+                  {/* Mobile Back Button */}
+                  <div style={{ marginBottom: '14px' }}>
+                    <button
+                      type="button"
+                      className="btn-outline mobile-view-toggle"
+                      style={{ padding: '6px 12px', fontSize: '11.5px', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto' }}
+                      onClick={() => setMobileTab('list')}
+                    >
+                      <ArrowLeft size={13} /> {t('Back to Claims List', 'তালিকায় ফিরুন', lang)}
+                    </button>
+                  </div>
                 <div style={{ background: 'var(--brand-slate-50)', padding: '14px', borderRadius: '8px', marginBottom: '16px' }}>
                   <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--brand-slate-400)', fontWeight: 600 }}>
                     {t('Official Purpose', 'দাপ্তরিক উদ্দেশ্য', lang)}
@@ -465,7 +540,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
             </div>
           )}
         </div>
-      )}
+      </>
+    )}
 
       {/* Rejection & Inquiry Explanation Modal */}
       {selectedClaim && (
