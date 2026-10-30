@@ -68,19 +68,42 @@ export interface DcsAlarmItem {
 
 export interface LotoPermitItem {
   id: string;
+  type?: 'loto' | 'hot_work' | 'confined_space';
+  typeLabel?: string;
   equipment: string;
+  equipmentTag?: string;
+  location?: string;
   breaker: string;
+  lockoutBoxNo?: string;
+  padlockCount?: number;
   issuedTo: string;
+  issuedBy?: string;
   status: string;
   hazard: string;
+  plainSummary?: string;
+  checklist?: {
+    powerCutVerified: boolean;
+    valvesDrained: boolean;
+    physicalPadlockLocked: boolean;
+    gasTestPassed: boolean;
+    warningTagHung: boolean;
+  };
+  timeIssued?: string;
+  validUntil?: string;
 }
 
 export interface ShiftHandoverItem {
+  id?: string;
   shift: string;
+  shiftType?: 'morning' | 'evening' | 'night';
   handover: string;
+  outgoingEngineer?: string;
+  incomingEngineer?: string;
   time: string;
   status: string;
   notes: string;
+  criticalWatchItems?: string[];
+  safetyChecklistSigned?: boolean;
 }
 
 export interface VehicleRequestItem {

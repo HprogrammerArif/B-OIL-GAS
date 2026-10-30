@@ -88,7 +88,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         return [
           { id: 'overview',    label: 'Factory Status & Alarms', labelBn: 'কারখানা স্ট্যাটাস', icon: <Gauge size={15} />, badge: DCS_ALARMS.length, badgeType: 'danger' as const },
           { id: 'refinery',    label: 'Factory Production',    labelBn: 'উৎপাদন চার্ট',      icon: <BarChart3 size={15} /> },
-          { id: 'safety_loto', label: 'Safety Permits & Shifts', labelBn: 'নিরাপত্তা পারমিট ও শিফট', icon: <Lock size={15} />, badge: INITIAL_LOTO_PERMITS.length, badgeType: 'warn' as const },
+          { id: 'safety_loto', label: 'Machine Safety Locks & Shifts', labelBn: 'মেশিন নিরাপত্তা লক ও শিফট নোট', icon: <Lock size={15} />, badge: INITIAL_LOTO_PERMITS.length, badgeType: 'warn' as const },
         ];
       case 'transport_admin':
         return [
