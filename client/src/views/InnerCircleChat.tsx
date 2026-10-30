@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ViewProps, t } from '../types';
+import { ViewProps, t, ROLE_META } from '../types';
 import { showToast } from '../App';
 import {
   Send, Paperclip, Mic, Flag, Pin, Search, Phone, Video,
@@ -69,7 +69,7 @@ const INNER_CIRCLE_MEMBERS: ChatMember[] = [
   { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: '#059669', status: 'away', statusLabel: 'At BSTI Tejgaon Directorate', location: 'Tejgaon, Dhaka', phone: '+880 1711-002103', unread: 1 },
   { id: 'si', name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: '#D97706', status: 'online', statusLabel: 'Available at HQ', location: 'Level-8 Commercial', phone: '+880 1711-002104' },
   { id: 'ta', name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: '#A51C30', status: 'offline', statusLabel: 'On Approved Medical Leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105', lastSeen: '10:15 AM' },
-  { id: 'nj', name: 'Nusrat Jahan', role: 'GM, Human Resources', initials: 'NJ', color: '#0891B2', status: 'online', statusLabel: 'Available at HR Suite', location: 'Level-6 HR Wing', phone: '+880 1711-002106' },
+  { id: 'nj', name: 'Sayeda Afroza Sultana', role: 'GM, Human Resources', initials: 'SAS', color: '#BE185D', status: 'online', statusLabel: 'Available at HR Suite', location: 'Level-6 HR Wing', phone: '+880 1711-002106' },
 ];
 
 const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
@@ -252,19 +252,21 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
 
+    const currentMeta = ROLE_META[role] || ROLE_META.chairman;
+
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
-      senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan (You)',
-      senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
-      senderColor: '#A51C30',
+      senderId: role,
+      senderName: `${currentMeta.name} (You)`,
+      senderRole: currentMeta.label,
+      senderInitials: currentMeta.initials,
+      senderColor: currentMeta.avatarColor,
       content: messageInput.trim(),
       timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
       type: isDirectiveMode ? 'directive' : 'text',
       directiveId: isDirectiveMode ? `BOGCL-DIR-2026-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
       directiveAcknowledged: false,
-      isChairman: true,
+      isChairman: role === 'chairman',
       isUrgent: isUrgentFlag || isDirectiveMode,
       readBy: [],
       reactions: {},
@@ -288,18 +290,20 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   };
 
   const handleSendVoiceMemo = () => {
+    const currentMeta = ROLE_META[role] || ROLE_META.chairman;
+
     const newMsg: ChatMessage = {
       id: `voice-${Date.now()}`,
-      senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan (You)',
-      senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
-      senderColor: '#A51C30',
-      content: 'Chairman Voice Directive Memo',
+      senderId: role,
+      senderName: `${currentMeta.name} (You)`,
+      senderRole: currentMeta.label,
+      senderInitials: currentMeta.initials,
+      senderColor: currentMeta.avatarColor,
+      content: `${currentMeta.label} Voice Memo`,
       timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
       type: 'voice',
       voiceDuration: `0:${recordingSeconds < 10 ? '0' : ''}${recordingSeconds || 24}`,
-      isChairman: true,
+      isChairman: role === 'chairman',
       readBy: [],
       reactions: {},
     };

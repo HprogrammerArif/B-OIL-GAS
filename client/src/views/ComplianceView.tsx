@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../App';
+import { useOperationsStore } from '../store/operationsStore';
 import {
   ShieldCheck, AlertTriangle, Clock, CheckCircle, FileText,
   Flame, Leaf, Building, ArrowRight, ArrowLeft, Upload, Zap, RefreshCw,
@@ -280,7 +281,7 @@ const STAGES = [
 ];
 
 export default function ComplianceView({ role, lang }: ViewProps) {
-  const [licenses, setLicenses] = useState<LicenseCard[]>(INITIAL_LICENSES);
+  const { licenses, setLicenses } = useOperationsStore();
   const [selectedLicense, setSelectedLicense] = useState<LicenseCard | null>(null);
   const [showDoLetterModal, setShowDoLetterModal] = useState<LicenseCard | null>(null);
   const [showSyncModal, setShowSyncModal] = useState<boolean>(false);
@@ -499,27 +500,31 @@ export default function ComplianceView({ role, lang }: ViewProps) {
             <div style={{ fontWeight: 800, color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{t('CRITICAL COMPLIANCE NOTICE:', 'জরুরি বিধিবদ্ধ নোটিশ:', lang)}</span>
               <span className="badge danger" style={{ background: '#450A0A', color: '#FCA5A5', border: '1px solid #7F1D1D', fontSize: '10px' }}>
-                {t('ACTION REQUIRED WITHIN 18 DAYS', '১৮ দিনের মধ্যে সমাধান প্রয়োজন', lang)}
+                {t(`ACTION REQUIRED WITHIN ${mostCriticalLicense?.daysLeft || 7} DAYS`, `${mostCriticalLicense?.daysLeft || 7} দিনের মধ্যে সমাধান প্রয়োজন`, lang)}
               </span>
             </div>
             <div style={{ color: '#F8FAFC', marginTop: '2px' }}>
-              {t(
-                `Bulk Hydrocarbon Tank Farm License (Tanks 1-8) has 18 days remaining. Chief Inspector of Explosives final audit sign-off pending. Daily shutdown exposure: ৳ 1.85 Cr.`,
-                `বাল্ক হাইড্রোকার্বন ও বিটুমিন ট্যাংক ফার্ম লাইসেন্সের মেয়াদ শেষ হতে মাত্র ১৮ দিন বাকি। বিস্ফোরক পরিদপ্তরের চূড়ান্ত অডিট সাইন-অফ বিবেচনাধীন। সম্ভাব্য শাটডাউন ক্ষতি: দৈনিক ১.৮৫ কোটি টাকা।`,
-                lang
-              )}
+              {mostCriticalLicense ? (
+                t(
+                  `${mostCriticalLicense.title} (${mostCriticalLicense.agency}) has ${mostCriticalLicense.daysLeft} days remaining. Regulatory review pending. Daily shutdown risk: ${mostCriticalLicense.dailyShutdownRiskTk}.`,
+                  `${mostCriticalLicense.titleBn} (${mostCriticalLicense.agencyBn})-এর মেয়াদ শেষ হতে মাত্র ${mostCriticalLicense.daysLeft} দিন বাকি। নিয়ন্ত্রক সংস্থার অনুমোদন আবশ্যক। সম্ভাব্য ঝুঁকি: ${mostCriticalLicense.dailyShutdownRiskTk}।`,
+                  lang
+                )
+              ) : null}
             </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button
-            className="btn-gold"
-            style={{ fontSize: '12px', padding: '7px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
-            onClick={() => handleOpenDoLetter(mostCriticalLicense)}
-          >
-            <FileText size={14} />
-            {t('Dispatch DO Letter to DG Explosives', 'বিস্ফোরক পরিদপ্তরে ডিও লেটার প্রেরণ', lang)}
-          </button>
+          {mostCriticalLicense && (
+            <button
+              className="btn-gold"
+              style={{ fontSize: '12px', padding: '7px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+              onClick={() => handleOpenDoLetter(mostCriticalLicense)}
+            >
+              <FileText size={14} />
+              {t(`Dispatch DO Letter to ${mostCriticalLicense.agency.split(' ')[0]}`, `${mostCriticalLicense.agencyBn}-এ ডিও লেটার প্রেরণ`, lang)}
+            </button>
+          )}
         </div>
       </div>
 

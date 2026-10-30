@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lang, t, ROLE_META, AppRole } from '../types';
-import { Shield, Cpu, Activity, CheckCircle2, Lock, Radio } from 'lucide-react';
+import { Activity, CheckCircle2, Radio } from 'lucide-react';
 
 interface TelemetryLoaderProps {
   role: AppRole;
@@ -9,30 +9,27 @@ interface TelemetryLoaderProps {
 }
 
 const STEPS = [
-  { textEn: 'Authenticating 256-bit TLS enterprise token...', textBn: '২৫৬-বিট টিএলএস টোকেন যাচাই করা হচ্ছে...' },
-  { textEn: 'Establishing edge mesh link to Keraniganj Refinery DCS...', textBn: 'কেরানীগঞ্জ রিফাইনারি ডিসিএস নোডে সংযোগ স্থাপন...' },
-  { textEn: 'Synchronizing SAP S/4HANA Enterprise Gateway ledger...', textBn: 'এসএপি এস/ফোরহানা গেটওয়ে সিঙ্ক করা হচ্ছে...' },
-  { textEn: 'Validating tamper-proof cryptographic e-sign certificates...', textBn: 'ডিজিটাল ই-স্বাক্ষর নিরাপত্তা সনদ যাচাই...' },
-  { textEn: 'Launching BOGCL OneOps Executive Cockpit...', textBn: 'এক্সিকিউটিভ কক্পিট প্রস্তুত করা হচ্ছে...' },
+  { textEn: 'Verifying your employee account...', textBn: 'আপনার কর্মী অ্যাকাউন্ট যাচাই করা হচ্ছে...' },
+  { textEn: 'Connecting to Head Office & Keraniganj Plant...', textBn: 'প্রধান কার্যালয় ও কেরানীগঞ্জ প্ল্যান্টের সাথে সংযোগ...' },
+  { textEn: 'Loading latest approvals, vehicles & records...', textBn: 'সর্বশেষ অনুমোদন, গাড়ি ও নথিপত্র লোড হচ্ছে...' },
+  { textEn: 'Preparing your workspace...', textBn: 'আপনার ওয়ার্কস্পেস প্রস্তুত করা হচ্ছে...' },
 ];
 
 export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoaderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [progress, setProgress] = useState(12);
+  const [progress, setProgress] = useState(18);
   const meta = ROLE_META[role];
 
   useEffect(() => {
-    const timer1 = setTimeout(() => { setCurrentStepIndex(1); setProgress(35); }, 300);
-    const timer2 = setTimeout(() => { setCurrentStepIndex(2); setProgress(62); }, 650);
-    const timer3 = setTimeout(() => { setCurrentStepIndex(3); setProgress(88); }, 950);
-    const timer4 = setTimeout(() => { setCurrentStepIndex(4); setProgress(100); }, 1250);
-    const timerEnd = setTimeout(() => { onComplete(); }, 1550);
+    const timer1 = setTimeout(() => { setCurrentStepIndex(1); setProgress(45); }, 250);
+    const timer2 = setTimeout(() => { setCurrentStepIndex(2); setProgress(75); }, 550);
+    const timer3 = setTimeout(() => { setCurrentStepIndex(3); setProgress(100); }, 850);
+    const timerEnd = setTimeout(() => { onComplete(); }, 1150);
 
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
-      clearTimeout(timer4);
       clearTimeout(timerEnd);
     };
   }, [onComplete]);
@@ -40,7 +37,6 @@ export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoa
   return (
     <div className="telemetry-loader-overlay">
       <div className="telemetry-loader-box">
-        {/* Glow emblem */}
         <div className="loader-emblem-wrap">
           <div className="brand-emblem loader-pulse">B</div>
           <div className="loader-ring" />
@@ -48,7 +44,7 @@ export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoa
 
         <div className="loader-hd">
           <h3>BASHUNDHARA OIL & GAS COMPANY LTD.</h3>
-          <p className="loader-sub">OneOps Enterprise Operations Platform • Terminal Handshake</p>
+          <p className="loader-sub">{t('OneOps Company Operations Portal • Signing In', 'ওয়ানঅপ্স কোম্পানি পোর্টাল • প্রবেশ করা হচ্ছে', lang)}</p>
         </div>
 
         {/* User Identity Welcome */}
@@ -57,8 +53,8 @@ export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoa
             {meta.initials}
           </div>
           <div>
-            <span className="user-name">{meta.name}</span>
-            <span className="user-role"> • {t(meta.label, meta.labelBn, lang)}</span>
+            <span className="user-name">{t(meta.name, meta.nameBn, lang)}</span>
+            <span className="user-role"> • {t(meta.label, meta.labelBn, lang)} ({meta.empId})</span>
           </div>
         </div>
 
@@ -68,10 +64,10 @@ export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoa
         </div>
 
         <div className="loader-pct-row">
-          <span>{progress}% Loaded</span>
+          <span>{progress}% {t('Ready', 'সম্পন্ন', lang)}</span>
           <span className="loader-status-tag">
             <Radio size={11} className="spin-slow" />
-            <span>Industrial Edge Node: 23.6844° N</span>
+            <span>{t(meta.siteLabel, meta.siteLabelBn, lang)}</span>
           </span>
         </div>
 

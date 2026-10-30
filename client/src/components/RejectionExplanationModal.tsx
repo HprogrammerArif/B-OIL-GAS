@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, RotateCcw, AlertTriangle, FileText, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { X, RotateCcw } from 'lucide-react';
 import { Lang, t } from '../types';
 
 export interface RejectionData {
@@ -27,102 +27,92 @@ interface RejectionExplanationModalProps {
 const CATEGORY_PRESETS: Record<string, { label: string; labelBn: string; defaultAdvice: string }[]> = {
   claim: [
     {
-      label: 'Missing Original VAT Vouchers & Receipts',
-      labelBn: 'মূল ভ্যাট রসিদ ও ভাউচার অনুপস্থিত',
-      defaultAdvice: 'Please attach scanned copies of original BIN-registered tax invoices and stamped conveyance slips.',
+      label: 'Missing Original Receipts / VAT Slips',
+      labelBn: 'মূল রসিদ বা ভ্যাট স্লিপ সংযুক্ত নেই',
+      defaultAdvice: 'Please attach clear photos or scans of original hotel/transport receipts and resubmit.',
     },
     {
-      label: 'Per Diem / Hotel Tariff Exceeds Grade Limit',
-      labelBn: 'দৈনিক ভাতা বা হোটেল খরচ পদমর্যাদা সীমা অতিক্রম করেছে',
-      defaultAdvice: 'Adjust hotel bill or daily allowance to adhere strictly to BOGCL Grade Travel Policy ceilings.',
+      label: 'Daily Allowance / Hotel Bill Above Company Limit',
+      labelBn: 'দৈনিক ভাতা বা হোটেল খরচ নির্ধারিত সীমার বেশি',
+      defaultAdvice: 'Please adjust the hotel or daily food allowance to match your grade travel policy limit.',
     },
     {
-      label: 'Tour Authorization Letter Not Attached',
-      labelBn: 'দাপ্তরিক সফর পূর্বানুমোদন পত্র সংযুক্ত নেই',
-      defaultAdvice: 'Attach official HOD/GM pre-approved tour sanction memo and travel itinerary before resubmission.',
+      label: 'Trip Approval Note Not Attached',
+      labelBn: 'সফরের পূর্বানুমোদন নোট সংযুক্ত নেই',
+      defaultAdvice: 'Attach your manager’s travel approval note and visit schedule before resubmitting.',
     },
     {
-      label: 'Duplicate / Overlapping Route Mileage Claimed',
-      labelBn: 'একই দূরত্বের দ্বৈত বা অতিরিক্ত ভ্রমণ বিল দাখিল',
-      defaultAdvice: 'Reconcile local conveyance distance with standard Google Maps corridor odometer calculations.',
-    },
-    {
-      label: 'Non-Compliant Mode of Transit',
-      labelBn: 'অননুমোদিত ভ্রমণ মাধ্যম ব্যবহার',
-      defaultAdvice: 'Provide written administrative justification why company pool vehicle or approved transit class was not utilized.',
+      label: 'Duplicate or Unclear Travel Distance',
+      labelBn: 'দ্বৈত এন্ট্রি বা দূরত্বের হিসাব অস্পষ্ট',
+      defaultAdvice: 'Please check the local travel dates and fare amounts so there are no duplicate entries.',
     },
   ],
   notesheet: [
     {
-      label: 'Budget Justification & Capex GL Account Mismatch',
-      labelBn: 'বাজেট ন্যায্যতা ও সিএপিইএক্স জিএল অ্যাকাউন্ট অসঙ্গতি',
-      defaultAdvice: 'Reconcile with Finance & Accounts department to ensure required GL Head balance exists in Q4 OPEX/CAPEX allocation.',
+      label: 'Budget Balance Check Needed',
+      labelBn: 'বাজেট ব্যালেন্স পুনরায় যাচাই প্রয়োজন',
+      defaultAdvice: 'Please confirm available budget with Finance & Accounts before sending for final signature.',
     },
     {
-      label: 'Vendor Quotations Lack 3 Competitive OEM Bids',
-      labelBn: 'দরপত্রে ন্যূনতম ৩টি অনুমোদিত প্রস্তুতকারক বিড নেই',
-      defaultAdvice: 'Submit 3 formal competitive tender quotations from authorized OEM distributors with comparative vetting matrix.',
+      label: 'Need 3 Vendor Price Quotes',
+      labelBn: 'ন্যূনতম ৩টি সরবরাহকারীর দরপত্র প্রয়োজন',
+      defaultAdvice: 'Please collect and attach at least 3 written vendor quotations for fair price comparison.',
     },
     {
-      label: 'Technical Clarification Required on ASME/API Spec',
-      labelBn: 'কারিগরি ও নিরাপত্তা স্পেসিফিকেশন স্পষ্টীকরণ প্রয়োজন',
-      defaultAdvice: 'Obtain engineering sign-off from Keraniganj Plant Technical Services on pressure/temperature ratings.',
+      label: 'Technical / Warranty Details Unclear',
+      labelBn: 'যন্ত্রপাতির বিবরণ বা ওয়ারেন্টি তথ্য অস্পষ্ট',
+      defaultAdvice: 'Add clear model details, delivery timeline, and warranty period from the supplier.',
     },
     {
-      label: 'DoE / Explosives Statutory Certificate Missing',
-      labelBn: 'পরিবেশ বা বিস্ফোরক পরিদপ্তরের সংবিধিবদ্ধ ছাড়পত্র অনুপস্থিত',
-      defaultAdvice: 'Attach valid statutory clearance certificate or inspection permit prior to procurement commitment.',
-    },
-    {
-      label: 'Commercial Price Revision / Payment Terms Adjustment',
-      labelBn: 'বাণিজ্যিক মূল্য বা পরিশোধের শর্তাবলী পুনর্বিবেচনা',
-      defaultAdvice: 'Negotiate minimum 90-day deferred credit term or 5% advance retention warranty clause with vendor.',
+      label: 'Negotiate Better Price or Payment Terms',
+      labelBn: 'মূল্য বা পরিশোধের শর্ত পুনর্বিবেচনা করুন',
+      defaultAdvice: 'Please ask the supplier for a better discount or standard 30-day payment after delivery.',
     },
   ],
   requisition: [
     {
-      label: 'All Pool Sedans Occupied for Emergency Plant Duty',
-      labelBn: 'জরুরি কারখানা ডিউটিতে সকল কোম্পানির গাড়ি নিয়োজিত',
-      defaultAdvice: 'Reschedule travel time or submit pooled ride request with colleagues heading along the same highway corridor.',
+      label: 'All Office Cars Busy at Requested Time',
+      labelBn: 'নির্ধারিত সময়ে সকল অফিসের গাড়ি ব্যস্ত',
+      defaultAdvice: 'Please adjust your departure time slightly or share a pooled ride heading in the same direction.',
     },
     {
-      label: 'Destination Covered by Company Staff Bus Route',
-      labelBn: 'গন্তব্যটি নিয়মিত কোম্পানির স্টাফ বাস রুটের অন্তর্ভুক্ত',
-      defaultAdvice: 'Utilize Route 01 or Route 04 scheduled staff transit coaches unless transporting heavy official cargo.',
+      label: 'Route Covered by Staff Shuttle Bus',
+      labelBn: 'গন্তব্যটি নিয়মিত স্টাফ বাস রুটের অন্তর্ভুক্ত',
+      defaultAdvice: 'Please use the scheduled staff shuttle bus unless carrying heavy samples or urgent client files.',
     },
     {
-      label: 'Official Duty Purpose Insufficiently Detailed',
-      labelBn: 'অফিসিয়াল কাজের বিবরণ সুনির্দিষ্ট নয়',
-      defaultAdvice: 'Provide detailed client meeting schedule or plant work order reference in requisition narrative.',
+      label: 'Visit Purpose Needs More Detail',
+      labelBn: 'সফরের উদ্দেশ্য আরও স্পষ্ট করুন',
+      defaultAdvice: 'Please mention the client name, meeting time, or work purpose clearly in the booking form.',
     },
   ],
   asset: [
     {
-      label: 'Calibration Certificate Expired / Uncertified',
-      labelBn: 'সরঞ্জামের ক্যালিব্রেশন সনদ মেয়াদোত্তীর্ণ',
-      defaultAdvice: 'Submit certified BSTI or ISO 17025 laboratory calibration test report before work order approval.',
+      label: 'Check Existing Store Room Stock First',
+      labelBn: 'প্রথমে স্টোর রুমে মজুদ আছে কি না দেখুন',
+      defaultAdvice: 'Please check with HR/IT Store Room first to see if a spare unit is already available.',
     },
     {
-      label: 'Vibration & Thermal Wear Exceeds Safety Margin',
-      labelBn: 'কম্পন ও তাপমাত্রা মান নিরাপত্তা সীমা অতিক্রম করেছে',
-      defaultAdvice: 'Perform non-destructive ultrasonic testing (NDT) and include maintenance engineer diagnostic log.',
+      label: 'Need Engineer Inspection Report',
+      labelBn: 'প্রকৌশলীর পরিদর্শন রিপোর্ট প্রয়োজন',
+      defaultAdvice: 'Attach a short inspection note confirming why the current equipment cannot be repaired.',
     },
     {
-      label: 'Preventive Maintenance Checksheet Incomplete',
-      labelBn: 'নিয়মিত প্রতিরোধমূলক রক্ষণাবেক্ষণ চেকশিট অসম্পূর্ণ',
-      defaultAdvice: 'Fill all 14 checklist points including lubricant grade and electrical megger insulation resistance.',
+      label: 'Price Estimate Needs Vendor Quote',
+      labelBn: 'আনুমানিক মূল্যের সাথে সরবরাহকারীর কোটেশন দিন',
+      defaultAdvice: 'Attach a recent supplier price quote matching the requested model and warranty.',
     },
   ],
   general: [
     {
-      label: 'Incomplete Documentation',
-      labelBn: 'অসম্পূর্ণ কাগজপত্র ও প্রমাণাদি',
-      defaultAdvice: 'Please furnish all requisite supporting documents, vouchers, and previous approval references.',
+      label: 'Supporting Papers Missing',
+      labelBn: 'প্রয়োজনীয় কাগজপত্র অসম্পূর্ণ',
+      defaultAdvice: 'Please attach all supporting documents and receipts before submitting again.',
     },
     {
-      label: 'Administrative Review Required',
-      labelBn: 'প্রশাসনিক পর্যালোচনা ও সুপারিশ প্রয়োজন',
-      defaultAdvice: 'Review and revise with immediate departmental supervisor before resubmitting for executive sanction.',
+      label: 'Manager Review Required First',
+      labelBn: 'প্রথমে বিভাগীয় প্রধানের পর্যালোচনা প্রয়োজন',
+      defaultAdvice: 'Please review the details with your supervisor and resubmit.',
     },
   ],
 };
@@ -141,18 +131,26 @@ export default function RejectionExplanationModal({
   categoryType,
 }: RejectionExplanationModalProps) {
   const presets = CATEGORY_PRESETS[categoryType] || CATEGORY_PRESETS.general;
-  const [selectedReason, setSelectedReason] = useState(presets[0]?.label || 'Incomplete Documentation');
+  const [selectedReason, setSelectedReason] = useState(presets[0]?.label || 'Supporting Papers Missing');
   const [observation, setObservation] = useState('');
   const [improvementsRequired, setImprovementsRequired] = useState(presets[0]?.defaultAdvice || '');
   const [notifySms, setNotifySms] = useState(true);
 
-  if (!isOpen) return null;
-
-  const handleSelectPreset = (p: typeof presets[0]) => {
-    setSelectedReason(p.label);
-    if (!improvementsRequired || presets.some((x) => x.defaultAdvice === improvementsRequired)) {
-      setImprovementsRequired(p.defaultAdvice);
+  useEffect(() => {
+    if (isOpen) {
+      const currentPresets = CATEGORY_PRESETS[categoryType] || CATEGORY_PRESETS.general;
+      setSelectedReason(currentPresets[0]?.label || 'Supporting Papers Missing');
+      setObservation('');
+      setImprovementsRequired(currentPresets[0]?.defaultAdvice || '');
     }
+  }, [isOpen, itemId, categoryType]);
+
+  if (!isOpen) return null;
+  if (typeof document === 'undefined') return null;
+
+  const handleSelectPreset = (p: (typeof presets)[0]) => {
+    setSelectedReason(p.label);
+    setImprovementsRequired(p.defaultAdvice);
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -160,12 +158,11 @@ export default function RejectionExplanationModal({
     onConfirm({
       reasonCategory: selectedReason,
       observation: observation.trim() || selectedReason,
-      improvementsRequired: improvementsRequired.trim() || 'Please revise documentation according to standard BOGCL policy guidelines.',
+      improvementsRequired:
+        improvementsRequired.trim() || 'Please update the details and resubmit.',
       notifySms,
     });
   };
-
-  if (typeof document === 'undefined') return null;
 
   return createPortal(
     <div
@@ -228,10 +225,10 @@ export default function RejectionExplanationModal({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
-                {title || t('Return / Query for Correction', 'সংশোধন ও পর্যালোচনার জন্য ফেরত', lang)}
+                {title || t('Return for Correction', 'সংশোধনের জন্য ফেরত পাঠান', lang)}
               </h3>
               <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
-                {t('Provide clear actionable audit observations and instructions', 'সুনির্দিষ্ট আপত্তি ও সংশোধনী নির্দেশনা প্রদান করুন', lang)}
+                {t('Explain clearly what needs to be fixed so the requester can update it easily', 'কী সংশোধন করতে হবে তা স্পষ্টভাবে উল্লেখ করুন', lang)}
               </div>
             </div>
           </div>
@@ -248,7 +245,7 @@ export default function RejectionExplanationModal({
         {/* Modal Body */}
         <form onSubmit={handleFormSubmit} style={{ margin: 0, display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'hidden' }}>
           <div className="modal-body" style={{ padding: '20px', overflowY: 'auto', flex: '1 1 auto', maxHeight: 'calc(92vh - 135px)' }}>
-            {/* Target Item Dossier Card */}
+            {/* Item Summary */}
             <div
               style={{
                 background: '#F8FAFC',
@@ -276,16 +273,16 @@ export default function RejectionExplanationModal({
 
               {(requesterName || department) && (
                 <div style={{ fontSize: '11px', color: '#64748B', marginTop: '6px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  {requesterName && <span>Initiator: <strong>{requesterName}</strong></span>}
-                  {department && <span>Dept: <strong>{department}</strong></span>}
+                  {requesterName && <span>{t('Submitted By:', 'আবেদনকারী:', lang)} <strong>{requesterName}</strong></span>}
+                  {department && <span>{t('Department:', 'বিভাগ:', lang)} <strong>{department}</strong></span>}
                 </div>
               )}
             </div>
 
-            {/* Quick Presets Ribbon */}
+            {/* Common Reasons */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
-                {t('Select Primary Regulatory / Audit Objection:', 'প্রধান আপত্তি বা পর্যালোচনার কারণ নির্বাচন করুন:', lang)}
+                {t('Choose Main Reason for Returning:', 'ফেরত পাঠানোর প্রধান কারণ নির্বাচন করুন:', lang)}
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {presets.map((p, idx) => {
@@ -315,10 +312,10 @@ export default function RejectionExplanationModal({
               </div>
             </div>
 
-            {/* Field 1: Detailed Observation & Why Returning */}
+            {/* Field 1: Why Returning */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                {t('Observation & Justification for Return (Why is this rejected?):', 'আপত্তির বিস্তারিত বিবরণ (ফাইলটি কেন ফেরত পাঠানো হচ্ছে?):', lang)}
+                {t('Details / What Was Found:', 'বিস্তারিত মন্তব্য (কেন ফেরত পাঠানো হচ্ছে?):', lang)}
               </label>
               <textarea
                 rows={3}
@@ -335,8 +332,8 @@ export default function RejectionExplanationModal({
                   boxSizing: 'border-box',
                 }}
                 placeholder={t(
-                  'e.g. Invoices lack official Mushak-6.3 tax registration, and per diem requested exceeds the standard grade policy limits...',
-                  'যেমন: মূল ভ্যাট রসিদ সংযুক্ত নেই, দৈনিক ভাতার পরিমাণ গ্রেড সীমার অতিরিক্ত দাখিল করা হয়েছে...',
+                  'e.g. Hotel receipt photo is missing and daily food allowance was calculated for 5 days instead of 4 days...',
+                  'যেমন: হোটেলের মূল রসিদ সংযুক্ত নেই এবং দৈনিক ভাতার হিসাব পুনরায় পরীক্ষা করা প্রয়োজন...',
                   lang
                 )}
                 value={observation}
@@ -344,10 +341,10 @@ export default function RejectionExplanationModal({
               />
             </div>
 
-            {/* Field 2: What need to improve / Fix before resubmission */}
+            {/* Field 2: Next Steps for Requester */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#047857', marginBottom: '4px' }}>
-                {t('Actionable Guidance for Initiator (What needs to be fixed / improved?):', 'আবেদনকারীর করণীয় নির্দেশনা (কী কী সংশোধন করে পুনরায় দাখিল করতে হবে?):', lang)}
+                {t('How to Fix Before Resubmitting:', 'আবেদনকারীর করণীয় (কী ঠিক করে আবার জমা দেবেন?):', lang)}
               </label>
               <textarea
                 rows={2}
@@ -363,11 +360,6 @@ export default function RejectionExplanationModal({
                   color: '#065F46',
                   boxSizing: 'border-box',
                 }}
-                placeholder={t(
-                  'e.g. Please collect the revised tax invoice from hotel, recalculate daily allowance at ৳1,500/day, and upload the signed tour approval memo.',
-                  'যেমন: সংশোধিত ভ্যাট রসিদ সংযুক্ত করুন এবং দৈনিক ভাতা নীতিমালা অনুযায়ী পুনঃহিসাব করে দাখিল করুন।',
-                  lang
-                )}
                 value={improvementsRequired}
                 onChange={(e) => setImprovementsRequired(e.target.value)}
               />
@@ -383,7 +375,7 @@ export default function RejectionExplanationModal({
                 style={{ cursor: 'pointer' }}
               />
               <label htmlFor="notifySms" style={{ cursor: 'pointer' }}>
-                {t('Dispatch high-priority SMS and in-app return notification to initiator', 'আবেদনকারীকে জরুরি এসএমএস ও ইন-অ্যাপ ফেরত বিজ্ঞপ্তি পাঠান', lang)}
+                {t('Send instant notification & SMS to requester', 'আবেদনকারীকে তাৎক্ষণিক নোটিফিকেশন ও এসএমএস পাঠান', lang)}
               </label>
             </div>
           </div>
@@ -425,7 +417,7 @@ export default function RejectionExplanationModal({
               }}
             >
               <RotateCcw size={14} />
-              {t('Confirm Return with Instructions', 'নির্দেশনাসহ ফেরত নিশ্চিত করুন', lang)}
+              {t('Return with Instructions', 'নির্দেশনাসহ ফেরত পাঠান', lang)}
             </button>
           </div>
         </form>

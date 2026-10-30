@@ -1,8 +1,8 @@
 import React from 'react';
-import { Lang, t } from '../types';
-import { X, CheckCircle, ShieldAlert, FileText, Calendar, DollarSign, UserCheck, ArrowRight, CornerDownRight, Clock } from 'lucide-react';
+import { AppRole, Lang, ROLE_META, t } from '../types';
+import { X, UserCheck, Clock } from 'lucide-react';
 import { showToast } from '../App';
-import { DepartmentApprovalStep } from '../store/approvalStore';
+import { DepartmentApprovalStep, useApprovalStore } from '../store/approvalStore';
 
 export interface DetailDrawerData {
   id: string;
@@ -21,9 +21,21 @@ interface DetailDrawerProps {
   data: DetailDrawerData | null;
   onClose: () => void;
   lang: Lang;
+  role?: AppRole;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
-export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps) {
+export default function DetailDrawer({
+  data,
+  onClose,
+  lang,
+  role = 'chairman',
+  onApprove,
+  onReject,
+}: DetailDrawerProps) {
+  const { approvalItems, approveApprovalItem, rejectApprovalItem } = useApprovalStore();
+
   React.useEffect(() => {
     if (!data) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,13 +49,68 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
 
   if (!data) return null;
 
+  const meta = ROLE_META[role];
+
+  const findMatchingApproval = () =>
+    approvalItems.find(
+      (a) => a.id === data.id || a.sourceId === data.id || a.sapDocRef === data.id || a.sapDocRef === data.sapRef
+    );
+
   const handleApprove = () => {
-    showToast(`✅ ${data.id} authorized with SHA-256 digital signature stamp.`, 'gold');
+    if (onApprove) {
+      onApprove(data.id);
+      onClose();
+      return;
+    }
+    const matched = findMatchingApproval();
+    if (matched) {
+      const res = approveApprovalItem(matched.id, undefined, undefined, role);
+      showToast(
+        t(
+          `Approved ${matched.title} (Voucher: ${res.sapVoucher}).`,
+          `${matched.titleBn} অনুমোদিত হয়েছে (ভাউচার: ${res.sapVoucher})।`,
+          lang
+        ),
+        'gold'
+      );
+    } else {
+      showToast(
+        t(
+          `${data.id} approved by ${meta.name}.`,
+          `${data.id} অনুমোদন সম্পন্ন হয়েছে।`,
+          lang
+        ),
+        'gold'
+      );
+    }
     onClose();
   };
 
   const handleSendBack = () => {
-    showToast(`↩️ ${data.id} sent back to ${data.dept} for budget verification.`, 'info');
+    if (onReject) {
+      onReject(data.id);
+      onClose();
+      return;
+    }
+    const matched = findMatchingApproval();
+    if (matched) {
+      rejectApprovalItem(
+        matched.id,
+        'Returned for Clarification',
+        'Please double-check the budget breakdown and attached supporting papers.',
+        'Revise and resubmit after department verification.',
+        undefined,
+        role
+      );
+    }
+    showToast(
+      t(
+        `Returned ${data.id} to ${data.dept} for clarification.`,
+        `${data.id} সংশোধনের জন্য ${data.dept}-এ ফেরত পাঠানো হয়েছে।`,
+        lang
+      ),
+      'info'
+    );
     onClose();
   };
 
@@ -53,7 +120,7 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
         <div className="drawer-header">
           <div>
             <div className="drawer-tag-row">
-              <span className={`badge ${data.urgency === 'urgent' ? 'danger' : 'info'}`}>
+              <span className={`badge ${data.urgency === 'urgent' || data.urgency === 'critical' ? 'danger' : 'info'}`}>
                 {data.urgency.toUpperCase()}
               </span>
               <span className="drawer-id">{data.id}</span>
@@ -74,36 +141,36 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
             </div>
             {data.amount && (
               <div className="drawer-metric-item">
-                <span className="lbl">{t('Requisition Amount', 'অনুমোদিত অর্থ', lang)}</span>
+                <span className="lbl">{t('Amount / Value', 'পরিমাণ / মূল্য', lang)}</span>
                 <span className="val val-gold">{data.amount}</span>
               </div>
             )}
             <div className="drawer-metric-item">
-              <span className="lbl">{t('Pending Duration', 'অপেক্ষার সময়', lang)}</span>
+              <span className="lbl">{t('Submitted', 'দাখিলের সময়', lang)}</span>
               <span className="val">{data.time}</span>
             </div>
             <div className="drawer-metric-item">
-              <span className="lbl">{t('SAP S/4HANA Ref', 'এসএপি রেফারেন্স', lang)}</span>
-              <span className="val font-mono">{data.sapRef || 'SAP-PR-2026-90412'}</span>
+              <span className="lbl">{t('Reference No.', 'রেফারেন্স নম্বর', lang)}</span>
+              <span className="val font-mono">{data.sapRef || data.id}</span>
             </div>
           </div>
 
-          {/* Description & Context */}
+          {/* Description */}
           <div className="drawer-section">
-            <h4>{t('Operational Justification', 'প্রয়োজনীয়তার যৌক্তিকতা', lang)}</h4>
+            <h4>{t('Purpose & Details', 'প্রস্তাবের বিবরণ ও যৌক্তিকতা', lang)}</h4>
             <p>
               {data.description ||
                 t(
-                  'Critical emergency procurement required for Keraniganj Bitumen Plant Unit-2 shutdown turnaround. Compliant with Bashundhara Group Procurement Policy Sec. 4.2.',
-                  'কেরানীগঞ্জ বিটুমিন প্ল্যান্ট ইউনিট-২ রক্ষণাবেক্ষণ কাজের জন্য অতীব জরুরি মালামাল ক্রয় অনুমোদন। বসুন্ধরা গ্রুপ প্রকিউরমেন্ট নীতিমালার ৪.২ ধারা অনুযায়ী যাচাইকৃত।',
+                  'Submitted for review and official approval under company operating guidelines. Budget availability and supporting papers have been checked.',
+                  'কোম্পানির নীতিমালা অনুযায়ী যাচাই ও চূড়ান্ত অনুমোদনের জন্য উপস্থাপিত। বাজেট ও প্রয়োজনীয় কাগজপত্র পরীক্ষা করা হয়েছে।',
                   lang
                 )}
             </p>
           </div>
 
-          {/* Audit Chain */}
+          {/* Approval History */}
           <div className="drawer-section">
-            <h4>{t('Approval Flow & Digital Audit Chain', 'অনুমোদন প্রক্রিয়া ও অডিট ট্রেইল', lang)}</h4>
+            <h4>{t('Review & Approval Steps', 'অনুমোদন ধাপসমূহ', lang)}</h4>
             <div className="drawer-timeline">
               {data.approvalTrail && data.approvalTrail.length > 0 ? (
                 <>
@@ -112,13 +179,13 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
                       <div className="timeline-dot" />
                       <div className="timeline-content">
                         <div className="timeline-name" style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>
-                          {step.officerName} ({step.roleName} · {step.department})
+                          {step.officerName} ({step.roleName})
                         </div>
                         <div className="timeline-sub" style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                          <span style={{ color: '#059669', fontWeight: 600 }}>✓ Endorsed:</span> "{step.note}"
+                          <span style={{ color: '#059669', fontWeight: 600 }}>✓ {t('Checked:', 'সুপারিশ:', lang)}</span> "{step.note}"
                         </div>
                         <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <Clock size={10} /> {step.timestamp} {step.signatureHash && <span style={{ fontFamily: 'monospace' }}>• {step.signatureHash.slice(0, 24)}...</span>}
+                          <Clock size={10} /> {step.timestamp}
                         </div>
                       </div>
                     </div>
@@ -126,32 +193,35 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
                   <div className="timeline-step current">
                     <div className="timeline-dot" />
                     <div className="timeline-content">
-                      <div className="timeline-name">👑 Ahmed Akbar Sobhan (Chairman & Managing Director)</div>
-                      <div className="timeline-sub">Awaiting Final Executive Sanction & Sanction Directive</div>
+                      <div className="timeline-name">
+                        {meta.name} ({t(meta.label, meta.labelBn, lang)})
+                      </div>
+                      <div className="timeline-sub">
+                        {t('Waiting for your decision', 'আপনার সিদ্ধান্তের অপেক্ষায়', lang)}
+                      </div>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="timeline-step done">
-                    <div className="timeline-dot" />
-                    <div className="timeline-content">
-                      <div className="timeline-name">Engr. Md. Harunur Rashid (Plant GM)</div>
-                      <div className="timeline-sub">Verified Technical Specs · OEM Quotes Evaluated · 4h ago</div>
+                  {data.initiator && (
+                    <div className="timeline-step done">
+                      <div className="timeline-dot" />
+                      <div className="timeline-content">
+                        <div className="timeline-name">{data.initiator}</div>
+                        <div className="timeline-sub">{t('Submitted request with supporting details', 'প্রয়োজনীয় তথ্যসহ আবেদন দাখিল করেছেন', lang)}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="timeline-step done">
-                    <div className="timeline-dot" />
-                    <div className="timeline-content">
-                      <div className="timeline-name">Farida Begum (CFO & Finance Director)</div>
-                      <div className="timeline-sub">Pre-Audited & Budget Provision Verified in SAP S/4HANA · 2h ago</div>
-                    </div>
-                  </div>
+                  )}
                   <div className="timeline-step current">
                     <div className="timeline-dot" />
                     <div className="timeline-content">
-                      <div className="timeline-name">Chairman & Managing Director</div>
-                      <div className="timeline-sub">Awaiting Final Executive Authorisation & Directive</div>
+                      <div className="timeline-name">
+                        {meta.name} ({t(meta.label, meta.labelBn, lang)})
+                      </div>
+                      <div className="timeline-sub">
+                        {t('Waiting for your review and approval', 'আপনার পর্যালোচনা ও অনুমোদনের অপেক্ষায়', lang)}
+                      </div>
                     </div>
                   </div>
                 </>
@@ -159,15 +229,15 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
             </div>
           </div>
 
-          {/* Security Compliance Seal */}
+          {/* Verified Signatory Note */}
           <div className="drawer-security-seal">
             <UserCheck size={16} color="var(--brand-gold)" />
             <div>
               <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-gold-dark)' }}>
-                {t('Tamper-Proof Cryptographic Verification', 'নিরাপদ ক্রিপ্টোগ্রাফিক যাচাইকরণ', lang)}
+                {t('Official Recorded Approval', 'সংরক্ষিত দাপ্তরিক অনুমোদন', lang)}
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', fontFamily: 'monospace' }}>
-                CERT: BOGCL-CORP-HQ-2026-ECDSA-SEC-P256
+              <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
+                {t(`Approving as ${meta.name} (${meta.empId})`, `অনুমোদনকারী: ${meta.nameBn} (${meta.empId})`, lang)}
               </div>
             </div>
           </div>
@@ -176,10 +246,10 @@ export default function DetailDrawer({ data, onClose, lang }: DetailDrawerProps)
         {/* Drawer Actions */}
         <div className="drawer-footer">
           <button className="btn-gold" style={{ flex: 1, padding: '10px' }} onClick={handleApprove}>
-            👑 {t('Authorize File', 'অনুমোদন প্রদান করুন', lang)}
+            ✓ {t('Approve Now', 'অনুমোদন দিন', lang)}
           </button>
           <button className="btn-outline-danger" style={{ padding: '10px 14px' }} onClick={handleSendBack}>
-            {t('Send Back', 'ফেরত পাঠান', lang)}
+            {t('Return for Correction', 'ফেরত পাঠান', lang)}
           </button>
           <button className="btn-sm-ghost" style={{ padding: '10px 14px' }} onClick={onClose}>
             {t('Close', 'বন্ধ', lang)}

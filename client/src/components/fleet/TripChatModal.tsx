@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { VehicleRequisition, useFleetStore } from '../../store/fleetStore';
-import { t } from '../../types';
+import { ROLE_META, t } from '../../types';
 import { showToast } from '../../App';
 import {
   MessageSquare, Send, X, Users, Car, MapPin,
@@ -40,10 +40,16 @@ export default function TripChatModal({
 }: TripChatModalProps) {
   const { chatMessages, sendChatMessage, approveTollExpense } = useFleetStore();
 
-  // Interactive Persona Switcher (Allows testing all 3 parties in real-time)
+  const currentStaff = ROLE_META[userRole as keyof typeof ROLE_META] || ROLE_META['employee'];
+
+  // Sender Persona Mode
   const [activePersona, setActivePersona] = useState<'employee' | 'driver' | 'admin'>(
     userRole === 'driver' ? 'driver' : userRole === 'admin' ? 'admin' : 'employee'
   );
+
+  useEffect(() => {
+    setActivePersona(userRole === 'driver' ? 'driver' : userRole === 'admin' ? 'admin' : 'employee');
+  }, [userRole]);
 
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState<string | null>(null);
@@ -63,10 +69,10 @@ export default function TripChatModal({
 
   // Authenticated Persona Profile
   const personaName = activePersona === 'employee'
-    ? requisition?.requesterName || 'Tanvir Ahmed'
+    ? requisition?.requesterName || currentStaff.name
     : activePersona === 'driver'
-    ? requisition?.assignedDriverName || 'Md. Shahidul Islam (Driver)'
-    : 'Md. Kamruzzaman (Transport Admin)';
+    ? requisition?.assignedDriverName || ROLE_META['driver']?.name || 'Md. Rafiqul Islam (Driver)'
+    : ROLE_META['transport_admin']?.name || 'Md. Kamruzzaman (Transport Admin)';
 
   const personaRole = activePersona;
 
@@ -366,35 +372,47 @@ export default function TripChatModal({
           </div>
         </div>
 
-        {/* ─── 3. INTERACTIVE PERSONA SWITCHER BAR ─── */}
+        {/* ─── 3. SENDER IDENTITY & PERSPECTIVE BAR ─── */}
         <div className="trip-chat-persona-bar">
           <div className="trip-chat-persona-controls">
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
-              {t('Testing Persona:', 'প্রেরক মোড:', lang)}
-            </span>
-            <div className="trip-chat-persona-group">
-              <button
-                type="button"
-                onClick={() => setActivePersona('employee')}
-                className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
-              >
-                👤 Staff (Tanvir)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePersona('driver')}
-                className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
-              >
-                🚗 Driver (Shahidul)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePersona('admin')}
-                className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
-              >
-                🛡️ Admin (Kamruzzaman)
-              </button>
-            </div>
+            {userRole === 'admin' ? (
+              <>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
+                  {t('Dispatch Channel Perspective:', 'প্রেরক মোড:', lang)}
+                </span>
+                <div className="trip-chat-persona-group">
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('employee')}
+                    className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
+                  >
+                    👤 Staff ({requisition?.requesterName?.split(' ')[0] || 'Staff'})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('driver')}
+                    className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
+                  >
+                    🚗 Driver ({requisition?.assignedDriverName?.split(' ')[1] || 'Driver'})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('admin')}
+                    className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
+                  >
+                    🛡️ Dispatch Desk
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
+                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
+                <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{personaName}</span>
+                <span className="badge teal" style={{ fontSize: '10px', textTransform: 'capitalize' }}>
+                  ✓ {activePersona}
+                </span>
+              </div>
+            )}
           </div>
 
           <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)' }}>

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppRole, ViewProps, t } from '../types';
+import { AppRole, ViewProps, t, ROLE_META } from '../types';
 import { showToast } from '../App';
 import {
-  FileSignature, CheckCircle, Clock, AlertTriangle, ShieldCheck,
-  Send, PenTool, Hash, Download, ArrowRight, UserCheck, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Eye, Layers, RefreshCw, X, Printer, RotateCcw, Crown, Plus, Sparkles
+  FileSignature, CheckCircle, Clock, ShieldCheck,
+  Send, PenTool, Hash, ArrowRight, Stamp,
+  FileText, QrCode, Lock, CheckCheck, Layers, X, Printer, RotateCcw, Crown, Plus
 } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 import InitiateNotesheetModal, {
@@ -14,191 +14,13 @@ import InitiateNotesheetModal, {
 } from '../components/notesheet/InitiateNotesheetModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 import { approvalStore } from '../store/approvalStore';
-
-interface NoteItem {
-  id: number;
-  para: number;
-  author: string;
-  role: string;
-  dept: string;
-  date: string;
-  body: string;
-  status: 'approved' | 'forwarded' | 'pending';
-  hash?: string;
-  isChairman?: boolean;
-}
-
-interface NoteFile {
-  id: string;
-  fileNo: string;
-  title: string;
-  dept: string;
-  amount: string;
-  urgency: 'urgent' | 'high' | 'normal';
-  status: 'pending_chairman' | 'approved' | 'in_review' | 'pending_approval';
-  date: string;
-  sapRef: string;
-  initiatorName?: string;
-  initiatorRole?: string;
-  initiatorDept?: string;
-  finalApproverRole?: AppRole;
-  signatoryRoute?: SignatoryStep[];
-  notes: NoteItem[];
-}
-
-const FILES_DATABASE: NoteFile[] = [
-  {
-    id: 'f1',
-    fileNo: 'BOGCL/PROC/KER-2026/0894',
-    title: 'Emergency Power Generator Overhaul & Critical Plant Spare Parts Procurement',
-    dept: 'Plant Operations & Maintenance',
-    amount: '৳48,50,000',
-    urgency: 'urgent',
-    status: 'pending_chairman',
-    date: '14 Oct 2026',
-    sapRef: 'SAP-PR-2026-90412',
-    initiatorName: 'Engr. Tariq Ahmed',
-    initiatorRole: 'Senior Plant Maintenance Engineer',
-    initiatorDept: 'Keraniganj Plant Operations',
-    finalApproverRole: 'chairman',
-    signatoryRoute: [
-      {
-        ...AVAILABLE_OFFICERS[0], // Plant GM
-        id: 's1',
-        status: 'signed',
-        signedAt: '14 Oct 2026, 02:45 PM',
-        hash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
-      },
-      {
-        ...AVAILABLE_OFFICERS[1], // CFO Farida Begum
-        id: 's2',
-        status: 'signed',
-        signedAt: '15 Oct 2026, 11:15 AM',
-        hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      },
-      {
-        ...AVAILABLE_OFFICERS[4], // Chairman Ahmed Akbar Sobhan
-        id: 's3',
-        status: 'pending',
-      },
-    ],
-    notes: [
-      {
-        id: 1,
-        para: 1,
-        author: 'Engr. Tariq Ahmed',
-        role: 'Senior Plant Maintenance Engineer',
-        dept: 'Keraniganj Plant Operations',
-        date: '14 Oct 2026, 09:30 AM',
-        body: 'Submitted for kind perusal and administrative approval. Urgent procurement of heavy-duty replacement components and complete overhaul service for the 1,200 kVA emergency backup power generator at Keraniganj Plant. This backup generator is critical to ensure 24/7 continuous factory operations, plant electrical safety, and prevent production stoppage during the upcoming manufacturing season.',
-        status: 'approved',
-        hash: 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
-      },
-      {
-        id: 2,
-        para: 2,
-        author: 'Engr. Md. Harunur Rashid',
-        role: 'Plant General Manager',
-        dept: 'Keraniganj Plant Operations',
-        date: '14 Oct 2026, 02:45 PM',
-        body: 'Forwarded with strong recommendation. Routine plant inspection identified wear on generator cooling water pumps and alternator seals. Three competitive quotations from authorized engineering vendors were evaluated. The lowest compliant vetted quote is ৳48,50,000 from Energypac Power (Cummins OEM), inclusive of 1-year on-site comprehensive warranty and certified installation.',
-        status: 'approved',
-        hash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
-      },
-      {
-        id: 3,
-        para: 3,
-        author: 'Farida Begum',
-        role: 'CFO & Head of Finance',
-        dept: 'Corporate Finance & Accounts',
-        date: '15 Oct 2026, 11:15 AM',
-        body: 'Vetted from budgetary standpoint. Provision exists under CAPEX Head: Plant Maintenance & Reliability (GL Code 4102-KER). Financial viability and tax deductions (5% AIT + 7.5% VAT) have been adjusted. Subject to formal approval of the Honourable Chairman & Managing Director, purchase order will be issued immediately.',
-        status: 'approved',
-        hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      },
-    ],
-  },
-  {
-    id: 'f2',
-    fileNo: 'BOGCL/IT/2026/0211',
-    title: 'Annual Corporate IT Cloud ERP & Business Software License Renewal (2026-2027)',
-    dept: 'Information Technology & Systems',
-    amount: '৳18,50,000',
-    urgency: 'high',
-    status: 'approved',
-    date: '12 Oct 2026',
-    sapRef: 'SAP-IT-LIC-0211',
-    initiatorName: 'Farida Begum',
-    initiatorRole: 'CFO & Head of Finance',
-    initiatorDept: 'Corporate Finance & Accounts',
-    finalApproverRole: 'hod',
-    signatoryRoute: [
-      {
-        ...AVAILABLE_OFFICERS[1], // CFO Farida Begum
-        id: 's1',
-        status: 'signed',
-        signedAt: '12 Oct 2026, 10:00 AM',
-        hash: 'SHA256: 41b2c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b112',
-      },
-    ],
-    notes: [
-      {
-        id: 1,
-        para: 1,
-        author: 'Farida Begum',
-        role: 'CFO & Head of Finance',
-        dept: 'Finance Directorate',
-        date: '12 Oct 2026, 10:00 AM',
-        body: 'Submitted and approved under departmental delegated authority. Annual license renewal for corporate SAP S/4HANA cloud system, secure business email accounts, and automated database backups for 750 staff across Head Office and factory sites. Budget verified compliant.',
-        status: 'approved',
-        hash: 'SHA256: 41b2c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b112',
-      },
-    ],
-  },
-  {
-    id: 'f3',
-    fileNo: 'BOGCL/HR/2026/0342',
-    title: 'Annual Factory Shift Staff & Operations Team Salary Increment Policy',
-    dept: 'Human Resources Directorate',
-    amount: 'Approved HR Policy',
-    urgency: 'normal',
-    status: 'approved',
-    date: '10 Oct 2026',
-    sapRef: 'SAP-HR-POL-0342',
-    initiatorName: 'Nusrat Jahan',
-    initiatorRole: 'GM, Human Resources',
-    initiatorDept: 'HR Suite, Dhaka HQ',
-    finalApproverRole: 'hr_admin',
-    signatoryRoute: [
-      {
-        ...AVAILABLE_OFFICERS[2], // GM HR Afroza Sultana
-        id: 's1',
-        status: 'signed',
-        signedAt: '10 Oct 2026, 03:20 PM',
-        hash: 'SHA256: a1e0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b774',
-      },
-    ],
-    notes: [
-      {
-        id: 1,
-        para: 1,
-        author: 'Nusrat Jahan',
-        role: 'GM, Human Resources',
-        dept: 'HR Suite, Dhaka HQ',
-        date: '10 Oct 2026, 03:20 PM',
-        body: 'Submitted for approval. Annual statutory performance salary increment framework covering 482 shift technicians, boiler operators, logistics drivers, and field support personnel. Financial commitment is fully covered under the approved 2026-2027 corporate payroll budget.',
-        status: 'approved',
-        hash: 'SHA256: a1e0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b774',
-      },
-    ],
-  },
-];
+import { useNotesheetStore, NoteFile, NoteItem } from '../store/notesheetStore';
 
 export default function NotesheetView({ role, lang }: ViewProps) {
-  const [activeFileId, setActiveFileId] = useState('f1');
-  const [files, setFiles] = useState<NoteFile[]>(FILES_DATABASE);
+  const { files, addFile, appendNote, approveFile, returnFileForRevision } = useNotesheetStore();
+
+  const [activeFileId, setActiveFileId] = useState(files[0]?.id || 'f1');
   const [newNoteText, setNewNoteText] = useState('');
-  const [forwardTo, setForwardTo] = useState('Chairman & MD');
   const [isSigned, setIsSigned] = useState(false);
   const [activeTab, setActiveTab] = useState<'sheet' | 'audit' | 'compare'>('sheet');
   const [showCertModal, setShowCertModal] = useState(false);
@@ -209,40 +31,55 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const [signatureHash, setSignatureHash] = useState<string | null>(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
 
-  const currentFile = files.find((f) => f.id === activeFileId) || files[0];
+  // Fallback to first file if active not found
+  const currentFile = files.find((f) => f.id === activeFileId) || files[0] || {
+    id: 'f1',
+    fileNo: 'BOGCL/PLANT/2026/0894',
+    title: 'Backup Power Generator Maintenance & Spare Parts Purchase',
+    dept: 'Plant Operations',
+    amount: '৳48,50,000',
+    urgency: 'urgent' as const,
+    status: 'pending_chairman' as const,
+    date: '27 Oct 2026',
+    sapRef: 'REF-PR-2026-90412',
+    initiatorName: 'Engr. Tariqul Islam',
+    initiatorRole: 'Senior Maintenance Engineer',
+    initiatorDept: 'Keraniganj Plant Operations',
+    finalApproverRole: 'chairman' as AppRole,
+    signatoryRoute: [],
+    notes: [],
+    quotations: [],
+    budgetInfo: {
+      budgetHead: 'Plant Maintenance & Reliability',
+      accountCode: 'GL-4102-KER',
+      annualAllocation: '৳2,50,00,000',
+      availableBalance: '৳1,18,40,000',
+      thisProposalAmount: '৳48,50,000',
+      purchaseOrderRef: 'PO-2026-KER-0894',
+    },
+  };
 
   const handleRejectOrReturn = (data: RejectionData) => {
-    const returnNote: NoteItem = {
-      id: currentFile.notes.length + 1,
-      para: currentFile.notes.length + 1,
-      author: role === 'chairman' ? 'Ahmed Akbar Sobhan' : 'Farida Begum',
-      role: role === 'chairman' ? 'Chairman & Managing Director' : 'Head of Department / Approver',
-      dept: role === 'chairman' ? "Chairman's Secretariat, Bashundhara Group" : 'Corporate Finance & Accounts',
-      date: 'Today, Just Now',
-      body: `[RETURNED FOR REVISION / কোয়ারি ও ফেরত]: ${data.reasonCategory}\n• Observation: ${data.observation}\n• Required Improvement: ${data.improvementsRequired}`,
-      status: 'pending',
-      hash: 'REVISION-AUDIT-STAMP: ' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-      isChairman: role === 'chairman',
-    };
+    const actorMeta = ROLE_META[role] || ROLE_META.hod;
+    returnFileForRevision({
+      fileIdOrNo: currentFile.id,
+      actorName: actorMeta.name,
+      actorRoleTitle: actorMeta.label,
+      actorDept: actorMeta.dept,
+      actorRole: role,
+      reasonCategory: data.reasonCategory,
+      observation: data.observation,
+      improvementsRequired: data.improvementsRequired,
+    });
 
-    setFiles((prev) =>
-      prev.map((f) => {
-        if (f.id === currentFile.id) {
-          return {
-            ...f,
-            status: 'in_review',
-            notes: [...f.notes, returnNote],
-          };
-        }
-        return f;
-      })
-    );
+    // Mirror to approval store
+    approvalStore.syncSourceDecision(currentFile.id, 'rejected', data.reasonCategory);
 
     setShowReturnModal(false);
     showToast(
       t(
-        `File ${currentFile.fileNo} returned with official query note: "${data.reasonCategory}". Actionable guidance dispatched to initiator.`,
-        `নথিটি কোয়ারি নোট ও সংশোধনী নির্দেশনাসহ আবেদনকারী বিভাগে ফেরত পাঠানো হয়েছে।`,
+        `File ${currentFile.fileNo} returned with query: "${data.reasonCategory}". Sent to initiator for corrections.`,
+        `নথিটি সংশোধনের নির্দেশনাসহ ফেরত পাঠানো হয়েছে।`,
         lang
       ),
       'warn'
@@ -300,6 +137,11 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
   const stopDrawing = () => {
     setIsDrawing(false);
+    // Auto-enable signature when user finishes drawing
+    setIsSigned(true);
+    if (!signatureHash) {
+      setSignatureHash(`VERIFIED-SIGN-${Math.random().toString(16).slice(2, 10).toUpperCase()}`);
+    }
   };
 
   const clearCanvas = () => {
@@ -310,22 +152,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setSignatureHash(null);
     setIsSigned(false);
-  };
-
-  const handleApplySignature = () => {
-    const generatedHash =
-      'SHA256: ' +
-      Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    setSignatureHash(generatedHash);
-    setIsSigned(true);
-    showToast(
-      t(
-        'Digital signature cryptographically stamped with SHA-256 seal.',
-        'ডিজিটাল স্বাক্ষর সফলভাবে সংযুক্ত করা হয়েছে।',
-        lang
-      ),
-      'gold'
-    );
   };
 
   // Identify currently pending signatory in route
@@ -347,7 +173,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     : (currentFile.finalApproverRole === 'chairman' ? 'Chairman & Managing Director' : 'Executive Approver');
   const activeSignatoryDept = currentPendingStep
     ? currentPendingStep.dept
-    : (currentFile.dept || "Corporate Secretariat");
+    : (currentFile.dept || 'Corporate Management');
 
   const handleCreateNotesheet = (data: NewNotesheetData) => {
     const newFile: NoteFile = {
@@ -358,7 +184,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       amount: data.amount,
       urgency: data.urgency,
       status: 'pending_approval',
-      date: 'Today, Just Now',
+      date: '29 Oct 2026',
       sapRef: data.sapRef,
       initiatorName: data.initiatorName,
       initiatorRole: data.initiatorRole,
@@ -372,24 +198,33 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           author: data.initiatorName,
           role: data.initiatorRole,
           dept: data.initiatorDept,
-          date: 'Today, Just Now',
+          date: '29 Oct 2026, 09:30 AM',
           body: data.initialNote,
           status: 'approved',
-          hash: 'SHA256: ' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+          hash: `VERIFIED-SIGN-INIT-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
         },
       ],
+      quotations: [],
+      budgetInfo: {
+        budgetHead: data.dept,
+        accountCode: 'GL-2026-OPEX',
+        annualAllocation: '৳1,00,00,000',
+        availableBalance: '৳65,00,000',
+        thisProposalAmount: data.amount,
+        purchaseOrderRef: `PO-${data.fileNo.replace(/\//g, '-')}`,
+      },
     };
 
-    setFiles((prev) => [newFile, ...prev]);
+    addFile(newFile);
     setActiveFileId(newFile.id);
     setActiveTab('sheet');
     clearCanvas();
 
-    // Mirror to Omni-Approval Queue so HOD / Approvers see it
+    // Mirror to Omni-Approval Queue
     approvalStore.addNotesheetApproval(data.fileNo, data.title, data.initiatorName, data.dept, data.amount);
     showToast(
       t(
-        `✓ Note-Sheet ${data.fileNo} created! Routed to ${data.signatoryRoute[0].officerName}.`,
+        `✓ Note-Sheet ${data.fileNo} created! Sent to ${data.signatoryRoute[0]?.officerName || 'Reviewer'}.`,
         `✓ নতুন নোট-শীট ${data.fileNo} তৈরি ও প্রথম অনুমোদনকারীর নিকট প্রেরিত।`,
         lang
       ),
@@ -398,9 +233,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   };
 
   const handleQuickSignActiveOfficer = () => {
-    const generatedHash =
-      'SHA256: ' +
-      Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const generatedHash = `VERIFIED-SIGN-${Math.random().toString(16).slice(2, 10).toUpperCase()}`;
     setSignatureHash(generatedHash);
     setIsSigned(true);
     const canvas = canvasRef.current;
@@ -410,18 +243,18 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = '#1E293B';
-        ctx.font = 'italic 700 22px "Outfit", "Times New Roman", serif';
-        ctx.fillText(activeSignatoryName, 25, 75);
+        ctx.font = 'italic 700 20px "Outfit", Georgia, serif';
+        ctx.fillText(activeSignatoryName, 25, 65);
         ctx.beginPath();
-        ctx.moveTo(20, 88);
-        ctx.bezierCurveTo(70, 105, 180, 65, 270, 80);
+        ctx.moveTo(20, 75);
+        ctx.bezierCurveTo(70, 95, 180, 55, 270, 70);
         ctx.stroke();
       }
     }
     showToast(
       t(
-        `Cryptographic digital signature token applied for ${activeSignatoryName}.`,
-        `${activeSignatoryName}-এর ডিজিটাল স্বাক্ষর টোকেন প্রয়োগ করা হয়েছে।`,
+        `Digital signature stamp applied for ${activeSignatoryName}.`,
+        `${activeSignatoryName}-এর ডিজিটাল স্বাক্ষর প্রয়োগ করা হয়েছে।`,
         lang
       ),
       'gold'
@@ -431,7 +264,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const handleSignAndAdvance = () => {
     if (!isSigned) {
       showToast(
-        t('Please sign or stamp your digital signature first.', 'অনুগ্রহ করে প্রথমে ডিজিটাল স্বাক্ষর করুন।', lang),
+        t('Please sign or click quick stamp first.', 'অনুগ্রহ করে প্রথমে ডিজিটাল স্বাক্ষর করুন।', lang),
         'info'
       );
       return;
@@ -439,63 +272,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
     const defaultRemark = isFinalStep
       ? (currentPendingStep?.roleId === 'chairman'
-          ? 'Approved as recommended in preceding paragraphs. Expedite procurement before peak asphalt refining run. Zero plant downtime authorized.'
+          ? 'Approved as recommended. Expedite procurement before scheduled plant operations. All standards verified compliant.'
           : `Approved under delegated authority as ${activeSignatoryRole}. Financial and technical scope verified compliant. Work execution authorized.`)
-      : `Reviewed and vetted from technical and administrative standpoint. Recommended for final authorization by ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName : 'Next Authority'}.`;
+      : `Reviewed and found compliant. Recommended for approval to ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName : 'the Next Approving Authority'}.`;
 
-    const newNotePara: NoteItem = {
-      id: currentFile.notes.length + 1,
-      para: currentFile.notes.length + 1,
-      author: activeSignatoryName,
-      role: activeSignatoryRole,
-      dept: activeSignatoryDept,
-      date: 'Today, Just Now (Real-Time Sign-Off)',
-      body: newNoteText.trim() || defaultRemark,
-      status: 'approved',
-      hash: signatureHash || ('SHA256: ' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')),
-      isChairman: currentPendingStep?.roleId === 'chairman',
-    };
-
-    setFiles((prev) =>
-      prev.map((f) => {
-        if (f.id === currentFile.id) {
-          const updatedRoute = f.signatoryRoute ? f.signatoryRoute.map((s, idx) => {
-            if (idx === currentPendingStepIndex) {
-              return { ...s, status: 'signed' as const, signedAt: 'Today, Just Now', hash: signatureHash || undefined };
-            }
-            if (idx === currentPendingStepIndex + 1) {
-              return { ...s, status: 'pending' as const };
-            }
-            return s;
-          }) : undefined;
-
-          return {
-            ...f,
-            status: isFinalStep ? ('approved' as const) : ('in_review' as const),
-            signatoryRoute: updatedRoute,
-            notes: [...f.notes, newNotePara],
-          };
-        }
-        return f;
-      })
-    );
-
-    setNewNoteText('');
-    setIsSigned(false);
-    clearCanvas();
+    const comment = newNoteText.trim() || defaultRemark;
 
     if (isFinalStep) {
-      // Sync cross-platform approval with Omni-Approval store
-      const matchingItem = approvalStore.getApprovalItems().find(
-        (a) => a.sourceId === currentFile.id || a.sapDocRef === currentFile.fileNo || a.id.includes('0894')
-      );
-      if (matchingItem) {
-        approvalStore.approveApprovalItem(
-          matchingItem.id,
-          newNoteText.trim() || defaultRemark,
-          activeSignatoryName
-        );
-      }
+      approveFile({
+        fileIdOrNo: currentFile.id,
+        actorName: activeSignatoryName,
+        actorRoleTitle: activeSignatoryRole,
+        actorDept: activeSignatoryDept,
+        actorRole: role,
+        remark: comment,
+      });
+
+      // Cross-platform sync with approval store
+      approvalStore.syncSourceDecision(currentFile.id, 'approved', comment);
 
       showToast(
         t(
@@ -507,6 +301,18 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       );
       setShowCertModal(true);
     } else {
+      // Intermediate step
+      appendNote(currentFile.id, {
+        author: activeSignatoryName,
+        role: activeSignatoryRole,
+        dept: activeSignatoryDept,
+        body: comment,
+        date: '29 Oct 2026, Just Now',
+        status: 'approved',
+        isChairman: currentPendingStep?.roleId === 'chairman',
+        hash: signatureHash || `VERIFIED-SIGN-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
+      });
+
       const nextOfficer = currentFile.signatoryRoute ? currentFile.signatoryRoute[currentPendingStepIndex + 1] : null;
       showToast(
         t(
@@ -517,6 +323,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         'info'
       );
     }
+
+    setNewNoteText('');
+    setIsSigned(false);
+    clearCanvas();
   };
 
   const officialDocData: DocumentData = {
@@ -530,7 +340,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       : 'Ahmed Akbar Sobhan',
     authorizerRole: currentFile.finalApproverRole
       ? (AVAILABLE_OFFICERS.find((o) => o.roleId === currentFile.finalApproverRole)?.roleName || 'Chairman & Managing Director')
-      : 'Chairman & Managing Director, Bashundhara Group',
+      : 'Chairman & Managing Director, Bashundhara Oil & Gas Company',
     amountOrValue: currentFile.amount,
     sapReference: currentFile.sapRef,
     paragraphs: currentFile.notes.map((n) => ({
@@ -543,17 +353,17 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
   return (
     <div className="view-container">
-      {/* ─── SLEEK MINIMAL HEADER & TOOLBAR ─── */}
+      {/* Header & Actions */}
       <div className="section-header" style={{ marginBottom: '14px', alignItems: 'center' }}>
         <div>
           <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '18px' }}>
             <span>✍️</span>
-            <span>{t('E-Note Sheet & Sign-Off Platform', 'ই-নোটশীট ও ডিজিটাল স্বাক্ষর প্ল্যাটফর্ম', lang)}</span>
+            <span>{t('Electronic Note-Sheet & Document Approvals', 'ই-নোটশীট ও ডিজিটাল অনুমোদন প্ল্যাটফর্ম', lang)}</span>
           </h2>
           <p className="section-subtitle" style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
             {t(
-              'DocuSign-grade sequential authorization & cryptographic ledger.',
-              'ধারাবাহিক অনুমোদন ব্যবস্থা ও ক্রিপ্টোগ্রাফিক ডিজিটাল খতিয়ান।',
+              'Sequential departmental review, transparent remarks, and verified digital signatures.',
+              'ধারাবাহিক বিভাগীয় অনুমোদন, সুস্পষ্ট মন্তব্য ও ডিজিটাল স্বাক্ষর খতিয়ান।',
               lang
             )}
           </p>
@@ -577,7 +387,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                transition: 'all 0.15s ease'
               }}
             >
               <FileText size={13} /> {t('Note Sheet', 'নোটশীট', lang)}
@@ -597,10 +406,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                transition: 'all 0.15s ease'
               }}
             >
-              <Layers size={13} /> {t('Quotations (3)', 'দরপত্র (৩টি)', lang)}
+              <Layers size={13} /> {t('Vendor Quotations', 'দরপত্র ও প্রাক্কলন', lang)}
             </button>
             <button
               onClick={() => setActiveTab('audit')}
@@ -617,10 +425,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                transition: 'all 0.15s ease'
               }}
             >
-              <Lock size={13} /> {t('Audit Ledger', 'খতিয়ান', lang)}
+              <Lock size={13} /> {t('Signatures & History', 'স্বাক্ষর ও খতিয়ান', lang)}
             </button>
           </div>
 
@@ -636,36 +443,33 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               gap: '6px',
               background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
               fontWeight: 700,
-              boxShadow: '0 2px 6px rgba(165,28,48,0.2)'
             }}
           >
-            <Plus size={13} /> {t('+ Start Note-Sheet', '+ নতুন নোট-শীট', lang)}
+            <Plus size={13} /> {t('+ New Note-Sheet', '+ নতুন নোট-শীট', lang)}
           </button>
           <button
             className="btn-outline"
             onClick={() => setShowOfficialDoc(true)}
             style={{ fontSize: '11.5px', padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <Printer size={13} /> {t('Print', 'প্রিন্ট', lang)}
+            <Printer size={13} /> {t('Print Document', 'প্রিন্ট', lang)}
           </button>
           <button
             className="btn-outline"
             onClick={() => setShowCertModal(true)}
             style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <QrCode size={13} /> {t('Certificate', 'সনদ', lang)}
+            <QrCode size={13} /> {t('Approval Certificate', 'অনুমোদন সনদ', lang)}
           </button>
         </div>
       </div>
 
-      {/* ─── SLEEK MINIMAL DOSSIER BAR & DYNAMIC STEPPER ─── */}
+      {/* Dossier Selector Bar */}
       <div className="card mb-4" style={{ padding: '10px 16px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-border)', borderRadius: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          
-          {/* Clean Dossier Pill Selector with '+ New' Trigger */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', maxWidth: '100%' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px' }}>
-              Dossier:
+              Files:
             </span>
             <button
               onClick={() => setShowInitiateModal(true)}
@@ -682,9 +486,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 alignItems: 'center',
                 gap: '4px',
                 whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
               }}
-              title={t('Initiate a new note-sheet document', 'নতুন নোট-শীট প্রস্তুত করুন', lang)}
             >
               <Plus size={12} /> {t('New Note', 'নতুন নোট', lang)}
             </button>
@@ -699,9 +501,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   }}
                   style={{
                     border: isSelected ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                    background: isSelected ? 'rgba(165, 28, 48, 0.08)' : 'transparent',
-                    color: isSelected ? 'var(--brand-crimson)' : 'var(--brand-slate-700)',
-                    padding: '4px 10px',
+                    background: isSelected ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
+                    color: isSelected ? '#fff' : 'var(--brand-slate-700)',
+                    padding: '4px 11px',
                     borderRadius: '16px',
                     fontSize: '11.5px',
                     fontWeight: isSelected ? 700 : 500,
@@ -710,675 +512,440 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     alignItems: 'center',
                     gap: '6px',
                     whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <span style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: file.status === 'approved' ? '#10B981' : '#F59E0B'
-                  }} />
-                  <span style={{ fontFamily: 'monospace' }}>{file.fileNo.split('/')[2] || file.fileNo}</span>
-                  <span style={{ opacity: 0.75, fontSize: '10.5px' }}>({file.amount})</span>
-                  {file.urgency === 'urgent' && isSelected && (
-                    <span style={{ fontSize: '9px', background: '#FEE2E2', color: '#DC2626', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>
-                      URGENT
-                    </span>
+                  <span>{file.fileNo.split('/').slice(-2).join('/')}</span>
+                  {file.status === 'approved' ? (
+                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#059669' }}>✓</span>
+                  ) : (
+                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#D97706' }}>⏳</span>
                   )}
                 </button>
               );
             })}
           </div>
 
-          {/* Dynamic Signatory Authorization Route Pipeline */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', flexWrap: 'wrap' }}>
-            {currentFile.initiatorName && (
-              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginRight: '2px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#64748B' }}></span>
-                <span style={{ fontWeight: 600 }}>{currentFile.initiatorName.split(' ')[0]}</span> (Initiator) ➔
-              </span>
-            )}
-            {currentFile.signatoryRoute && currentFile.signatoryRoute.length > 0 ? (
-              currentFile.signatoryRoute.map((step, idx) => {
-                const isSigned = step.status === 'signed';
-                const isPending = step.status === 'pending';
-                const isFinal = idx === (currentFile.signatoryRoute?.length || 0) - 1;
-                const isChairman = step.roleId === 'chairman';
-
-                return (
-                  <React.Fragment key={step.id}>
-                    {idx > 0 && <span style={{ color: 'var(--brand-slate-300)', fontSize: '10px' }}>➔</span>}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '2px 8px',
-                        borderRadius: '10px',
-                        background: isSigned
-                          ? 'rgba(16, 185, 129, 0.1)'
-                          : isPending
-                          ? isChairman ? 'rgba(212, 175, 55, 0.18)' : 'rgba(165, 28, 48, 0.1)'
-                          : 'rgba(148, 163, 184, 0.1)',
-                        color: isSigned
-                          ? '#059669'
-                          : isPending
-                          ? isChairman ? '#B45309' : 'var(--brand-crimson)'
-                          : 'var(--brand-slate-400)',
-                        fontWeight: isPending ? 700 : 600,
-                        border: isPending ? (isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-crimson)') : '1px solid transparent',
-                        fontSize: '11px'
-                      }}
-                      title={`${step.officerName} (${step.roleName}) - Status: ${step.status}`}
-                    >
-                      {isSigned ? (
-                        <CheckCircle size={12} color="#059669" />
-                      ) : isPending ? (
-                        <span>{isChairman ? '👑' : '✍️'}</span>
-                      ) : (
-                        <Clock size={11} />
-                      )}
-                      <span>
-                        {step.officerName.split(' ')[0]} {isFinal ? '★' : ''}
-                      </span>
-                    </div>
-                  </React.Fragment>
-                );
-              })
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontWeight: 600 }}>
-                <CheckCircle size={12} />
-                <span>Authorized</span>
-              </div>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className={`badge ${currentFile.urgency === 'urgent' ? 'danger' : currentFile.urgency === 'high' ? 'warn' : 'info'}`}>
+              {currentFile.urgency.toUpperCase()}
+            </span>
+            <span className={`badge ${currentFile.status === 'approved' ? 'success' : currentFile.status === 'in_review' ? 'warn' : 'gold'}`}>
+              {currentFile.status === 'approved' ? 'APPROVED' : currentFile.status === 'in_review' ? 'QUERY / IN REVIEW' : 'PENDING APPROVAL'}
+            </span>
           </div>
-
         </div>
       </div>
 
-      {/* ─── TAB 1: OFFICIAL NOTE-SHEET DOCUMENT ─── */}
+      {/* TAB 1: MAIN NOTE SHEET */}
       {activeTab === 'sheet' && (
-        <div className="responsive-col-2">
-          {/* Official Document View */}
-          <div className="card" style={{ border: '1px solid var(--brand-slate-200)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <div className="card-body" style={{ padding: '24px' }}>
-              {/* Official Letterhead Directly on Document Paper */}
-              <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '14px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--brand-crimson)', margin: 0, letterSpacing: '0.4px' }}>
-                    BASHUNDHARA OIL & GAS COMPANY LTD.
-                  </h3>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                    Corporate Secretariat • Keraniganj Petroleum Refinery Division
+        <div className="grid-2col-main" style={{ gap: '16px', gridTemplateColumns: '1.9fr 1.1fr' }}>
+          {/* Left Column: Note-Sheet Document */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="card" style={{ padding: '20px', border: '1px solid var(--brand-slate-200)', background: 'var(--brand-card-bg)' }}>
+              {/* Document Letterhead */}
+              <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+                  <div>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 800, color: 'var(--brand-crimson)' }}>
+                      BASHUNDHARA OIL & GAS COMPANY LIMITED
+                    </div>
+                    <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: '4px 0 2px 0' }}>
+                      {currentFile.title}
+                    </h3>
+                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                      File No: <strong>{currentFile.fileNo}</strong> • Date: {currentFile.date} • Dept: {currentFile.dept}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                    ISO 9001:2015 & OHSAS 18001 Certified Refined Bitumen & Base Oil Facilities
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '12px', color: 'var(--brand-slate-900)' }}>{currentFile.fileNo}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Date: {currentFile.date}</div>
-                  <div style={{ display: 'inline-block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-crimson)', marginTop: '3px', background: 'rgba(165,28,48,0.06)', padding: '2px 8px', borderRadius: '4px' }}>
-                    Value: {currentFile.amount}
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>Financial Value</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--brand-crimson)' }}>{currentFile.amount}</div>
                   </div>
                 </div>
               </div>
 
-              {/* Official Query Callout Banner if dossier is returned */}
-              {currentFile.status === 'in_review' && (
-                <div
-                  style={{
-                    background: '#FEF2F2',
-                    border: '1.5px solid #FCA5A5',
-                    borderRadius: '8px',
-                    padding: '12px 16px',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                  }}
-                >
-                  <RotateCcw size={18} color="#B91C1C" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <div>
-                    <strong style={{ color: '#991B1B', fontSize: '13px' }}>
-                      {t('Dossier Returned with Official Audit Observation', 'দাপ্তরিক কোয়ারি ও নির্দেশনাসহ নথিটি ফেরত পাঠানো হয়েছে', lang)}
-                    </strong>
-                    <div style={{ fontSize: '11.5px', color: '#7F1D1D', marginTop: '3px', lineHeight: 1.5 }}>
-                      {t(
-                        'This file was returned by reviewing executive authority. Review the observation paragraph below and submit required revisions.',
-                        'পর্যালোচনা কর্তৃপক্ষ কর্তৃক নথিটিতে আপত্তি উত্থাপন করা হয়েছে। প্রয়োজনীয় সংশোধনী সংযুক্ত করুন।',
-                        lang
-                      )}
-                    </div>
+              {/* Sequential Signatory Route Tracker */}
+              {currentFile.signatoryRoute && currentFile.signatoryRoute.length > 0 && (
+                <div style={{ background: 'var(--brand-slate-50)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--brand-slate-200)', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                    Approval Route & Status
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+                    {currentFile.signatoryRoute.map((step, idx) => (
+                      <div
+                        key={step.id || idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          background: step.status === 'signed' ? '#ECFDF5' : step.status === 'pending' ? '#FFFBEB' : '#F1F5F9',
+                          border: step.status === 'signed' ? '1px solid #10B981' : step.status === 'pending' ? '1px solid #F59E0B' : '1px solid #E2E8F0',
+                          fontSize: '11px',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <span style={{ fontWeight: 800, color: step.status === 'signed' ? '#059669' : step.status === 'pending' ? '#D97706' : '#94A3B8' }}>
+                          {idx + 1}. {step.officerName}
+                        </span>
+                        <span style={{ fontSize: '10px', color: step.status === 'signed' ? '#059669' : '#64748B' }}>
+                          ({step.roleName.split(' ')[0]})
+                        </span>
+                        {step.status === 'signed' ? (
+                          <span style={{ color: '#059669', fontWeight: 800 }}>✓</span>
+                        ) : step.status === 'pending' ? (
+                          <span style={{ color: '#D97706', fontWeight: 800 }}>⏳</span>
+                        ) : (
+                          <span style={{ color: '#94A3B8' }}>•</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Subject */}
-              <div style={{ background: 'var(--brand-slate-50)', padding: '12px 14px', borderRadius: '6px', borderLeft: '3px solid var(--brand-crimson)', marginBottom: '18px', fontWeight: 600, fontSize: '12.5px', color: 'var(--brand-slate-900)', lineHeight: 1.5 }}>
-                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 700 }}>{t('Subject: ', 'বিষয়: ', lang)}</span> {currentFile.title}
-              </div>
-
-              {/* Departmental Endorsements & Vetting Trail (Why Document Got Approved At Each Department) */}
-              <div
-                style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #CBD5E1',
-                  borderRadius: '8px',
-                  padding: '12px 14px',
-                  marginBottom: '16px',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#1E293B' }}>
-                    <ShieldCheck size={16} color="#059669" />
-                    <span>{t('Departmental Endorsements & Audit Trail', 'বিভাগীয় সুপারিশ ও অনুমোদন খতিয়ান', lang)}</span>
-                  </div>
-                  <span className="badge green" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                    {currentFile.notes.length} {t('Vetted Steps', 'টি যাচাইকৃত ধাপ', lang)}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {currentFile.notes.map((n) => (
-                    <div
-                      key={n.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '8px',
-                        fontSize: '11px',
-                        background: '#FFFFFF',
-                        padding: '6px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #E2E8F0',
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: '16px',
-                          height: '16px',
-                          borderRadius: '50%',
-                          background: '#DCFCE7',
-                          color: '#15803D',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '9px',
-                          fontWeight: 800,
-                          flexShrink: 0,
-                          marginTop: '2px',
-                        }}
-                      >
-                        ✓
-                      </span>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
-                          <strong style={{ color: '#0F172A' }}>Para-{n.para}: {n.author}</strong>
-                          <span style={{ fontSize: '10px', color: '#64748B' }}>{n.role} · {n.dept}</span>
-                        </div>
-                        <div style={{ color: '#334155', fontStyle: 'italic', marginTop: '2px', lineHeight: 1.45 }}>
-                          "{n.body.length > 140 ? `${n.body.slice(0, 140)}...` : n.body}"
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Notes Paragraphs */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {currentFile.notes.map((n) => (
                   <div
                     key={n.id}
                     style={{
-                      padding: '14px',
+                      padding: '12px 14px',
                       borderRadius: '8px',
                       border: n.isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-slate-200)',
                       background: n.isChairman ? 'rgba(212, 175, 55, 0.04)' : 'var(--brand-card-bg)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? '#B45309' : 'var(--brand-slate-700)' }}>
-                          Para-{n.para}.
+                          Para {n.para}.
                         </span>
                         <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{n.author}</strong>
-                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>({n.role})</span>
+                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>({n.role} · {n.dept})</span>
                       </div>
                       <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{n.date}</span>
                     </div>
 
-                    <p style={{ fontSize: '12.5px', lineHeight: '1.65', margin: '0 0 10px 0', color: 'var(--brand-slate-800)' }}>
+                    <p style={{ fontSize: '12.5px', lineHeight: '1.6', margin: '0 0 8px 0', color: 'var(--brand-slate-800)', whiteSpace: 'pre-line' }}>
                       {n.body}
                     </p>
 
                     {n.hash && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px', fontSize: '10px', color: 'var(--brand-slate-400)', flexWrap: 'wrap', gap: '4px' }}>
-                        <span style={{ fontFamily: 'monospace' }}>🔒 {n.hash}</span>
-                        <span style={{ color: '#059669', fontWeight: 600 }}>✓ Digitally Validated</span>
+                        <span style={{ fontFamily: 'monospace' }}>🔒 Verification Code: {n.hash}</span>
+                        <span style={{ color: '#059669', fontWeight: 600 }}>✓ Verified Stamp</span>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Right Column: Signature Pad & Executive Authorization */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="card" style={{ border: '1px solid var(--brand-slate-200)' }}>
-              <div className="card-hd" style={{ padding: '12px 16px' }}>
-                <div className="card-hd-left">
-                  <div className="card-hd-icon"><Stamp size={15} /></div>
+            {/* Budget Allocation Summary Card */}
+            {currentFile.budgetInfo && (
+              <div className="card" style={{ padding: '14px 18px', border: '1px solid var(--brand-slate-200)', background: 'var(--brand-slate-50)' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px' }}>
+                  📊 Budget & Account Allocation Summary
+                </div>
+                <div className="responsive-col-3" style={{ gap: '10px', fontSize: '11.5px' }}>
                   <div>
-                    <div className="card-title" style={{ fontSize: '13px' }}>{t('Executive E-Sign Pad', 'ডিজিটাল স্বাক্ষর প্যাড', lang)}</div>
-                    <div className="card-subtitle">{t('Draw or apply 1-click cryptographic token', 'স্বাক্ষর আঁকুন বা ডিজিটাল সিল প্রয়োগ করুন', lang)}</div>
+                    <div style={{ color: 'var(--brand-slate-500)' }}>Budget Head:</div>
+                    <strong>{currentFile.budgetInfo.budgetHead}</strong>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--brand-slate-500)' }}>Account Code:</div>
+                    <code style={{ fontWeight: 700 }}>{currentFile.budgetInfo.accountCode}</code>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--brand-slate-500)' }}>Available Balance:</div>
+                    <strong style={{ color: '#059669' }}>{currentFile.budgetInfo.availableBalance}</strong>
                   </div>
                 </div>
               </div>
-              <div className="card-body" style={{ padding: '16px' }}>
-                {/* File Status Alert if Fully Approved */}
-                {currentFile.status === 'approved' && (
-                  <div style={{
-                    padding: '10px 12px',
-                    borderRadius: '6px',
-                    background: '#ECFDF5',
-                    border: '1px solid #10B981',
-                    color: '#065F46',
-                    marginBottom: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <ShieldCheck size={18} color="#059669" />
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '12px' }}>
-                        {t('File Finalized & Authorized', 'নথি চূড়ান্ত অনুমোদিত ও সিলমোহরকৃত', lang)}
-                      </div>
-                      <div style={{ fontSize: '10.5px', color: '#047857', marginTop: '1px' }}>
-                        {t('All route signatories approved. Cryptographic certificate issued.', 'অনুমোদন প্রক্রিয়া সম্পূর্ণ। ডিজিটাল সনদ তৈরি হয়েছে।', lang)}
-                      </div>
-                    </div>
-                  </div>
-                )}
+            )}
+          </div>
 
-                {/* Active Pending Signatory Header */}
-                <div style={{
-                  padding: '9px 12px',
-                  background: isFinalStep ? 'rgba(212, 175, 55, 0.1)' : 'rgba(165, 28, 48, 0.05)',
-                  border: isFinalStep ? '1px solid #D4AF37' : '1px solid rgba(165, 28, 48, 0.2)',
+          {/* Right Column: Signature Pad & Decision Controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="card" style={{ border: '1px solid var(--brand-slate-200)', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <div className="card-hd-icon" style={{ width: '28px', height: '28px' }}><Stamp size={15} /></div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                    {t('Sign & Endorse Document', 'স্বাক্ষর ও অনুমোদন নিয়ন্ত্রণ', lang)}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                    {t('Add remarks and apply your digital signature', 'মন্তব্য যোগ করুন ও স্বাক্ষর সম্পন্ন করুন', lang)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Signer Capsule */}
+              <div style={{
+                padding: '9px 12px',
+                background: isFinalStep ? 'rgba(212, 175, 55, 0.1)' : 'rgba(165, 28, 48, 0.05)',
+                border: isFinalStep ? '1px solid #D4AF37' : '1px solid rgba(165, 28, 48, 0.2)',
+                borderRadius: '6px',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>
+                    {isFinalStep ? t('Final Sanction Authority', 'চূড়ান্ত অনুমোদনকারী', lang) : t('Current Reviewing Officer', 'বর্তমান অনুমোদনকারী', lang)}
+                  </div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                    {activeSignatoryName}
+                  </div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
+                    {activeSignatoryRole}
+                  </div>
+                </div>
+                {isFinalStep && (
+                  <span style={{ fontSize: '9px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                    FINAL APPROVAL
+                  </span>
+                )}
+              </div>
+
+              {/* 1-Click Quick Stamp */}
+              <button
+                type="button"
+                onClick={handleQuickSignActiveOfficer}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
                   borderRadius: '6px',
-                  marginBottom: '10px',
+                  border: '1px dashed #D4AF37',
+                  background: 'rgba(212, 175, 55, 0.08)',
+                  color: '#B45309',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                      width: '26px',
-                      height: '26px',
-                      borderRadius: '50%',
-                      background: isFinalStep ? '#D4AF37' : 'var(--brand-crimson)',
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px'
-                    }}>
-                      {currentPendingStep?.roleId === 'chairman' ? '👑' : <Stamp size={13} />}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>
-                        {isFinalStep ? t('Final Sanction Authority', 'চূড়ান্ত অনুমোদনকারী', lang) : t('Pending Reviewer / Signatory', 'বর্তমান অনুমোদনকারী', lang)}
-                      </div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                        {activeSignatoryName}
-                      </div>
-                      <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)' }}>
-                        {activeSignatoryRole}
-                      </div>
-                    </div>
-                  </div>
-                  {isFinalStep && (
-                    <span style={{ fontSize: '9px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
-                      FINAL
-                    </span>
+                  justifyContent: 'center',
+                  gap: '6px',
+                  marginBottom: '10px',
+                }}
+              >
+                {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="#D4AF37" /> : <Stamp size={14} color="#B45309" />}
+                <span>
+                  {t(
+                    `⚡ 1-Click Digital Stamp: ${activeSignatoryName}`,
+                    `⚡ ডিজিটাল স্বাক্ষর প্রয়োগ: ${activeSignatoryName}`,
+                    lang
                   )}
-                </div>
+                </span>
+              </button>
 
-                {/* 1-Click Quick Sign Action for Active Officer */}
+              {/* Canvas Pad */}
+              <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: '#FAFAFC', position: 'relative', height: '100px', marginBottom: '10px' }}>
+                <canvas
+                  ref={canvasRef}
+                  width={340}
+                  height={100}
+                  style={{ width: '100%', height: '100%', cursor: 'crosshair', touchAction: 'none' }}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                />
+                {!isDrawing && !isSigned && (
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--brand-slate-400)', fontSize: '11px' }}>
+                    <PenTool size={13} style={{ marginRight: '5px' }} /> Or draw signature with stylus / mouse
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <button
                   type="button"
-                  onClick={handleQuickSignActiveOfficer}
+                  onClick={clearCanvas}
+                  style={{ border: 'none', background: 'transparent', color: 'var(--brand-slate-500)', fontSize: '11px', cursor: 'pointer', padding: 0 }}
+                >
+                  Clear Signature
+                </button>
+                {isSigned && (
+                  <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 700 }}>
+                    ✓ Signature Ready
+                  </span>
+                )}
+              </div>
+
+              {/* Remarks Textarea */}
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ fontSize: '11px' }}>{t('Official Remarks / Approval Note', 'দাপ্তরিক মন্তব্য / অনুমোদন নোট', lang)}</label>
+                <textarea
+                  rows={3}
+                  placeholder={
+                    isFinalStep
+                      ? 'Approved as recommended. Release purchase order and proceed with works.'
+                      : 'Reviewed and found technically compliant. Forwarded for final sanction.'
+                  }
+                  value={newNoteText}
+                  onChange={(e) => setNewNoteText(e.target.value)}
+                  style={{ fontSize: '12px' }}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={handleSignAndAdvance}
                   style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    border: '1px dashed #D4AF37',
-                    background: 'rgba(212, 175, 55, 0.08)',
-                    color: '#B45309',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
+                    flex: 2,
+                    fontWeight: 800,
+                    fontSize: '12px',
+                    padding: '9px 12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    marginBottom: '10px',
-                    transition: 'all 0.15s ease'
                   }}
                 >
-                  {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="#D4AF37" /> : <Stamp size={14} color="#B45309" />}
-                  <span>
-                    {t(
-                      `⚡ 1-Click Digital Token: ${activeSignatoryName}`,
-                      `⚡ ডিজিটাল স্বাক্ষর টোকেন প্রয়োগ: ${activeSignatoryName}`,
-                      lang
-                    )}
-                  </span>
+                  <CheckCheck size={14} />
+                  <span>{isFinalStep ? t('Final Sanction & Approve', 'চূড়ান্ত অনুমোদন প্রদান', lang) : t('Sign & Forward', 'স্বাক্ষর ও ফরোয়ার্ড', lang)}</span>
                 </button>
 
-                {/* Canvas Drawing Box */}
-                <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: '#FAFAFC', position: 'relative', height: '110px', marginBottom: '10px' }}>
-                  <canvas
-                    ref={canvasRef}
-                    width={340}
-                    height={110}
-                    style={{ width: '100%', height: '100%', cursor: 'crosshair', touchAction: 'none' }}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={draw}
-                    onTouchEnd={stopDrawing}
-                  />
-                  {!isDrawing && !isSigned && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--brand-slate-400)', fontSize: '11px' }}>
-                      <PenTool size={13} style={{ marginRight: '5px' }} /> Or draw signature with stylus / mouse
-                    </div>
-                  )}
-                  {isSigned && (
-                    <div style={{ position: 'absolute', bottom: '6px', right: '8px', background: '#ECFDF5', border: '1px solid #10B981', color: '#059669', padding: '2px 6px', borderRadius: '4px', fontSize: '9.5px', fontWeight: 700 }}>
-                      ✓ Cryptographically Signed
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                  <button className="btn-outline" style={{ flex: 1, fontSize: '11px', padding: '5px 8px' }} onClick={clearCanvas}>
-                    {t('Clear Pad', 'মুছে ফেলুন', lang)}
-                  </button>
-                  <button className="btn-primary" style={{ flex: 1, fontSize: '11px', padding: '5px 8px' }} onClick={handleApplySignature}>
-                    <CheckCheck size={13} /> {t('Apply Signature', 'স্বাক্ষর প্রয়োগ', lang)}
-                  </button>
-                </div>
-
-                {/* Quick 1-Click Executive Directive Presets */}
-                <div style={{ marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
-                    <Sparkles size={13} color="#D97706" />
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)' }}>
-                      {t('1-Click Executive Presets / Terms:', 'এক-ক্লিক অনুমোদন শর্তাবলী:', lang)}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                    {[
-                      {
-                        label: 'Standard Sanction',
-                        labelBn: 'প্রমিত অনুমোদন',
-                        text: 'Approved as recommended in preceding department paragraphs. Scope and budget verified compliant with BOGCL governance. Expedite execution.',
-                      },
-                      {
-                        label: '5% Retention Clause',
-                        labelBn: '৫% ওয়ারেন্টি শর্ত',
-                        text: 'Approved subject to standard 5% advance retention warranty for 90 days following successful plant commissioning and engineer handover test.',
-                      },
-                      {
-                        label: 'Immediate SAP Release',
-                        labelBn: 'জরুরি এসএপি অর্থছাড়',
-                        text: 'Executive clearance granted. Forwarded to SAP S/4HANA for immediate real-time electronic disbursement via BEFTN corporate gateway.',
-                      },
-                      {
-                        label: 'Mushak-6.3 VAT Audit',
-                        labelBn: 'ভ্যাট যাচাই শর্ত',
-                        text: 'Sanctioned under delegated authority. Accounts department must verify original BIN Mushak-6.3 tax invoice and TDS deduction prior to release.',
-                      },
-                      {
-                        label: 'Zero Downtime Priority',
-                        labelBn: 'জিরো ডাউনটাইম অগ্রাধিকার',
-                        text: 'Approved on top emergency priority to ensure uninterrupted 24/7 bitumen refinery operations and zero plant stoppage.',
-                      },
-                    ].map((pr, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setNewNoteText(pr.text)}
-                        style={{
-                          fontSize: '10px',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: newNoteText === pr.text ? '1px solid #4338CA' : '1px solid var(--brand-slate-200)',
-                          background: newNoteText === pr.text ? '#EEF2FF' : '#FAFAFA',
-                          color: newNoteText === pr.text ? '#3730A3' : 'var(--brand-slate-600)',
-                          fontWeight: newNoteText === pr.text ? 700 : 500,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                        }}
-                      >
-                        {lang === 'bn' ? pr.labelBn : pr.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label className="form-label" style={{ fontSize: '11px', fontWeight: 600 }}>
-                    {isFinalStep
-                      ? t('Final Executive Sanction Directive', 'চূড়ান্ত নির্বাহী পর্যবেক্ষণ ও অনুমোদন মন্তব্য', lang)
-                      : t('Review / Recommendation Remarks', 'পর্যালোচনা ও অগ্রগমন মন্তব্য', lang)}
-                  </label>
-                  <textarea
-                    className="form-input"
-                    rows={2}
-                    placeholder={isFinalStep
-                      ? t('Enter final executive approval directive or sanction remarks...', 'চূড়ান্ত অনুমোদন নির্দেশনা লিখুন...', lang)
-                      : t('Enter endorsement remarks to forward to next officer...', 'পরবর্তী কর্মকর্তার জন্য মন্তব্য লিখুন...', lang)
-                    }
-                    value={newNoteText}
-                    onChange={(e) => setNewNoteText(e.target.value)}
-                    style={{ fontSize: '12px', padding: '8px 10px' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    className="btn-primary"
-                    style={{
-                      flex: 1.5,
-                      justifyContent: 'center',
-                      padding: '9px 12px',
-                      background: isFinalStep
-                        ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                        : 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
-                      fontSize: '12px',
-                      fontWeight: 700
-                    }}
-                    onClick={handleSignAndAdvance}
-                  >
-                    {isFinalStep ? (
-                      <>
-                        <ShieldCheck size={14} /> {t('Authorize & Grant Final Approval', 'চূড়ান্ত অনুমোদন ও সিল', lang)}
-                      </>
-                    ) : (
-                      <>
-                        <Send size={14} /> {t(
-                          `Sign & Forward ➔ ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName.split(' ')[0] : 'Next'}`,
-                          'স্বাক্ষর ও পরবর্তী ধাপে প্রেরণ',
-                          lang
-                        )}
-                      </>
-                    )}
-                  </button>
-                  <button
-                    className="btn-outline"
-                    style={{ flex: 1, justifyContent: 'center', padding: '9px 10px', borderColor: '#DC2626', color: '#DC2626', background: 'rgba(220, 38, 38, 0.04)', fontSize: '12px' }}
-                    onClick={() => setShowReturnModal(true)}
-                  >
-                    <RotateCcw size={13} /> {t('Return / Query', 'আপত্তি ও ফেরত', lang)}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Document Meta & SAP Connection */}
-            <div className="card" style={{ border: '1px solid var(--brand-slate-200)' }}>
-              <div className="card-hd" style={{ padding: '10px 14px' }}>
-                <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ width: '24px', height: '24px' }}>🔗</div>
-                  <div>
-                    <div className="card-title" style={{ fontSize: '12px' }}>SAP S/4HANA Linkage</div>
-                    <div className="card-subtitle" style={{ fontSize: '10.5px' }}>Purchase Requisition: {currentFile.sapRef}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="card-body" style={{ padding: '12px 14px', fontSize: '11.5px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Cost Center:</span>
-                  <strong>CC-4102 (Keraniganj Refinery)</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>GL Account:</span>
-                  <strong>GL-88201 (Plant Capital Spares)</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Audit Hash:</span>
-                  <code style={{ fontSize: '10px', color: 'var(--brand-slate-600)' }}>SHA256: 7f83b1...d9069</code>
-                </div>
+                <button
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => setShowReturnModal(true)}
+                  style={{
+                    flex: 1,
+                    fontSize: '12px',
+                    padding: '9px 10px',
+                    color: '#DC2626',
+                    borderColor: '#DC2626',
+                    background: 'rgba(220, 38, 38, 0.04)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  <span>{t('Return / Query', 'আপত্তি / ফেরত', lang)}</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── TAB 2: VENDOR QUOTATIONS COMPARISON ─── */}
+      {/* TAB 2: VENDOR QUOTATIONS */}
       {activeTab === 'compare' && (
         <div className="card mb-4" style={{ border: '1px solid var(--brand-slate-200)', padding: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--brand-slate-900)' }}>
-                {t('Commercial & Technical Tender Comparison (3 Engineering Bids)', 'বাণিজ্যিক ও কারিগরি দরপত্র তুলনা (৩টি দরপত্র)', lang)}
+                {t('Vendor Quotations & Price Comparison', 'সরবরাহকারী দরপত্র ও মূল্য তুলনা', lang)}
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-                Dossier {currentFile.fileNo} · 1,200 kVA Emergency Generator Overhaul & Spare Parts Supply
+                File: {currentFile.fileNo} · {currentFile.title}
               </p>
             </div>
-            <span className="badge success">3/3 Bids Vetted & Technical Compliant</span>
+            <span className="badge success">Vetted by Procurement Committee</span>
           </div>
 
-          <div className="responsive-col-3" style={{ marginBottom: '16px' }}>
-            {/* Vendor 1 (Selected) */}
-            <div style={{ border: '2px solid #059669', borderRadius: '8px', padding: '16px', background: '#F0FDF4', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
-                RECOMMENDED & LOWEST BID
-              </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#065F46' }}>Energypac Power Generation Ltd</div>
-              <div style={{ fontSize: '11px', color: '#047857' }}>Dhaka, Bangladesh (Authorized Cummins Partner)</div>
-              
-              <div style={{ margin: '14px 0', borderTop: '1px solid #A7F3D0', borderBottom: '1px solid #A7F3D0', padding: '10px 0' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: '#065F46' }}>৳48,50,000</div>
-                <div style={{ fontSize: '10.5px', color: '#059669' }}>Inclusive of Delivery, Installation, 5% AIT & 7.5% VAT</div>
-              </div>
+          {currentFile.quotations && currentFile.quotations.length > 0 ? (
+            <div className="responsive-col-3" style={{ gap: '14px', marginBottom: '16px' }}>
+              {currentFile.quotations.map((quote, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    border: quote.isRecommended ? '2px solid #059669' : '1px solid var(--brand-slate-200)',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    background: quote.isRecommended ? '#F0FDF4' : 'var(--brand-card-bg)',
+                    position: 'relative',
+                  }}
+                >
+                  {quote.isRecommended && (
+                    <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                      RECOMMENDED & LOWEST BID
+                    </div>
+                  )}
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-900)' }}>
+                    {quote.vendor}
+                  </div>
+                  <div style={{ fontSize: '11px', color: quote.isRecommended ? '#047857' : 'var(--brand-slate-500)' }}>
+                    Origin: {quote.origin}
+                  </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: '#064E3B' }}>
-                <div><strong>Delivery & Setup:</strong> 7 Calendar Days (Ex-Stock Dhaka)</div>
-                <div><strong>Warranty:</strong> 24 Months Full Warranty + 4 Free Servicing</div>
-                <div><strong>Model:</strong> Cummins QSK23-G3 Industrial Package</div>
-                <div><strong>Technical Rating:</strong> 98.4% (Highest Technical Rating)</div>
+                  <div style={{ margin: '12px 0', borderTop: '1px solid var(--brand-slate-200)', borderBottom: '1px solid var(--brand-slate-200)', padding: '8px 0' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-800)' }}>
+                      {quote.priceText}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', color: 'var(--brand-slate-700)' }}>
+                    <div><strong>Delivery:</strong> {quote.deliveryTime}</div>
+                    <div><strong>Warranty:</strong> {quote.warranty}</div>
+                    <div><strong>Notes:</strong> {quote.remarks}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '36px', background: 'var(--brand-slate-50)', borderRadius: '8px' }}>
+              <FileText size={32} color="var(--brand-slate-400)" style={{ margin: '0 auto 8px' }} />
+              <div style={{ fontWeight: 700, fontSize: '13px' }}>Standard Purchasing File</div>
+              <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
+                Competitive vendor bids are verified and linked under purchase reference <strong>{currentFile.sapRef}</strong>.
               </div>
             </div>
-
-            {/* Vendor 2 */}
-            <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Bangla CAT (Caterpillar)</div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Mohakhali, Dhaka (Authorized CAT Dealer)</div>
-              
-              <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳52,10,000</div>
-                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳3,60,000 higher than lowest bid</div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                <div><strong>Delivery & Setup:</strong> 21 Calendar Days</div>
-                <div><strong>Warranty:</strong> 12 Months Standard Warranty</div>
-                <div><strong>Model:</strong> CAT C32 Industrial Power Package</div>
-                <div><strong>Technical Rating:</strong> 94.2%</div>
-              </div>
-            </div>
-
-            {/* Vendor 3 */}
-            <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '16px', background: 'var(--brand-card-bg)' }}>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>Orient Energy Systems Ltd</div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Gulshan, Dhaka (Perkins Diesel Agent)</div>
-              
-              <div style={{ margin: '14px 0', borderTop: '1px solid var(--brand-slate-100)', borderBottom: '1px solid var(--brand-slate-100)', padding: '10px 0' }}>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-800)' }}>৳54,80,000</div>
-                <div style={{ fontSize: '10.5px', color: '#DC2626' }}>+৳6,30,000 higher than lowest bid</div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                <div><strong>Delivery & Setup:</strong> 30 Calendar Days</div>
-                <div><strong>Warranty:</strong> 12 Months Standard Warranty</div>
-                <div><strong>Model:</strong> Perkins 4012-46TWG2A Package</div>
-                <div><strong>Technical Rating:</strong> 91.5%</div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '6px', borderLeft: '3px solid #059669', fontSize: '12px', color: 'var(--brand-slate-700)' }}>
-            ✓ <strong>Procurement Committee Resolution:</strong> Energypac Power Generation Ltd complies 100% with technical requirements and saves <strong>৳3,60,000</strong> compared to the second lowest bidder. Recommended for immediate Chairman sanction and SAP PO release.
-          </div>
+          )}
         </div>
       )}
 
-      {/* ─── TAB 3: AUDIT & PROOF LEDGER ─── */}
+      {/* TAB 3: SIGNATURES & HISTORY */}
       {activeTab === 'audit' && (
         <div className="card mb-4" style={{ border: '1px solid var(--brand-slate-200)', padding: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
             <div>
               <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, color: 'var(--brand-slate-900)' }}>
-                {t('Cryptographic Endorsement Ledger & Audit Trail', 'ক্রিপ্টোগ্রাফিক নিরীক্ষা খতিয়ান ও টাইমস্ট্যাম্প', lang)}
+                {t('Document Approval History & Audit Trail', 'অনুমোদন প্রক্রিয়া ও দাপ্তরিক খতিয়ান', lang)}
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-                Envelope Ref: ENV-2026-90412 · SHA-256 Merkle Provenance
+                Document Reference: {currentFile.fileNo} · Recorded & Verified
               </p>
             </div>
-            <span className="badge success">4-Tier Chain Validated</span>
+            <span className="badge success">Sequential Approvals Verified</span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {currentFile.notes.map((n, idx) => (
-              <div key={n.id} style={{ display: 'flex', gap: '14px', padding: '14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: n.isChairman ? '#D4AF37' : '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '12px', flexShrink: 0 }}>
+              <div key={n.id} style={{ display: 'flex', gap: '12px', padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: n.isChairman ? '#D4AF37' : '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '11px', flexShrink: 0 }}>
                   {idx + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>
                       {n.author} <span style={{ fontWeight: 400, color: 'var(--brand-slate-500)', fontSize: '11px' }}>({n.role})</span>
                     </div>
-                    <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>{n.date}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{n.date}</span>
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--brand-slate-700)', margin: '4px 0 8px 0', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--brand-slate-700)', margin: '4px 0 6px 0', lineHeight: 1.5, whiteSpace: 'pre-line' }}>
                     {n.body}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', fontFamily: 'monospace', color: 'var(--brand-slate-500)', flexWrap: 'wrap' }}>
-                    <span style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)' }}>
-                      {n.hash}
-                    </span>
-                    <span style={{ color: '#059669', fontWeight: 700 }}>✓ SHA-256 VERIFIED</span>
-                  </div>
+                  {n.hash && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
+                      <span style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)', fontFamily: 'monospace' }}>
+                        {n.hash}
+                      </span>
+                      <span style={{ color: '#059669', fontWeight: 700 }}>✓ Verified Digital Signature</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1389,15 +956,15 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       {/* Certificate of Completion Modal */}
       {showCertModal && (
         <div className="app-modal-overlay" onClick={() => setShowCertModal(false)}>
-          <div className="app-modal-dialog" style={{ maxWidth: '620px', width: '95vw' }} onClick={e => e.stopPropagation()}>
+          <div className="app-modal-dialog" style={{ maxWidth: '600px', width: '95vw' }} onClick={(e) => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
                 <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>
                   <ShieldCheck size={18} />
                 </div>
                 <div>
-                  <h3 className="app-modal-title">{t('Bashundhara Certificate of Execution', 'বসুন্ধরা এক্সিকিউশন সার্টিফিকেট', lang)}</h3>
-                  <div className="app-modal-subtitle">{t('Cryptographic SHA-256 Immutable Audit Trail Record', 'ক্রিপ্টোগ্রাফিক ডিজিটাল অডিট রেকর্ড', lang)}</div>
+                  <h3 className="app-modal-title">{t('Official Certificate of Approval', 'দাপ্তরিক অনুমোদন সনদ', lang)}</h3>
+                  <div className="app-modal-subtitle">{t('Verified Corporate Document Record', 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস কোম্পানি লিমিটেড', lang)}</div>
                 </div>
               </div>
               <button className="app-modal-close" onClick={() => setShowCertModal(false)} aria-label="Close">
@@ -1408,76 +975,35 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             <div className="app-modal-body">
               <div style={{ border: '2px solid #D4AF37', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#B45309', fontWeight: 800 }}>
-                  IMMUTABLE AUDIT TRAIL RECORD
+                  BASHUNDHARA OIL & GAS COMPANY LIMITED
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '8px 0 4px 0', color: 'var(--brand-crimson)' }}>
-                  CERTIFICATE OF COMPLETION
+                <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '8px 0 4px 0', color: 'var(--brand-crimson)' }}>
+                  CERTIFICATE OF FINAL APPROVAL
                 </h3>
                 <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)' }}>
-                  Envelope ID: <code>ENV-2026-90412-BOGCL-0894</code>
+                  File Reference: <code>{currentFile.fileNo}</code>
                 </div>
 
-                <div style={{ marginTop: '20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Document:</span>
-                    <strong>{currentFile.title}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Final Executive Signer:</span>
-                    <strong>Ahmed Akbar Sobhan (Chairman & MD)</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '6px' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Security Verification:</span>
-                    <span className="badge success">SHA-256 Digest Cryptographically Verified</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>SAP S/4HANA PO Released:</span>
-                    <strong style={{ color: 'var(--status-success)' }}>PO #90412 Auto-Approved</strong>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-                  <QrCode size={64} color="#0F172A" />
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                  <div><strong>Subject:</strong> {currentFile.title}</div>
+                  <div><strong>Amount Authorized:</strong> {currentFile.amount}</div>
+                  <div><strong>Department:</strong> {currentFile.dept}</div>
+                  <div><strong>Approval Date:</strong> {currentFile.date}</div>
+                  <div style={{ color: '#059669', fontWeight: 700 }}>✓ Verified by all designated authorities</div>
                 </div>
               </div>
             </div>
 
             <div className="app-modal-footer">
-              <button className="btn-sm-ghost" onClick={() => setShowCertModal(false)}>
+              <button className="btn-primary" onClick={() => setShowCertModal(false)}>
                 {t('Close', 'বন্ধ করুন', lang)}
-              </button>
-              <button
-                className="btn-primary"
-                onClick={() => {
-                  showToast(t('Downloaded Official Watermarked PDF with SHA-256 seal.', 'পিডিএফ ডাউনলোড সম্পন্ন।', lang), 'success');
-                  setShowCertModal(false);
-                }}
-              >
-                <Download size={14} /> {t('Download Sealed PDF', 'সিলকৃত পিডিএফ ডাউনলোড', lang)}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Rejection / Return with Query Modal */}
-      {showReturnModal && (
-        <RejectionExplanationModal
-          isOpen={showReturnModal}
-          onClose={() => setShowReturnModal(false)}
-          onConfirm={handleRejectOrReturn}
-          lang={lang}
-          title={t('Return Note-Sheet with Official Observation Query', 'দাপ্তরিক কোয়ারি ও আপত্তি সহ নোটশীট ফেরত', lang)}
-          itemId={currentFile.fileNo}
-          itemTitle={currentFile.title}
-          requesterName={currentFile.initiatorName}
-          department={currentFile.dept}
-          amount={currentFile.amount}
-          categoryType="notesheet"
-        />
-      )}
-
-      {/* Official Bashundhara Group Letterhead & Memo Print Modal */}
+      {/* Official Printable Document Modal */}
       <OfficialDocumentModal
         isOpen={showOfficialDoc}
         onClose={() => setShowOfficialDoc(false)}
@@ -1485,13 +1011,27 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         docData={officialDocData}
       />
 
-      {/* Dynamic Note-Sheet Initiator Studio Modal */}
+      {/* Initiate New Notesheet Modal */}
       <InitiateNotesheetModal
         isOpen={showInitiateModal}
         onClose={() => setShowInitiateModal(false)}
         onSubmit={handleCreateNotesheet}
         lang={lang}
         currentRole={role}
+      />
+
+      {/* Rejection / Query Explanation Modal */}
+      <RejectionExplanationModal
+        isOpen={showReturnModal}
+        onClose={() => setShowReturnModal(false)}
+        onConfirm={handleRejectOrReturn}
+        title={t(`Return File: ${currentFile.fileNo}`, `নথি ফেরত: ${currentFile.fileNo}`, lang)}
+        itemId={currentFile.id}
+        itemTitle={currentFile.title}
+        department={currentFile.dept}
+        amount={currentFile.amount}
+        categoryType="notesheet"
+        lang={lang}
       />
     </div>
   );

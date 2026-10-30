@@ -4,13 +4,12 @@ import { useEmployeeStore, Employee } from '../store/employeeStore';
 import OnboardEmployeeModal from '../components/workforce/OnboardEmployeeModal';
 import OffboardClearanceDrawer from '../components/workforce/OffboardClearanceDrawer';
 import {
-  Users, UserPlus, UserX, Search, Filter, ShieldCheck, MapPin,
-  Building, Phone, Mail, Award, CheckCircle, FileText, ArrowRight,
-  Sparkles, RefreshCw
+  Users, UserPlus, UserX, Search, Building, MapPin,
+  CheckCircle, FileText, Shield
 } from 'lucide-react';
 
 export default function WorkforceView({ role, lang }: ViewProps) {
-  const { employees, activeEmployees, offboardedEmployees } = useEmployeeStore();
+  const { activeEmployees, offboardedEmployees } = useEmployeeStore();
 
   const [activeTab, setActiveTab] = useState<'active' | 'offboarded'>('active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,11 +22,12 @@ export default function WorkforceView({ role, lang }: ViewProps) {
 
   // Filtered List
   const displayedList = (activeTab === 'active' ? activeEmployees : offboardedEmployees).filter((emp) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.sapPernr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.name.toLowerCase().includes(q) ||
+      emp.id.toLowerCase().includes(q) ||
+      emp.sapPernr.toLowerCase().includes(q) ||
+      emp.designation.toLowerCase().includes(q) ||
       emp.phone.includes(searchQuery);
 
     const matchesDept = selectedDept === 'ALL' || emp.dept === selectedDept;
@@ -45,12 +45,12 @@ export default function WorkforceView({ role, lang }: ViewProps) {
       <div className="flex-between mb-4">
         <div>
           <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-            {t('Workforce Master Directory & Human Capital Desk', 'জনবল মাস্টার ডিরেক্টরি ও মানবসম্পদ প্রশাসন', lang)}
+            {t('Employee Directory & HR Management', 'জনবল ডিরেক্টরি ও মানবসম্পদ ব্যবস্থাপনা', lang)}
           </h2>
           <p className="text-muted">
             {t(
-              'Enterprise Personnel Master • Automated 4-Way Exit Clearance • Geofence Site Allocation • SAP S/4HANA Personnel Sync',
-              'কর্মচারী মাস্টার ডাটা • চাকরি সমাপ্তির ৪-ধাপীয় ছাড়পত্র • প্ল্যান্ট জিওফেন্স বণ্টন • এসএপি পার্সোনেল সিঙ্ক',
+              'Company Staff Directory • Department Clearance • Site Allocation • Payroll & System Records',
+              'কোম্পানি কর্মী তালিকা • বিভাগীয় ছাড়পত্র • কর্মস্থল বণ্টন • পেরোল ও সিস্টেম রেকর্ড',
               lang
             )}
           </p>
@@ -63,7 +63,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
             onClick={() => setShowOnboardModal(true)}
           >
             <UserPlus size={15} />
-            {t('Onboard New Personnel', 'নতুন কর্মচারী অনবোর্ডিং', lang)}
+            {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
           </button>
         </div>
       </div>
@@ -72,12 +72,12 @@ export default function WorkforceView({ role, lang }: ViewProps) {
       <div className="stats-grid mb-4">
         <div className="stat-card green">
           <div className="stat-top">
-            <span className="stat-label">{t('Total Active Staff', 'মোট সক্রিয় জনবল', lang)}</span>
+            <span className="stat-label">{t('Total Active Staff', 'মোট সক্রিয় কর্মী', lang)}</span>
             <div className="stat-icon-wrap"><Users size={16} /></div>
           </div>
           <div className="stat-value">{activeEmployees.length}</div>
           <div className="stat-sub">
-            <span className="sub-up">100% Verified</span> • SAP PERNR Bound
+            <span className="sub-up">Active on Duty</span> • Regular Payroll
           </div>
         </div>
 
@@ -88,29 +88,29 @@ export default function WorkforceView({ role, lang }: ViewProps) {
           </div>
           <div className="stat-value">{plantCount}</div>
           <div className="stat-sub">
-            Site B Geofence • 24/7 Operations
+            Keraniganj Plant • Operations & Engineering
           </div>
         </div>
 
         <div className="stat-card gold">
           <div className="stat-top">
-            <span className="stat-label">{t('Corporate HQ Team', 'বারিধারা করপোরেট হেডকোয়ার্টার', lang)}</span>
+            <span className="stat-label">{t('Corporate HQ Team', 'বারিধারা হেড অফিস', lang)}</span>
             <div className="stat-icon-wrap"><MapPin size={16} /></div>
           </div>
           <div className="stat-value">{hqCount}</div>
           <div className="stat-sub">
-            Site A Geofence • Executive & Sales
+            Baridhara Office • Management & Sales
           </div>
         </div>
 
         <div className="stat-card warn">
           <div className="stat-top">
-            <span className="stat-label">{t('Offboarded / Former', 'সাবেক / ছাড়পত্র প্রাপ্ত', lang)}</span>
+            <span className="stat-label">{t('Former Employees', 'সাবেক কর্মী / ছাড়পত্র প্রাপ্ত', lang)}</span>
             <div className="stat-icon-wrap"><UserX size={16} /></div>
           </div>
           <div className="stat-value">{offboardedEmployees.length}</div>
           <div className="stat-sub">
-            Audit Retained • Never Hard-Deleted
+            Archived Staff Records • Complete Handover
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('active')}
             >
               <Users size={14} />
-              {t('Active Enterprise Staff', 'সক্রিয় কর্মকর্তা-কর্মচারী', lang)}
+              {t('Active Staff', 'সক্রিয় কর্মকর্তা-কর্মচারী', lang)}
               <span style={{ background: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'active' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
                 {activeEmployees.length}
               </span>
@@ -159,7 +159,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('offboarded')}
             >
               <UserX size={14} />
-              {t('Former Staff / Exit Archive', 'সাবেক জনবল / আর্কাইভ', lang)}
+              {t('Former Staff / Exit Archive', 'সাবেক কর্মী / আর্কাইভ', lang)}
               <span style={{ background: activeTab === 'offboarded' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'offboarded' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
                 {offboardedEmployees.length}
               </span>
@@ -172,7 +172,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
               <Search size={14} className="workforce-search-icon" />
               <input
                 type="text"
-                placeholder={t('Search staff, ID, SAP...', 'খুঁজুন...', lang)}
+                placeholder={t('Search employee name, ID, phone...', 'কর্মচারীর নাম, আইডি, ফোন নম্বর দিয়ে খুঁজুন...', lang)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="workforce-search-input"
@@ -190,9 +190,9 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                 <option value="Sales & Distribution">Sales & Distribution</option>
                 <option value="Finance & Accounts">Finance & Accounts</option>
                 <option value="Transport & Logistics">Transport & Logistics</option>
-                <option value="HSE & Compliance">HSE & Compliance</option>
+                <option value="HSE & Compliance">HSE & Safety</option>
                 <option value="Human Resources">Human Resources</option>
-                <option value="Security Administration">Security Admin</option>
+                <option value="Security Administration">Security Administration</option>
               </select>
 
               <select
@@ -200,10 +200,10 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                 onChange={(e) => setSelectedSite(e.target.value)}
                 className="workforce-select"
               >
-                <option value="ALL">All Facilities</option>
-                <option value="PLANT_KERANIGANJ">Keraniganj Refinery</option>
+                <option value="ALL">All Locations</option>
+                <option value="PLANT_KERANIGANJ">Keraniganj Plant</option>
                 <option value="HQ_BARIDHARA">Baridhara HQ</option>
-                <option value="TERMINAL_CTG">Chattogram Port</option>
+                <option value="TERMINAL_CTG">Chattogram Port Depot</option>
               </select>
             </div>
           </div>
@@ -215,10 +215,10 @@ export default function WorkforceView({ role, lang }: ViewProps) {
             <table className="data-table">
             <thead>
               <tr>
-                <th>{t('Personnel Identity', 'কর্মচারী পরিচয়', lang)}</th>
-                <th>{t('Department & Unit', 'বিভাগ ও ইউনিট', lang)}</th>
-                <th>{t('SAP & Corporate Contact', 'এসএপি ও যোগাযোগ', lang)}</th>
-                <th>{t('Geofence Facility', 'কর্মস্থল / সাইট', lang)}</th>
+                <th>{t('Employee Name & ID', 'কর্মচারীর নাম ও পদবি', lang)}</th>
+                <th>{t('Department & Reporting Manager', 'বিভাগ ও রিপোর্টিং কর্মকর্তা', lang)}</th>
+                <th>{t('Official Contact & Staff ID', 'দাপ্তরিক যোগাযোগ ও আইডি', lang)}</th>
+                <th>{t('Work Location', 'কর্মস্থল / সাইট', lang)}</th>
                 <th>{t('Status / Joined', 'অবস্থা ও যোগদান', lang)}</th>
                 <th style={{ textAlign: 'right' }}>{t('Actions', 'পদক্ষেপ', lang)}</th>
               </tr>
@@ -277,10 +277,10 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                       <span className="badge info" style={{ fontSize: '10.5px' }}>
                         <MapPin size={11} />
                         {emp.assignedSite === 'PLANT_KERANIGANJ'
-                          ? 'Keraniganj Refinery'
+                          ? 'Keraniganj Plant'
                           : emp.assignedSite === 'HQ_BARIDHARA'
                           ? 'Baridhara HQ'
-                          : 'Chattogram Marine Terminal'}
+                          : 'Chattogram Port Depot'}
                       </span>
                     </td>
 
@@ -302,7 +302,11 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
-                      {emp.status === 'active' ? (
+                      {emp.id === 'EMP-0001' ? (
+                        <span className="badge gold" style={{ fontSize: '10.5px' }}>
+                          <Shield size={11} /> Executive Office
+                        </span>
+                      ) : emp.status === 'active' ? (
                         <button
                           className="btn-outline-danger"
                           style={{ fontSize: '11px', padding: '4px 10px' }}
@@ -318,7 +322,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                           onClick={() => setSelectedEmployeeForExit(emp)}
                         >
                           <FileText size={12} />
-                          {t('View Exit Dossier', 'নথিপত্র দেখুন', lang)}
+                          {t('View Clearance File', 'ছাড়পত্র ফাইল দেখুন', lang)}
                         </button>
                       )}
                     </td>
@@ -355,7 +359,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                   </div>
                   <div>
                     {emp.status === 'active' ? (
-                      <span className="badge success">Active Duty</span>
+                      <span className="badge success">Active</span>
                     ) : emp.status === 'on_leave' ? (
                       <span className="badge warn">On Leave</span>
                     ) : (
@@ -366,10 +370,10 @@ export default function WorkforceView({ role, lang }: ViewProps) {
 
                 <div style={{ background: 'var(--brand-slate-100)', padding: '8px 10px', borderRadius: '6px', fontSize: '11.5px', marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                   <div><strong>Dept:</strong> {emp.dept} ({emp.reportingHOD.split(' ')[0]})</div>
-                  <div><strong>SAP:</strong> <span style={{ fontFamily: 'monospace' }}>{emp.sapPernr}</span> • 📞 {emp.phone}</div>
+                  <div><strong>ID:</strong> <span style={{ fontFamily: 'monospace' }}>{emp.sapPernr}</span> • 📞 {emp.phone}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--brand-slate-600)' }}>
                     <MapPin size={11} color="var(--brand-crimson)" />
-                    <span>{emp.assignedSite === 'PLANT_KERANIGANJ' ? 'Keraniganj Refinery' : emp.assignedSite === 'HQ_BARIDHARA' ? 'Baridhara HQ' : 'Chattogram Terminal'}</span>
+                    <span>{emp.assignedSite === 'PLANT_KERANIGANJ' ? 'Keraniganj Plant' : emp.assignedSite === 'HQ_BARIDHARA' ? 'Baridhara HQ' : 'Chattogram Port Depot'}</span>
                   </div>
                 </div>
 
@@ -377,7 +381,11 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                   <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
                     {emp.status === 'offboarded' ? `Exit: ${emp.exitDate}` : `Joined: ${emp.joinDate}`}
                   </span>
-                  {emp.status === 'active' ? (
+                  {emp.id === 'EMP-0001' ? (
+                    <span className="badge gold" style={{ fontSize: '10.5px' }}>
+                      <Shield size={11} /> Executive Office
+                    </span>
+                  ) : emp.status === 'active' ? (
                     <button
                       className="btn-outline-danger"
                       style={{ fontSize: '11px', padding: '5px 12px' }}
@@ -393,7 +401,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                       onClick={() => setSelectedEmployeeForExit(emp)}
                     >
                       <FileText size={12} />
-                      {t('Exit Dossier', 'নথিপত্র', lang)}
+                      {t('Clearance File', 'ছাড়পত্র ফাইল', lang)}
                     </button>
                   )}
                 </div>

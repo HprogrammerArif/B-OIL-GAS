@@ -3,7 +3,9 @@ import './index.css';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import CommandPalette from './components/CommandPalette';
-import { AppRole, AppView, Lang } from './types';
+import { AppRole, AppView, Lang, t } from './types';
+import { useNoticeStore } from './store/noticeStore';
+import { Megaphone, CheckCircle2, X } from 'lucide-react';
 
 // Views
 import LoginPage from './views/LoginPage';
@@ -37,6 +39,8 @@ export default function App() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
+
+  const { activeBroadcast, dismissActiveBroadcast, acknowledgeNotice } = useNoticeStore();
 
   // Sync theme to HTML root element
   useEffect(() => {
@@ -79,8 +83,8 @@ export default function App() {
       const next = prev === 'light' ? 'dark' : 'light';
       showToast(
         next === 'dark'
-          ? (lang === 'en' ? 'Dark Mode activated for refinery control room.' : 'ডার্ক মোড সক্রিয় করা হয়েছে।')
-          : (lang === 'en' ? 'Light Mode restored.' : 'লাইট মোড সক্রিয় করা হয়েছে।'),
+          ? (lang === 'en' ? 'Dark Mode turned on.' : 'ডার্ক মোড চালু করা হয়েছে।')
+          : (lang === 'en' ? 'Light Mode restored.' : 'লাইট মোড চালু করা হয়েছে।'),
         'info'
       );
       return next;
@@ -147,6 +151,102 @@ export default function App() {
           onToggleMobileMenu={() => setIsMobileSidebarOpen((prev) => !prev)}
         />
 
+        {/* Live Company-Wide Announcement Banner */}
+        {activeBroadcast && (
+          <div
+            style={{
+              background: 'linear-gradient(135deg, #881337 0%, #A51C30 60%, #7F1D1D 100%)',
+              color: '#FFFFFF',
+              padding: '10px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '14px',
+              flexWrap: 'wrap',
+              borderBottom: '2px solid var(--brand-gold, #D4AF37)',
+              boxShadow: '0 4px 12px rgba(165, 28, 48, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1 1 320px' }}>
+              <div
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '8px',
+                  background: 'rgba(255,255,255,0.16)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '2px',
+                }}
+              >
+                <Megaphone size={16} color="#FDE047" />
+              </div>
+              <div>
+                <div style={{ fontSize: '12.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ background: '#FDE047', color: '#78350F', padding: '1px 7px', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>
+                    {t('COMPANY ANNOUNCEMENT', 'বিশেষ ঘোষণা', lang)}
+                  </span>
+                  <span>{activeBroadcast.title}</span>
+                </div>
+                <div style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.9)', marginTop: '2px', lineHeight: 1.45 }}>
+                  {activeBroadcast.body} — <strong style={{ color: '#FDE047' }}>{activeBroadcast.author}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {activeBroadcast.requireAck && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    acknowledgeNotice(`NOT-${activeBroadcast.id}`);
+                    dismissActiveBroadcast();
+                    showToast(
+                      t('Announcement acknowledged and saved to Notice Board.', 'ঘোষণাটি পঠিত হিসেবে নিশ্চিত করা হয়েছে।', lang),
+                      'gold'
+                    );
+                  }}
+                  style={{
+                    background: '#FDE047',
+                    color: '#78350F',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    fontSize: '11.5px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <CheckCircle2 size={13} />
+                  <span>{t('Acknowledge', 'পঠিত নিশ্চিত করুন', lang)}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={dismissActiveBroadcast}
+                title={t('Dismiss banner', 'বন্ধ করুন', lang)}
+                style={{
+                  background: 'rgba(255,255,255,0.14)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: '6px',
+                  padding: '5px 8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
         <main className={`page-content${view === 'inner_circle' ? ' no-padding-chat' : ''}`}>
           <div key={view} className="view-transition-wrapper">
             {view === 'dashboard'      && <DashboardView      role={role} lang={lang} onNavigate={setView} />}
@@ -167,7 +267,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* Mobile Enterprise Bottom Tab Navigation Bar */}
+      {/* Mobile Bottom Tab Navigation Bar */}
       <MobileBottomNav
         role={role}
         activeView={view}
@@ -179,7 +279,7 @@ export default function App() {
         onOpenMenu={() => setIsMobileSidebarOpen(true)}
       />
 
-      {/* Global Command Palette */}
+      {/* Global Search & Command Palette */}
       <CommandPalette
         isOpen={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
@@ -188,9 +288,10 @@ export default function App() {
         onToggleTheme={toggleTheme}
         lang={lang}
         currentTheme={theme}
+        role={role}
       />
 
-      {showBroadcast && <BroadcastModal onClose={() => setShowBroadcast(false)} />}
+      {showBroadcast && <BroadcastModal lang={lang} onClose={() => setShowBroadcast(false)} />}
       <ToastManager />
     </div>
   );

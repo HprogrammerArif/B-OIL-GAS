@@ -1,6 +1,6 @@
 import React from 'react';
 import { Lang, t } from '../types';
-import { Printer, Download, X, QrCode, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Printer, Download, QrCode, ShieldCheck } from 'lucide-react';
 import { showToast } from '../App';
 
 export interface DocumentData {
@@ -38,8 +38,8 @@ export default function OfficialDocumentModal({
   const handleDownload = () => {
     showToast(
       t(
-        `PDF Generated: ${docData.docNumber}.pdf (Cryptographically Sealed with 256-bit SHA)`,
-        `পিডিএফ প্রস্তুত: ${docData.docNumber}.pdf (ডিজিটাল সিলমোহর সংযুক্ত)`,
+        `Official PDF Ready: ${docData.docNumber}.pdf (Signed & Stamped)`,
+        `অফিসিয়াল পিডিএফ প্রস্তুত: ${docData.docNumber}.pdf (স্বাক্ষর ও সিলমোহর সংযুক্ত)`,
         lang
       ),
       'gold'
@@ -58,15 +58,14 @@ export default function OfficialDocumentModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldCheck size={18} color="var(--brand-gold)" />
             <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
-              {t('Official Executive Document Viewer & Print Dispatch', 'দাপ্তরিক নথি ও প্রিন্ট ভিউয়ার', lang)}
+              {t('Official Company Document & Print Preview', 'দাপ্তরিক নথি ও প্রিন্ট প্রিভিউ', lang)}
             </h3>
           </div>
           <button className="modal-close" style={{ color: '#fff' }} onClick={onClose}>×</button>
         </div>
 
-        {/* Modal Body: The Printable Sheet */}
+        {/* Printable Sheet */}
         <div className="modal-body" style={{ overflowY: 'auto', padding: '24px', background: '#F1F5F9' }}>
-          {/* Paper Sheet Container */}
           <div
             className="printable-paper"
             style={{
@@ -101,7 +100,7 @@ export default function OfficialDocumentModal({
 
             {/* Letterhead */}
             <div style={{ borderBottom: '2px solid #A51C30', paddingBottom: '16px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div
@@ -125,12 +124,12 @@ export default function OfficialDocumentModal({
                         BASHUNDHARA OIL & GAS COMPANY LTD.
                       </h2>
                       <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'sans-serif' }}>
-                        A Concern of Bashundhara Group • Enterprise Operations
+                        A Concern of Bashundhara Group • Official Record
                       </div>
                     </div>
                   </div>
                   <div style={{ fontSize: '10px', color: '#94A3B8', marginTop: '6px', fontFamily: 'sans-serif' }}>
-                    Plot-3, Block-G, Umme Kulsum Road, Baridhara R/A, Dhaka-1229 • Keraniganj Bitumen Refinery Complex
+                    Plot-3, Block-G, Umme Kulsum Road, Baridhara R/A, Dhaka-1229 • Keraniganj Plant
                   </div>
                 </div>
 
@@ -139,14 +138,14 @@ export default function OfficialDocumentModal({
                   <div style={{ fontSize: '11px', color: '#64748B' }}>Date: {docData.date}</div>
                   {docData.sapReference && (
                     <div style={{ fontSize: '10px', color: '#0369A1', fontFamily: 'monospace', marginTop: '2px' }}>
-                      SAP: {docData.sapReference}
+                      Ref: {docData.sapReference}
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Document Subject */}
+            {/* Subject */}
             <div style={{ fontFamily: 'sans-serif', marginBottom: '20px' }}>
               <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: '#64748B' }}>
                 Department: {docData.department}
@@ -156,21 +155,21 @@ export default function OfficialDocumentModal({
               </div>
               {docData.amountOrValue && (
                 <div style={{ fontSize: '12px', color: '#A51C30', fontWeight: 700, marginTop: '4px', paddingLeft: '10px' }}>
-                  Financial Consideration: {docData.amountOrValue}
+                  Approved Amount / Value: {docData.amountOrValue}
                 </div>
               )}
             </div>
 
-            {/* Body Paragraphs */}
+            {/* Paragraphs */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
               {docData.paragraphs.map((para, idx) => (
                 <div key={idx} style={{ fontSize: '12.5px', lineHeight: '1.7', color: '#1E293B', textAlign: 'justify' }}>
                   <strong>{para.label}:</strong> {para.text}
-                  <div style={{ marginTop: '4px', fontSize: '10.5px', color: '#64748B', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'space-between' }}>
+                  <div style={{ marginTop: '4px', fontSize: '10.5px', color: '#64748B', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
                     <span>— {para.signedBy}</span>
                     {para.hash && (
                       <span style={{ fontFamily: 'monospace', fontSize: '9.5px', color: '#059669' }}>
-                        ✓ Hash: {para.hash.slice(0, 24)}...
+                        ✓ Stamp Code: {para.hash.slice(0, 26)}
                       </span>
                     )}
                   </div>
@@ -179,15 +178,14 @@ export default function OfficialDocumentModal({
             </div>
 
             {/* Seal & Authorization Box */}
-            <div style={{ borderTop: '1px dashed #CBD5E1', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontFamily: 'sans-serif' }}>
+            <div style={{ borderTop: '1px dashed #CBD5E1', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontFamily: 'sans-serif', flexWrap: 'wrap', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <QrCode size={64} color="#0F172A" />
                 <div style={{ fontSize: '9.5px', color: '#64748B', maxWidth: '240px', lineHeight: 1.4 }}>
-                  Scan QR with BOGCL Gate ALPR or Mobile OneOps to verify cryptographic authenticity from central ledger.
+                  Scan this QR code at any company gate or office desk to verify this official document.
                 </div>
               </div>
 
-              {/* Official Stamp */}
               <div style={{ textAlign: 'center' }}>
                 <div
                   style={{
@@ -204,7 +202,7 @@ export default function OfficialDocumentModal({
                     marginBottom: '8px',
                   }}
                 >
-                  ★ BOGCL AUTHORIZED ★
+                  ★ BOGCL APPROVED ★
                 </div>
                 <div style={{ fontSize: '12px', fontWeight: 800 }}>{docData.authorizedBy}</div>
                 <div style={{ fontSize: '10.5px', color: '#64748B' }}>{docData.authorizerRole}</div>
@@ -213,10 +211,10 @@ export default function OfficialDocumentModal({
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Footer Actions */}
+        <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <span style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-            ✓ Ready for ISO Audit Archive & Statutory Submission
+            ✓ {t('Verified Official Company Record', 'যাচাইকৃত প্রাতিষ্ঠানিক নথি', lang)}
           </span>
 
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -226,7 +224,7 @@ export default function OfficialDocumentModal({
             </button>
             <button className="btn-primary" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Printer size={14} />
-              <span>{t('Print Official Memo', 'অফিসিয়াল মেমো প্রিন্ট', lang)}</span>
+              <span>{t('Print Document', 'নথি প্রিন্ট করুন', lang)}</span>
             </button>
           </div>
         </div>

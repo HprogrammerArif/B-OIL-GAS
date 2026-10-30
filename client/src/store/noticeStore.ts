@@ -35,7 +35,6 @@ class NoticeStore {
     return this.activeBroadcast;
   }
 
-  // 1. Add standard formal circular or departmental notice
   addNotice(notice: NoticeItem): NoticeItem {
     const newNotice: NoticeItem = {
       ...notice,
@@ -47,8 +46,6 @@ class NoticeStore {
     return newNotice;
   }
 
-  // 2. Add an Executive Broadcast:
-  // Immediately archives to the Notice List as top pinned priority AND sets active broadcast
   addBroadcast(data: {
     title: string;
     body: string;
@@ -75,26 +72,25 @@ class NoticeStore {
 
     const archivedNotice: NoticeItem = {
       id: `NOT-${id}`,
-      title: `[BROADCAST] ${data.title}`,
-      title_bn: `[জরুরি সম্প্রচার] ${data.title}`,
-      tag: '📢 EXECUTIVE BROADCAST',
+      title: `[ANNOUNCEMENT] ${data.title}`,
+      title_bn: `[বিশেষ ঘোষণা] ${data.title}`,
+      tag: '📢 COMPANY ANNOUNCEMENT',
       category: 'executive',
       priority: 'critical',
       date: timestamp,
       author,
       authorRole,
-      targetAudience: 'Entire Group (All 847 Employees across 6 Locations)',
+      targetAudience: 'All Staff Across Head Office, Keraniganj Plant & Chattogram Depot',
       body: data.body,
       body_bn: data.body,
       pinned: true,
       read: false,
       requiresAck: data.requireAck,
       acknowledgedCount: 1,
-      totalRecipients: 847,
-      referenceNo: `BOGCL/EXEC/BC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      totalRecipients: 788,
+      referenceNo: `BOGCL/NOTICE/2026-${Math.floor(100 + Math.random() * 900)}`,
     };
 
-    // Prepend to top of notice board
     this.notices = [archivedNotice, ...this.notices];
     this.activeBroadcast = broadcastPayload;
     this.notify();

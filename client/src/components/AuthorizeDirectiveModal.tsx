@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Crown, CheckCircle2, ShieldCheck, Send, FileText, Clock, Sparkles } from 'lucide-react';
-import { Lang, t } from '../types';
+import { X, Crown, CheckCircle2, ShieldCheck, Clock, Sparkles } from 'lucide-react';
+import { AppRole, Lang, ROLE_META, t } from '../types';
 import { DepartmentApprovalStep } from '../store/approvalStore';
 
 export interface AuthorizeData {
@@ -22,29 +22,31 @@ interface AuthorizeDirectiveModalProps {
   amount?: string | number;
   sapDocRef?: string;
   approvalTrail?: DepartmentApprovalStep[];
+  role?: AppRole;
   roleTitle?: string;
+  signerName?: string;
 }
 
 const DIRECTIVE_PRESETS = [
   {
-    label: 'Standard Executive Sanction',
-    labelBn: 'প্রমিত অনুমোদন ও অর্থছাড়',
-    text: 'Approved as recommended in preceding department paragraphs. Scope and budget verified compliant with BOGCL standard operating governance. Expedite execution.',
+    label: 'Standard Approval',
+    labelBn: 'সাধারণ অনুমোদন',
+    text: 'Approved as recommended by the reviewing department. Budget and purpose checked — please proceed as per company rules.',
   },
   {
-    label: '5% Retention Warranty Clause',
+    label: '5% Warranty Hold',
     labelBn: '৫% ওয়ারেন্টি জামানত শর্ত',
-    text: 'Approved subject to standard 5% advance retention warranty for 90 days following successful plant commissioning and engineer handover test.',
+    text: 'Approved subject to keeping 5% security retention for 90 days after successful delivery, installation, and quality check.',
   },
   {
-    label: 'Immediate SAP Release',
-    labelBn: 'জরুরি এসএপি অর্থছাড়',
-    text: 'Executive clearance granted. Forwarded to SAP S/4HANA for immediate real-time electronic disbursement via BEFTN corporate banking gateway.',
+    label: 'Release Bank Payment',
+    labelBn: 'ব্যাংক পেমেন্ট ছাড়ের অনুমোদন',
+    text: 'Approved for immediate payment release through Finance & Accounts via official company bank transfer.',
   },
   {
-    label: 'Statutory VAT Compliance',
-    labelBn: 'সংবিধিবদ্ধ ভ্যাট যাচাই শর্ত',
-    text: 'Sanctioned under delegated authority. Accounts department must verify original BIN Mushak-6.3 tax invoice and TDS deduction prior to release.',
+    label: 'Check VAT Receipt Before Payment',
+    labelBn: 'পেমেন্টের পূর্বে ভ্যাট রসিদ যাচাই',
+    text: 'Approved. Accounts team please verify the original vendor VAT receipt and deduct applicable source tax before releasing payment.',
   },
 ];
 
@@ -60,29 +62,52 @@ export default function AuthorizeDirectiveModal({
   amount,
   sapDocRef,
   approvalTrail,
-  roleTitle = 'Chairman & Managing Director',
+  role,
+  roleTitle,
+  signerName,
 }: AuthorizeDirectiveModalProps) {
   const [directive, setDirective] = useState(DIRECTIVE_PRESETS[0].text);
   const [notifySms, setNotifySms] = useState(true);
   const [showTrailDetails, setShowTrailDetails] = useState(true);
 
+  useEffect(() => {
+    if (isOpen) {
+      setDirective(DIRECTIVE_PRESETS[0].text);
+    }
+  }, [isOpen, itemId]);
+
   if (!isOpen) return null;
   if (typeof document === 'undefined') return null;
 
-  const handlePresetClick = (text: string) => {
-    setDirective(text);
-  };
+  const resolvedMeta = role ? ROLE_META[role] : undefined;
+  const displayTitle =
+    roleTitle ||
+    (resolvedMeta ? t(resolvedMeta.label, resolvedMeta.labelBn, lang) : t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang));
+
+  const displaySigner =
+    signerName ||
+    (resolvedMeta
+      ? t(resolvedMeta.name, resolvedMeta.nameBn, lang)
+      : roleTitle && roleTitle.toLowerCase().includes('finance')
+      ? 'Farida Begum'
+      : roleTitle && roleTitle.toLowerCase().includes('hr')
+      ? 'Sayeda Afroza Sultana'
+      : roleTitle && roleTitle.toLowerCase().includes('plant')
+      ? 'Engr. Md. Harunur Rashid'
+      : 'Ahmed Akbar Sobhan');
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const hash =
-      'SHA256: ' +
-      Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const stampCode =
+      'APPROVED-' +
+      new Date().getFullYear() +
+      '-' +
+      Math.floor(100000 + Math.random() * 900000);
 
     onConfirm({
       directive: directive.trim() || DIRECTIVE_PRESETS[0].text,
       notifySms,
-      signatureHash: hash,
+      signatureHash: stampCode,
     });
   };
 
@@ -160,10 +185,10 @@ export default function AuthorizeDirectiveModal({
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
-                {t('Executive Sanction & Authorization Directive', 'নির্বাহী অনুমোদন ও বিশেষ নির্দেশনা প্রদান', lang)}
+                {t('Confirm Approval & Add Note', 'অনুমোদন নিশ্চিত করুন ও নির্দেশনা যোগ করুন', lang)}
               </h3>
               <div style={{ fontSize: '11.5px', color: '#CBD5E1', marginTop: '2px' }}>
-                {t('Review prior department endorsements, enter directive, and stamp final seal', 'বিভাগীয় সুপারিশ পর্যালোচনা ও চূড়ান্ত অনুমোদন নির্দেশিকা', lang)}
+                {t('Review previous checks, add any approval note, and apply your official stamp', 'পূর্ববর্তী সুপারিশ দেখে চূড়ান্ত অনুমোদন নিশ্চিত করুন', lang)}
               </div>
             </div>
           </div>
@@ -185,8 +210,7 @@ export default function AuthorizeDirectiveModal({
         {/* Modal Body */}
         <form onSubmit={handleFormSubmit} style={{ margin: 0, display: 'flex', flexDirection: 'column', flex: '1 1 auto', overflow: 'hidden' }}>
           <div className="modal-body" style={{ padding: '20px', overflowY: 'auto', flex: '1 1 auto', maxHeight: 'calc(94vh - 135px)' }}>
-            
-            {/* Target Dossier Summary Card */}
+            {/* Summary Card */}
             <div
               style={{
                 background: '#F8FAFC',
@@ -202,9 +226,9 @@ export default function AuthorizeDirectiveModal({
                     <span style={{ fontSize: '11px', fontWeight: 800, color: '#4338CA', fontFamily: 'monospace' }}>
                       {itemId}
                     </span>
-                    {sapDocRef && (
+                    {sapDocRef && sapDocRef !== itemId && (
                       <span className="badge info" style={{ fontSize: '10px', padding: '1px 6px' }}>
-                        SAP: {sapDocRef}
+                        {t('Ref:', 'রেফারেন্স:', lang)} {sapDocRef}
                       </span>
                     )}
                   </div>
@@ -221,21 +245,29 @@ export default function AuthorizeDirectiveModal({
 
               {(requesterName || department) && (
                 <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '6px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-                  {requesterName && <span>Initiator: <strong style={{ color: '#1E293B' }}>{requesterName}</strong></span>}
-                  {department && <span>Dept: <strong style={{ color: '#1E293B' }}>{department}</strong></span>}
+                  {requesterName && (
+                    <span>
+                      {t('Submitted By:', 'আবেদনকারী:', lang)} <strong style={{ color: '#1E293B' }}>{requesterName}</strong>
+                    </span>
+                  )}
+                  {department && (
+                    <span>
+                      {t('Department:', 'বিভাগ:', lang)} <strong style={{ color: '#1E293B' }}>{department}</strong>
+                    </span>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Departmental Endorsement Trail (Who already approved & why) */}
+            {/* Prior Endorsements */}
             {approvalTrail && approvalTrail.length > 0 && (
               <div style={{ marginBottom: '18px', background: '#F1F5F9', borderRadius: '10px', padding: '12px 14px', border: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#1E293B' }}>
                     <ShieldCheck size={16} color="#059669" />
-                    <span>{t('Departmental Endorsements & Audit Trail', 'বিভাগীয় সুপারিশ ও অনুমোদন খতিয়ান', lang)}</span>
+                    <span>{t('Previous Reviews & Recommendations', 'পূর্ববর্তী যাচাই ও সুপারিশ', lang)}</span>
                     <span className="badge green" style={{ fontSize: '10px', padding: '1px 6px' }}>
-                      {approvalTrail.filter(s => s.status === 'completed').length} {t('Completed', 'অনুমোদিত', lang)}
+                      {approvalTrail.filter((s) => s.status === 'completed').length} {t('Checked', 'যাচাইকৃত', lang)}
                     </span>
                   </div>
                   <button
@@ -243,7 +275,7 @@ export default function AuthorizeDirectiveModal({
                     onClick={() => setShowTrailDetails(!showTrailDetails)}
                     style={{ background: 'none', border: 'none', color: '#4338CA', fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                   >
-                    {showTrailDetails ? t('Hide Notes', 'সংক্ষিপ্ত করুন', lang) : t('View Notes', 'বিস্তারিত দেখুন', lang)}
+                    {showTrailDetails ? t('Hide Details', 'সংক্ষিপ্ত করুন', lang) : t('Show Details', 'বিস্তারিত দেখুন', lang)}
                   </button>
                 </div>
 
@@ -260,13 +292,13 @@ export default function AuthorizeDirectiveModal({
                           fontSize: '11.5px',
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>
                               ✓
                             </span>
                             <strong style={{ color: '#0F172A', fontSize: '12px' }}>{step.officerName}</strong>
-                            <span style={{ color: '#64748B' }}>({step.roleName} · {step.department})</span>
+                            <span style={{ color: '#64748B' }}>({step.roleName})</span>
                           </div>
                           <span style={{ fontSize: '10.5px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '3px' }}>
                             <Clock size={11} /> {step.timestamp}
@@ -282,12 +314,12 @@ export default function AuthorizeDirectiveModal({
               </div>
             )}
 
-            {/* Quick Presets Ribbon */}
+            {/* Quick Presets */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                 <Sparkles size={14} color="#D97706" />
                 <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
-                  {t('1-Click Executive Directive Presets:', 'দ্রুত অনুমোদন নির্দেশিকা নির্বাচন:', lang)}
+                  {t('Quick Approval Note Templates:', 'দ্রুত অনুমোদন নোট নির্বাচন করুন:', lang)}
                 </label>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -297,7 +329,7 @@ export default function AuthorizeDirectiveModal({
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handlePresetClick(p.text)}
+                      onClick={() => setDirective(p.text)}
                       style={{
                         fontSize: '11px',
                         padding: '6px 11px',
@@ -318,10 +350,10 @@ export default function AuthorizeDirectiveModal({
               </div>
             </div>
 
-            {/* Field: Executive Directive & Sanction Remarks */}
+            {/* Approval Remarks */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>
-                {t('Executive Directive & Sanction Remarks (Why & Under What Terms Authorized?):', 'নির্বাহী নির্দেশনা ও অনুমোদনের শর্তাবলী (কী নির্দেশনাসহ অনুমোদিত হচ্ছে?):', lang)}
+                {t('Approval Note / Instructions:', 'অনুমোদন নোট বা বিশেষ নির্দেশনা:', lang)}
               </label>
               <textarea
                 rows={3}
@@ -341,14 +373,14 @@ export default function AuthorizeDirectiveModal({
                 value={directive}
                 onChange={(e) => setDirective(e.target.value)}
                 placeholder={t(
-                  'Enter official executive sanction instructions, vendor payment warranty terms, or special operational guidelines...',
-                  'অফিসিয়াল অনুমোদন নির্দেশনা বা বিশেষ শর্তাবলী লিখুন...',
+                  'Write your approval instructions or payment conditions...',
+                  'আপনার অনুমোদন নোট বা পেমেন্ট নির্দেশনা লিখুন...',
                   lang
                 )}
               />
             </div>
 
-            {/* Cryptographic Digital Signature Preview */}
+            {/* Dynamic Signer Stamp Preview */}
             <div
               style={{
                 background: '#F0FDF4',
@@ -364,20 +396,33 @@ export default function AuthorizeDirectiveModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '12px' }}>
-                  👑
+                <div
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    background: resolvedMeta?.avatarColor || '#166534',
+                    color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '10.5px',
+                  }}
+                >
+                  {resolvedMeta?.initials || '✓'}
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: '#166534' }}>
-                    {roleTitle}: Ahmed Akbar Sobhan
+                    {displaySigner} — {displayTitle}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#15803D' }}>
-                    Cryptographic SHA-256 Digital Signature Token Attached Automatically
+                  <div style={{ fontSize: '10.5px', color: '#15803D' }}>
+                    {t('Official Company Digital Approval Stamp Attached', 'অফিসিয়াল ডিজিটাল অনুমোদন সিল সংযুক্ত হবে', lang)}
                   </div>
                 </div>
               </div>
               <span className="badge green" style={{ fontSize: '10.5px', fontWeight: 800 }}>
-                ✓ Legally Binding E-Sign
+                ✓ {t('Verified Signatory', 'অনুমোদিত স্বাক্ষরকারী', lang)}
               </span>
             </div>
 
@@ -391,7 +436,7 @@ export default function AuthorizeDirectiveModal({
                 style={{ cursor: 'pointer' }}
               />
               <label htmlFor="notifyAuthSms" style={{ cursor: 'pointer' }}>
-                {t('Dispatch executive clearance SMS and push alert to Initiator, Plant GM, and CFO', 'আবেদনকারী, প্ল্যান্ট জিএম ও অর্থ বিভাগকে জরুরি অনুমোদন বিজ্ঞপ্তি পাঠান', lang)}
+                {t('Notify requester and Finance team immediately upon approval', 'অনুমোদনের সাথে সাথে আবেদনকারী ও অর্থ বিভাগকে বিজ্ঞপ্তি পাঠান', lang)}
               </label>
             </div>
           </div>
@@ -434,7 +479,7 @@ export default function AuthorizeDirectiveModal({
               }}
             >
               <CheckCircle2 size={16} />
-              {t('Confirm & Authorize Sanction', 'অনুমোদন নিশ্চিত করুন', lang)}
+              {t('Approve Now', 'অনুমোদন নিশ্চিত করুন', lang)}
             </button>
           </div>
         </form>

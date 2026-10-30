@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
 import { showToast } from '../App';
+import { useOperationsStore } from '../store/operationsStore';
 import {
   Package, CheckCircle, Clock, MapPin, QrCode, ShieldCheck,
   AlertTriangle, ArrowRight, UserCheck, Search, Plus, Lock,
@@ -489,8 +490,8 @@ export default function ParcelView({ role, lang }: ViewProps) {
   const currentUserDept = currentUser.dept;
   const isStaff = role === 'employee';
 
-  // State
-  const [parcels, setParcels] = useState<ParcelItem[]>(INITIAL_PARCELS);
+  // Persistent Operations Store State
+  const { parcels, setParcels, advanceParcelStage } = useOperationsStore();
   const [activeTab, setActiveTab] = useState<'all' | 'inbound' | 'outbound' | 'transit' | 'delivered' | 'returned'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'normal'>('all');
@@ -499,7 +500,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
   const [cockpitView, setCockpitView] = useState<'map' | 'timeline' | 'details'>('map');
 
   // Scope Toggle: Staff is strictly 'personal'
-  const [scopeMode, setScopeMode] = useState<'personal' | 'master'>(isStaff ? 'personal' : 'personal');
+  const [scopeMode, setScopeMode] = useState<'personal' | 'master'>(isStaff ? 'personal' : 'master');
 
   // Modals
   const [showNewModal, setShowNewModal] = useState(false);
@@ -538,7 +539,8 @@ export default function ParcelView({ role, lang }: ViewProps) {
     if (isStaff || scopeMode === 'personal') {
       return parcels.filter(p =>
         p.sender.toLowerCase().includes(currentUserName.toLowerCase()) ||
-        p.receiver.toLowerCase().includes(currentUserName.toLowerCase())
+        p.receiver.toLowerCase().includes(currentUserName.toLowerCase()) ||
+        (isStaff && (p.sender.toLowerCase().includes('tanvir') || p.receiver.toLowerCase().includes('tanvir')))
       );
     }
     return parcels;
@@ -556,29 +558,37 @@ export default function ParcelView({ role, lang }: ViewProps) {
   // Computed Statistics
   // ─────────────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const userParcels = parcels.filter(p =>
-      p.sender.toLowerCase().includes(currentUserName.toLowerCase()) ||
-      p.receiver.toLowerCase().includes(currentUserName.toLowerCase())
-    );
+    const isMasterScope = !isStaff && scopeMode === 'master';
+    const pool = isMasterScope
+      ? parcels
+      : parcels.filter(p =>
+          p.sender.toLowerCase().includes(currentUserName.toLowerCase()) ||
+          p.receiver.toLowerCase().includes(currentUserName.toLowerCase()) ||
+          (isStaff && (p.sender.toLowerCase().includes('tanvir') || p.receiver.toLowerCase().includes('tanvir')))
+        );
 
-    const receivedAll = userParcels.filter(p => p.receiver.toLowerCase().includes(currentUserName.toLowerCase()));
+    const receivedAll = isMasterScope
+      ? pool
+      : pool.filter(p => p.receiver.toLowerCase().includes(currentUserName.toLowerCase()) || (isStaff && p.receiver.toLowerCase().includes('tanvir')));
     const receivedDelivered = receivedAll.filter(p => p.status === 'delivered');
     const receivedPending = receivedAll.filter(p => p.status !== 'delivered' && p.status !== 'returned');
 
-    const sentAll = userParcels.filter(p => p.sender.toLowerCase().includes(currentUserName.toLowerCase()));
+    const sentAll = isMasterScope
+      ? pool
+      : pool.filter(p => p.sender.toLowerCase().includes(currentUserName.toLowerCase()) || (isStaff && p.sender.toLowerCase().includes('tanvir')));
     const sentDelivered = sentAll.filter(p => p.status === 'delivered');
     const sentInTransit = sentAll.filter(p => p.status === 'in_transit' || p.status === 'dispatched');
 
-    const activeInTransit = userParcels.filter(p =>
+    const activeInTransit = pool.filter(p =>
       p.status === 'in_transit' || p.status === 'at_gate'
     );
 
-    const actionRequired = userParcels.filter(p =>
-      (p.receiver.toLowerCase().includes(currentUserName.toLowerCase()) && p.currentStage === 4 && p.status !== 'returned') ||
+    const actionRequired = pool.filter(p =>
+      (p.currentStage === 4 && p.status !== 'returned') ||
       p.tamperStatus === 'flagged'
     );
 
-    const returnsAndIssues = userParcels.filter(p =>
+    const returnsAndIssues = pool.filter(p =>
       p.status === 'returned' || p.tamperStatus === 'flagged'
     );
 
@@ -593,7 +603,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
       actionRequiredCount: actionRequired.length,
       returnsCount: returnsAndIssues.length,
     };
-  }, [parcels, currentUserName]);
+  }, [parcels, currentUserName, isStaff, scopeMode]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Filtered List
@@ -1231,7 +1241,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 {t('Consignment Feed', 'চালান তালিকা', lang)} ({displayedParcels.length})
               </span>
               <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                {isStaff ? 'Tanvir Ahmed Personal' : 'Enterprise View'}
+                {isStaff ? `${currentUserName} (${t('Personal', 'ব্যক্তিগত', lang)})` : t('Enterprise Master View', 'সর্বজনীন মাস্টার ভিউ', lang)}
               </span>
             </div>
 
@@ -1380,7 +1390,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#CBD5E1' }}>
                       <span>Seal: <strong>{selectedParcel.sealNo}</strong></span>
                       <span>•</span>
-                      <span style={{ color: '#34D399', fontWeight: 700 }}>✓ SHA-256 Validated</span>
+                      <span style={{ color: '#34D399', fontWeight: 700 }}>✓ {t('Tamper-Check Validated', 'নিরাপত্তা সিল যাচাইকৃত', lang)}</span>
                     </div>
                   </div>
 
@@ -1835,7 +1845,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   {selectedParcel.sealNo}
                 </div>
                 <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  Waybill: <strong>{selectedParcel.trackingNo}</strong> • SHA-256: <span style={{ fontFamily: 'monospace', color: '#059669' }}>9a8f...21b4 (VALID)</span>
+                  Waybill: <strong>{selectedParcel.trackingNo}</strong> • Security Seal: <span style={{ color: '#059669', fontWeight: 700 }}>✓ Verified Intact</span>
                 </div>
               </div>
 
@@ -2104,7 +2114,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <div><strong>Security Level:</strong> {selectedParcel.urgency.toUpperCase()}</div>
                 </div>
                 <div style={{ marginTop: '6px', fontSize: '11px', color: '#64748B' }}>
-                  Cryptographic Integrity Verification: <span style={{ color: '#059669', fontWeight: 700 }}>● SHA-256 Validated</span>
+                  {t('Digital Custody Verification:', 'ডিজিটাল কাস্টডি যাচাই:', lang)} <span style={{ color: '#059669', fontWeight: 700 }}>● {t('Verified Intact', 'অক্ষত ও সুরক্ষিত', lang)}</span>
                 </div>
               </div>
 
@@ -2315,7 +2325,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <option value="qc_sample">Refinery Lab Chemical & Bitumen Samples</option>
                     <option value="refinery_spares">Critical Spare Parts & Instrumentation</option>
                     <option value="tender_bid">Sealed Tender Bids & RHD Proposals</option>
-                    <option value="it_hardware">IT Hardware & Cryptographic Tokens</option>
+                    <option value="it_hardware">IT Hardware & Secure Keycards</option>
                   </select>
                 </div>
 

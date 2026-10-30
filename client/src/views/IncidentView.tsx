@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ViewProps, t } from '../types';
+import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../App';
+import { useOperationsStore, IncidentItem } from '../store/operationsStore';
 import {
   AlertTriangle, ShieldAlert, CheckCircle, Clock, Flame,
   FileText, Plus, Eye, Zap, ShieldCheck, Activity, Camera,
@@ -8,121 +9,9 @@ import {
   Check, ArrowRight, UserCheck, AlertOctagon, Send
 } from 'lucide-react';
 
-interface IncidentItem {
-  id: string;
-  incNo: string;
-  title: string;
-  titleBn: string;
-  category: 'spill' | 'pressure' | 'fire' | 'near_miss' | 'electrical';
-  level: 1 | 2 | 3 | 4 | 5;
-  location: string;
-  reportedBy: string;
-  date: string;
-  rootCause: string;
-  capaAction: string;
-  capaOwner: string;
-  capaStatus: 'open' | 'in_progress' | 'closed';
-  statutoryReportable: boolean; // DoE / Explosives report
-  fiveWhys?: {
-    why1: string;
-    why2: string;
-    why3: string;
-    why4: string;
-    why5: string;
-    fishboneCategory: 'Machine' | 'Method' | 'Material' | 'Man' | 'Measurement' | 'Environment';
-  };
-  evidenceAttached?: boolean;
-}
-
-const INITIAL_INCIDENTS: IncidentItem[] = [
-  {
-    id: 'INC-01',
-    incNo: 'BOGCL-HSE-2026-041',
-    title: 'Minor Bitumen Residue Weepage at Tank #TK-201 Bottom Flange',
-    titleBn: 'ট্যাংক #TK-201 এর নিচের ফ্ল্যাঞ্জে সামান্য বিটুমিন নিঃসরণ',
-    category: 'spill',
-    level: 3,
-    location: 'Tank Farm Zone-B, Keraniganj Plant',
-    reportedBy: 'Engr. Tariq Ahmed (Maintenance)',
-    date: '15 Oct 2026, 11:20 AM',
-    rootCause: 'High-temperature thermal expansion caused gasket elasticity degradation on 4-inch drain valve.',
-    capaAction: 'Isolate line, drain remnant asphalt, replace with spiral-wound graphite gasket and torque to 180 Nm.',
-    capaOwner: 'Maintenance Division',
-    capaStatus: 'in_progress',
-    statutoryReportable: true,
-    evidenceAttached: true,
-    fiveWhys: {
-      why1: 'Why did bitumen seep from flange? Gasket seal failed to maintain compression.',
-      why2: 'Why did the gasket fail? Compressed fiber material hardened under 180°C continuous asphalt holding.',
-      why3: 'Why was that material used? Procurement substitute installed during previous turnaround.',
-      why4: 'Why was substitute installed without MOC? Urgent stockout forced local requisition.',
-      why5: 'Root Cause: Management of Change (MOC) process bypassed without chemical compatibility sign-off.',
-      fishboneCategory: 'Material',
-    },
-  },
-  {
-    id: 'INC-02',
-    incNo: 'BOGCL-HSE-2026-039',
-    title: 'Near-Miss: Contractor Scaffold Clamps Unsecured Near Gas Flare Stack',
-    titleBn: 'নিয়ার-মিস: গ্যাস ফ্লেয়ার স্ট্যাকের কাছে অসংরক্ষিত মাচা',
-    category: 'near_miss',
-    level: 2,
-    location: 'Flare Header Elevation +14m',
-    reportedBy: 'Farhana Kabir (EHS Lead)',
-    date: '13 Oct 2026, 03:45 PM',
-    rootCause: 'Third-party scaffolding vendor skipped daily pre-shift tag inspection checklist.',
-    capaAction: 'Issued work-stop notice. Suspended contractor pass for 3 days until full retraining is completed.',
-    capaOwner: 'Safety Inspection Team',
-    capaStatus: 'closed',
-    statutoryReportable: false,
-    evidenceAttached: true,
-    fiveWhys: {
-      why1: 'Why were clamps loose? Scaffolder did not use calibrated torque wrench.',
-      why2: 'Why was wrench not used? Tool was left in contractor truck outside gate.',
-      why3: 'Why did supervisor allow work to proceed? Shift supervisor rushed to beat afternoon rain.',
-      why4: 'Why was there schedule pressure? Flare stack inspection window was restricted to 4 hours.',
-      why5: 'Root Cause: Contractor supervisory oversight lacking daily Permit-to-Work (PTW) checklist audit.',
-      fishboneCategory: 'Method',
-    },
-  },
-  {
-    id: 'INC-03',
-    incNo: 'BOGCL-HSE-2026-036',
-    title: 'Electrical Trip on Emulsion Agitator Motor #M-04 during Heavy Surge',
-    titleBn: 'ইমালসিফায়ার মিক্সার মোটর #M-04 এ বৈদ্যুতিক ট্রিপ',
-    category: 'electrical',
-    level: 2,
-    location: 'Chemical Blending Unit #1',
-    reportedBy: 'Mahbub Alam (Electrical Engr)',
-    date: '10 Oct 2026, 06:10 PM',
-    rootCause: 'Substation relay calibration drift caused premature earth leakage trip.',
-    capaAction: 'Relay recalibrated and insulation megger test recorded 120 M-ohms (Passed).',
-    capaOwner: 'Electrical Department',
-    capaStatus: 'closed',
-    statutoryReportable: false,
-    evidenceAttached: false,
-  },
-  {
-    id: 'INC-04',
-    incNo: 'BOGCL-HSE-2026-031',
-    title: 'High Pressure Alarm Triggered on Hydro-Testing Bypass Line',
-    titleBn: 'হাইড্রো-টেস্টিং বাইপাস পাইপলাইনে অতিরিক্ত চাপ সংকেত',
-    category: 'pressure',
-    level: 4,
-    location: 'Hydro-Testing Bay #2',
-    reportedBy: 'Dr. Rafiqul Huq (QC Head)',
-    date: '06 Oct 2026, 02:15 PM',
-    rootCause: 'Manual throttling valve jammed due to bituminous slurry buildup.',
-    capaAction: 'Automatic safety pressure-relief interlock installed with SCADA audio buzzer.',
-    capaOwner: 'Plant GM & Automation Team',
-    capaStatus: 'closed',
-    statutoryReportable: true,
-    evidenceAttached: true,
-  },
-];
-
 export default function IncidentView({ role, lang }: ViewProps) {
-  const [incidents, setIncidents] = useState<IncidentItem[]>(INITIAL_INCIDENTS);
+  const { incidents, setIncidents, advanceIncidentStatus } = useOperationsStore();
+  const currentPersona = ROLE_META[role] || ROLE_META.employee;
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'spill' | 'pressure' | 'near_miss' | 'critical'>('all');
   
   // Modals
@@ -144,7 +33,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
   const [rcaWhy3, setRcaWhy3] = useState('');
   const [rcaWhy4, setRcaWhy4] = useState('');
   const [rcaWhy5, setRcaWhy5] = useState('');
-  const [rcaCategory, setRcaCategory] = useState<'Machine' | 'Method' | 'Material' | 'Man' | 'Measurement' | 'Environment'>('Machine');
+  const [rcaCategory, setRcaCategory] = useState<'Equipment' | 'Procedure' | 'Material' | 'Staffing' | 'Inspection' | 'Weather'>('Equipment');
 
   const openRcaModal = (inc: IncidentItem) => {
     setSelectedRcaIncident(inc);
@@ -153,7 +42,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
     setRcaWhy3(inc.fiveWhys?.why3 || '');
     setRcaWhy4(inc.fiveWhys?.why4 || '');
     setRcaWhy5(inc.fiveWhys?.why5 || '');
-    setRcaCategory(inc.fiveWhys?.fishboneCategory || 'Machine');
+    setRcaCategory(inc.fiveWhys?.fishboneCategory || 'Equipment');
   };
 
   const handleSaveRca = () => {
@@ -197,8 +86,8 @@ export default function IncidentView({ role, lang }: ViewProps) {
       category: formCategory,
       level: formLevel,
       location: formLocation,
-      reportedBy: role === 'plant_gm' ? 'Engr. Harunur Rashid (GM)' : 'Tanvir Ahmed (Staff)',
-      date: '17 Oct 2026, Just Now',
+      reportedBy: `${currentPersona.name} (${currentPersona.label})`,
+      date: `${SYSTEM_TODAY}, Just Now`,
       rootCause: 'Under active root-cause investigation by Plant EHS team.',
       capaAction: formDescription,
       capaOwner: 'EHS Investigation Committee',
@@ -228,7 +117,7 @@ export default function IncidentView({ role, lang }: ViewProps) {
             {t('EHS & Plant Incident Management Cockpit', 'পরিবেশ, স্বাস্থ্য ও নিরাপত্তা (ইএইচএস) ইনসিডেন্ট ককপিট', lang)}
           </h2>
           <p className="text-muted">
-            {t('Zero-Harm Refinery Philosophy • 5x5 Petroleum Risk Matrix • 5-Whys RCA & Statutory Dossier Generator', 'শূন্য দুর্ঘটনা দর্শন • ৫x৫ পেট্রোলিয়াম ঝুঁকি ম্যাট্রিক্স • ৫-হোয়াইজ আরসিএ ও সরকারি ডসিয়ার', lang)}
+            {t('Zero-Harm Safety Commitment • Petroleum Risk Matrix • Root Cause Analysis & Statutory Reports', 'শূন্য দুর্ঘটনা দর্শন • ঝুঁকি ব্যবস্থাপনা • কারণ অনুসন্ধান ও সরকারি নিরাপত্তা প্রতিবেদন', lang)}
           </p>
         </div>
         <div className="flex-gap">
@@ -519,9 +408,9 @@ export default function IncidentView({ role, lang }: ViewProps) {
 
               {/* Fishbone Category Selector */}
               <div className="form-group mb-3">
-                <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Ishikawa / Fishbone Primary Factor', 'ইশিকাওয়া কারণ শ্রেণী', lang)}</label>
+                <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Primary Cause Factor', 'মূল কারণ শ্রেণী', lang)}</label>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {(['Machine', 'Method', 'Material', 'Man', 'Measurement', 'Environment'] as const).map(cat => (
+                  {(['Equipment', 'Procedure', 'Material', 'Staffing', 'Inspection', 'Weather'] as const).map(cat => (
                     <button
                       key={cat}
                       type="button"

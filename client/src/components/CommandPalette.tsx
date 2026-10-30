@@ -1,9 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Search, LayoutDashboard, FileSignature, ShieldCheck, Truck, Bus,
-  Package, MapPin, AlertTriangle, ArrowRight, CornerDownLeft, Shield, Moon, Sun, Lock, Users, ClipboardCheck, Sparkles, Wrench
+  Package, MapPin, AlertTriangle, CornerDownLeft, Moon, Sun, Users,
+  ClipboardCheck, Wrench, Receipt, MessageSquare
 } from 'lucide-react';
+import { getAllowedViewsForRole } from './Sidebar';
+import { useNotesheetStore } from '../store/notesheetStore';
+import { useFleetStore } from '../store/fleetStore';
+import { useAssetStore } from '../store/assetStore';
+import { useOperationsStore } from '../store/operationsStore';
+import { useEmployeeStore } from '../store/employeeStore';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -13,17 +20,40 @@ interface CommandPaletteProps {
   onToggleTheme: () => void;
   lang: Lang;
   currentTheme: 'light' | 'dark';
+  role?: AppRole;
 }
 
 interface CommandItem {
   id: string;
   title: string;
   titleBn: string;
-  category: 'Views' | 'Switch Persona' | 'Quick Actions' | 'Records & Assets' | 'Security';
+  category: 'Pages' | 'Live Records' | 'Quick Settings' | 'Switch Role (Preview)';
   icon: React.ReactNode;
   action: () => void;
   shortcut?: string;
 }
+
+const ALL_VIEW_COMMANDS: Array<{
+  view: AppView;
+  title: string;
+  titleBn: string;
+  icon: React.ReactNode;
+}> = [
+  { view: 'dashboard',    title: 'Workspace Overview (Home Dashboard)',    titleBn: 'ওয়ার্কস্পেস ড্যাশবোর্ড',         icon: <LayoutDashboard size={15} /> },
+  { view: 'approvals',    title: 'Pending Approvals Center',               titleBn: 'অপেক্ষমাণ অনুমোদন কেন্দ্র',       icon: <ClipboardCheck size={15} /> },
+  { view: 'notesheet',    title: 'Official Documents & Signatures',        titleBn: 'দাপ্তরিক নথিপত্র ও স্বাক্ষর',      icon: <FileSignature size={15} /> },
+  { view: 'inner_circle', title: 'Leadership Messages',                    titleBn: 'নেতৃত্বের বার্তালাপ',             icon: <MessageSquare size={15} /> },
+  { view: 'asset',        title: 'Company Assets & Equipment',             titleBn: 'কোম্পানির সম্পদ ও যন্ত্রপাতি',    icon: <Wrench size={15} /> },
+  { view: 'fleet',        title: 'Company Vehicles & Car Bookings',        titleBn: 'অফিসিয়াল গাড়ি ও ট্রিপ বুকিং',    icon: <Truck size={15} /> },
+  { view: 'bus',          title: 'Staff Shuttle Buses & Seats',            titleBn: 'স্টাফ বাস রুট ও সিট তালিকা',     icon: <Bus size={15} /> },
+  { view: 'claims',       title: 'Expense & Travel Claims',                titleBn: 'ভ্রমণ ও যাতায়াত ব্যয় বিল',      icon: <Receipt size={15} /> },
+  { view: 'attendance',   title: 'Daily Attendance & Leave',               titleBn: 'দৈনন্দিন উপস্থিতি ও ছুটি',       icon: <MapPin size={15} /> },
+  { view: 'workforce',    title: 'Staff Directory & Exit Clearance',       titleBn: 'কর্মী তালিকা ও বিদায় ছাড়পত্র',   icon: <Users size={15} /> },
+  { view: 'compliance',   title: 'Permits & License Renewals',             titleBn: 'লাইসেন্স ও অনুমোদন নবায়ন',       icon: <ShieldCheck size={15} /> },
+  { view: 'guest',        title: 'Visitor Gate Passes',                    titleBn: 'অতিথি ও পরিদর্শক গেট পাস',       icon: <Users size={15} /> },
+  { view: 'parcel',       title: 'Office Mail & Parcel Tracker',           titleBn: 'অফিস পার্সেল ট্র্যাকার',         icon: <Package size={15} /> },
+  { view: 'incident',     title: 'Safety & Incident Reports',              titleBn: 'নিরাপত্তা ও দুর্ঘটনা রিপোর্ট',    icon: <AlertTriangle size={15} /> },
+];
 
 export default function CommandPalette({
   isOpen,
@@ -33,11 +63,18 @@ export default function CommandPalette({
   onToggleTheme,
   lang,
   currentTheme,
+  role = 'chairman',
 }: CommandPaletteProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  const { files } = useNotesheetStore();
+  const { vehicles, requisitions } = useFleetStore();
+  const { assets } = useAssetStore();
+  const { licenses } = useOperationsStore();
+  const { activeEmployees } = useEmployeeStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -48,208 +85,199 @@ export default function CommandPalette({
     }
   }, [isOpen]);
 
-  // All actionable commands and records
-  const items: CommandItem[] = [
-    // Views
-    {
-      id: 'view-dashboard',
-      title: 'Executive Cockpit',
-      titleBn: 'এক্সিকিউটিভ কক্পিট',
-      category: 'Views',
-      icon: <LayoutDashboard size={15} />,
-      action: () => { onNavigate('dashboard'); onClose(); },
-    },
-    {
-      id: 'view-approvals',
-      title: 'Unified Executive Approval Inbox',
-      titleBn: 'একীভূত নির্বাহী অনুমোদন ইনবক্স',
-      category: 'Views',
-      icon: <ClipboardCheck size={15} />,
-      action: () => { onNavigate('approvals'); onClose(); },
-    },
-    {
-      id: 'view-notesheet',
-      title: 'Note-Sheet & Cryptographic E-Sign',
-      titleBn: 'নোট-শিট ও ই-স্বাক্ষর',
-      category: 'Views',
-      icon: <FileSignature size={15} />,
-      action: () => { onNavigate('notesheet'); onClose(); },
-    },
-    {
-      id: 'view-compliance',
-      title: 'BSTI & Statutory License Pipeline',
-      titleBn: 'বিএসটিআই লাইসেন্স পাইপলাইন',
-      category: 'Views',
-      icon: <ShieldCheck size={15} />,
-      action: () => { onNavigate('compliance'); onClose(); },
-    },
-    {
-      id: 'view-fleet',
-      title: 'Fleet Logistics & Ride Pooling',
-      titleBn: 'ফ্লিট ও রাইড পুলিং',
-      category: 'Views',
-      icon: <Truck size={15} />,
-      action: () => { onNavigate('fleet'); onClose(); },
-    },
-    {
-      id: 'view-bus',
-      title: 'Bus Seat FIFO Waitlist & Booking',
-      titleBn: 'বাস সিট ওয়েটলিস্ট',
-      category: 'Views',
-      icon: <Bus size={15} />,
-      action: () => { onNavigate('bus'); onClose(); },
-    },
-    {
-      id: 'view-parcel',
-      title: 'Parcel Chain-of-Custody Tracker',
-      titleBn: 'পার্সেল ট্র্যাকার',
-      category: 'Views',
-      icon: <Package size={15} />,
-      action: () => { onNavigate('parcel'); onClose(); },
-    },
-    {
-      id: 'view-attendance',
-      title: 'Geofenced Mobile Attendance & Timesheets',
-      titleBn: 'জিওফেন্স অ্যাটেন্ডেন্স',
-      category: 'Views',
-      icon: <MapPin size={15} />,
-      action: () => { onNavigate('attendance'); onClose(); },
-    },
-    {
-      id: 'view-inner-circle',
-      title: "Chairman's Inner Circle Secure Messaging",
-      titleBn: 'ইনার সার্কেল এনক্রিপ্টেড মেসেজিং',
-      category: 'Views',
-      icon: <FileSignature size={15} />,
-      action: () => { onNavigate('inner_circle'); onClose(); },
-    },
-    {
-      id: 'view-incident',
-      title: 'HSE Incident Management & OSHA CAPA',
-      titleBn: 'এইচএসই ইনসিডেন্ট',
-      category: 'Views',
-      icon: <AlertTriangle size={15} />,
-      action: () => { onNavigate('incident'); onClose(); },
-    },
-    {
-      id: 'view-claims',
-      title: 'TA / DA & Conveyance Claim Portal',
-      titleBn: 'টিএ/ডিএ ও যাতায়াত দাবি পোর্টাল',
-      category: 'Views',
-      icon: <LayoutDashboard size={15} />,
-      action: () => { onNavigate('claims'); onClose(); },
-    },
-    {
-      id: 'view-asset',
-      title: 'Enterprise Asset Lifetime, Valuation & EAM (ISO 55001 / IAS 16)',
-      titleBn: 'সম্পদ জীবনচক্র, অবচয় ও রক্ষণাবেক্ষণ (ইএএম)',
-      category: 'Views',
-      icon: <Wrench size={15} />,
-      action: () => { onNavigate('asset'); onClose(); },
-    },
-    {
-      id: 'view-guest',
-      title: 'Guest & VIP Protocol Gate Pass',
-      titleBn: 'অতিথি ও ভিআইপি প্রটোকল গেট পাস',
-      category: 'Views',
-      icon: <Package size={15} />,
-      action: () => { onNavigate('guest'); onClose(); },
-    },
-    {
-      id: 'view-workforce',
-      title: 'Workforce Master & 4-Way Exit Clearance',
-      titleBn: 'কর্মী মাস্টার ও বহির্গমন ছাড়পত্র',
-      category: 'Views',
-      icon: <Users size={15} />,
-      action: () => { onNavigate('workforce'); onClose(); },
-    },
+  const allowedViews = useMemo(() => getAllowedViewsForRole(role), [role]);
+  const meta = ROLE_META[role];
 
-    // Switch Persona (RBAC Evaluation)
-    ...(onRoleChange ? (Object.keys(ROLE_META) as AppRole[]).map((r) => {
-      const meta = ROLE_META[r];
-      return {
-        id: `switch-role-${r}`,
-        title: `Switch Persona: ${meta.name} (${t(meta.label, meta.labelBn, lang)})`,
-        titleBn: `রোল পরিবর্তন: ${meta.name} (${t(meta.label, meta.labelBn, lang)})`,
-        category: 'Switch Persona' as const,
-        icon: <Users size={15} color={meta.avatarColor} />,
+  const items: CommandItem[] = useMemo(() => {
+    const list: CommandItem[] = [];
+
+    // 1. Permitted Pages
+    ALL_VIEW_COMMANDS.filter((v) => allowedViews.has(v.view)).forEach((v) => {
+      list.push({
+        id: `view-${v.view}`,
+        title: v.title,
+        titleBn: v.titleBn,
+        category: 'Pages',
+        icon: v.icon,
         action: () => {
-          onRoleChange(r);
+          onNavigate(v.view);
           onClose();
         },
-        shortcut: meta.initials,
-      };
-    }) : []),
+      });
+    });
 
-    // Quick Actions
-    {
+    // 2. Live Records (Scoped to Role Permissions)
+    if (allowedViews.has('notesheet')) {
+      const visibleFiles =
+        role === 'employee'
+          ? files.filter((f) => f.initiatorName === meta.name)
+          : files;
+      visibleFiles.slice(0, 4).forEach((f) => {
+        list.push({
+          id: `doc-${f.id}`,
+          title: `${f.fileNo}: ${f.title} (${f.amount})`,
+          titleBn: `${f.fileNo}: ${f.title}`,
+          category: 'Live Records',
+          icon: <FileSignature size={15} color="#A51C30" />,
+          action: () => {
+            onNavigate('notesheet');
+            onClose();
+          },
+        });
+      });
+    }
+
+    if (allowedViews.has('asset')) {
+      const visibleAssets =
+        role === 'employee' || role === 'driver'
+          ? assets.filter((a) => a.custodianEmpId === meta.empId)
+          : assets.slice(0, 4);
+      visibleAssets.forEach((a) => {
+        list.push({
+          id: `ast-${a.id}`,
+          title: `${a.tag}: ${a.name}`,
+          titleBn: `${a.tag}: ${a.name}`,
+          category: 'Live Records',
+          icon: <Wrench size={15} color="#0369A1" />,
+          action: () => {
+            onNavigate('asset');
+            onClose();
+          },
+        });
+      });
+    }
+
+    if (allowedViews.has('fleet')) {
+      if (role === 'employee') {
+        requisitions
+          .filter((r) => r.requesterName === meta.name)
+          .forEach((r) => {
+            list.push({
+              id: `req-${r.id}`,
+              title: `${r.id}: Car Booking — ${r.from} to ${r.to}`,
+              titleBn: `${r.id}: গাড়ির আবেদন — ${r.from} হতে ${r.to}`,
+              category: 'Live Records',
+              icon: <Truck size={15} color="#059669" />,
+              action: () => {
+                onNavigate('fleet');
+                onClose();
+              },
+            });
+          });
+      } else if (role === 'driver') {
+        requisitions
+          .filter((r) => r.assignedDriverId === 'DRV-01')
+          .forEach((r) => {
+            list.push({
+              id: `drv-req-${r.id}`,
+              title: `${r.id}: Assigned Trip — ${r.from} to ${r.to}`,
+              titleBn: `${r.id}: নির্ধারিত ট্রিপ — ${r.from} হতে ${r.to}`,
+              category: 'Live Records',
+              icon: <Truck size={15} color="#059669" />,
+              action: () => {
+                onNavigate('fleet');
+                onClose();
+              },
+            });
+          });
+      } else {
+        vehicles.slice(0, 3).forEach((v) => {
+          list.push({
+            id: `veh-${v.id}`,
+            title: `${v.plate}: ${v.model} (${v.driverName || 'Standby Pool'})`,
+            titleBn: `${v.plate}: ${v.model}`,
+            category: 'Live Records',
+            icon: <Truck size={15} color="#0369A1" />,
+            action: () => {
+              onNavigate('fleet');
+              onClose();
+            },
+          });
+        });
+      }
+    }
+
+    if (allowedViews.has('compliance')) {
+      licenses.slice(0, 3).forEach((l) => {
+        list.push({
+          id: `lic-${l.id}`,
+          title: `${l.refNo}: ${l.title} (${l.daysLeft} days left)`,
+          titleBn: `${l.refNo}: ${l.titleBn}`,
+          category: 'Live Records',
+          icon: <ShieldCheck size={15} color="#D97706" />,
+          action: () => {
+            onNavigate('compliance');
+            onClose();
+          },
+        });
+      });
+    }
+
+    if (allowedViews.has('workforce')) {
+      activeEmployees.slice(0, 4).forEach((emp) => {
+        list.push({
+          id: `emp-${emp.id}`,
+          title: `${emp.name} (${emp.id}) — ${emp.designation}`,
+          titleBn: `${emp.nameBn || emp.name} (${emp.id})`,
+          category: 'Live Records',
+          icon: <Users size={15} color="#7C3AED" />,
+          action: () => {
+            onNavigate('workforce');
+            onClose();
+          },
+        });
+      });
+    }
+
+    // 3. Quick Settings
+    list.push({
       id: 'act-theme',
       title: `Switch to ${currentTheme === 'light' ? 'Dark' : 'Light'} Mode`,
       titleBn: currentTheme === 'light' ? 'ডার্ক মোড চালু করুন' : 'লাইট মোড চালু করুন',
-      category: 'Quick Actions',
+      category: 'Quick Settings',
       icon: currentTheme === 'light' ? <Moon size={15} /> : <Sun size={15} />,
-      action: () => { onToggleTheme(); onClose(); },
-      shortcut: '⌘D',
-    },
+      action: () => {
+        onToggleTheme();
+        onClose();
+      },
+    });
 
-    // Searchable Records
-    {
-      id: 'rec-proc-0894',
-      title: 'PROC/2026/0894: Safety Valve Procurement (৳48.5L)',
-      titleBn: 'ক্রয় নথি: সেফটি ভালভ প্রকিউরমেন্ট',
-      category: 'Records & Assets',
-      icon: <FileSignature size={15} color="#A51C30" />,
-      action: () => { onNavigate('notesheet'); onClose(); },
-    },
-    {
-      id: 'rec-bsti-cert',
-      title: 'BSTI/2026/L-089: Bitumen 60/70 Quality Standard Renewal',
-      titleBn: 'বিএসটিআই বিটুমিন গুণমান লাইসেন্স',
-      category: 'Records & Assets',
-      icon: <ShieldCheck size={15} color="#D97706" />,
-      action: () => { onNavigate('compliance'); onClose(); },
-    },
-    {
-      id: 'rec-tanker-4820',
-      title: 'DHAKA-METRO-D-11-4820: Toyota Land Cruiser Executive Fleet',
-      titleBn: 'যানবাহন: ঢাকা-মেট্রো-ঘ-১১-৪৮২০',
-      category: 'Records & Assets',
-      icon: <Truck size={15} color="#0369A1" />,
-      action: () => { onNavigate('fleet'); onClose(); },
-    },
-    {
-      id: 'rec-employee-harun',
-      title: 'Engr. Md. Harunur Rashid — Keraniganj Plant GM',
-      titleBn: 'প্রকৌ. হারুনুর রশীদ — প্ল্যান্ট জিএম',
-      category: 'Records & Assets',
-      icon: <MapPin size={15} color="#7C3AED" />,
-      action: () => { onNavigate('attendance'); onClose(); },
-    },
-    {
-      id: 'rec-asset-pmp-102',
-      title: 'BOGCL-KER-PMP-102: Sulzer Multiphase Crude Oil Feed Pump (IAS 16 UoP)',
-      titleBn: 'মূলধনী সম্পদ: সালজার মাল্টিফেজ ক্রুড অয়েল পাম্প',
-      category: 'Records & Assets',
-      icon: <Wrench size={15} color="#0369A1" />,
-      action: () => { onNavigate('asset'); onClose(); },
-    },
-    {
-      id: 'rec-asset-gen-01',
-      title: 'BOGCL-KER-GEN-01: Caterpillar 1500kVA Generator — Write-Off & Condemnation Dossier',
-      titleBn: 'অবলোপন নথি: ক্যাটারপিলার ১৫০০ কেভিএ জেনারেটর',
-      category: 'Records & Assets',
-      icon: <Wrench size={15} color="#DC2626" />,
-      action: () => { onNavigate('asset'); onClose(); },
-    },
-    {
-      id: 'rec-asset-lap-204',
-      title: 'BOGCL-IT-LAP-204: MacBook Pro M3 — Staff Custody Handover & ITAM',
-      titleBn: 'কর্মী সম্পদ হেফাজত: ম্যাকবুক প্রো এম৩',
-      category: 'Records & Assets',
-      icon: <Wrench size={15} color="#059669" />,
-      action: () => { onNavigate('asset'); onClose(); },
-    },
-  ];
+    // 4. Switch Role (Preview)
+    if (onRoleChange) {
+      (Object.keys(ROLE_META) as AppRole[]).forEach((r) => {
+        const rMeta = ROLE_META[r];
+        list.push({
+          id: `switch-role-${r}`,
+          title: `Switch Role: ${rMeta.name} (${rMeta.label})`,
+          titleBn: `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
+          category: 'Switch Role (Preview)',
+          icon: <Users size={15} color={rMeta.avatarColor} />,
+          action: () => {
+            onRoleChange(r);
+            onClose();
+          },
+          shortcut: rMeta.empId,
+        });
+      });
+    }
+
+    return list;
+  }, [
+    allowedViews,
+    role,
+    meta,
+    files,
+    assets,
+    vehicles,
+    requisitions,
+    licenses,
+    activeEmployees,
+    currentTheme,
+    onNavigate,
+    onToggleTheme,
+    onRoleChange,
+    onClose,
+  ]);
 
   const filteredItems = items.filter((item) => {
     const q = query.toLowerCase().trim();
@@ -257,7 +285,8 @@ export default function CommandPalette({
     return (
       item.title.toLowerCase().includes(q) ||
       item.titleBn.toLowerCase().includes(q) ||
-      item.category.toLowerCase().includes(q)
+      item.category.toLowerCase().includes(q) ||
+      (item.shortcut && item.shortcut.toLowerCase().includes(q))
     );
   });
 
@@ -298,8 +327,8 @@ export default function CommandPalette({
             }}
             onKeyDown={handleKeyDown}
             placeholder={t(
-              'Type a command, note-sheet ID, vehicle plate, or view name...',
-              'কমান্ড, নথি আইডি, গাড়ির নম্বর বা পেইজ অনুসন্ধান করুন...',
+              'Search pages, document numbers, assets, vehicles, or staff...',
+              'পেইজ, ফাইল নম্বর, সম্পদ, গাড়ি বা কর্মীর নাম খুঁজুন...',
               lang
             )}
           />
@@ -310,7 +339,7 @@ export default function CommandPalette({
         <div className="palette-list" ref={listRef}>
           {filteredItems.length === 0 ? (
             <div className="palette-empty">
-              <span>{t('No matching actions or records found.', 'কোনো ফলাফল পাওয়া যায়নি।', lang)}</span>
+              <span>{t('No matching pages or records found.', 'কোনো ফলাফল পাওয়া যায়নি।', lang)}</span>
             </div>
           ) : (
             filteredItems.map((item, index) => {
@@ -343,12 +372,12 @@ export default function CommandPalette({
         {/* Palette Footer */}
         <div className="palette-footer">
           <div className="palette-footer-hint">
-            <span><kbd>↑</kbd> <kbd>↓</kbd> {t('Navigate', 'নেভিগেট', lang)}</span>
-            <span><kbd>↵</kbd> {t('Select', 'নির্বাচন', lang)}</span>
+            <span><kbd>↑</kbd> <kbd>↓</kbd> {t('Move', 'নেভিগেট', lang)}</span>
+            <span><kbd>↵</kbd> {t('Open', 'নির্বাচন', lang)}</span>
             <span><kbd>esc</kbd> {t('Close', 'বন্ধ', lang)}</span>
           </div>
           <div className="palette-footer-badge">
-            BOGCL Enterprise Omnisearch
+            {t(`BOGCL Quick Search • ${meta.label}`, `দ্রুত অনুসন্ধান • ${meta.labelBn}`, lang)}
           </div>
         </div>
       </div>

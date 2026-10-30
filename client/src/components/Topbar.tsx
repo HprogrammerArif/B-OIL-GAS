@@ -11,41 +11,40 @@ import UserProfileModal from './UserProfileModal';
 import LockScreenModal from './LockScreenModal';
 
 const PAGE_META: Record<string, { section: string; sectionBn: string; en: string; bn: string; sub: string; subBn: string }> = {
-  dashboard:       { section: 'Governance',  sectionBn: 'গভর্ন্যান্স', en: 'Executive Cockpit',                  bn: 'এক্সিকিউটিভ কক্পিট',                 sub: 'Real-time enterprise intelligence & multi-tier governance',        subBn: 'রিয়েল-টাইম এন্টারপ্রাইজ ইন্টেলিজেন্স' },
-  inner_circle:    { section: 'Executive',   sectionBn: 'এক্সিকিউটিভ', en: "Chairman's Inner Circle Messaging",  bn: 'ইনার সার্কেল মেসেজিং',             sub: 'Confidential encrypted communication channel with key leadership', subBn: 'শীর্ষ নেতৃত্বের সাথে নিরাপদ এনক্রিপ্টেড বার্তালাপ' },
-  notesheet:       { section: 'Governance',  sectionBn: 'গভর্ন্যান্স', en: 'Note-Sheet & E-Signature',           bn: 'নোট-শিট ও ই-স্বাক্ষর',             sub: 'Digital file approval with tamper-proof cryptographic audit trail', subBn: 'ডিজিটাল ফাইল অনুমোদন ও ই-স্বাক্ষর' },
-  compliance:      { section: 'Governance',  sectionBn: 'গভর্ন্যান্স', en: 'BSTI & Regulatory Pipeline',         bn: 'বিএসটিআই লাইসেন্স পাইপলাইন',       sub: '5-stage visual kanban for all statutory license renewals',          subBn: '৫-ধাপ আইনি লাইসেন্স নবায়ন প্রক্রিয়া' },
-  workforce:       { section: 'Human Capital', sectionBn: 'মানবসম্পদ', en: 'Workforce Master & Exit Clearance', bn: 'কর্মী মাস্টার ও ছাড়পত্র', sub: 'Employee directory, SAP PERNR sync & 4-way exit clearance checklist', subBn: 'কর্মী মাস্টার, এসএপি সিঙ্ক ও ৪-ধাপ বহির্গমন ছাড়পত্র' },
-  fleet:           { section: 'Operations',  sectionBn: 'লজিস্টিক্স',  en: 'Fleet & Ride Pooling',                bn: 'ফ্লিট ও রাইড পুলিং',                sub: 'Smart vehicle dispatch, pooling suggestions & fuel audit',          subBn: 'যানবাহন বরাদ্দ ও পুলিং ব্যবস্থাপনা' },
-  bus:             { section: 'Operations',  sectionBn: 'লজিস্টিক্স',  en: 'Bus Seat FIFO Waitlist',              bn: 'বাস সিট ওয়েটলিস্ট',                sub: 'Transparent FIFO allocation with auto-cascade on seat vacancy',     subBn: 'ন্যায্য ফিফো পদ্ধতিতে বাস সিট বরাদ্দ' },
-  parcel:          { section: 'Operations',  sectionBn: 'লজিস্টিক্স',  en: 'Parcel Chain-of-Custody',             bn: 'পার্সেল চেইন-অব-কাস্টডি',           sub: 'QR-based custody tracking from sender to recipient OTP delivery',   subBn: 'কিউআর ভিত্তিক পার্সেল ট্র্যাকিং' },
-  attendance:      { section: 'Workforce',   sectionBn: 'কর্মশক্তি',   en: 'Geofenced Mobile Attendance',         bn: 'জিওফেন্স অ্যাটেন্ডেন্স',            sub: 'Anti-spoof server-side Haversine geofence validation',              subBn: 'মোবাইল ভিত্তিক উপস্থিতি নথিভুক্তি' },
-  incident:        { section: 'Safety',      sectionBn: 'নিরাপত্তা',   en: 'HSE Incident Management & CAPA',       bn: 'এইচএসই ইনসিডেন্ট ম্যানেজমেন্ট',       sub: 'OSHA-compliant incident triage, root cause analysis & CAPA',       subBn: 'নিরাপত্তা ঘটনা প্রতিবেদন ও সংশোধনী পদক্ষেপ' },
-  claims:          { section: 'Finance',     sectionBn: 'অর্থায়ন',    en: 'TA / DA & Conveyance Claims',         bn: 'টিএ/ডিএ ও যাতায়াত দাবি',           sub: 'Tour expense requisitions, per diem calculation & local travel',     subBn: 'ভ্রমণ ব্যয়, দৈনিক ভাতা ও যাতায়াত বিল ব্যবস্থাপনা' },
-  asset:           { section: 'EAM & Fixed Assets', sectionBn: 'স্থায়ী সম্পদ ও রক্ষণাবেক্ষণ', en: 'Enterprise Asset Lifetime & Valuation', bn: 'সম্পদ জীবনচক্র ও অবচয় ব্যবস্থাপনা', sub: 'ISO 55001 cradle-to-grave EAM, IAS 16 depreciation, custody & 10-yr disposal archive', subBn: 'মূলধনী সরঞ্জাম জীবনচক্র, আইএএস ১৬ অবচয়, হেফাজত ও অবলোপন আর্কাইভ' },
-  guest:           { section: 'Security',    sectionBn: 'নিরাপত্তা',   en: 'Guest & VIP Protocol Gate Pass',      bn: 'অতিথি ও ভিআইপি প্রটোকল গেট পাস',    sub: 'Digital QR passes, regulatory inspection audits & VIP protocol',     subBn: 'ডিজিটাল কিউআর গেট পাস ও ভিআইপি প্রটোকল' },
-  approvals:       { section: 'Governance',  sectionBn: 'গভর্ন্যান্স', en: 'Unified Approval Queue',              bn: 'ইউনিফায়েড অনুমোদন সারি',           sub: 'Consolidated approval inbox across leaves, claims, and requisitions', subBn: 'ছুটি, ব্যয় ও ক্রয় রিকুইজিশন অনুমোদন' },
-  vehicle_request: { section: 'Operations',  sectionBn: 'লজিস্টিক্স',  en: 'Vehicle Booking Request',             bn: 'গাড়ির অনুরোধ',                     sub: 'Self-service pool car and logistics travel requisition',            subBn: 'অফিসিয়াল যাতায়াত ও গাড়ি বুকিং' },
+  dashboard:       { section: 'Overview',      sectionBn: 'ড্যাশবোর্ড',    en: 'Workspace Overview',               bn: 'ওয়ার্কস্পেস সারসংক্ষেপ',           sub: 'Daily tasks, pending approvals, alerts & company updates',          subBn: 'দৈনন্দিন কাজ, অনুমোদন ও কোম্পানির সর্বশেষ তথ্য' },
+  inner_circle:    { section: 'Leadership',    sectionBn: 'নেতৃত্ব',       en: 'Leadership Messages',              bn: 'নেতৃত্বের বার্তালাপ',               sub: 'Direct messaging, voice notes & official instructions',             subBn: 'বিভাগীয় প্রধানদের সাথে সরাসরি বার্তালাপ ও নির্দেশনা' },
+  notesheet:       { section: 'Approvals',     sectionBn: 'অনুমোদন',       en: 'Official Documents & Signatures',  bn: 'দাপ্তরিক নথিপত্র ও স্বাক্ষর',        sub: 'Create, review, compare quotes & sign official company files',      subBn: 'দাপ্তরিক ফাইল তৈরি, দরপত্র তুলনা ও ডিজিটাল স্বাক্ষর' },
+  compliance:      { section: 'Permits',       sectionBn: 'লাইসেন্স',      en: 'Permits & License Renewals',       bn: 'লাইসেন্স ও সরকারি অনুমোদন নবায়ন',    sub: '5-step renewal tracker for factory, fire, quality & import permits', subBn: '৫-ধাপ সরকারি লাইসেন্স ও ছাড়পত্র নবায়ন ট্র্যাকার' },
+  workforce:       { section: 'HR & Staff',    sectionBn: 'মানবসম্পদ',     en: 'Staff Directory & Exit Clearance', bn: 'কর্মী তালিকা ও বিদায় ছাড়পত্র',       sub: 'Employee profiles, contact details & 4-step exit handover checklist', subBn: 'কর্মীদের প্রোফাইল, তথ্য ও ৪-ধাপ বিদায় ছাড়পত্র' },
+  fleet:           { section: 'Transport',     sectionBn: 'পরিবহন',        en: 'Company Vehicles & Trips',         bn: 'অফিসিয়াল গাড়ি ও ট্রিপ ব্যবস্থাপনা',  sub: 'Book office cars, assign drivers, share rides & track fuel slips',   subBn: 'গাড়ি বুকিং, ড্রাইভার বরাদ্দ ও জ্বালানি হিসাব' },
+  bus:             { section: 'Transport',     sectionBn: 'পরিবহন',        en: 'Staff Shuttle Buses & Seats',      bn: 'স্টাফ বাস রুট ও সিট তালিকা',         sub: 'Daily staff bus routes, seat assignments & waiting list',            subBn: 'নিয়মিত স্টাফ বাসের রুট, সিট ও অপেক্ষমাণ তালিকা' },
+  parcel:          { section: 'Office Mail',   sectionBn: 'পার্সেল',       en: 'Office Mail & Parcel Tracker',     bn: 'অফিস চিঠিপত্র ও পার্সেল ট্র্যাকার',   sub: 'Track documents and samples from dispatch to 4-digit PIN delivery', subBn: 'প্রেরক থেকে প্রাপকের হাতে পৌঁছানো পর্যন্ত ট্র্যাকিং' },
+  attendance:      { section: 'HR & Staff',    sectionBn: 'কর্মশক্তি',     en: 'Daily Attendance & Leave',         bn: 'দৈনন্দিন উপস্থিতি ও ছুটি',           sub: 'Daily office/plant check-in, shift roster & leave requests',        subBn: 'অফিস ও প্ল্যান্ট উপস্থিতি, শিফট তালিকা ও ছুটির আবেদন' },
+  incident:        { section: 'Safety',        sectionBn: 'নিরাপত্তা',     en: 'Safety & Incident Reports',        bn: 'নিরাপত্তা ও দুর্ঘটনা প্রতিবেদন',      sub: 'Report workplace or road safety issues and track resolution steps',  subBn: 'নিরাপত্তা ঝুঁকি বা ঘটনার রিপোর্ট ও সমাধান ট্র্যাকিং' },
+  claims:          { section: 'Finance',       sectionBn: 'অর্থ ও হিসাব',  en: 'Expense & Travel Claims',          bn: 'ভ্রমণ ও যাতায়াত ব্যয় বিল',          sub: 'Submit outstation travel, local transport & office event bills',     subBn: 'ভ্রমণ ভাতা, স্থানীয় যাতায়াত ও অফিস ইভেন্ট বিল দাখিল' },
+  asset:           { section: 'Assets',        sectionBn: 'স্থায়ী সম্পদ',  en: 'Company Assets & Equipment',       bn: 'কোম্পানির সম্পদ ও যন্ত্রপাতি',        sub: 'Full lifetime tracking of machinery, vehicles, computers & repairs', subBn: 'যন্ত্রপাতি, গাড়ি ও কম্পিউটারের পূর্ণ জীবনচক্র ও মেরামত হিসাব' },
+  guest:           { section: 'Gate Security', sectionBn: 'গেট নিরাপত্তা', en: 'Visitor Gate Passes',              bn: 'অতিথি ও পরিদর্শক গেট পাস',           sub: 'Pre-register guests, print gate passes & log government visits',     subBn: 'অতিথি নিবন্ধন, ডিজিটাল গেট পাস ও পরিদর্শন রেকর্ড' },
+  approvals:       { section: 'Approvals',     sectionBn: 'অনুমোদন',       en: 'Pending Approvals Center',         bn: 'অপেক্ষমাণ অনুমোদন কেন্দ্র',           sub: 'Review and approve purchases, expense claims, car bookings & leave', subBn: 'ক্রয় প্রস্তাব, ব্যয় বিল, গাড়ি বুকিং ও ছুটি অনুমোদন' },
+  vehicle_request: { section: 'Transport',     sectionBn: 'পরিবহন',        en: 'Book Company Car',                 bn: 'অফিসিয়াল গাড়ি বুকিং',               sub: 'Request an office vehicle for client meetings or plant visits',      subBn: 'দাপ্তরিক কাজের জন্য অফিসের গাড়ির আবেদন' },
 };
 
 const DEFAULT_PAGE_META = {
   section: 'Operations',
-  sectionBn: 'অপারেশন',
+  sectionBn: 'পরিচালনা',
   en: 'Overview',
-  bn: 'সংক্ষিপ্ত বিবরণ',
-  sub: 'Operational console & enterprise workflow',
-  subBn: 'অপারেশনাল কনসোল',
+  bn: 'সারসংক্ষেপ',
+  sub: 'Company operations & daily workflow',
+  subBn: 'কোম্পানির দৈনন্দিন কার্যক্রম',
 };
 
-// Enterprise personnel metadata per role
-const USER_CREDENTIALS: Record<AppRole, { email: string; pernr: string; clearance: string }> = {
-  chairman:       { email: 'ahmed.sobhan@bashundhara.com',    pernr: 'PERNR-000101', clearance: 'Level-5 Executive' },
-  plant_gm:       { email: 'harunur.rashid@bashundhara.com',  pernr: 'PERNR-001042', clearance: 'Level-4 Operations' },
-  hr_admin:       { email: 'afroza.sultana@bashundhara.com',  pernr: 'PERNR-001205', clearance: 'Level-4 Compliance' },
-  transport_admin:{ email: 'kamruzzaman@bashundhara.com',     pernr: 'PERNR-002410', clearance: 'Level-3 Dispatch' },
-  hod:            { email: 'farida.begum@bashundhara.com',    pernr: 'PERNR-001088', clearance: 'Level-4 Signatory' },
-  employee:       { email: 'tanvir.ahmed@bashundhara.com',    pernr: 'PERNR-004119', clearance: 'Level-2 Staff' },
-  driver:         { email: 'rafiqul.driver@bashundhara.com',  pernr: 'PERNR-008821', clearance: 'Level-1 Duty Transit' },
+const ROLE_ACCESS_LEVEL: Record<AppRole, { en: string; bn: string }> = {
+  chairman:        { en: 'Executive Full Access',     bn: 'সর্বোচ্চ নির্বাহী অনুমোদন' },
+  plant_gm:        { en: 'Plant Management Access',   bn: 'প্ল্যান্ট ব্যবস্থাপনা অনুমোদন' },
+  hr_admin:        { en: 'HR & Admin Management',     bn: 'মানবসম্পদ ও প্রশাসন অনুমোদন' },
+  transport_admin: { en: 'Transport & Gate Dispatch', bn: 'পরিবহন ও গেট ব্যবস্থাপনা' },
+  hod:             { en: 'Finance & Dept Approver',   bn: 'অর্থ ও বিভাগীয় অনুমোদনকারী' },
+  employee:        { en: 'Staff Self-Service',        bn: 'কর্মী সেবা পোর্টাল' },
+  driver:          { en: 'Driver Duty Access',        bn: 'ড্রাইভার ডিউটি পোর্টাল' },
 };
 
 interface TopbarProps {
@@ -84,8 +83,9 @@ export default function Topbar({
   const [showLockScreen, setShowLockScreen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
   const meta = ROLE_META[role];
-  const creds = USER_CREDENTIALS[role];
+  const accessLevel = ROLE_ACCESS_LEVEL[role];
   const page = PAGE_META[view] || DEFAULT_PAGE_META;
 
   // Real-time ticking clock
@@ -130,14 +130,12 @@ export default function Topbar({
           <Menu size={20} />
         </button>
 
-        {/* Page Heading: Step 1 (Top) Page Title + Step 2 (Bottom) Small Breadcrumb */}
+        {/* Page Heading */}
         <div className="page-heading">
-          {/* Top: Primary Page Title */}
           <h1 className="topbar-page-title">
             {t(page.en, page.bn, lang)}
           </h1>
 
-          {/* Bottom (one step bottom): Subdued Breadcrumb with small words */}
           <nav className="topbar-breadcrumb" aria-label="Breadcrumb">
             <span className="crumb-segment crumb-brand">BOGCL OneOps</span>
             <span className="crumb-sep">/</span>
@@ -149,26 +147,26 @@ export default function Topbar({
       </div>
 
       <div className="topbar-right">
-        {/* 1. Global Search / Command Palette Trigger */}
+        {/* 1. Global Search Trigger */}
         <button
           className="topbar-search-trigger"
           onClick={onOpenSearch}
-          title="Global Search & Quick Command Palette (Ctrl+K / ⌘K)"
+          title={t('Quick Search across pages & records (Ctrl+K)', 'পেইজ ও রেকর্ড দ্রুত অনুসন্ধান করুন (Ctrl+K)', lang)}
         >
           <Search size={13} className="search-icon" />
-          <span className="search-placeholder">{t('Search OneOps...', 'অনুসন্ধান...', lang)}</span>
-          <span className="search-kbd">⌘K</span>
+          <span className="search-placeholder">{t('Search pages & files...', 'অনুসন্ধান...', lang)}</span>
+          <span className="search-kbd">Ctrl+K</span>
         </button>
 
-        {/* 2. Unified Enterprise Telemetry Capsule (SAP Sync + Clock) */}
+        {/* 2. System Sync & Clock Capsule */}
         <div
           className="topbar-telemetry-capsule"
           onClick={() => setShowSapModal(true)}
-          title="BOGCL S/4HANA Gateway: Live · Precision Dhaka Time (BST / UTC+6)"
+          title={t('Click to view Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সিঙ্ক স্ট্যাটাস দেখুন', lang)}
         >
           <div className="telemetry-sap">
             <span className="sap-dot" />
-            <span className="sap-label">SAP Live</span>
+            <span className="sap-label">{t('System Synced', 'সিস্টেম সিঙ্ক', lang)}</span>
           </div>
           <span className="telemetry-divider telemetry-hide-mobile" />
           <div className="telemetry-clock telemetry-hide-mobile">
@@ -179,10 +177,8 @@ export default function Topbar({
 
         {/* 3. Quick Utilities Dock (Notifications, Dark Mode, Language) */}
         <div className="topbar-utility-dock">
-          {/* Notification Center */}
-          <NotificationCenter lang={lang} onNavigate={onNavigate} />
+          <NotificationCenter role={role} lang={lang} onNavigate={onNavigate} />
 
-          {/* Dark / Light Mode Toggle */}
           <button
             className="btn-dock-tool"
             onClick={onToggleTheme}
@@ -191,35 +187,34 @@ export default function Topbar({
             {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
           </button>
 
-          {/* Language Toggle */}
           <button
             className="btn-dock-tool btn-dock-lang"
             onClick={onLangToggle}
-            title="Switch Interface Language (English / বাংলা)"
+            title={t('Switch Language (English / বাংলা)', 'ভাষা পরিবর্তন করুন (English / বাংলা)', lang)}
           >
             <Globe size={13} />
             <span>{lang === 'en' ? 'বাং' : 'EN'}</span>
           </button>
         </div>
 
-        {/* 4. Executive Strategic Action (Chairman Broadcast) */}
+        {/* 4. Chairman Announcement Button */}
         {role === 'chairman' && (
           <button
             className="btn-broadcast-compact"
             onClick={onBroadcastOpen}
-            title="Dispatch Sovereign Alert Broadcast to Leadership"
+            title={t('Send Company-Wide Announcement to All Staff', 'সকল কর্মীর উদ্দেশ্যে বিশেষ ঘোষণা পাঠান', lang)}
           >
             <Megaphone size={13} />
-            <span className="broadcast-btn-text">{t('Broadcast', 'জরুরি বার্তা', lang)}</span>
+            <span className="broadcast-btn-text">{t('Announce', 'ঘোষণা পাঠান', lang)}</span>
           </button>
         )}
 
-        {/* 5. Enterprise Authenticated Identity Widget (Never clipped or hidden) */}
+        {/* 5. User Profile & Role Switcher Widget */}
         <div className="topbar-user-section" ref={dropdownRef}>
           <div
             className="user-widget-interactive"
             onClick={() => setShowDropdown(!showDropdown)}
-            title="Click to view official employee profile, security & session settings"
+            title={t('Click to view profile, handover settings, or switch demo role', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}
           >
             <div className="user-avatar" style={{ background: meta.avatarColor }}>
               {meta.initials}
@@ -227,45 +222,50 @@ export default function Topbar({
             </div>
             <div className="user-meta">
               <div className="name">
-                <span>{meta.name}</span>
+                <span>{t(meta.name, meta.nameBn, lang)}</span>
                 <ChevronDown size={12} className={`chevron-indicator ${showDropdown ? 'open' : ''}`} />
               </div>
               <div className="dept">{t(meta.label, meta.labelBn, lang)}</div>
             </div>
           </div>
 
-          {/* Enterprise Profile Dropdown Menu */}
+          {/* Profile Dropdown Menu */}
           {showDropdown && (
             <div className="user-dropdown-menu">
-              {/* Header with Enterprise Credentials */}
               <div className="user-dropdown-hd">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                   <div className="user-avatar" style={{ background: meta.avatarColor, width: '42px', height: '42px', fontSize: '15px' }}>
                     {meta.initials}
                   </div>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div className="name" style={{ fontSize: '13.5px', fontWeight: 800 }}>{meta.name}</div>
-                    <div className="role" style={{ fontSize: '11px', color: 'var(--brand-gold)' }}>{t(meta.label, meta.labelBn, lang)}</div>
-                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', wordBreak: 'break-all' }}>{creds.email}</div>
+                    <div className="name" style={{ fontSize: '13.5px', fontWeight: 800 }}>
+                      {t(meta.name, meta.nameBn, lang)}
+                    </div>
+                    <div className="role" style={{ fontSize: '11px', color: 'var(--brand-gold)' }}>
+                      {t(meta.label, meta.labelBn, lang)}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.75)', marginTop: '2px', wordBreak: 'break-all' }}>
+                      {meta.email}
+                    </div>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.08)', padding: '5px 10px', borderRadius: '6px', fontSize: '10px' }}>
                   <span style={{ color: 'var(--brand-gold-light)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Shield size={11} color="var(--brand-gold)" />
-                    {creds.clearance}
+                    {t(accessLevel.en, accessLevel.bn, lang)}
                   </span>
-                  <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{creds.pernr}</span>
+                  <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{meta.empId}</span>
                 </div>
               </div>
 
-              {/* Presentation & Demo Persona Quick Switcher */}
+              {/* Quick Role Switcher */}
               <div
                 style={{
                   padding: '10px 14px',
                   background: 'rgba(0, 0, 0, 0.03)',
                   borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
                 }}
               >
                 <div
@@ -278,15 +278,15 @@ export default function Topbar({
                     fontWeight: 800,
                     color: 'var(--brand-slate-600, #475569)',
                     textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
+                    letterSpacing: '0.5px',
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <Sparkles size={12} color="var(--brand-gold, #D97706)" />
-                    {t('Switch Persona (Demo Mode)', 'রোল পরিবর্তন (ডেমো মূল্যায়ন)', lang)}
+                    {t('Switch Role (Preview)', 'পদবি পরিবর্তন (প্রিভিউ)', lang)}
                   </span>
                   <span style={{ fontSize: '9.5px', color: 'var(--brand-gold, #D97706)', fontWeight: 700 }}>
-                    7 RBAC Roles
+                    {t('7 Roles', '৭টি পদবি', lang)}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
@@ -302,13 +302,14 @@ export default function Topbar({
                           onRoleChange(r);
                           showToast(
                             t(
-                              `Switched persona to: ${rMeta.name} (${t(rMeta.label, rMeta.labelBn, lang)})`,
-                              `পদবি পরিবর্তন: ${rMeta.name}`,
+                              `Switched to: ${rMeta.name} (${rMeta.label})`,
+                              `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
                               lang
                             ),
                             'gold'
                           );
                         }}
+                        title={`${rMeta.name} (${rMeta.empId}) — ${rMeta.label}`}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -329,7 +330,7 @@ export default function Topbar({
                           cursor: 'pointer',
                           textAlign: 'left',
                           transition: 'all 0.15s ease',
-                          boxSizing: 'border-box'
+                          boxSizing: 'border-box',
                         }}
                       >
                         <span
@@ -344,13 +345,13 @@ export default function Topbar({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0
+                            flexShrink: 0,
                           }}
                         >
                           {rMeta.initials}
                         </span>
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                          {rMeta.name.split(' ')[0]}
+                          {rMeta.shortName}
                         </span>
                         {isCurrent && <span style={{ fontSize: '10px', color: 'var(--brand-crimson)' }}>✓</span>}
                       </button>
@@ -359,9 +360,8 @@ export default function Topbar({
                 </div>
               </div>
 
-              {/* Real Enterprise Software Actions */}
+              {/* Account Actions */}
               <div className="user-dropdown-body">
-                {/* 1. My Profile & Credentials */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
@@ -372,13 +372,14 @@ export default function Topbar({
                 >
                   <User size={15} color="var(--brand-slate-600)" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('My Profile & Credentials', 'আমার প্রোফাইল ও সনদপত্র', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Official designation, reporting line & SAP dossier', 'অফিসিয়াল পদবী ও সার্ভিস রেকর্ড', lang)}</div>
+                    <div style={{ fontWeight: 600 }}>{t('My Employee Profile', 'আমার কর্মী প্রোফাইল', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                      {t(`${meta.empId} • ${meta.siteLabel}`, `${meta.empId} • ${meta.siteLabelBn}`, lang)}
+                    </div>
                   </div>
                   <ChevronRight size={13} color="var(--brand-slate-300)" />
                 </div>
 
-                {/* 2. Security & 2FA */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
@@ -389,13 +390,14 @@ export default function Topbar({
                 >
                   <Key size={15} color="#059669" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Security & 2-Factor Auth (2FA)', 'নিরাপত্তা ও ২-ফ্যাক্টর অথেনটিকেশন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#059669' }}>✓ FIDO2 Key & MFA Enforced</div>
+                    <div style={{ fontWeight: 600 }}>{t('Password & Login Security', 'পাসওয়ার্ড ও নিরাপত্তা', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: '#059669' }}>
+                      ✓ {t('2-Step Verification Active', '২-ধাপ নিরাপত্তা যাচাই চালু', lang)}
+                    </div>
                   </div>
                   <ChevronRight size={13} color="var(--brand-slate-300)" />
                 </div>
 
-                {/* 3. Out-of-Office / Delegation */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
@@ -406,13 +408,14 @@ export default function Topbar({
                 >
                   <Award size={15} color="#D97706" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Delegation & Out of Office', 'অনুমোদন প্রতিনিধিত্ব (ছুটি/ভ্রমণ)', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Assign signing authority during plant visits', 'অনুপস্থিতিতে বিকল্প স্বাক্ষরকারী নির্ধারণ', lang)}</div>
+                    <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                      {t('Assign an acting colleague during leave or travel', 'ছুটি বা ভ্রমণে বিকল্প দায়িত্বপ্রাপ্ত কর্মকর্তা নির্ধারণ', lang)}
+                    </div>
                   </div>
                   <ChevronRight size={13} color="var(--brand-slate-300)" />
                 </div>
 
-                {/* 4. Sign-In History & Audit */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
@@ -423,15 +426,16 @@ export default function Topbar({
                 >
                   <Clock size={15} color="#0284C7" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Sign-In History & Sessions', 'লগইন ইতিহাস ও সেশন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('10.14.2.88 (Dhaka HQ Gateway) · 0 failed', '১০.১৪.২.৮৮ (ঢাকা সদর দপ্তর)', lang)}</div>
+                    <div style={{ fontWeight: 600 }}>{t('Active Devices & Sign-In Log', 'সক্রিয় ডিভাইস ও লগইন ইতিহাস', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                      {t('Manage signed-in computers and mobile phones', 'লগইনকৃত কম্পিউটার ও মোবাইল পরিচালনা', lang)}
+                    </div>
                   </div>
                   <ChevronRight size={13} color="var(--brand-slate-300)" />
                 </div>
 
                 <div className="user-dropdown-divider" />
 
-                {/* 5. Lock Workstation */}
                 <div
                   className="user-dropdown-item"
                   onClick={() => {
@@ -441,13 +445,13 @@ export default function Topbar({
                 >
                   <Lock size={15} color="var(--brand-slate-600)" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Lock Workstation', 'ওয়ার্কস্টেশন লক করুন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Instant terminal security lock (PIN / Biometric)', 'তাৎক্ষণিক টার্মিনাল লক', lang)}</div>
+                    <div style={{ fontWeight: 600 }}>{t('Lock Screen', 'স্ক্রিন লক করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
+                      {t('Temporarily lock your screen with a 4-digit PIN', '৪-সংখ্যার পিন দিয়ে সাময়িকভাবে স্ক্রিন লক করুন', lang)}
+                    </div>
                   </div>
-                  <span style={{ fontSize: '10px', background: 'var(--brand-slate-100)', padding: '2px 5px', borderRadius: '4px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>⌘L</span>
                 </div>
 
-                {/* 6. Sign Out / Exit Session */}
                 <div
                   className="user-dropdown-item danger"
                   onClick={() => {
@@ -457,8 +461,10 @@ export default function Topbar({
                 >
                   <LogOut size={15} color="#DC2626" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: '#DC2626' }}>{t('Sign Out / Exit Session', 'সাইন আউট করুন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#EF4444' }}>{t('End S/4HANA session & return to login', 'সেশন সমাপ্ত করে লগইন পেজে ফিরে যান', lang)}</div>
+                    <div style={{ fontWeight: 700, color: '#DC2626' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: '#EF4444' }}>
+                      {t('Close session and return to sign-in screen', 'সেশন শেষ করে লগইন পেইজে ফিরে যান', lang)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -467,10 +473,10 @@ export default function Topbar({
         </div>
       </div>
 
-      {/* SAP Gateway Modal */}
+      {/* Accounting & System Sync Status Modal */}
       {showSapModal && <SapGatewayModal onClose={() => setShowSapModal(false)} lang={lang} />}
 
-      {/* Enterprise Personnel Dossier & Security Modal */}
+      {/* Employee Profile & Security Modal */}
       {showProfileModal && (
         <UserProfileModal
           role={role}
@@ -480,7 +486,7 @@ export default function Topbar({
         />
       )}
 
-      {/* Workstation Lock Screen */}
+      {/* Screen Lock Modal */}
       {showLockScreen && (
         <LockScreenModal
           role={role}

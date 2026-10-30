@@ -1,7 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Lang, t, AppView } from '../types';
-import { Bell, CheckCheck, FileText, AlertTriangle, Truck, ShieldCheck, Clock, ExternalLink } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { AppRole, Lang, t, AppView, ROLE_META } from '../types';
+import { Bell, CheckCheck, FileText, AlertTriangle, Truck, ShieldCheck } from 'lucide-react';
 import { showToast } from '../App';
+import { useApprovalStore } from '../store/approvalStore';
+import { useFleetStore } from '../store/fleetStore';
+import { useNoticeStore } from '../store/noticeStore';
+import { getAllowedViewsForRole } from './Sidebar';
 
 interface NotificationItem {
   id: string;
@@ -15,76 +19,28 @@ interface NotificationItem {
   targetView?: AppView;
 }
 
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n-1',
-    category: 'approval',
-    title: 'High-Value Note Escalation',
-    titleBn: 'জরুরি নথি অনুমোদন বাকি',
-    desc: 'Farida Begum forwarded Note PROC/0894 (Safety Valve ৳48.5L) for Chairman sign-off.',
-    descBn: 'ফরিদা বেগম নোট PROC/0894 (সেফটি ভালভ ৪৮.৫ লাখ টাকা) চেয়ারম্যান স্বাক্ষরের জন্য পাঠিয়েছেন।',
-    time: '4m ago',
-    unread: true,
-    targetView: 'notesheet',
-  },
-  {
-    id: 'n-2',
-    category: 'safety',
-    title: 'Keraniganj Bitumen Tank Pressure Normal',
-    titleBn: 'কেরানীগঞ্জ বিটুমিন ট্যাঙ্ক চাপ স্বাভাবিক',
-    desc: 'DCS SCADA sensor TK-01 returned to standard 162°C nominal envelope.',
-    descBn: 'ডিসিএস সেন্সর TK-01 স্বাভাবিক অপারেটিং তাপমাত্রা ১৬২° সে.-এ ফিরে এসেছে।',
-    time: '18m ago',
-    unread: true,
-    targetView: 'dashboard',
-  },
-  {
-    id: 'n-3',
-    category: 'logistics',
-    title: 'Smart Fleet Ride Pooling Activated',
-    titleBn: 'ফ্লিট রাইড পুলিং কার্যকর হয়েছে',
-    desc: 'Pool #3 combined 2 passenger requests to Keraniganj Plant, saving 18.4L octane.',
-    descBn: 'পুল #৩ কেরানীগঞ্জ প্ল্যান্টের ২ যাত্রী একীভূত করে ১৮.৪ লিটার অকটেন সাশ্রয় করেছে।',
-    time: '1h ago',
-    unread: true,
-    targetView: 'fleet',
-  },
-  {
-    id: 'n-4',
-    category: 'system',
-    title: 'SAP S/4HANA Enterprise Gateway Synced',
-    titleBn: 'এসএপি গেটওয়ে সফলভাবে সিঙ্ক হয়েছে',
-    desc: '32 plant inventory movements & attendance batches posted to SAP Finance ledger.',
-    descBn: '৩২টি প্ল্যান্ট ইনভেন্টরি ও উপস্থিতি ব্যাচ এসএপি লেজারে সফলভাবে আপলোড হয়েছে।',
-    time: '2h ago',
-    unread: false,
-    targetView: 'dashboard',
-  },
-  {
-    id: 'n-5',
-    category: 'safety',
-    title: 'BSTI License Audit Scheduled',
-    titleBn: 'বিএসটিআই লাইসেন্স অডিট নির্ধারিত',
-    desc: 'Statutory inspection by BSTI Directorate booked for upcoming Tuesday 11:00 AM.',
-    descBn: 'বিএসটিআই অধিদপ্তরের বার্ষিক পরিদর্শন আগামী মঙ্গলবার সকাল ১১টায় অনুষ্ঠিত হবে।',
-    time: '4h ago',
-    unread: false,
-    targetView: 'compliance',
-  },
-];
-
 interface NotificationCenterProps {
+  role?: AppRole;
   lang: Lang;
   onNavigate: (view: AppView) => void;
 }
 
-export default function NotificationCenter({ lang, onNavigate }: NotificationCenterProps) {
+export default function NotificationCenter({
+  role = 'chairman',
+  lang,
+  onNavigate,
+}: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [readIds, setReadIds] = useState<Set<string>>(new Set(['sys-sync']));
   const [filter, setFilter] = useState<'all' | 'approval' | 'safety' | 'logistics'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const { approvalItems } = useApprovalStore();
+  const { notifications: fleetNotifs, markNotificationRead } = useFleetStore();
+  const { activeBroadcast } = useNoticeStore();
+
+  const allowedViews = useMemo(() => getAllowedViewsForRole(role), [role]);
+  const meta = ROLE_META[role];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -96,14 +52,171 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const notifications = useMemo<NotificationItem[]>(() => {
+    const list: NotificationItem[] = [];
+
+    // 1. Live Company Announcement (if active)
+    if (activeBroadcast) {
+      list.push({
+        id: `bc-${activeBroadcast.id}`,
+        category: 'system',
+        title: `Announcement: ${activeBroadcast.title}`,
+        titleBn: `ঘোষণা: ${activeBroadcast.title}`,
+        desc: `${activeBroadcast.body.slice(0, 95)}... — ${activeBroadcast.author}`,
+        descBn: `${activeBroadcast.body.slice(0, 95)}... — ${activeBroadcast.author}`,
+        time: activeBroadcast.timestamp,
+        unread: !readIds.has(`bc-${activeBroadcast.id}`),
+        targetView: 'dashboard',
+      });
+    }
+
+    // 2. Role-Specific Relevant Notifications
+    if (role === 'driver') {
+      list.push(
+        {
+          id: 'drv-1',
+          category: 'logistics',
+          title: 'Active Trip Assigned (REQ-2026-442)',
+          titleBn: 'নির্ধারিত ট্রিপ চালু রয়েছে (REQ-2026-442)',
+          desc: 'Head Office to Motijheel Bangladesh Bank with Farida Begum (Toyota Prado GHA-13-8821).',
+          descBn: 'বারিধারা প্রধান কার্যালয় হতে মতিঝিল বাংলাদেশ ব্যাংক (ফরিদা বেগম)।',
+          time: '15m ago',
+          unread: !readIds.has('drv-1'),
+          targetView: 'fleet',
+        },
+        {
+          id: 'drv-2',
+          category: 'safety',
+          title: 'Morning Fitness & License Check Passed',
+          titleBn: 'সকালের ফিটনেস ও লাইসেন্স যাচাই সম্পন্ন',
+          desc: 'Duty check-in completed at 06:48 AM at Head Office Gate-1.',
+          descBn: 'সকাল ০৬:৪৮ মিনিটে প্রধান কার্যালয় গেট-১ এ উপস্থিতি নিশ্চিত হয়েছে।',
+          time: '2h ago',
+          unread: !readIds.has('drv-2'),
+          targetView: 'attendance',
+        }
+      );
+    } else if (role === 'employee') {
+      list.push(
+        {
+          id: 'emp-1',
+          category: 'approval',
+          title: 'Confirm Receipt of New Office Phone',
+          titleBn: 'নতুন অফিস ফোনের প্রাপ্তি নিশ্চিত করুন',
+          desc: 'iPhone 15 Business Handset (BOGCL-IT-PHN-310) is waiting for your 1-click confirmation.',
+          descBn: 'আপনার নামে বরাদ্দকৃত অফিস ফোনের প্রাপ্তি নিশ্চিত করুন।',
+          time: '20m ago',
+          unread: !readIds.has('emp-1'),
+          targetView: 'asset',
+        },
+        {
+          id: 'emp-2',
+          category: 'logistics',
+          title: 'Visitor Expected Today at 3:15 PM',
+          titleBn: 'আজ বিকাল ৩:১৫ মিনিটে অতিথি আগমন',
+          desc: 'Engr. Mahfuzur Rahman (RHD) pre-registered for Level 4 Meeting Room B.',
+          descBn: 'প্রকৌ. মাহফুজুর রহমান (সওজ) বিকাল ৩:১৫ মিনিটে ৪র্থ তলায় আসবেন।',
+          time: '1h ago',
+          unread: !readIds.has('emp-2'),
+          targetView: 'guest',
+        },
+        {
+          id: 'emp-3',
+          category: 'approval',
+          title: '2 Expense Claims Under Review',
+          titleBn: '২টি ভ্রমণ ও যাতায়াত বিল অনুমোদনের অপেক্ষায়',
+          desc: 'Chattogram Dealer Visit (৳14,850) and Local Client Visits (৳5,420) are with Finance.',
+          descBn: 'চট্টগ্রাম ডিলার ভিজিট ও স্থানীয় যাতায়াত বিল অর্থ বিভাগে পর্যালোচনায় রয়েছে।',
+          time: '3h ago',
+          unread: !readIds.has('emp-3'),
+          targetView: 'claims',
+        }
+      );
+    } else {
+      // Management / Supervisor Roles
+      if (allowedViews.has('approvals') && approvalItems.length > 0) {
+        const top = approvalItems[0];
+        list.push({
+          id: `apr-top-${top.id}`,
+          category: 'approval',
+          title: `${approvalItems.length} Items Waiting for Approval`,
+          titleBn: `${approvalItems.length}টি প্রস্তাব অনুমোদনের অপেক্ষায়`,
+          desc: `Priority: ${top.title} (${top.amount || top.requester}).`,
+          descBn: `অগ্রাধিকার: ${top.titleBn} (${top.amount || top.requester})।`,
+          time: '5m ago',
+          unread: !readIds.has(`apr-top-${top.id}`),
+          targetView: 'approvals',
+        });
+      }
+
+      if (allowedViews.has('compliance')) {
+        list.push({
+          id: 'perm-urgent',
+          category: 'safety',
+          title: 'Import Quota Permit Renews in 7 Days',
+          titleBn: 'কাঁচামাল আমদানি কোটা নবায়নে ৭ দিন বাকি',
+          desc: 'Annual Raw Material Import Permit (EMRD/BOGCL/2026/09) is at Ministry review.',
+          descBn: 'বার্ষিক কাঁচামাল আমদানি পারমিট জ্বালানি মন্ত্রণালয়ে চূড়ান্ত পর্যায়ে রয়েছে।',
+          time: '35m ago',
+          unread: !readIds.has('perm-urgent'),
+          targetView: 'compliance',
+        });
+      }
+
+      if (allowedViews.has('fleet')) {
+        const recentFleet = fleetNotifs.slice(0, 2);
+        recentFleet.forEach((fn) => {
+          list.push({
+            id: `fn-${fn.id}`,
+            category: 'logistics',
+            title: fn.title,
+            titleBn: fn.title,
+            desc: fn.message,
+            descBn: fn.message,
+            time: fn.time,
+            unread: fn.unread && !readIds.has(`fn-${fn.id}`),
+            targetView: 'fleet',
+          });
+        });
+      }
+    }
+
+    // Common System Sync Notice
+    list.push({
+      id: 'sys-sync',
+      category: 'system',
+      title: 'Daily Attendance & Accounts Synced',
+      titleBn: 'দৈনন্দিন উপস্থিতি ও হিসাব সিঙ্ক সম্পন্ন',
+      desc: `All records for ${meta.siteLabel} are up to date for 29 Oct 2026.`,
+      descBn: `${meta.siteLabelBn}-এর সকল তথ্য হালনাগাদ রয়েছে।`,
+      time: 'Today, 09:00 AM',
+      unread: !readIds.has('sys-sync'),
+      targetView: 'dashboard',
+    });
+
+    return list;
+  }, [activeBroadcast, role, allowedViews, approvalItems, fleetNotifs, readIds, meta]);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
   const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-    showToast(t('All notifications marked as read', 'সকল নোটিফিকেশন পঠিত হিসেবে চিহ্নিত', lang), 'info');
+    const next = new Set(readIds);
+    notifications.forEach((n) => {
+      next.add(n.id);
+      if (n.id.startsWith('fn-')) {
+        markNotificationRead(n.id.replace('fn-', ''));
+      }
+    });
+    setReadIds(next);
+    showToast(t('All notifications marked as read.', 'সকল নোটিফিকেশন পঠিত হিসেবে চিহ্নিত করা হয়েছে।', lang), 'info');
   };
 
   const handleItemClick = (item: NotificationItem) => {
-    setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, unread: false } : n));
-    if (item.targetView) {
+    setReadIds((prev) => new Set(prev).add(item.id));
+    if (item.id.startsWith('fn-')) {
+      markNotificationRead(item.id.replace('fn-', ''));
+    }
+    if (item.targetView && allowedViews.has(item.targetView)) {
       onNavigate(item.targetView);
       setIsOpen(false);
     }
@@ -111,7 +224,7 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
 
   const filtered = filter === 'all'
     ? notifications
-    : notifications.filter(n => n.category === filter);
+    : notifications.filter((n) => n.category === filter);
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
@@ -128,7 +241,7 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
       <button
         className="btn-icon-topbar"
         onClick={() => setIsOpen(!isOpen)}
-        title={t('Notifications & Activity Stream', 'নোটিফিকেশন ও কার্যক্রম', lang)}
+        title={t('Notifications & Updates', 'নোটিফিকেশন ও সাম্প্রতিক আপডেট', lang)}
       >
         <Bell size={16} />
         {unreadCount > 0 && (
@@ -140,8 +253,8 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
         <div className="notification-dropdown">
           <div className="notif-header">
             <div className="notif-header-title">
-              <h4>{t('Activity & Notifications', 'নোটিফিকেশন ও সাম্প্রতিক তথ্য', lang)}</h4>
-              <span className="notif-count-pill">{unreadCount} {t('unread', 'নতুন', lang)}</span>
+              <h4>{t('Notifications & Updates', 'নোটিফিকেশন ও সাম্প্রতিক তথ্য', lang)}</h4>
+              <span className="notif-count-pill">{unreadCount} {t('new', 'নতুন', lang)}</span>
             </div>
 
             <div className="notif-header-actions">
@@ -172,13 +285,13 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
               className={`notif-tab ${filter === 'safety' ? 'active' : ''}`}
               onClick={() => setFilter('safety')}
             >
-              {t('Safety', 'নিরাপত্তা', lang)}
+              {t('Safety & Permits', 'নিরাপত্তা', lang)}
             </button>
             <button
               className={`notif-tab ${filter === 'logistics' ? 'active' : ''}`}
               onClick={() => setFilter('logistics')}
             >
-              {t('Logistics', 'লজিস্টিক্স', lang)}
+              {t('Transport', 'পরিবহন', lang)}
             </button>
           </div>
 
@@ -186,7 +299,7 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
           <div className="notif-list">
             {filtered.length === 0 ? (
               <div className="notif-empty">
-                <span>{t('No notifications in this category.', 'কোনো নোটিফিকেশন নেই।', lang)}</span>
+                <span>{t('No notifications in this tab.', 'এই বিভাগে কোনো নোটিফিকেশন নেই।', lang)}</span>
               </div>
             ) : (
               filtered.map((item) => (
@@ -215,7 +328,7 @@ export default function NotificationCenter({ lang, onNavigate }: NotificationCen
 
           <div className="notif-footer">
             <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-              ⚡ Industrial SCADA & SAP S/4HANA Event Bus
+              🔔 {t(`Live Updates for ${meta.name}`, `${meta.nameBn}-এর লাইভ আপডেট`, lang)}
             </span>
           </div>
         </div>

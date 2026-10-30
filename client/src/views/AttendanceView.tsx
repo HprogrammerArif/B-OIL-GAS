@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ViewProps, t } from '../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ViewProps, ROLE_META, t } from '../types';
 import { showToast } from '../App';
 import {
   MapPin, CheckCircle, Clock, ShieldCheck, AlertCircle,
@@ -84,6 +84,7 @@ const ROSTER_DATA: ShiftWorker[] = [
 ];
 
 export default function AttendanceView({ role, lang }: ViewProps) {
+  const currentPersona = ROLE_META[role] || ROLE_META.employee;
   const [hasPunchedIn, setHasPunchedIn] = useState(true);
   const [punchTime, setPunchTime] = useState('08:52 AM');
   const [showFaceModal, setShowFaceModal] = useState(false);
@@ -92,6 +93,25 @@ export default function AttendanceView({ role, lang }: ViewProps) {
   const [selectedLocation, setSelectedLocation] = useState<'keraniganj' | 'dhaka_hq'>('keraniganj');
   const [gpsAccuracy, setGpsAccuracy] = useState('±4.2m');
   const [userCoords, setUserCoords] = useState({ lat: '23.6850° N', lng: '90.3540° E' });
+
+  const roster = useMemo(() => {
+    const defaultRoster = [
+      {
+        id: currentPersona.empId,
+        name: currentPersona.name,
+        role: currentPersona.label,
+        dept: currentPersona.dept || 'Operations Division',
+        shift: 'General (09:00 - 18:00)',
+        inTime: hasPunchedIn ? punchTime : 'Not Clocked In',
+        outTime: hasPunchedIn ? 'On Duty' : '-',
+        locationStatus: hasPunchedIn ? ('inside_geofence' as const) : ('absent' as const),
+        overtimeHours: 0,
+        distanceMeters: 42,
+      },
+      ...ROSTER_DATA.filter(r => r.name !== currentPersona.name && r.name !== 'Tanvir Ahmed'),
+    ];
+    return defaultRoster;
+  }, [currentPersona, hasPunchedIn, punchTime]);
 
   const handlePunchToggle = () => {
     if (!hasPunchedIn) {
@@ -135,8 +155,8 @@ export default function AttendanceView({ role, lang }: ViewProps) {
           </h2>
           <p className="section-subtitle">
             {t(
-              'Server-side Haversine anti-spoof validation, AI biometric facial liveness & statutory shift roster.',
-              'সার্ভার-সাইড হ্যাভারসাইন অ্যান্টি-স্পুফ জিওফেন্স, এআই ফেসিয়াল লাইভনেস ও শিফট রোস্টার।',
+              'High-precision GPS location validation, biometric facial recognition & official shift roster.',
+              'জিপিএস অবস্থান যাচাই, বায়োমেট্রিক উপস্থিতি ও অফিশিয়াল শিফট রোস্টার।',
               lang
             )}
           </p>
@@ -241,7 +261,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 <strong style={{ color: '#059669' }}>PASSED (None)</strong>
               </div>
               <div>
-                <span style={{ color: 'var(--brand-slate-500)' }}>Haversine Radius:</span>{' '}
+                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Geofence Radius:', 'জিওফেন্স ব্যাসার্ধ:', lang)}</span>{' '}
                 <strong>500 Meters (Clear)</strong>
               </div>
             </div>
@@ -255,7 +275,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
               <div className="card-hd-icon"><UserCheck size={16} /></div>
               <div>
                 <div className="card-title">{t('My Personal Shift Console', 'আমার ব্যক্তিগত শিফট কনসোল', lang)}</div>
-                <div className="card-subtitle">Tanvir Ahmed · Sales Officer (ID: BOGCL-1049)</div>
+                <div className="card-subtitle">{currentPersona.name} · {currentPersona.label} (ID: {currentPersona.empId})</div>
               </div>
             </div>
             <span className={`badge ${hasPunchedIn ? 'success' : 'warn'}`}>
@@ -334,7 +354,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {ROSTER_DATA.map((r) => (
+                {roster.map((r) => (
                   <tr key={r.id}>
                     <td>
                       <div style={{ fontWeight: 600 }}>{r.name}</div>
@@ -428,7 +448,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 {faceScanning ? t('Scanning Facial Geometry...', 'মুখমন্ডলের জ্যামিতি স্ক্যান করা হচ্ছে...', lang) : t('Biometric Match: 99.4% Verified', 'বায়োমেট্রিক ম্যাচ: ৯৯.৪% নিশ্চিত', lang)}
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--brand-slate-500)', margin: 0 }}>
-                {faceScanning ? t('Please look directly at camera inside Keraniganj Plant geofence.', 'অনুগ্রহ করে ক্যামেরার দিকে তাকান।', lang) : t('Tanvir Ahmed (ID: BOGCL-1049) authenticated successfully.', 'তানভীর আহমেদ (আইডি: BOGCL-1049) যাচাই সম্পন্ন হয়েছে।', lang)}
+                {faceScanning ? t('Please look directly at camera inside Keraniganj Plant geofence.', 'অনুগ্রহ করে ক্যামেরার দিকে তাকান।', lang) : t(`${currentPersona.name} (ID: ${currentPersona.empId}) authenticated successfully.`, `${currentPersona.name} (আইডি: ${currentPersona.empId}) যাচাই সম্পন্ন হয়েছে।`, lang)}
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
 import { showToast } from '../App';
+import { useOperationsStore } from '../store/operationsStore';
 import {
   Users, User, UserCheck, ShieldAlert, QrCode, Plus, Search,
   CheckCircle, Clock, AlertTriangle, Building2, Crown,
@@ -360,8 +361,8 @@ export default function GuestView({ role, lang }: ViewProps) {
   const currentUserDept = currentUser.dept;
   const isStaff = role === 'employee';
 
-  // State
-  const [visitors, setVisitors] = useState<VisitorRecord[]>(INITIAL_VISITORS);
+  // Persistent Operations Store
+  const { visitors, setVisitors } = useOperationsStore();
   const [selectedVisitorId, setSelectedVisitorId] = useState<string>('VIS-2026-0811');
   const [activeTab, setActiveTab] = useState<'all' | 'inside' | 'my_guests' | 'vip_govt' | 'pre_registered'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -418,10 +419,13 @@ export default function GuestView({ role, lang }: ViewProps) {
   // ─────────────────────────────────────────────────────────────────────────
   const scopedVisitors = useMemo(() => {
     if (scopeMode === 'my_guests') {
-      return visitors.filter(v => v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()));
+      return visitors.filter(v =>
+        v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()) ||
+        (isStaff && v.hostEmployee.toLowerCase().includes('tanvir'))
+      );
     }
     return visitors;
-  }, [visitors, scopeMode, currentUserName]);
+  }, [visitors, scopeMode, currentUserName, isStaff]);
 
   const selectedVisitor = useMemo(() => {
     return visitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0] || visitors[0];
@@ -695,13 +699,13 @@ export default function GuestView({ role, lang }: ViewProps) {
               {t('Guest & VIP Protocol Management System', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}
             </h2>
             <span className="badge success" style={{ fontSize: '10.5px' }}>
-              ALPR & HSE PERMIT-TO-ENTER
+              VEHICLE GATE & HSE PASS
             </span>
           </div>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
             {t(
-              'Encrypted QR Gate Passes, ALPR Barrier Automation, HSE Safety Gear Allotment & Emergency Evacuation Muster',
-              'এনক্রিপ্টেড কিউআর গেট পাস, লাইসেন্স প্লেট বেরিয়ার, এইচএসই নিরাপত্তা সরঞ্জাম ও জরুরি ইভাকুয়েশন মাস্টার',
+              'Digital QR Gate Passes, Automatic Vehicle Barrier, Safety Gear Clearance & Evacuation Roster',
+              'কিউআর গেট পাস, স্বয়ংক্রিয় গাড়ি বেরিয়ার, নিরাপত্তা সরঞ্জাম ও জরুরি ইভাকুয়েশন তালিকা',
               lang
             )}
           </p>
@@ -713,7 +717,7 @@ export default function GuestView({ role, lang }: ViewProps) {
             className="btn-gold"
             style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
             onClick={() => setShowScannerModal(true)}
-            title="Open Live Gate QR Scanner & ALPR Reader"
+            title="Open Live Gate QR Scanner & Plate Reader"
           >
             <Scan size={14} />
             {t('Quick QR Gate Scanner', 'গেট কিউআর স্ক্যানার', lang)}
@@ -730,14 +734,14 @@ export default function GuestView({ role, lang }: ViewProps) {
             {t('Emergency Muster List', 'জরুরি ইভাকুয়েশন তালিকা', lang)} ({stats.totalInside})
           </button>
 
-          {/* ALPR Gate Barrier Scanner Simulator */}
+          {/* Vehicle Gate Barrier Scanner Simulator */}
           <button
             className="btn-outline"
             style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
             onClick={() => setShowALPRModal(true)}
           >
             <Car size={14} />
-            {t('ALPR Gate Barrier 1', 'গেট ১ ক্যামেরা ও বেরিয়ার', lang)}
+            {t('Vehicle Barrier Gate 1', 'গেট ১ ক্যামেরা ও বেরিয়ার', lang)}
           </button>
 
           {/* Pre-Register Button */}
@@ -1228,7 +1232,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     onClick={() => setCockpitSubTab('alpr')}
                   >
                     <Car size={13} />
-                    {t('ALPR Vehicle Gate', 'নম্বরপ্লেট ও বেরিয়ার', lang)}
+                    {t('Vehicle Gate Barrier', 'যানবাহন গেট বেরিয়ার', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'zones' ? 'active' : ''}`}

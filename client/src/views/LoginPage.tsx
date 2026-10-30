@@ -3,7 +3,7 @@ import { AppRole, Lang, ROLE_META, t } from '../types';
 import { showToast } from '../App';
 import {
   Lock, Mail, ArrowRight, ShieldCheck,
-  Globe, Eye, EyeOff, Sparkles, User
+  Globe, Eye, EyeOff, Sparkles
 } from 'lucide-react';
 import TelemetryLoader from '../components/TelemetryLoader';
 
@@ -15,44 +15,60 @@ interface LoginPageProps {
 
 interface PersonaOption {
   role: AppRole;
-  email: string;
   shortLabel: string;
   shortLabelBn: string;
 }
 
 const PERSONAS: PersonaOption[] = [
-  { role: 'chairman',       email: 'ahmed.sobhan@bashundhara.com',    shortLabel: 'Chairman & MD',       shortLabelBn: 'চেয়ারম্যান' },
-  { role: 'plant_gm',       email: 'harunur.rashid@bashundhara.com',  shortLabel: 'Plant GM',            shortLabelBn: 'প্ল্যান্ট জিএম' },
-  { role: 'hr_admin',       email: 'afroza.sultana@bashundhara.com',  shortLabel: 'HR GM',               shortLabelBn: 'এইচআর জিএম' },
-  { role: 'transport_admin',email: 'kamruzzaman@bashundhara.com',     shortLabel: 'Transport Super',     shortLabelBn: 'পরিবহন সুপার' },
-  { role: 'hod',            email: 'farida.begum@bashundhara.com',    shortLabel: 'Finance HOD',         shortLabelBn: 'অর্থ প্রধান' },
-  { role: 'employee',       email: 'tanvir.ahmed@bashundhara.com',    shortLabel: 'Staff Self-Service',  shortLabelBn: 'কর্মী সেলফ-সার্ভিস' },
-  { role: 'driver',         email: 'rafiqul.driver@bashundhara.com',  shortLabel: 'Duty Driver Terminal',shortLabelBn: 'ডিউটি ড্রাইভার' },
+  { role: 'chairman',        shortLabel: 'Chairman & MD',        shortLabelBn: 'চেয়ারম্যান ও এমডি' },
+  { role: 'plant_gm',        shortLabel: 'Plant GM',             shortLabelBn: 'প্ল্যান্ট জিএম' },
+  { role: 'hr_admin',        shortLabel: 'GM, HR & Admin',       shortLabelBn: 'এইচআর ও প্রশাসন' },
+  { role: 'transport_admin', shortLabel: 'Transport Supervisor', shortLabelBn: 'পরিবহন সুপারভাইজার' },
+  { role: 'hod',             shortLabel: 'Head of Finance',      shortLabelBn: 'অর্থ বিভাগ প্রধান' },
+  { role: 'employee',        shortLabel: 'Sales Officer',        shortLabelBn: 'সিনিয়র সেলস অফিসার' },
+  { role: 'driver',          shortLabel: 'Company Driver',       shortLabelBn: 'কোম্পানি ড্রাইভার' },
 ];
 
 export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProps) {
   const [selectedRole, setSelectedRole] = useState<AppRole>('chairman');
-  const [email, setEmail] = useState('ahmed.sobhan@bashundhara.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState(ROLE_META.chairman.email);
+  const [password, setPassword] = useState('bogcl2026');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSelectPersona = (p: PersonaOption) => {
+    const meta = ROLE_META[p.role];
     setSelectedRole(p.role);
-    setEmail(p.email);
-    setPassword('••••••••••••');
+    setEmail(meta.email);
+    setPassword('bogcl2026');
+  };
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val);
+    const normalized = val.trim().toLowerCase();
+    const matchedRole = (Object.keys(ROLE_META) as AppRole[]).find(
+      (r) =>
+        ROLE_META[r].email.toLowerCase() === normalized ||
+        ROLE_META[r].empId.toLowerCase() === normalized
+    );
+    if (matchedRole) {
+      setSelectedRole(matchedRole);
+    }
   };
 
   const handleTelemetryComplete = () => {
     setIsSubmitting(false);
     onLogin(selectedRole);
     const meta = ROLE_META[selectedRole];
-    showToast(t(
-      `Welcome, ${meta.name}! Logged into BOGCL OneOps.`,
-      `স্বাগতম, ${meta.name}! সফলভাবে লগইন সম্পন্ন হয়েছে।`,
-      lang
-    ), 'gold');
+    showToast(
+      t(
+        `Welcome, ${meta.name}! Signed into BOGCL OneOps.`,
+        `স্বাগতম, ${meta.nameBn}! সফলভাবে লগইন সম্পন্ন হয়েছে।`,
+        lang
+      ),
+      'gold'
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -70,7 +86,7 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
           <div className="brand-emblem">B</div>
           <div className="login-brand-title">
             <h1>BASHUNDHARA OIL & GAS COMPANY LTD.</h1>
-            <p>{t('A Concern of Bashundhara Group • Enterprise Operations', 'বসুন্ধরা গ্রুপ — দেশ ও মানুষের কল্যাণে', lang)}</p>
+            <p>{t('A Concern of Bashundhara Group • Company Operations Portal', 'বসুন্ধরা গ্রুপ — দেশ ও মানুষের কল্যাণে', lang)}</p>
           </div>
         </div>
 
@@ -83,7 +99,7 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
             borderColor: 'rgba(255,255,255,0.18)',
             padding: '6px 14px',
             borderRadius: '20px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           <Globe size={14} />
@@ -100,18 +116,22 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
               <div className="brand-emblem-large">B</div>
             </div>
             <h2 className="login-main-title">
-              {t('Sign In to BOGCL OneOps', 'বসুন্ধরা ওয়ান-অপ্স এ সাইন ইন করুন', lang)}
+              {t('Sign In to BOGCL OneOps', 'বসুন্ধরা ওয়ান-অপ্স পোর্টালে সাইন ইন করুন', lang)}
             </h2>
             <p className="login-main-subtitle">
-              {t('Unified Operational Governance & Refinery Command', 'একীভূত অপারেশনাল গভর্ন্যান্স ও রিফাইনারি কমান্ড', lang)}
+              {t(
+                'Daily Operations, Approvals, Vehicles, Assets & Staff Services',
+                'দৈনন্দিন কার্যক্রম, অনুমোদন, পরিবহন, সম্পদ ও কর্মী সেবা পোর্টাল',
+                lang
+              )}
             </p>
           </div>
 
-          {/* Quick Demo Persona Switcher (Clean, intuitive 3x2 pills) */}
+          {/* Quick Demo Role Switcher */}
           <div className="demo-persona-section">
             <div className="demo-persona-label">
               <Sparkles size={12} color="var(--brand-gold)" />
-              <span>{t('Select Persona for Demo / Evaluation', 'ডেমো পর্যালোচনার জন্য পদবি নির্বাচন করুন', lang)}</span>
+              <span>{t('Choose a Role to Preview the System', 'সিস্টেমটি দেখার জন্য যেকোনো একটি পদবি নির্বাচন করুন', lang)}</span>
             </div>
 
             <div className="demo-pills-grid">
@@ -124,13 +144,13 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
                     type="button"
                     className={`demo-pill-btn ${isSelected ? 'active' : ''}`}
                     onClick={() => handleSelectPersona(p)}
-                    title={`${meta.name} — ${t(meta.label, meta.labelBn, lang)}`}
+                    title={`${meta.name} (${meta.empId}) — ${t(meta.label, meta.labelBn, lang)}`}
                   >
                     <span className="demo-pill-avatar" style={{ background: meta.avatarColor }}>
                       {meta.initials}
                     </span>
                     <span className="demo-pill-text">
-                      <strong className="demo-pill-name">{meta.name.split(' ')[0]}</strong>
+                      <strong className="demo-pill-name">{meta.shortName}</strong>
                       <span className="demo-pill-role">{t(p.shortLabel, p.shortLabelBn, lang)}</span>
                     </span>
                     {isSelected && <span className="demo-pill-check">✓</span>}
@@ -142,16 +162,21 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="login-form-clean">
-            {/* Corporate Email / PERNR */}
+            {/* Work Email / Employee ID */}
             <div className="form-group-clean">
-              <label>{t('Corporate Email / Employee ID', 'প্রাতিষ্ঠানিক ইমেইল বা আইডি', lang)}</label>
+              <div className="label-with-link">
+                <label>{t('Work Email or Employee ID', 'অফিস ইমেইল অথবা কর্মী আইডি', lang)}</label>
+                <span style={{ fontSize: '11px', color: 'var(--brand-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
+                  {currentMeta.empId}
+                </span>
+              </div>
               <div className="login-input-clean">
                 <Mail size={15} className="input-icon-clean" />
                 <input
                   type="text"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@bashundhara.com"
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  placeholder="name@bashundhara.com or EMP-0001"
                   required
                 />
               </div>
@@ -165,7 +190,14 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
                   href="#forgot"
                   onClick={(e) => {
                     e.preventDefault();
-                    showToast(t('Contact Bashundhara IT Helpdesk: ext. 4401', 'আইটি হেল্পডেস্কে যোগাযোগ করুন: ext. 4401', lang), 'info');
+                    showToast(
+                      t(
+                        'For password reset, please call IT Support Desk at Ext. 4401.',
+                        'পাসওয়ার্ড রিসেটের জন্য আইটি সাপোর্ট ডেস্কে কল করুন: Ext. 4401',
+                        lang
+                      ),
+                      'info'
+                    );
                   }}
                   className="forgot-link-clean"
                 >
@@ -184,6 +216,7 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
                   type="button"
                   className="pw-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -199,7 +232,7 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <span>{t('Remember this workstation', 'এই ওয়ার্কস্টেশন মনে রাখুন', lang)}</span>
+                <span>{t('Keep me signed in on this computer', 'এই ডিভাইসে সাইন-ইন মনে রাখুন', lang)}</span>
               </label>
             </div>
 
@@ -210,13 +243,13 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <span>{t('Authenticating Credentials...', 'যাচাই করা হচ্ছে...', lang)}</span>
+                <span>{t('Signing In...', 'প্রবেশ করা হচ্ছে...', lang)}</span>
               ) : (
                 <>
                   <span>
                     {t(
-                      `Sign In as ${currentMeta.name.split(' ')[0]}`,
-                      `${currentMeta.name.split(' ')[0]} হিসেবে প্রবেশ করুন`,
+                      `Sign In as ${currentMeta.shortName} (${currentMeta.label})`,
+                      `${currentMeta.nameBn} হিসেবে প্রবেশ করুন`,
                       lang
                     )}
                   </span>
@@ -225,39 +258,39 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
               )}
             </button>
 
-            {/* Subtle SSO Divider */}
+            {/* Divider */}
             <div className="login-divider-clean">
               <span>{t('or continue with', 'অথবা', lang)}</span>
             </div>
 
-            {/* Enterprise Active Directory SSO */}
+            {/* Company Single Sign-On */}
             <button
               type="button"
               className="btn-sso-clean"
               onClick={() => setIsSubmitting(true)}
             >
               <ShieldCheck size={16} color="var(--brand-gold)" />
-              <span>{t('Bashundhara Group Active Directory (SSO)', 'বসুন্ধরা গ্রুপ অ্যাক্টিভ ডিরেক্টরি (এসএসও)', lang)}</span>
+              <span>{t('Sign In with Bashundhara Group Office Account', 'বসুন্ধরা গ্রুপ অফিস অ্যাকাউন্ট দিয়ে প্রবেশ করুন', lang)}</span>
             </button>
           </form>
         </div>
       </main>
 
-      {/* Minimal Footer */}
+      {/* Clean Footer */}
       <footer className="login-footer-clean">
         <div>
           © 2026 <strong>Bashundhara Oil & Gas Company Limited</strong>. All rights reserved.
         </div>
         <div className="login-footer-tags">
-          <span>🔒 256-Bit TLS</span>
+          <span>🔒 {t('Secure Connection', 'নিরাপদ সংযোগ', lang)}</span>
           <span>•</span>
-          <span>ISO 9001:2015</span>
+          <span>{t('Baridhara Head Office', 'বারিধারা প্রধান কার্যালয়', lang)}</span>
           <span>•</span>
-          <span>Keraniganj Refinery Node</span>
+          <span>{t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)}</span>
         </div>
       </footer>
 
-      {/* Telemetry Loader */}
+      {/* Sign-In Progress Overlay */}
       {isSubmitting && (
         <TelemetryLoader
           role={selectedRole}

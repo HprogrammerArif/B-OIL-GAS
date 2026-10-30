@@ -21,7 +21,7 @@ import {
   Send,
   Sparkles,
 } from 'lucide-react';
-import { t } from '../../types';
+import { t, AppRole, ROLE_META } from '../../types';
 import { showToast } from '../../App';
 
 export interface ClaimSubmissionData {
@@ -46,6 +46,7 @@ interface SubmitClaimModalProps {
   onClose: () => void;
   lang: 'en' | 'bn';
   onSubmit: (newClaim: ClaimSubmissionData) => void;
+  currentRole?: AppRole;
 }
 
 interface ItemizedExpense {
@@ -89,6 +90,7 @@ export default function SubmitClaimModal({
   onClose,
   lang,
   onSubmit,
+  currentRole,
 }: SubmitClaimModalProps) {
   const [claimType, setClaimType] = useState<'tada' | 'conveyance' | 'tour_event'>('tada');
   const [purpose, setPurpose] = useState('');
@@ -104,7 +106,7 @@ export default function SubmitClaimModal({
       id: 'item-1',
       date: '2026-10-28',
       category: 'Daily Allowance (DA)',
-      desc: 'Official Duty DA — Grade 8 Statutory Rate (4 Days @ ৳1,500/day)',
+      desc: 'Official Duty DA — Standard Rate (4 Days @ ৳1,500/day)',
       voucherNo: 'DA-CALC-001',
       amount: 6000,
     },
@@ -112,7 +114,7 @@ export default function SubmitClaimModal({
       id: 'item-2',
       date: '2026-10-29',
       category: 'Hotel Accommodation',
-      desc: 'Hotel Peninsula CTG (3 Nights with GST Bill #INV-7729)',
+      desc: 'Hotel Peninsula CTG (3 Nights with VAT Mushak-6.3 #INV-7729)',
       voucherNo: 'VCH-HTL-7729',
       amount: 7200,
     },
@@ -128,7 +130,7 @@ export default function SubmitClaimModal({
 
   // Uploaded Vouchers Simulation
   const [vouchers, setVouchers] = useState([
-    { name: 'Hotel_Peninsula_GST_Invoice_7729.pdf', size: '1.4 MB' },
+    { name: 'Hotel_Peninsula_VAT_Mushak6_3.pdf', size: '1.4 MB' },
     { name: 'Shohoz_AC_Bus_Ticket_EB4491.pdf', size: '420 KB' },
     { name: 'Depot_Gate_Clearance_Slip.jpg', size: '890 KB' },
   ]);
@@ -166,9 +168,12 @@ export default function SubmitClaimModal({
     setItems(items.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
   };
 
-  // Auto calculate Grade 8 DA
+  // Auto calculate DA based on dates
   const handleAutoCalculateDA = () => {
-    const days = 4;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const days = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1);
     const rate = 1500;
     const daAmount = days * rate;
 
@@ -178,7 +183,7 @@ export default function SubmitClaimModal({
       updated[existingDaIndex] = {
         ...updated[existingDaIndex],
         amount: daAmount,
-        desc: `Grade 8 DA Entitlement (${days} days @ ৳${rate}/day compliant with Grade Policy)`,
+        desc: `Official Duty DA (${days} days @ ৳${rate}/day compliant with Grade Policy)`,
       };
       setItems(updated);
     } else {
@@ -187,14 +192,14 @@ export default function SubmitClaimModal({
           id: `item-${Date.now()}`,
           date: startDate || '2026-10-28',
           category: 'Daily Allowance (DA)',
-          desc: `Grade 8 DA Entitlement (${days} days @ ৳${rate}/day compliant with Grade Policy)`,
+          desc: `Official Duty DA (${days} days @ ৳${rate}/day compliant with Grade Policy)`,
           voucherNo: `DA-CALC-${Math.floor(100 + Math.random() * 900)}`,
           amount: daAmount,
         },
         ...items,
       ]);
     }
-    showToast(t(`✓ Calculated Grade 8 Statutory DA: ৳${daAmount} (4 days)`, `✓ গ্রেড ৮ নির্ধারিত ডিএ হিসাব সম্পন্ন: ৳${daAmount}`, lang), 'success');
+    showToast(t(`✓ Calculated Statutory DA: ৳${daAmount} (${days} days)`, `✓ নির্ধারিত দৈনিক ভাতা হিসাব সম্পন্ন: ৳${daAmount} (${days} দিন)`, lang), 'success');
   };
 
   // Apply Preset
@@ -242,11 +247,13 @@ export default function SubmitClaimModal({
       ? 'Oct 01 – Oct 31, 2026'
       : `${startDate} to ${endDate}`;
 
+    const meta = ROLE_META[currentRole || 'employee'];
+
     const submissionData: ClaimSubmissionData = {
       id: newId,
-      claimant: 'Tanvir Ahmed',
-      designation: 'Sales Officer, Grade 8',
-      dept: 'Sales & Distribution',
+      claimant: meta.name,
+      designation: meta.label,
+      dept: meta.dept,
       type: claimType,
       purpose,
       destination: claimType === 'conveyance' ? 'Dhaka Metro Area' : destination,
@@ -286,13 +293,13 @@ export default function SubmitClaimModal({
                   {t('Submit TA / DA & Conveyance Expense Claim', 'ভ্রমণ ও যাতায়াত ভাতা দাবি দাখিল', lang)}
                 </h3>
                 <span style={{ backgroundColor: 'var(--brand-gold, #D4AF37)', color: '#0F172A', fontSize: '10px', fontWeight: 900, padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
-                  Grade 8 Active
+                  Official Claim
                 </span>
               </div>
               <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#CBD5E1', lineHeight: 1.4 }}>
                 {t(
-                  'Automated Grade-policy verification with HOD approval and SAP S/4HANA direct BEFTN transfer',
-                  'গ্রেড নীতিমালা যাচাই, বিভাগীয় প্রধানের অনুমোদন এবং সরাসরি স্যাপ বিইএফটিএন নিষ্পত্তি',
+                  'Verified against company expense limits with departmental review and accounts payment.',
+                  'কোম্পানি নীতিমালা অনুযায়ী যাচাই, বিভাগীয় অনুমোদন এবং সরাসরি একাউন্টস নিষ্পত্তি।',
                   lang
                 )}
               </p>
@@ -314,28 +321,28 @@ export default function SubmitClaimModal({
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--brand-crimson, #A51C30)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
-                TA
+                {ROLE_META[currentRole || 'employee'].initials}
               </div>
               <div>
-                <strong style={{ color: 'var(--brand-slate-900, #0F172A)' }}>Tanvir Ahmed</strong>
-                <span style={{ color: 'var(--brand-slate-500, #64748B)', marginLeft: '6px' }}>(Sales Officer, Grade 8)</span>
+                <strong style={{ color: 'var(--brand-slate-900, #0F172A)' }}>{ROLE_META[currentRole || 'employee'].name}</strong>
+                <span style={{ color: 'var(--brand-slate-500, #64748B)', marginLeft: '6px' }}>({ROLE_META[currentRole || 'employee'].label})</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600, #475569)' }}>
               <Building size={14} style={{ color: '#2563EB' }} />
-              <span>Dept: <strong>Sales & Distribution</strong></span>
+              <span>Dept: <strong>{ROLE_META[currentRole || 'employee'].dept}</strong></span>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600, #475569)' }}>
               <CreditCard size={14} style={{ color: '#059669' }} />
-              <span>Cost Center: <strong style={{ fontFamily: 'monospace' }}>CC-SALES-DHAKA-102</strong></span>
+              <span>Cost Center: <strong style={{ fontFamily: 'monospace' }}>CC-BOGCL-2026</strong></span>
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ECFDF5', padding: '4px 10px', borderRadius: '8px', border: '1px solid #A7F3D0', color: '#047857', fontWeight: 700, fontSize: '11px' }}>
             <ShieldCheck size={14} />
-            <span>Conveyance Cap: ৳8,000 / mo (৳5,420 Claimed)</span>
+            <span>Monthly Conveyance Limit: ৳8,000</span>
           </div>
         </div>
 

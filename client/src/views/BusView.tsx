@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { ViewProps, t } from '../types';
+import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../App';
 import {
   Bus, Users, MapPin, CheckCircle, Clock, AlertTriangle,
@@ -124,7 +124,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
   // Commute Direction & Date
   const [commuteDirection, setCommuteDirection] = useState<'inbound' | 'outbound'>('inbound');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-22');
+  const [selectedDate, setSelectedDate] = useState<string>(SYSTEM_TODAY);
 
   // Bus Fleet and Routes State (All 10 Commuter Buses)
   const [buses, setBuses] = useState<BusVehicle[]>(INITIAL_BUSES);
@@ -197,16 +197,18 @@ export default function BusView({ role, lang }: ViewProps) {
     'Traffic Congestion Notice: 10-12 min delay near Babubazar Bridge due to flyover maintenance. Conductor notified.'
   );
 
+  const currentStaffMeta = ROLE_META[role] || ROLE_META['employee'];
+
   // Direct Booking Form State
   const [bookForm, setBookForm] = useState({
-    name: 'Tanvir Ahmed',
-    staffId: 'EMP-1042',
-    dept: 'Sales & Distribution',
-    phone: '+880 1720-334455',
+    name: currentStaffMeta.name,
+    staffId: currentStaffMeta.empId,
+    dept: currentStaffMeta.label,
+    phone: currentStaffMeta.phone,
     pickupPoint: 'Farmgate Overbridge',
     bookingType: 'shift_pass' as 'permanent' | 'shift_pass' | 'guest',
     commuterCategory: 'Employee Commute',
-    bloodGroup: 'B+',
+    bloodGroup: currentStaffMeta.bloodGroup || 'B+',
     targetSeatNum: 12,
   });
 
@@ -228,14 +230,32 @@ export default function BusView({ role, lang }: ViewProps) {
 
   // Form for joining waitlist
   const [joinForm, setJoinForm] = useState({
-    name: 'Tanvir Ahmed',
-    staffId: 'EMP-1042',
-    dept: 'Sales & Distribution',
-    phone: '+880 1720-334455',
+    name: currentStaffMeta.name,
+    staffId: currentStaffMeta.empId,
+    dept: currentStaffMeta.label,
+    phone: currentStaffMeta.phone,
     pickupPoint: 'Farmgate Overbridge',
     priority: 'Shift' as 'Shift' | 'Emergency' | 'Overtime',
     shift: 'Morning Shift (07:00 AM)',
   });
+
+  useEffect(() => {
+    setBookForm(prev => ({
+      ...prev,
+      name: currentStaffMeta.name,
+      staffId: currentStaffMeta.empId,
+      dept: currentStaffMeta.label,
+      phone: currentStaffMeta.phone,
+      bloodGroup: currentStaffMeta.bloodGroup || prev.bloodGroup,
+    }));
+    setJoinForm(prev => ({
+      ...prev,
+      name: currentStaffMeta.name,
+      staffId: currentStaffMeta.empId,
+      dept: currentStaffMeta.label,
+      phone: currentStaffMeta.phone,
+    }));
+  }, [role, currentStaffMeta]);
 
   const isAnyModalOpen =
     showVacateDialog ||
@@ -266,10 +286,19 @@ export default function BusView({ role, lang }: ViewProps) {
   const activeRoute: RouteInfo = routes[selectedRouteKey] || routes['route-1'] || INITIAL_ROUTES['route-1'];
   const activeStops: RouteStop[] = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
 
-  // Current logged-in user profile (Tanvir Ahmed, Seat #5)
-  const mySeat = seats.find(s => s.num === 5);
+  // Current logged-in user profile dynamically mapped to active role
+  const mySeat = useMemo(() => {
+    const byId = seats.find(s => s.staffId === currentStaffMeta.empId);
+    if (byId) return byId;
+    const byName = seats.find(s => s.assignedTo?.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase()));
+    if (byName) return byName;
+    return seats.find(s => s.num === 5) || seats[4];
+  }, [seats, currentStaffMeta]);
+
   const isMySeatVacated = mySeat?.status === 'vacated';
-  const myWaitlistEntry = waitlist.find(w => w.staffId === 'EMP-1042' || w.name === 'Tanvir Ahmed');
+  const myWaitlistEntry = waitlist.find(
+    w => w.staffId === currentStaffMeta.empId || w.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase())
+  );
 
   // Counts
   const occupiedCount = seats.filter(s => s.status === 'occupied').length;
@@ -296,8 +325,9 @@ export default function BusView({ role, lang }: ViewProps) {
 
   // Employee Voluntary Seat Release Action
   const handleReleaseMySeat = () => {
+    if (!mySeat) return;
     setSeats(prev => prev.map(s => {
-      if (s.num === 5) {
+      if (s.num === mySeat.num) {
         return {
           ...s,
           status: 'vacated',
@@ -310,8 +340,8 @@ export default function BusView({ role, lang }: ViewProps) {
     setShowVacateDialog(false);
     showToast(
       t(
-        `Seat #05 voluntarily released for today. Candidate #${waitlist[0]?.rank || 1} will be promoted by Transport Cell.`,
-        `আজকের জন্য ৫ নম্বর আসন ছেড়ে দেওয়া হয়েছে। অপেক্ষমান সহকর্মীকে সুযোগ দেওয়ার জন্য ধন্যবাদ।`,
+        `Seat #${String(mySeat.num).padStart(2, '0')} voluntarily released for today. Candidate #${waitlist[0]?.rank || 1} will be promoted by Transport Cell.`,
+        `আজকের জন্য ${mySeat.num} নম্বর আসন ছেড়ে দেওয়া হয়েছে। অপেক্ষমান সহকর্মীকে সুযোগ দেওয়ার জন্য ধন্যবাদ।`,
         lang
       ),
       'gold'
@@ -320,26 +350,32 @@ export default function BusView({ role, lang }: ViewProps) {
 
   // Employee Reclaim My Seat Action
   const handleReclaimMySeat = () => {
+    if (!mySeat) return;
     setSeats(prev => prev.map(s => {
-      if (s.num === 5) {
+      if (s.num === mySeat.num) {
         return {
           ...s,
-          assignedTo: 'Tanvir Ahmed',
-          staffId: 'EMP-1042',
-          dept: 'Sales & Distribution',
-          phone: '+880 1720-334455',
-          pickupPoint: 'Farmgate Overbridge',
-          pickupTime: '07:18 AM',
+          assignedTo: currentStaffMeta.name,
+          staffId: currentStaffMeta.empId,
+          dept: currentStaffMeta.label,
+          phone: currentStaffMeta.phone,
+          pickupPoint: s.pickupPoint || 'Farmgate Overbridge',
+          pickupTime: s.pickupTime || '07:18 AM',
           status: 'occupied',
           vacatedReason: undefined,
           isStandbyPromoted: false,
+          boarded: true,
         };
       }
       return s;
     }));
     showToast(
-      t('Seat #05 reclaimed successfully. Your QR boarding pass is active.', '৫ নম্বর আসন পুনরুদ্ধার করা হয়েছে।', lang),
-      'info'
+      t(
+        `Seat #${String(mySeat.num).padStart(2, '0')} successfully reclaimed! Your daily QR commute pass is restored.`,
+        `${mySeat.num} নম্বর আসন পুনরায় আপনার নামে বহাল করা হয়েছে! কিউআর পাস সক্রিয়।`,
+        lang
+      ),
+      'success'
     );
   };
 
@@ -761,13 +797,13 @@ export default function BusView({ role, lang }: ViewProps) {
               {activeRoute.coachNo}
             </span>
             <span className="badge gold" style={{ fontSize: '10px' }}>
-              {selectedDate === '2026-10-22' ? t('Today (22 Oct)', 'আজ (২২ অক্টোবর)', lang) : selectedDate}
+              {selectedDate === SYSTEM_TODAY ? t('Today (29 Oct)', 'আজ (২৯ অক্টোবর)', lang) : selectedDate}
             </span>
           </div>
           <p className="section-subtitle" style={{ marginTop: '4px' }}>
             {t(
-              'Interactive 52-seater coach fuselage, instant seat booking, automated FIFO waitlist, GPS route corridors & security manifest.',
-              '৫২-সিটার কোচ লেআউট, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় ফিফো অপেক্ষাতালিকা, জিপিএস ট্র্যাকিং ও নিরাপত্তা গেট পাস।',
+              'Interactive 52-seater coach seat map, instant seat booking, automated standby queue, live GPS route stops & passenger manifest.',
+              '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
               lang
             )}
           </p>
@@ -842,7 +878,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <button
               onClick={() => {
                 setActivePerspective('staff');
-                showToast(t('Switched to Staff Commuter Self-Service Mode (Tanvir Ahmed)', 'স্টাফ সেলফ-সার্ভিস মোড সক্রিয়', lang), 'info');
+                showToast(t(`Switched to Staff Commuter Self-Service Mode (${currentStaffMeta.name})`, 'স্টাফ সেলফ-সার্ভিস মোড সক্রিয়', lang), 'info');
               }}
               style={{
                 background: activePerspective === 'staff' ? '#FFFFFF' : 'transparent',
@@ -1254,17 +1290,17 @@ export default function BusView({ role, lang }: ViewProps) {
                 fontWeight: 900,
                 fontSize: '14px'
               }}>
-                #05
+                #{mySeat?.num ? String(mySeat.num).padStart(2, '0') : '05'}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '12.5px', fontWeight: 800 }}>Tanvir Ahmed</span>
+                  <span style={{ fontSize: '12.5px', fontWeight: 800 }}>{mySeat?.assignedTo || currentStaffMeta.name}</span>
                   <span className={`badge ${isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
                     {isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
                   </span>
                 </div>
                 <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '2px' }}>
-                  Route-1 · 📍 Farmgate Overbridge ({commuteDirection === 'inbound' ? '07:18 AM' : '06:05 PM'})
+                  {activeRoute.name} · 📍 {mySeat?.pickupPoint || 'Farmgate Overbridge'} ({commuteDirection === 'inbound' ? (mySeat?.pickupTime || '07:18 AM') : '06:05 PM'})
                 </div>
               </div>
             </div>
@@ -2169,10 +2205,10 @@ export default function BusView({ role, lang }: ViewProps) {
                 }}>
                   <Info size={16} color="#D4AF37" />
                   <div>
-                    <strong>{t('Strict FIFO Policy:', 'স্বচ্ছ ফিফো নিয়ম:', lang)}</strong>{' '}
+                    <strong>{t('Standby Queue Policy:', 'স্বচ্ছ অপেক্ষমাণ তালিকা নীতি:', lang)}</strong>{' '}
                     {t(
-                      'Applications are prioritized purely by submission timestamp. When any seat is freed, it automatically awards to Rank #1.',
-                      'নিবন্ধনের সময় অনুযায়ী ক্রম নির্ধারণ করা হয়। কোনো সিট ফাঁকা হলেই ১ম ব্যক্তি স্বয়ংক্রিয়ভাবে পাবেন।',
+                      'Applications are placed in order of submission time. When any seat is freed, it automatically offers to the next person.',
+                      'আবেদনের সময়ক্রম অনুযায়ী তালিকা তৈরি হয়। কোনো আসন ফাঁকা হলে স্বয়ংক্রিয়ভাবে পরবর্তী সহকর্মীকে বরাদ্দ করা হয়।',
                       lang
                     )}
                   </div>
@@ -2188,7 +2224,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   ) : (
                     waitlist.map((candidate) => {
                       const isRankOne = candidate.rank === 1;
-                      const isMe = candidate.staffId === 'EMP-1042' || candidate.name === 'Tanvir Ahmed';
+                      const isMe = candidate.staffId === currentStaffMeta.empId || candidate.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase());
 
                       return (
                         <div
@@ -3143,15 +3179,22 @@ export default function BusView({ role, lang }: ViewProps) {
                 <input
                   type="text"
                   className="input-text"
-                  placeholder="Enter Staff ID or Seat # (e.g. EMP-1042 or 5)"
-                  defaultValue="EMP-1042"
+                  placeholder={`Enter Staff ID or Seat # (e.g. ${currentStaffMeta.empId} or 5)`}
+                  defaultValue={currentStaffMeta.empId}
                   style={{ flex: 1 }}
                 />
                 <button
                   className="btn-primary"
                   onClick={() => {
-                    handleToggleBoarding(5);
-                    showToast(t('Tanvir Ahmed (Seat #05) verified and boarded!', 'তানভীর আহমেদ (সিট #০৫) বোর্ডিং যাচাই সম্পন্ন!', lang), 'gold');
+                    handleToggleBoarding(mySeat?.num || 5);
+                    showToast(
+                      t(
+                        `${mySeat?.assignedTo || currentStaffMeta.name} (Seat #${String(mySeat?.num || 5).padStart(2, '0')}) verified and boarded!`,
+                        `${mySeat?.assignedTo || currentStaffMeta.name} (সিট #${String(mySeat?.num || 5).padStart(2, '0')}) বোর্ডিং যাচাই সম্পন্ন!`,
+                        lang
+                      ),
+                      'gold'
+                    );
                   }}
                 >
                   <UserCheck size={14} /> {t('Verify', 'যাচাই', lang)}

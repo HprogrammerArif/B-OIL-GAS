@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useFleetStore, VehicleRequisition } from '../../store/fleetStore';
-import { t } from '../../types';
+import { ROLE_META, t } from '../../types';
 import { showToast } from '../../App';
 import {
   MessageSquare, Send, Car, MapPin, Clock, ShieldCheck, CheckCircle2,
@@ -78,31 +78,50 @@ export default function FleetChatCenter({
   const isActualEmployee = userRole === 'employee';
   const isActualDriver = userRole === 'driver';
   const isActualAdmin = userRole === 'admin';
+  const currentPersona = ROLE_META[userRole as keyof typeof ROLE_META] || ROLE_META['employee'];
 
-  // Interactive Persona Switcher (Allows testing all 3 parties in real-time)
+  // Sender Persona Mode
   const [activePersona, setActivePersona] = useState<'employee' | 'driver' | 'admin'>(
     isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee'
   );
 
+  useEffect(() => {
+    setActivePersona(isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee');
+  }, [isActualDriver, isActualAdmin]);
+
   // Authenticated Persona Profile
   const personaName = activePersona === 'employee'
-    ? 'Tanvir Ahmed'
+    ? currentPersona.name
     : activePersona === 'driver'
-    ? 'Md. Shahidul Islam (Driver)'
-    : 'Md. Kamruzzaman (Transport Admin)';
+    ? (ROLE_META['driver']?.name || 'Md. Rafiqul Islam (Driver)')
+    : (ROLE_META['transport_admin']?.name || 'Md. Kamruzzaman (Transport Admin)');
 
   const personaRole = activePersona;
 
   // Filter requisitions relevant to role
   const relevantRequisitions = useMemo(() => {
     if (isActualEmployee) {
-      return requisitions.filter(r => r.requesterName.includes('Tanvir') || r.id === 'REQ-2026-441' || r.id === 'REQ-2026-435');
+      return requisitions.filter(
+        r =>
+          r.requesterName.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
+          r.requesterName.includes('Tanvir') ||
+          r.id === 'REQ-2026-441' ||
+          r.id === 'REQ-2026-435'
+      );
     }
     if (isActualDriver) {
-      return requisitions.filter(r => r.assignedDriverName?.includes('Rafiqul') || r.assignedDriverName?.includes('Shahidul') || r.id === 'REQ-2026-435' || r.id === 'REQ-2026-441');
+      const driverName = ROLE_META['driver']?.name || 'Md. Rafiqul Islam';
+      return requisitions.filter(
+        r =>
+          r.assignedDriverName?.toLowerCase().includes(driverName.toLowerCase()) ||
+          r.assignedDriverName?.includes('Rafiqul') ||
+          r.assignedDriverName?.includes('Shahidul') ||
+          r.id === 'REQ-2026-435' ||
+          r.id === 'REQ-2026-441'
+      );
     }
     return requisitions;
-  }, [requisitions, isActualEmployee, isActualDriver]);
+  }, [requisitions, isActualEmployee, isActualDriver, currentPersona.name]);
 
   // Static Direct Hotlines & Emergency Channels
   const directChannels = useMemo(() => [
@@ -1131,35 +1150,47 @@ export default function FleetChatCenter({
           )}
         </div>
 
-        {/* ─── ROLE PERSONA SWITCHER BAR ─── */}
+        {/* ─── SENDER IDENTITY & PERSPECTIVE BAR ─── */}
         <div className="trip-chat-persona-bar">
           <div className="trip-chat-persona-controls">
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
-              {t('Testing Persona:', 'প্রেরক মোড:', lang)}
-            </span>
-            <div className="trip-chat-persona-group">
-              <button
-                type="button"
-                onClick={() => setActivePersona('employee')}
-                className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
-              >
-                👤 Staff (Tanvir)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePersona('driver')}
-                className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
-              >
-                🚗 Driver (Shahidul)
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePersona('admin')}
-                className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
-              >
-                🛡️ Admin (Kamruzzaman)
-              </button>
-            </div>
+            {isActualAdmin ? (
+              <>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
+                  {t('Dispatch Channel Perspective:', 'প্রেরক মোড:', lang)}
+                </span>
+                <div className="trip-chat-persona-group">
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('employee')}
+                    className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
+                  >
+                    👤 Staff
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('driver')}
+                    className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
+                  >
+                    🚗 Driver
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActivePersona('admin')}
+                    className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
+                  >
+                    🛡️ Dispatch Desk
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
+                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
+                <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{personaName}</span>
+                <span className="badge teal" style={{ fontSize: '10px', textTransform: 'capitalize' }}>
+                  ✓ {activePersona}
+                </span>
+              </div>
+            )}
           </div>
 
           <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)' }}>

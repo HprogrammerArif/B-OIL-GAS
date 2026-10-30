@@ -131,11 +131,15 @@ export default function AssetView({ role, lang }: ViewProps) {
   const roleScopedAssets = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
       return assets.filter(
-        (a) => a.custodianEmpId === 'EMP-1042' || a.custodian.toLowerCase().includes('tanvir ahmed')
+        (a) =>
+          a.custodianEmpId === currentPersona.empId ||
+          a.custodian.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
+          a.custodianEmpId === 'EMP-1042' ||
+          a.custodian.toLowerCase().includes('tanvir ahmed')
       );
     }
     return assets;
-  }, [assets, roleConfig.isSelfServiceOnly]);
+  }, [assets, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
 
   // Live Category Counts (excluding disposed unless stageFilter includes disposed)
   const categoryCounts = useMemo(() => {
@@ -277,11 +281,15 @@ export default function AssetView({ role, lang }: ViewProps) {
   const visibleRequisitions = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
       return requisitions.filter(
-        (r) => r.requestedByEmpId === 'EMP-1042' || r.requestedBy.toLowerCase().includes('tanvir ahmed')
+        (r) =>
+          r.requestedByEmpId === currentPersona.empId ||
+          r.requestedBy.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
+          r.requestedByEmpId === 'EMP-1042' ||
+          r.requestedBy.toLowerCase().includes('tanvir ahmed')
       );
     }
     return requisitions;
-  }, [requisitions, roleConfig.isSelfServiceOnly]);
+  }, [requisitions, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
 
   // Portfolio KPI Aggregations
   const portfolioStats = useMemo(() => {
@@ -450,33 +458,47 @@ export default function AssetView({ role, lang }: ViewProps) {
 
     // 1. Custody Acceptance Signature Pending
     if (!selectedAsset.custodianAcknowledged) {
+      const isCustodianOrAdmin =
+        role === 'transport_admin' ||
+        role === 'plant_gm' ||
+        role === 'chairman' ||
+        role === 'hr_admin' ||
+        selectedAsset.custodianEmpId === currentPersona.empId ||
+        selectedAsset.custodian.toLowerCase().includes(currentPersona.name.toLowerCase());
+
       return (
         <div className="eam-next-action">
           <div className="eam-next-action-text">
             <UserCheck size={17} style={{ color: '#D97706', flexShrink: 0 }} />
             <div>
-              <strong>{t('Recommended Action — Custody Handover Sign-Off:', 'প্রস্তাবিত পদক্ষেপ — হস্তান্তর গ্রহণ স্বাক্ষর:', lang)}</strong>{' '}
+              <strong>{t('Action Required — Custody Handover Sign-Off:', 'প্রয়োজনীয় পদক্ষেপ — হেফাজত গ্রহণ স্বাক্ষর:', lang)}</strong>{' '}
               {t(
-                `Issued to ${selectedAsset.custodian}. Digital acceptance signature is pending.`,
-                `${selectedAsset.custodian}-এর ডিজিটাল গ্রহণ স্বাক্ষর অপেক্ষমাণ।`,
+                `Issued to ${selectedAsset.custodian}. Digital handover receipt is awaiting acceptance.`,
+                `${selectedAsset.custodian}-কে বরাদ্দকৃত। ডিজিটাল গ্রহণ স্বাক্ষর এখনও সম্পন্ন হয়নি।`,
                 lang
               )}
             </div>
           </div>
-          <button
-            type="button"
-            className="btn-gold"
-            style={{ padding: '6px 13px', fontSize: '11.5px', fontWeight: 800 }}
-            onClick={() => {
-              acknowledgeCustody(selectedAsset.id, currentPersona.name, currentPersona.label);
-              showToast(
-                t(`✓ Custody receipt digitally signed for ${selectedAsset.tag}!`, `✓ ${selectedAsset.tag}-এর হেফাজত গ্রহণ স্বাক্ষর সম্পন্ন!`, lang),
-                'gold'
-              );
-            }}
-          >
-            ✍️ {t('Sign Custody Receipt', 'গ্রহণ স্বাক্ষর করুন', lang)}
-          </button>
+          {isCustodianOrAdmin ? (
+            <button
+              type="button"
+              className="btn-gold"
+              style={{ padding: '6px 13px', fontSize: '11.5px', fontWeight: 800 }}
+              onClick={() => {
+                acknowledgeCustody(selectedAsset.id, currentPersona.name, currentPersona.label);
+                showToast(
+                  t(`✓ Custody receipt digitally signed for ${selectedAsset.tag}!`, `✓ ${selectedAsset.tag}-এর হেফাজত গ্রহণ স্বাক্ষর সম্পন্ন!`, lang),
+                  'gold'
+                );
+              }}
+            >
+              ✍️ {t('Sign Custody Receipt', 'গ্রহণ স্বাক্ষর করুন', lang)}
+            </button>
+          ) : (
+            <span style={{ fontSize: '11px', color: '#B45309', fontWeight: 600, padding: '4px 8px', background: '#FEF3C7', borderRadius: '4px' }}>
+              {t('Awaiting Custodian Sign-Off', 'হেফাজতকারীর স্বাক্ষরের অপেক্ষায়', lang)}
+            </span>
+          )}
         </div>
       );
     }
@@ -642,8 +664,8 @@ export default function AssetView({ role, lang }: ViewProps) {
           </h2>
           <p className="section-subtitle">
             {t(
-              'ISO 55001 Cradle-to-Grave Lifecycle • IAS 16 Fixed Asset Valuation • Statutory Calibration • Chain-of-Custody & 10-Yr Archive',
-              'ক্রয় রিকুইজিশন হতে কমিশনিং, হস্তান্তর, ক্যালিব্রেশন, অবচয় হিসাবায়ন (IAS 16) এবং চূড়ান্ত অবলোপন আর্কাইভ পর্যন্ত পূর্ণ ব্যবস্থাপনা।',
+              'Complete Asset Lifetime Tracking • Current Asset Valuation • Maintenance & Calibrations • Digital Custody Sign-Off',
+              'ক্রয় রিকুইজিশন হতে কমিশনিং, হেফাজত হস্তান্তর, ক্যালিব্রেশন, বর্তমান বইমূল্য ও অবলোপন ব্যবস্থাপনা।',
               lang
             )}
           </p>
@@ -701,7 +723,7 @@ export default function AssetView({ role, lang }: ViewProps) {
             <span className="eam-kpi-label">
               {roleConfig.isSelfServiceOnly
                 ? t('My Custody Asset Value', 'আমার হেফাজতে সম্পদের মূল্য', lang)
-                : t('Carrying Net Book Value', 'বর্তমান নিট বইমূল্য (NBV)', lang)}
+                : t('Current Book Value', 'বর্তমান বইমূল্য', lang)}
             </span>
             <span className="eam-kpi-icon"><DollarSign size={15} /></span>
           </div>
@@ -845,7 +867,7 @@ export default function AssetView({ role, lang }: ViewProps) {
             onClick={() => setActiveTab('financials')}
           >
             <DollarSign size={15} />
-            <span>{t('IAS 16 Valuation & TCO Ledger', 'অবচয় (IAS 16) ও আর্থিক খতিয়ান', lang)}</span>
+            <span>{t('Valuation & Depreciation Ledger', 'সম্পদ মূল্য ও অবচয় খতিয়ান', lang)}</span>
           </button>
         )}
 
@@ -1992,7 +2014,7 @@ export default function AssetView({ role, lang }: ViewProps) {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          TAB 3: IAS 16 FIXED ASSET VALUATION, DEPRECIATION & TCO LEDGER
+          TAB 3: FIXED ASSET VALUATION, DEPRECIATION & LIFETIME COST LEDGER
           ══════════════════════════════════════════════════════════════════════ */}
       {activeTab === 'financials' && roleConfig.canViewFinancialLedger && (
         <div className="card">
@@ -2001,12 +2023,12 @@ export default function AssetView({ role, lang }: ViewProps) {
               <div className="card-hd-icon"><DollarSign size={16} /></div>
               <div>
                 <div className="card-title">
-                  {t('SAP S/4HANA FI-AA Fixed Asset Valuation, IAS 16 Depreciation & TCO Ledger', 'স্থায়ী সম্পদ মূল্যায়ন, অবচয় তফসিল (IAS 16) ও মোট জীবনচক্র ব্যয় (TCO) খতিয়ান', lang)}
+                  {t('Fixed Asset Valuation, Depreciation & Lifetime Cost Ledger', 'সম্পদ মূল্যায়ন, অবচয় তফসিল ও মোট জীবনচক্র ব্যয় খতিয়ান', lang)}
                 </div>
                 <div className="card-subtitle">
                   {t(
-                    'Straight-Line (SLM), Declining Balance (WDV) & Units-of-Production (UoP) • Automated 50% Repair-to-CAPEX EoL Watch',
-                    'সরলরৈখিক (SLM), ক্রমহ্রাসমান (WDV) ও উৎপাদন-ঘণ্টা (UoP) অবচয় পদ্ধতি এবং ৫০% মেরামত-সীমা সতর্কতা',
+                    'Straight-Line, Reducing Balance & Usage-Based Depreciation • Automated 50% Repair-to-Cost Review Alert',
+                    'সরলরৈখিক, হ্রাসমান-জের ও ব্যবহার-একক অবচয় পদ্ধতি এবং ৫০% মেরামত-সীমা পর্যবেক্ষণ',
                     lang
                   )}
                 </div>
@@ -2014,7 +2036,7 @@ export default function AssetView({ role, lang }: ViewProps) {
             </div>
 
             <button type="button" className="btn-primary" onClick={handleExportMasterLedgerCsv}>
-              <Download size={14} /> {t('Export SAP FI-AA Ledger (CSV)', 'খতিয়ান ডাউনলোড (CSV)', lang)}
+              <Download size={14} /> {t('Export Financial Ledger (CSV)', 'আর্থিক খতিয়ান ডাউনলোড (CSV)', lang)}
             </button>
           </div>
 
@@ -2039,11 +2061,11 @@ export default function AssetView({ role, lang }: ViewProps) {
               <span style={{ color: '#DC2626', fontWeight: 700 }}>-৳{portfolioStats.totalAccDep.toLocaleString()}</span>
             </span>
             <span>
-              <strong>Carrying Net Book Value:</strong>{' '}
+              <strong>Current Book Value:</strong>{' '}
               <span style={{ color: '#059669', fontWeight: 800 }}>৳{portfolioStats.totalNbv.toLocaleString()}</span>
             </span>
             <span>
-              <strong>Portfolio TCO (CAPEX + OPEX):</strong> ৳{portfolioStats.totalTco.toLocaleString()}
+              <strong>Total Cost (CAPEX + OPEX):</strong> ৳{portfolioStats.totalTco.toLocaleString()}
             </span>
           </div>
 
@@ -2052,13 +2074,13 @@ export default function AssetView({ role, lang }: ViewProps) {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>{t('Asset Tag & SAP FI-AA', 'ট্যাগ ও এসএপি কোড', lang)}</th>
-                    <th>{t('GL Cost Center', 'কস্ট সেন্টার', lang)}</th>
-                    <th>{t('Gross CAPEX', 'মোট মূলধন ব্যয়', lang)}</th>
-                    <th>{t('IAS 16 Policy & Yr Dep.', 'পদ্ধতি ও বার্ষিক অবচয়', lang)}</th>
+                    <th>{t('Asset Tag & Financial Code', 'ট্যাগ ও আর্থিক কোড', lang)}</th>
+                    <th>{t('Cost Center', 'কস্ট সেন্টার', lang)}</th>
+                    <th>{t('Purchase Cost', 'মূলধন ক্রয় ব্যয়', lang)}</th>
+                    <th>{t('Depreciation Method & Rate', 'পদ্ধতি ও বার্ষিক অবচয়', lang)}</th>
                     <th>{t('Accumulated Dep.', 'পুঞ্জীভূত অবচয়', lang)}</th>
-                    <th>{t('Carrying NBV', 'বর্তমান বইমূল্য (NBV)', lang)}</th>
-                    <th>{t('Lifetime TCO & OPEX Ratio', 'মোট ব্যয় ও মেরামত %', lang)}</th>
+                    <th>{t('Current Book Value', 'বর্তমান বইমূল্য', lang)}</th>
+                    <th>{t('Total Cost & Repair Ratio', 'মোট ব্যয় ও মেরামত %', lang)}</th>
                     <th style={{ textAlign: 'right' }}>{t('Actions', 'পদক্ষেপ', lang)}</th>
                   </tr>
                 </thead>
