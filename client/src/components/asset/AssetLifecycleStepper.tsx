@@ -16,14 +16,14 @@ const PIPELINE_STEPS: {
   matchStages: LifecycleStage[];
   stepOrder: number;
 }[] = [
-  { id: 's1', labelEn: 'CAPEX Req', labelBn: 'রিকুইজিশন', tipEn: 'Stage 1: Capital Requisition & ROI Sanction', matchStages: [], stepOrder: 1 },
-  { id: 's2', labelEn: 'PO & FAT', labelBn: 'ক্রয় ও পরীক্ষা', tipEn: 'Stage 2: Procurement, FAT/SAT & GRN Inspection', matchStages: [], stepOrder: 2 },
-  { id: 's3', labelEn: 'Tagged / Store', labelBn: 'ট্যাগ ও স্টোর', tipEn: 'Stage 3: SAP FI-AA Capitalized & QR Tagged in Store', matchStages: ['in_stock'], stepOrder: 3 },
-  { id: 's4', labelEn: 'Active Duty', labelBn: 'সক্রিয় চালু', tipEn: 'Stage 4: Commissioned & Operational Service', matchStages: ['operational'], stepOrder: 4 },
-  { id: 's5', labelEn: 'Transit / Pass', labelBn: 'স্থানান্তর', tipEn: 'Stage 5: Inter-Site or Custodian Gate-Pass Transit', matchStages: ['in_transfer'], stepOrder: 5 },
-  { id: 's6', labelEn: 'PM & Audit', labelBn: 'ক্যালিব্রেশন', tipEn: 'Stage 6: Preventive Overhaul & Statutory Calibration', matchStages: ['maintenance', 'calibration_due'], stepOrder: 6 },
-  { id: 's7', labelEn: 'Condemned', labelBn: 'অকেজো জরিপ', tipEn: 'Stage 7: Condemned & Pre-Disposal Safety Checklist', matchStages: ['decommissioned'], stepOrder: 7 },
-  { id: 's8', labelEn: '10y Archive', labelBn: 'নিলাম আর্কাইভ', tipEn: 'Stage 8: Disposed, Written-Off & Locked in 10-Yr Archive', matchStages: ['disposed'], stepOrder: 8 },
+  { id: 's1', labelEn: '1. Requisition', labelBn: '১. রিকুইজিশন', tipEn: 'Step 1: Purchase request and budget approval', matchStages: [], stepOrder: 1 },
+  { id: 's2', labelEn: '2. Purchased', labelBn: '২. ক্রয় ও পরিদর্শন', tipEn: 'Step 2: Bought and quality inspection verified', matchStages: [], stepOrder: 2 },
+  { id: 's3', labelEn: '3. In Warehouse', labelBn: '৩. স্টোর পুল', tipEn: 'Step 3: Barcode tagged and stored in warehouse', matchStages: ['in_stock'], stepOrder: 3 },
+  { id: 's4', labelEn: '4. Active Service', labelBn: '৪. সক্রিয় চালু', tipEn: 'Step 4: Installed and running in production', matchStages: ['operational'], stepOrder: 4 },
+  { id: 's5', labelEn: '5. In Transit', labelBn: '৫. স্থানান্তরধীন', tipEn: 'Step 5: Moving between plant facilities', matchStages: ['in_transfer'], stepOrder: 5 },
+  { id: 's6', labelEn: '6. Servicing', labelBn: '৬. সার্ভিস ও পরীক্ষা', tipEn: 'Step 6: Under routine servicing or safety calibration', matchStages: ['maintenance', 'calibration_due'], stepOrder: 6 },
+  { id: 's7', labelEn: '7. Retired', labelBn: '৭. অবসরপ্রাপ্ত', tipEn: 'Step 7: Declared worn out and ready for scrap', matchStages: ['decommissioned'], stepOrder: 7 },
+  { id: 's8', labelEn: '8. Scrapped', labelBn: '৮. নিলাম/স্ক্র্যাপ', tipEn: 'Step 8: Sold or recycled with permanent audit record', matchStages: ['disposed'], stepOrder: 8 },
 ];
 
 function getActiveStepOrder(stage: LifecycleStage): number {
@@ -64,17 +64,17 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
       <div className="eam-stepper-hd">
         <div className="eam-stepper-title">
           <GitCommit size={14} style={{ color: 'var(--brand-crimson)' }} />
-          <span>{t('ISO 55001 Cradle-to-Grave Lifecycle Pipeline', 'সম্পদের পূর্ণ জীবনচক্র ধাপ (ISO 55001)', lang)}</span>
+          <span>{t('Equipment Lifetime Progress (8 Stages)', 'সম্পদের পূর্ণ জীবনচক্র ধাপ (৮টি পর্যায়)', lang)}</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           {asset.isUnderWarranty ? (
             <span className="badge success" style={{ fontSize: '10px' }}>
-              <ShieldCheck size={11} /> {t('Warranty till', 'ওয়ারেন্টি:', lang)} {asset.warrantyExpiry}
+              <ShieldCheck size={11} /> {t('Warranty active till', 'ওয়ারেন্টি সক্রিয়:', lang)} {asset.warrantyExpiry}
             </span>
           ) : (
             <span className="badge" style={{ fontSize: '10px', background: 'var(--brand-slate-200)', color: 'var(--brand-slate-600)' }}>
-              {t('Post-Warranty / AMC', 'ওয়ারেন্টি উত্তীর্ণ', lang)}
+              {t('Warranty Expired', 'ওয়ারেন্টি শেষ', lang)}
             </span>
           )}
 
@@ -88,11 +88,11 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
                 fontWeight: 800,
               }}
             >
-              <Activity size={11} /> {t('RUL', 'অবশিষ্ট আয়ু', lang)}: {fin.remainingUsefulLifeYears} {t('yrs', 'বছর', lang)} ({fin.remainingUsefulLifePct}%)
+              <Activity size={11} /> {t('Est. Remaining Life', 'অবশিষ্ট আয়ু', lang)}: {fin.remainingUsefulLifeYears} {t('yrs', 'বছর', lang)} ({fin.remainingUsefulLifePct}%)
             </span>
           ) : (
             <span className="badge danger" style={{ fontSize: '10px' }}>
-              <Archive size={11} /> {t('10-Yr Statutory Archive', '১০-বছর সংরক্ষিত আর্কাইভ', lang)}
+              <Archive size={11} /> {t('Permanent Archive Record', 'সংরক্ষিত স্থায়ী রেকর্ড', lang)}
             </span>
           )}
         </div>
@@ -136,14 +136,14 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
       {/* Useful Life & Reliability Progress Meter */}
       <div className="eam-life-meter-row">
         <span>
-          {t('Economic Life Consumed', 'ব্যবহৃত আয়ুষ্কাল', lang)}:{' '}
+          {t('Expected Lifespan Used', 'ব্যবহৃত আয়ুষ্কাল', lang)}:{' '}
           <strong>
-            {asset.ageYears} / {asset.usefulLifeYears} {t('yrs', 'বছর', lang)}
+            {asset.ageYears} of {asset.usefulLifeYears} {t('years', 'বছর', lang)}
           </strong>{' '}
-          ({lifeConsumedPct}% · {asset.runtimeHours.toLocaleString()} hrs)
+          ({lifeConsumedPct}% used · {asset.runtimeHours.toLocaleString()} running hrs)
         </span>
         <span>
-          MTBF: <strong>{asset.mtbfHours.toLocaleString()}h</strong> · MTTR: <strong>{asset.mttrHours}h</strong>
+          Avg. Run Between Repairs: <strong>{asset.mtbfHours.toLocaleString()}h</strong>
         </span>
       </div>
 
@@ -182,8 +182,8 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
           <AlertTriangle size={14} style={{ flexShrink: 0 }} />
           <span>
             {t(
-              `Economic End-of-Life Watch: Cumulative repair OPEX is ${fin.repairToCapexRatioPct}% of CAPEX (or RUL critical). Evaluate replacement or Stage-7 condemnation.`,
-              `অর্থনৈতিক আয়ুষ্কাল সতর্কতা: মেরামত ব্যয় মূলধনের ${fin.repairToCapexRatioPct}%। প্রতিস্থাপন বা অকেজো ঘোষণার মূল্যায়ন করুন।`,
+              `High Repair Cost Warning: Total repair costs have reached ${fin.repairToCapexRatioPct}% of the original purchase price. Consider retiring or replacing this machine.`,
+              `অতিরিক্ত মেরামত ব্যয় সতর্কতা: মোট মেরামত ব্যয় মূল মূলধনের ${fin.repairToCapexRatioPct}%-এ পৌঁছেছে। প্রতিস্থাপন বা অবসরের বিবেচনা করুন।`,
               lang
             )}
           </span>

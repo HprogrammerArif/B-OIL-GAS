@@ -54,6 +54,7 @@ import {
   Table as TableIcon,
   QrCode,
   ExternalLink,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 type MainModuleTab = 'register' | 'maintenance' | 'financials' | 'transfers' | 'disposal';
@@ -104,6 +105,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
   // Selected Asset ID
   const [selectedAssetId, setSelectedAssetId] = useState<string>('AST-001');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
 
   // Modal Triggers
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -654,18 +656,18 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION HEADER + PRIMARY QUICK ACTIONS
           ══════════════════════════════════════════════════════════════════════ */}
-      <div className="section-header" style={{ marginBottom: '12px' }}>
+      <div className="section-header" style={{ marginBottom: '10px' }}>
         <div>
           <h2 className="section-title">
             🏗️{' '}
             {roleConfig.isSelfServiceOnly
-              ? t('My Assigned Corporate Assets & Equipment Portal', 'আমার বরাদ্দকৃত প্রাতিষ্ঠানিক সম্পদ ও রিকুইজিশন পোর্টাল', lang)
-              : t('Enterprise Asset Lifetime Tracking & EAM System', 'এন্টারপ্রাইজ সম্পদ জীবনচক্র ট্র্যাকিং ও রক্ষণাবেক্ষণ সিস্টেম', lang)}
+              ? t('My Assigned Equipment & Requests', 'আমার বরাদ্দকৃত সরঞ্জাম ও রিকুইজিশন', lang)
+              : t('Machinery & Equipment Lifetime Tracking', 'যন্ত্রপাতি ও সরঞ্জাম জীবনচক্র ট্র্যাকিং', lang)}
           </h2>
           <p className="section-subtitle">
             {t(
-              'Complete Asset Lifetime Tracking • Current Asset Valuation • Maintenance & Calibrations • Digital Custody Sign-Off',
-              'ক্রয় রিকুইজিশন হতে কমিশনিং, হেফাজত হস্তান্তর, ক্যালিব্রেশন, বর্তমান বইমূল্য ও অবলোপন ব্যবস্থাপনা।',
+              'Track machine health, scheduled servicing, equipment locations, and retirement.',
+              'কারখানার যন্ত্রপাতি ও মেশিনের স্বাস্থ্য, সার্ভিসিং সময়সূচী, হেফাজতকারী এবং অবসর ব্যবস্থাপনা।',
               lang
             )}
           </p>
@@ -674,7 +676,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         <div className="btn-group" style={{ flexWrap: 'wrap' }}>
           {roleConfig.canRegisterAsset && (
             <button type="button" className="btn-primary" onClick={() => setShowRegisterModal(true)}>
-              <Plus size={15} /> {t('Commission Asset', 'নতুন সম্পদ নিবন্ধন', lang)}
+              <Plus size={15} /> {t('Add Machine', 'নতুন মেশিন যুক্ত', lang)}
             </button>
           )}
           <button
@@ -682,28 +684,35 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             className={roleConfig.canRegisterAsset ? 'btn-outline' : 'btn-primary'}
             onClick={() => setShowRequisitionModal(true)}
           >
-            <FilePlus size={15} /> {t('Request Asset', 'সম্পদ রিকুইজিশন', lang)}
+            <FilePlus size={15} /> {t('Request Equipment', 'যন্ত্রপাতির আবেদন', lang)}
           </button>
           <button type="button" className="btn-outline" onClick={() => setShowScanModal(true)}>
-            <Barcode size={15} /> {t('Scan QR / RFID', 'ট্যাগ স্ক্যান', lang)}
+            <Barcode size={15} /> {t('Scan Tag', 'ট্যাগ স্ক্যান', lang)}
           </button>
         </div>
       </div>
 
-      {/* Compact RBAC Governance Context Strip */}
-      <div className="eam-role-strip">
-        <div className="eam-role-strip-left">
-          <div className="eam-role-avatar" style={{ background: currentPersona.avatarColor }}>
+      {/* Sleek RBAC Authority Strip */}
+      <div className="eam-role-strip" style={{ padding: '8px 14px', marginBottom: '14px' }}>
+        <div className="eam-role-strip-left" style={{ gap: '10px' }}>
+          <div className="eam-role-avatar" style={{ width: '30px', height: '30px', fontSize: '11px', background: currentPersona.avatarColor }}>
             {currentPersona.initials}
           </div>
-          <div>
-            <div className="eam-role-title">{t(roleConfig.roleTitle, roleConfig.roleTitleBn, lang)}</div>
-            <div className="eam-role-desc">{t(roleConfig.scopeDescription, roleConfig.scopeDescriptionBn, lang)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+              {currentPersona.name} ({currentPersona.label})
+            </span>
+            <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>•</span>
+            <span style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
+              {t(roleConfig.roleTitle, roleConfig.roleTitleBn, lang)}
+            </span>
           </div>
         </div>
-        <span className="eam-scope-pill">
-          <Sparkles size={12} /> {t(roleConfig.scopeBadge, roleConfig.scopeBadgeBn, lang)}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="eam-scope-pill" style={{ padding: '3px 9px', fontSize: '10.5px' }}>
+            <Sparkles size={11} /> {t(roleConfig.scopeBadge, roleConfig.scopeBadgeBn, lang)}
+          </span>
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -722,14 +731,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <div className="eam-kpi-top">
             <span className="eam-kpi-label">
               {roleConfig.isSelfServiceOnly
-                ? t('My Custody Asset Value', 'আমার হেফাজতে সম্পদের মূল্য', lang)
-                : t('Current Book Value', 'বর্তমান বইমূল্য', lang)}
+                ? t('My Equipment Value', 'আমার হেফাজতে সম্পদের মূল্য', lang)
+                : t('Total Machinery Value', 'মোট সম্পদের বর্তমান মূল্য', lang)}
             </span>
             <span className="eam-kpi-icon"><DollarSign size={15} /></span>
           </div>
           <div className="eam-kpi-val">{fmtBdtShort(portfolioStats.totalNbv)}</div>
           <div className="eam-kpi-foot">
-            <span>Gross CAPEX: {fmtBdtShort(portfolioStats.totalGross)} ({portfolioStats.activeCount})</span>
+            <span>{t(`Purchase cost: ${fmtBdtShort(portfolioStats.totalGross)} (${portfolioStats.activeCount} assets)`, `মূল ক্রয়মূল্য: ${fmtBdtShort(portfolioStats.totalGross)} (${portfolioStats.activeCount}টি)`, lang)}</span>
             <span className="eam-kpi-hint">{t('View All →', 'সকল দেখুন →', lang)}</span>
           </div>
         </button>
@@ -748,15 +757,15 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           }}
         >
           <div className="eam-kpi-top">
-            <span className="eam-kpi-label">{t('Operational Availability', 'অপারেশনাল প্রস্তুতি ও হেফাজত', lang)}</span>
+            <span className="eam-kpi-label">{t('Working & Ready', 'সক্রিয় ও প্রস্তুত মেশিন', lang)}</span>
             <span className="eam-kpi-icon"><ShieldCheck size={15} /></span>
           </div>
           <div className="eam-kpi-val">{portfolioStats.availabilityPct}%</div>
           <div className="eam-kpi-foot">
             <span>
               {portfolioStats.pendingSignOffs > 0
-                ? `✍️ ${portfolioStats.pendingSignOffs} handover sign-off pending`
-                : '✓ 100% custody chain signed'}
+                ? t(`✍️ ${portfolioStats.pendingSignOffs} sign-off pending`, `✍️ ${portfolioStats.pendingSignOffs} জনের স্বাক্ষর বাকি`, lang)
+                : t('✓ 100% assigned & signed', '✓ ১০০% দায়িত্ব নিশ্চিত', lang)}
             </span>
             <span className="eam-kpi-hint">
               {kpiFilter === 'pending_signoff' ? t('Reset ×', 'রিসেট ×', lang) : t('Filter →', 'ফিল্টার →', lang)}
@@ -774,14 +783,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           }}
         >
           <div className="eam-kpi-top">
-            <span className="eam-kpi-label">{t('Calibration & PM Alerts', 'ক্যালিব্রেশন ও সার্ভিস সতর্কতা', lang)}</span>
+            <span className="eam-kpi-label">{t('Servicing & Inspections Due', 'সার্ভিসিং ও পরীক্ষা বাকি', lang)}</span>
             <span className="eam-kpi-icon"><Wrench size={15} /></span>
           </div>
           <div className="eam-kpi-val">
-            {portfolioStats.calAlerts} {t('Assets', 'টি সম্পদ', lang)}
+            {portfolioStats.calAlerts} {t('Machines', 'টি মেশিন', lang)}
           </div>
           <div className="eam-kpi-foot">
-            <span>{baseWorkOrders.filter((w) => w.status !== 'completed').length} open CMMS work orders</span>
+            <span>{t(`${baseWorkOrders.filter((w) => w.status !== 'completed').length} active repair orders`, `${baseWorkOrders.filter((w) => w.status !== 'completed').length}টি মেরামতের কাজ চলমান`, lang)}</span>
             <span className="eam-kpi-hint">
               {kpiFilter === 'cal_alerts' ? t('Reset ×', 'রিসেট ×', lang) : t('Filter Due →', 'বাকিগুলো →', lang)}
             </span>
@@ -807,21 +816,21 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <div className="eam-kpi-top">
             <span className="eam-kpi-label">
               {roleConfig.isSelfServiceOnly
-                ? t('My Open Requisitions', 'আমার চলমান রিকুইজিশন', lang)
-                : t('Retired / End-of-Life Watch', 'অবসরপ্রাপ্ত সম্পদ ও শেষ মেয়াদ', lang)}
+                ? t('My Open Requests', 'আমার চলমান আবেদন', lang)
+                : t('Retired / Scrap Watch', 'অবসরপ্রাপ্ত ও পুরনো মেশিন', lang)}
             </span>
             <span className="eam-kpi-icon"><Archive size={15} /></span>
           </div>
           <div className="eam-kpi-val">
             {roleConfig.isSelfServiceOnly
               ? `${visibleRequisitions.length} Req`
-              : `${decommissionedAssets.length} Write-Off`}
+              : `${decommissionedAssets.length} ${t('Ready to Scrap', 'স্ক্র্যাপ প্রস্তুত', lang)}`}
           </div>
           <div className="eam-kpi-foot">
             <span>
               {roleConfig.isSelfServiceOnly
-                ? 'Multi-tier approval tracked live'
-                : `Dep: ${fmtBdtShort(portfolioStats.totalAccDep)} · ${disposedAssets.length} Archived`}
+                ? t('Approval tracked live', 'অনুমোদন প্রক্রিয়া চলছে', lang)
+                : t(`${disposedAssets.length} archived records`, `${disposedAssets.length}টি স্থায়ী আর্কাইভ`, lang)}
             </span>
             <span className="eam-kpi-hint">{t('Open →', 'খুলুন →', lang)}</span>
           </div>
@@ -829,7 +838,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          EXECUTIVE 5-MODULE NAVIGATION BAR
+          EXECUTIVE 5-MODULE NAVIGATION BAR (Streamlined & Responsive)
           ══════════════════════════════════════════════════════════════════════ */}
       <div className="eam-nav-bar">
         <button
@@ -840,8 +849,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <Layers size={15} />
           <span>
             {roleConfig.isSelfServiceOnly
-              ? t('My Custody Assets', 'আমার বরাদ্দকৃত সম্পদ', lang)
-              : t('Asset Register & 360° Cockpit', 'সম্পদ রেজিস্টার ও ৩৬০° ডসিয়ার', lang)}
+              ? t('My Assigned Equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
+              : t('Machinery Register', 'মেশিন রেজিস্টার', lang)}
           </span>
           <span className="eam-nav-count">{roleScopedAssets.filter((a) => a.lifecycleStage !== 'disposed').length}</span>
         </button>
@@ -854,8 +863,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <Wrench size={15} />
           <span>
             {roleConfig.isSelfServiceOnly
-              ? t('Service & Defect Logs', 'মেরামত ও ত্রুটি লগ', lang)
-              : t('Repairs & Servicing Orders', 'সার্ভিসিং ও মেরামত কার্যাদেশ', lang)}
+              ? t('Service Logs', 'সার্ভিস লগ', lang)
+              : t('Repairs & Servicing', 'সার্ভিসিং ও মেরামত', lang)}
           </span>
           <span className="eam-nav-count warn">{baseWorkOrders.filter((w) => w.status !== 'completed').length}</span>
         </button>
@@ -867,7 +876,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setActiveTab('financials')}
           >
             <DollarSign size={15} />
-            <span>{t('Asset Worth & Depreciation (Financial Value)', 'সম্পদ মূল্য ও অবচয় খতিয়ান', lang)}</span>
+            <span>{t('Valuation & Depreciation', 'সম্পদ মূল্য ও অবচয়', lang)}</span>
           </button>
         )}
 
@@ -879,8 +888,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <ArrowRightLeft size={15} />
           <span>
             {roleConfig.isSelfServiceOnly
-              ? t('My Asset Requisitions', 'নতুন সম্পদের আবেদন', lang)
-              : t('Equipment Requests & Transfers', 'আবেদন ও স্থানান্তর', lang)}
+              ? t('Equipment Requisitions', 'নতুন যন্ত্রপাতির আবেদন', lang)
+              : t('Requests & Transfers', 'আবেদন ও স্থানান্তর', lang)}
           </span>
           <span className="eam-nav-count">
             {visibleRequisitions.filter((r) => r.stage !== 'commissioned' && r.stage !== 'rejected').length}
@@ -894,7 +903,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setActiveTab('disposal')}
           >
             <Archive size={15} />
-            <span>{t('Retired Assets & Scrap History', 'অবসরপ্রাপ্ত সম্পদ ও স্ক্র্যাপ ইতিহাস', lang)}</span>
+            <span>{t('Retired & Scrap', 'অবসর ও স্ক্র্যাপ', lang)}</span>
             {decommissionedAssets.length > 0 && (
               <span className="eam-nav-count danger">{decommissionedAssets.length}</span>
             )}
@@ -914,13 +923,13 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 <div className="eam-cat-chips">
                   {(
                     [
-                      ['all', t('All Assets', 'সকল সম্পদ', lang)],
-                      ['plant', `⚙️ ${t('Refinery Plant', 'রিফাইনারি', lang)}`],
-                      ['vehicle', `🚛 ${t('Fleet & Tankers', 'ফ্লিট ও ট্যাংকার', lang)}`],
-                      ['it', `💻 ${t('SCADA & IT', 'স্কাডা ও আইটি', lang)}`],
-                      ['safety', `🛡️ ${t('Safety / HSE', 'নিরাপত্তা', lang)}`],
-                      ['lab', `🔬 ${t('QC Metrology', 'কিউসি ল্যাব', lang)}`],
-                      ['corporate', `🏢 ${t('Corporate', 'করপোরেট', lang)}`],
+                      ['all', t('All Machines', 'সকল মেশিন', lang)],
+                      ['plant', `⚙️ ${t('Refinery Plant', 'রিফাইনারি প্ল্যান্ট', lang)}`],
+                      ['vehicle', `🚛 ${t('Tankers & Fleet', 'ট্যাংকার ও ফ্লিট', lang)}`],
+                      ['it', `💻 ${t('Control & IT', 'নিয়ন্ত্রণ ও আইটি', lang)}`],
+                      ['safety', `🛡️ ${t('Safety Gear', 'নিরাপত্তা সরঞ্জাম', lang)}`],
+                      ['lab', `🔬 ${t('Lab Instruments', 'পরীক্ষাগার যন্ত্র', lang)}`],
+                      ['corporate', `🏢 ${t('Corporate Office', 'করপোরেট অফিস', lang)}`],
                     ] as const
                   ).map(([catKey, label]) => {
                     const count = categoryCounts[catKey] ?? 0;
@@ -946,14 +955,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                     className={`eam-view-btn ${viewMode === 'cockpit' ? 'active' : ''}`}
                     onClick={() => setViewMode('cockpit')}
                   >
-                    <LayoutGrid size={13} /> {t('360° Cockpit', '৩৬০° ককপিট', lang)}
+                    <LayoutGrid size={13} /> {t('360° View', '৩৬০° ভিউ', lang)}
                   </button>
                   <button
                     type="button"
                     className={`eam-view-btn ${viewMode === 'table' ? 'active' : ''}`}
                     onClick={() => setViewMode('table')}
                   >
-                    <TableIcon size={13} /> {t('Master Table', 'পূর্ণ টেবিল', lang)}
+                    <TableIcon size={13} /> {t('Table View', 'টেবিল ভিউ', lang)}
                   </button>
                 </div>
               </div>
@@ -965,7 +974,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 <input
                   type="text"
                   className="eam-search-input"
-                  placeholder={t('Search tag, SAP FI-AA, serial, custodian, or location...', 'ট্যাগ, এসএপি কোড, সিরিয়াল বা নাম খুঁজুন...', lang)}
+                  placeholder={t('Search machine name, tag, location, or operator...', 'মেশিনের নাম, ট্যাগ, অবস্থান বা অপারেটর খুঁজুন...', lang)}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -981,43 +990,93 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 )}
               </div>
 
-              {!roleConfig.isSelfServiceOnly && (
-                <>
-                  <select
-                    className="eam-filter-select"
-                    value={facilityFilter}
-                    onChange={(e) => setFacilityFilter(e.target.value)}
-                  >
-                    <option value="all">{t('All 3 BOGCL Sites', 'সকল স্থাপনা (৩টি)', lang)}</option>
-                    <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
-                    <option value="Bashundhara Corporate HQ, Baridhara">Baridhara Corporate HQ</option>
-                    <option value="Chattogram Patenga Terminal">Chattogram Marine Terminal</option>
-                  </select>
+              {/* Quick Health / Condition Filter Pills */}
+              <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className={`eam-cat-chip ${stageFilter === 'operational' ? 'active' : ''}`}
+                  style={{ padding: '4px 10px', fontSize: '11px' }}
+                  onClick={() => {
+                    setKpiFilter('none');
+                    setStageFilter((prev) => (prev === 'operational' ? 'active_all' : 'operational'));
+                  }}
+                >
+                  🟢 {t('Running Normal', 'সক্রিয় চালু', lang)}
+                </button>
+                <button
+                  type="button"
+                  className={`eam-cat-chip ${kpiFilter === 'cal_alerts' ? 'active' : ''}`}
+                  style={{ padding: '4px 10px', fontSize: '11px' }}
+                  onClick={() => {
+                    setStageFilter('active_all');
+                    setKpiFilter((prev) => (prev === 'cal_alerts' ? 'none' : 'cal_alerts'));
+                  }}
+                >
+                  🟡 {t('Service Due', 'সার্ভিস বাকি', lang)}
+                </button>
+                <button
+                  type="button"
+                  className={`eam-cat-chip ${stageFilter === 'maintenance' ? 'active' : ''}`}
+                  style={{ padding: '4px 10px', fontSize: '11px' }}
+                  onClick={() => {
+                    setKpiFilter('none');
+                    setStageFilter((prev) => (prev === 'maintenance' ? 'active_all' : 'maintenance'));
+                  }}
+                >
+                  🔴 {t('In Repair', 'মেরামতাধীন', lang)}
+                </button>
+              </div>
 
-                  <select
-                    className="eam-filter-select"
-                    value={stageFilter}
-                    onChange={(e) => setStageFilter(e.target.value)}
-                  >
-                    <option value="active_all">{t('Active Lifecycle Stages', 'সক্রিয় জীবনচক্র ধাপ', lang)}</option>
-                    <option value="operational">Stage 4: Operational</option>
-                    <option value="in_stock">Stage 3: Central Store Pool</option>
-                    <option value="in_transfer">Stage 5: In Transit</option>
-                    <option value="calibration_due">Stage 6: Calibration Due</option>
-                    <option value="maintenance">Stage 6: Under Overhaul</option>
-                    <option value="decommissioned">Stage 7: Condemned</option>
-                    <option value="disposed">Stage 8: 10-Yr Archive</option>
-                    <option value="all">All (Incl. Disposed Archive)</option>
-                  </select>
-                </>
+              {!roleConfig.isSelfServiceOnly && (
+                <button
+                  type="button"
+                  className={`eam-view-btn ${showAdvancedFilters ? 'active' : ''}`}
+                  style={{ height: '36px', padding: '0 10px', border: '1.5px solid var(--brand-slate-200)', borderRadius: '8px' }}
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  title="Toggle more filters"
+                >
+                  <SlidersHorizontal size={13} /> {t('Filters', 'ফিল্টার', lang)}
+                </button>
               )}
 
               {hasActiveFilters && (
                 <button type="button" className="eam-reset-btn" onClick={resetAllFilters}>
-                  <X size={13} /> {t('Reset Filters', 'ফিল্টার মুছুন', lang)} ({filteredAssets.length})
+                  <X size={13} /> {t('Reset', 'রিসেট', lang)} ({filteredAssets.length})
                 </button>
               )}
             </div>
+
+            {/* Optional Collapsible Secondary Filters (Site & Full Lifecycle Stage) */}
+            {showAdvancedFilters && !roleConfig.isSelfServiceOnly && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px dashed var(--brand-slate-200)' }}>
+                <select
+                  className="eam-filter-select"
+                  value={facilityFilter}
+                  onChange={(e) => setFacilityFilter(e.target.value)}
+                >
+                  <option value="all">{t('All 3 Facilities', 'সকল স্থাপনা (৩টি)', lang)}</option>
+                  <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
+                  <option value="Bashundhara Corporate HQ, Baridhara">Baridhara Corporate HQ</option>
+                  <option value="Chattogram Patenga Terminal">Chattogram Marine Terminal</option>
+                </select>
+
+                <select
+                  className="eam-filter-select"
+                  value={stageFilter}
+                  onChange={(e) => setStageFilter(e.target.value)}
+                >
+                  <option value="active_all">{t('Active Machinery (Excl. Disposed)', 'সক্রিয় যন্ত্রপাতি', lang)}</option>
+                  <option value="operational">Operational (Stage 4)</option>
+                  <option value="in_stock">In Warehouse (Stage 3)</option>
+                  <option value="in_transfer">In Transit (Stage 5)</option>
+                  <option value="calibration_due">Inspection / Service Due (Stage 6)</option>
+                  <option value="maintenance">Under Repair (Stage 6)</option>
+                  <option value="decommissioned">Worn-Out / Condemned (Stage 7)</option>
+                  <option value="disposed">Archived Scrap (Stage 8)</option>
+                  <option value="all">All (Including Scrapped)</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Mobile List / 360° Dossier Switcher */}
@@ -1237,12 +1296,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             <div>
                               {roleConfig.canViewFinancialLedger ? (
                                 <span>
-                                  NBV: <strong style={{ color: 'var(--brand-slate-900)' }}>
+                                  {t('Value:', 'মূল্য:', lang)}{' '}
+                                  <strong style={{ color: 'var(--brand-slate-900)' }}>
                                     {item.lifecycleStage === 'disposed' ? '৳0 (Retired)' : fmtBdtShort(f.netBookValue)}
-                                  </strong>{' '}
-                                  <span style={{ color: 'var(--brand-slate-400)', fontFamily: 'monospace', fontSize: '10px' }}>
-                                    ({item.depreciationMethod})
-                                  </span>
+                                  </strong>
                                 </span>
                               ) : (
                                 <span style={{ color: 'var(--brand-slate-500)' }}>S/N: {item.serialNo}</span>
@@ -1257,10 +1314,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                     style={{ width: `${item.healthScore}%`, background: healthColor }}
                                   />
                                 </div>
-                                <span>{item.healthScore}%</span>
+                                <span>♥ {item.healthScore}%</span>
                               </div>
                             ) : (
-                              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>EoL Stage</span>
+                              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Retired', 'অবসরপ্রাপ্ত', lang)}</span>
                             )}
                           </div>
                         </button>
@@ -1306,7 +1363,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                       <div className="eam-hero-tile">
                         <div className="eam-hero-tile-lbl">
                           {roleConfig.canViewFinancialLedger
-                            ? t('Carrying NBV', 'বর্তমান বইমূল্য', lang)
+                            ? t('Current Value', 'বর্তমান মূল্যায়ন', lang)
                             : t('Commissioned Date', 'কমিশনিং তারিখ', lang)}
                         </div>
                         <div className="eam-hero-tile-val" style={{ color: '#34D399' }}>
@@ -1318,25 +1375,25 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </div>
                         <div className="eam-hero-tile-sub">
                           {roleConfig.canViewFinancialLedger
-                            ? `${selectedAsset.depreciationMethod} · Gross ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)}`
+                            ? t(`Cost: ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)}`, `মূল ব্যয়: ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)}`, lang)
                             : selectedAsset.glCostCenter}
                         </div>
                       </div>
 
                       <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Health & RUL', 'স্বাস্থ্য ও অবশিষ্ট আয়ু', lang)}</div>
+                        <div className="eam-hero-tile-lbl">{t('Machine Health', 'মেশিনের স্বাস্থ্য অবস্থা', lang)}</div>
                         <div className="eam-hero-tile-val">
                           {selectedAsset.lifecycleStage === 'disposed'
                             ? 'Archived'
-                            : `${selectedAsset.healthScore}% Health`}
+                            : `${selectedAsset.healthScore}% Good`}
                         </div>
                         <div className="eam-hero-tile-sub">
-                          RUL: {selectedFinancials.remainingUsefulLifeYears} yrs ({selectedAsset.runtimeHours.toLocaleString()}h)
+                          {t(`Est. Remaining Life: ${selectedFinancials.remainingUsefulLifeYears} yrs`, `অবশিষ্ট আয়ু: ${selectedFinancials.remainingUsefulLifeYears} বছর`, lang)}
                         </div>
                       </div>
 
                       <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Statutory Audit', 'পরবর্তী ক্যালিব্রেশন', lang)}</div>
+                        <div className="eam-hero-tile-lbl">{t('Next Service Due', 'পরবর্তী সার্ভিসিং', lang)}</div>
                         <div
                           className="eam-hero-tile-val"
                           style={{
@@ -1348,15 +1405,15 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         >
                           {selectedAsset.lifecycleStage === 'disposed'
                             ? 'Retired'
-                            : `${selectedAsset.daysToService} ${t('days', 'দিন', lang)}`}
+                            : `${selectedAsset.daysToService} ${t('days', 'দিন বাকি', lang)}`}
                         </div>
                         <div className="eam-hero-tile-sub">
-                          {selectedAsset.regulatoryAuthority || 'ISO 55001'} · {selectedAsset.nextServiceDate}
+                          {selectedAsset.nextServiceDate}
                         </div>
                       </div>
 
                       <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Current Custodian', 'হেফাজতকারী কর্মকর্তা', lang)}</div>
+                        <div className="eam-hero-tile-lbl">{t('Assigned Operator', 'দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}</div>
                         <div className="eam-hero-tile-val" style={{ fontSize: '12.5px' }}>
                           {selectedAsset.custodian}
                         </div>
@@ -1364,7 +1421,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                           className="eam-hero-tile-sub"
                           style={{ color: selectedAsset.custodianAcknowledged ? '#6EE7B7' : '#FDE047' }}
                         >
-                          {selectedAsset.custodianAcknowledged ? '✓ Handover E-Signed' : '⏳ Signature Pending'}
+                          {selectedAsset.custodianAcknowledged ? t('✓ Handover Signed', '✓ দায়িত্ব নিশ্চিত', lang) : t('⏳ Awaiting Sign-Off', '⏳ গ্রহণ স্বাক্ষর বাকি', lang)}
                         </div>
                       </div>
                     </div>
@@ -1395,21 +1452,21 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         className={`eam-subtab ${inspectorTab === 'overview' ? 'active' : ''}`}
                         onClick={() => setInspectorTab('overview')}
                       >
-                        <Eye size={13} /> {t('Specs & Controls', 'বিবরণ ও নিয়ন্ত্রণ', lang)}
+                        <Eye size={13} /> {t('Specs & Actions', 'বিবরণ ও কার্যাবলী', lang)}
                       </button>
                       <button
                         type="button"
                         className={`eam-subtab ${inspectorTab === 'timeline' ? 'active' : ''}`}
                         onClick={() => setInspectorTab('timeline')}
                       >
-                        <History size={13} /> {t('Audit Trail', 'জীবনচক্র খতিয়ান', lang)} ({selectedAsset.lifecycleEvents.length})
+                        <History size={13} /> {t('Activity Log', 'কার্যক্রম ইতিহাস', lang)} ({selectedAsset.lifecycleEvents.length})
                       </button>
                       <button
                         type="button"
                         className={`eam-subtab ${inspectorTab === 'custody' ? 'active' : ''}`}
                         onClick={() => setInspectorTab('custody')}
                       >
-                        <UserCheck size={13} /> {t('Custody Chain', 'হেফাজত ইতিহাস', lang)} ({selectedAsset.custodyHistory.length})
+                        <UserCheck size={13} /> {t('Custody History', 'দায়িত্ব হস্তান্তর', lang)} ({selectedAsset.custodyHistory.length})
                       </button>
                       {!roleConfig.isSelfServiceOnly && (
                         <button
@@ -1417,7 +1474,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                           className={`eam-subtab ${inspectorTab === 'spares' ? 'active' : ''}`}
                           onClick={() => setInspectorTab('spares')}
                         >
-                          <Package size={13} /> {t('BOM Spares', 'খুচরা যন্ত্রাংশ', lang)} ({selectedAsset.spares.length})
+                          <Package size={13} /> {t('Spare Parts', 'খুচরা যন্ত্রাংশ', lang)} ({selectedAsset.spares.length})
                         </button>
                       )}
                     </div>
@@ -1536,7 +1593,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         {/* Organized Lifecycle Action Toolbar */}
                         <div className="eam-action-section">
                           <div className="eam-action-section-lbl">
-                            {t('Lifecycle Operations & Governance Controls', 'জীবনচক্র অপারেশন ও গভর্ন্যান্স নিয়ন্ত্রণ', lang)}
+                            {t('Quick Actions & Machine Controls', 'দ্রুত কার্যাবলী ও নিয়ন্ত্রণ', lang)}
                           </div>
                           <div className="eam-actions-grid">
                             {roleConfig.canCertifyCalibration &&
@@ -1549,15 +1606,15 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                     certifyAssetDirect(selectedAsset.id, currentPersona.name, currentPersona.label);
                                     showToast(
                                       t(
-                                        `✓ Calibration & reliability certified for ${selectedAsset.tag}. Next cycle set to ${selectedAsset.calibrationCycleDays}d.`,
-                                        `✓ ${selectedAsset.tag}-এর ক্যালিব্রেশন প্রত্যয়ন সম্পন্ন হয়েছে।`,
+                                        `✓ Service & quality certified for ${selectedAsset.tag}. Next service set in ${selectedAsset.calibrationCycleDays} days.`,
+                                        `✓ ${selectedAsset.tag}-এর সার্ভিস ও মান প্রত্যয়ন সম্পন্ন হয়েছে।`,
                                         lang
                                       ),
                                       'success'
                                     );
                                   }}
                                 >
-                                  <CheckCircle size={14} /> {t('Certify Calibration / PM', 'ক্যালিব্রেশন প্রত্যয়ন', lang)}
+                                  <CheckCircle size={14} /> {t('Certify Service & Quality', 'সার্ভিস ও মান প্রত্যয়ন', lang)}
                                 </button>
                               )}
 
@@ -1565,7 +1622,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               selectedAsset.lifecycleStage !== 'disposed' &&
                               selectedAsset.lifecycleStage !== 'decommissioned' && (
                                 <button type="button" className="btn-outline" onClick={() => setShowWorkOrderModal(true)}>
-                                  <Wrench size={14} /> {t('Dispatch Work Order', 'কার্যাদেশ জারি', lang)}
+                                  <Wrench size={14} /> {t('Create Repair Order', 'মেরামত কার্যাদেশ জারি', lang)}
                                 </button>
                               )}
 
@@ -1573,13 +1630,13 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               selectedAsset.lifecycleStage !== 'disposed' &&
                               selectedAsset.lifecycleStage !== 'decommissioned' && (
                                 <button type="button" className="btn-outline" onClick={() => setShowTransferModal(true)}>
-                                  <ArrowRightLeft size={14} /> {t('Transfer Custody / Site', 'হস্তান্তর / গেট পাস', lang)}
+                                  <ArrowRightLeft size={14} /> {t('Transfer Machine / Gate Pass', 'মেশিন স্থানান্তর / গেট পাস', lang)}
                                 </button>
                               )}
 
                             {roleConfig.canViewFinancialLedger && (
                               <button type="button" className="btn-outline" onClick={() => setScheduleTargetAsset(selectedAsset)}>
-                                <DollarSign size={14} /> {t('Yearly Depreciation Table (IAS 16)', 'বার্ষিক অবচয় তফসিল', lang)}
+                                <DollarSign size={14} /> {t('Yearly Value Drop Table', 'বার্ষিক অবচয় তালিকা', lang)}
                               </button>
                             )}
 
@@ -1594,7 +1651,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   <RotateCcw size={14} />
                                   {roleConfig.isSelfServiceOnly
                                     ? t('Report Defect', 'ত্রুটি রিপোর্ট করুন', lang)
-                                    : t('Report Machine Problem / Defect', 'যন্ত্রপাতির ত্রুটি জানান', lang)}
+                                    : t('Report Machine Defect', 'যন্ত্রপাতির সমস্যা জানান', lang)}
                                 </button>
                               )}
 
@@ -1616,7 +1673,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                 }}
                               >
                                 <AlertTriangle size={14} color="#DC2626" />
-                                {t('Report Safety Incident / Issue', 'নিরাপত্তা সমস্যা / বিপদ রিপোর্ট', lang)}
+                                {t('Report Safety Incident', 'নিরাপত্তা ঝুঁকি রিপোর্ট', lang)}
                               </button>
                             )}
 
@@ -1628,7 +1685,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   className="btn-outline-danger"
                                   onClick={() => setShowDecommissionModal(true)}
                                 >
-                                  <Archive size={14} /> {t('Retire Machine (Decommission)', 'অকেজো / অবসর ঘোষণা', lang)}
+                                  <Archive size={14} /> {t('Retire Machine (End-of-Life)', 'মেশিন অবসর ঘোষণা', lang)}
                                 </button>
                               )}
 
@@ -1850,10 +1907,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               <div className="card-hd-icon"><Wrench size={16} /></div>
               <div>
                 <div className="card-title">
-                  {t('CMMS Work Orders & Statutory Calibration Compliance Board', 'রক্ষণাবেক্ষণ কার্যাদেশ ও সংবিধিবদ্ধ ক্যালিব্রেশন বোর্ড', lang)}
+                  {t('Machine Repairs & Scheduled Servicing', 'যন্ত্রপাতি মেরামত ও নিয়মিত সার্ভিসিং', lang)}
                 </div>
                 <div className="card-subtitle">
-                  {t('BSTI · Department of Explosives (DoE) · ASME Sec VIII · BRTA · OEM Warranty Tracking', 'বিএসটিআই · বিস্ফোরক পরিদপ্তর · এএসএমই · বিআরটিএ ফিটনেস ও ওয়ারেন্টি ক্লেইম ট্র্যাকিং', lang)}
+                  {t('Track ongoing repair work orders, scheduled safety inspections, and manufacturer warranty.', 'চলমান মেরামত কাজ, নিয়মিত সেফটি ইন্সপেকশন এবং ওয়ারেন্টি ট্র্যাকিং।', lang)}
                 </div>
               </div>
             </div>
@@ -2045,12 +2102,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               <div className="card-hd-icon"><DollarSign size={16} /></div>
               <div>
                 <div className="card-title">
-                  {t('Fixed Asset Valuation, Depreciation & Lifetime Cost Ledger', 'সম্পদ মূল্যায়ন, অবচয় তফসিল ও মোট জীবনচক্র ব্যয় খতিয়ান', lang)}
+                  {t('Machinery Valuation & Yearly Value Drop', 'যন্ত্রপাতির মূল্যায়ন ও বার্ষিক অবচয় হিসাব', lang)}
                 </div>
                 <div className="card-subtitle">
                   {t(
-                    'Straight-Line, Reducing Balance & Usage-Based Depreciation • Automated 50% Repair-to-Cost Review Alert',
-                    'সরলরৈখিক, হ্রাসমান-জের ও ব্যবহার-একক অবচয় পদ্ধতি এবং ৫০% মেরামত-সীমা পর্যবেক্ষণ',
+                    'Current book value, yearly depreciation, and total repair expenses compared to purchase cost.',
+                    'যন্ত্রপাতির বর্তমান আর্থিক মূল্য, বার্ষিক অবচয় এবং মোট মেরামত ব্যয়ের হিসাব।',
                     lang
                   )}
                 </div>
@@ -2200,15 +2257,15 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 <div className="card-hd-icon"><FilePlus size={16} /></div>
                 <div>
                   <div className="card-title">
-                    {t('Stage 1–3 Asset Acquisition & Replacement Requisition Pipeline', 'নতুন সম্পদ ক্রয় ও প্রতিস্থাপন রিকুইজিশন পাইপলাইন', lang)}
+                    {t('Equipment Purchase & Replacement Requests', 'নতুন যন্ত্রপাতি ক্রয় ও প্রতিস্থাপন আবেদন', lang)}
                   </div>
                   <div className="card-subtitle">
-                    {t('End-to-end birth tracking: Requisition → Dept Vetting → CFO/Chairman Sanction → Auto-Tag Commissioning', 'আবেদন হতে বিভাগীয় সুপারিশ, চেয়ারম্যান/অর্থ অনুমোদন এবং স্বয়ংক্রিয় অ্যাসেট ট্যাগ কমিশনিং', lang)}
+                    {t('Track approval pipeline from request to purchase, safety inspection, and delivery.', 'অনুরোধ হতে বিভাগীয় অনুমোদন, ক্রয় এবং স্থাপনা হস্তান্তরের সার্বিক ট্র্যাকিং।', lang)}
                   </div>
                 </div>
               </div>
               <button type="button" className="btn-primary" onClick={() => setShowRequisitionModal(true)}>
-                <Plus size={14} /> {t('New Asset Requisition', 'নতুন রিকুইজিশন দাখিল', lang)}
+                <Plus size={14} /> {t('New Equipment Request', 'নতুন আবেদন দাখিল', lang)}
               </button>
             </div>
 
@@ -2432,17 +2489,17 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               <div className="card-hd-left">
                 <div className="card-hd-icon"><ShieldAlert size={16} /></div>
                 <div>
-                  <div className="card-title">{t('Stage-7 Condemned Assets Pending Write-Off & Disposal', 'পর্যায়-৭: অকেজো ঘোষিত সম্পদ ও প্রাক-অবলোপন যাচাইকরণ তালিকা', lang)}</div>
+                  <div className="card-title">{t('Worn-Out Machinery Pending Final Retirement', 'অকেজো যন্ত্রপাতি ও চূড়ান্ত অবসর অনুমোদন', lang)}</div>
                   <div className="card-subtitle">
                     {t(
-                      'Mandatory 4-Point Pre-Disposal Checklist (Engineering Survey · DoE Gas-Free / NIST Data Wipe · Spares Harvest · CFO Audit)',
-                      'চূড়ান্ত নিলাম বা অবলোপনের পূর্বে ৪-দফা কারিগরি, পরিবেশগত ও আর্থিক ছাড়পত্র বাধ্যতামূলক',
+                      'Mandatory 4-point verification before selling or scrapping (Engineering Survey, Decontamination, Spares Harvest, Accounts Sign-Off).',
+                      'নিলাম বা স্ক্র্যাপ করার পূর্বে ৪-দফা কারিগরি, নিরাপত্তা ও আর্থিক ছাড়পত্র।',
                       lang
                     )}
                   </div>
                 </div>
               </div>
-              <span className="badge danger">{decommissionedAssets.length} Pending Write-Off</span>
+              <span className="badge danger">{decommissionedAssets.length} {t('Pending Write-Off', 'অবলোপন বাকি', lang)}</span>
             </div>
 
             <div className="card-body">

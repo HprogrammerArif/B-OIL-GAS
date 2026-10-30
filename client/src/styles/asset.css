@@ -210,25 +210,30 @@
   background: var(--brand-card-bg);
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-md);
-  padding: 5px 8px;
-  margin-bottom: 16px;
+  padding: 4px 6px;
+  margin-bottom: 14px;
   overflow-x: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   box-shadow: var(--shadow-xs);
+}
+
+.eam-nav-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .eam-nav-tab {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  border-radius: 8px;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 7px;
   border: none;
   background: transparent;
   color: var(--brand-slate-600);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
