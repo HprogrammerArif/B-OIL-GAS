@@ -714,7 +714,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                     </div>
                   </div>
                 </div>
-                <span className="badge success" style={{ fontSize: '10px' }}>0.00% BAC Clear</span>
+                <span className="badge success" style={{ fontSize: '10px' }}>Alcohol Test: Passed</span>
               </div>
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

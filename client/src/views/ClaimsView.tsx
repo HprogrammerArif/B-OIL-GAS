@@ -216,13 +216,13 @@ export default function ClaimsView({ role, lang }: ViewProps) {
           {t('All Claims', 'সকল দাবি', lang)} ({claims.length})
         </button>
         <button className={`pill-tab ${activeTab === 'tada' ? 'active' : ''}`} onClick={() => setActiveTab('tada')}>
-          ✈️ {t('Tour TA / DA', 'সফর টিএ / ডিএ', lang)}
+          ✈️ {t('Outstation Travel (TA/DA)', 'দূরপাল্লার ভ্রমণ ভাতা (টিএ/ডিএ)', lang)}
         </button>
         <button className={`pill-tab ${activeTab === 'conveyance' ? 'active' : ''}`} onClick={() => setActiveTab('conveyance')}>
-          🚕 {t('Monthly Conveyance', 'মাসিক যাতায়াত', lang)}
+          🚕 {t('Local Travel & Taxi', 'স্থানীয় যাতায়াত ও ট্যাক্সি', lang)}
         </button>
         <button className={`pill-tab ${activeTab === 'tour_event' ? 'active' : ''}`} onClick={() => setActiveTab('tour_event')}>
-          🏆 {t('Tour & Event Advance', 'সফর ও ইভেন্ট অগ্রিম', lang)}
+          🏆 {t('Event & Dealer Meets', 'ইভেন্ট ও ডিলার সম্মেলন', lang)}
         </button>
         <button className={`pill-tab ${activeTab === 'policy' ? 'active' : ''}`} onClick={() => setActiveTab('policy')}>
           📜 {t('Allowance Policy Rates', 'ভাতা নীতিমালা হার', lang)}

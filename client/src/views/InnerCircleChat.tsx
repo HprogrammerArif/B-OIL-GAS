@@ -57,10 +57,10 @@ interface ChatMessage {
 }
 
 const CHANNELS: ChatChannel[] = [
-  { id: 'ch_executive', name: 'executive-command', description: 'C-Suite, Chairman & Board Strategic Directives', membersCount: 7, unread: 3 },
-  { id: 'ch_refinery', name: 'refinery-ops-confidential', description: 'Keraniganj Unit 1 & 2 DCS Telemetry & Production', membersCount: 5 },
-  { id: 'ch_capex', name: 'capex-finance-treasury', description: 'L/C Authorizations, Banking & Large PO Sign-offs', membersCount: 4 },
-  { id: 'ch_statutory', name: 'regulatory-statutory-risk', description: 'BSTI, Explosives Directorate & Legal Audit Compliance', membersCount: 4, isLocked: true },
+  { id: 'ch_executive', name: 'executive-leadership', description: 'Chairman, Directors & Key Decisions', membersCount: 7, unread: 3 },
+  { id: 'ch_refinery', name: 'factory-operations', description: 'Keraniganj Plant Production & Machine Status', membersCount: 5 },
+  { id: 'ch_capex', name: 'finance-and-purchases', description: 'Budget Approvals, Banking & Large Purchases', membersCount: 4 },
+  { id: 'ch_statutory', name: 'permits-and-compliance', description: 'Govt Licenses, Factory Inspections & Legal Checks', membersCount: 4, isLocked: true },
 ];
 
 const INNER_CIRCLE_MEMBERS: ChatMember[] = [
@@ -81,7 +81,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderRole: 'Plant GM, Keraniganj',
       senderInitials: 'HR',
       senderColor: '#0369A1',
-      content: 'Honourable Chairman Sir, Keraniganj Unit-2 catalytic cracking reached 5,000 MT/day today. Efficiency is 12% above projected baseline. Daily DCS telemetry summary is attached below for your perusal.',
+      content: "Honourable Chairman Sir, Keraniganj Factory reached 5,000 Metric Tons today, running 12% above target. Today's production report is attached below for your review.",
       timestamp: '09:14 AM',
       type: 'text',
       readBy: ['fb', 'km', 'si', 'nj', 'chairman'],

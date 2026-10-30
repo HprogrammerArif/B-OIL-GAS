@@ -79,33 +79,33 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     switch (role) {
       case 'chairman':
         return [
-          { id: 'overview',     label: 'Strategic Cockpit',    labelBn: 'কক্পিট সংক্ষিপ্ত', icon: <Crown size={15} /> },
+          { id: 'overview',     label: 'Executive Overview',   labelBn: 'এক্সিকিউটিভ ওভারভিউ', icon: <Crown size={15} /> },
           { id: 'approvals',    label: 'Priority Approvals',   labelBn: 'জরুরি অনুমোদন',    icon: <FileCheck size={15} />, badge: PENDING_APPROVALS.length, badgeType: 'danger' as const },
-          { id: 'inner_circle', label: 'Inner Circle Roster',  labelBn: 'ইনার সার্কেল',      icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' as const },
-          { id: 'notices',      label: 'Corporate Notices',    labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: sharedNotices.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
+          { id: 'inner_circle', label: 'Leadership Team',      labelBn: 'নেতৃত্বের তালিকা',  icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' as const },
+          { id: 'notices',      label: 'Company Notices',      labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: sharedNotices.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
         ];
       case 'plant_gm':
         return [
-          { id: 'overview',    label: 'Plant SCADA Console',  labelBn: 'প্ল্যান্ট কনসোল',    icon: <Gauge size={15} />, badge: DCS_ALARMS.length, badgeType: 'danger' as const },
-          { id: 'refinery',    label: 'Refinery Production',  labelBn: 'উৎপাদন চার্ট',      icon: <BarChart3 size={15} /> },
-          { id: 'safety_loto', label: 'LOTO Safety & Shifts', labelBn: 'নিরাপত্তা পারমিট',  icon: <Lock size={15} />, badge: INITIAL_LOTO_PERMITS.length, badgeType: 'warn' as const },
+          { id: 'overview',    label: 'Factory Status & Alarms', labelBn: 'কারখানা স্ট্যাটাস', icon: <Gauge size={15} />, badge: DCS_ALARMS.length, badgeType: 'danger' as const },
+          { id: 'refinery',    label: 'Factory Production',    labelBn: 'উৎপাদন চার্ট',      icon: <BarChart3 size={15} /> },
+          { id: 'safety_loto', label: 'Safety Permits & Shifts', labelBn: 'নিরাপত্তা পারমিট ও শিফট', icon: <Lock size={15} />, badge: INITIAL_LOTO_PERMITS.length, badgeType: 'warn' as const },
         ];
       case 'transport_admin':
         return [
           { id: 'overview',     label: 'Fleet Operations',     labelBn: 'ফ্লিট হাব',         icon: <Truck size={15} /> },
-          { id: 'requisitions', label: 'Travel Requisitions',  labelBn: 'যানবাহন আবেদন',    icon: <Car size={15} />, badge: sharedRequisitions.filter(r => r.status === 'pending').length, badgeType: 'warn' as const },
-          { id: 'corridor',     label: 'Corridor Transit HUD', labelBn: 'টোল করিডোর',       icon: <Navigation size={15} /> },
+          { id: 'requisitions', label: 'Vehicle Requests',     labelBn: 'যানবাহন আবেদন',    icon: <Car size={15} />, badge: sharedRequisitions.filter(r => r.status === 'pending').length, badgeType: 'warn' as const },
+          { id: 'corridor',     label: 'Live Highway Travel',  labelBn: 'হাইওয়ে ট্রিপ ট্র্যাকার', icon: <Navigation size={15} /> },
         ];
       case 'hod':
         return [
           { id: 'overview',  label: 'Department Hub',        labelBn: 'বিভাগ হাব',          icon: <Briefcase size={15} /> },
-          { id: 'approvals', label: 'Omni-Approval Queue',   labelBn: 'অনুমোদন সারি',       icon: <FileCheck size={15} />, badge: INITIAL_HOD_QUEUE.length, badgeType: 'danger' as const },
+          { id: 'approvals', label: 'Pending Approvals',     labelBn: 'অনুমোদন তালিকা',     icon: <FileCheck size={15} />, badge: INITIAL_HOD_QUEUE.length, badgeType: 'danger' as const },
         ];
       case 'hr_admin':
         return [
-          { id: 'overview',  label: 'Workforce Cockpit',     labelBn: 'কর্মী কক্পিট',      icon: <Users size={15} /> },
+          { id: 'overview',  label: 'Workforce Overview',    labelBn: 'কর্মী ওভারভিউ',      icon: <Users size={15} /> },
           { id: 'clearance', label: 'Exit Clearances',       labelBn: 'ছাড়পত্র অডিট',     icon: <UserCheck size={15} />, badge: '1', badgeType: 'warn' as const },
-          { id: 'sites',     label: 'Site Deployment Nodes', labelBn: 'আঞ্চলিক নোড',      icon: <Building2Icon size={15} /> },
+          { id: 'sites',     label: 'Office & Plant Locations', labelBn: 'অফিস ও প্ল্যান্ট এলাকা', icon: <Building2Icon size={15} /> },
         ];
       case 'driver':
         return [

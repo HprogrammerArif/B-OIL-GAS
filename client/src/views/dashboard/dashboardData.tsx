@@ -204,7 +204,7 @@ export const ROLE_STATS: Record<AppRole, StatDef[]> = {
   ],
   plant_gm: [
     { label: 'Plant Headcount', labelBn: 'প্ল্যান্টে উপস্থিত', value: '218', sub: 'Keraniganj Refinery, today', type: 'green', icon: <Users size={16}/>, sparkline: [205, 210, 212, 215, 214, 217, 218], sparkColor: '#059669' },
-    { label: 'DCS Active Alarms', labelBn: 'ডিসিএস সক্রিয় অ্যালার্ম', value: '3', sub: '1 high priority — Column C-102 temp', type: 'red', icon: <Zap size={16}/>, sparkline: [5, 4, 4, 3, 2, 3, 3], sparkColor: '#DC2626' },
+    { label: 'Sensor & Heat Alerts', labelBn: 'সেন্সর ও তাপমাত্রা সতর্কতা', value: '3', sub: '1 high priority — Column C-102 temp', type: 'red', icon: <Zap size={16}/>, sparkline: [5, 4, 4, 3, 2, 3, 3], sparkColor: '#DC2626' },
     { label: 'Active Work Orders', labelBn: 'সক্রিয় কার্যাদেশ', value: '14', sub: '4 preventive, 10 corrective', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [18, 16, 15, 14, 15, 14, 14], sparkColor: '#D97706' },
     { label: 'Refinery Efficiency', labelBn: 'রিফাইনারি দক্ষতা', value: '96.3%', sub: '+1.2% vs last week', type: 'blue', icon: <Gauge size={16}/>, sparkline: [94.1, 94.8, 95.2, 95.7, 95.9, 96.1, 96.3], sparkColor: '#0284C7' },
   ],
@@ -217,8 +217,8 @@ export const ROLE_STATS: Record<AppRole, StatDef[]> = {
   hr_admin: [
     { label: 'Active Workforce', labelBn: 'সক্রিয় কর্মী', value: '743', sub: 'Across HQ, Plant & Terminal', type: 'green', icon: <Users size={16}/>, sparkline: [730, 735, 738, 740, 741, 742, 743], sparkColor: '#059669' },
     { label: 'Pending Clearances', labelBn: 'বহির্গমন ছাড়পত্র', value: '1', sub: '1 separation in-progress (50%)', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [3, 2, 2, 1, 1, 1, 1], sparkColor: '#D97706' },
-    { label: 'Today Attendance', labelBn: 'আজকের বায়োমেট্রিক', value: '94.8%', sub: 'Haversine geofenced verified', type: 'blue', icon: <TrendingUp size={16}/>, sparkline: [92, 93, 93.5, 94, 94.2, 94.5, 94.8], sparkColor: '#0284C7' },
-    { label: 'SAP HCM Sync', labelBn: 'এসএপি এইচসিএম সিঙ্ক', value: '100%', sub: 'PERNR Master up to date', type: 'green', icon: <ShieldCheckIcon />, sparkline: [100, 100, 100, 100, 100, 100, 100], sparkColor: '#059669' },
+    { label: 'Staff Attendance', labelBn: 'আজকের উপস্থিতি', value: '94.8%', sub: 'Verified inside office boundary (GPS)', type: 'blue', icon: <TrendingUp size={16}/>, sparkline: [92, 93, 93.5, 94, 94.2, 94.5, 94.8], sparkColor: '#0284C7' },
+    { label: 'HR Master Records', labelBn: 'এইচআর মাস্টার রেকর্ড', value: '100%', sub: 'All employee profiles up to date', type: 'green', icon: <ShieldCheckIcon />, sparkline: [100, 100, 100, 100, 100, 100, 100], sparkColor: '#059669' },
   ],
   hod: [
     { label: 'Pending Approvals', labelBn: 'অনুমোদন বাকি', value: '7', sub: '3 expense + 2 travel + 2 leave', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [12, 10, 9, 8, 7, 8, 7], sparkColor: '#D97706' },
@@ -234,7 +234,7 @@ export const ROLE_STATS: Record<AppRole, StatDef[]> = {
   ],
   driver: [
     { label: 'Assigned Mission', labelBn: 'বরাদ্দকৃত ট্রিপ', value: '1 Active', sub: 'Baridhara HQ ➔ Keraniganj', type: 'green', icon: <Truck size={16}/>, sparkline: [1, 2, 1, 2, 1], sparkColor: '#059669' },
-    { label: 'Sobriety BAC', labelBn: 'অ্যালকোহল টেস্ট', value: '0.00%', sub: 'Zero Alcohol Cleared Today', type: 'blue', icon: <CheckCircle size={16}/>, sparkline: [0, 0, 0, 0, 0], sparkColor: '#0284C7' },
+    { label: 'Alcohol Breath Test', labelBn: 'অ্যালকোহল টেস্ট', value: '100% Passed', sub: 'Zero alcohol (0.00% BAC) verified', type: 'blue', icon: <CheckCircle size={16}/>, sparkline: [0, 0, 0, 0, 0], sparkColor: '#0284C7' },
     { label: 'Toll Slips Claimed', labelBn: 'টোল দাবি স্লিপ', value: '৳410', sub: '2 claims awaiting reimbursement', type: 'warn', icon: <Receipt size={16}/>, sparkline: [150, 260, 410], sparkColor: '#D97706' },
     { label: 'Safety Rating', labelBn: 'নিরাপত্তা স্কোর', value: '4.9/5.0', sub: 'Top Chauffeur Category', type: 'green', icon: <TrendingUp size={16}/>, sparkline: [4.7, 4.8, 4.8, 4.9, 4.9], sparkColor: '#059669' },
   ],

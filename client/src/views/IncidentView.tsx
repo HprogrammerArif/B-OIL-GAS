@@ -495,16 +495,16 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
-              {t('Industrial Incident Management & Factory Safety Cockpit', 'শিল্প কারখানা ইনসিডেন্ট ও পেশাগত স্বাস্থ্য-নিরাপত্তা ককপিট', lang)}
+              {t('Factory Safety & Incident Management System', 'কারখানা স্বাস্থ্য-নিরাপত্তা ও ইনসিডেন্ট ব্যবস্থাপনা', lang)}
             </h2>
             <span className="badge success" style={{ fontSize: '10px' }}>
-              ISO 45001 / OSHA 1904 COMPLIANT
+              OSHA & ISO 45001 STANDARDS
             </span>
           </div>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
             {t(
-              'Zero-Harm Safety Commitment • Petroleum Rules & Explosives Dept Compliance • 5-Whys & Fishbone RCA • CAPA Engine',
-              'শূন্য দুর্ঘটনা দর্শন • পেট্রোলিয়াম আইন ও বিস্ফোরক পরিদপ্তর রিপোর্টিং • মূল কারণ বিশ্লেষণ ও সিএপিএ সমাধান ব্যবস্থা',
+              'Zero-Harm Workplace • Fast Floor Reporting • Step-by-Step Problem Solving (5-Whys) • Action Fixes (CAPA)',
+              'শূন্য দুর্ঘটনা দর্শন • দ্রুত মেঝে পর্যায় থেকে রিপোর্ট • সমস্যার মূল কারণ অনুসন্ধান ও স্থায়ী সমাধান ব্যবস্থা',
               lang
             )}
           </p>
@@ -518,7 +518,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setShowEmergencyModal(true)}
           >
             <Siren size={15} color="#DC2626" />
-            {t('Emergency Evacuation / Siren Drill', 'জরুরি অ্যালার্ম ও ইভাকুয়েশন ড্রিল', lang)}
+            {t('Emergency Siren & Drill', 'জরুরি সাইরেন ও ইভাকুয়েশন ড্রিল', lang)}
           </button>
 
           <button
@@ -528,7 +528,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setShowQuickHazardModal(true)}
           >
             <Zap size={14} color="#7C3AED" />
-            {t('1-Min Good Catch / Hazard', '১-মিনিট বিপদ পর্যবেক্ষণ', lang)}
+            {t('1-Min Quick Hazard Spotter', '১-মিনিট দ্রুত বিপদ পর্যবেক্ষণ', lang)}
           </button>
 
           <button
@@ -541,7 +541,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             }}
           >
             <Plus size={15} />
-            {t('Report Factory Incident / Near-Miss', 'নতুন কারখানা ইনসিডেন্ট রিপোর্ট', lang)}
+            {t('Report Incident / Near-Miss', 'নতুন ইনসিডেন্ট রিপোর্ট', lang)}
           </button>
         </div>
       </div>
@@ -558,9 +558,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#15803D' }}>{stats.safeDays}</div>
-            <div className="parcel-kpi-title">{t('Days Without Lost Time Injury (LTI)', 'কর্মবিরতিহীন নিরাপদ কর্মদিবস', lang)}</div>
+            <div className="parcel-kpi-title">{t('Accident-Free Working Days', 'দুর্ঘটনামুক্ত নিরাপদ কর্মদিবস', lang)}</div>
             <div className="parcel-kpi-sub">
-              {stats.safeManHours.toLocaleString()} {t('Safe Man-Hours Worked', 'নিরাপদ কর্মঘণ্টা অর্জিত', lang)}
+              {stats.safeManHours.toLocaleString()} {t('Safe Work Hours (No Lost Time)', 'নিরাপদ কর্মঘণ্টা (কোনো দুর্ঘটনা নেই)', lang)}
             </div>
           </div>
         </div>
@@ -579,9 +579,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#D97706' }}>{stats.open}</div>
-            <div className="parcel-kpi-title">{t('Active Investigations / CAPA', 'চলমান তদন্ত ও সমাধান', lang)}</div>
+            <div className="parcel-kpi-title">{t('Open Issues & Investigations', 'চলমান তদন্ত ও সমাধান', lang)}</div>
             <div className="parcel-kpi-sub">
-              {stats.closed} {t('Incidents Closed This Year', 'টি ঘটনা সফলভাবে মীমাংসিত', lang)}
+              {stats.closed} {t('Resolved Safely This Year', 'টি ঘটনা সফলভাবে সমাধান হয়েছে', lang)}
             </div>
           </div>
         </div>
@@ -592,13 +592,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: '#DBEAFE', color: '#1D4ED8' }}>
               <CheckSquare size={18} />
             </div>
-            <span className="badge info" style={{ fontSize: '9.5px' }}>SLA: &gt;85%</span>
+            <span className="badge info" style={{ fontSize: '9.5px' }}>TARGET: &gt;85%</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>{stats.capaRate}%</div>
-            <div className="parcel-kpi-title">{t('CAPA Action Closure Rate', 'সিএপিএ সমাপ্তির হার', lang)}</div>
+            <div className="parcel-kpi-title">{t('Safety Fix Rate (CAPA)', 'নিরাপত্তা প্রতিকারের হার (CAPA)', lang)}</div>
             <div className="parcel-kpi-sub">
-              {t('Audited under ISO 45001 protocol', 'আইএসও ৪৫০০১ অডিটে প্রত্যায়িত', lang)}
+              {t('Fixing problems & preventing recurrence', 'সমস্যা সমাধান ও পুনরাবৃত্তি রোধ', lang)}
             </div>
           </div>
         </div>
@@ -613,11 +613,11 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: '#FEE2E2', color: '#B91C1C' }}>
               <FileText size={18} />
             </div>
-            <span className="badge danger" style={{ fontSize: '9.5px' }}>24-HR GOVT SLA</span>
+            <span className="badge danger" style={{ fontSize: '9.5px' }}>GOVT DEADLINE</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#B91C1C' }}>{stats.statutory}</div>
-            <div className="parcel-kpi-title">{t('Statutory Notice Required (DoE)', 'সরকারিভাবে রিপোর্টযোগ্য', lang)}</div>
+            <div className="parcel-kpi-title">{t('Govt-Reportable Issues (DoE)', 'সরকারিভাবে রিপোর্টযোগ্য বিষয়', lang)}</div>
             <div className="parcel-kpi-sub">
               {t('Explosives Dept Form B-12 Ready', 'বিস্ফোরক পরিদপ্তর ফর্ম বি-১২ প্রস্তুত', lang)}
             </div>
@@ -630,19 +630,19 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: '#F3E8FF', color: '#7E22CE' }}>
               <Activity size={18} />
             </div>
-            <span className="badge meeting" style={{ fontSize: '9.5px' }}>BENCHMARK &lt;0.50</span>
+            <span className="badge meeting" style={{ fontSize: '9.5px' }}>LOWER IS BETTER</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#7E22CE' }}>{stats.trir}</div>
-            <div className="parcel-kpi-title">{t('Total Recordable Incident Rate', 'টিআরআইআর হার (TRIR)', lang)}</div>
+            <div className="parcel-kpi-title">{t('Safety Score (Injury Rate - TRIR)', 'নিরাপত্তা স্কোর (আঘাতের হার - TRIR)', lang)}</div>
             <div className="parcel-kpi-sub">
-              {t('World-class petroleum refinery standard', 'বিশ্বমানের আন্তর্জাতিক রিফাইনারি মান', lang)}
+              {t('0.14 vs industry benchmark 0.85', 'শিল্প গড়ের চেয়ে অনেক নিরাপদ (০.১৪)', lang)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ─── 3. INTERACTIVE 5x5 PETROLEUM RISK MATRIX (ISO 45001 / AS/NZS 4360) ─── */}
+      {/* ─── 3. INTERACTIVE 5x5 RISK MATRIX ─── */}
       <div className="card mb-4" style={{ overflow: 'hidden' }}>
         <div className="card-hd">
           <div className="card-hd-left">
@@ -651,10 +651,10 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             </div>
             <div>
               <div className="card-title">
-                {t('5x5 Petroleum Risk Matrix (Consequence Severity vs Probability)', '৫x৫ পেট্রোলিয়াম ঝুঁকি ম্যাট্রিক্স', lang)}
+                {t('Risk Priority Grid: How Likely? × How Severe?', 'ঝুঁকি মূল্যায়ন গ্রিড: সম্ভাবনা × প্রভাব', lang)}
               </div>
               <div className="card-subtitle">
-                {t('Click any cell below to filter factory incidents mapped to that risk rating', 'যেকোনো ঘরে ক্লিক করে নির্দিষ্ট ঝুঁকির ইনসিডেন্ট ফিল্টার করুন', lang)}
+                {t('Click any colored square to see factory issues with that risk rating', 'যেকোনো রঙের ঘরে ক্লিক করে নির্দিষ্ট ঝুঁকির ঘটনাগুলো ফিল্টার করুন', lang)}
               </div>
             </div>
           </div>
@@ -667,10 +667,10 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 style={{ fontSize: '11px', background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}
                 onClick={() => setMatrixFilter(null)}
               >
-                ✕ {t('Clear Matrix Filter', 'ম্যাট্রিক্স ফিল্টার মুছুন', lang)} (Level {matrixFilter.level} × Prob {matrixFilter.likelihood})
+                ✕ {t('Clear Matrix Filter', 'ম্যাট্রিক্স ফিল্টার মুছুন', lang)} (Severity {matrixFilter.level} × Chance {matrixFilter.likelihood})
               </button>
             )}
-            <span className="badge gold">ISO 45001 / OSHA MATRIX</span>
+            <span className="badge gold">5×5 RISK GRID</span>
           </div>
         </div>
 
@@ -679,19 +679,19 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="hse-risk-matrix-grid">
               {/* Top Row: Headers */}
               <div className="hse-matrix-header-cell" style={{ visibility: 'hidden' }}>-</div>
-              <div className="hse-matrix-header-cell">1. Rare (E)</div>
-              <div className="hse-matrix-header-cell">2. Unlikely (D)</div>
-              <div className="hse-matrix-header-cell">3. Possible (C)</div>
-              <div className="hse-matrix-header-cell">4. Likely (B)</div>
-              <div className="hse-matrix-header-cell">5. Almost Certain (A)</div>
+              <div className="hse-matrix-header-cell">1. Very Rare</div>
+              <div className="hse-matrix-header-cell">2. Unlikely</div>
+              <div className="hse-matrix-header-cell">3. Possible</div>
+              <div className="hse-matrix-header-cell">4. Likely</div>
+              <div className="hse-matrix-header-cell">5. Almost Certain</div>
 
               {/* Rows 5 down to 1 */}
               {[5, 4, 3, 2, 1].map((lvl) => {
                 const rowLabel =
-                  lvl === 5 ? '5. Catastrophic' :
-                  lvl === 4 ? '4. Major' :
-                  lvl === 3 ? '3. Moderate' :
-                  lvl === 2 ? '2. Minor' : '1. Insignificant';
+                  lvl === 5 ? '5. Severe Disaster' :
+                  lvl === 4 ? '4. Serious Damage' :
+                  lvl === 3 ? '3. Moderate Issue' :
+                  lvl === 2 ? '2. Minor Problem' : '1. Negligible';
 
                 return (
                   <React.Fragment key={lvl}>
@@ -749,9 +749,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-              <span>← Probability: Rare (1) to Almost Certain (5)</span>
-              <span>★ Active factory incidents mapped to real-time risk scores</span>
-              <span>Consequence: Minor (1) to Catastrophic (5) ↑</span>
+              <span>← Likelihood: Very Rare (1) to Almost Certain (5)</span>
+              <span>★ Factory issues placed in grid by calculated risk</span>
+              <span>Severity: Negligible (1) to Severe Disaster (5) ↑</span>
             </div>
           </div>
         </div>
@@ -766,42 +766,42 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
             onClick={() => { setActiveTab('all'); setMatrixFilter(null); }}
           >
-            📋 {t('All Factory Incidents', 'সকল ইনসিডেন্ট', lang)} ({incidents.length})
+            📋 {t('All Safety Records', 'সকল ইনসিডেন্ট', lang)} ({incidents.length})
           </button>
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'spill_leak' ? 'active' : ''}`}
             onClick={() => { setActiveTab('spill_leak'); setMatrixFilter(null); }}
           >
-            🛢️ {t('Spills & Loss of Containment', 'তেল / বিটুমিন নিঃসরণ', lang)}
+            🛢️ {t('Oil & Fuel Spills', 'তেল / বিটুমিন নিঃসরণ', lang)}
           </button>
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'near_miss' ? 'active' : ''}`}
             onClick={() => { setActiveTab('near_miss'); setMatrixFilter(null); }}
           >
-            ⚡ {t('Near-Misses & Hazards', 'নিয়ার-মিস ও বিপদ পর্যবেক্ষণ', lang)}
+            ⚡ {t('Near-Misses (Almost Happened)', 'নিয়ার-মিস ও বিপদ পর্যবেক্ষণ', lang)}
           </button>
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'first_aid' ? 'active' : ''}`}
             onClick={() => { setActiveTab('first_aid'); setMatrixFilter(null); }}
           >
-            🩹 {t('First-Aid & Injuries', 'প্রাথমিক চিকিৎসা ও আঘাত', lang)}
+            🩹 {t('First-Aid & Health', 'প্রাথমিক চিকিৎসা ও আঘাত', lang)}
           </button>
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'pressure_piping' ? 'active' : ''}`}
             onClick={() => { setActiveTab('pressure_piping'); setMatrixFilter(null); }}
           >
-            ⚠️ {t('Pressure & Thermal Piping', 'চাপ ও পাইপলাইন', lang)}
+            ⚠️ {t('Pipes & Pressure Valves', 'চাপ ও পাইপলাইন', lang)}
           </button>
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'electrical_arc' ? 'active' : ''}`}
             onClick={() => { setActiveTab('electrical_arc'); setMatrixFilter(null); }}
           >
-            ⚙️ {t('Electrical & Mechanical', 'বৈদ্যুতিক ও মেকানিক্যাল', lang)}
+            ⚙️ {t('Electrical & Machinery', 'বৈদ্যুতিক ও মেকানিক্যাল', lang)}
           </button>
           <button
             type="button"
@@ -809,7 +809,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             style={{ color: stats.statutory > 0 ? '#DC2626' : undefined }}
             onClick={() => { setActiveTab('statutory'); setMatrixFilter(null); }}
           >
-            🚨 {t('Statutory Reportable (DoE)', 'সরকারি নোটিশ রিপোর্টযোগ্য', lang)} ({stats.statutory})
+            🚨 {t('Govt-Reportable (Explosives Dept)', 'সরকারি নোটিশ রিপোর্টযোগ্য', lang)} ({stats.statutory})
           </button>
         </div>
 
@@ -822,7 +822,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               type="text"
               className="form-input"
               style={{ width: '100%', paddingLeft: '32px', height: '36px', fontSize: '12px' }}
-              placeholder={t('Search by incident #, keyword, location, or reporter...', 'আইডি, স্থান বা বিবরণ লিখে খুঁজুন...', lang)}
+              placeholder={t('Search by issue #, keyword, location, or reporter...', 'আইডি, স্থান বা বিবরণ লিখে খুঁজুন...', lang)}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -877,11 +877,11 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               onChange={(e) => setSelectedStage(e.target.value as any)}
             >
               <option value="all">{t('All Workflow Stages', 'সকল পর্যায়', lang)}</option>
-              <option value="reported">{t('1. Reported / Draft', '১. দাখিলকৃত', lang)}</option>
-              <option value="triaged">{t('2. Triaged & Assessed', '২. প্রাথমিক যাচাই', lang)}</option>
-              <option value="under_investigation">{t('3. Under Investigation (RCA)', '৩. তদন্তাধীন', lang)}</option>
-              <option value="capa_execution">{t('4. CAPA In Progress', '৪. সিএপিএ চলমান', lang)}</option>
-              <option value="closed">{t('5. Closed & Signed Off', '৫. সমাপ্ত ও অনুমোদিত', lang)}</option>
+              <option value="reported">{t('1. Reported', '১. দাখিলকৃত', lang)}</option>
+              <option value="triaged">{t('2. Risk Evaluated', '২. ঝুঁকি যাচাই', lang)}</option>
+              <option value="under_investigation">{t('3. Root Cause Investigation', '৩. তদন্তাধীন', lang)}</option>
+              <option value="capa_execution">{t('4. Fixing Problem (CAPA)', '৪. প্রতিকার চলমান', lang)}</option>
+              <option value="closed">{t('5. Closed & Verified', '৫. সমাপ্ত ও অনুমোদিত', lang)}</option>
             </select>
           </div>
         </div>
@@ -914,7 +914,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <div className="inc-hd">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <span className={`badge ${inc.level >= 4 ? 'danger' : inc.level === 3 ? 'warn' : 'info'}`} style={{ fontSize: '10px', fontWeight: 800 }}>
-                      Level {inc.level} · {inc.riskCategory ? inc.riskCategory.toUpperCase() : 'RISK'} ({inc.riskScore || (inc.level * 2)})
+                      Level {inc.level} · {inc.riskCategory ? inc.riskCategory.toUpperCase() : 'RISK'} (Score {inc.riskScore || (inc.level * 2)})
                     </span>
 
                     <span className="badge" style={{ background: 'var(--brand-slate-100)', color: typeMeta.color, border: `1px solid ${typeMeta.color}40`, fontSize: '10px', fontWeight: 700 }}>
@@ -927,13 +927,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                     {inc.statutoryReportable && (
                       <span className="badge danger" style={{ animation: 'pulse 1.5s infinite', fontSize: '9.5px' }}>
-                        🚨 {t('Statutory Notice (DoE/Explosives)', 'সরকারিভাবে রিপোর্টযোগ্য', lang)}
+                        🚨 {t('Govt Report (Explosives Dept)', 'সরকারিভাবে রিপোর্টযোগ্য', lang)}
                       </span>
                     )}
 
                     {inc.fiveWhys && (
                       <span className="badge gold" style={{ fontSize: '9.5px' }}>
-                        ✓ 5-Whys RCA Done ({inc.fiveWhys.fishboneCategory})
+                        ✓ Root Cause Solved (5-Whys: {inc.fiveWhys.fishboneCategory})
                       </span>
                     )}
                   </div>
@@ -952,19 +952,19 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   </div>
                   <ChevronRight size={10} color="#94A3B8" />
                   <div className={`hse-pipeline-step ${currentStage === 'triaged' ? 'active' : currentStage === 'reported' ? '' : 'completed'}`}>
-                    2. {t('Triage & Risk Assessed', 'ঝুঁকি যাচাই', lang)}
+                    2. {t('Risk Evaluated', 'ঝুঁকি যাচাই', lang)}
                   </div>
                   <ChevronRight size={10} color="#94A3B8" />
                   <div className={`hse-pipeline-step ${currentStage === 'under_investigation' ? 'active' : (currentStage === 'capa_execution' || currentStage === 'closed') ? 'completed' : ''}`}>
-                    3. {t('Investigation & RCA', 'তদন্ত ও আরসিএ', lang)}
+                    3. {t('Root Cause Found', 'তদন্ত ও আরসিএ', lang)}
                   </div>
                   <ChevronRight size={10} color="#94A3B8" />
                   <div className={`hse-pipeline-step ${currentStage === 'capa_execution' ? 'active' : currentStage === 'closed' ? 'completed' : ''}`}>
-                    4. {t('CAPA Implementation', 'সিএপিএ প্রয়োগ', lang)}
+                    4. {t('Fixing Problem (CAPA)', 'সিএপিএ প্রয়োগ', lang)}
                   </div>
                   <ChevronRight size={10} color="#94A3B8" />
                   <div className={`hse-pipeline-step ${currentStage === 'closed' ? 'active' : ''}`}>
-                    5. {t('GM Closed & Sign-Off', 'সমাপ্ত ও অনুমোদিত', lang)}
+                    5. {t('Approved & Closed', 'সমাপ্ত ও অনুমোদিত', lang)}
                   </div>
                 </div>
 
@@ -1636,7 +1636,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <HelpCircle size={18} color="#FBBF24" />
                   <h3 style={{ color: '#fff', margin: 0 }}>
-                    {t('Root Cause Analysis Studio (5-Whys & Ishikawa Diagram)', 'মূল কারণ অনুসন্ধান ও ইশিকাওয়া ফিশবোন স্টুডিও', lang)}
+                    {t('Problem Root Cause Finder (5-Whys & Fishbone Diagram)', 'সমস্যার মূল কারণ অনুসন্ধান (৫-কেন ও ফিশবোন চার্ট)', lang)}
                   </h3>
                 </div>
                 <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px' }}>
@@ -1662,7 +1662,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   fontSize: '12px',
                 }}
               >
-                1. 5-Whys Sequential Analysis
+                1. {t('Step-by-Step "Why" Investigation (5-Whys)', 'ধাপে ধাপে "কেন" অনুসন্ধান (৫-কেন)', lang)}
               </button>
               <button
                 type="button"
@@ -1678,7 +1678,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   fontSize: '12px',
                 }}
               >
-                2. Ishikawa Fishbone (6M Categories)
+                2. {t('Cause Categories (People, Machinery, Process)', 'কারণ শ্রেণী (কর্মী, যন্ত্রপাতি, পদ্ধতি)', lang)}
               </button>
             </div>
 
@@ -1686,7 +1686,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               {rcaSubTab === '5whys' ? (
                 <div>
                   <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px', color: '#92400E' }}>
-                    💡 <strong>Methodology:</strong> Drill down by repeatedly asking "Why" at each tier until the systemic root cause is uncovered. This ensures prevention rather than just treating symptoms.
+                    💡 <strong>Easy Investigation Method:</strong> By asking "Why did this happen?" a few times in a row, we find the real underlying cause instead of just treating surface symptoms.
                   </div>
 
                   <div className="form-group mb-3">
@@ -1874,7 +1874,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckSquare size={18} color="#34D399" />
                   <h3 style={{ color: '#fff', margin: 0 }}>
-                    {t('Corrective & Preventive Action (CAPA) Manager', 'সিএপিএ অ্যাকশন ম্যানেজার', lang)}
+                    {t('Safety Action Manager (Fix & Prevent - CAPA)', 'নিরাপত্তা প্রতিকার ও প্রতিরোধমূলক কাজ (CAPA)', lang)}
                   </h3>
                 </div>
                 <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
@@ -1885,10 +1885,14 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             </div>
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
+              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '9px 12px', borderRadius: '6px', fontSize: '11.5px', color: '#166534', marginBottom: '14px' }}>
+                💡 <strong>What is CAPA?</strong> Corrective actions fix the problem immediately. Preventive actions change maintenance or processes so the issue never happens again.
+              </div>
+
               {/* Existing Actions List */}
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--brand-slate-500)' }}>
-                  Assigned CAPA Tasks ({(selectedCapaIncident.capaItems || []).length})
+                  Assigned Action Tasks ({(selectedCapaIncident.capaItems || []).length})
                 </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
                   {(selectedCapaIncident.capaItems || []).map((c) => (
@@ -2031,11 +2035,11 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <FileText size={18} color="#FDE68A" />
                   <h3 style={{ color: '#fff', margin: 0 }}>
-                    {t('Official Statutory HSE Incident Dossier', 'সরকারি এইচএসই ইনসিডেন্ট ডসিয়ার', lang)}
+                    {t('Official Government Incident Report (Form B-12)', 'সরকারি ফর্ম বি-১২ ইনসিডেন্ট রিপোর্ট', lang)}
                   </h3>
                 </div>
                 <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
-                  Department of Explosives & Petroleum Act Compliance Form B-12
+                  Department of Explosives (DoE) & Bangladesh Petroleum Act Compliance Dossier
                 </div>
               </div>
               <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedDossierIncident(null)}>×</button>

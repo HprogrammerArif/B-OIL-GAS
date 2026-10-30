@@ -187,9 +187,9 @@ export default function AttendanceView({ role, lang }: ViewProps) {
           <div className="kpi-sub">500m radius · Inside perimeter (42m from center)</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">{t('Anti-Spoof Security Status', 'অ্যান্টি-স্পুফ নিরাপত্তা স্ট্যাটাস', lang)}</div>
-          <div className="kpi-value text-emerald">SECURE (Grade-A)</div>
-          <div className="kpi-sub">Zero Mock Providers · Cell Tower Validated</div>
+          <div className="kpi-label">{t('Location Security Verification', 'অবস্থান নিরাপত্তা যাচাই', lang)}</div>
+          <div className="kpi-value text-emerald">REAL GPS (VERIFIED)</div>
+          <div className="kpi-sub">Fake GPS Blocked · Cell Tower Verified</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">{t('Shift Overtime Accrued', 'মোট শিফট ওভারটাইম', lang)}</div>

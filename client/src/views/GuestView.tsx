@@ -125,9 +125,9 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     dietaryPreferences: 'Executive High Tea & Green Tea',
     isEvacuatedSafe: true,
     inspectionFindings: [
-      { focusArea: 'Tanks 1-8 Nitrogen Blanketing Pressure', observation: 'Pressure maintained at 2.45 bar nominal. Zero leakage detected.', status: 'passed', signOffDate: 'Today, 11:15 AM' },
-      { focusArea: 'Bitumen Relief Valves Hydro-Testing Seals', observation: 'Calibration seals validated against National Metrology Lab standards.', status: 'passed', signOffDate: 'Today, 11:45 AM' },
-      { focusArea: 'Flare Stack Continuous Pilot Scanner', observation: 'Optical pilot flame scanner active with dual igniter redundancy.', status: 'passed', signOffDate: 'Today, 12:10 PM' },
+      { focusArea: 'Tanks 1-8 Nitrogen Fire-Safety Seal', observation: 'Tank seal pressure normal at 2.45 bar. Zero gas leakage detected.', status: 'passed', signOffDate: 'Today, 11:15 AM' },
+      { focusArea: 'Bitumen Pressure Safety Valves', observation: 'Safety valves tested and official inspection seals validated.', status: 'passed', signOffDate: 'Today, 11:45 AM' },
+      { focusArea: 'Emergency Flare Pilot Flame', observation: 'Safety flame optical sensor active with backup auto-igniter working.', status: 'passed', signOffDate: 'Today, 12:10 PM' },
     ],
   },
 

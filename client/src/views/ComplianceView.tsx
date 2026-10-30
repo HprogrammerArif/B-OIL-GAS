@@ -80,10 +80,10 @@ const INITIAL_LICENSES: LicenseCard[] = [
     ministryAddress: 'Department of Explosives, 8/C Segunbagicha, Dhaka-1000',
     certificateValidity: '01 Nov 2025 – 31 Oct 2026',
     auditChecklist: [
-      { item: 'Nitrogen blanketing pressure integrity verified on all 8 tanks', passed: true },
-      { item: 'Pressure vacuum relief valves (PVRV) calibrated to 2.5 bar', passed: true },
-      { item: 'Dyke containment wall volumetric retention capacity > 110%', passed: true },
-      { item: 'Explosion-proof ATEX lighting certified in Zone-1 areas', passed: false },
+      { item: 'Nitrogen Tank Fire-Safety Seal Tested on All 8 Tanks', passed: true },
+      { item: 'Tank Pressure Release Safety Valves Tested & Calibrated', passed: true },
+      { item: 'Concrete Safety Spill Wall Around Tanks (110% Capacity Checked)', passed: true },
+      { item: 'Spark-Proof Safety Lights Installed in Fuel Tank Yard', passed: false },
     ],
     documents: [
       { name: 'Ultrasonic_API653_TK1-8_Summary.pdf', size: '3.8 MB', date: '04 Oct 2026', type: 'Engineering Log' },
@@ -117,10 +117,10 @@ const INITIAL_LICENSES: LicenseCard[] = [
     ministryAddress: 'Department of Environment, Paribesh Bhaban, E-16 Agargaon, Dhaka-1207',
     certificateValidity: '15 Nov 2025 – 14 Nov 2026',
     auditChecklist: [
-      { item: 'Online Continuous Effluent Monitoring System (CEMS) online', passed: true },
-      { item: 'ETP Treated discharge: BOD < 30 mg/L, COD < 200 mg/L', passed: true },
-      { item: 'Stack emission analyzer: SOx/NOx within DoE threshold', passed: true },
-      { item: 'Hazardous sludge disposal contract with certified vendor', passed: true },
+      { item: 'Online Water & Smoke Pollution Sensor Active', passed: true },
+      { item: 'Waste Water Treatment Plant (ETP) Clean Water Standard Met', passed: true },
+      { item: 'Chimney Smoke & Air Quality Sensor Within Govt Limits', passed: true },
+      { item: 'Industrial Waste Disposal Contract With Approved Vendor', passed: true },
     ],
     documents: [
       { name: 'CEMS_Online_Telemetry_Log_Q3.pdf', size: '5.1 MB', date: '12 Sep 2026', type: 'IoT Telemetry' },
