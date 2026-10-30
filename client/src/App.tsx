@@ -154,6 +154,7 @@ export default function App() {
         {/* Live Company-Wide Announcement Banner */}
         {activeBroadcast && (
           <div
+            className="announcement-banner"
             style={{
               background: 'linear-gradient(135deg, #881337 0%, #A51C30 60%, #7F1D1D 100%)',
               color: '#FFFFFF',
@@ -196,7 +197,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="announcement-banner-actions">
               {activeBroadcast.requireAck && (
                 <button
                   type="button"
@@ -257,9 +258,9 @@ export default function App() {
             {view === 'bus'            && <BusView            role={role} lang={lang} />}
             {view === 'parcel'         && <ParcelView         role={role} lang={lang} />}
             {view === 'attendance'     && <AttendanceView     role={role} lang={lang} />}
-            {view === 'incident'       && <IncidentView       role={role} lang={lang} />}
+            {view === 'incident'       && <IncidentView       role={role} lang={lang} onNavigate={setView} />}
             {view === 'claims'         && <ClaimsView         role={role} lang={lang} />}
-            {view === 'asset'          && <AssetView          role={role} lang={lang} />}
+            {view === 'asset'          && <AssetView          role={role} lang={lang} onNavigate={setView} />}
             {view === 'guest'          && <GuestView          role={role} lang={lang} />}
             {view === 'workforce'      && <WorkforceView      role={role} lang={lang} />}
             {view === 'approvals'      && <ApprovalsView      role={role} lang={lang} />}

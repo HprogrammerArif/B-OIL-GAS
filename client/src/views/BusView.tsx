@@ -1265,7 +1265,7 @@ export default function BusView({ role, lang }: ViewProps) {
         boxShadow: 'var(--shadow-sm)',
         padding: '14px 18px'
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1.35fr 1.1fr', gap: '16px', alignItems: 'center' }}>
+        <div className="bus-hero-dossier-grid">
           {/* Sub-card 1: My Personal Commute Dossier */}
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
@@ -1601,7 +1601,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     const isVacated = s.status === 'vacated';
                     const isOccupied = s.status === 'occupied';
                     const isEmpty = s.status === 'empty';
-                    const isMine = s.num === 5;
+                    const isMine = mySeat?.num === s.num;
                     const isBoarded = s.boarded;
 
                     // Match active filter

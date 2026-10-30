@@ -60,7 +60,7 @@ type MainModuleTab = 'register' | 'maintenance' | 'financials' | 'transfers' | '
 type InspectorSubTab = 'overview' | 'timeline' | 'custody' | 'spares';
 type KpiQuickFilter = 'none' | 'pending_signoff' | 'cal_alerts' | 'eol_watch';
 
-export default function AssetView({ role, lang }: ViewProps) {
+export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const {
     assets,
     workOrders,
@@ -1597,6 +1597,28 @@ export default function AssetView({ role, lang }: ViewProps) {
                                     : t('Flag Deficiency', 'ত্রুটি ফ্ল্যাগ করুন', lang)}
                                 </button>
                               )}
+
+                            {selectedAsset.lifecycleStage !== 'disposed' && onNavigate && (
+                              <button
+                                type="button"
+                                className="btn-outline"
+                                style={{ borderColor: 'rgba(239, 68, 68, 0.45)', color: '#DC2626', background: 'rgba(239, 68, 68, 0.05)' }}
+                                onClick={() => {
+                                  onNavigate('incident');
+                                  showToast(
+                                    t(
+                                      `Opening HSE Incident Cockpit to report equipment event for ${selectedAsset.tag} (${selectedAsset.name}).`,
+                                      `${selectedAsset.tag} এর জন্য ইনসিডেন্ট বা ঝুঁকি রিপোর্ট করতে সেফটি ককপিট খোলা হচ্ছে।`,
+                                      lang
+                                    ),
+                                    'gold'
+                                  );
+                                }}
+                              >
+                                <AlertTriangle size={14} color="#DC2626" />
+                                {t('Report HSE Incident / Failure', 'ইনসিডেন্ট / বিপদ রিপোর্ট', lang)}
+                              </button>
+                            )}
 
                             {roleConfig.canInitiateDecommission &&
                               selectedAsset.lifecycleStage !== 'decommissioned' &&

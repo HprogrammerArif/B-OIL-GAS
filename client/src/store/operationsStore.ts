@@ -273,23 +273,82 @@ const INITIAL_LICENSES: LicenseCard[] = [
 ];
 
 /* ──────────────────────────────────────────────────────────────────────────
-   2. SAFETY & INCIDENT REPORTS
+   2. SAFETY & INDUSTRIAL INCIDENT MANAGEMENT SYSTEM (EHS / OSHA / ISO 45001)
    ────────────────────────────────────────────────────────────────────────── */
+export type IncidentType =
+  | 'near_miss'
+  | 'hazard_observation'
+  | 'first_aid'
+  | 'medical_treatment'
+  | 'lost_time'
+  | 'spill_leak'
+  | 'pressure_piping'
+  | 'fire_thermal'
+  | 'electrical_arc'
+  | 'equipment_damage'
+  | 'environmental';
+
+export type IncidentWorkflowStage =
+  | 'reported'
+  | 'triaged'
+  | 'under_investigation'
+  | 'capa_execution'
+  | 'closed';
+
+export interface InvolvedPerson {
+  name: string;
+  empId?: string;
+  role: string;
+  involvementType: 'injured' | 'witness' | 'first_responder' | 'operator';
+  injuryNature?: string;
+  treatmentGiven?: string;
+}
+
+export interface CapaActionItem {
+  id: string;
+  actionType: 'immediate_containment' | 'corrective' | 'preventive';
+  description: string;
+  owner: string;
+  ownerEmpId?: string;
+  dueDate: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'in_progress' | 'completed';
+  completedAt?: string;
+  verificationEvidence?: string;
+}
+
+export interface FishboneFactors {
+  people: string[];
+  machine: string[];
+  method: string[];
+  material: string[];
+  measurement: string[];
+  environment: string[];
+}
+
 export interface IncidentItem {
   id: string;
   incNo: string;
   title: string;
   titleBn: string;
-  category: 'spill' | 'pressure' | 'fire' | 'near_miss' | 'electrical';
-  level: 1 | 2 | 3 | 4 | 5;
+  incidentType: IncidentType;
+  category: 'spill' | 'pressure' | 'fire' | 'near_miss' | 'electrical'; // for backwards compatibility
+  level: 1 | 2 | 3 | 4 | 5; // Severity: 1 Minor, 2 Low, 3 Moderate, 4 Major, 5 Critical
+  likelihood: 1 | 2 | 3 | 4 | 5; // Probability: 1 Rare, 2 Unlikely, 3 Possible, 4 Likely, 5 Almost Certain
+  riskScore: number; // level * likelihood (1 to 25)
+  riskCategory: 'low' | 'medium' | 'high' | 'extreme';
+  plantZone: string;
   location: string;
+  shift: 'Morning Shift (07:00 - 15:00)' | 'Evening Shift (15:00 - 23:00)' | 'Night Shift (23:00 - 07:00)';
   reportedBy: string;
+  reporterEmpId?: string;
   date: string;
+  workflowStage: IncidentWorkflowStage;
+  immediateActionsTaken: string;
+  personsInvolved?: InvolvedPerson[];
+  investigationLead?: string;
+  investigationTeam?: string[];
   rootCause: string;
-  capaAction: string;
-  capaOwner: string;
-  capaStatus: 'open' | 'in_progress' | 'closed';
-  statutoryReportable: boolean;
   fiveWhys?: {
     why1: string;
     why2: string;
@@ -298,47 +357,162 @@ export interface IncidentItem {
     why5: string;
     fishboneCategory: 'Equipment' | 'Procedure' | 'Material' | 'Staffing' | 'Inspection' | 'Weather';
   };
+  fishboneFactors?: FishboneFactors;
+  capaItems: CapaActionItem[];
+  capaAction: string; // legacy backwards compat
+  capaOwner: string; // legacy backwards compat
+  capaStatus: 'open' | 'in_progress' | 'closed'; // legacy backwards compat
+  statutoryReportable: boolean;
+  statutoryAgency?: string;
+  statutoryNoticeHours?: number;
   evidenceAttached?: boolean;
+  closureSignOff?: {
+    safetyOfficerName: string;
+    safetySignedAt: string;
+    gmName: string;
+    gmSignedAt: string;
+    remarks: string;
+  };
 }
 
 const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-01',
     incNo: 'INC-2026-041',
-    title: 'Small Hot Bitumen Drip Found on Storage Tank TK-102 Drain Valve',
+    title: 'Hot Bitumen Drip on Storage Tank TK-102 Lower Drain Valve',
     titleBn: 'স্টোরেজ ট্যাংক TK-102 এর ড্রেন ভালভে সামান্য বিটুমিন ফোঁটা',
+    incidentType: 'spill_leak',
     category: 'spill',
     level: 3,
-    location: 'Storage Tank Yard, Keraniganj Plant',
+    likelihood: 3,
+    riskScore: 9,
+    riskCategory: 'medium',
+    plantZone: 'Storage Tank Yard (TK-101 to TK-108)',
+    location: 'Storage Tank Yard, Tank TK-102, Keraniganj Complex',
+    shift: 'Morning Shift (07:00 - 15:00)',
     reportedBy: 'Nazmul Huda (Safety Officer)',
+    reporterEmpId: 'EMP-0007',
     date: '28 Oct 2026, 11:20 AM',
-    rootCause: 'Rubber valve seal wore out early due to continuous high heat.',
-    capaAction: 'Closed valve line safely, cleaned drip tray, and installing new heat-resistant seal.',
+    workflowStage: 'capa_execution',
+    immediateActionsTaken: 'Closed manual valve V-102B, placed stainless steel drip tray with absorbent pads, cordoned 5-meter hazardous zone.',
+    personsInvolved: [
+      { name: 'Nazmul Huda', empId: 'EMP-0007', role: 'Safety Inspector', involvementType: 'first_responder' },
+      { name: 'Md. Rafiqul Islam', empId: 'EMP-0009', role: 'Mechanical Lead', involvementType: 'operator' },
+    ],
+    investigationLead: 'Farhana Kabir (Lead Safety Officer)',
+    investigationTeam: ['Farhana Kabir (Lead Safety Officer)', 'Md. Rafiqul Islam (Mechanical Lead)'],
+    rootCause: 'Standard nitrile rubber gasket degraded prematurely under continuous 180°C asphalt circulation.',
+    fiveWhys: {
+      why1: 'Bitumen fluid seeped through the flange seal onto the drip tray during morning inspection.',
+      why2: 'The internal sealing ring lost elasticity and experienced micro-cracking from prolonged heat.',
+      why3: 'A standard industrial nitrile gasket was fitted during the last turnaround instead of a high-temp Viton gasket.',
+      why4: 'High-temperature Viton gasket spares were temporarily out of stock in the plant store that week.',
+      why5: 'Core Preventive Rule: Maintain a mandatory reserve of 10 high-heat Viton gaskets in central inventory and require QC material verification before installation.',
+      fishboneCategory: 'Material',
+    },
+    fishboneFactors: {
+      people: ['Night turnaround crew under time pressure'],
+      machine: ['Tank TK-102 lower discharge flange (180°C flow)'],
+      method: ['Gasket material specification checklist omitted from turnaround sign-off'],
+      material: ['Standard nitrile gasket installed instead of high-temperature Viton seal'],
+      measurement: ['Visual check only; flange thermal imaging not conducted'],
+      environment: ['Continuous thermal cycling of molten bitumen batch'],
+    },
+    capaItems: [
+      {
+        id: 'CAPA-101',
+        actionType: 'immediate_containment',
+        description: 'Replace cracked gasket with certified Viton 240°C thermal jacket gasket and torque flange to 185 Nm.',
+        owner: 'Md. Rafiqul Islam (Mechanical Lead)',
+        ownerEmpId: 'EMP-0009',
+        dueDate: '28 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '28 Oct 2026, 04:30 PM',
+        verificationEvidence: 'Viton gasket lot #VT-2026-99 installed, pressure tested to 12 Bar without seepage.',
+      },
+      {
+        id: 'CAPA-102',
+        actionType: 'corrective',
+        description: 'Perform ultrasonic wall thickness & flange bolt torque audit across all bottom discharge valves on Tanks TK-101 to TK-108.',
+        owner: 'Plant Maintenance Team',
+        dueDate: '02 Nov 2026',
+        priority: 'high',
+        status: 'in_progress',
+      },
+      {
+        id: 'CAPA-103',
+        actionType: 'preventive',
+        description: 'Update ERP inventory minimum reorder rule: maintain permanent safety buffer of 10 Viton high-heat seals in central store.',
+        owner: 'Central Store & Procurement Lead',
+        dueDate: '05 Nov 2026',
+        priority: 'medium',
+        status: 'completed',
+        completedAt: '29 Oct 2026, 02:00 PM',
+        verificationEvidence: 'Purchase requisition PR-9941 approved for 25 units from authorized OEM.',
+      },
+    ],
+    capaAction: 'Flange repacked with high-temperature Viton gasket; inventory min-buffer enforced.',
     capaOwner: 'Plant Maintenance Team',
     capaStatus: 'in_progress',
     statutoryReportable: false,
     evidenceAttached: true,
-    fiveWhys: {
-      why1: 'Small bitumen drip noticed on the lower drain valve during morning walk.',
-      why2: 'The inner valve rubber ring became stiff and cracked from heat.',
-      why3: 'A standard seal was fitted during last quarter servicing instead of a high-heat ring.',
-      why4: 'High-heat spare rings were temporarily out of stock that week.',
-      why5: 'Main Cause & Fix: Keep minimum 10 high-heat seals in store room and verify part grade before fitting.',
-      fishboneCategory: 'Material',
-    },
   },
   {
     id: 'INC-02',
     incNo: 'INC-2026-040',
     title: 'Delivery Gate Barrier Arm Sensor Stuck During Morning Rain',
     titleBn: 'সকালের বৃষ্টিতে ডেলিভারি গেট ব্যারিয়ার সেন্সর আটকে যাওয়া',
+    incidentType: 'equipment_damage',
     category: 'electrical',
     level: 1,
+    likelihood: 2,
+    riskScore: 2,
+    riskCategory: 'low',
+    plantZone: 'Main Truck Logistics Gate #2',
     location: 'Main Truck Gate #2, Keraniganj Plant',
+    shift: 'Morning Shift (07:00 - 15:00)',
     reportedBy: 'Mizanur Rahman (Security Officer)',
+    reporterEmpId: 'EMP-0008',
     date: '29 Oct 2026, 08:15 AM',
-    rootCause: 'Rainwater entered the outdoor sensor cover at Gate #2.',
-    capaAction: 'Electrician drying sensor box and fitting a waterproof protective hood.',
+    workflowStage: 'capa_execution',
+    immediateActionsTaken: 'Switched barrier to manual control; security guard assigned with handheld traffic wand to prevent congestion.',
+    personsInvolved: [
+      { name: 'Mizanur Rahman', empId: 'EMP-0008', role: 'Security Shift In-Charge', involvementType: 'first_responder' },
+    ],
+    investigationLead: 'Kazi Farhan (Electrical Engineer)',
+    rootCause: 'Heavy monsoon driving rain penetrated unsealed cable grommet on optical sensor enclosure.',
+    fiveWhys: {
+      why1: 'Barrier arm failed to open automatically upon RFID tanker card scan.',
+      why2: 'Optical safety sensor photodiode output dropped below threshold.',
+      why3: 'Rainwater seeped into sensor housing during morning squall.',
+      why4: 'Silicone seal around rear cable entry gland had cracked from UV exposure.',
+      why5: 'Core Preventive Rule: Replace standard sensor housings with IP67 sealed junction boxes and protective drip shrouds.',
+      fishboneCategory: 'Weather',
+    },
+    capaItems: [
+      {
+        id: 'CAPA-201',
+        actionType: 'immediate_containment',
+        description: 'Dry optical sensor interior with warm air blower and apply marine-grade silicone weather seal.',
+        owner: 'Kazi Farhan (Electrical Engineer)',
+        dueDate: '29 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '29 Oct 2026, 11:00 AM',
+        verificationEvidence: 'Sensor dried, recalibrated, and automated barrier operation restored.',
+      },
+      {
+        id: 'CAPA-202',
+        actionType: 'preventive',
+        description: 'Fabricate and mount stainless steel weather deflectors over optical eye sensors on Gates #1, #2, and #3.',
+        owner: 'Central Workshop Fabrication Crew',
+        dueDate: '04 Nov 2026',
+        priority: 'low',
+        status: 'in_progress',
+      },
+    ],
+    capaAction: 'Electrician dried sensor, resealed cable gland, and installing weather shroud.',
     capaOwner: 'Electrical & Gate Maintenance',
     capaStatus: 'open',
     statutoryReportable: false,
@@ -349,24 +523,76 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     incNo: 'INC-2026-039',
     title: 'Near-Miss: Unsecured Repair Ladder Near Loading Bay Walkway',
     titleBn: 'নিয়ার-মিস: লোডিং বে পথের পাশে অরক্ষিত মেরামত মই',
+    incidentType: 'near_miss',
     category: 'near_miss',
     level: 2,
+    likelihood: 3,
+    riskScore: 6,
+    riskCategory: 'medium',
+    plantZone: 'Bulk Tanker Loading Gantry',
     location: 'Truck Loading Bay #1, Keraniganj Plant',
+    shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Md. Kamruzzaman (Transport Supervisor)',
+    reporterEmpId: 'EMP-0003',
     date: '25 Oct 2026, 03:45 PM',
-    rootCause: 'Painting contractor left a folding ladder without warning cones during tea break.',
-    capaAction: 'Area cordoned immediately and contractor supervisor briefed on mandatory safety cones.',
+    workflowStage: 'closed',
+    immediateActionsTaken: 'Removed unattended ladder to maintenance storage cage immediately; cordoned area and summoned contractor supervisor.',
+    personsInvolved: [
+      { name: 'Md. Kamruzzaman', empId: 'EMP-0003', role: 'Transport Supervisor', involvementType: 'witness' },
+    ],
+    investigationLead: 'Farhana Kabir (Lead Safety Officer)',
+    rootCause: 'Painting contractor crew departed for tea break without folding, securing, or coning off their working ladder.',
+    fiveWhys: {
+      why1: 'A 10-foot aluminum extension ladder was left standing upright near the high-traffic walkway.',
+      why2: 'Contractor crew took afternoon tea break and assumed nobody would pass close by.',
+      why3: 'Contractor team was unfamiliar with refinery zero-tolerance rules for unsecured high-reach equipment.',
+      why4: 'Contractor daily toolbox talk (TBT) did not emphasize job site closeout when taking breaks.',
+      why5: 'Core Preventive Rule: Contractor permit-to-work (PTW) must include mandatory shift break housekeeping verification before departure.',
+      fishboneCategory: 'Procedure',
+    },
+    fishboneFactors: {
+      people: ['Contractor crew failed to secure tools during break'],
+      machine: ['10ft aluminum folding ladder'],
+      method: ['Shift break safety housekeeping procedure not reinforced in morning TBT'],
+      material: ['Absence of barrier cones and caution tags'],
+      measurement: ['Area supervisor was monitoring Bay-3 loading at the time'],
+      environment: ['Brisk wind gust near open gantry bay'],
+    },
+    capaItems: [
+      {
+        id: 'CAPA-301',
+        actionType: 'immediate_containment',
+        description: 'Issue official safety warning letter to contractor firm with 2-day pass suspension for offending team.',
+        owner: 'Farhana Kabir (Lead Safety Officer)',
+        dueDate: '25 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '25 Oct 2026, 05:00 PM',
+        verificationEvidence: 'Warning letter signed by contractor director and recorded in EHS vendor log.',
+      },
+      {
+        id: 'CAPA-302',
+        actionType: 'preventive',
+        description: 'Incorporate mandatory mid-shift equipment storage check into refinery electronic Permit-to-Work (ePTW) system.',
+        owner: 'Safety & Admin Team',
+        dueDate: '27 Oct 2026',
+        priority: 'medium',
+        status: 'completed',
+        completedAt: '27 Oct 2026, 01:30 PM',
+        verificationEvidence: 'ePTW checklist updated and deployed to all plant entry security booths.',
+      },
+    ],
+    capaAction: 'Area cordoned immediately; contractor penalised and ePTW checklist amended.',
     capaOwner: 'Safety & Admin Team',
     capaStatus: 'closed',
     statutoryReportable: false,
     evidenceAttached: true,
-    fiveWhys: {
-      why1: 'Folding ladder was left unattended near a busy pedestrian walkway.',
-      why2: 'Contractor workers went on break without folding or tying the ladder.',
-      why3: 'Daily safety checklist was not signed before starting afternoon painting.',
-      why4: 'Contractor team leader arrived 30 minutes late.',
-      why5: 'Main Cause & Fix: Security now checks contractor safety supervisor presence before issuing work pass.',
-      fishboneCategory: 'Procedure',
+    closureSignOff: {
+      safetyOfficerName: 'Farhana Kabir',
+      safetySignedAt: '27 Oct 2026, 02:30 PM',
+      gmName: 'Engr. Md. Harunur Rashid',
+      gmSignedAt: '27 Oct 2026, 04:00 PM',
+      remarks: 'Contractor re-trained on refinery safety protocols. No recurrence observed.',
     },
   },
   {
@@ -374,19 +600,222 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     incNo: 'INC-2026-036',
     title: 'High Pressure Warning Alarm on Heating Pipe Line #2',
     titleBn: 'হিটিং পাইপলাইন #২-এ অতিরিক্ত চাপ সতর্কতা সংকেত',
+    incidentType: 'pressure_piping',
     category: 'pressure',
     level: 4,
+    likelihood: 3,
+    riskScore: 12,
+    riskCategory: 'high',
+    plantZone: 'Bitumen Thermal Processing Unit #2',
     location: 'Heating Unit #2, Keraniganj Plant',
+    shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Engr. Md. Harunur Rashid (Plant GM)',
+    reporterEmpId: 'EMP-0002',
     date: '20 Oct 2026, 02:15 PM',
-    rootCause: 'Thick bitumen buildup partially blocked a manual bypass valve.',
+    workflowStage: 'closed',
+    immediateActionsTaken: 'DCS automated bypass opened; thermal fluid burner heat reduced by 15%; pressure stabilized back to nominal 18 Bar within 4 minutes.',
+    personsInvolved: [
+      { name: 'Engr. Md. Harunur Rashid', empId: 'EMP-0002', role: 'Plant GM', involvementType: 'operator' },
+      { name: 'Nazmul Huda', empId: 'EMP-0007', role: 'Safety Inspector', involvementType: 'first_responder' },
+    ],
+    investigationLead: 'Farhana Kabir (Lead Safety Officer)',
+    investigationTeam: ['Farhana Kabir (Lead Safety Officer)', 'Md. Rafiqul Islam (Mechanical Lead)'],
+    rootCause: 'Thick bitumen coking buildup partially throttled a manual bypass valve during grade changeover.',
+    fiveWhys: {
+      why1: 'Pressure sensor PT-204 alarmed at 26.5 Bar (threshold 24.0 Bar).',
+      why2: 'Asphalt flow velocity decreased across the secondary heat exchanger bank.',
+      why3: 'High-viscosity bitumen residue accumulated on the throttling seat of valve V-204.',
+      why4: 'Solvent flush frequency was set to monthly instead of bi-weekly following raw material switch.',
+      why5: 'Core Preventive Rule: Link DCS differential pressure alarms to automated solvent flush cycles and install pneumatic relief valve.',
+      fishboneCategory: 'Procedure',
+    },
+    fishboneFactors: {
+      people: ['Operators monitored board alerts promptly'],
+      machine: ['Manual bypass valve V-204 prone to coking'],
+      method: ['Solvent flush cycle interval too long for heavy crude grade'],
+      material: ['High-viscosity polymer bitumen grade 60/70'],
+      measurement: ['Differential pressure transmitter PT-204 triggered accurately'],
+      environment: ['Ambient cold snap increased thermal fluid viscosity drop'],
+    },
+    capaItems: [
+      {
+        id: 'CAPA-401',
+        actionType: 'immediate_containment',
+        description: 'Execute thermal flush on Pipe Line #2 and verify line integrity with ultrasonic thickness gauge.',
+        owner: 'Mechanical Maintenance Team',
+        dueDate: '20 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '20 Oct 2026, 08:00 PM',
+        verificationEvidence: 'Pipe wall thickness verified at nominal 9.8mm; no localized erosion detected.',
+      },
+      {
+        id: 'CAPA-402',
+        actionType: 'corrective',
+        description: 'Replace manual bypass valve with pneumatic self-cleaning control valve integrated into DCS interlock.',
+        owner: 'Instrumentation & Electrical Lead',
+        dueDate: '22 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '22 Oct 2026, 03:00 PM',
+        verificationEvidence: 'Pneumatic actuator tested and commissioned on DCS console.',
+      },
+      {
+        id: 'CAPA-403',
+        actionType: 'preventive',
+        description: 'Submit official Level-4 Incident Dossier to Chief Inspector of Boilers & Explosives Department.',
+        owner: 'Plant General Manager',
+        dueDate: '21 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '21 Oct 2026, 11:30 AM',
+        verificationEvidence: 'Form B-12 submitted with receipt acknowledgement #EXP/2026/881.',
+      },
+    ],
     capaAction: 'Flushed pipe clean and installed an automatic pressure release alarm in the control room.',
     capaOwner: 'Plant GM & Maintenance Engineers',
     capaStatus: 'closed',
     statutoryReportable: true,
+    statutoryAgency: 'Dept. of Explosives & Chief Inspector of Boilers',
+    statutoryNoticeHours: 24,
+    evidenceAttached: true,
+    closureSignOff: {
+      safetyOfficerName: 'Farhana Kabir',
+      safetySignedAt: '23 Oct 2026, 10:00 AM',
+      gmName: 'Engr. Md. Harunur Rashid',
+      gmSignedAt: '23 Oct 2026, 11:15 AM',
+      remarks: 'Automated pressure relief interlock functioning reliably. Statutory compliance verified.',
+    },
+  },
+  {
+    id: 'INC-05',
+    incNo: 'INC-2026-042',
+    title: 'Hazard Observation: Worn Insulation Jacket on Bitumen Transfer Pump P-109',
+    titleBn: 'বিপদ পর্যবেক্ষণ: বিটুমিন পাম্প P-109 এর ইনসুলেশন জ্যাকেট ক্ষতিগ্রস্ত',
+    incidentType: 'hazard_observation',
+    category: 'fire',
+    level: 2,
+    likelihood: 2,
+    riskScore: 4,
+    riskCategory: 'low',
+    plantZone: 'Circulation Pump House, Unit-2',
+    location: 'Circulation Bay Pump House, Unit-2, Keraniganj Complex',
+    shift: 'Night Shift (23:00 - 07:00)',
+    reportedBy: 'Tanvir Ahmed (Senior Operations Officer)',
+    reporterEmpId: 'EMP-0004',
+    date: '30 Oct 2026, 03:15 AM',
+    workflowStage: 'triaged',
+    immediateActionsTaken: 'Marked pump casing with high-heat warning placard and cordoned side walkway with yellow tape.',
+    personsInvolved: [
+      { name: 'Tanvir Ahmed', empId: 'EMP-0004', role: 'Operations Officer', involvementType: 'witness' },
+    ],
+    investigationLead: 'Nazmul Huda (Safety Inspector)',
+    rootCause: 'Fiberglass rockwool insulation jacket deteriorated over 3 years of thermal expansion cycling.',
+    fiveWhys: {
+      why1: 'Pump exterior surface reached 140°C, presenting a burn hazard if brushed against.',
+      why2: 'External protective aluminum cladding had separated along the lower seam.',
+      why3: 'High-temperature rockwool blanket had loosened from pump vibration.',
+      why4: 'Routine insulation audits only inspected static piping rather than dynamic pump casings.',
+      why5: 'Core Preventive Rule: Include rotating equipment thermal insulation in quarterly thermographic camera surveys.',
+      fishboneCategory: 'Equipment',
+    },
+    capaItems: [
+      {
+        id: 'CAPA-501',
+        actionType: 'immediate_containment',
+        description: 'Wrap pump with temporary high-heat silica fire blanket rated to 500°C.',
+        owner: 'Mechanical Maintenance Team',
+        dueDate: '30 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '30 Oct 2026, 08:30 AM',
+        verificationEvidence: 'Temporary silica wrap installed; surface temp measured at 48°C.',
+      },
+      {
+        id: 'CAPA-502',
+        actionType: 'corrective',
+        description: 'Order custom pre-formed removable insulation mattress with quick-release velcro buckles.',
+        owner: 'Central Workshop Fabrication Crew',
+        dueDate: '06 Nov 2026',
+        priority: 'medium',
+        status: 'pending',
+      },
+    ],
+    capaAction: 'Temporary silica wrap deployed; custom rockwool jacket on order.',
+    capaOwner: 'Mechanical Maintenance Team',
+    capaStatus: 'open',
+    statutoryReportable: false,
+    evidenceAttached: true,
+  },
+  {
+    id: 'INC-06',
+    incNo: 'INC-2026-043',
+    title: 'Minor Thumb Pinch During Tanker Hose Coupling at Loading Bay #3',
+    titleBn: 'লোডিং বে ৩-এ ট্যাংকার হোস কাপলিং করার সময় বৃদ্ধাঙ্গুলিতে সামান্য চোট',
+    incidentType: 'first_aid',
+    category: 'pressure',
+    level: 2,
+    likelihood: 2,
+    riskScore: 4,
+    riskCategory: 'low',
+    plantZone: 'Bulk Tanker Loading Gantry',
+    location: 'Loading Bay #3, Heavy Tanker Gantry, Keraniganj Complex',
+    shift: 'Morning Shift (07:00 - 15:00)',
+    reportedBy: 'Shahidul Islam (Senior Driver)',
+    reporterEmpId: 'EMP-0005',
+    date: '30 Oct 2026, 09:40 AM',
+    workflowStage: 'capa_execution',
+    immediateActionsTaken: 'Driver immediately stopped operation; escorted to Plant Medical Center within 5 minutes. Cold compress applied.',
+    personsInvolved: [
+      {
+        name: 'Shahidul Islam',
+        empId: 'EMP-0005',
+        role: 'Tanker Driver',
+        involvementType: 'injured',
+        injuryNature: 'Minor superficial contusion on left thumb tip (no laceration or fracture)',
+        treatmentGiven: 'Cold compress and antiseptic dressing applied by Dr. Nusrat Jahan at Plant Clinic. Cleared for light duties.',
+      },
+    ],
+    investigationLead: 'Farhana Kabir (Lead Safety Officer)',
+    rootCause: 'Heavy 4-inch camlock coupling snap lever caught glove cuff when latching under pressure.',
+    fiveWhys: {
+      why1: 'Driver felt sharp pinch when snapping camlock closing lever.',
+      why2: 'Loose cuff on standard leather glove got caught between lever arm and coupling body.',
+      why3: 'High-impact snug-wrist safety gloves were not being worn at the gantry.',
+      why4: 'Driver was using general utility gloves from transport cabin instead of gantry-certified PPE.',
+      why5: 'Core Preventive Rule: Install a dedicated PPE dispenser station at every loading bay with snug-fitting impact gloves.',
+      fishboneCategory: 'Staffing',
+    },
+    capaItems: [
+      {
+        id: 'CAPA-601',
+        actionType: 'immediate_containment',
+        description: 'Inspect Bay-3 camlock coupling lever arm for mechanical burrs or sharp edges.',
+        owner: 'Gantry Maintenance Crew',
+        dueDate: '30 Oct 2026',
+        priority: 'high',
+        status: 'completed',
+        completedAt: '30 Oct 2026, 11:15 AM',
+        verificationEvidence: 'Coupling arm deburred and lubricated with silicone spray.',
+      },
+      {
+        id: 'CAPA-602',
+        actionType: 'preventive',
+        description: 'Install weatherproof PPE cabinets at Gantry Bays 1-4 stocked with Level-3 cut & impact gloves with velcro wrist straps.',
+        owner: 'Farhana Kabir (Lead Safety Officer)',
+        dueDate: '03 Nov 2026',
+        priority: 'high',
+        status: 'in_progress',
+      },
+    ],
+    capaAction: 'First aid rendered promptly; gantry camlock deburred and new snug-wrist PPE cabinets being installed.',
+    capaOwner: 'Safety & Gantry Operations',
+    capaStatus: 'in_progress',
+    statutoryReportable: false,
     evidenceAttached: true,
   },
 ];
+
 
 /* ──────────────────────────────────────────────────────────────────────────
    3. OFFICE MAIL & PARCELS
@@ -1610,12 +2039,82 @@ class OperationsStore {
     this.notify();
   }
 
+  addIncident(item: IncidentItem) {
+    this.incidents = [item, ...this.incidents];
+    this.notify();
+  }
+
+  updateIncident(id: string, updates: Partial<IncidentItem>) {
+    this.incidents = this.incidents.map(inc => inc.id === id ? { ...inc, ...updates } : inc);
+    this.notify();
+  }
+
   advanceIncidentStatus(incidentId: string) {
     this.incidents = this.incidents.map((inc) => {
       if (inc.id !== incidentId) return inc;
       const nextStatus: IncidentItem['capaStatus'] =
         inc.capaStatus === 'open' ? 'in_progress' : 'closed';
-      return { ...inc, capaStatus: nextStatus };
+      const nextStage: IncidentWorkflowStage =
+        inc.workflowStage === 'reported' ? 'triaged' :
+        inc.workflowStage === 'triaged' ? 'under_investigation' :
+        inc.workflowStage === 'under_investigation' ? 'capa_execution' : 'closed';
+      return { ...inc, capaStatus: nextStatus, workflowStage: nextStage };
+    });
+    this.notify();
+  }
+
+  addCapaItem(incidentId: string, item: Omit<CapaActionItem, 'id'>) {
+    const newId = `CAPA-${Math.floor(100 + Math.random() * 900)}`;
+    const fullItem: CapaActionItem = { ...item, id: newId };
+    this.incidents = this.incidents.map(inc => {
+      if (inc.id !== incidentId) return inc;
+      return {
+        ...inc,
+        capaItems: [...(inc.capaItems || []), fullItem],
+        capaStatus: 'in_progress',
+        workflowStage: 'capa_execution',
+      };
+    });
+    this.notify();
+  }
+
+  toggleCapaStatus(incidentId: string, capaId: string, status: 'pending' | 'in_progress' | 'completed', evidenceNote?: string) {
+    this.incidents = this.incidents.map(inc => {
+      if (inc.id !== incidentId) return inc;
+      const updatedCapa = (inc.capaItems || []).map(c => {
+        if (c.id !== capaId) return c;
+        return {
+          ...c,
+          status,
+          completedAt: status === 'completed' ? 'Just Now' : undefined,
+          verificationEvidence: evidenceNote || c.verificationEvidence,
+        };
+      });
+      const allCompleted = updatedCapa.length > 0 && updatedCapa.every(c => c.status === 'completed');
+      return {
+        ...inc,
+        capaItems: updatedCapa,
+        capaStatus: allCompleted ? 'closed' : 'in_progress',
+      };
+    });
+    this.notify();
+  }
+
+  closeIncidentWithSignOff(id: string, safetyOfficerName: string, gmName: string, remarks: string) {
+    this.incidents = this.incidents.map(inc => {
+      if (inc.id !== id) return inc;
+      return {
+        ...inc,
+        capaStatus: 'closed',
+        workflowStage: 'closed',
+        closureSignOff: {
+          safetyOfficerName,
+          safetySignedAt: '30 Oct 2026, 06:15 PM',
+          gmName,
+          gmSignedAt: '30 Oct 2026, 06:30 PM',
+          remarks: remarks || 'All corrective and preventive actions inspected on-site and verified compliant under ISO 45001 protocol.',
+        },
+      };
     });
     this.notify();
   }
@@ -1827,7 +2326,12 @@ export function useOperationsStore() {
     ...state,
     setLicenses: operationsStore.setLicenses.bind(operationsStore),
     setIncidents: operationsStore.setIncidents.bind(operationsStore),
+    addIncident: operationsStore.addIncident.bind(operationsStore),
+    updateIncident: operationsStore.updateIncident.bind(operationsStore),
     advanceIncidentStatus: operationsStore.advanceIncidentStatus.bind(operationsStore),
+    addCapaItem: operationsStore.addCapaItem.bind(operationsStore),
+    toggleCapaStatus: operationsStore.toggleCapaStatus.bind(operationsStore),
+    closeIncidentWithSignOff: operationsStore.closeIncidentWithSignOff.bind(operationsStore),
     setParcels: operationsStore.setParcels.bind(operationsStore),
     advanceParcelStage: operationsStore.advanceParcelStage.bind(operationsStore),
     setVisitors: operationsStore.setVisitors.bind(operationsStore),

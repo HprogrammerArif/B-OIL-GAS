@@ -498,6 +498,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
   // Cockpit Internal View Switcher: 'map' | 'timeline' | 'details'
   const [cockpitView, setCockpitView] = useState<'map' | 'timeline' | 'details'>('map');
+  const [mobileTab, setMobileTab] = useState<'feed' | 'tracker'>('feed');
 
   // Scope Toggle: Staff is strictly 'personal'
   const [scopeMode, setScopeMode] = useState<'personal' | 'master'>(isStaff ? 'personal' : 'master');
@@ -1228,12 +1229,32 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
       </div>
 
+      {/* ── Mobile View Segmented Switcher (Feed vs Tracker) ── */}
+      <div className="mobile-view-toggle parcel-mobile-view-toggle">
+        <button
+          type="button"
+          className={mobileTab === 'feed' ? 'active' : ''}
+          onClick={() => setMobileTab('feed')}
+        >
+          <Package size={14} />
+          <span>{t('Consignment Feed', 'চালান তালিকা', lang)} ({displayedParcels.length})</span>
+        </button>
+        <button
+          type="button"
+          className={mobileTab === 'tracker' ? 'active' : ''}
+          onClick={() => setMobileTab('tracker')}
+        >
+          <Truck size={14} />
+          <span>{t('Active Tracker & PIN', 'লাইভ ট্র্যাকার ও পিন', lang)}</span>
+        </button>
+      </div>
+
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 3. PRACTICAL TWO-COLUMN MODERN COCKPIT WORKSPACE */}
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="parcel-two-col-layout">
         {/* ── LEFT COLUMN: MY CONSIGNMENTS FEED ── */}
-        <div>
+        <div className={`parcel-feed-col ${mobileTab === 'tracker' ? 'mobile-hide' : ''}`}>
           {/* Feed Header with Pill Filters */}
           <div style={{ background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -1304,7 +1325,10 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <div
                     key={p.id}
                     className={`parcel-feed-card ${isSelected ? 'active' : ''}`}
-                    onClick={() => setSelectedParcelId(p.id)}
+                    onClick={() => {
+                      setSelectedParcelId(p.id);
+                      setMobileTab('tracker');
+                    }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                       <div>
@@ -1362,7 +1386,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         </div>
 
         {/* ── RIGHT COLUMN: INTERACTIVE LIVE TRACKING COCKPIT ── */}
-        <div>
+        <div className={`parcel-tracker-col ${mobileTab === 'feed' ? 'mobile-hide' : ''}`}>
           {selectedParcel && (
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
               {/* Cockpit Hero Banner */}
@@ -1396,6 +1420,14 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
                   {/* Top Action Toolbar */}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)', fontSize: '11.5px', fontWeight: 700 }}
+                      onClick={() => setMobileTab('feed')}
+                    >
+                      ← {t('Back to List', 'তালিকায় ফিরুন', lang)}
+                    </button>
                     <button
                       className="btn-sm-ghost"
                       style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}

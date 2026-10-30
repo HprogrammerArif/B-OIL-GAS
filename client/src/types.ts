@@ -21,6 +21,7 @@ export type Lang = 'en' | 'bn';
 export interface ViewProps {
   role: AppRole;
   lang: Lang;
+  onNavigate?: (view: AppView) => void;
 }
 
 export interface RoleMetaItem {

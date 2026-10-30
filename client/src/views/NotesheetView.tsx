@@ -538,7 +538,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
       {/* TAB 1: MAIN NOTE SHEET */}
       {activeTab === 'sheet' && (
-        <div className="grid-2col-main" style={{ gap: '16px', gridTemplateColumns: '1.9fr 1.1fr' }}>
+        <div className="notesheet-grid-2col grid-2col-main">
           {/* Left Column: Note-Sheet Document */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div className="card" style={{ padding: '20px', border: '1px solid var(--brand-slate-200)', background: 'var(--brand-card-bg)' }}>

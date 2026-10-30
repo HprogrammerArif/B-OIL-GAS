@@ -777,11 +777,19 @@
 
   /* Industry Standard Mobile Bottom-Sheet Pattern for Modals */
   .modal,
-  .sap-modal,
-  .broadcast-modal,
-  .official-doc-modal,
+  .modal-dialog,
+  .app-modal-dialog,
+  .claims-modal-dialog,
+  .trip-chat-dialog,
+  .driver-call-modal,
+  .eam-modal,
+  .fleet-modal-dialog,
   .notice-modal-dialog,
-  .fleet-modal-dialog {
+  .sap-modal-dialog,
+  .broadcast-modal-dialog,
+  .official-doc-modal,
+  .sap-modal,
+  .broadcast-modal {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
@@ -790,7 +798,7 @@
     transform: none !important;
     width: 100vw !important;
     max-width: 100vw !important;
-    max-height: 88vh !important;
+    max-height: 90vh !important;
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 20px 20px 0 0 !important;
@@ -803,25 +811,59 @@
   }
 
   .modal-hd,
+  .modal-header,
+  .app-modal-header,
+  .claims-modal-header,
+  .trip-chat-header,
+  .eam-modal-hd,
+  .notice-modal-hd,
   .sap-modal .modal-hd,
   .broadcast-modal .modal-hd,
   .official-doc-modal .modal-hd {
     border-radius: 20px 20px 0 0 !important;
-    padding: 14px 18px !important;
+    padding: 14px 16px !important;
     flex-shrink: 0 !important;
   }
 
-  .modal-body {
+  .modal-body,
+  .app-modal-body,
+  .claims-modal-body,
+  .trip-chat-body,
+  .eam-modal-body,
+  .notice-modal-body {
     overflow-y: auto !important;
-    max-height: calc(88vh - 120px) !important;
-    padding: 16px 18px !important;
+    max-height: calc(90vh - 125px) !important;
+    padding: 16px !important;
     flex: 1 1 auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  .modal-ft {
-    padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  .modal-ft,
+  .modal-footer,
+  .app-modal-footer,
+  .claims-modal-footer,
+  .trip-chat-footer,
+  .eam-modal-ft,
+  .notice-modal-ft {
+    padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
     flex-shrink: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Modal Form Grid Stacking on Mobile Devices */
+  .modal-body .form-row,
+  .app-modal-body .form-row,
+  .claims-modal-body .form-row,
+  .eam-modal-body .form-row,
+  .notice-modal-body .form-row,
+  .modal-body div[style*="gridTemplateColumns"],
+  .app-modal-body div[style*="gridTemplateColumns"],
+  .claims-modal-body div[style*="gridTemplateColumns"],
+  .eam-modal-body div[style*="gridTemplateColumns"],
+  .notice-modal-body div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 
   @keyframes slideUpBottomSheet {
@@ -877,6 +919,11 @@
 
   .btn-row,
   .modal-footer,
+  .modal-ft,
+  .app-modal-footer,
+  .claims-modal-footer,
+  .eam-modal-ft,
+  .notice-modal-ft,
   .card-footer {
     flex-direction: column !important;
     width: 100% !important;
@@ -884,18 +931,52 @@
   }
 
   .btn-row > *,
-  .modal-footer > * {
+  .modal-footer > *,
+  .modal-ft > *,
+  .app-modal-footer > *,
+  .claims-modal-footer > *,
+  .eam-modal-ft > *,
+  .notice-modal-ft > * {
     width: 100% !important;
     justify-content: center !important;
     text-align: center !important;
   }
 
-  .modal {
-    width: 95vw !important;
-    max-width: 95vw !important;
+  .modal,
+  .modal-dialog,
+  .app-modal-dialog,
+  .claims-modal-dialog,
+  .trip-chat-dialog,
+  .driver-call-modal,
+  .eam-modal,
+  .fleet-modal-dialog,
+  .notice-modal-dialog,
+  .sap-modal-dialog,
+  .broadcast-modal-dialog,
+  .official-doc-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
     max-height: 92vh !important;
     display: flex !important;
     flex-direction: column !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  /* Bus Fuselage & Seat Matrix Ultra-Compact Scaling */
+  .bus-fuselage-frame {
+    padding: 10px 6px !important;
+    border-radius: 20px 20px 10px 10px !important;
+  }
+
+  .bus-seat-cell {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 2px !important;
+    font-size: 8.5px !important;
+  }
+
+  .bus-windshield-bar {
+    padding: 6px 10px !important;
   }
 
   .modal-body {
@@ -1371,3 +1452,72 @@
     display: none !important;
   }
 }
+
+/* ─── DEDICATED RESPONSIVE GRIDS & HERO BANNERS ────────────────────────────── */
+.notesheet-grid-2col {
+  display: grid;
+  grid-template-columns: 1.9fr 1.1fr;
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .notesheet-grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+}
+
+.bus-hero-dossier-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.35fr 1.1fr;
+  gap: 16px;
+  align-items: center;
+}
+@media (max-width: 1024px) {
+  .bus-hero-dossier-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+.announcement-banner {
+  box-sizing: border-box;
+}
+.announcement-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .announcement-banner {
+    padding: 10px 14px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .announcement-banner-actions {
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+  .announcement-banner-actions button {
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+  }
+}
+
+/* ─── PARCEL COCKPIT MOBILE ADAPTATION ─── */
+@media (max-width: 768px) {
+  .parcel-quick-chips {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    padding-bottom: 4px !important;
+  }
+  .parcel-quick-chip {
+    flex-shrink: 0 !important;
+  }
+  .parcel-cockpit-hero h1 {
+    font-size: 20px !important;
+  }
+}
+
