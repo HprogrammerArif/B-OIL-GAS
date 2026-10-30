@@ -553,6 +553,40 @@ export default function GuestView({ role, lang }: ViewProps) {
     showToast(t(`Evacuation safety status updated for ${target?.name || 'visitor'}.`, `ইভাকুয়েশন স্ট্যাটাস আপডেট করা হয়েছে।`, lang), 'info');
   };
 
+  const handleMarkAllEvacuatedSafe = () => {
+    setVisitors(prev => prev.map(v => v.status === 'checked_in' ? { ...v, isEvacuatedSafe: true } : v));
+    showToast(t(`✓ All inside visitors marked safe at Assembly Point #3.`, `✓ সকল অতিথিকে অ্যাসেম্বলি পয়েন্ট ৩-এ নিরাপদ চিহ্নিত করা হয়েছে।`, lang), 'success');
+  };
+
+  const handleApproveAllPPE = () => {
+    if (!selectedVisitor) return;
+    setVisitors(prev => prev.map(v => {
+      if (v.id === selectedVisitor.id) {
+        return {
+          ...v,
+          ppeCleared: {
+            hardHat: true,
+            safetyGoggles: true,
+            safetyShoes: true,
+            hiVisVest: true,
+            h2sBriefing: true,
+          },
+          safetyBriefingCompleted: true,
+        };
+      }
+      return v;
+    }));
+    showToast(t(`✓ All 5 safety equipment clearances approved for ${selectedVisitor.name}!`, `✓ সকল ৫টি নিরাপত্তা সরঞ্জাম ছাড়পত্র অনুমোদিত হয়েছে!`, lang), 'success');
+  };
+
+  const handleCopyPassLink = (visitorId: string) => {
+    const link = `https://oneops.bogcl.com/gate-pass/${visitorId}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link);
+    }
+    showToast(t(`Digital Pass Link copied to clipboard! (${link})`, `পাস লিংক ক্লিপবোর্ডে কপি হয়েছে!`, lang), 'info');
+  };
+
   const handleBroadcastEvacuationAlert = () => {
     const insideCount = visitors.filter(v => v.status === 'checked_in').length;
     showToast(
@@ -696,55 +730,23 @@ export default function GuestView({ role, lang }: ViewProps) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
-              {t('Guest & VIP Protocol Management System', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}
+              {t('Guest & VIP Protocol Management', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}
             </h2>
             <span className="badge success" style={{ fontSize: '10.5px' }}>
-              VEHICLE GATE & HSE PASS
+              🛡️ {t('Security & VIP Desk', 'নিরাপত্তা ও ভিআইপি ডেস্ক', lang)}
             </span>
           </div>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
             {t(
-              'Digital QR Gate Passes, Automatic Vehicle Barrier, Safety Gear Clearance & Evacuation Roster',
-              'কিউআর গেট পাস, স্বয়ংক্রিয় গাড়ি বেরিয়ার, নিরাপত্তা সরঞ্জাম ও জরুরি ইভাকুয়েশন তালিকা',
+              'Digital QR gate passes, vehicle barrier entry, safety equipment clearance, and evacuation roster.',
+              'কিউআর গেট পাস, গাড়ি বেরিয়ার এন্ট্রি, নিরাপত্তা সরঞ্জাম ছাড়পত্র ও জরুরি ইভাকুয়েশন তালিকা।',
               lang
             )}
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Quick QR Scanner Simulator */}
-          <button
-            className="btn-gold"
-            style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
-            onClick={() => setShowScannerModal(true)}
-            title="Open Live Gate QR Scanner & Plate Reader"
-          >
-            <Scan size={14} />
-            {t('Quick QR Gate Scanner', 'গেট কিউআর স্ক্যানার', lang)}
-          </button>
-
-          {/* Emergency Muster Button */}
-          <button
-            className="btn-outline-danger"
-            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowMusterModal(true)}
-            title="View Live Evacuation Muster Roll"
-          >
-            <Flame size={14} />
-            {t('Emergency Muster List', 'জরুরি ইভাকুয়েশন তালিকা', lang)} ({stats.totalInside})
-          </button>
-
-          {/* Vehicle Gate Barrier Scanner Simulator */}
-          <button
-            className="btn-outline"
-            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowALPRModal(true)}
-          >
-            <Car size={14} />
-            {t('Vehicle Barrier Gate 1', 'গেট ১ ক্যামেরা ও বেরিয়ার', lang)}
-          </button>
-
-          {/* Pre-Register Button */}
+          {/* Pre-Register Button (Primary) */}
           <button
             className="btn-primary"
             style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--brand-crimson)', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
@@ -755,6 +757,38 @@ export default function GuestView({ role, lang }: ViewProps) {
           >
             <Plus size={14} />
             {t('Pre-Register Guest', 'নতুন অতিথি প্রাক-নিবন্ধন', lang)}
+          </button>
+
+          {/* Quick QR Scanner Simulator */}
+          <button
+            className="btn-gold"
+            style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
+            onClick={() => setShowScannerModal(true)}
+            title="Open Live Gate QR Scanner & Plate Reader"
+          >
+            <Scan size={14} />
+            {t('Fast Gate Scan', 'গেট কিউআর স্ক্যানার', lang)}
+          </button>
+
+          {/* Emergency Muster Button */}
+          <button
+            className="btn-outline-danger"
+            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowMusterModal(true)}
+            title="View Live Evacuation Roll-Call Roster"
+          >
+            <Flame size={14} />
+            {t('Evacuation Roll-Call', 'জরুরি ইভাকুয়েশন তালিকা', lang)} ({stats.totalInside})
+          </button>
+
+          {/* Vehicle Gate Barrier Scanner Simulator */}
+          <button
+            className="btn-outline"
+            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowALPRModal(true)}
+          >
+            <Car size={14} />
+            {t('Boom Barrier Live', 'গাড়ি গেট ও ক্যামেরা', lang)}
           </button>
         </div>
       </div>
@@ -845,24 +879,25 @@ export default function GuestView({ role, lang }: ViewProps) {
           className={`parcel-kpi-card ${activeTab === 'inside' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'inside' ? 'all' : 'inside')}
           title="Click to view guests currently inside"
+          style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
             <div className="parcel-kpi-icon" style={{ background: '#ECFDF5', color: '#059669' }}>
               <UserCheck size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
-              ● LIVE MUSTER
+              ● {t('ACTIVE INSIDE', 'উপস্থিত', lang)}
             </span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#059669' }}>
-              {stats.totalInside} <span style={{ fontSize: '14px', fontWeight: 600 }}>Guests</span>
+              {stats.totalInside} <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('Inside', 'জন', lang)}</span>
             </div>
             <div className="parcel-kpi-title">
-              {t('Currently Inside Perimeter', 'বর্তমানে ক্যাম্পাসে উপস্থিত', lang)}
+              {t('Visitors Inside Now', 'বর্তমানে ক্যাম্পাসে উপস্থিত', lang)}
             </div>
             <div className="parcel-kpi-sub">
-              {stats.insideRefinery} at Keraniganj • {stats.insideHQ} at Dhaka HQ
+              {t(`${stats.insideRefinery} at Keraniganj • ${stats.insideHQ} at Dhaka HQ`, `${stats.insideRefinery} জন কেরানীগঞ্জ • ${stats.insideHQ} জন প্রধান কার্যালয়`, lang)}
             </div>
           </div>
         </div>
@@ -872,24 +907,25 @@ export default function GuestView({ role, lang }: ViewProps) {
           className={`parcel-kpi-card ${activeTab === 'pre_registered' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'pre_registered' ? 'all' : 'pre_registered')}
           title="Click to view pre-registered upcoming visits"
+          style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
             <div className="parcel-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
               <Clock size={18} />
             </div>
             <span className="badge info" style={{ fontSize: '10px' }}>
-              TODAY
+              {t('TODAY', 'আজকের', lang)}
             </span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>
-              {stats.preRegisteredCount}
+              {stats.preRegisteredCount} <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('Expected', 'জন', lang)}</span>
             </div>
             <div className="parcel-kpi-title">
-              {t('Expected / Pre-Registered', 'প্রত্যাশিত অতিথি তালিকা', lang)}
+              {t('Expected Today', 'আজকের প্রত্যাশিত অতিথি', lang)}
             </div>
             <div className="parcel-kpi-sub">
-              Digital QR Gate Passes Issued
+              {t('Digital QR gate passes issued', 'কিউআর গেট পাস ইস্যু সম্পন্ন', lang)}
             </div>
           </div>
         </div>
@@ -899,24 +935,25 @@ export default function GuestView({ role, lang }: ViewProps) {
           className={`parcel-kpi-card ${activeTab === 'vip_govt' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'vip_govt' ? 'all' : 'vip_govt')}
           title="Click to view VIP & Govt inspectors"
+          style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
             <div className="parcel-kpi-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#B45309' }}>
               <Crown size={18} />
             </div>
             <span className="badge warn" style={{ fontSize: '10px' }}>
-              HIGH PROTOCOL
+              {t('VIP PROTOCOL', 'ভিআইপি প্রটোকল', lang)}
             </span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: 'var(--brand-crimson)' }}>
-              {stats.vipGovtCount} <span style={{ fontSize: '13px', fontWeight: 500 }}>Delegations</span>
+              {stats.vipGovtCount} <span style={{ fontSize: '13px', fontWeight: 500 }}>{t('Delegations', 'টি দল', lang)}</span>
             </div>
             <div className="parcel-kpi-title">
-              {t('VIP & Govt Inspections', 'ভিআইপি ও সরকারি পরিদর্শন', lang)}
+              {t('VIP & Govt Delegations', 'ভিআইপি ও সরকারি পরিদর্শন', lang)}
             </div>
             <div className="parcel-kpi-sub">
-              DoE Explosives & Axens France
+              {t('DoE Explosives & Technical Experts', 'বিস্ফোরক পরিদপ্তর ও কারিগরি বিশেষজ্ঞ', lang)}
             </div>
           </div>
         </div>
@@ -926,24 +963,25 @@ export default function GuestView({ role, lang }: ViewProps) {
           className="parcel-kpi-card"
           onClick={() => setCockpitSubTab('ppe')}
           title="Click to inspect safety gear & induction checklist"
+          style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
             <div className="parcel-kpi-icon" style={{ background: '#F0F9FF', color: '#0284C7' }}>
               <HardHat size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
-              {stats.ppeComplianceRate}%
+              100% {t('VERIFIED', 'যাচাইকৃত', lang)}
             </span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: '#0284C7' }}>
-              100%
+              {stats.ppeComplianceRate}%
             </div>
             <div className="parcel-kpi-title">
-              {t('HSE Gear Allotment & NDA', 'নিরাপত্তা সরঞ্জাম ও চুক্তি', lang)}
+              {t('Safety Gear & Briefing', 'নিরাপত্তা সরঞ্জাম ও ব্রিফিং', lang)}
             </div>
             <div className="parcel-kpi-sub">
-              Mandatory Refinery Plant PPE Active
+              {t('Refinery PPE & safety induction certified', 'হেলমেট, জুতা ও সেফটি ব্রিফিং সম্পন্ন', lang)}
             </div>
           </div>
         </div>
@@ -953,24 +991,25 @@ export default function GuestView({ role, lang }: ViewProps) {
           className="parcel-kpi-card"
           onClick={() => setShowALPRModal(true)}
           title="Click to view ALPR gate camera feed"
+          style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
             <div className="parcel-kpi-icon" style={{ background: '#FEF2F2', color: '#DC2626' }}>
               <Shield size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
-              ALPR ACTIVE
+              {t('ALPR ACTIVE', 'সেন্সর সক্রিয়', lang)}
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ fontSize: '20px', color: '#991B1B' }}>
-              GATE 1 & 2
+            <div className="parcel-kpi-val" style={{ fontSize: '18px', color: '#991B1B' }}>
+              {t('Gates 1 & 2', 'গেট ১ ও ২', lang)}
             </div>
             <div className="parcel-kpi-title">
-              {t('Automatic Plate Recognition', 'নম্বরপ্লেট সেন্সর বেরিয়ার', lang)}
+              {t('Vehicle Boom Barrier', 'যানবাহন গেট বেরিয়ার', lang)}
             </div>
             <div className="parcel-kpi-sub">
-              Barrier Auto-Open on QR Match
+              {t('License plate reader auto-barrier', 'নম্বরপ্লেট ক্যামেরা অটো-বেরিয়ার চালু', lang)}
             </div>
           </div>
         </div>
@@ -1048,6 +1087,13 @@ export default function GuestView({ role, lang }: ViewProps) {
               >
                 ⏳ Expected ({stats.preRegisteredCount})
               </button>
+              <button
+                className={`parcel-pill-tab ${activeTab === 'my_guests' ? 'active' : ''}`}
+                style={{ padding: '3px 8px', fontSize: '10.5px' }}
+                onClick={() => setActiveTab('my_guests')}
+              >
+                👤 My Guests ({stats.myGuestsCount})
+              </button>
             </div>
           </div>
 
@@ -1102,13 +1148,48 @@ export default function GuestView({ role, lang }: ViewProps) {
                       {v.purpose}
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '10.5px' }}>
-                      <span style={{ color: isHostMe ? '#2563EB' : 'var(--brand-slate-500)', fontWeight: isHostMe ? 700 : 500 }}>
-                        Host: {v.hostEmployee}
-                      </span>
-                      <span style={{ color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>
-                        {v.id}
-                      </span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '10.5px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ color: isHostMe ? '#2563EB' : 'var(--brand-slate-600)', fontWeight: isHostMe ? 700 : 500 }}>
+                          Host: {v.hostEmployee}
+                        </span>
+                        <span style={{ color: 'var(--brand-slate-300)' }}>•</span>
+                        <span style={{ color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>
+                          {v.id}
+                        </span>
+                      </div>
+
+                      {/* 1-Click Fast Gate Action on Card */}
+                      {v.status === 'pre_registered' ? (
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          style={{ fontSize: '10.5px', padding: '3px 9px', background: '#059669', color: '#fff', borderRadius: '4px', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCheckIn(v.id);
+                          }}
+                          title="Instant Check-in at security gate"
+                        >
+                          <UserCheck size={11} /> {t('Check In', 'চেক-ইন', lang)}
+                        </button>
+                      ) : v.status === 'checked_in' ? (
+                        <button
+                          type="button"
+                          style={{ fontSize: '10.5px', padding: '3px 9px', background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '4px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCheckOut(v.id);
+                          }}
+                          title="Check out visitor & clear barrier"
+                        >
+                          <Clock size={11} /> {t('Check Out', 'চেক-আউট', lang)}
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', fontWeight: 600 }}>
+                          ✓ Done
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -1144,7 +1225,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                       {selectedVisitor.designation} • <strong>{selectedVisitor.organization}</strong>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', fontSize: '11.5px', color: '#94A3B8' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', fontSize: '11.5px', color: '#94A3B8', flexWrap: 'wrap' }}>
                       <span>Pass ID: <strong style={{ color: '#fff', fontFamily: 'monospace' }}>{selectedVisitor.id}</strong></span>
                       <span>•</span>
                       <span>Badge No: <strong style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{selectedVisitor.badgeNo || 'UNISSUED'}</strong></span>
@@ -1168,14 +1249,23 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedVisitor.status === 'checked_in' ? '#10B981' : '#F59E0B', display: 'inline-block' }} />
                     <strong style={{ color: '#F8FAFC' }}>
                       {selectedVisitor.status === 'checked_in'
-                        ? `Inside Premises since ${selectedVisitor.checkInTime}`
+                        ? t(`Inside Premises since ${selectedVisitor.checkInTime}`, `${selectedVisitor.checkInTime} হতে ক্যাম্পাসে অবস্থান করছেন`, lang)
                         : selectedVisitor.status === 'pre_registered'
-                        ? `Expected Arrival: ${selectedVisitor.expectedTime}`
-                        : `Checked Out at ${selectedVisitor.checkOutTime}`}
+                        ? t(`Expected Arrival: ${selectedVisitor.expectedTime}`, `প্রত্যাশিত আগমন: ${selectedVisitor.expectedTime}`, lang)
+                        : t(`Checked Out at ${selectedVisitor.checkOutTime}`, `${selectedVisitor.checkOutTime}-এ চেক-আউট সম্পন্ন`, lang)}
                     </strong>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      className="btn-sm-ghost"
+                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      onClick={() => handleCopyPassLink(selectedVisitor.id)}
+                      title="Copy Pass Link"
+                    >
+                      <Share2 size={12} />
+                      {t('Copy Link', 'লিংক কপি', lang)}
+                    </button>
                     <button
                       className="btn-sm-ghost"
                       style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
@@ -1190,7 +1280,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                       onClick={() => setShowSMSModal(true)}
                     >
                       <Send size={12} />
-                      {t('SMS QR Pass', 'এসএমএস পাঠান', lang)}
+                      {t('Share Pass', 'শেয়ার করুন', lang)}
                     </button>
                   </div>
                 </div>
@@ -1204,42 +1294,42 @@ export default function GuestView({ role, lang }: ViewProps) {
                     onClick={() => setCockpitSubTab('pass')}
                   >
                     <User size={13} />
-                    {t('Visit & Host', 'সাক্ষাৎ ও স্বাগতিক', lang)}
+                    {t('Visit Details', 'সাক্ষাৎ ও স্বাগতিক', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'protocol' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('protocol')}
                   >
                     <Crown size={13} />
-                    {t('VIP Protocol & Lounge', 'ভিআইপি প্রটোকল ও লাউঞ্জ', lang)}
+                    {t('VIP Protocol & Hospitality', 'ভিআইপি প্রটোকল ও আপ্যায়ন', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'inspection' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('inspection')}
                   >
                     <FileCheck size={13} />
-                    {t('Inspection & Debrief', 'পরিদর্শন ও মূল্যায়ন', lang)}
+                    {t('Inspection & Findings', 'পরিদর্শন ও পর্যবেক্ষণ', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'ppe' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('ppe')}
                   >
                     <HardHat size={13} />
-                    {t('HSE Gear Allotment', 'এইচএসই গিয়ার', lang)}
+                    {t('Safety Gear & Briefing', 'নিরাপত্তা সরঞ্জাম ও ব্রিফিং', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'alpr' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('alpr')}
                   >
                     <Car size={13} />
-                    {t('Vehicle Gate Barrier', 'যানবাহন গেট বেরিয়ার', lang)}
+                    {t('Vehicle Barrier', 'যানবাহন গেট বেরিয়ার', lang)}
                   </button>
                   <button
                     className={`parcel-pill-tab ${cockpitSubTab === 'zones' ? 'active' : ''}`}
                     onClick={() => setCockpitSubTab('zones')}
                   >
                     <MapPin size={13} />
-                    {t('Permitted Plant Zones', 'অনুমোদিত প্ল্যান্ট অঞ্চল', lang)}
+                    {t('Permitted Zones', 'অনুমোদিত অঞ্চল', lang)}
                   </button>
                 </div>
 
@@ -1559,8 +1649,37 @@ export default function GuestView({ role, lang }: ViewProps) {
 
                   {/* Add New Finding Form */}
                   <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)', marginBottom: '10px' }}>
-                      {t('+ Record Live Inspection Observation / Checkpoint', '+ নতুন পরিদর্শন পর্যবেক্ষণ যোগ করুন', lang)}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                        {t('+ Record Live Inspection Observation / Checkpoint', '+ নতুন পরিদর্শন পর্যবেক্ষণ যোগ করুন', lang)}
+                      </div>
+                      {/* Quick Presets */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          className="badge info"
+                          style={{ cursor: 'pointer', border: 'none' }}
+                          onClick={() => {
+                            setNewFindingFocus('Bitumen Storage Tank TK-101 Pressure Relief');
+                            setNewFindingObs('Pressure verified at 2.4 bar, nitrogen blanket sealed, PRV stamp valid.');
+                            setNewFindingStatus('passed');
+                          }}
+                        >
+                          + Relief Valve (Passed)
+                        </button>
+                        <button
+                          type="button"
+                          className="badge warn"
+                          style={{ cursor: 'pointer', border: 'none' }}
+                          onClick={() => {
+                            setNewFindingFocus('Flare Header Elevation +14m Grounding');
+                            setNewFindingObs('Static grounding copper braid shows slight atmospheric oxidation; maintenance scheduled.');
+                            setNewFindingStatus('observation');
+                          }}
+                        >
+                          + Flare Grounding (Advisory)
+                        </button>
+                      </div>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '10px' }}>
                       <div>
@@ -1610,16 +1729,27 @@ export default function GuestView({ role, lang }: ViewProps) {
               {/* ── TAB 2: HSE SAFETY GEAR & INDUCTION CLEARANCE ── */}
               {cockpitSubTab === 'ppe' && (
                 <div style={{ padding: '24px' }}>
-                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <HardHat size={28} color="#B45309" />
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#92400E' }}>
-                        MANDATORY PETROCHEMICAL REFINERY SAFETY INDUCTION (HSE POLICY 10.4)
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: '#B45309', marginTop: '2px' }}>
-                        Visitors entering refinery process units must wear full PPE, undergo H2S emergency breathing briefing, and surrender non-intrinsically safe mobile phones.
+                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <HardHat size={28} color="#B45309" />
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#92400E' }}>
+                          MANDATORY PETROCHEMICAL REFINERY SAFETY INDUCTION (HSE POLICY 10.4)
+                        </div>
+                        <div style={{ fontSize: '11.5px', color: '#B45309', marginTop: '2px' }}>
+                          Visitors entering refinery process units must wear full PPE, undergo H2S emergency breathing briefing, and surrender non-intrinsically safe mobile phones.
+                        </div>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      style={{ fontSize: '12px', padding: '7px 14px', background: '#059669', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                      onClick={handleApproveAllPPE}
+                    >
+                      <CheckCircle2 size={15} />
+                      {t('Approve All 5 Safety Checks', 'সকল ৫টি নিরাপত্তা ছাড়পত্র অনুমোদন', lang)}
+                    </button>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
@@ -2108,14 +2238,26 @@ export default function GuestView({ role, lang }: ViewProps) {
                       Safety wardens must tick off each visitor upon physical verification at muster point.
                     </div>
                   </div>
-                  <button
-                    className="btn-primary"
-                    style={{ background: '#DC2626', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px' }}
-                    onClick={handleBroadcastEvacuationAlert}
-                  >
-                    <Radio size={14} />
-                    {t('Broadcast Siren SMS Alert', 'সাইরেন এসএমএস ব্রডকাস্ট করুন', lang)}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="btn-outline"
+                      style={{ background: '#ECFDF5', borderColor: '#10B981', color: '#047857', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px' }}
+                      onClick={handleMarkAllEvacuatedSafe}
+                    >
+                      <CheckCircle2 size={14} />
+                      {t('Mark All Safe at Muster Point', 'সবাইকে নিরাপদ চিহ্নিত করুন', lang)}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      style={{ background: '#DC2626', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                      onClick={handleBroadcastEvacuationAlert}
+                    >
+                      <Radio size={14} />
+                      {t('Broadcast Siren SMS Alert', 'সাইরেন এসএমএস ব্রডকাস্ট করুন', lang)}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="table-responsive">
