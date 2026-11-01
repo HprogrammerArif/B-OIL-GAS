@@ -22,7 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { t, AppRole, ROLE_META } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 export interface ClaimSubmissionData {
   id: string;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { useEmployeeStore } from '../../store/employeeStore';
 import {
   AssetCategory,

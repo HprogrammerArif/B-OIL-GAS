@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ViewProps, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import { useFleetStore, Driver, Vehicle, VehicleRequisition, TripChatMessage, FleetNotification } from '../store/fleetStore';
 import {
   Truck, Car, Fuel, MapPin, CheckCircle, Clock, AlertCircle,

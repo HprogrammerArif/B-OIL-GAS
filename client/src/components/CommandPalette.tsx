@@ -5,7 +5,7 @@ import {
   Package, MapPin, AlertTriangle, CornerDownLeft, Moon, Sun, Users,
   ClipboardCheck, Wrench, Receipt, MessageSquare
 } from 'lucide-react';
-import { getAllowedViewsForRole } from './Sidebar';
+import { allowedViews as allowedViewsFor } from '../auth/permissions';
 import { useNotesheetStore } from '../store/notesheetStore';
 import { useFleetStore } from '../store/fleetStore';
 import { useAssetStore } from '../store/assetStore';
@@ -16,7 +16,6 @@ interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (view: AppView) => void;
-  onRoleChange?: (role: AppRole) => void;
   onToggleTheme: () => void;
   lang: Lang;
   currentTheme: 'light' | 'dark';
@@ -27,7 +26,7 @@ interface CommandItem {
   id: string;
   title: string;
   titleBn: string;
-  category: 'Pages' | 'Live Records' | 'Quick Settings' | 'Switch Role (Preview)';
+  category: 'Pages' | 'Live Records' | 'Quick Settings';
   icon: React.ReactNode;
   action: () => void;
   shortcut?: string;
@@ -59,7 +58,6 @@ export default function CommandPalette({
   isOpen,
   onClose,
   onNavigate,
-  onRoleChange,
   onToggleTheme,
   lang,
   currentTheme,
@@ -85,7 +83,7 @@ export default function CommandPalette({
     }
   }, [isOpen]);
 
-  const allowedViews = useMemo(() => getAllowedViewsForRole(role), [role]);
+  const allowedViews = useMemo(() => allowedViewsFor(role), [role]);
   const meta = ROLE_META[role];
 
   const items: CommandItem[] = useMemo(() => {
@@ -242,25 +240,6 @@ export default function CommandPalette({
       },
     });
 
-    // 4. Switch Role (Preview)
-    if (onRoleChange) {
-      (Object.keys(ROLE_META) as AppRole[]).forEach((r) => {
-        const rMeta = ROLE_META[r];
-        list.push({
-          id: `switch-role-${r}`,
-          title: `Switch Role: ${rMeta.name} (${rMeta.label})`,
-          titleBn: `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
-          category: 'Switch Role (Preview)',
-          icon: <Users size={15} color={rMeta.avatarColor} />,
-          action: () => {
-            onRoleChange(r);
-            onClose();
-          },
-          shortcut: rMeta.empId,
-        });
-      });
-    }
-
     return list;
   }, [
     allowedViews,
@@ -275,7 +254,6 @@ export default function CommandPalette({
     currentTheme,
     onNavigate,
     onToggleTheme,
-    onRoleChange,
     onClose,
   ]);
 

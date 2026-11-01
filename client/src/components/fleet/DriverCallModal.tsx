@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Grid, Shield, Sparkles } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 interface DriverCallModalProps {
   isOpen: boolean;

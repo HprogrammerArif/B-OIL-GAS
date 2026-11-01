@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { NoticeItem } from './types';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 
 interface NoticeDetailModalProps {
   notice: NoticeItem | null;

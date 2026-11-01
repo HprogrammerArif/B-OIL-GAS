@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
   useAssetStore,
   AssetCategory,

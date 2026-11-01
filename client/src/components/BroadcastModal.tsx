@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { t, Lang } from '../types';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 import { Megaphone, X } from 'lucide-react';
 import { useNoticeStore } from '../store/noticeStore';
 

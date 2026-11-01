@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../../types';
 import { useFleetStore, Driver } from '../../store/fleetStore';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { X, UserPlus, Check, Award, Phone, ShieldCheck } from 'lucide-react';
 
 interface EnrollDriverModalProps {

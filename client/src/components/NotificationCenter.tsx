@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AppRole, Lang, t, AppView, ROLE_META } from '../types';
 import { Bell, CheckCheck, FileText, AlertTriangle, Truck, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 import { useApprovalStore } from '../store/approvalStore';
 import { useFleetStore } from '../store/fleetStore';
 import { useNoticeStore } from '../store/noticeStore';
-import { getAllowedViewsForRole } from './Sidebar';
+import { allowedViews as getAllowedViewsForRole } from '../auth/permissions';
 
 interface NotificationItem {
   id: string;

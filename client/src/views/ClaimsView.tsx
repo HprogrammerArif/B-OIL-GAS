@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
   Receipt, Plus, CheckCircle, Clock, AlertTriangle, Download,
   DollarSign, MapPin, Calendar, FileText, Send, UserCheck,

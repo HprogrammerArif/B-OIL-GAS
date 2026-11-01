@@ -1,7 +1,7 @@
 import React from 'react';
 import { Lang, t } from '../types';
 import { Printer, Download, QrCode, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 
 export interface DocumentData {
   type: 'notesheet' | 'trip_pass' | 'gate_pass';

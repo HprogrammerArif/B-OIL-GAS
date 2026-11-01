@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lang, t, AppRole } from '../../types';
 import { Employee, useEmployeeStore } from '../../store/employeeStore';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { X, UserPlus, Check } from 'lucide-react';
 
 interface OnboardEmployeeModalProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserCheck, Building2 } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import { DashboardSubViewProps } from './types';
 
 export default function HrAdminDashboard({

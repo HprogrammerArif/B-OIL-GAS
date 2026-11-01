@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { X, UserCheck, Clock } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 import { DepartmentApprovalStep, useApprovalStore } from '../store/approvalStore';
 
 export interface DetailDrawerData {

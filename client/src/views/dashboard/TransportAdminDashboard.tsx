@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Car, Navigation } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import { useFleetStore } from '../../store/fleetStore';
 import { DashboardSubViewProps } from './types';

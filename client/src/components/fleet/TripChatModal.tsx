@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { VehicleRequisition, useFleetStore } from '../../store/fleetStore';
 import { ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import {
   MessageSquare, Send, X, Users, Car, MapPin,
   Clock, ShieldCheck, Check, CheckCheck,

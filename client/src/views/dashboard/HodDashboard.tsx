@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FileCheck, Check, CheckSquare, Square } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import { DashboardSubViewProps } from './types';
 import { INITIAL_HOD_QUEUE } from './dashboardData';

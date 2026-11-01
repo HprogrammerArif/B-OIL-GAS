@@ -5,7 +5,7 @@ import {
   AlertOctagon, Plus, Send, Check, QrCode, Play, Flag, MessageSquare
 } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import { useFleetStore } from '../../store/fleetStore';
 import { DashboardSubViewProps } from './types';
 

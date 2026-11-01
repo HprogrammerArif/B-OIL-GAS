@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
 import {
   ShieldCheck, AlertTriangle, Clock, CheckCircle, FileText,

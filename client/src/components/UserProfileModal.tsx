@@ -3,7 +3,7 @@ import { AppRole, Lang, ROLE_META, t } from '../types';
 import {
   Shield, Key, CheckCircle, Clock, User, Award, Lock, X, LogOut
 } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
 
 interface UserProfileModalProps {

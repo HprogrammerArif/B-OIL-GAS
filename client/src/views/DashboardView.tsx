@@ -5,7 +5,7 @@ import {
   BarChart3, Navigation, Bell, UserCheck, Activity,
   Lock, ArrowRight, MapPin, Bus, Receipt, QrCode
 } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import AnimatedCounter from '../components/AnimatedCounter';
 import Sparkline from '../components/Sparkline';
 import DetailDrawer, { DetailDrawerData } from '../components/DetailDrawer';

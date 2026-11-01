@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import { readToken } from '../lib/theme';
 import {
   FileSignature, CheckCircle, Clock, ShieldCheck,

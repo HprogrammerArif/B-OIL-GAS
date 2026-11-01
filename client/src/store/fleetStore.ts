@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import React from 'react';
 import { SYSTEM_TODAY } from '../types';
 
@@ -745,6 +746,17 @@ const INITIAL_DRIVER_TOLL_SLIPS: DriverTollSlip[] = [
   { id: 'TOL-2026-8790', reqId: 'REQ-2026-438', plaza: 'Postogola Buriganga Bridge', amount: 150, time: 'Yesterday, 02:10 PM', status: 'Paid' },
 ];
 
+interface FleetSnapshot {
+  drivers: Driver[];
+  vehicles: Vehicle[];
+  requisitions: VehicleRequisition[];
+  chatMessages: TripChatMessage[];
+  notifications: FleetNotification[];
+  driverTollSlips: DriverTollSlip[];
+}
+const PERSIST_NAME = 'fleet';
+const PERSIST_VERSION = 1;
+
 class FleetStore {
   private drivers: Driver[] = [...INITIAL_DRIVERS];
   private vehicles: Vehicle[] = [...INITIAL_VEHICLES];
@@ -753,6 +765,11 @@ class FleetStore {
   private notifications: FleetNotification[] = [...INITIAL_FLEET_NOTIFICATIONS];
   private driverTollSlips: DriverTollSlip[] = [...INITIAL_DRIVER_TOLL_SLIPS];
   private listeners: (() => void)[] = [];
+
+  constructor() {
+    const saved = loadPersisted<FleetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) Object.assign(this, saved);
+  }
 
   getDrivers(): Driver[] { return this.drivers; }
   getVehicles(): Vehicle[] { return this.vehicles; }
@@ -1286,6 +1303,14 @@ class FleetStore {
 
   private notify(): void {
     this.listeners.forEach((listener) => listener());
+    savePersisted<FleetSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      drivers: this.drivers,
+      vehicles: this.vehicles,
+      requisitions: this.requisitions,
+      chatMessages: this.chatMessages,
+      notifications: this.notifications,
+      driverTollSlips: this.driverTollSlips,
+    }));
   }
 }
 

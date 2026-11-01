@@ -14,6 +14,7 @@ import { useFleetStore } from '../store/fleetStore';
 import { useAssetStore } from '../store/assetStore';
 import { useBusStore } from '../store/busStore';
 import { useEmployeeStore } from '../store/employeeStore';
+import { canAccessView } from '../auth/permissions';
 
 interface SidebarProps {
   role: AppRole;
@@ -232,18 +233,6 @@ export const ROLE_NAV: Record<AppRole, NavSection[]> = {
   driver: DRIVER_NAV,
 };
 
-export function getAllowedViewsForRole(role: AppRole): Set<AppView> {
-  const allowed = new Set<AppView>();
-  ROLE_NAV[role].forEach((section) => {
-    section.items.forEach((item) => {
-      allowed.add(item.view);
-      if (item.view === 'fleet') {
-        allowed.add('vehicle_request');
-      }
-    });
-  });
-  return allowed;
-}
 
 export function useLiveNavBadges(role: AppRole): Record<string, { text: string; type: 'danger' | 'warn' | 'info' }> {
   const meta = ROLE_META[role];
@@ -388,7 +377,11 @@ export default function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const meta = ROLE_META[role];
-  const sections = ROLE_NAV[role];
+  // Nav is the role's curated menu, filtered once more by the permission matrix
+  // so a menu entry can never expose a view the role cannot open.
+  const sections = ROLE_NAV[role]
+    .map((s) => ({ ...s, items: s.items.filter((i) => canAccessView(role, i.view)) }))
+    .filter((s) => s.items.length > 0);
   const liveBadges = useLiveNavBadges(role);
 
   const normalizedActiveView: AppView = activeView === 'vehicle_request' ? 'fleet' : activeView;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Lang, t } from '../types';
 import { Database, Server, RefreshCw } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 
 interface SapGatewayModalProps {
   onClose: () => void;

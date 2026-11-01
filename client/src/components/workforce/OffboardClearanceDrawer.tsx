@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Lang, t } from '../../types';
 import { Employee, useEmployeeStore } from '../../store/employeeStore';
 import { useAssetStore } from '../../store/assetStore';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { X, ShieldAlert, CheckCircle, RotateCcw, Laptop, Key, CreditCard, DollarSign, Wrench, Check } from 'lucide-react';
 
 interface OffboardClearanceDrawerProps {

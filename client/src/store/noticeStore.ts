@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import React from 'react';
 import { NoticeItem } from '../views/dashboard/types';
 import { NOTICE_BOARD } from '../views/dashboard/dashboardData';
@@ -13,8 +14,12 @@ export interface BroadcastPayload {
   timestamp: string;
 }
 
+const PERSIST_NAME = 'notices';
+const PERSIST_VERSION = 1;
+
 class NoticeStore {
-  private notices: NoticeItem[] = [...NOTICE_BOARD];
+  private notices: NoticeItem[] = loadPersisted<NoticeItem[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...NOTICE_BOARD];
+  // The live banner is intentionally session-only: it should not reappear after a reload.
   private activeBroadcast: BroadcastPayload | null = null;
   private listeners: Set<() => void> = new Set();
 
@@ -25,6 +30,7 @@ class NoticeStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted(PERSIST_NAME, PERSIST_VERSION, () => this.notices);
   }
 
   getNotices(): NoticeItem[] {

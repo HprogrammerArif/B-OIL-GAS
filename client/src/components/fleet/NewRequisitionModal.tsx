@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { VehicleRequisition } from '../../store/fleetStore';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import {
   Car,
   MapPin,

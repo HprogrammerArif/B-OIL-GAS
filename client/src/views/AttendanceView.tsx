@@ -1,92 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
-  MapPin, CheckCircle, Clock, ShieldCheck, AlertCircle,
-  Camera, UserCheck, Calendar, Users, Award, Compass,
-  Navigation, Shield, Check, X, Smartphone, RefreshCw, Zap
+  CheckCircle, Clock, Camera, UserCheck, Users, Compass,
+  Check, X, RefreshCw
 } from 'lucide-react';
-
-interface ShiftWorker {
-  id: string;
-  name: string;
-  role: string;
-  dept: string;
-  shift: string;
-  inTime: string;
-  outTime: string;
-  locationStatus: 'inside_geofence' | 'remote_approved' | 'late' | 'absent';
-  overtimeHours: number;
-  distanceMeters: number;
-}
-
-const ROSTER_DATA: ShiftWorker[] = [
-  {
-    id: 'BOGCL-1049',
-    name: 'Tanvir Ahmed',
-    role: 'Senior Sales Executive',
-    dept: 'Sales & Distribution',
-    shift: 'General (09:00 - 18:00)',
-    inTime: '08:52 AM',
-    outTime: 'Pending',
-    locationStatus: 'inside_geofence',
-    overtimeHours: 0,
-    distanceMeters: 42,
-  },
-  {
-    id: 'BOGCL-2012',
-    name: 'Md. Shahidul Islam',
-    role: 'Executive Pool Chauffeur',
-    dept: 'Fleet Management',
-    shift: 'Morning Shift A (06:00 - 14:00)',
-    inTime: '05:48 AM',
-    outTime: 'Pending',
-    locationStatus: 'inside_geofence',
-    overtimeHours: 2.5,
-    distanceMeters: 110,
-  },
-  {
-    id: 'BOGCL-3088',
-    name: 'Engr. Tariq Ahmed',
-    role: 'Senior Plant Maintenance Lead',
-    dept: 'Keraniganj Refinery Complex',
-    shift: 'General (08:30 - 17:30)',
-    inTime: 'On Leave',
-    outTime: '-',
-    locationStatus: 'absent',
-    overtimeHours: 0,
-    distanceMeters: 0,
-  },
-  {
-    id: 'BOGCL-4105',
-    name: 'Kamrul Hasan',
-    role: 'Boiler & Steam Operator',
-    dept: 'Refinery Utilities',
-    shift: 'Shift A (07:00 - 15:00)',
-    inTime: '06:54 AM',
-    outTime: 'Pending',
-    locationStatus: 'inside_geofence',
-    overtimeHours: 1.0,
-    distanceMeters: 85,
-  },
-  {
-    id: 'BOGCL-5501',
-    name: 'Farhana Kabir',
-    role: 'Lead EHS Compliance Officer',
-    dept: 'Health, Safety & Environment',
-    shift: 'General (09:00 - 18:00)',
-    inTime: '09:12 AM',
-    outTime: 'Pending',
-    locationStatus: 'late',
-    overtimeHours: 0,
-    distanceMeters: 310,
-  },
-];
+import { useOperationsStore } from '../store/operationsStore';
 
 export default function AttendanceView({ role, lang }: ViewProps) {
   const currentPersona = ROLE_META[role] || ROLE_META.employee;
-  const [hasPunchedIn, setHasPunchedIn] = useState(true);
-  const [punchTime, setPunchTime] = useState('08:52 AM');
+  const { attendanceRoster, punchAttendance } = useOperationsStore();
+
+  // The signed-in user's row in the shared roster drives the punch console
+  const myRecord = attendanceRoster.find((w) => w.id === currentPersona.empId);
+  const hasPunchedIn = !!myRecord && myRecord.outTime === 'On Duty' && myRecord.locationStatus !== 'absent';
+  const punchTime = myRecord?.inTime ?? '—';
+
   const [showFaceModal, setShowFaceModal] = useState(false);
   const [faceScanning, setFaceScanning] = useState(false);
   const [faceVerified, setFaceVerified] = useState(false);
@@ -94,24 +23,11 @@ export default function AttendanceView({ role, lang }: ViewProps) {
   const [gpsAccuracy, setGpsAccuracy] = useState('±4.2m');
   const [userCoords, setUserCoords] = useState({ lat: '23.6850° N', lng: '90.3540° E' });
 
-  const roster = useMemo(() => {
-    const defaultRoster = [
-      {
-        id: currentPersona.empId,
-        name: currentPersona.name,
-        role: currentPersona.label,
-        dept: currentPersona.dept || 'Operations Division',
-        shift: 'General (09:00 - 18:00)',
-        inTime: hasPunchedIn ? punchTime : 'Not Clocked In',
-        outTime: hasPunchedIn ? 'On Duty' : '-',
-        locationStatus: hasPunchedIn ? ('inside_geofence' as const) : ('absent' as const),
-        overtimeHours: 0,
-        distanceMeters: 42,
-      },
-      ...ROSTER_DATA.filter(r => r.name !== currentPersona.name && r.name !== 'Tanvir Ahmed'),
-    ];
-    return defaultRoster;
-  }, [currentPersona, hasPunchedIn, punchTime]);
+  // Own row first, then everyone else
+  const roster = useMemo(
+    () => [...attendanceRoster].sort((a, b) => (a.id === currentPersona.empId ? -1 : b.id === currentPersona.empId ? 1 : 0)),
+    [attendanceRoster, currentPersona.empId],
+  );
 
   const handlePunchToggle = () => {
     if (!hasPunchedIn) {
@@ -123,7 +39,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
         setFaceVerified(true);
       }, 2000);
     } else {
-      setHasPunchedIn(false);
+      punchAttendance(role, 'out');
       showToast(
         t(
           'Punched Out for today. Shift duration: 8 hrs 42 mins. Overtime: 0 hrs. Safe commute!',
@@ -137,8 +53,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
 
   const handleConfirmFacePunch = () => {
     setShowFaceModal(false);
-    setHasPunchedIn(true);
-    setPunchTime(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    punchAttendance(role, 'in', selectedLocation === 'keraniganj' ? 'PLANT_KERANIGANJ' : 'HQ_BARIDHARA');
     showToast(
       t('Biometric Face Attendance Verified & Geofenced to Keraniganj Plant.', 'বায়োমেট্রিক উপস্থিতি নিশ্চিত করা হয়েছে।', lang),
       'success'
@@ -361,16 +276,20 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                       <div style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-slate-400)' }}>{r.id}</div>
                     </td>
                     <td>
-                      <div style={{ fontSize: '12px' }}>{r.role}</div>
+                      <div style={{ fontSize: '12px' }}>{r.roleTitle}</div>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{r.dept}</div>
                     </td>
                     <td>{r.shift}</td>
                     <td><strong>{r.inTime}</strong></td>
                     <td>
-                      {r.locationStatus === 'inside_geofence' ? (
+                      {r.outTime !== '-' && r.outTime !== 'On Duty' ? (
+                        <span className="badge info">Punched Out {r.outTime}</span>
+                      ) : r.locationStatus === 'inside_geofence' ? (
                         <span className="badge success">Inside Geofence ({r.distanceMeters}m)</span>
                       ) : r.locationStatus === 'late' ? (
                         <span className="badge warn">Late In ({r.distanceMeters}m)</span>
+                      ) : r.locationStatus === 'remote_approved' ? (
+                        <span className="badge info">Remote (Approved)</span>
                       ) : (
                         <span className="badge danger">Approved Leave</span>
                       )}

@@ -158,9 +158,13 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
   ],
 };
 
-const PERMISSION_SETS: Record<AppRole, ReadonlySet<Permission>> = Object.fromEntries(
-  (Object.keys(ROLE_PERMISSIONS) as AppRole[]).map((r) => [r, new Set(ROLE_PERMISSIONS[r])]),
-) as Record<AppRole, ReadonlySet<Permission>>;
+const PERMISSION_SETS = (Object.keys(ROLE_PERMISSIONS) as AppRole[]).reduce(
+  (acc, r) => {
+    acc[r] = new Set(ROLE_PERMISSIONS[r]);
+    return acc;
+  },
+  {} as Record<AppRole, ReadonlySet<Permission>>,
+);
 
 export function permissionsFor(role: AppRole): ReadonlySet<Permission> {
   return PERMISSION_SETS[role];

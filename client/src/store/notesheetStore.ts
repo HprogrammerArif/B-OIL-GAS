@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, SYSTEM_TODAY } from '../types';
 import type { SignatoryStep } from '../components/notesheet/InitiateNotesheetModal';
@@ -439,8 +440,11 @@ const INITIAL_NOTE_FILES: NoteFile[] = [
   },
 ];
 
+const PERSIST_NAME = 'notesheets';
+const PERSIST_VERSION = 1;
+
 class NotesheetStore {
-  private files: NoteFile[] = [...INITIAL_NOTE_FILES];
+  private files: NoteFile[] = loadPersisted<NoteFile[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...INITIAL_NOTE_FILES];
   private listeners: Set<() => void> = new Set();
 
   subscribe(listener: () => void): () => void {
@@ -450,6 +454,7 @@ class NotesheetStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted(PERSIST_NAME, PERSIST_VERSION, () => this.files);
   }
 
   getFiles(): NoteFile[] {

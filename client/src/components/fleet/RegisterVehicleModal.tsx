@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Truck, Check, X, ShieldCheck } from 'lucide-react';
 import { Vehicle, useFleetStore } from '../../store/fleetStore';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 interface RegisterVehicleModalProps {
   isOpen: boolean;

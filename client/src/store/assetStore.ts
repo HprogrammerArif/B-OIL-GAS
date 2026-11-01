@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
 
@@ -1560,13 +1561,31 @@ const INITIAL_TRANSFERS: AssetTransfer[] = [
 /* ──────────────────────────────────────────────────────────────────────────
    GLOBAL REACTIVE STORE SINGLETON
    ────────────────────────────────────────────────────────────────────────── */
-let globalAssets: AssetRecord[] = [...INITIAL_ASSETS];
-let globalWorkOrders: AssetWorkOrder[] = [...INITIAL_WORK_ORDERS];
-let globalRequisitions: AssetRequisition[] = [...INITIAL_REQUISITIONS];
-let globalTransfers: AssetTransfer[] = [...INITIAL_TRANSFERS];
+interface AssetSnapshot {
+  assets: AssetRecord[];
+  workOrders: AssetWorkOrder[];
+  requisitions: AssetRequisition[];
+  transfers: AssetTransfer[];
+}
+const PERSIST_NAME = 'assets';
+const PERSIST_VERSION = 1;
+const persistedAssets = loadPersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+
+let globalAssets: AssetRecord[] = persistedAssets?.assets ?? [...INITIAL_ASSETS];
+let globalWorkOrders: AssetWorkOrder[] = persistedAssets?.workOrders ?? [...INITIAL_WORK_ORDERS];
+let globalRequisitions: AssetRequisition[] = persistedAssets?.requisitions ?? [...INITIAL_REQUISITIONS];
+let globalTransfers: AssetTransfer[] = persistedAssets?.transfers ?? [...INITIAL_TRANSFERS];
 
 let listeners: Array<() => void> = [];
-const notify = () => listeners.forEach((fn) => fn());
+const notify = () => {
+  listeners.forEach((fn) => fn());
+  savePersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+    assets: globalAssets,
+    workOrders: globalWorkOrders,
+    requisitions: globalRequisitions,
+    transfers: globalTransfers,
+  }));
+};
 
 export function getAssetStoreSnapshot() {
   return {

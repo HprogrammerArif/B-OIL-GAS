@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { Lock, Unlock, LogOut, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 
 interface LockScreenModalProps {
   role: AppRole;

@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award, Sparkles
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award
 } from 'lucide-react';
-import { showToast } from '../App';
+import { useCan } from '../auth/session';
 import SapGatewayModal from './SapGatewayModal';
 import NotificationCenter from './NotificationCenter';
 import UserProfileModal from './UserProfileModal';
@@ -52,7 +52,6 @@ interface TopbarProps {
   lang: Lang;
   view: AppView;
   theme: 'light' | 'dark';
-  onRoleChange: (r: AppRole) => void;
   onLangToggle: () => void;
   onToggleTheme: () => void;
   onOpenSearch: () => void;
@@ -67,7 +66,6 @@ export default function Topbar({
   lang,
   view,
   theme,
-  onRoleChange,
   onLangToggle,
   onToggleTheme,
   onOpenSearch,
@@ -87,6 +85,8 @@ export default function Topbar({
   const meta = ROLE_META[role];
   const accessLevel = ROLE_ACCESS_LEVEL[role];
   const page = PAGE_META[view] || DEFAULT_PAGE_META;
+  const canBroadcast = useCan('notices:broadcast');
+  const canSeeSync = useCan('settings:sync_status');
 
   // Real-time ticking clock
   useEffect(() => {
@@ -161,8 +161,9 @@ export default function Topbar({
         {/* 2. System Sync & Clock Capsule */}
         <div
           className="topbar-telemetry-capsule"
-          onClick={() => setShowSapModal(true)}
-          title={t('Click to view Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সিঙ্ক স্ট্যাটাস দেখুন', lang)}
+          onClick={() => canSeeSync && setShowSapModal(true)}
+          style={canSeeSync ? undefined : { cursor: 'default' }}
+          title={canSeeSync ? t('Click to view Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সিঙ্ক স্ট্যাটাস দেখুন', lang) : undefined}
         >
           <div className="telemetry-sap">
             <span className="sap-dot" />
@@ -197,8 +198,8 @@ export default function Topbar({
           </button>
         </div>
 
-        {/* 4. Chairman Announcement Button */}
-        {role === 'chairman' && (
+        {/* 4. Company-wide announcement (permission-gated) */}
+        {canBroadcast && (
           <button
             className="btn-broadcast-compact"
             onClick={onBroadcastOpen}
@@ -214,7 +215,7 @@ export default function Topbar({
           <div
             className="user-widget-interactive"
             onClick={() => setShowDropdown(!showDropdown)}
-            title={t('Click to view profile, handover settings, or switch demo role', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}
+            title={t('Profile, security and sign-out', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}
           >
             <div className="user-avatar" style={{ background: meta.avatarColor }}>
               {meta.initials}
@@ -256,107 +257,6 @@ export default function Topbar({
                     {t(accessLevel.en, accessLevel.bn, lang)}
                   </span>
                   <span style={{ fontFamily: 'monospace', color: 'var(--status-info-bright)', fontWeight: 700 }}>{meta.empId}</span>
-                </div>
-              </div>
-
-              {/* Quick Role Switcher */}
-              <div
-                style={{
-                  padding: '10px 14px',
-                  background: 'rgba(0, 0, 0, 0.03)',
-                  borderBottom: '1px solid var(--brand-slate-200)',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '8px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    color: 'var(--brand-slate-600)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={12} color="var(--brand-gold)" />
-                    {t('Switch Role (Preview)', 'পদবি পরিবর্তন (প্রিভিউ)', lang)}
-                  </span>
-                  <span style={{ fontSize: '9.5px', color: 'var(--brand-gold)', fontWeight: 700 }}>
-                    {t('7 Roles', '৭টি পদবি', lang)}
-                  </span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
-                  {(Object.keys(ROLE_META) as AppRole[]).map((r) => {
-                    const rMeta = ROLE_META[r];
-                    const isCurrent = r === role;
-                    return (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => {
-                          setShowDropdown(false);
-                          onRoleChange(r);
-                          showToast(
-                            t(
-                              `Switched to: ${rMeta.name} (${rMeta.label})`,
-                              `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
-                              lang
-                            ),
-                            'gold'
-                          );
-                        }}
-                        title={`${rMeta.name} (${rMeta.empId}) — ${rMeta.label}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '5px 8px',
-                          borderRadius: '6px',
-                          border: isCurrent
-                            ? '1.5px solid var(--brand-crimson)'
-                            : '1px solid var(--brand-slate-200)',
-                          background: isCurrent
-                            ? 'rgba(165, 28, 48, 0.08)'
-                            : 'var(--brand-card-bg)',
-                          color: isCurrent
-                            ? 'var(--brand-crimson)'
-                            : 'var(--brand-slate-700)',
-                          fontSize: '11px',
-                          fontWeight: isCurrent ? 800 : 600,
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'all 0.15s ease',
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: '18px',
-                            height: '18px',
-                            borderRadius: '4px',
-                            background: rMeta.avatarColor,
-                            color: 'var(--text-on-brand)',
-                            fontSize: '9px',
-                            fontWeight: 800,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}
-                        >
-                          {rMeta.initials}
-                        </span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                          {rMeta.shortName}
-                        </span>
-                        {isCurrent && <span style={{ fontSize: '10px', color: 'var(--brand-crimson)' }}>✓</span>}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
 

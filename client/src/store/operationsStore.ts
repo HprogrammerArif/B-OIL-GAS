@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
 import type {
@@ -1980,6 +1981,21 @@ const INITIAL_PROFILE_PREFS: UserProfilePreferences = {
 /* ──────────────────────────────────────────────────────────────────────────
    OPERATIONS SINGLETON STORE
    ────────────────────────────────────────────────────────────────────────── */
+interface OperationsSnapshot {
+  licenses: LicenseCard[];
+  incidents: IncidentItem[];
+  parcels: ParcelItem[];
+  visitors: VisitorRecord[];
+  attendanceRoster: ShiftWorker[];
+  leaveRequests: LeaveRequestItem[];
+  chatChannels: ChatChannel[];
+  chatMembers: ChatMember[];
+  chatMessages: Record<string, ChatMessage[]>;
+  profilePrefs: UserProfilePreferences;
+}
+const PERSIST_NAME = 'operations';
+const PERSIST_VERSION = 1;
+
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
   private incidents: IncidentItem[] = [...INITIAL_INCIDENTS];
@@ -1993,6 +2009,11 @@ class OperationsStore {
   private profilePrefs: UserProfilePreferences = { ...INITIAL_PROFILE_PREFS };
   private listeners: Set<() => void> = new Set();
 
+  constructor() {
+    const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) Object.assign(this, saved);
+  }
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -2000,6 +2021,18 @@ class OperationsStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      licenses: this.licenses,
+      incidents: this.incidents,
+      parcels: this.parcels,
+      visitors: this.visitors,
+      attendanceRoster: this.attendanceRoster,
+      leaveRequests: this.leaveRequests,
+      chatChannels: this.chatChannels,
+      chatMembers: this.chatMembers,
+      chatMessages: this.chatMessages,
+      profilePrefs: this.profilePrefs,
+    }));
   }
 
   // ── Getters ──

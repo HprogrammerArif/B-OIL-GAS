@@ -23,7 +23,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import RefineryOutputChart from '../../components/RefineryOutputChart';
 import { DashboardSubViewProps, LotoPermitItem, ShiftHandoverItem } from './types';

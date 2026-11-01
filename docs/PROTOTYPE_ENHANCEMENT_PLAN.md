@@ -105,10 +105,28 @@ Total ≈ 15–22 focused days. P1 alone already removes the two biggest credibi
 - Changes are incremental and demoable at every step; `npm run build` must pass after each module pass.
 - Quantitative targets at the end of P2: `0` hex literals in `.tsx`, `< 300` inline style blocks (layout-only), `0` name-string identity checks, dark-mode checklist 100 %.
 
-## 6. Decisions needed before P1 starts
+## 6. Decisions (taken)
 
-1. **Presentation date & audience** — determines whether P2 order should favour executive screens (board) or operational ones (department heads).
-2. **Dark mode** — keep both themes (recommended; P1 makes it cheap) or ship light-only and remove the toggle.
-3. **Login realism** — password-validated login with hidden persona switcher (recommended) vs keep visible persona picker.
-4. **Routing** — add hash routing with lazy views (recommended, no new runtime dependency) vs keep state-based navigation.
-5. **Feature trimming** — confirm the "removed/hidden" column in WS-D; anything there the client specifically asked to see?
+1. **Audience** — Chairman/board; P2 favours executive screens.
+2. **Dark mode** — both themes kept, driven by `tokens.css`.
+3. **Login** — password-validated login; persona switcher hidden behind `Ctrl+Shift+D`.
+4. **Routing** — hash routing with lazy views, no new dependency.
+5. **Feature trimming** — per WS-D column; revisit per module in P2.
+
+## 7. P1 status and implemented conventions
+
+P1 foundations are in place. The concrete contracts the P2 module passes build on:
+
+| Area | Where | Contract |
+| :-- | :-- | :-- |
+| Tokens | `src/styles/tokens.css` | Semantic `--surface-*`, `--text-*`, `--border-*`, `--status-{success,warning,danger,info,purple}-{text,bright,bg,border,solid,solid-dark}`; light values equal the original palette, dark values tuned. `dark.css` inverts `--brand-slate-*`, so never use slate-900/800 as a *fill* — use `--surface-inverse*` / `--surface-selected`. |
+| Theme | `src/lib/theme.ts`, `index.html` | `oneops.theme.v1` in localStorage; pre-paint script applies `data-theme`; `readToken()` for canvas drawing. |
+| Identity | `src/auth/permissions.ts`, `src/auth/session.ts` | `Permission = 'module:action'`, `can(role, p)`, `useCan(p)`, `useScope()`, `inScope(scope, record)`, `canAccessView(role, view)`. Session persisted under `oneops.session.v1` (localStorage when "keep me signed in", else sessionStorage). Demo password is `bogcl2026` for every persona (SHA-256 digest only in code). 5 failed attempts lock the form. |
+| Routing | `src/lib/router.ts` | Hash paths: `/`, `/approvals`, `/documents`, `/messages`, `/permits`, `/fleet`, `/fleet/request`, `/shuttle`, `/parcels`, `/attendance`, `/safety`, `/claims`, `/assets`, `/visitors`, `/people`. Inaccessible routes redirect to `/`; views are `React.lazy` behind `ViewSkeleton`. |
+| Persistence | `src/lib/persist.ts` | `loadPersisted(name, v)` / `savePersisted(name, v, snapshot)` (debounced 150 ms) under `oneops.store.<name>.v<N>`. Persisted: approvals, notesheets, operations, fleet, bus, notices, employees, assets. Bump `N` when seed shape changes. `voiceBriefingStore` and the active broadcast banner are session-only. |
+| Clock & refs | `src/lib/clock.ts`, `src/lib/refs.ts` | `today()`, `nowStamp()`, `daysFromToday(n)`, `daysUntil(date)`; `nextRef('APR')` → `APR-2026-0901`, `nextNoteSheetRef('FIN')` → `BOGCL/FIN/2026/0041` (counters in `oneops.refs.v1`). Stores still carry `Math.random()` IDs and `'Today, Just Now'` strings — replace with these helpers during each P2 module pass. |
+| Primitives | `src/components/ui/` | `Button`, `Card`, `StatusPill`, `EmptyState`, `PageHeader`, `Modal`, `FormField`, `ViewSkeleton` (styles in `styles/ui.css`). Adopt in P2 as each module is touched; do not mass-replace. |
+| Store wiring | `BusView`, `InnerCircleChat`, `AttendanceView` | Now read/write `busStore` / `operationsStore`; their private seed copies were deleted. Any remaining view-local seed data is a P2 defect. |
+| Presenter panel | `src/components/demo/DemoPanel.tsx` | `Ctrl+Shift+D`: switch persona / sign-in-as, theme, language, sign out, **Reset demo data** (clears every `oneops.*` key except theme and language, then reloads to the login page). |
+
+Known P1 leftovers for P2: identity strings differ between `busData.ts` seat generator, `SupervisorSeatModal.tsx` and the employee directory (e.g. Harunur Rashid `EMP-0104` vs `EMP-0012`); the chairman dashboard "Priority Approvals" tab count is static; ~105 `role === '…'`/name-string checks remain inside views.

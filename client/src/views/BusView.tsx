@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
   Bus, Users, MapPin, CheckCircle, Clock, AlertTriangle,
   QrCode, UserMinus, UserPlus, Phone, Compass, BellRing,
@@ -16,105 +16,13 @@ import {
 import type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle } from '../components/bus/busTypes';
 export type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle };
 
-import {
-  INITIAL_BUSES,
-  INITIAL_ROUTES,
-  generateSeatsForRoute,
-} from '../components/bus/busData';
+import { INITIAL_ROUTES, generateSeatsForRoute } from '../components/bus/busData';
+import { useBusStore } from '../store/busStore';
 import RegisterBusModal from '../components/bus/RegisterBusModal';
 import RouteBuilderModal from '../components/bus/RouteBuilderModal';
 import SupervisorSeatModal from '../components/bus/SupervisorSeatModal';
 import ReassignBusRouteModal from '../components/bus/ReassignBusRouteModal';
 import BusFleetOverviewGrid from '../components/bus/BusFleetOverviewGrid';
-
-
-const INITIAL_SEATS: Seat[] = [
-  // Row 1 - Executive / Lead Engineers
-  { num: 1, row: 1, col: 'left_win', assignedTo: 'Engr. Harunur Rashid', staffId: 'EMP-0104', dept: 'Plant GM & Operations', phone: '+880 1711-002101', pickupPoint: 'Dhanmondi-27', pickupTime: '06:55 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'executive', bookingType: 'permanent' },
-  { num: 2, row: 1, col: 'left_aisle', assignedTo: 'Mizanur Rahman', staffId: 'EMP-0219', dept: 'Quality Assurance', phone: '+880 1712-441122', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'executive', bookingType: 'permanent' },
-  { num: 3, row: 1, col: 'right_aisle', assignedTo: 'Farhana Kabir', staffId: 'EMP-0312', dept: 'EHS Safety Lead', phone: '+880 1819-556677', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'lady_priority', bookingType: 'permanent' },
-  { num: 4, row: 1, col: 'right_win', assignedTo: 'Engr. Tariq Ahmed', staffId: 'EMP-0145', dept: 'Maintenance Div.', phone: '+880 1711-002105', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'vacated', vacatedReason: 'Approved Annual Leave', bloodGroup: 'AB+', boarded: false, category: 'executive', bookingType: 'permanent' },
-
-  // Row 2 (Tanvir Ahmed holds Seat #5)
-  { num: 5, row: 2, col: 'left_win', assignedTo: 'Tanvir Ahmed', staffId: 'EMP-1042', dept: 'Sales & Distribution', phone: '+880 1720-334455', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 6, row: 2, col: 'left_aisle', assignedTo: 'Shariful Islam', staffId: 'EMP-0452', dept: 'Refinery Tech', phone: '+880 1713-998877', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 7, row: 2, col: 'right_aisle', assignedTo: 'Rezaul Karim', staffId: 'EMP-0678', dept: 'Instrument Specialist', phone: '+880 1814-223344', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'vacated', vacatedReason: 'Working from Corporate HQ Dhaka', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 8, row: 2, col: 'right_win', assignedTo: 'Babul Akhter', staffId: 'EMP-0551', dept: 'Logistics Custodian', phone: '+880 1911-887766', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O-', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 3
-  { num: 9, row: 3, col: 'left_win', assignedTo: 'Nurul Amin', staffId: 'EMP-0782', dept: 'Plant Accounts', phone: '+880 1715-667788', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 10, row: 3, col: 'left_aisle', assignedTo: 'Kamrul Hasan', staffId: 'EMP-0891', dept: 'HR & Administration', phone: '+880 1816-554433', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 11, row: 3, col: 'right_aisle', assignedTo: 'Saiful Islam', staffId: 'EMP-0924', dept: 'Lab Chemist', phone: '+880 1917-443322', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 12, row: 3, col: 'right_win', assignedTo: null, staffId: undefined, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 4
-  { num: 13, row: 4, col: 'left_win', assignedTo: 'Arif Hossain', staffId: 'EMP-1102', dept: 'Security Officer', phone: '+880 1718-223311', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 14, row: 4, col: 'left_aisle', assignedTo: 'Al-Amin Mia', staffId: 'EMP-1205', dept: 'Boiler Operator', phone: '+880 1819-112233', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 15, row: 4, col: 'right_aisle', assignedTo: 'Mahbub Alam', staffId: 'EMP-1311', dept: 'Electrical Engr.', phone: '+880 1920-334455', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 16, row: 4, col: 'right_win', assignedTo: 'Tofazzal Hossain', staffId: 'EMP-1402', dept: 'Maintenance', phone: '+880 1725-889900', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'vacated', vacatedReason: 'Self-commute by motorcycle today', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 5
-  { num: 17, row: 5, col: 'left_win', assignedTo: 'Delwar Hossain', staffId: 'EMP-1520', dept: 'Plant Instrumentation', phone: '+880 1721-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 18, row: 5, col: 'left_aisle', assignedTo: 'Jahangir Alam', staffId: 'EMP-1632', dept: 'Shift Marshall', phone: '+880 1822-778899', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 19, row: 5, col: 'right_aisle', assignedTo: 'Moniruzzaman', staffId: 'EMP-1744', dept: 'Piping Specialist', phone: '+880 1923-889900', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 20, row: 5, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 6
-  { num: 21, row: 6, col: 'left_win', assignedTo: 'Zahirul Haque', staffId: 'EMP-1850', dept: 'Terminal Dispatch', phone: '+880 1726-112233', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 22, row: 6, col: 'left_aisle', assignedTo: 'Shahidul Islam', staffId: 'EMP-1901', dept: 'Warehouse Lead', phone: '+880 1827-223344', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 23, row: 6, col: 'right_aisle', assignedTo: 'Imran Nazir', staffId: 'EMP-2015', dept: 'Refinery Process', phone: '+880 1928-334455', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 24, row: 6, col: 'right_win', assignedTo: 'Anwar Sadat', staffId: 'EMP-2108', dept: 'Safety Inspector', phone: '+880 1729-445566', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 7
-  { num: 25, row: 7, col: 'left_win', assignedTo: 'Golam Mostafa', staffId: 'EMP-2210', dept: 'Turbine Mechanic', phone: '+880 1730-556677', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 26, row: 7, col: 'left_aisle', assignedTo: 'Nazrul Islam', staffId: 'EMP-2322', dept: 'Compressor Tech', phone: '+880 1831-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 27, row: 7, col: 'right_aisle', assignedTo: 'Asaduzzaman', staffId: 'EMP-2433', dept: 'LPG Bottling', phone: '+880 1932-778899', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 28, row: 7, col: 'right_win', assignedTo: 'Mustafizur Rahman', staffId: 'EMP-2544', dept: 'Instrumentation', phone: '+880 1733-889900', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O-', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 8
-  { num: 29, row: 8, col: 'left_win', assignedTo: 'Habibur Rahman', staffId: 'EMP-2655', dept: 'Control Room Tech', phone: '+880 1734-990011', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 30, row: 8, col: 'left_aisle', assignedTo: 'Rabiul Awal', staffId: 'EMP-2766', dept: 'HVAC Specialist', phone: '+880 1835-001122', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 31, row: 8, col: 'right_aisle', assignedTo: 'Kawsar Ahmed', staffId: 'EMP-2877', dept: 'Water Treatment', phone: '+880 1936-112233', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 32, row: 8, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 9
-  { num: 33, row: 9, col: 'left_win', assignedTo: 'Shamsul Alam', staffId: 'EMP-2988', dept: 'Fire & Safety Officer', phone: '+880 1737-223344', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 34, row: 9, col: 'left_aisle', assignedTo: 'Liton Das', staffId: 'EMP-3099', dept: 'Plant Chemist', phone: '+880 1838-334455', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 35, row: 9, col: 'right_aisle', assignedTo: 'Akram Hossain', staffId: 'EMP-3101', dept: 'Tank Farm Operator', phone: '+880 1939-445566', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 36, row: 9, col: 'right_win', assignedTo: 'Bazlur Rashid', staffId: 'EMP-3212', dept: 'Pipeline Welder', phone: '+880 1740-556677', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 10
-  { num: 37, row: 10, col: 'left_win', assignedTo: 'Selim Mia', staffId: 'EMP-3323', dept: 'Generators Lead', phone: '+880 1741-667788', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 38, row: 10, col: 'left_aisle', assignedTo: 'Ashraful Islam', staffId: 'EMP-3434', dept: 'Maintenance Fitter', phone: '+880 1842-778899', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 39, row: 10, col: 'right_aisle', assignedTo: 'Farid Uddin', staffId: 'EMP-3545', dept: 'Civil Works Tech', phone: '+880 1943-889900', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 40, row: 10, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 11
-  { num: 41, row: 11, col: 'left_win', assignedTo: 'Mainul Islam', staffId: 'EMP-3656', dept: 'Flare System Tech', phone: '+880 1744-990011', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 42, row: 11, col: 'left_aisle', assignedTo: 'Badrul Huda', staffId: 'EMP-3767', dept: 'Security Escort', phone: '+880 1845-001122', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 43, row: 11, col: 'right_aisle', assignedTo: 'Nazim Uddin', staffId: 'EMP-3878', dept: 'Stores Supervisor', phone: '+880 1946-112233', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 44, row: 11, col: 'right_win', assignedTo: 'Saidur Rahman', staffId: 'EMP-3989', dept: 'Canteen Supervisor', phone: '+880 1747-223344', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 12
-  { num: 45, row: 12, col: 'left_win', assignedTo: 'Touhidul Islam', staffId: 'EMP-4090', dept: 'Electrical Substation', phone: '+880 1748-334455', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'AB+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 46, row: 12, col: 'left_aisle', assignedTo: 'Belal Hossain', staffId: 'EMP-4101', dept: 'Laboratory Asst.', phone: '+880 1849-445566', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 47, row: 12, col: 'right_aisle', assignedTo: 'Sultan Mahmud', staffId: 'EMP-4212', dept: 'Diesel Generator Tech', phone: '+880 1950-556677', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 48, row: 12, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 13 - Rear Row
-  { num: 49, row: 13, col: 'left_win', assignedTo: 'Enamul Haque', staffId: 'EMP-4323', dept: 'Refinery Utilities', phone: '+880 1751-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 50, row: 13, col: 'left_aisle', assignedTo: 'Firoz Ahmed', staffId: 'EMP-4434', dept: 'Logistics Handler', phone: '+880 1852-778899', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 51, row: 13, col: 'right_aisle', assignedTo: 'Sajid Hasan', staffId: 'EMP-4545', dept: 'EHS Assistant', phone: '+880 1953-889900', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 52, row: 13, col: 'right_win', assignedTo: 'Rokonuzzaman', staffId: 'EMP-4656', dept: 'Security Gate Staff', phone: '+880 1754-990011', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-];
-
-const INITIAL_WAITLIST: WaitlistEntry[] = [
-  { rank: 1, staffId: 'EMP-5501', name: 'Shahadat Hossain', dept: 'Mechanical Tech', pickupPoint: 'Farmgate Overbridge', phone: '+880 1718-445566', joinedAt: '06:12 AM', priority: 'Emergency', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 2, staffId: 'EMP-5502', name: 'Nasir Uddin', dept: 'Refinery Operator', pickupPoint: 'Shahbagh Square', phone: '+880 1823-998811', joinedAt: '06:25 AM', priority: 'Shift', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 3, staffId: 'EMP-5503', name: 'Ziaur Rahman', dept: 'Procurement Asst.', pickupPoint: 'Babubazar Bridge', phone: '+880 1912-334455', joinedAt: '06:33 AM', priority: 'Shift', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 4, staffId: 'EMP-5504', name: 'Sabbir Ahmed', dept: 'Chemical Blending Tech', pickupPoint: 'Farmgate Overbridge', phone: '+880 1729-110022', joinedAt: '06:40 AM', priority: 'Overtime', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 5, staffId: 'EMP-5505', name: 'Tarek Mansoor', dept: 'EHS Compliance Officer', pickupPoint: 'Mirpur-10 Circle', phone: '+880 1830-449922', joinedAt: '06:48 AM', priority: 'Emergency', shift: 'Morning Shift (07:00 AM)' },
-];
 
 export default function BusView({ role, lang }: ViewProps) {
   // Operational perspective: staff vs supervisor (default to supervisor if role is transport_admin)
@@ -126,42 +34,25 @@ export default function BusView({ role, lang }: ViewProps) {
   const [commuteDirection, setCommuteDirection] = useState<'inbound' | 'outbound'>('inbound');
   const [selectedDate, setSelectedDate] = useState<string>(SYSTEM_TODAY);
 
-  // Bus Fleet and Routes State (All 10 Commuter Buses)
-  const [buses, setBuses] = useState<BusVehicle[]>(INITIAL_BUSES);
-  const [routes, setRoutes] = useState<Record<string, RouteInfo>>(INITIAL_ROUTES);
-  const [routeSeats, setRouteSeats] = useState<Record<string, Seat[]>>(() => {
-    const initial: Record<string, Seat[]> = {
-      'route-1': INITIAL_SEATS,
-    };
-    Object.keys(INITIAL_ROUTES).forEach(k => {
-      if (k !== 'route-1') {
-        initial[k] = generateSeatsForRoute(k, INITIAL_ROUTES[k]?.capacity || 52);
-      }
-    });
-    return initial;
-  });
+  // Bus fleet, routes, seat maps and waitlist are owned by busStore (shared + persisted)
+  const {
+    buses, routes, routeSeats, waitlist,
+    setBuses, setRoutes, setRouteSeats, setSeatsForRoute, setWaitlist,
+  } = useBusStore();
 
   // Supervisor deck sub-tab: 'fleet' (10-bus grid) vs 'seats' (52-seater layout)
   const [supervisorSubTab, setSupervisorSubTab] = useState<'fleet' | 'seats'>('fleet');
 
   // Routes & Seats State
   const [selectedRouteKey, setSelectedRouteKey] = useState<string>('route-1');
-  const [seats, setSeatsState] = useState<Seat[]>(INITIAL_SEATS);
+  const seats: Seat[] = routeSeats[selectedRouteKey] ?? [];
 
-  // Synchronized setter for seats that maintains routeSeats map
+  // Seat setter scoped to the active route (writes through to the store)
   const setSeats = (action: React.SetStateAction<Seat[]>) => {
-    setSeatsState(prev => {
-      const nextVal = typeof action === 'function' ? action(prev) : action;
-      setRouteSeats(rPrev => ({
-        ...rPrev,
-        [selectedRouteKey]: nextVal,
-      }));
-      return nextVal;
-    });
+    setSeatsForRoute(selectedRouteKey, action);
   };
 
-  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>(INITIAL_WAITLIST);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(INITIAL_SEATS[4]); // Seat #5 Tanvir Ahmed
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(() => seats.find(s => s.num === 5) ?? seats[0] ?? null);
 
   // Filters & Tabs
   const [seatFilter, setSeatFilter] = useState<'all' | 'occupied' | 'vacated' | 'empty' | 'mine'>('all');
@@ -661,8 +552,11 @@ export default function BusView({ role, lang }: ViewProps) {
   // Switch active route and load that route's seat map
   const handleSelectRoute = (routeKey: string) => {
     setSelectedRouteKey(routeKey);
-    const targetSeats = routeSeats[routeKey] || generateSeatsForRoute(routeKey, routes[routeKey]?.capacity || 52);
-    setSeatsState(targetSeats);
+    let targetSeats = routeSeats[routeKey];
+    if (!targetSeats) {
+      targetSeats = generateSeatsForRoute(routeKey, routes[routeKey]?.capacity || 52);
+      setSeatsForRoute(routeKey, targetSeats);
+    }
     setSelectedSeat(targetSeats[0] || null);
   };
 

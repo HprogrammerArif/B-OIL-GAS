@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronRight, Plus, Eye, Pin, CheckCircle2, Megaphone, Search, X } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import { DetailDrawerData } from '../../components/DetailDrawer';
 import { DashboardSubViewProps, NoticeItem } from './types';

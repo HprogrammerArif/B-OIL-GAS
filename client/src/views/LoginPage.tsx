@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Lang, ROLE_META, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import { sessionStore } from '../auth/session';
 import {
   Lock, Mail, ArrowRight, ShieldCheck,
@@ -19,7 +19,7 @@ const ERROR_TEXT: Record<Exclude<FormError, null>, { en: string; bn: string }> =
     en: 'Enter your work email or employee ID and password.',
     bn: 'আপনার অফিস ইমেইল বা কর্মী আইডি এবং পাসওয়ার্ড লিখুন।',
   },
-  invalid_credentials: {
+invalid_credentials  : {
     en: 'The email/ID or password you entered is incorrect.',
     bn: 'ইমেইল/আইডি অথবা পাসওয়ার্ড সঠিক নয়।',
   },

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
   ClipboardCheck, Check, X, CheckSquare, Square, Search,
   Clock, DollarSign, ShieldCheck, RefreshCw, FileText

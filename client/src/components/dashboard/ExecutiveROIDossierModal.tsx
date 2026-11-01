@@ -18,7 +18,7 @@ import {
   Building,
 } from 'lucide-react';
 import { Lang, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 interface ExecutiveROIDossierModalProps {
   isOpen: boolean;

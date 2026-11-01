@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../types';
 import { Activity, BarChart3, Database, RefreshCw, Zap, TrendingUp, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 
 interface RefineryOutputChartProps {
   lang: Lang;

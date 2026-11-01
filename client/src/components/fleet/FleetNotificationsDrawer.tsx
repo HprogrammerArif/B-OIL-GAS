@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFleetStore, FleetNotification } from '../../store/fleetStore';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import {
   Bell, X, CheckCheck, Car, MessageSquare, Wrench,
   AlertTriangle, Clock, ArrowRight, Shield, CheckCircle2, UserCheck

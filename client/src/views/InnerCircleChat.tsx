@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
 import {
   Send, Paperclip, Mic, Flag, Pin, Search, Phone, Video,
   CheckCheck, Check, Clock, Shield, ChevronRight, ChevronLeft, MessageSquare,
@@ -9,193 +9,17 @@ import {
   Sliders, ThumbsUp, AlertCircle, Sparkles, Download, PhoneOff,
   MicOff, VideoOff, Maximize2, ShieldCheck, Zap, Crown, CheckCircle
 } from 'lucide-react';
-
-interface ChatMember {
-  id: string;
-  name: string;
-  role: string;
-  initials: string;
-  color: string;
-  status: 'online' | 'away' | 'in-meeting' | 'offline';
-  statusLabel: string;
-  location: string;
-  phone: string;
-  lastSeen?: string;
-  unread?: number;
-}
-
-interface ChatChannel {
-  id: string;
-  name: string;
-  description: string;
-  membersCount: number;
-  unread?: number;
-  isLocked?: boolean;
-}
-
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderRole?: string;
-  senderInitials: string;
-  senderColor: string;
-  content: string;
-  timestamp: string;
-  type: 'text' | 'voice' | 'document' | 'directive';
-  isUrgent?: boolean;
-  isPinned?: boolean;
-  isChairman?: boolean;
-  readBy: string[];
-  directiveId?: string;
-  directiveAcknowledged?: boolean;
-  fileName?: string;
-  fileSize?: string;
-  voiceDuration?: string;
-  reactions?: Record<string, number>;
-  repliesCount?: number;
-}
-
-const CHANNELS: ChatChannel[] = [
-  { id: 'ch_executive', name: 'executive-leadership', description: 'Chairman, Directors & Key Decisions', membersCount: 7, unread: 3 },
-  { id: 'ch_refinery', name: 'factory-operations', description: 'Keraniganj Plant Production & Machine Status', membersCount: 5 },
-  { id: 'ch_capex', name: 'finance-and-purchases', description: 'Budget Approvals, Banking & Large Purchases', membersCount: 4 },
-  { id: 'ch_statutory', name: 'permits-and-compliance', description: 'Govt Licenses, Factory Inspections & Legal Checks', membersCount: 4, isLocked: true },
-];
-
-const INNER_CIRCLE_MEMBERS: ChatMember[] = [
-  { id: 'hr', name: 'Engr. M. Harunur Rashid', role: 'Plant GM, Keraniganj', initials: 'HR', color: 'var(--status-info)', status: 'online', statusLabel: 'Control Room Unit-1', location: 'Keraniganj Plant', phone: '+880 1711-002101', unread: 2 },
-  { id: 'fb', name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: 'var(--status-purple)', status: 'in-meeting', statusLabel: 'Boardroom A (Q4 Review)', location: 'Dhaka HQ, Level 9', phone: '+880 1711-002102' },
-  { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: 'var(--status-success)', status: 'away', statusLabel: 'At BSTI Tejgaon Directorate', location: 'Tejgaon, Dhaka', phone: '+880 1711-002103', unread: 1 },
-  { id: 'si', name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: 'var(--status-warning)', status: 'online', statusLabel: 'Available at HQ', location: 'Level-8 Commercial', phone: '+880 1711-002104' },
-  { id: 'ta', name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: 'var(--brand-crimson)', status: 'offline', statusLabel: 'On Approved Medical Leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105', lastSeen: '10:15 AM' },
-  { id: 'nj', name: 'Sayeda Afroza Sultana', role: 'GM, Human Resources', initials: 'SAS', color: 'var(--status-pink)', status: 'online', statusLabel: 'Available at HR Suite', location: 'Level-6 HR Wing', phone: '+880 1711-002106' },
-];
-
-const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
-  ch_executive: [
-    {
-      id: 'm1',
-      senderId: 'hr',
-      senderName: 'Engr. M. Harunur Rashid',
-      senderRole: 'Plant GM, Keraniganj',
-      senderInitials: 'HR',
-      senderColor: 'var(--status-info-solid)',
-      content: "Honourable Chairman Sir, Keraniganj Factory reached 5,000 Metric Tons today, running 12% above target. Today's production report is attached below for your review.",
-      timestamp: '09:14 AM',
-      type: 'text',
-      readBy: ['fb', 'km', 'si', 'nj', 'chairman'],
-      reactions: { '👍': 4, '👏': 2 },
-      repliesCount: 3,
-    },
-    {
-      id: 'm2',
-      senderId: 'hr',
-      senderName: 'Engr. M. Harunur Rashid',
-      senderRole: 'Plant GM, Keraniganj',
-      senderInitials: 'HR',
-      senderColor: 'var(--status-info-solid)',
-      content: 'Refinery_Output_Keraniganj_Oct2026.pdf',
-      timestamp: '09:15 AM',
-      type: 'document',
-      fileName: 'Refinery_Output_Keraniganj_Oct2026.pdf',
-      fileSize: '3.4 MB',
-      readBy: ['fb', 'km', 'si', 'nj', 'chairman'],
-      reactions: { '📥': 3 },
-    },
-    {
-      id: 'm3',
-      senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan (You)',
-      senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
-      senderColor: 'var(--brand-crimson)',
-      content: 'COMMENCE PREVENTIVE MAINTENANCE ON COLUMN C-102 IMMEDIATELY. SAFETY VALVES PROCUREMENT (৳48.5L) AUTHORIZED UNDER FAST-TRACK. CFO EXPEDITE L/C DISBURSEMENT WITHIN 48 HOURS.',
-      timestamp: '09:22 AM',
-      type: 'directive',
-      directiveId: 'BOGCL-DIR-2026-0922',
-      directiveAcknowledged: true,
-      isChairman: true,
-      isUrgent: true,
-      isPinned: true,
-      readBy: ['hr', 'fb', 'km', 'si', 'nj'],
-      reactions: { '🫡': 5, '⚡': 3 },
-    },
-    {
-      id: 'm4',
-      senderId: 'fb',
-      senderName: 'Farida Begum',
-      senderRole: 'CFO & Finance Director',
-      senderInitials: 'FB',
-      senderColor: 'var(--status-purple-solid)',
-      content: 'Understood Chairman Sir. L/C instructions have been formally transmitted to Bashundhara Corporate Bank branch under GL 4102-KER. Bank assurance confirmed for 2:00 PM today.',
-      timestamp: '09:28 AM',
-      type: 'text',
-      readBy: ['hr', 'km', 'si', 'nj', 'chairman'],
-      reactions: { '✅': 4 },
-    },
-    {
-      id: 'm5',
-      senderId: 'nj',
-      senderName: 'Nusrat Jahan',
-      senderRole: 'GM, Human Resources',
-      senderInitials: 'NJ',
-      senderColor: 'var(--status-info-solid)',
-      content: 'Staff Shift Welfare & Night Duty Roster Update',
-      timestamp: '11:15 AM',
-      type: 'voice',
-      voiceDuration: '0:42',
-      readBy: ['hr', 'fb', 'km', 'si', 'chairman'],
-      reactions: { '👂': 3 },
-    },
-  ],
-  ch_refinery: [
-    {
-      id: 'rf1',
-      senderId: 'hr',
-      senderName: 'Engr. M. Harunur Rashid',
-      senderRole: 'Plant GM',
-      senderInitials: 'HR',
-      senderColor: 'var(--status-info-solid)',
-      content: 'SCADA alarm C-102 reboiler skin temperature peaked at 382°C at 04:00 AM. Nitrogen purge was activated. Temperature stabilized to 365°C.',
-      timestamp: '07:45 AM',
-      type: 'text',
-      isUrgent: true,
-      readBy: ['chairman'],
-    },
-  ],
-  hr: [
-    {
-      id: 'dm_hr1',
-      senderId: 'hr',
-      senderName: 'Engr. M. Harunur Rashid',
-      senderRole: 'Plant GM',
-      senderInitials: 'HR',
-      senderColor: 'var(--status-info-solid)',
-      content: 'Sir, strictly confidential: DoE regulatory inspector Dr. Shahabuddin is conducting surprise site walk today. We are demonstrating compliance on the water effluent treatment plant (ETP).',
-      timestamp: '08:30 AM',
-      type: 'text',
-      readBy: ['chairman'],
-    },
-    {
-      id: 'dm_hr2',
-      senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan (You)',
-      senderRole: 'Chairman & MD',
-      senderInitials: 'AAS',
-      senderColor: 'var(--brand-crimson)',
-      content: 'Received Harun. Ensure full cooperation, provide all laboratory sample logs, and accord him highest official hospitality. Keep me updated hourly.',
-      timestamp: '08:42 AM',
-      type: 'text',
-      isChairman: true,
-      readBy: ['hr'],
-    },
-  ],
-};
+import { operationsStore, useOperationsStore, type ChatMessage, type ChatMember } from '../store/operationsStore';
 
 export default function InnerCircleChat({ role, lang }: ViewProps) {
+  // Channels, members and message history are owned by operationsStore (shared + persisted)
+  const {
+    chatChannels: CHANNELS,
+    chatMembers: INNER_CIRCLE_MEMBERS,
+    chatMessages: allMessages,
+    setChatMessages: setAllMessages,
+  } = useOperationsStore();
   const [activeTarget, setActiveTarget] = useState<{ type: 'channel' | 'dm'; id: string }>({ type: 'channel', id: 'ch_executive' });
-  const [allMessages, setAllMessages] = useState<Record<string, ChatMessage[]>>(INITIAL_MESSAGES);
   const [messageInput, setMessageInput] = useState('');
   const [isDirectiveMode, setIsDirectiveMode] = useState(false);
   const [isUrgentFlag, setIsUrgentFlag] = useState(false);
@@ -225,6 +49,11 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   useEffect(() => {
     scrollToBottom();
   }, [allMessages, activeTarget]);
+
+  // Opening a conversation clears its unread counter
+  useEffect(() => {
+    operationsStore.markConversationRead(activeTarget.type, activeTarget.id);
+  }, [activeTarget]);
 
   // Voice recording timer simulation
   useEffect(() => {

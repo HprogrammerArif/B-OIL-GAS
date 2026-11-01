@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import {
   FileSignature,
   FileText,
