@@ -1,50 +1,25 @@
-import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
-import { router, Stack } from "expo-router";
-import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import { Stack } from "expo-router";
+import { View, StyleSheet } from "react-native";
+import { LockScreen } from "@/features/lock/LockScreen";
+import { useSessionBootstrap } from "@/features/auth/useSessionBootstrap";
+import { useAutoLock } from "@/hooks/useAutoLock";
 import { useTheme } from "@/hooks/use-theme";
+import { useAppSelector } from "@/redux/hooks";
 
-/**
- * Protected App Layout — wraps authenticated screens.
- * Redirects to login if no token.
- * (tabs)/ sub-group handles the tab navigator; other screens (e.g. edit-profile)
- * are pushed on top of it via this Stack.
- */
+/** Signed-in shell: session bootstrap, auto-lock and the biometric gate. */
 export default function AppLayout() {
-  // const token = useAppSelector(selectCurrentToken);
-  const token = true;
-
   const theme = useTheme();
-
-  useEffect(() => {
-    if (!token) {
-      router.replace("/(auth)/login");
-    }
-  }, [token]);
-
-  if (!token) {
-    // Brief window between logout and the redirect above committing — show a themed
-    // spinner instead of a blank flash.
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: theme.background,
-        }}
-      >
-        <ActivityIndicator size="large" color={theme.accent} />
-      </View>
-    );
-  }
-
+  const isLocked = useAppSelector((s) => s.auth.locked);
+  useSessionBootstrap();
+  useAutoLock();
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="edit-profile" options={{ presentation: "modal" }} />
-      <Stack.Screen name="new-item" options={{ presentation: "modal" }} />
-    </Stack>
+    <View style={styles.flex}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.background } }}>
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      {isLocked ? <LockScreen /> : null}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({ flex: { flex: 1 } });

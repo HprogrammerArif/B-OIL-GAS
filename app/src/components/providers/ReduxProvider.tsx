@@ -1,30 +1,13 @@
-import React, { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { store, persistor } from "@/redux/store";
-import { ActivityIndicator, View } from "react-native";
+import { persistor, store } from "@/redux/store";
 
-interface ReduxProviderProps {
-  children: ReactNode;
-}
-
-/**
- * ReduxProvider — wraps the app with the Redux store and PersistGate.
- *
- * PersistGate delays rendering until the persisted state is rehydrated
- * from SecureStore, preventing flash-of-unauthenticated-content.
- */
-export function ReduxProvider({ children }: ReduxProviderProps) {
+/** Renders nothing until rehydrated; the native splash stays up meanwhile (see app/_layout). */
+export function ReduxProvider({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
-      <PersistGate
-        loading={
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <ActivityIndicator size="large" color="#2B7FFF" />
-          </View>
-        }
-        persistor={persistor}
-      >
+      <PersistGate loading={null} persistor={persistor}>
         {children}
       </PersistGate>
     </Provider>

@@ -1,33 +1,18 @@
-import { Control, Controller, FieldPath, FieldValues } from "react-hook-form";
-import { TextInputProps } from "react-native";
-import { TextField } from "./TextField";
+import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { TextField, type TextFieldProps } from "./TextField";
 
-interface FormFieldProps<TFormValues extends FieldValues> extends Omit<
-  TextInputProps,
-  "value" | "onChangeText" | "style"
-> {
-  control: Control<TFormValues>;
-  name: FieldPath<TFormValues>;
-  label: string;
-  helperText?: string;
+interface FormFieldProps<T extends FieldValues> extends Omit<TextFieldProps, "value" | "onChangeText" | "error"> {
+  control: Control<T>;
+  name: FieldPath<T>;
 }
 
 /**
- * FormField — react-hook-form Controller wired to the shared TextField.
- * This is the pattern every form in the app should use: define a zod schema,
- * resolve it with `zodResolver`, then render one FormField per field.
- *
- * Example:
- *   const { control, handleSubmit } = useForm({ resolver: zodResolver(schema) });
- *   <FormField control={control} name="email" label="Email" keyboardType="email-address" />
+ * react-hook-form Controller bound to TextField. Zod messages are i18n keys
+ * (`errors:required`), translated here so schemas stay language-neutral.
  */
-export function FormField<TFormValues extends FieldValues>({
-  control,
-  name,
-  label,
-  helperText,
-  ...inputProps
-}: FormFieldProps<TFormValues>) {
+export function FormField<T extends FieldValues>({ control, name, ...inputProps }: FormFieldProps<T>) {
+  const { t } = useTranslation(["common", "errors", "auth"]);
   return (
     <Controller
       control={control}
@@ -35,12 +20,10 @@ export function FormField<TFormValues extends FieldValues>({
       render={({ field: { onChange, onBlur, value, ref }, fieldState: { error } }) => (
         <TextField
           ref={ref}
-          label={label}
-          value={typeof value === "string" ? value : (value ?? "")}
+          value={typeof value === "string" ? value : value == null ? "" : String(value)}
           onChangeText={onChange}
           onBlur={onBlur}
-          error={error?.message}
-          helperText={helperText}
+          error={error?.message ? t(error.message as "errors:required", { defaultValue: error.message }) : undefined}
           {...inputProps}
         />
       )}

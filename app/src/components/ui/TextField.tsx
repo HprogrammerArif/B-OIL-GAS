@@ -1,122 +1,105 @@
 import { forwardRef, useState } from "react";
-import { StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from "react-native";
+import { useTranslation } from "react-i18next";
+import { FontFamily, MinTouchTarget, Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Radius, Spacing, Typography } from "@/constants/theme";
+import { useLanguage } from "@/hooks/useLanguage";
+import { Icon, type IconName } from "./Icon";
+import { Text } from "./Text";
 
-interface TextFieldProps extends Omit<TextInputProps, "style"> {
+export interface TextFieldProps extends Omit<TextInputProps, "style"> {
   label: string;
   error?: string;
   helperText?: string;
+  icon?: IconName;
+  /** Rendered after the label, e.g. "(optional)". */
+  labelSuffix?: string;
 }
 
-/**
- * TextField — the single canonical text input. Replaces CustomInput.
- * Pass `secureTextEntry` to get a built-in show/hide toggle for free.
- */
 export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
-  {
-    label,
-    error,
-    helperText,
-    secureTextEntry,
-    editable = true,
-    onFocus,
-    onBlur,
-    multiline,
-    ...rest
-  },
+  { label, error, helperText, icon, labelSuffix, secureTextEntry, editable = true, onFocus, onBlur, multiline, ...rest },
   ref,
 ) {
   const theme = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  const borderColor = error ? theme.danger : isFocused ? theme.accent : theme.border;
+  const lang = useLanguage();
+  const { t } = useTranslation("auth");
+  const [focused, setFocused] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const borderColor = error ? theme.danger : focused ? theme.accent : theme.border;
 
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
-      <View style={styles.inputRow}>
+      <Text variant="caption" color="textSecondary" style={styles.label}>
+        {labelSuffix ? `${label} ${labelSuffix}` : label}
+      </Text>
+      <View
+        style={[
+          styles.inputRow,
+          multiline && styles.multilineRow,
+          { borderColor, backgroundColor: editable ? theme.surface : theme.surfaceSecondary },
+        ]}
+      >
+        {icon ? <Icon name={icon} size={18} color={focused ? "accent" : "textTertiary"} /> : null}
         <TextInput
           ref={ref}
           style={[
             styles.input,
-            multiline && styles.inputMultiline,
-            {
-              borderColor,
-              backgroundColor: editable ? theme.surface : theme.surfaceSecondary,
-              color: editable ? theme.text : theme.textTertiary,
-              paddingRight: secureTextEntry ? 46 : Spacing.lg,
-            },
+            multiline && styles.multiline,
+            { color: editable ? theme.text : theme.textTertiary, fontFamily: FontFamily[lang].regular },
           ]}
           placeholderTextColor={theme.textTertiary}
-          secureTextEntry={secureTextEntry && !isPasswordVisible}
+          secureTextEntry={secureTextEntry && !visible}
           editable={editable}
           multiline={multiline}
           textAlignVertical={multiline ? "top" : "center"}
+          accessibilityLabel={label}
+          accessibilityHint={error ?? helperText}
           onFocus={(e) => {
-            setIsFocused(true);
+            setFocused(true);
             onFocus?.(e);
           }}
           onBlur={(e) => {
-            setIsFocused(false);
+            setFocused(false);
             onBlur?.(e);
           }}
           {...rest}
         />
-        {secureTextEntry && (
-          <TouchableOpacity
-            style={styles.eyeBtn}
-            onPress={() => setIsPasswordVisible((v) => !v)}
-            activeOpacity={0.7}
+        {secureTextEntry ? (
+          <Pressable
+            onPress={() => setVisible((v) => !v)}
+            hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel={isPasswordVisible ? "Hide password" : "Show password"}
+            accessibilityLabel={visible ? t("hidePassword") : t("showPassword")}
+            style={styles.eye}
           >
-            <Ionicons
-              name={isPasswordVisible ? "eye-off" : "eye"}
-              size={20}
-              color={theme.textTertiary}
-            />
-          </TouchableOpacity>
-        )}
+            <Icon name={visible ? "eye-off-outline" : "eye-outline"} size={20} color="textTertiary" />
+          </Pressable>
+        ) : null}
       </View>
-      {(error || helperText) && (
-        <Text style={[styles.helper, { color: error ? theme.danger : theme.textTertiary }]}>
+      {error || helperText ? (
+        <Text variant="caption" color={error ? "danger" : "textTertiary"} style={styles.helper} accessibilityLiveRegion="polite">
           {error || helperText}
         </Text>
-      )}
+      ) : null}
     </View>
   );
 });
 
 const styles = StyleSheet.create({
   wrapper: { width: "100%" },
-  label: {
-    ...Typography.caption,
-    marginBottom: Spacing.sm - 2,
-  },
-  inputRow: { position: "relative" },
-  input: {
-    height: 52,
+  label: { marginBottom: Spacing.xs + 2 },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    minHeight: MinTouchTarget + 6,
     borderWidth: 1.5,
     borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg,
-    fontSize: 15,
+    paddingHorizontal: Spacing.md,
   },
-  inputMultiline: {
-    height: undefined,
-    minHeight: 96,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.md,
-  },
-  eyeBtn: {
-    position: "absolute",
-    right: Spacing.lg,
-    top: 16,
-  },
-  helper: {
-    fontSize: 12,
-    marginTop: Spacing.xs,
-  },
+  multilineRow: { alignItems: "flex-start", paddingVertical: Spacing.sm },
+  input: { flex: 1, fontSize: 15, paddingVertical: Spacing.sm },
+  multiline: { minHeight: 96 },
+  eye: { padding: Spacing.xs },
+  helper: { marginTop: Spacing.xs },
 });

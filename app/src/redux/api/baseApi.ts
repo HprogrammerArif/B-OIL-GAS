@@ -1,188 +1,99 @@
-// src/api/baseApi.ts
-import {
-  createApi,
-  fetchBaseQuery,
-  retry,
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
-} from "@reduxjs/toolkit/query/react";
-import { logout, updateToken } from "../features/auth/authSlice";
-import Toast from "react-native-toast-message"; // or your toast library
-import { RootState } from "../store";
-import { logger } from "@/lib/logger";
+import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
+import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { REHYDRATE } from "redux-persist";
+import type { UnknownAction } from "@reduxjs/toolkit";
+import { apiBaseUrl, isMockApi } from "@/lib/env";
+import { secure } from "@/lib/storage/secure";
+import { SecureKeys } from "@/lib/storage/keys";
+import { sessionExpired, tokenRefreshed } from "@/redux/slices/auth.slice";
+import { TAG_TYPES } from "./tags";
+import { commonHeaders, mockBaseQuery, PUBLIC_ENDPOINTS, requestRefresh } from "./transport";
 
-// EXPO_PUBLIC_API_URL must always be set — in dev via .env.local, in production via your build config.
-const API_URL = (() => {
-  const url = process.env.EXPO_PUBLIC_API_URL;
-  if (!url) {
-    throw new Error(
-      "[baseApi] EXPO_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set it to your backend URL.",
-    );
-  }
-  return url.replace(/"/g, "").replace(/\/$/, "");
-})();
-export const baseUrl = API_URL;
-const baseQuery = fetchBaseQuery({
-  baseUrl: API_URL,
-  timeout: 15000, // 15 seconds timeout
-  credentials: "include",
-  prepareHeaders: (headers, { getState, endpoint }) => {
-    // Skip token for public endpoints
-    const skipAuth = [
-      "login",
-      "register",
-      "refreshToken",
-      "verify-email",
-      "confirm",
-      "legal-privacy/",
-      "submitSupportForm",
-    ].includes(endpoint);
-    if (skipAuth) return headers;
+type HeaderState = Parameters<typeof commonHeaders>[0];
 
-    const token = (getState() as RootState).auth.token;
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
+const liveBaseQuery = fetchBaseQuery({
+  baseUrl: apiBaseUrl,
+  timeout: 15_000,
+  prepareHeaders: async (headers, { getState, endpoint }) => {
+    const common = await commonHeaders(getState() as HeaderState, endpoint);
+    Object.entries(common).forEach(([k, v]) => {
+      if (!headers.has(k)) headers.set(k, v);
+    });
     return headers;
   },
 });
 
-const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+const rawBaseQuery = isMockApi ? mockBaseQuery : liveBaseQuery;
+
+let refreshInFlight: Promise<"ok" | "rejected" | "network"> | null = null;
+
+/** Single-flight refresh: concurrent 401s share one rotation; the new refresh token is stored before retries. */
+function refreshSession(api: BaseQueryApi): Promise<"ok" | "rejected" | "network"> {
+  refreshInFlight ??= (async () => {
+    const refreshToken = await secure.get(SecureKeys.refreshToken);
+    if (!refreshToken) return "rejected" as const;
+    const result = await requestRefresh(refreshToken);
+    if (!result.ok) return result.reason;
+    await secure.set(SecureKeys.refreshToken, result.tokens.refreshToken);
+    api.dispatch(tokenRefreshed({ accessToken: result.tokens.accessToken, expiresIn: result.tokens.expiresIn }));
+    return "ok" as const;
+  })()
+    .catch(() => "network" as const)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+}
+
+export const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
   extraOptions,
 ) => {
-  const requestUrl = typeof args === "string" ? args : args.url;
-  logger.log(`[RTK Query] 📡 Requesting: ${API_URL}/${requestUrl}`);
-
-  let result = await baseQuery(args, api, extraOptions);
-
-  // Check if this is an approve/reject endpoint
-  const isApproveRejectEndpoint = requestUrl?.includes("/expenses/approve/");
-  const is403Error = result.error?.status === 403;
-
-  if (result.error) {
-    if (!(isApproveRejectEndpoint && is403Error)) {
-      logger.log(`[RTK Query] ❌ Error for ${requestUrl}:`, result.error);
-    }
-  } else {
-    logger.log(`[RTK Query] ✅ Success for ${requestUrl}:`, result.data);
-  }
-
-  // Handle known errors
-  if (result.error?.status === 401) {
-    logger.log("Token expired — attempting refresh");
-
-    const refreshToken = (api.getState() as RootState).auth.refreshToken;
-
-    if (!refreshToken) {
-      logger.log("No refresh token available - logging out");
-      api.dispatch(logout());
-      return result;
-    }
-
-    try {
-      const refreshResult = await fetch(`${API_URL}/api/token/refresh/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refresh: refreshToken }),
-      });
-
-      const data = await refreshResult.json();
-
-      if (refreshResult.ok || data?.access) {
-        const user = (api.getState() as RootState).auth.user;
-
-        if (!user) {
-          api.dispatch(logout());
-          return result;
-        }
-
-        // Update token in store
-        api.dispatch(
-          updateToken({
-            token: data.access,
-          }),
-        );
-
-        // Retry original request
-        result = await baseQuery(args, api, extraOptions);
-      } else {
-        throw new Error("Refresh failed");
-      }
-    } catch (error) {
-      logger.log("Refresh failed — logging out", error);
-      api.dispatch(logout());
-      Toast.show({
-        type: "error",
-        text1: "Session expired. Please log in again.",
-      });
+  let result = await rawBaseQuery(args, api, extraOptions);
+  if (result.error?.status === 401 && !PUBLIC_ENDPOINTS.has(api.endpoint)) {
+    const outcome = await refreshSession(api);
+    if (outcome === "ok") {
+      result = await rawBaseQuery(args, api, extraOptions);
+    } else if (outcome === "rejected") {
+      await secure.remove(SecureKeys.refreshToken);
+      api.dispatch(sessionExpired());
     }
   }
-
-  // Optional: global error handling
-  if (result.error) {
-    const errorData = result.error.data as { message?: string } | undefined;
-    const message = errorData?.message || "Something went wrong";
-
-    // Don't show toast for expected 403 errors on approve/reject (handled in UI)
-    if (result.error.status === 403 && !isApproveRejectEndpoint) {
-      Toast.show({ type: "error", text1: message });
-    } else if (result.error.status === 404) {
-      logger.log("404 error", message);
-    } else if (typeof result.error.status === "number" && result.error.status >= 500) {
-      Toast.show({
-        type: "error",
-        text1: "Server error. Please try again later.",
-      });
-    }
-  }
-
   return result;
 };
 
-/**
- * Wraps baseQueryWithReauth with automatic retry logic.
- * Only retries on FETCH_ERROR (network failure) — never on 4xx / 5xx.
- * Max 2 retries (3 total attempts) with RTK Query's built-in exponential back-off.
- */
+/** Retry only idempotent reads on transport failures; mutations rely on the offline queue instead. */
 const baseQueryWithRetry = retry(
   async (args: string | FetchArgs, api, extraOptions) => {
     const result = await baseQueryWithReauth(args, api, extraOptions);
-    // Bail immediately on definitive server/auth errors — no point retrying
-    if (result.error && result.error.status !== "FETCH_ERROR") {
-      retry.fail(result.error);
-    }
+    const transient = result.error?.status === "FETCH_ERROR" || result.error?.status === "TIMEOUT_ERROR";
+    if (result.error && !(api.type === "query" && transient)) retry.fail(result.error);
     return result;
   },
   { maxRetries: 2 },
 );
 
+interface RehydrateAction extends UnknownAction {
+  key: string;
+  payload?: Record<string, unknown>;
+}
+
+const isRehydrate = (action: UnknownAction): action is RehydrateAction => action.type === REHYDRATE;
+
 export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithRetry,
-  refetchOnReconnect: true, // Re-fetch when network comes back
-  refetchOnFocus: true, // Re-fetch when app returns to foreground (AppState → onFocus)
-  tagTypes: [
-    "Child",
-    "Message",
-    "Expense",
-    "Schedule",
-    "documents",
-    "Profile",
-    "Onboarding",
-    "Children",
-    "PendingInvitations",
-    "Milestones",
-    "NotificationPreferences",
-    "NotificationHistory",
-    "HomeScreenSentimentGraph",
-    "LegalAndPrivacyPolicy",
-    "SubscriptionPlans",
-    "MySubscription",
-  ] as const,
-  endpoints: (builder) => ({}),
+  refetchOnReconnect: true,
+  refetchOnFocus: true,
+  keepUnusedDataFor: 120,
+  extractRehydrationInfo(action, { reducerPath }) {
+    if (isRehydrate(action) && action.key === reducerPath && action.payload) {
+      // Persisted payload is the api slice itself (see redux/persist/config.ts).
+      return action.payload as never;
+    }
+    return undefined;
+  },
+  tagTypes: TAG_TYPES,
+  endpoints: () => ({}),
 });

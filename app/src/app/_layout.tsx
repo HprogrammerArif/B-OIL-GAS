@@ -1,82 +1,110 @@
+import { deviceLanguage, setLanguage } from "@/lib/i18n";
 import { useEffect, useRef } from "react";
-import { DarkTheme, DefaultTheme, ThemeProvider, Slot } from "expo-router";
+import { StyleSheet } from "react-native";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import type { NotificationResponse } from "expo-notifications";
-import "@/global.css";
-
-// Must run before any other module (Redux store included) so Reactotron can
-// hook into everything from the start — this ordering is intentional, hence
-// the imports below the require() call instead of at the very top of the file.
-/* eslint-disable import/first, @typescript-eslint/no-require-imports */
-if (__DEV__) {
-  require("../lib/ReactotronConfig");
-}
-
-import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from "@expo-google-fonts/inter";
+import {
+  NotoSansBengali_400Regular,
+  NotoSansBengali_500Medium,
+  NotoSansBengali_600SemiBold,
+  NotoSansBengali_700Bold,
+} from "@expo-google-fonts/noto-sans-bengali";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import OfflineBanner from "@/components/OfflineBanner";
-import { initSentry } from "@/lib/sentry";
-import { configureRevenueCat, loginRevenueCat, logoutRevenueCat } from "@/lib/revenuecat";
-import { useNotifications } from "@/hooks/useNotifications";
-import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/auth/authSlice";
-import { logger } from "@/lib/logger";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import { PresenterProvider } from "@/features/presenter/PresenterProvider";
+import { signOut } from "@/features/auth/session";
+import { useColorSchemeName, useTheme } from "@/hooks/use-theme";
+import { identifySentryUser, initSentry } from "@/lib/sentry";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { locked } from "@/redux/slices/auth.slice";
 
-// Initialize Sentry once at module load (no-op if DSN not set)
+void SplashScreen.preventAutoHideAsync();
 initSentry();
 
-// ─── Inner layout — has Redux store access ───────────────────────────────────
-function InnerLayout() {
-  const colorScheme = useColorScheme();
-  const user = useAppSelector(selectCurrentUser);
-  const hasConfiguredRevenueCat = useRef(false);
-
-  // RevenueCat.configure() must run exactly once at startup — re-calling it on every
-  // login/logout resets SDK state. Subsequent identity changes use logIn/logOut instead.
-  useEffect(() => {
-    const userId = user?.id ? String(user.id) : null;
-
-    if (!hasConfiguredRevenueCat.current) {
-      configureRevenueCat(userId);
-      hasConfiguredRevenueCat.current = true;
-      return;
-    }
-
-    if (userId) {
-      loginRevenueCat(userId);
-    } else {
-      logoutRevenueCat();
-    }
-  }, [user?.id]);
-
-  // Register for push notifications
-  useNotifications({
-    onTokenReady: (pushToken: string) => {
-      // TODO: dispatch(updateDeviceToken({ device_token: pushToken }));
-      logger.log("[Layout] Push token:", pushToken);
-    },
-    onNotificationResponse: (_response: NotificationResponse) => {
-      // TODO: navigate to relevant screen based on response.notification.request.content.data
-    },
+export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+    NotoSansBengali_400Regular,
+    NotoSansBengali_500Medium,
+    NotoSansBengali_600SemiBold,
+    NotoSansBengali_700Bold,
   });
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Slot />
-      <OfflineBanner />
-      <Toast />
-    </ThemeProvider>
+    <GestureHandlerRootView style={styles.flex}>
+      <SafeAreaProvider>
+        <ReduxProvider>
+          <ErrorBoundary>
+            <AppShell ready={fontsLoaded || !!fontError} />
+          </ErrorBoundary>
+        </ReduxProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
-// ─── Root Layout — all providers ────────────────────────────────────────────
-export default function RootLayout() {
+/** Runs once Redux has rehydrated (inside PersistGate). */
+function AppShell({ ready }: { ready: boolean }) {
+  const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const scheme = useColorSchemeName();
+  const language = useAppSelector((s) => s.ui.language);
+  const auth = useAppSelector((s) => s.auth);
+  const booted = useRef(false);
+  const signedIn = auth.status === "signedIn";
+
+  useEffect(() => {
+    setLanguage(language ?? deviceLanguage());
+  }, [language]);
+
+  useEffect(() => {
+    if (booted.current) return;
+    booted.current = true;
+    if (auth.status !== "signedIn") return;
+    if (!auth.keepSignedIn) void signOut(dispatch);
+    else if (auth.biometricEnabled) dispatch(locked());
+  }, [auth.status, auth.keepSignedIn, auth.biometricEnabled, dispatch]);
+
+  useEffect(() => {
+    identifySentryUser(auth.user?.id ?? null);
+  }, [auth.user?.id]);
+
+  useEffect(() => {
+    if (ready) void SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
+
   return (
-    <ErrorBoundary>
-      <ReduxProvider>
-        <InnerLayout />
-      </ReduxProvider>
-    </ErrorBoundary>
+    <PresenterProvider>
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.background }, animation: "slide_from_right" }}>
+        <Stack.Protected guard={signedIn}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="(auth)" options={{ animation: "fade" }} />
+        </Stack.Protected>
+      </Stack>
+      <Toast topOffset={56} />
+    </PresenterProvider>
   );
 }
+
+const styles = StyleSheet.create({ flex: { flex: 1 } });

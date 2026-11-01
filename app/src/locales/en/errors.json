@@ -1,0 +1,15 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "network": "No connection. Check your network and try again.",
+  "timeout": "The server took too long to respond.",
+  "forbidden": "You don't have access to this.",
+  "notFound": "This item no longer exists.",
+  "conflict": "Someone else already acted on this. Refreshed with the latest.",
+  "rateLimited": "Too many requests. Please wait a moment.",
+  "validation": "Please check the highlighted fields.",
+  "crashTitle": "Something broke",
+  "crashBody": "The error has been reported. You can try again.",
+  "required": "Required",
+  "tooShort": "Too short",
+  "invalidAmount": "Enter a valid amount"
+}

@@ -1,101 +1,60 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Component, type ErrorInfo, type ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 import { captureError } from "@/lib/sentry";
+import { logger } from "@/lib/logger";
+import { Button } from "./ui/Button";
+import { Icon } from "./ui/Icon";
+import { Text } from "./ui/Text";
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
 }
 
 interface State {
-  hasError: boolean;
   error: Error | null;
 }
 
-/**
- * ErrorBoundary — catches render errors in the component tree.
- *
- * Usage:
- *   <ErrorBoundary>
- *     <YourScreen />
- *   </ErrorBoundary>
- *
- * Errors are automatically reported to Sentry (if enabled).
- */
+function Fallback({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  const theme = useTheme();
+  const { t } = useTranslation(["errors", "common"]);
+  return (
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Icon name="warning-outline" size={40} color="danger" />
+      <Text variant="h2" align="center">
+        {t("crashTitle")}
+      </Text>
+      <Text variant="body" color="textSecondary" align="center">
+        {__DEV__ ? error.message : t("crashBody")}
+      </Text>
+      <Button title={t("common:actions.retry")} onPress={onRetry} fullWidth={false} />
+    </View>
+  );
+}
+
+/** Catches render errors, reports them, and offers a retry. */
 export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+  state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     captureError(error, { componentStack: info.componentStack ?? "" });
-    if (__DEV__) {
-      console.error("[ErrorBoundary] Caught render error:", error, info);
-    }
+    logger.error("[ErrorBoundary]", error);
   }
 
-  handleRetry = (): void => {
-    this.setState({ hasError: false, error: null });
-  };
+  private retry = () => this.setState({ error: null });
 
   render(): ReactNode {
-    if (this.state.hasError) {
-      if (this.props.fallback) return this.props.fallback;
-
-      return (
-        <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
-            {__DEV__
-              ? this.state.error?.message
-              : "An unexpected error occurred. Please try again."}
-          </Text>
-          <TouchableOpacity style={styles.button} onPress={this.handleRetry}>
-            <Text style={styles.buttonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
+    if (this.state.error) return <Fallback error={this.state.error} onRetry={this.retry} />;
     return this.props.children;
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1a1a1a",
-    marginBottom: 8,
-  },
-  message: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  button: {
-    backgroundColor: "#2B7FFF",
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 15,
-  },
+  container: { flex: 1, alignItems: "center", justifyContent: "center", padding: Spacing.xxl, gap: Spacing.md },
 });

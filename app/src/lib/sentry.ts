@@ -1,44 +1,45 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// Sentry — Optional error tracking
-//
-// Sentry is DISABLED when EXPO_PUBLIC_SENTRY_DSN is blank or missing.
-// To enable: add your DSN to .env.local:
-//   EXPO_PUBLIC_SENTRY_DSN=https://xxx@ooo.ingest.sentry.io/yyy
-//
-// You never need to change this file. It is always called in _layout.tsx.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import * as Sentry from "@sentry/react-native";
+import { env } from "./env";
 import { logger } from "./logger";
 
-const DSN = process.env.EXPO_PUBLIC_SENTRY_DSN;
+const DSN = env.EXPO_PUBLIC_SENTRY_DSN;
 
-/**
- * Call once at app startup in the root _layout.tsx.
- * No-op when EXPO_PUBLIC_SENTRY_DSN is not set.
- */
-export function initSentry(): void {
-  if (!DSN) {
-    logger.log("[Sentry] DSN not set — Sentry is disabled.");
-    return;
-  }
+/** Phone numbers, NIDs and bearer tokens never leave the device (doc 07 PII rules). */
+const PII_PATTERNS: RegExp[] = [/\+?880[\s-]?1\d{3}[\s-]?\d{6}/g, /\b\d{10,17}\b/g, /Bearer\s+[\w.-]+/gi, /m[ar]t_[\w]+/g];
 
-  Sentry.init({
-    dsn: DSN,
-    debug: __DEV__,
-    // Capture 100% of transactions in dev, 20% in production
-    tracesSampleRate: __DEV__ ? 1.0 : 0.2,
-    // Attach breadcrumbs for better crash context
-    attachStacktrace: true,
-    enabled: !__DEV__, // disable in dev to avoid noise; set to true to test
-  });
-
-  logger.log("[Sentry] Initialized.");
+function scrub(value: string): string {
+  return PII_PATTERNS.reduce((acc, re) => acc.replace(re, "[redacted]"), value);
 }
 
-/**
- * Report a caught error to Sentry (no-op if Sentry is disabled).
- */
+/** Call once at startup; no-op without a DSN. */
+export function initSentry(): void {
+  if (!DSN) {
+    logger.log("[Sentry] DSN not set — disabled.");
+    return;
+  }
+  Sentry.init({
+    dsn: DSN,
+    debug: false,
+    sendDefaultPii: false,
+    tracesSampleRate: __DEV__ ? 1.0 : 0.2,
+    attachStacktrace: true,
+    enabled: !__DEV__,
+    beforeSend(event) {
+      if (event.message) event.message = scrub(event.message);
+      event.exception?.values?.forEach((v) => {
+        if (v.value) v.value = scrub(v.value);
+      });
+      if (event.request) delete event.request.headers;
+      return event;
+    },
+    beforeBreadcrumb(crumb) {
+      if (crumb.message) crumb.message = scrub(crumb.message);
+      if (crumb.category === "xhr" || crumb.category === "fetch") delete crumb.data;
+      return crumb;
+    },
+  });
+}
+
 export function captureError(error: unknown, context?: Record<string, unknown>): void {
   if (!DSN) return;
   Sentry.withScope((scope) => {
@@ -47,23 +48,13 @@ export function captureError(error: unknown, context?: Record<string, unknown>):
   });
 }
 
-/**
- * Add a breadcrumb for debugging (no-op if Sentry is disabled).
- */
 export function addBreadcrumb(message: string, data?: Record<string, unknown>): void {
   if (!DSN) return;
-  Sentry.addBreadcrumb({ message, data, level: "info" });
+  Sentry.addBreadcrumb({ message: scrub(message), data, level: "info" });
 }
 
-/**
- * Identify the user in Sentry (call after login).
- * Pass null to reset on logout.
- */
-export function identifySentryUser(user: { id: string; email?: string } | null): void {
+/** Opaque user id only — no email or name. */
+export function identifySentryUser(userId: string | null): void {
   if (!DSN) return;
-  if (user) {
-    Sentry.setUser({ id: user.id, email: user.email });
-  } else {
-    Sentry.setUser(null);
-  }
+  Sentry.setUser(userId ? { id: userId } : null);
 }
