@@ -668,7 +668,7 @@ class ApprovalStore {
             ...item,
             decisionStatus: 'approved',
             authorizedBy: actorName,
-            authorizedAt: `${SYSTEM_TODAY}, Just Now`,
+            authorizedAt: nowStamp(),
             executiveDirective: noteOrReason,
             sapVoucher: voucher,
           }
@@ -676,7 +676,7 @@ class ApprovalStore {
             ...item,
             decisionStatus: 'rejected',
             rejectedBy: actorName,
-            rejectedAt: `${SYSTEM_TODAY}, Just Now`,
+            rejectedAt: nowStamp(),
             rejectionReason: noteOrReason || 'Returned for revision',
           };
 
@@ -724,7 +724,7 @@ class ApprovalStore {
         ...item,
         decisionStatus: 'approved',
         authorizedBy: approverLabel,
-        authorizedAt: `${SYSTEM_TODAY}, Just Now`,
+        authorizedAt: nowStamp(),
         executiveDirective: directive || item.executiveDirective,
         sapVoucher: generatedVoucher,
       };
@@ -753,7 +753,7 @@ class ApprovalStore {
   ) {
     const item = this.approvalItems.find((a) => a.id === itemId);
     const meta = ROLE_META[reviewerRole];
-    const timestamp = `${SYSTEM_TODAY}, Just Now`;
+    const timestamp = nowStamp();
     const reviewerName = reviewer || `${meta.name} (${meta.label})`;
     const reason = reasonCategory || 'Additional Details Needed';
     const obs = observation || 'Please review attached figures and supporting receipts.';
@@ -817,7 +817,7 @@ class ApprovalStore {
     improvementsRequired: string,
     reviewer?: string
   ) {
-    const timestamp = `${SYSTEM_TODAY}, Just Now`;
+    const timestamp = nowStamp();
     const reviewerName = reviewer || 'Approving Manager';
 
     this.claims = this.claims.map((c) =>
@@ -929,7 +929,7 @@ class ApprovalStore {
             ...linked,
             decisionStatus: status,
             authorizedBy: status === 'approved' ? actorName || 'Finance Approver' : undefined,
-            authorizedAt: status === 'approved' ? `${SYSTEM_TODAY}, Just Now` : undefined,
+            authorizedAt: status === 'approved' ? nowStamp() : undefined,
             sapVoucher: voucher,
           },
           ...this.decidedItems,

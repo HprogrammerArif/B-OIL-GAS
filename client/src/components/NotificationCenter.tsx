@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AppRole, Lang, t, AppView, ROLE_META } from '../types';
 import { Bell, CheckCheck, FileText, AlertTriangle, Truck, ShieldCheck } from 'lucide-react';
 import { showToast } from './ToastManager';
-import { useApprovalStore } from '../store/approvalStore';
+import { useMyApprovalQueue } from '../views/approvals/config';
 import { useFleetStore } from '../store/fleetStore';
 import { useNoticeStore } from '../store/noticeStore';
 import { allowedViews as getAllowedViewsForRole } from '../auth/permissions';
@@ -35,7 +35,7 @@ export default function NotificationCenter({
   const [filter, setFilter] = useState<'all' | 'approval' | 'safety' | 'logistics'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { approvalItems } = useApprovalStore();
+  const { pending: approvalItems } = useMyApprovalQueue();
   const { notifications: fleetNotifs, markNotificationRead } = useFleetStore();
   const { activeBroadcast } = useNoticeStore();
 

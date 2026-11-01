@@ -8,6 +8,7 @@ import {
   Briefcase, BarChart3, X
 } from 'lucide-react';
 import { useApprovalStore } from '../store/approvalStore';
+import { useMyApprovalQueue } from '../views/approvals/config';
 import { useNotesheetStore } from '../store/notesheetStore';
 import { useOperationsStore } from '../store/operationsStore';
 import { useFleetStore } from '../store/fleetStore';
@@ -236,7 +237,8 @@ export const ROLE_NAV: Record<AppRole, NavSection[]> = {
 
 export function useLiveNavBadges(role: AppRole): Record<string, { text: string; type: 'danger' | 'warn' | 'info' }> {
   const meta = ROLE_META[role];
-  const { approvalItems, claims } = useApprovalStore();
+  const { claims } = useApprovalStore();
+  const { pending: approvalItems } = useMyApprovalQueue();
   const { files } = useNotesheetStore();
   const { licenses, incidents, visitors, chatChannels, chatMembers } = useOperationsStore();
   const { requisitions, driverTollSlips } = useFleetStore();

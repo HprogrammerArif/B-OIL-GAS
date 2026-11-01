@@ -11,9 +11,10 @@
  *   - HR clears leave and HR files.
  * Nobody sees their own requests in their inbox.
  */
+import { useMemo } from 'react';
 import type { AppRole } from '../../types';
-import type { ApprovalItem } from '../../store/approvalStore';
-import type { CurrentUser } from '../../auth/session';
+import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
+import { useCurrentUser, type CurrentUser } from '../../auth/session';
 
 type Category = ApprovalItem['category'];
 
@@ -105,4 +106,26 @@ export function approvalQueuePredicate(user: CurrentUser): (item: ApprovalItem) 
     cats.has(item.category) &&
     item.requester !== user.name &&
     (cfg.accepts ? cfg.accepts(item, user) : true);
+}
+
+/**
+ * The signed-in user's pending and decided queues. Used by the Approvals view,
+ * the sidebar badge, the notification centre and the dashboards so every
+ * count on screen agrees.
+ */
+export function useMyApprovalQueue() {
+  const user = useCurrentUser();
+  const { approvalItems, decidedItems } = useApprovalStore();
+  const inQueue = useMemo(() => (user ? approvalQueuePredicate(user) : () => false), [user]);
+  const pending = useMemo(() => approvalItems.filter(inQueue), [approvalItems, inQueue]);
+  const decided = useMemo(
+    () =>
+      decidedItems.filter(
+        (d) =>
+          inQueue(d) ||
+          (user ? d.authorizedBy?.startsWith(user.name) || d.rejectedBy?.startsWith(user.name) : false),
+      ),
+    [decidedItems, inQueue, user],
+  );
+  return { user, config: user ? APPROVALS_CONFIG[user.role] : undefined, pending, decided };
 }

@@ -42,6 +42,8 @@ const SEED_START: Counters = {
   WO: 5270,   // work orders
   NOT: 310,   // notices
   BC: 40,     // broadcasts
+  VCH: 7120,  // payment / sanction vouchers
+  ARQ: 23,    // asset purchase requests
 };
 
 /** `nextRef('APR')` → `APR-2026-0901` */
