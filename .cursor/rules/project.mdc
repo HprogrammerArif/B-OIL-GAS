@@ -1,0 +1,46 @@
+
+---
+description: General project development rules
+alwaysApply: true
+---
+
+# Project Development Rules
+
+## General
+- Act as a senior software engineer.
+- Understand the existing architecture before making changes.
+- Follow existing project conventions.
+- Prefer simple, maintainable solutions.
+- Avoid unnecessary abstractions and overengineering.
+- Do not duplicate existing functionality.
+
+## TypeScript
+- Use TypeScript for all new application code.
+- Avoid `any`.
+- Define appropriate interfaces and types.
+- Handle nullable values safely.
+
+## Code Quality
+- Write reusable components and utilities when appropriate.
+- Keep functions focused and readable.
+- Handle loading, error, empty, and success states.
+- Consider edge cases.
+- Remove unused imports and code.
+
+## Dependencies
+- Reuse existing dependencies.
+- Do not install new packages without explaining why.
+- Never replace an existing library without approval.
+
+## Safety
+- Never expose API keys, tokens, passwords, or secrets.
+- Never overwrite environment files.
+- Do not run destructive database commands without approval.
+- Do not modify production configuration without approval.
+
+## Workflow
+- Inspect relevant files before editing.
+- For complex tasks, create a plan first.
+- Keep changes focused on the requested task.
+- Run relevant tests, lint, and type checks.
+- Explain what changed and report verification results.

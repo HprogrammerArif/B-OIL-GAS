@@ -16,6 +16,8 @@ While BOGCL leadership originally asked for a prototype based on a high-level di
 
 | Document | Purpose | Key Contents |
 | :--- | :--- | :--- |
+| **[00. Comprehensive Current-State Report](docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md)** | **Code-verified snapshot of what is built** | **Background & rationale, actual vs. declared stack, 17 module deep-dives with business rules and seed data, simulated features, gaps, defects, readiness and next steps.** |
+| **[Master Status & Feature Ledger](file:///c:/project/B-OIL-GAS/docs/PROJECT_MASTER_STATUS_AND_FEATURE_LEDGER.md)** | **Living SSOT & Feature Registry** | **Complete module inventory, implementation status, persona matrix, change protocol, and mutation history.** |
 | **[01. Executive Pitch & Project Dossier](file:///e:/B-OIL-GAS/docs/01_EXECUTIVE_PITCH_AND_PROJECT_DOSSIER.md)** | Strategic Boardroom Proposal | Executive vision, strategic alignment with Bashundhara Group, financial ROI, commercial contract protection, data residency & hosting strategy. |
 | **[02. Enterprise Architecture & Specs](file:///e:/B-OIL-GAS/docs/02_ENTERPRISE_SYSTEM_ARCHITECTURE_AND_SPECS.md)** | Full Technical & Functional Blueprint | In-depth engineering design of all 16 modules, dynamic workflow engine, compliance scheduler, note-sheet e-signing, HSE incident CAPA, geofencing. |
 | **[03. Traceability Ledger & Matrix](file:///e:/B-OIL-GAS/docs/03_REQUIREMENTS_TRACEABILITY_LEDGER_AND_MATRIX.md)** | Comprehensive Requirements Ledger | Module-by-module matrix covering triggers, business rules, multi-tier approvals, outputs, prototype scope, phase delivery, and risk assessment. |
