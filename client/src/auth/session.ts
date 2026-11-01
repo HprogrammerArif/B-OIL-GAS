@@ -118,6 +118,12 @@ export const sessionStore = {
     return { ok: true };
   },
 
+  /** Re-authenticate the signed-in user (lock screen). */
+  async verifyPassword(password: string): Promise<boolean> {
+    if (!state.user) return false;
+    return (await sha256Hex(password)) === DEMO_PASSWORD_SHA256;
+  },
+
   logout() {
     persist(null, false);
     setState({ user: null });

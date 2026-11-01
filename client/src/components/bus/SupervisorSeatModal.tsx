@@ -20,7 +20,7 @@ interface SupervisorSeatModalProps {
 
 const EMPLOYEE_PRESETS = [
   { name: 'Tanvir Ahmed', staffId: 'EMP-1042', dept: 'Sales & Distribution', phone: '+880 1720-334455', blood: 'B+' },
-  { name: 'Engr. Harunur Rashid', staffId: 'EMP-0104', dept: 'Plant GM & Operations', phone: '+880 1711-002101', blood: 'O+' },
+  { name: 'Engr. Md. Harunur Rashid', staffId: 'EMP-0012', dept: 'Plant GM & Operations', phone: '+880 1711-002101', blood: 'O+' },
   { name: 'Farhana Kabir', staffId: 'EMP-0312', dept: 'EHS Safety Lead', phone: '+880 1819-556677', blood: 'B+' },
   { name: 'Engr. Tariq Ahmed', staffId: 'EMP-0145', dept: 'Maintenance Div.', phone: '+880 1711-002105', blood: 'AB+' },
   { name: 'Mizanur Rahman', staffId: 'EMP-0219', dept: 'Quality Assurance', phone: '+880 1712-441122', blood: 'A+' },

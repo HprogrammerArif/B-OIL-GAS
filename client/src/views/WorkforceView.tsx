@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ViewProps, t } from '../types';
 import { useEmployeeStore, Employee } from '../store/employeeStore';
+import { useCurrentUser } from '../auth/session';
 import OnboardEmployeeModal from '../components/workforce/OnboardEmployeeModal';
 import OffboardClearanceDrawer from '../components/workforce/OffboardClearanceDrawer';
 import {
@@ -8,8 +9,9 @@ import {
   CheckCircle, FileText, Shield
 } from 'lucide-react';
 
-export default function WorkforceView({ role, lang }: ViewProps) {
+export default function WorkforceView({ lang }: ViewProps) {
   const { activeEmployees, offboardedEmployees } = useEmployeeStore();
+  const canManage = !!useCurrentUser()?.permissions.has('workforce:manage');
 
   const [activeTab, setActiveTab] = useState<'active' | 'offboarded'>('active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,16 +58,18 @@ export default function WorkforceView({ role, lang }: ViewProps) {
           </p>
         </div>
 
-        <div className="flex-gap">
-          <button
-            className="btn-primary"
-            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowOnboardModal(true)}
-          >
-            <UserPlus size={15} />
-            {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
-          </button>
-        </div>
+        {canManage && (
+          <div className="flex-gap">
+            <button
+              className="btn-primary"
+              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => setShowOnboardModal(true)}
+            >
+              <UserPlus size={15} />
+              {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* KPI Ribbon */}
@@ -307,7 +311,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                           <Shield size={11} /> Executive Office
                         </span>
                       ) : emp.status === 'active' ? (
-                        <button
+                        !canManage ? null : <button
                           className="btn-outline-danger"
                           style={{ fontSize: '11px', padding: '4px 10px' }}
                           onClick={() => setSelectedEmployeeForExit(emp)}
@@ -386,7 +390,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                       <Shield size={11} /> Executive Office
                     </span>
                   ) : emp.status === 'active' ? (
-                    <button
+                    !canManage ? null : <button
                       className="btn-outline-danger"
                       style={{ fontSize: '11px', padding: '5px 12px' }}
                       onClick={() => setSelectedEmployeeForExit(emp)}

@@ -3,6 +3,11 @@ import { useFleetStore, VehicleRequisition, Driver } from '../../store/fleetStor
 import { t } from '../../types';
 import { showToast } from '../ToastManager';
 import DriverCallModal from './DriverCallModal';
+import { EmptyState } from '../ui';
+import { useCurrentUser } from '../../auth/session';
+import { driverRecordFor } from '../../views/fleet/config';
+import { nextRef } from '../../lib/refs';
+import { nowTime } from '../../lib/clock';
 import {
   Car, UserCheck, ShieldCheck, Phone, MessageSquare, AlertTriangle,
   MapPin, CheckCircle2, Navigation, AlertOctagon, Receipt,
@@ -14,9 +19,25 @@ interface DriverConsoleProps {
   onOpenChat: (req: VehicleRequisition) => void;
 }
 
-export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) {
+export default function DriverConsole(props: DriverConsoleProps) {
+  const user = useCurrentUser();
+  const { drivers } = useFleetStore();
+  const currentDriver = user ? driverRecordFor(user, drivers) : undefined;
+
+  if (!currentDriver) {
+    return (
+      <EmptyState
+        icon={<Car size={22} />}
+        title={t('No driver record linked to your account', 'আপনার অ্যাকাউন্টে কোনো চালক রেকর্ড যুক্ত নেই', props.lang)}
+        description={t('Ask the transport cell to link your employee ID to the driver roster.', 'আপনার কর্মী আইডি চালক তালিকায় যুক্ত করতে ট্রান্সপোর্ট সেলকে বলুন।', props.lang)}
+      />
+    );
+  }
+  return <DriverConsoleBody {...props} currentDriver={currentDriver} />;
+}
+
+function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsoleProps & { currentDriver: Driver }) {
   const {
-    drivers,
     requisitions,
     startTrip,
     completeTrip,
@@ -24,17 +45,10 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
     sendChatMessage,
   } = useFleetStore();
 
-  // Current logged in driver persona: Md. Rafiqul Islam (DRV-01)
-  const currentDriver = drivers.find(d => d.id === 'DRV-01') || drivers[0];
-
-  // Active missions assigned to this driver or available assigned ones
   const assignedMissions = requisitions.filter(
-    r => (r.assignedDriverId === currentDriver.id || !r.assignedDriverId) &&
-         (r.status === 'assigned' || r.status === 'in_transit')
+    r => r.assignedDriverId === currentDriver.id && (r.status === 'assigned' || r.status === 'in_transit')
   );
-
-  // Pick the foremost active mission
-  const activeMission = assignedMissions[0] || requisitions.find(r => r.status === 'assigned' || r.status === 'in_transit');
+  const activeMission = assignedMissions[0];
 
   // Call Modal State
   const [showCallModal, setShowCallModal] = useState(false);
@@ -92,7 +106,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
   const handleConfirmStartJourney = () => {
     if (!activeMission) return;
     const odo = parseInt(startOdoInput, 10) || 42350;
-    startTrip(activeMission.id, odo, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    startTrip(activeMission.id, odo, nowTime());
     setShowStartTripDialog(false);
     showToast(
       lang === 'en'
@@ -109,7 +123,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
     completeTrip(
       activeMission.id,
       odo,
-      new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      nowTime(),
       5,
       'Trip completed smoothly by duty driver.'
     );
@@ -133,10 +147,10 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
     const amt = parseFloat(tollAmount) || 0;
     if (amt <= 0) return;
     const newClaim = {
-      id: `TOL-${Math.floor(100 + Math.random() * 900)}`,
+      id: nextRef('TOL'),
       plaza: tollPlaza,
       amount: amt,
-      time: 'Just now',
+      time: nowTime(),
       status: 'Pending Dispatch Review',
     };
     setTollClaims([newClaim, ...tollClaims]);
@@ -145,7 +159,8 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
         activeMission.id,
         'driver',
         currentDriver.name,
-        `🧾 Submitted toll slip voucher: ৳${amt} at ${tollPlaza}. Receipt photo logged to dispatch.`
+        `Claimed official highway toll: ${tollPlaza} (৳${amt}). Receipt voucher: ${newClaim.id}`,
+        { messageType: 'toll_claim', tollData: { tollName: tollPlaza, amount: amt, receiptNo: newClaim.id, approved: false } }
       );
     }
     setShowTollModal(false);
@@ -165,7 +180,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
         activeMission.id,
         'driver',
         currentDriver.name,
-        `🚨 EMERGENCY SOS: Highway breakdown or route anomaly near Keraniganj corridor! Immediate assistance requested!`
+        `🚨 EMERGENCY SOS: breakdown or route problem on the way to ${activeMission.to}. Immediate assistance requested.`
       );
     }
     showToast(
@@ -192,7 +207,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                 {currentDriver.name}
               </h2>
               <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(217, 119, 6, 0.2)', border: '1px solid rgba(217, 119, 6, 0.4)', color: 'var(--status-warning-bright)' }}>
-                Badge #{currentDriver.id}
+                {t('Driver ID', 'চালক আইডি', lang)} {currentDriver.id}
               </span>
               <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: 'var(--status-success-bright)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <ShieldCheck size={13} />
@@ -201,7 +216,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
             </div>
 
             <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span>{t('Assigned Vehicle:', 'বরাদ্দকৃত গাড়ি:', lang)} <strong style={{ color: 'var(--text-on-brand)', fontFamily: 'monospace' }}>{currentDriver.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821'}</strong></span>
+              <span>{t('Assigned Vehicle:', 'বরাদ্দকৃত গাড়ি:', lang)} <strong style={{ color: 'var(--text-on-brand)', fontFamily: 'monospace' }}>{currentDriver.assignedVehiclePlate || '—'}</strong></span>
               <span>•</span>
               <span>{t('License:', 'ড্রাইভিং লাইসেন্স:', lang)} <strong style={{ color: 'var(--text-on-brand)' }}>{currentDriver.licenseNo}</strong></span>
               <span>•</span>

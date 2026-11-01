@@ -4,7 +4,6 @@ import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
 import { nextRef } from '../lib/refs';
 import { nowStamp } from '../lib/clock';
 import type {
-  CustodyLogEntry,
   ReturnDetails,
   ParcelItem,
 } from '../views/ParcelView';
@@ -536,7 +535,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Truck Loading Bay #1, Keraniganj Plant',
     shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Md. Kamruzzaman (Transport Supervisor)',
-    reporterEmpId: 'EMP-0003',
+    reporterEmpId: 'EMP-0045',
     date: '25 Oct 2026, 03:45 PM',
     workflowStage: 'closed',
     immediateActionsTaken: 'Removed unattended ladder to maintenance storage cage immediately; cordoned area and summoned contractor supervisor.',
@@ -613,7 +612,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Heating Unit #2, Keraniganj Plant',
     shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Engr. Md. Harunur Rashid (Plant GM)',
-    reporterEmpId: 'EMP-0002',
+    reporterEmpId: 'EMP-0012',
     date: '20 Oct 2026, 02:15 PM',
     workflowStage: 'closed',
     immediateActionsTaken: 'DCS automated bypass opened; thermal fluid burner heat reduced by 15%; pressure stabilized back to nominal 18 Bar within 4 minutes.',
@@ -705,7 +704,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Circulation Bay Pump House, Unit-2, Keraniganj Complex',
     shift: 'Night Shift (23:00 - 07:00)',
     reportedBy: 'Tanvir Ahmed (Senior Operations Officer)',
-    reporterEmpId: 'EMP-0004',
+    reporterEmpId: 'EMP-1042',
     date: '30 Oct 2026, 03:15 AM',
     workflowStage: 'triaged',
     immediateActionsTaken: 'Marked pump casing with high-heat warning placard and cordoned side walkway with yellow tape.',
@@ -2105,7 +2104,7 @@ class OperationsStore {
   }
 
   addCapaItem(incidentId: string, item: Omit<CapaActionItem, 'id'>) {
-    const newId = `CAPA-${Math.floor(100 + Math.random() * 900)}`;
+    const newId = nextRef('CAPA', 3);
     const fullItem: CapaActionItem = { ...item, id: newId };
     this.incidents = this.incidents.map(inc => {
       if (inc.id !== incidentId) return inc;
@@ -2127,7 +2126,7 @@ class OperationsStore {
         return {
           ...c,
           status,
-          completedAt: status === 'completed' ? 'Just Now' : undefined,
+          completedAt: status === 'completed' ? nowStamp() : undefined,
           verificationEvidence: evidenceNote || c.verificationEvidence,
         };
       });
@@ -2163,45 +2162,6 @@ class OperationsStore {
   // ── 3. Parcels Actions ──
   setParcels(updater: ParcelItem[] | ((prev: ParcelItem[]) => ParcelItem[])) {
     this.parcels = typeof updater === 'function' ? updater(this.parcels) : updater;
-    this.notify();
-  }
-
-  advanceParcelStage(parcelId: string, actorName: string, actorRoleTitle: string) {
-    const STAGE_LABELS: Record<number, { en: string; bn: string; loc: string; eta: string; pct: number; status: ParcelItem['status'] }> = {
-      2: { en: 'Handed to Driver', bn: 'ড্রাইভারের নিকট হস্তান্তর', loc: 'Dispatch Loading Gate', eta: 'On the road (ETA 1 hr)', pct: 35, status: 'in_transit' },
-      3: { en: 'On the Way (Checkpoint Passed)', bn: 'পথে রয়েছে (চেকপয়েন্ট অতিক্রম)', loc: 'Babubazar Bridge Checkpoint', eta: 'Arriving within 30 mins', pct: 68, status: 'in_transit' },
-      4: { en: 'Arrived at Reception Desk', bn: 'রিসিপশন ডেস্কে পৌঁছেছে', loc: 'Destination Reception Desk', eta: 'Ready for PIN Handover', pct: 90, status: 'at_gate' },
-    };
-
-    this.parcels = this.parcels.map((p) => {
-      if (p.id !== parcelId || p.currentStage >= 4 || p.status === 'delivered' || p.status === 'returned') {
-        return p;
-      }
-      const nextStage = p.currentStage + 1;
-      const meta = STAGE_LABELS[nextStage];
-      if (!meta) return p;
-
-      const log: CustodyLogEntry = {
-        stage: nextStage,
-        stageName: meta.en,
-        stageNameBn: meta.bn,
-        location: meta.loc,
-        timestamp: 'Today, Just Now',
-        actor: actorName,
-        actorRole: actorRoleTitle,
-        notes: `Parcel moved to Stage ${nextStage} (${meta.en}). Seal checked intact.`,
-      };
-
-      return {
-        ...p,
-        currentStage: nextStage,
-        status: meta.status,
-        eta: meta.eta,
-        corridorProgressPercent: meta.pct,
-        lastUpdated: 'Today, Just Now',
-        chainOfCustody: [...p.chainOfCustody, log],
-      };
-    });
     this.notify();
   }
 
@@ -2381,7 +2341,6 @@ export function useOperationsStore() {
     toggleCapaStatus: operationsStore.toggleCapaStatus.bind(operationsStore),
     closeIncidentWithSignOff: operationsStore.closeIncidentWithSignOff.bind(operationsStore),
     setParcels: operationsStore.setParcels.bind(operationsStore),
-    advanceParcelStage: operationsStore.advanceParcelStage.bind(operationsStore),
     setVisitors: operationsStore.setVisitors.bind(operationsStore),
     punchAttendance: operationsStore.punchAttendance.bind(operationsStore),
     addLeaveRequest: operationsStore.addLeaveRequest.bind(operationsStore),

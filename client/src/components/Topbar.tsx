@@ -158,18 +158,21 @@ export default function Topbar({
           <span className="search-kbd">Ctrl+K</span>
         </button>
 
-        {/* 2. System Sync & Clock Capsule */}
+        {/* 2. Integrations & Clock Capsule */}
         <div
-          className="topbar-telemetry-capsule"
+          className={`topbar-telemetry-capsule${canSeeSync ? '' : ' telemetry-hide-mobile'}`}
           onClick={() => canSeeSync && setShowSapModal(true)}
           style={canSeeSync ? undefined : { cursor: 'default' }}
-          title={canSeeSync ? t('Click to view Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সিঙ্ক স্ট্যাটাস দেখুন', lang) : undefined}
+          title={canSeeSync ? t('View integration status', 'ইন্টিগ্রেশন স্ট্যাটাস দেখুন', lang) : undefined}
         >
-          <div className="telemetry-sap">
-            <span className="sap-dot" />
-            <span className="sap-label">{t('System Synced', 'সিস্টেম সিঙ্ক', lang)}</span>
-          </div>
-          <span className="telemetry-divider telemetry-hide-mobile" />
+          {canSeeSync && (
+            <>
+              <div className="telemetry-sap">
+                <span className="sap-label">{t('Integrations', 'ইন্টিগ্রেশন', lang)}</span>
+              </div>
+              <span className="telemetry-divider telemetry-hide-mobile" />
+            </>
+          )}
           <div className="telemetry-clock telemetry-hide-mobile">
             <Clock size={11} className="clock-icon" />
             <span className="clock-time">{currentTime}</span>

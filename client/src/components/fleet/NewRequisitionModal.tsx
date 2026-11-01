@@ -32,8 +32,7 @@ interface NewRequisitionModalProps {
   onClose: () => void;
   onSubmit: (requisitionData: Omit<VehicleRequisition, 'id' | 'status' | 'createdAt'>) => void;
   lang: 'en' | 'bn';
-  currentUserName?: string;
-  currentUserDept?: string;
+  requester: { name: string; empId: string; label: string; dept: string; phone: string; initials: string };
 }
 
 // Company Employee Directory for Passenger Selection Dropdown
@@ -134,8 +133,7 @@ export default function NewRequisitionModal({
   onClose,
   onSubmit,
   lang,
-  currentUserName = 'Tanvir Ahmed',
-  currentUserDept = 'Sales & Distribution',
+  requester,
 }: NewRequisitionModalProps) {
   // Form State
   const [tripType, setTripType] = useState<'round_trip' | 'one_way'>('round_trip');
@@ -153,9 +151,16 @@ export default function NewRequisitionModal({
   const [stopInput, setStopInput] = useState('');
 
   // Accompanying Passengers Dropdown State
-  const [selectedPassengers, setSelectedPassengers] = useState<CompanyColleague[]>([
-    COMPANY_COLLEAGUES[0], // Tanvir Ahmed
-    COMPANY_COLLEAGUES[1], // Engr. Tariq Ahmed
+  const [selectedPassengers, setSelectedPassengers] = useState<CompanyColleague[]>(() => [
+    COMPANY_COLLEAGUES.find((c) => c.id === requester.empId) ?? {
+      id: requester.empId,
+      name: requester.name,
+      designation: requester.label,
+      dept: requester.dept,
+      phone: requester.phone,
+      email: '',
+      avatarColor: 'var(--status-info-solid)',
+    },
   ]);
   const [showPassengerDropdown, setShowPassengerDropdown] = useState(false);
   const [passengerSearchQuery, setPassengerSearchQuery] = useState('');
@@ -254,10 +259,11 @@ export default function NewRequisitionModal({
     const passengerNamesString = selectedPassengers.map((p) => p.name).join(', ');
 
     onSubmit({
-      requesterName: currentUserName,
-      requesterRole: 'Sales Officer (Grade 8)',
-      dept: currentUserDept,
-      phone: '+880 1711-009988',
+      requesterName: requester.name,
+      requesterEmpId: requester.empId,
+      requesterRole: requester.label,
+      dept: requester.dept,
+      phone: requester.phone,
       tripType,
       from: fromLoc,
       to: toLoc,
@@ -422,14 +428,14 @@ export default function NewRequisitionModal({
                 border: '1px solid var(--status-warning)',
               }}
             >
-              TA
+              {requester.initials}
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '12.5px' }}>
-                {currentUserName} <span style={{ fontWeight: 600, opacity: 0.75 }}>• Sales Officer (Grade 8)</span>
+                {requester.name} <span style={{ fontWeight: 600, opacity: 0.75 }}>• {requester.label}</span>
               </div>
               <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '1px' }}>
-                {currentUserDept} • Cost Center: <code style={{ fontWeight: 700, color: 'var(--brand-crimson)' }}>{costCenter}</code>
+                {requester.dept} • Cost Center: <code style={{ fontWeight: 700, color: 'var(--brand-crimson)' }}>{costCenter}</code>
               </div>
             </div>
           </div>

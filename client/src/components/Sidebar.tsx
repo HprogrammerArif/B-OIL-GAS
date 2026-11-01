@@ -15,7 +15,12 @@ import { useFleetStore } from '../store/fleetStore';
 import { useAssetStore } from '../store/assetStore';
 import { useBusStore } from '../store/busStore';
 import { useEmployeeStore } from '../store/employeeStore';
-import { canAccessView } from '../auth/permissions';
+import { canAccessView, type Permission } from '../auth/permissions';
+import { useCurrentUser } from '../auth/session';
+import { fleetModeFor, driverRecordFor } from '../views/fleet/config';
+import { guestModeFor, visitorsVisibleTo } from '../views/guest/config';
+import { incidentModeFor, incidentsVisibleTo } from '../views/incident/config';
+import { isMine as isMyClaim, isPending as isPendingClaim } from '../views/claims/config';
 
 interface SidebarProps {
   role: AppRole;
@@ -235,133 +240,114 @@ export const ROLE_NAV: Record<AppRole, NavSection[]> = {
 };
 
 
-export function useLiveNavBadges(role: AppRole): Record<string, { text: string; type: 'danger' | 'warn' | 'info' }> {
-  const meta = ROLE_META[role];
+export function useLiveNavBadges(_role: AppRole): Record<string, { text: string; type: 'danger' | 'warn' | 'info' }> {
+  const user = useCurrentUser();
   const { claims } = useApprovalStore();
   const { pending: approvalItems } = useMyApprovalQueue();
   const { files } = useNotesheetStore();
   const { licenses, incidents, visitors, chatChannels, chatMembers } = useOperationsStore();
-  const { requisitions, driverTollSlips } = useFleetStore();
+  const { requisitions, driverTollSlips, drivers } = useFleetStore();
   const { assets } = useAssetStore();
   const { waitlist } = useBusStore();
   const { activeEmployees } = useEmployeeStore();
 
   const badges: Record<string, { text: string; type: 'danger' | 'warn' | 'info' }> = {};
+  if (!user) return badges;
+  const can = (p: Permission) => user.permissions.has(p);
 
-  // 1. Approvals Queue
   if (approvalItems.length > 0) {
     badges.approvals = { text: String(approvalItems.length), type: 'danger' };
   }
 
-  // 2. Official Documents (Pending Note-Sheets)
-  const pendingDocs =
-    role === 'employee'
-      ? files.filter((f) => f.initiatorName === meta.name && f.status !== 'approved').length
-      : files.filter((f) => f.status !== 'approved').length;
+  const pendingDocs = files.filter(
+    (f) => f.status !== 'approved' && (can('notesheet:view_all') || f.initiatorName === user.name)
+  ).length;
   if (pendingDocs > 0) {
     badges.notesheet = { text: String(pendingDocs), type: 'warn' };
   }
 
-  // 3. Leadership Messages Unread Count
-  const unreadChat =
-    chatChannels.reduce((acc, c) => acc + (c.unread || 0), 0) +
-    chatMembers.reduce((acc, m) => acc + (m.unread || 0), 0);
-  if (unreadChat > 0) {
-    badges.inner_circle = { text: String(unreadChat), type: 'info' };
+  if (can('chat:leadership')) {
+    const unreadChat =
+      chatChannels.reduce((acc, c) => acc + (c.unread || 0), 0) +
+      (can('chat:directive') ? chatMembers.reduce((acc, m) => acc + (m.unread || 0), 0) : 0);
+    if (unreadChat > 0) {
+      badges.inner_circle = { text: String(unreadChat), type: 'info' };
+    }
   }
 
-  // 4. Permits Expiring Within 90 Days
-  const expiringPermits = licenses.filter((l) => l.stage < 5 && l.daysLeft <= 90).length;
-  if (expiringPermits > 0) {
-    badges.compliance = { text: String(expiringPermits), type: 'warn' };
+  if (can('compliance:view')) {
+    const expiringPermits = licenses.filter((l) => l.stage < 5 && l.daysLeft <= 90).length;
+    if (expiringPermits > 0) {
+      badges.compliance = { text: String(expiringPermits), type: 'warn' };
+    }
   }
 
-  // 5. Open Safety Incidents
-  const openIncidents = incidents.filter((i) => i.capaStatus !== 'closed').length;
-  if (openIncidents > 0 && role !== 'employee' && role !== 'driver') {
-    badges.incident = { text: String(openIncidents), type: 'danger' };
+  const openIncidents = incidentsVisibleTo(user, incidentModeFor(user), incidents).filter((i) => i.capaStatus !== 'closed').length;
+  if (openIncidents > 0) {
+    badges.incident = { text: String(openIncidents), type: can('incident:view_all') ? 'danger' : 'info' };
   }
 
-  // 6. Visitors Inside
-  const insideVisitors =
-    role === 'employee'
-      ? visitors.filter((v) => v.hostEmployee === meta.name && v.status === 'checked_in').length
-      : visitors.filter((v) => v.status === 'checked_in').length;
+  const insideVisitors = visitorsVisibleTo(user, guestModeFor(user), visitors, 'all').filter((v) => v.status === 'checked_in').length;
   if (insideVisitors > 0) {
     badges.guest = { text: `${insideVisitors}`, type: 'info' };
   }
 
-  // 7. Vehicles & Trips
-  if (role === 'driver') {
+  const fleetMode = fleetModeFor(user);
+  const myDriver = fleetMode === 'driver' ? driverRecordFor(user, drivers) : undefined;
+  if (myDriver) {
     const activeDriverTrips = requisitions.filter(
-      (r) => r.assignedDriverId === 'DRV-01' && (r.status === 'assigned' || r.status === 'in_transit')
+      (r) => r.assignedDriverId === myDriver.id && (r.status === 'assigned' || r.status === 'in_transit')
     ).length;
     if (activeDriverTrips > 0) {
       badges.fleet = { text: String(activeDriverTrips), type: 'warn' };
     }
-  } else if (role === 'transport_admin' || role === 'hod' || role === 'hr_admin') {
+  } else if (fleetMode === 'dispatch') {
     const pendingTrips = requisitions.filter((r) => r.status === 'pending').length;
     if (pendingTrips > 0) {
       badges.fleet = { text: String(pendingTrips), type: 'warn' };
     }
   }
 
-  // 8. Shuttle Bus Waitlist
-  if (waitlist.length > 0 && (role === 'transport_admin' || role === 'hr_admin')) {
+  if (waitlist.length > 0 && can('bus:manage')) {
     badges.bus = { text: `${waitlist.length} Wait`, type: 'info' };
   }
 
-  // 9. Staff Directory Count
-  if (activeEmployees.length > 0 && (role === 'hr_admin' || role === 'chairman')) {
+  if (activeEmployees.length > 0 && can('workforce:view')) {
     badges.workforce = { text: String(activeEmployees.length), type: 'info' };
   }
 
-  // 10. Expense Claims
-  if (role === 'driver') {
+  if (myDriver) {
     const pendingTolls = driverTollSlips.filter((s) => s.status === 'Pending Review').length;
     if (pendingTolls > 0) {
       badges.claims = { text: String(pendingTolls), type: 'info' };
     }
-  } else if (role === 'employee') {
-    const myPendingClaims = claims.filter(
-      (c) => c.claimant === meta.name && (c.status === 'pending_hod' || c.status === 'pending_finance')
-    ).length;
-    if (myPendingClaims > 0) {
-      badges.claims = { text: String(myPendingClaims), type: 'info' };
-    }
-  } else {
-    const allPendingClaims = claims.filter(
-      (c) => c.status === 'pending_hod' || c.status === 'pending_finance'
-    ).length;
+  } else if (can('claims:view_all')) {
+    const allPendingClaims = claims.filter(isPendingClaim).length;
     if (allPendingClaims > 0) {
       badges.claims = { text: String(allPendingClaims), type: 'warn' };
     }
+  } else {
+    const myPendingClaims = claims.filter((c) => isMyClaim(c, user) && isPendingClaim(c)).length;
+
+    if (myPendingClaims > 0) {
+      badges.claims = { text: String(myPendingClaims), type: 'info' };
+    }
   }
 
-  // 11. Assets & Equipment
-  if (role === 'employee' || role === 'driver') {
-    const unconfirmed = assets.filter(
-      (a) => a.custodianEmpId === meta.empId && !a.custodianAcknowledged
-    ).length;
+  if (!can('asset:view_all')) {
+    const unconfirmed = assets.filter((a) => a.custodianEmpId === user.empId && !a.custodianAcknowledged).length;
     if (unconfirmed > 0) {
       badges.asset = { text: `${unconfirmed} Confirm`, type: 'warn' };
     }
-  } else if (role === 'plant_gm') {
-    const dueMaint = assets.filter(
-      (a) => a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance'
-    ).length;
+  } else if (can('asset:manage')) {
+    const dueMaint = assets.filter((a) => a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance').length;
     if (dueMaint > 0) {
       badges.asset = { text: `${dueMaint} Due`, type: 'warn' };
     }
-  } else if (role === 'chairman' || role === 'hod') {
+  } else if (can('asset:approve_disposal')) {
     const retirePending = assets.filter((a) => a.lifecycleStage === 'decommissioned').length;
     if (retirePending > 0) {
       badges.asset = { text: `${retirePending} Review`, type: 'warn' };
-    }
-  } else if (role === 'hr_admin') {
-    const inStore = assets.filter((a) => a.lifecycleStage === 'in_stock').length;
-    if (inStore > 0) {
-      badges.asset = { text: `${inStore} Store`, type: 'info' };
     }
   }
 
@@ -480,15 +466,14 @@ export default function Sidebar({
           <div className="sidebar-footer-content">
             <div className="footer-status-row">
               <div className="online-dot" />
-              <span>{t('Head Office & Plant: Connected', 'প্রধান কার্যালয় ও প্ল্যান্ট: সংযুক্ত', lang)}</span>
+              <span>{t('Online', 'অনলাইন', lang)}</span>
             </div>
             <div className="footer-version-row">
               <span className="badge-version">OneOps v2.5</span>
-              <span className="latency-text">{t('Live Sync Active', 'লাইভ সিঙ্ক চালু', lang)}</span>
             </div>
           </div>
         ) : (
-          <div className="online-dot" title="Head Office & Keraniganj Plant: Connected" />
+          <div className="online-dot" title={t('Online', 'অনলাইন', lang)} />
         )}
       </div>
     </aside>

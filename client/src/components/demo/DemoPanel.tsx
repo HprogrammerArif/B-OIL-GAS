@@ -2,7 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { AppRole, Lang, ROLE_META, SYSTEM_TODAY, t } from '../../types';
 import { sessionStore, useCurrentUser } from '../../auth/session';
 import type { Theme } from '../../lib/theme';
-import { X, RotateCcw, Moon, Sun, Globe, UserRound } from 'lucide-react';
+import { X, RotateCcw, Moon, Sun, Globe, UserRound, Clapperboard, Presentation } from 'lucide-react';
+import { DEMO_SCENARIOS, runScenario } from './scenarios';
+
+const PRESENTATION_KEY = 'oneops.presentation.v1';
+
+function readPresentation(): boolean {
+  try {
+    return window.localStorage.getItem(PRESENTATION_KEY) === 'on';
+  } catch {
+    return false;
+  }
+}
 
 interface DemoPanelProps {
   lang: Lang;
@@ -19,7 +30,17 @@ const ROLES = Object.keys(ROLE_META) as AppRole[];
  */
 export default function DemoPanel({ lang, theme, onToggleTheme, onLangToggle }: DemoPanelProps) {
   const [open, setOpen] = useState(false);
+  const [presentation, setPresentation] = useState(readPresentation);
   const user = useCurrentUser();
+
+  useEffect(() => {
+    document.documentElement.dataset.presentation = presentation ? 'on' : 'off';
+    try {
+      window.localStorage.setItem(PRESENTATION_KEY, presentation ? 'on' : 'off');
+    } catch {
+      /* ignore */
+    }
+  }, [presentation]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -91,7 +112,41 @@ export default function DemoPanel({ lang, theme, onToggleTheme, onLangToggle }: 
         </div>
       </div>
 
+      <div className="demo-panel-section">
+        <div className="demo-panel-label">
+          <Clapperboard size={12} />
+          {t('Scenarios', 'দৃশ্যপট', lang)}
+        </div>
+        <div className="demo-panel-scenarios">
+          {DEMO_SCENARIOS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className="demo-panel-scenario"
+              onClick={() => {
+                runScenario(s);
+                setOpen(false);
+              }}
+            >
+              <strong>{t(s.label[0], s.label[1], lang)}</strong>
+              <span>
+                {t(s.hint[0], s.hint[1], lang)} · {ROLE_META[s.persona].shortName}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="demo-panel-section demo-panel-actions">
+        <button
+          type="button"
+          className={`demo-panel-btn${presentation ? ' active' : ''}`}
+          onClick={() => setPresentation((v) => !v)}
+          aria-pressed={presentation}
+        >
+          <Presentation size={13} />
+          {t('Presentation mode', 'প্রেজেন্টেশন মোড', lang)}
+        </button>
         <button type="button" className="demo-panel-btn" onClick={onToggleTheme}>
           {theme === 'light' ? <Moon size={13} /> : <Sun size={13} />}
           {theme === 'light' ? t('Dark mode', 'ডার্ক মোড', lang) : t('Light mode', 'লাইট মোড', lang)}

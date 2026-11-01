@@ -1,4 +1,6 @@
 import { loadPersisted, savePersisted } from '../lib/persist';
+import { nextRef } from '../lib/refs';
+import { nowStamp } from '../lib/clock';
 import React from 'react';
 import { NoticeItem } from '../views/dashboard/types';
 import { NOTICE_BOARD } from '../views/dashboard/dashboardData';
@@ -44,8 +46,8 @@ class NoticeStore {
   addNotice(notice: NoticeItem): NoticeItem {
     const newNotice: NoticeItem = {
       ...notice,
-      id: notice.id || `NOT-2026-${Math.floor(100 + Math.random() * 900)}`,
-      date: notice.date || 'Today, Just Now',
+      id: notice.id || nextRef('NOT'),
+      date: notice.date || nowStamp(),
     };
     this.notices = [newNotice, ...this.notices];
     this.notify();
@@ -61,7 +63,7 @@ class NoticeStore {
     authorRole?: string;
   }): { notice: NoticeItem; broadcast: BroadcastPayload } {
     const id = `BC-${Date.now().toString().slice(-4)}`;
-    const timestamp = 'Today, Just Now';
+    const timestamp = nowStamp();
     const author = data.author || 'Ahmed Akbar Sobhan';
     const authorRole = data.authorRole || 'Chairman & Managing Director';
 
@@ -94,7 +96,7 @@ class NoticeStore {
       requiresAck: data.requireAck,
       acknowledgedCount: 1,
       totalRecipients: 788,
-      referenceNo: `BOGCL/NOTICE/2026-${Math.floor(100 + Math.random() * 900)}`,
+      referenceNo: `BOGCL/NOTICE/${nextRef('NTC', 3).slice(4)}`,
     };
 
     this.notices = [archivedNotice, ...this.notices];

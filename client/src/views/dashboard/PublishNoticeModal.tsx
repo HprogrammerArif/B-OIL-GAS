@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import { NoticeItem } from './types';
 import { t } from '../../types';
+import { useCurrentUser } from '../../auth/session';
+import { nextRef, peekRef } from '../../lib/refs';
+import { nowStamp } from '../../lib/clock';
 
 interface PublishNoticeModalProps {
   isOpen: boolean;
@@ -112,9 +115,10 @@ export default function PublishNoticeModal({
   const [priority, setPriority] = useState<'critical' | 'high' | 'normal'>('high');
   const [targetAudience, setTargetAudience] = useState('All Group Employees (1,240 Staff)');
   const [body, setBody] = useState('');
-  const [author] = useState('Ahmed Akbar Sobhan');
-  const [authorRole] = useState('Chairman & Managing Director');
-  const [referenceNo, setReferenceNo] = useState(`BOGCL/DIR/2026/Q4-${Math.floor(100 + Math.random() * 900)}`);
+  const user = useCurrentUser();
+  const author = user?.name ?? '';
+  const authorRole = user?.label ?? '';
+  const [referenceNo, setReferenceNo] = useState(() => peekRef('NOT'));
   const [pinned, setPinned] = useState(true);
   const [requiresAck, setRequiresAck] = useState(true);
   const [sendSms, setSendSms] = useState(true);
@@ -139,13 +143,13 @@ export default function PublishNoticeModal({
     if (!title.trim()) return;
 
     const newNotice: NoticeItem = {
-      id: `NOT-2026-${Math.floor(100 + Math.random() * 900)}`,
+      id: nextRef('NOT'),
       title: title.trim(),
       title_bn: titleBn.trim() || title.trim(),
       tag,
       category,
       priority,
-      date: 'Today, Just Now',
+      date: nowStamp(lang),
       author,
       authorRole,
       targetAudience,
@@ -930,7 +934,7 @@ export default function PublishNoticeModal({
                 <span className={`badge ${pinned ? 'danger' : 'info'}`}>{tag}</span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '12px' }}>
-                Just Now · {author}, {authorRole} · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-warning)' }}>{referenceNo}</span>
+                {nowStamp(lang)} · {author}, {authorRole} · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-warning)' }}>{referenceNo}</span>
               </div>
               <div style={{ fontSize: '13.5px', color: 'var(--text-2)', lineHeight: 1.6, marginBottom: '16px' }}>
                 {body || 'Notice message body will appear here...'}

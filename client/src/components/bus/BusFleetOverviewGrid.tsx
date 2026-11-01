@@ -187,7 +187,7 @@ export default function BusFleetOverviewGrid({
             {totalBuses} <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--brand-slate-500)' }}>{t('Buses', 'টি বাস', lang)}</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700, marginTop: '4px' }}>
-            ✓ 100% Operational Readiness
+            {t('One bus per staff route', 'প্রতিটি রুটে একটি বাস', lang)}
           </div>
         </div>
 
@@ -205,7 +205,7 @@ export default function BusFleetOverviewGrid({
             {totalCapacity} <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--brand-slate-500)' }}>{t('Seats', 'টি আসন', lang)}</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 600, marginTop: '4px' }}>
-            Across 10 Dhaka Highway Corridors
+            {t(`Across ${totalBuses} routes`, `${totalBuses}টি রুটে`, lang)}
           </div>
         </div>
 
@@ -223,7 +223,7 @@ export default function BusFleetOverviewGrid({
             {overallFillRate}% <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--brand-slate-500)' }}>({totalOccupied}/{totalCapacity})</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--status-warning)', fontWeight: 700, marginTop: '4px' }}>
-            {totalFreeStandby} Vacant / Standby Seats
+            {t(`${totalFreeStandby} seats free`, `${totalFreeStandby}টি আসন খালি`, lang)}
           </div>
         </div>
 
@@ -309,7 +309,7 @@ export default function BusFleetOverviewGrid({
 
                   <div style={{ textAlign: 'right' }}>
                     <span className={`badge ${isSelected ? 'gold' : 'success'}`} style={{ fontSize: '9.5px', padding: '2px 8px', fontWeight: 800 }}>
-                      {isSelected ? '● ACTIVE INSPECTION' : 'ON DUTY'}
+                      {isSelected ? t('● Selected', '● নির্বাচিত', lang) : t('On duty', 'ডিউটিতে', lang)}
                     </span>
                     <div style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 700, marginTop: '3px' }}>
                       {bus.acType}

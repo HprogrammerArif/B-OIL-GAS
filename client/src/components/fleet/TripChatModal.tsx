@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { VehicleRequisition, useFleetStore } from '../../store/fleetStore';
-import { ROLE_META, t } from '../../types';
+import { t } from '../../types';
+import type { FleetParty } from '../../views/fleet/config';
+import { nextRef } from '../../lib/refs';
 import { showToast } from '../ToastManager';
 import {
   MessageSquare, Send, X, Users, Car, MapPin,
@@ -14,7 +16,10 @@ interface TripChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   requisition: VehicleRequisition | null;
-  userRole: 'employee' | 'driver' | 'admin';
+  party: FleetParty;
+  senderName: string;
+  /** Oversight users can read the thread but not post. */
+  readOnly?: boolean;
   lang: 'en' | 'bn';
   onOpenFullDesk?: (req: VehicleRequisition) => void;
 }
@@ -34,31 +39,21 @@ export default function TripChatModal({
   isOpen,
   onClose,
   requisition,
-  userRole,
+  party,
+  senderName,
+  readOnly = false,
   lang,
   onOpenFullDesk,
 }: TripChatModalProps) {
   const { chatMessages, sendChatMessage, approveTollExpense } = useFleetStore();
 
-  const currentStaff = ROLE_META[userRole as keyof typeof ROLE_META] || ROLE_META['employee'];
-
-  // Sender Persona Mode
-  const [activePersona, setActivePersona] = useState<'employee' | 'driver' | 'admin'>(
-    userRole === 'driver' ? 'driver' : userRole === 'admin' ? 'admin' : 'employee'
-  );
-
-  useEffect(() => {
-    setActivePersona(userRole === 'driver' ? 'driver' : userRole === 'admin' ? 'admin' : 'employee');
-  }, [userRole]);
+  const activePersona = party;
 
   const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState<string | null>(null);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showTollForm, setShowTollForm] = useState(false);
   const [tollPlaza, setTollPlaza] = useState('Mayor Hanif Flyover');
   const [tollAmount, setTollAmount] = useState('260');
-  const [tollSlipNo, setTollSlipNo] = useState(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
-
   // Audio Voice Player state
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
@@ -67,14 +62,8 @@ export default function TripChatModal({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Authenticated Persona Profile
-  const personaName = activePersona === 'employee'
-    ? requisition?.requesterName || currentStaff.name
-    : activePersona === 'driver'
-    ? requisition?.assignedDriverName || ROLE_META['driver']?.name || 'Md. Rafiqul Islam (Driver)'
-    : ROLE_META['transport_admin']?.name || 'Md. Kamruzzaman (Transport Admin)';
-
-  const personaRole = activePersona;
+  const personaName = senderName;
+  const personaRole = party;
 
   // Filter messages for current requisition
   const reqMessages = requisition
@@ -99,13 +88,13 @@ export default function TripChatModal({
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [reqMessages.length, isOpen, isTyping, showTollForm, isRecordingVoice]);
+  }, [reqMessages.length, isOpen, showTollForm, isRecordingVoice]);
 
   if (!isOpen || !requisition) return null;
 
   const handleSendMessage = (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
-    if (!text) return;
+    if (!text || readOnly) return;
 
     sendChatMessage(
       requisition.id,
@@ -115,57 +104,6 @@ export default function TripChatModal({
       { messageType: 'text' }
     );
     setInputText('');
-
-    // Simulate realistic counterpart response
-    simulateCounterpartResponse(text, requisition);
-  };
-
-  const simulateCounterpartResponse = (userText: string, req: VehicleRequisition) => {
-    const lower = userText.toLowerCase();
-    const driverName = req.assignedDriverName || 'Md. Shahidul Islam';
-    const vehiclePlate = req.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821';
-
-    if (activePersona === 'employee') {
-      setTimeout(() => {
-        setIsTyping(`${driverName} (Driver)`);
-      }, 800);
-
-      setTimeout(() => {
-        setIsTyping(null);
-        let reply = '';
-        if (lower.includes('where') || lower.includes('location') || lower.includes('gate') || lower.includes('porch')) {
-          reply = `Ji Tanvir Sir, I am at Gate-1 porch with ${vehiclePlate}. AC is running at 21°C. Please come down whenever ready.`;
-        } else if (lower.includes('5 min') || lower.includes('down') || lower.includes('delay') || lower.includes('wait')) {
-          reply = `Noted Sir, take your time. I am parked safely in the bay with drinking water bottles ready.`;
-        } else if (lower.includes('ac') || lower.includes('cool')) {
-          reply = `Cabin temperature is cooled to 20°C Sir. Ready for highway transit.`;
-        } else if (lower.includes('toll') || lower.includes('flyover')) {
-          reply = `Ji Sir, I have paid the Mayor Hanif Flyover toll (৳260) with electronic pass and uploaded the voucher for clearance.`;
-        } else {
-          reply = `Assalamu Alaikum Tanvir Sir, message received. Vehicle ${vehiclePlate} is ready for official duty.`;
-        }
-
-        sendChatMessage(req.id, 'driver', `${driverName} (Driver)`, reply, { messageType: 'text' });
-      }, 2100);
-    } else if (activePersona === 'driver') {
-      setTimeout(() => {
-        setIsTyping('Tanvir Ahmed (Passenger)');
-      }, 800);
-
-      setTimeout(() => {
-        setIsTyping(null);
-        sendChatMessage(req.id, 'employee', 'Tanvir Ahmed', 'Thank you Shahidul Bhai. I am bringing down the documents now.', { messageType: 'text' });
-      }, 2000);
-    } else {
-      setTimeout(() => {
-        setIsTyping(`${driverName} (Driver)`);
-      }, 800);
-
-      setTimeout(() => {
-        setIsTyping(null);
-        sendChatMessage(req.id, 'driver', `${driverName} (Driver)`, `Ji Kamruzzaman Sir, instruction received. Following designated corridor safely.`, { messageType: 'text' });
-      }, 2100);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -198,24 +136,24 @@ export default function TripChatModal({
       return;
     }
 
+    const receiptNo = nextRef('TOL');
     sendChatMessage(
       requisition.id,
       personaRole,
       personaName,
-      `Claimed official highway toll: ${tollPlaza} (৳${amountNum}). Receipt voucher: ${tollSlipNo}`,
+      `Claimed official highway toll: ${tollPlaza} (৳${amountNum}). Receipt voucher: ${receiptNo}`,
       {
         messageType: 'toll_claim',
         tollData: {
           tollName: tollPlaza,
           amount: amountNum,
-          receiptNo: tollSlipNo,
+          receiptNo,
           approved: false
         }
       }
     );
 
     setShowTollForm(false);
-    setTollSlipNo(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
     showToast(t(
       `✓ Toll voucher claimed: ${tollPlaza} (৳${amountNum}). Awaiting Admin audit.`,
       `✓ টোল ভাউচার দাখিল সম্পন্ন: ৳${amountNum}`,
@@ -238,7 +176,6 @@ export default function TripChatModal({
       }
     );
     showToast(t('Voice note sent to mission chat', 'ভয়েস বার্তা পাঠানো হয়েছে', lang), 'success');
-    simulateCounterpartResponse('voice note', requisition);
   };
 
   const quickReplies = activePersona === 'employee'
@@ -375,49 +312,17 @@ export default function TripChatModal({
         {/* ─── 3. SENDER IDENTITY & PERSPECTIVE BAR ─── */}
         <div className="trip-chat-persona-bar">
           <div className="trip-chat-persona-controls">
-            {userRole === 'admin' ? (
-              <>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)' }}>
-                  {t('Dispatch Channel Perspective:', 'প্রেরক মোড:', lang)}
-                </span>
-                <div className="trip-chat-persona-group">
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('employee')}
-                    className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
-                  >
-                    👤 Staff ({requisition?.requesterName?.split(' ')[0] || 'Staff'})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('driver')}
-                    className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
-                  >
-                    🚗 Driver ({requisition?.assignedDriverName?.split(' ')[1] || 'Driver'})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('admin')}
-                    className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
-                  >
-                    🛡️ Dispatch Desk
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
-                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
-                <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{personaName}</span>
-                <span className="badge teal" style={{ fontSize: '10px', textTransform: 'capitalize' }}>
-                  ✓ {activePersona}
-                </span>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
+              {readOnly ? (
+                <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>{t('View only — you are not a party to this trip.', 'শুধু দেখার জন্য — আপনি এই ট্রিপের অংশ নন।', lang)}</span>
+              ) : (
+                <>
+                  <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{personaName}</span>
+                </>
+              )}
+            </div>
           </div>
-
-          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-            Enter sends • Shift+Enter for newline
-          </span>
         </div>
 
         {/* ─── 4. MESSAGES STREAM ─── */}
@@ -524,7 +429,7 @@ export default function TripChatModal({
                         </div>
 
                         {/* RBAC: ONLY ADMIN CAN APPROVE */}
-                        {activePersona === 'admin' && !m.tollData.approved && (
+                        {activePersona === 'admin' && !readOnly && !m.tollData.approved && (
                           <div style={{ paddingTop: '6px', borderTop: '1px solid var(--status-warning-border)', display: 'flex', justifyContent: 'flex-end' }}>
                             <button
                               onClick={() => approveTollExpense(m.id, m.requisitionId, personaName)}
@@ -638,17 +543,6 @@ export default function TripChatModal({
             })
           )}
 
-          {isTyping && (
-            <div className="trip-chat-typing-pill">
-              <span style={{ display: 'inline-flex', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-              </span>
-              <span>{isTyping} is typing...</span>
-            </div>
-          )}
-
           <div ref={messagesEndRef} />
         </div>
 
@@ -698,6 +592,7 @@ export default function TripChatModal({
           </div>
         )}
 
+        {!readOnly && (<>
         {/* ─── 6. ROLE-SPECIFIC QUICK REPLIES ─── */}
         <div className="trip-chat-quick-bar">
           {quickReplies.map((q, idx) => (
@@ -777,10 +672,10 @@ export default function TripChatModal({
                 onKeyDown={handleKeyDown}
                 placeholder={
                   activePersona === 'employee'
-                    ? t('Message driver & dispatch as Tanvir...', 'যাত্রী হিসেবে বার্তা দিন...', lang)
+                    ? t('Message your driver and the transport cell…', 'চালক ও ট্রান্সপোর্ট সেলকে বার্তা দিন…', lang)
                     : activePersona === 'driver'
-                    ? t('Message passenger & dispatch as Driver Shahidul...', 'চালক হিসেবে বার্তা দিন...', lang)
-                    : t('Send official dispatch instruction as Kamruzzaman...', 'ডেসপ্যাচ নির্দেশনা দিন...', lang)
+                    ? t('Message the passenger and the transport cell…', 'যাত্রী ও ট্রান্সপোর্ট সেলকে বার্তা দিন…', lang)
+                    : t('Send an instruction to the driver and passenger…', 'চালক ও যাত্রীকে নির্দেশনা দিন…', lang)
                 }
                 className="trip-chat-input-field"
               />
@@ -797,6 +692,7 @@ export default function TripChatModal({
             </div>
           )}
         </div>
+        </>)}
       </div>
 
       {/* VoIP Calling Modal */}

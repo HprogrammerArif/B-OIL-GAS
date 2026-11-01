@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../../types';
 import { showToast } from '../ToastManager';
+import { peekRef } from '../../lib/refs';
 import { useEmployeeStore } from '../../store/employeeStore';
 import {
   AssetCategory,
@@ -77,7 +78,7 @@ export function RegisterAssetModal({
   );
 
   const applyPreset = (presetKey: 'pump' | 'laptop' | 'tanker' | 'safety' | 'lab') => {
-    const suffix = Math.floor(105 + Math.random() * 88);
+    const suffix = peekRef('TAG', 3).slice(-3);
     if (presetKey === 'pump') {
       setTag(`BOGCL-KER-PMP-${suffix}`);
       setName('Sulzer High-Pressure Bitumen Circulation Booster Pump');
@@ -102,7 +103,7 @@ export function RegisterAssetModal({
       setCategory('it');
       setCriticality('general_c');
       setFacility('Bashundhara Corporate HQ, Baridhara');
-      setFunctionalLocation('Level-8 SAP ERP & Finance Wing');
+      setFunctionalLocation('Level-8 Finance Wing');
       setOem('Lenovo Enterprise');
       setModelNo('P16s-G3-vPro');
       setSerialNo(`LNV-BD-${suffix}`);
@@ -233,7 +234,7 @@ export function RegisterAssetModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Commission & Capitalize Enterprise Asset', 'নতুন মূলধনী সম্পদ নিবন্ধন ও কমিশনিং', lang)}</h3>
-              <div className="eam-modal-subtitle">ISO 55001 / ISO 14224 Taxonomy • SAP S/4HANA FI-AA Capitalization</div>
+              <div className="eam-modal-subtitle">ISO 55001 / ISO 14224 taxonomy • Fixed-asset capitalization</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -442,7 +443,7 @@ export function RegisterAssetModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-primary">
-              <CheckCircle size={15} /> {t('Capitalize in SAP FI-AA & Generate QR Tag', 'এসএপিতে নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
+              <CheckCircle size={15} /> {t('Register Asset & Generate QR Tag', 'সম্পদ নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
             </button>
           </div>
         </form>
@@ -576,7 +577,7 @@ export function TransferAssetModal({
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('New Receiving Custodian (SAP PERNR Bound)', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
+              <label className="eam-label">{t('New Receiving Custodian', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
               <select className="eam-select" value={toEmpId} onChange={(e) => setToEmpId(e.target.value)}>
                 {activeEmployees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
@@ -742,7 +743,7 @@ export function CreateWorkOrderModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Dispatch Maintenance / Calibration Work Order', 'রক্ষণাবেক্ষণ ও ক্যালিব্রেশন কার্যাদেশ তৈরি', lang)}</h3>
-              <div className="eam-modal-subtitle">SAP PM Work Order • OSHA LOTO Interlock • IAS 16 CAPEX/OPEX Split</div>
+              <div className="eam-modal-subtitle">Work order • Lock-out/tag-out • IAS 16 CAPEX/OPEX split</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -937,7 +938,7 @@ export function SubmitAssetRequisitionModal({
   );
   const [justification, setJustification] = useState(
     isStaff
-      ? 'Required for multi-district bitumen dealer credit reconciliation and mobile SAP S/4HANA order entry.'
+      ? 'Required for multi-district bitumen dealer credit reconciliation and mobile ERP order entry.'
       : 'Preventive refractory & electrical hotspot diagnostics across Keraniganj Distillation Unit 1 & 2.'
   );
 
@@ -953,7 +954,7 @@ export function SubmitAssetRequisitionModal({
       setCost('185000');
       setUrgency('normal');
       setSpecs('Core i7 vPro, 32GB RAM, 1TB NVMe, 5G LTE Module & Hardware TPM');
-      setJustification('Required for real-time SAP ERP field order & distributor reconciliation.');
+      setJustification('Required for field order & distributor reconciliation.');
     } else if (p === 'thermal') {
       setTitle('Fluke Ti480 PRO Infrared Thermography Camera');
       setCategory('safety');
@@ -993,7 +994,7 @@ export function SubmitAssetRequisitionModal({
       facility,
       department: meta.dept,
       requestedBy: meta.name,
-      requestedByEmpId: role === 'employee' ? 'EMP-1042' : undefined,
+      requestedByEmpId: meta.empId,
       estimatedCapexBdt: Number(cost) || 100000,
       justification,
       specs,
@@ -1263,7 +1264,7 @@ export function FinalizeDisposalModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Executive Write-Off & Stage-8 Disposal Realization', 'চূড়ান্ত অবলোপন, নিলাম ও আর্কাইভ অনুমোদন', lang)}</h3>
-              <div className="eam-modal-subtitle">SAP S/4HANA FI-AA Asset Retirement • IAS 16.71 Gain/Loss Posting</div>
+              <div className="eam-modal-subtitle">Asset retirement • IAS 16.71 gain/loss posting</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1299,7 +1300,7 @@ export function FinalizeDisposalModal({
             {/* Live IAS 16 Gain/Loss Accounting Preview */}
             <div className="eam-spec-box" style={{ fontSize: '12px' }}>
               <div style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--brand-slate-900)' }}>
-                📊 {t('SAP FI-AA Retirement Journal Preview', 'এসএপি অবলোপন হিসাব প্রাকদর্শন', lang)} ({asset.sapAssetNo})
+                📊 {t('Retirement Journal Preview', 'অবলোপন হিসাব প্রাকদর্শন', lang)} ({asset.sapAssetNo})
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                 <span>Gross Capitalized Cost:</span>
@@ -1333,7 +1334,7 @@ export function FinalizeDisposalModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-gold" style={{ fontWeight: 800 }}>
-              👑 {t('Sanction Write-Off, Post SAP Voucher & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
+              👑 {t('Sanction Write-Off & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
             </button>
           </div>
         </form>
@@ -1486,7 +1487,7 @@ export function DepreciationScheduleModal({
         <div className="eam-modal-ft">
           <button type="button" className="btn-outline" onClick={onClose}>{t('Close', 'বন্ধ করুন', lang)}</button>
           <button type="button" className="btn-primary" onClick={handleExportCsv}>
-            <Download size={14} /> {t('Export SAP FI-AA Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
+            <Download size={14} /> {t('Export Depreciation Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
           </button>
         </div>
       </div>
@@ -1523,7 +1524,7 @@ export function AssetPassportModal({
                 {t('Digital Equipment Passport & Metal QR Plate', 'ডিজিটাল সরঞ্জাম পাসপোর্ট ও মেটাল কিউআর ট্যাগ', lang)}
               </h3>
               <div className="eam-modal-subtitle">
-                ISO 55001 • SAP FI-AA ({asset.sapAssetNo}) • Tamper-Evident Anodized Seal
+                ISO 55001 • Ledger {asset.sapAssetNo}
               </div>
             </div>
           </div>
@@ -1580,7 +1581,7 @@ export function AssetPassportModal({
 
               <div style={{ flex: 1, fontSize: '11px', lineHeight: 1.55 }}>
                 <div><strong>TAG:</strong> <span style={{ color: 'var(--brand-crimson-dark)', fontWeight: 800 }}>{asset.tag}</span></div>
-                <div><strong>SAP FI-AA:</strong> {asset.sapAssetNo} ({asset.glCostCenter})</div>
+                <div><strong>Ledger no.:</strong> {asset.sapAssetNo} ({asset.glCostCenter})</div>
                 <div><strong>SERIAL:</strong> {asset.serialNo}</div>
                 <div><strong>CUSTODIAN:</strong> {asset.custodian}</div>
                 <div><strong>COMMISSIONED:</strong> {asset.commissioningDate}</div>
@@ -1708,7 +1709,7 @@ export function AssetScannerModal({
             <input
               type="text"
               className="eam-search-input"
-              placeholder={t('Filter tag, SAP ID, or equipment to simulate scan...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
+              placeholder={t('Search by tag, ledger no. or equipment...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
               value={scanQuery}
               onChange={(e) => setScanQuery(e.target.value)}
             />

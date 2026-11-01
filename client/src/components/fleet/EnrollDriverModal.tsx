@@ -15,7 +15,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+880 17');
-  const [licenseNo, setLicenseNo] = useState(`DK-BRTA-2022-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [licenseNo, setLicenseNo] = useState('');
   const [licenseType, setLicenseType] = useState<Driver['licenseType']>('Heavy Commercial (HAZMAT)');
   const [licenseExpiry, setLicenseExpiry] = useState('18 Oct 2029');
   const [bloodGroup, setBloodGroup] = useState('B+');

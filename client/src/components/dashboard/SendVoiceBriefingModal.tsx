@@ -20,6 +20,7 @@ import {
 import { Lang, t } from '../../types';
 import { showToast } from '../ToastManager';
 import { voiceBriefingStore, VoiceBriefingItem } from '../../store/voiceBriefingStore';
+import { nowStamp } from '../../lib/clock';
 
 interface SendVoiceBriefingModalProps {
   isOpen: boolean;
@@ -188,7 +189,7 @@ export default function SendVoiceBriefingModal({
       title: currentPresetObj?.title || "Chairman's Executive Voice Directive",
       titleBn: currentPresetObj?.titleBn || 'চেয়ারম্যান মহোদয়ের ভয়েস নির্দেশনা',
       durationSeconds: seconds || 42,
-      recordedAt: 'Today, Just Now',
+      recordedAt: nowStamp(),
       transcript: transcript.trim() || PRESET_VOICE_MEMOS[0].text,
       transcriptBn: transcriptBn.trim() || PRESET_VOICE_MEMOS[0].textBn,
       targetAudiences: audiences.length > 0 ? audiences : ['Inner Circle'],

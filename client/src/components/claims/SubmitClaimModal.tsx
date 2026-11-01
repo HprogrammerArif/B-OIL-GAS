@@ -25,6 +25,12 @@ import { currentUser } from '../../auth/session';
 import { nextRef } from '../../lib/refs';
 import { today } from '../../lib/clock';
 
+const MAX_RECEIPT_BYTES = 15 * 1024 * 1024;
+
+function formatFileSize(bytes: number): string {
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
 export interface ClaimSubmissionData {
   id: string;
   claimant: string;
@@ -150,7 +156,7 @@ export default function SubmitClaimModal({
       date: startDate || new Date().toISOString().split('T')[0],
       category: claimType === 'conveyance' ? 'Local Conveyance' : 'Food / Incidental',
       desc: claimType === 'conveyance' ? 'Local CNG / Uber Travel' : 'Official Outstation Incidental Expense',
-      voucherNo: `VCH-${Math.floor(1000 + Math.random() * 9000)}`,
+      voucherNo: '',
       amount: 500,
     };
     setItems([...items, newItem]);
@@ -195,7 +201,7 @@ export default function SubmitClaimModal({
           date: startDate || '2026-10-28',
           category: 'Daily Allowance (DA)',
           desc: `Official Duty DA (${days} days @ ৳${rate}/day compliant with Grade Policy)`,
-          voucherNo: `DA-CALC-${Math.floor(100 + Math.random() * 900)}`,
+          voucherNo: 'DA-CALC-001',
           amount: daAmount,
         },
         ...items,
@@ -739,22 +745,34 @@ export default function SubmitClaimModal({
               ))}
             </div>
 
-            <div
-              className="claims-dropzone"
-              onClick={() => {
-                const sampleName = `Voucher_Slip_${Math.floor(1000 + Math.random() * 9000)}.pdf`;
-                setVouchers([...vouchers, { name: sampleName, size: '820 KB' }]);
-                showToast(t(`Attached voucher: ${sampleName}`, `ভাউচার সংযুক্ত করা হয়েছে`, lang), 'success');
-              }}
-            >
+            <label className="claims-dropzone" style={{ display: 'block', cursor: 'pointer' }}>
+              <input
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                multiple
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const picked = Array.from(e.target.files ?? []);
+                  e.target.value = '';
+                  const accepted = picked.filter(
+                    (f) => ['application/pdf', 'image/jpeg', 'image/png'].includes(f.type) && f.size <= MAX_RECEIPT_BYTES
+                  );
+                  if (accepted.length < picked.length) {
+                    showToast(t('Only PDF, JPG or PNG files up to 15 MB can be attached.', 'শুধু ১৫ এমবি পর্যন্ত PDF, JPG বা PNG ফাইল সংযুক্ত করা যাবে।', lang), 'warn');
+                  }
+                  if (accepted.length === 0) return;
+                  setVouchers([...vouchers, ...accepted.map((f) => ({ name: f.name, size: formatFileSize(f.size) }))]);
+                  showToast(t(`${accepted.length} receipt(s) attached.`, `${accepted.length}টি রসিদ সংযুক্ত হয়েছে।`, lang), 'success');
+                }}
+              />
               <UploadCloud size={24} style={{ color: 'var(--status-info)', margin: '0 auto 6px' }} />
               <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-700)' }}>
-                {t('Click or drag receipts here to attach', 'রসিদ বা ইনভয়েস সংযুক্ত করতে ক্লিক করুন', lang)}
+                {t('Click to attach receipts', 'রসিদ বা ইনভয়েস সংযুক্ত করতে ক্লিক করুন', lang)}
               </div>
               <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                PDF, JPG, PNG up to 15MB each (Tax invoice, Shohoz tickets, Uber receipts)
+                {t('PDF, JPG or PNG, up to 15 MB each', 'PDF, JPG বা PNG, প্রতিটি সর্বোচ্চ ১৫ এমবি', lang)}
               </div>
-            </div>
+            </label>
           </div>
         </div>
 

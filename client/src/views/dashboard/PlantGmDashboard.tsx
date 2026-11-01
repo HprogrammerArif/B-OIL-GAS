@@ -23,6 +23,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { t } from '../../types';
+import { nowTime } from '../../lib/clock';
 import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import RefineryOutputChart from '../../components/RefineryOutputChart';
@@ -134,7 +135,7 @@ export default function PlantGmDashboard({
         gasTestPassed: true,
         warningTagHung: true,
       },
-      timeIssued: 'Just Now',
+      timeIssued: nowTime(lang),
       validUntil: 'Today, 06:00 PM',
     };
 
@@ -170,7 +171,7 @@ export default function PlantGmDashboard({
       handover: `${newShiftOutgoing} ➔ ${newShiftIncoming}`,
       outgoingEngineer: newShiftOutgoing,
       incomingEngineer: newShiftIncoming,
-      time: 'Just Now',
+      time: nowTime(lang),
       status: 'completed',
       notes: newShiftNotes.trim(),
       criticalWatchItems: newShiftWatch.trim() ? newShiftWatch.split(',').map(s => s.trim()) : ['Normal routine monitoring'],

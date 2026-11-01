@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../types';
-import { Activity, BarChart3, Database, RefreshCw, Zap, TrendingUp, ShieldCheck } from 'lucide-react';
-import { showToast } from './ToastManager';
+import { BarChart3, Database, TrendingUp } from 'lucide-react';
 
 interface RefineryOutputChartProps {
   lang: Lang;
@@ -27,18 +26,9 @@ const TANKS = [
 export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) {
   const [activeTab, setActiveTab] = useState<'7d' | '30d' | 'quarter'>('7d');
   const [hoveredDay, setHoveredDay] = useState<number | null>(6);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const maxVal = 6000;
   const chartHeight = 160;
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-      showToast(t('Keraniganj DCS telemetry stream synchronized with SAP S/4HANA.', 'কেরানীগঞ্জ ডিসিএস টেলিমেট্রি সিঙ্ক সম্পন্ন।', lang), 'gold');
-    }, 700);
-  };
 
   const currentHover = hoveredDay !== null ? PRODUCTION_DATA[hoveredDay] : PRODUCTION_DATA[6];
 
@@ -51,11 +41,10 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
           </div>
           <div>
             <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{t('Keraniganj Bitumen & Petroleum Output Telemetry', 'কেরানীগঞ্জ বিটুমিন ও পেট্রোলিয়াম উৎপাদন টেলিমেট্রি', lang)}</span>
-              <span className="badge success" style={{ fontSize: '9px', padding: '1px 6px' }}>SCADA LIVE</span>
+              <span>{t('Keraniganj Bitumen Output', 'কেরানীগঞ্জ বিটুমিন উৎপাদন', lang)}</span>
             </div>
             <div className="card-subtitle">
-              {t('Continuous DCS Stream • Baseline Target: 5,000 MT/Day • Grade 60/70 & 80/100', 'নিয়মিত ডিসিএস স্ট্রিম • দৈনিক লক্ষ্যমাত্রা: ৫,০০০ মে.টন', lang)}
+              {t('Daily target: 5,000 MT • Grade 60/70 & 80/100', 'দৈনিক লক্ষ্যমাত্রা: ৫,০০০ মে.টন • গ্রেড ৬০/৭০ ও ৮০/১০০', lang)}
             </div>
           </div>
         </div>
@@ -75,15 +64,6 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
               {t('MTD Target', 'চলতি মাস', lang)}
             </button>
           </div>
-
-          <button
-            className="btn-icon-subtle"
-            title="Poll Keraniganj DCS Stream"
-            onClick={handleRefresh}
-            style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          >
-            <RefreshCw size={13} className={isRefreshing ? 'spin-anim' : ''} />
-          </button>
         </div>
       </div>
 

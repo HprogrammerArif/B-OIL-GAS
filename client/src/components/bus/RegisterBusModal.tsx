@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BusVehicle, RouteInfo } from './busTypes';
 import { t } from '../../types';
+import { nextRef } from '../../lib/refs';
 import {
   Bus, X, CheckCircle, Shield, Truck, Calendar, Phone,
   User, Check, Sparkles, Navigation, Fuel, KeyRound
@@ -53,7 +54,7 @@ export default function RegisterBusModal({
       fuelLevel: '95%',
       fitnessExpiry,
       acType,
-      gpsTrackerId: `GPS-BOGCL-${Math.floor(10 + Math.random() * 90)}`
+      gpsTrackerId: nextRef('GPS', 3)
     };
 
     onRegister(newBus);

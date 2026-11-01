@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { ViewProps, ROLE_META, t } from '../types';
+import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
+import { useCurrentUser } from '../auth/session';
+import { nextRef } from '../lib/refs';
+import { nowStamp, nowTime, today } from '../lib/clock';
+import { type GuestMode, guestModeFor, visitorsVisibleTo, isMyGuest } from './guest/config';
 import {
   Users, User, UserCheck, ShieldAlert, QrCode, Plus, Search,
   CheckCircle, Clock, AlertTriangle, Building2, Crown,
@@ -74,296 +78,18 @@ export interface VisitorRecord {
   isEvacuatedSafe?: boolean;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPREHENSIVE REFINERY & CORPORATE SEED DATA
-// ─────────────────────────────────────────────────────────────────────────────
 
-const INITIAL_VISITORS: VisitorRecord[] = [
-  // ── 1. REGULATORY GOVERNMENT INSPECTOR (Checked In - High Risk Zone) ──
-  {
-    id: 'VIS-2026-0811',
-    name: 'Dr. Shahabuddin Ahmed',
-    organization: 'Directorate of Explosives, Govt. of Bangladesh',
-    designation: 'Chief Inspector of Explosives (Grade-1)',
-    category: 'govt',
-    hostEmployee: 'Engr. Md. Harunur Rashid',
-    hostDept: 'Keraniganj Refinery Complex',
-    hostPhone: '01711-554433',
-    facility: 'Keraniganj Bitumen Refinery',
-    permittedZones: [
-      { zoneId: 'Z-01', name: 'Admin Building & Reception', nameBn: 'প্রশাসন ভবন ও অভ্যর্থনা', level: 'green', escortRequired: false },
-      { zoneId: 'Z-02', name: 'Central QC & Bitumen Testing Lab', nameBn: 'কেন্দ্রীয় কিউসি ল্যাব', level: 'yellow', escortRequired: false },
-      { zoneId: 'Z-03', name: 'Bitumen Reactor & Tank Farm Spheres', nameBn: 'রিঅ্যাক্টর ও স্টোরেজ স্ফিয়ার', level: 'red', escortRequired: true },
-    ],
-    purpose: 'Statutory Annual Inspection of Bitumen Storage Spheres, Pressure Relief Valves & Flare Stack',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '10:30 AM',
-    checkInTime: '10:28 AM',
-    status: 'checked_in',
-    durationHours: 4,
-    vehiclePlate: 'DHAKA-METRO-GHA-11-9042',
-    badgeNo: 'GOVT-04',
-    vipProtocol: true,
-    safetyBriefingCompleted: true,
-    ndaSigned: true,
-    ppeCleared: {
-      hardHat: true,
-      safetyGoggles: true,
-      safetyShoes: true,
-      hiVisVest: true,
-      h2sBriefing: true,
-    },
-    phone: '+880 1711-234567',
-    email: 'shahabuddin@explosives.gov.bd',
-    idProofType: 'Official Govt Badge',
-    idProofNumber: 'DOE-HQ-9902',
-    emergencyContact: 'Dept of Explosives Control: 02-9552144',
-    vipTier: 'VIP - Level 2',
-    escortOfficer: 'Major (Retd.) Tariqul Islam (Security Lead)',
-    executiveSuite: 'Refinery Executive Briefing Suite (Ground Floor)',
-    parkingBay: 'VIP Portico Bay #02',
-    dietaryPreferences: 'Executive High Tea & Green Tea',
-    isEvacuatedSafe: true,
-    inspectionFindings: [
-      { focusArea: 'Tanks 1-8 Nitrogen Fire-Safety Seal', observation: 'Tank seal pressure normal at 2.45 bar. Zero gas leakage detected.', status: 'passed', signOffDate: 'Today, 11:15 AM' },
-      { focusArea: 'Bitumen Pressure Safety Valves', observation: 'Safety valves tested and official inspection seals validated.', status: 'passed', signOffDate: 'Today, 11:45 AM' },
-      { focusArea: 'Emergency Flare Pilot Flame', observation: 'Safety flame optical sensor active with backup auto-igniter working.', status: 'passed', signOffDate: 'Today, 12:10 PM' },
-    ],
-  },
+export default function GuestView({ lang }: ViewProps) {
+  const user = useCurrentUser();
+  const mode: GuestMode = user ? guestModeFor(user) : 'host';
+  const currentUserName = user?.name ?? '';
+  const currentUserDept = user?.dept ?? '';
+  const isStaff = mode === 'host';
+  const isGate = mode === 'gate';
+  const canInvite = !!user?.permissions.has('guest:invite');
 
-  // ── 2. INTERNATIONAL VIP DIGNITARY (Pre-Registered - Chairman Escort) ──
-  {
-    id: 'VIS-2026-0812',
-    name: 'Francois Dubois',
-    organization: 'Axens Catalysts & Clean Fuels (France)',
-    designation: 'Senior Technical Director, Hydroprocessing',
-    category: 'vip',
-    hostEmployee: 'Ahmed Akbar Sobhan',
-    hostDept: "Chairman's Office",
-    hostPhone: '01713-000001',
-    facility: 'Bashundhara Corporate HQ, Baridhara',
-    permittedZones: [
-      { zoneId: 'Z-01', name: 'Executive Suite & Boardroom (Level 12)', nameBn: 'এক্সিকিউটিভ স্যুট ও বোর্ডরুম', level: 'green', escortRequired: false },
-      { zoneId: 'Z-04', name: 'Project Engineering Studio (Level 9)', nameBn: 'প্রজেক্ট ইঞ্জিনিয়ারিং স্টুডিও', level: 'green', escortRequired: false },
-    ],
-    purpose: 'High-Level Technical Review for Euro-V Base Oil Expansion Plant & Catalyst Supply Agreement',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '02:30 PM',
-    status: 'pre_registered',
-    durationHours: 3,
-    vehiclePlate: 'DHAKA-METRO-CHA-22-1001 (VIP Escort Pool)',
-    badgeNo: 'VIP-01',
-    vipProtocol: true,
-    safetyBriefingCompleted: true,
-    ndaSigned: true,
-    ppeCleared: {
-      hardHat: false,
-      safetyGoggles: false,
-      safetyShoes: false,
-      hiVisVest: false,
-      h2sBriefing: false,
-    },
-    phone: '+33 6 12 34 56 78',
-    email: 'francois.dubois@axens.net',
-    idProofType: 'Passport',
-    idProofNumber: 'FR-88914022',
-    emergencyContact: 'French Embassy Diplomatic Security: 02-55668600',
-    vipTier: 'VVIP - Level 1',
-    escortOfficer: 'Director Technical / Plant General Manager',
-    executiveSuite: 'Chairman Executive Suite & Boardroom (Level 12)',
-    parkingBay: 'Chairman Private Portico Bay #01',
-    dietaryPreferences: 'French Press Espresso & Continental Executive Lunch',
-    isEvacuatedSafe: false,
-    inspectionFindings: [
-      { focusArea: 'Euro-V Hydrocracker Catalyst Space Velocity', observation: 'Technical review of high-sulfur atmospheric residue conversion kinetics.', status: 'passed', signOffDate: 'Scheduled 03:00 PM' },
-    ],
-  },
-
-  // ── 3. ROADS & HIGHWAYS (RHD) EXECUTIVE (Pre-Registered - Host: TANVIR AHMED) ──
-  {
-    id: 'VIS-2026-0814',
-    name: 'Engr. Mahfuzur Rahman',
-    organization: 'Roads & Highways Department (RHD), Govt of BD',
-    designation: 'Executive Engineer, Procurement & Quality Audit',
-    category: 'govt',
-    hostEmployee: 'Tanvir Ahmed',
-    hostDept: 'Sales & Distribution, Dhaka',
-    hostPhone: '01711-998877',
-    facility: 'Bashundhara Corporate HQ, Baridhara',
-    permittedZones: [
-      { zoneId: 'Z-01', name: 'Sales & Commercial Division (Level 4)', nameBn: 'বিক্রয় ও বাণিজ্যিক বিভাগ', level: 'green', escortRequired: false },
-      { zoneId: 'Z-02', name: 'Executive Meeting Room B (Level 4)', nameBn: 'নির্বাহী সভাকক্ষ', level: 'green', escortRequired: false },
-    ],
-    purpose: 'Commercial Review of BDT 14.5 Crore Penetration 60/70 Bitumen Tender & Certified Test Certificates',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '03:15 PM',
-    status: 'pre_registered',
-    durationHours: 2,
-    vehiclePlate: 'DHAKA-METRO-GHA-14-3829',
-    badgeNo: 'GOVT-06',
-    vipProtocol: true,
-    safetyBriefingCompleted: true,
-    ndaSigned: true,
-    ppeCleared: {
-      hardHat: false,
-      safetyGoggles: false,
-      safetyShoes: false,
-      hiVisVest: false,
-      h2sBriefing: false,
-    },
-    phone: '+880 1712-449911',
-    email: 'mahfuz.rhd@rhd.gov.bd',
-    idProofType: 'Official Govt Badge',
-    idProofNumber: 'RHD-EE-4190',
-    emergencyContact: 'RHD Dhaka Division: 02-48119830',
-    vipTier: 'VIP - Level 2',
-    escortOfficer: 'Tanvir Ahmed (Sales & Commercial Lead)',
-    executiveSuite: 'Commercial Executive Conference Room B (Level 4)',
-    parkingBay: 'Reserved Commercial Portico Bay #04',
-    dietaryPreferences: 'Traditional High Tea & Snacks',
-    isEvacuatedSafe: false,
-    inspectionFindings: [
-      { focusArea: 'Penetration Grade 60/70 Ductility Test', observation: 'Lab tests confirm ductility > 100 cm and softening point 52°C.', status: 'passed', signOffDate: 'Scheduled 03:45 PM' },
-    ],
-  },
-
-  // ── 4. MAJOR ROAD CONTRACTOR (Checked In - Host: TANVIR AHMED) ──
-  {
-    id: 'VIS-2026-0815',
-    name: 'S.M. Rezaul Karim',
-    organization: 'National Asphalt & Infrastructure Works Ltd.',
-    designation: 'Managing Director & Chief Contractor',
-    category: 'client',
-    hostEmployee: 'Tanvir Ahmed',
-    hostDept: 'Sales & Distribution, Dhaka',
-    hostPhone: '01711-998877',
-    facility: 'Bashundhara Corporate HQ, Baridhara',
-    permittedZones: [
-      { zoneId: 'Z-01', name: 'Sales & Commercial Division (Level 4)', nameBn: 'বিক্রয় ও বাণিজ্যিক বিভাগ', level: 'green', escortRequired: false },
-    ],
-    purpose: 'Finalize Purchase Order for 2,500 MT Bulk Bitumen & Payment Term L/C Verification',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '11:00 AM',
-    checkInTime: '11:05 AM',
-    status: 'checked_in',
-    durationHours: 3,
-    vehiclePlate: 'DHAKA-METRO-GHA-18-2020',
-    badgeNo: 'CLN-09',
-    vipProtocol: false,
-    safetyBriefingCompleted: true,
-    ndaSigned: true,
-    ppeCleared: {
-      hardHat: false,
-      safetyGoggles: false,
-      safetyShoes: false,
-      hiVisVest: false,
-      h2sBriefing: false,
-    },
-    phone: '+880 1819-338822',
-    email: 'rezaul@nationalasphalt.com.bd',
-    idProofType: 'National ID',
-    idProofNumber: '19842691234567890',
-    emergencyContact: 'Corporate HQ: 01819-001122',
-    vipTier: 'Official Delegation',
-    executiveSuite: 'Commercial Meeting Room B',
-    parkingBay: 'Visitor Bay #08',
-    dietaryPreferences: 'Tea & Coffee',
-    isEvacuatedSafe: true,
-  },
-
-  // ── 5. TECHNICAL VENDOR (Checked In - High Hazards SCADA PLC Checks) ──
-  {
-    id: 'VIS-2026-0813',
-    name: 'Enamul Haque',
-    organization: 'Siemens Energy Bangladesh Ltd.',
-    designation: 'Field Service Automation Engineer',
-    category: 'vendor',
-    hostEmployee: 'Engr. Tariq Ahmed',
-    hostDept: 'Refinery Maintenance',
-    hostPhone: '01712-334455',
-    facility: 'Keraniganj Bitumen Refinery',
-    permittedZones: [
-      { zoneId: 'Z-01', name: 'Admin Building & Workshop', nameBn: 'ওয়ার্কশপ ও প্রশাসন', level: 'green', escortRequired: false },
-      { zoneId: 'Z-05', name: 'SCADA Central Control Room (DCS)', nameBn: 'স্কার্ডা কন্ট্রোল রুম', level: 'yellow', escortRequired: true },
-    ],
-    purpose: 'SCADA PLC Unit 2 firmware diagnostics, redundant safety interlock checks & burner trip loop verification',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '11:15 AM',
-    checkInTime: '11:12 AM',
-    status: 'checked_in',
-    durationHours: 6,
-    vehiclePlate: 'DHAKA-METRO-KHA-55-4019',
-    badgeNo: 'VND-18',
-    vipProtocol: false,
-    safetyBriefingCompleted: true,
-    ndaSigned: true,
-    ppeCleared: {
-      hardHat: true,
-      safetyGoggles: true,
-      safetyShoes: true,
-      hiVisVest: true,
-      h2sBriefing: true,
-    },
-    phone: '+880 1912-345678',
-    email: 'enamul.haque@siemens-energy.com',
-    idProofType: 'Company ID',
-    idProofNumber: 'SIE-BD-8841',
-    emergencyContact: 'Siemens Dispatch Control: 02-9883300',
-    escortOfficer: 'Engr. Tariq Ahmed (Process Instrumentation)',
-    parkingBay: 'Technical Contractor Lot Bay #12',
-    isEvacuatedSafe: false,
-  },
-
-  // ── 6. STATUTORY STANDARDS OFFICER (Checked Out) ──
-  {
-    id: 'VIS-2026-0810',
-    name: 'Kazi Mahbub Alam',
-    organization: 'BSTI Standards Directorate',
-    designation: 'Senior Field Officer, Chemical Testing Division',
-    category: 'govt',
-    hostEmployee: 'Adv. Karim Molla',
-    hostDept: 'Legal & Regulatory Compliance',
-    facility: 'Keraniganj Bitumen Refinery',
-    permittedZones: [
-      { zoneId: 'Z-02', name: 'Central Quality Lab (Keraniganj)', nameBn: 'কেন্দ্রীয় মান নিয়ন্ত্রণ ল্যাব', level: 'yellow', escortRequired: false },
-    ],
-    purpose: 'Sample verification for VG-30 Paving Grade Bitumen certification & laboratory batch logs audit',
-    expectedDate: 'Today, 17 Oct',
-    expectedTime: '09:00 AM',
-    checkInTime: '09:05 AM',
-    checkOutTime: '12:40 PM',
-    status: 'checked_out',
-    durationHours: 4,
-    badgeNo: 'GOVT-02',
-    ndaSigned: true,
-    safetyBriefingCompleted: true,
-    ppeCleared: {
-      hardHat: true,
-      safetyGoggles: true,
-      safetyShoes: true,
-      hiVisVest: true,
-      h2sBriefing: true,
-    },
-    phone: '+880 1819-876543',
-    idProofType: 'Official Govt Badge',
-    idProofNumber: 'BSTI-CHEM-092',
-    vipTier: 'VIP - Level 2',
-    inspectionFindings: [
-      { focusArea: 'BDS 1238 Batch Audit for Dhaka-Sylhet Highway', observation: 'Flash point > 240°C verified, fully compliant with BSTI standards.', status: 'passed', signOffDate: 'Today, 10:15 AM' },
-    ],
-    isEvacuatedSafe: true,
-  },
-];
-
-export default function GuestView({ role, lang }: ViewProps) {
-  const currentUser = ROLE_META[role] || ROLE_META.employee;
-  const currentUserName = currentUser.name;
-  const currentUserDept = currentUser.dept;
-  const isStaff = role === 'employee';
-
-  // Persistent Operations Store
   const { visitors, setVisitors } = useOperationsStore();
-  const [selectedVisitorId, setSelectedVisitorId] = useState<string>('VIS-2026-0811');
+  const [selectedVisitorId, setSelectedVisitorId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'inside' | 'my_guests' | 'vip_govt' | 'pre_registered'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [facilityFilter, setFacilityFilter] = useState<'all' | 'Keraniganj Bitumen Refinery' | 'Bashundhara Corporate HQ, Baridhara'>('all');
@@ -403,12 +129,11 @@ export default function GuestView({ role, lang }: ViewProps) {
   const [formDesignation, setFormDesignation] = useState('');
   const [formCategory, setFormCategory] = useState<VisitorRecord['category']>('client');
   const [formFacility, setFormFacility] = useState<VisitorRecord['facility']>('Bashundhara Corporate HQ, Baridhara');
-  const [formHost, setFormHost] = useState(isStaff ? currentUserName : '');
   const [formPurpose, setFormPurpose] = useState('');
   const [formVehicle, setFormVehicle] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formEmail, setFormEmail] = useState('');
-  const [formDate, setFormDate] = useState('Today, 17 Oct');
+  const [formDate, setFormDate] = useState(`Today, ${today().split(' ').slice(0, 2).join(' ')}`);
   const [formTime, setFormTime] = useState('02:30 PM');
   const [formDuration, setFormDuration] = useState('3');
   const [formIdProofType, setFormIdProofType] = useState<VisitorRecord['idProofType']>('National ID');
@@ -417,29 +142,25 @@ export default function GuestView({ role, lang }: ViewProps) {
   // ─────────────────────────────────────────────────────────────────────────
   // Scoped & Filtered Visitors
   // ─────────────────────────────────────────────────────────────────────────
-  const scopedVisitors = useMemo(() => {
-    if (scopeMode === 'my_guests') {
-      return visitors.filter(v =>
-        v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()) ||
-        (isStaff && v.hostEmployee.toLowerCase().includes('tanvir'))
-      );
-    }
-    return visitors;
-  }, [visitors, scopeMode, currentUserName, isStaff]);
+  const scopedVisitors = useMemo(
+    () => (user ? visitorsVisibleTo(user, mode, visitors, scopeMode) : []),
+    [user, mode, visitors, scopeMode],
+  );
 
-  const selectedVisitor = useMemo(() => {
-    return visitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0] || visitors[0];
-  }, [visitors, selectedVisitorId, scopedVisitors]);
+  const selectedVisitor: VisitorRecord | undefined = useMemo(
+    () => scopedVisitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0],
+    [selectedVisitorId, scopedVisitors],
+  );
 
-  // Statistics calculation
   const stats = useMemo(() => {
-    const inside = visitors.filter(v => v.status === 'checked_in');
-    const preReg = visitors.filter(v => v.status === 'pre_registered');
-    const vipGovt = visitors.filter(v => v.category === 'vip' || v.category === 'govt');
-    const myGuests = visitors.filter(v => v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase()));
+    const pool = mode === 'host' ? scopedVisitors : visitors;
+    const inside = pool.filter(v => v.status === 'checked_in');
+    const preReg = pool.filter(v => v.status === 'pre_registered');
+    const vipGovt = pool.filter(v => v.category === 'vip' || v.category === 'govt');
+    const myGuests = user ? visitors.filter(v => isMyGuest(v, user)) : [];
     const myGuestsInside = myGuests.filter(v => v.status === 'checked_in');
 
-    const ppeTotal = visitors.filter(v => v.facility === 'Keraniganj Bitumen Refinery');
+    const ppeTotal = pool.filter(v => v.facility === 'Keraniganj Bitumen Refinery');
     const ppeCleared = ppeTotal.filter(v => v.ppeCleared.hardHat && v.ppeCleared.safetyShoes);
 
     return {
@@ -451,15 +172,15 @@ export default function GuestView({ role, lang }: ViewProps) {
       myGuestsCount: myGuests.length,
       myGuestsInsideCount: myGuestsInside.length,
       ppeComplianceRate: ppeTotal.length ? Math.round((ppeCleared.length / ppeTotal.length) * 100) : 100,
-      overdueCount: visitors.filter(v => v.status === 'overdue').length,
+      overdueCount: pool.filter(v => v.status === 'overdue').length,
     };
-  }, [visitors, currentUserName]);
+  }, [visitors, scopedVisitors, mode, user]);
 
   const displayedVisitors = useMemo(() => {
     return scopedVisitors.filter(v => {
       // Tab Filtering
       if (activeTab === 'inside' && v.status !== 'checked_in') return false;
-      if (activeTab === 'my_guests' && !v.hostEmployee.toLowerCase().includes(currentUserName.toLowerCase())) return false;
+      if (activeTab === 'my_guests' && (!user || !isMyGuest(v, user))) return false;
       if (activeTab === 'vip_govt' && v.category !== 'vip' && v.category !== 'govt') return false;
       if (activeTab === 'pre_registered' && v.status !== 'pre_registered') return false;
 
@@ -482,47 +203,42 @@ export default function GuestView({ role, lang }: ViewProps) {
 
       return true;
     });
-  }, [scopedVisitors, activeTab, facilityFilter, searchQuery, currentUserName]);
+  }, [scopedVisitors, activeTab, facilityFilter, searchQuery, user]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Handlers
   // ─────────────────────────────────────────────────────────────────────────
 
   const handleCheckIn = (id: string) => {
-    setVisitors(prev => prev.map(v => {
-      if (v.id === id) {
-        const badge = v.category === 'vip' ? 'VIP-02' : v.category === 'govt' ? 'GOVT-05' : `BDG-${Math.floor(100 + Math.random() * 900)}`;
-        return {
-          ...v,
-          status: 'checked_in',
-          checkInTime: 'Just Now',
-          badgeNo: badge,
-          safetyBriefingCompleted: true,
-        };
-      }
-      return v;
-    }));
-
+    if (!isGate) return;
     const target = visitors.find(v => v.id === id);
-    if (target?.vipProtocol || target?.category === 'vip' || target?.category === 'govt') {
-      showToast(
-        lang === 'en'
-          ? `👑 VIP PROTOCOL ACTIVATED: ${target?.name} checked in. Escort vehicle & Chairman Secretariat alerted.`
-          : `👑 ভিআইপি প্রটোকল সক্রিয়: ${target?.name} প্রবেশ করেছেন। সচিবালয়কে অবহিত করা হয়েছে।`,
-        'gold'
-      );
+    if (!target || target.status === 'checked_in') return;
+    const badge = nextRef('BDG', 3);
+    const time = nowTime();
+    setVisitors(prev => prev.map(v => v.id === id ? {
+      ...v,
+      status: 'checked_in',
+      checkInTime: time,
+      badgeNo: badge,
+      safetyBriefingCompleted: true,
+    } : v));
+
+    if (target.vipProtocol || target.category === 'vip' || target.category === 'govt') {
+      showToast(t(`${target.name} checked in with badge ${badge}. Host ${target.hostEmployee} notified for escort.`, `${target.name} ব্যাজ ${badge} সহ প্রবেশ করেছেন। হোস্টকে এসকর্টের জন্য জানানো হয়েছে।`, lang), 'gold');
     } else {
-      showToast(lang === 'en' ? `Visitor ${target?.name} checked in. Badge ${target?.badgeNo || 'BDG-01'} issued.` : `অতিথি চেক-ইন সফল হয়েছে। ব্যাজ প্রদান সম্পন্ন।`, 'success');
+      showToast(t(`${target.name} checked in. Badge ${badge} issued.`, `${target.name} চেক-ইন সম্পন্ন। ব্যাজ ${badge} প্রদান করা হয়েছে।`, lang), 'success');
     }
   };
 
   const handleCheckOut = (id: string) => {
-    setVisitors(prev => prev.map(v => v.id === id ? { ...v, status: 'checked_out', checkOutTime: 'Just Now' } : v));
-    showToast(lang === 'en' ? `Security checkout logged. Badge surrendered & barrier cleared.` : `পাস জমা ও নিরাপত্তা চেক-আউট সম্পন্ন হয়েছে।`, 'info');
+    if (!isGate) return;
+    const time = nowTime();
+    setVisitors(prev => prev.map(v => v.id === id ? { ...v, status: 'checked_out', checkOutTime: time } : v));
+    showToast(t('Checked out. Badge returned.', 'চেক-আউট সম্পন্ন। ব্যাজ জমা হয়েছে।', lang), 'info');
   };
 
   const handleTogglePPE = (gearKey: keyof VisitorRecord['ppeCleared']) => {
-    if (!selectedVisitor) return;
+    if (!selectedVisitor || !isGate) return;
     setVisitors(prev => prev.map(v => {
       if (v.id === selectedVisitor.id) {
         const updatedPPE = {
@@ -540,26 +256,29 @@ export default function GuestView({ role, lang }: ViewProps) {
   };
 
   const handleSimulateBarrier = () => {
+    if (!isGate) return;
     setBarrierOpen(true);
-    showToast(t('ALPR CAMERA MATCHED: Vehicle plate verified. Gate Barrier #1 RAISED.', 'লাইসেন্স প্লেট মিল নিশ্চিত: গেট বেরিয়ার ১ উন্মুক্ত হয়েছে।', lang), 'gold');
+    showToast(t('Plate matches the pass. Barrier raised.', 'প্লেট পাসের সাথে মিলেছে। বেরিয়ার খোলা হয়েছে।', lang), 'success');
     setTimeout(() => {
       setBarrierOpen(false);
     }, 4000);
   };
 
   const handleToggleEvacuated = (id: string) => {
+    if (!isGate) return;
     setVisitors(prev => prev.map(v => v.id === id ? { ...v, isEvacuatedSafe: !v.isEvacuatedSafe } : v));
     const target = visitors.find(v => v.id === id);
     showToast(t(`Evacuation safety status updated for ${target?.name || 'visitor'}.`, `ইভাকুয়েশন স্ট্যাটাস আপডেট করা হয়েছে।`, lang), 'info');
   };
 
   const handleMarkAllEvacuatedSafe = () => {
+    if (!isGate) return;
     setVisitors(prev => prev.map(v => v.status === 'checked_in' ? { ...v, isEvacuatedSafe: true } : v));
     showToast(t(`✓ All inside visitors marked safe at Assembly Point #3.`, `✓ সকল অতিথিকে অ্যাসেম্বলি পয়েন্ট ৩-এ নিরাপদ চিহ্নিত করা হয়েছে।`, lang), 'success');
   };
 
   const handleApproveAllPPE = () => {
-    if (!selectedVisitor) return;
+    if (!selectedVisitor || !isGate) return;
     setVisitors(prev => prev.map(v => {
       if (v.id === selectedVisitor.id) {
         return {
@@ -588,22 +307,13 @@ export default function GuestView({ role, lang }: ViewProps) {
   };
 
   const handleBroadcastEvacuationAlert = () => {
+    if (!isGate) return;
     const insideCount = visitors.filter(v => v.status === 'checked_in').length;
-    showToast(
-      lang === 'en'
-        ? `🚨 EMERGENCY BROADCAST SENT: Urgent evacuation SMS dispatched to all ${insideCount} visitors on campus!`
-        : `🚨 জরুরি সতর্কতা প্রেরণ: ক্যাম্পাসে উপস্থিত ${insideCount} জন অতিথির মোবাইলে ইভাকুয়েশন এসএমএস পাঠানো হয়েছে!`,
-      'danger'
-    );
+    showToast(t(`Evacuation SMS sent to ${insideCount} visitor(s) on site.`, `সাইটে থাকা ${insideCount} জন অতিথিকে ইভাকুয়েশন এসএমএস পাঠানো হয়েছে।`, lang), 'danger');
   };
 
   const handleNotifyChairmanVIP = (v: VisitorRecord) => {
-    showToast(
-      lang === 'en'
-        ? `👑 VIP PROTOCOL ALERT: Arrival notification for ${v.name} (${v.organization}) dispatched to Chairman's Inner Circle & Plant GM!`
-        : `👑 ভিআইপি প্রটোকল সতর্কতা: ${v.name}-এর আগমন বার্তা চেয়ারম্যান সচিবালয় ও প্ল্যান্ট জিএম-কে পাঠানো হয়েছে!`,
-      'gold'
-    );
+    showToast(t(`Arrival notice for ${v.name} sent to the host and the Chairman's office.`, `${v.name}-এর আগমন বার্তা হোস্ট ও চেয়ারম্যান দপ্তরে পাঠানো হয়েছে।`, lang), 'success');
   };
 
   const handleAddInspectionFinding = () => {
@@ -617,7 +327,7 @@ export default function GuestView({ role, lang }: ViewProps) {
       focusArea: newFindingFocus.trim(),
       observation: newFindingObs.trim(),
       status: newFindingStatus,
-      signOffDate: 'Just Now',
+      signOffDate: nowStamp(),
     };
 
     const updatedFindings = [...(selectedVisitor.inspectionFindings || []), newFinding];
@@ -641,21 +351,22 @@ export default function GuestView({ role, lang }: ViewProps) {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canInvite) return;
     if (!formName.trim() || !formOrg.trim() || !formPurpose.trim()) {
       showToast(lang === 'en' ? 'Please complete required fields.' : 'অনুগ্রহ করে প্রয়োজনীয় তথ্য পূরণ করুন।', 'warn');
       return;
     }
 
-    const newId = `VIS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newId = nextRef('VIS');
     const newVis: VisitorRecord = {
       id: newId,
       name: formName.trim(),
       organization: formOrg.trim(),
       designation: formDesignation.trim() || (formCategory === 'vip' ? 'Honorary Dignitary' : formCategory === 'govt' ? 'Official Inspector' : 'Representative'),
       category: formCategory,
-      hostEmployee: formHost.trim() || currentUserName,
-      hostDept: isStaff ? currentUserDept : 'Plant Administration',
-      hostPhone: '+880 1711-998877',
+      hostEmployee: currentUserName,
+      hostDept: currentUserDept,
+      hostPhone: user?.phone ?? '',
       facility: formFacility,
       permittedZones: [
         { zoneId: 'Z-01', name: 'Reception & Admin Lobby', nameBn: 'অভ্যর্থনা ও লবি', level: 'green', escortRequired: false },
@@ -680,10 +391,10 @@ export default function GuestView({ role, lang }: ViewProps) {
         h2sBriefing: formFacility === 'Keraniganj Bitumen Refinery',
       },
       idProofType: formIdProofType,
-      idProofNumber: formIdProofNum.trim() || 'NID-VERIFIED',
+      idProofNumber: formIdProofNum.trim(),
     };
 
-    setVisitors([newVis, ...visitors]);
+    setVisitors(prev => [newVis, ...prev]);
     setSelectedVisitorId(newVis.id);
     setShowRegisterModal(false);
 
@@ -697,12 +408,7 @@ export default function GuestView({ role, lang }: ViewProps) {
     setFormEmail('');
     setFormIdProofNum('');
 
-    showToast(
-      lang === 'en'
-        ? `Digital Gate Pass ${newId} issued for ${newVis.name}! Encrypted QR dispatched.`
-        : `ডিজিটাল গেট পাস ${newId} সফলভাবে তৈরি হয়েছে! কিউআর কোড পাঠানো হয়েছে।`,
-      'success'
-    );
+    showToast(t(`Gate pass ${newId} issued for ${newVis.name}. The QR pass has been sent to the visitor.`, `${newVis.name}-এর জন্য গেট পাস ${newId} তৈরি হয়েছে। কিউআর পাস অতিথিকে পাঠানো হয়েছে।`, lang), 'success');
   };
 
   const getCategoryBadge = (category: VisitorRecord['category']) => {
@@ -710,7 +416,7 @@ export default function GuestView({ role, lang }: ViewProps) {
       case 'vip':
         return <span className="badge gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>👑 VIP Guest</span>;
       case 'govt':
-        return <span className="badge danger" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🏛️ Govt Inspector</span>;
+        return <span className="badge danger" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🏛️ {t('Govt inspector', 'সরকারি পরিদর্শক', lang)}</span>;
       case 'client':
         return <span className="badge meeting" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>🤝 Commercial Client</span>;
       case 'vendor':
@@ -728,147 +434,85 @@ export default function GuestView({ role, lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="flex-between mb-4" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
-              {t('Guest & VIP Protocol Management', 'অতিথি ও ভিআইপি প্রটোকল ব্যবস্থাপনা', lang)}
-            </h2>
-            <span className="badge success" style={{ fontSize: '10.5px' }}>
-              🛡️ {t('Security & VIP Desk', 'নিরাপত্তা ও ভিআইপি ডেস্ক', lang)}
-            </span>
-          </div>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
+            {isGate
+              ? t('Visitor Gate', 'ভিজিটর গেট', lang)
+              : mode === 'oversight'
+              ? t('Visitors on Site', 'সাইটে অতিথি', lang)
+              : t('My Guests', 'আমার অতিথি', lang)}
+          </h2>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
-            {t(
-              'Digital QR gate passes, vehicle barrier entry, safety equipment clearance, and evacuation roster.',
-              'কিউআর গেট পাস, গাড়ি বেরিয়ার এন্ট্রি, নিরাপত্তা সরঞ্জাম ছাড়পত্র ও জরুরি ইভাকুয়েশন তালিকা।',
-              lang
-            )}
+            {isGate
+              ? t('Check visitors in and out, issue badges, clear PPE and run the evacuation roll-call.', 'অতিথি চেক-ইন/আউট, ব্যাজ, পিপিই ছাড়পত্র ও ইভাকুয়েশন রোল-কল।', lang)
+              : mode === 'oversight'
+              ? t('Every gate pass across HQ and the plant.', 'প্রধান কার্যালয় ও প্ল্যান্টের সকল গেট পাস।', lang)
+              : t('Invite a visitor and track their gate pass.', 'অতিথি আমন্ত্রণ জানান ও গেট পাস অনুসরণ করুন।', lang)}
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Pre-Register Button (Primary) */}
-          <button
-            className="btn-primary"
-            style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--brand-crimson)', color: 'var(--text-on-brand)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => {
-              setFormHost(isStaff ? currentUserName : '');
-              setShowRegisterModal(true);
-            }}
-          >
-            <Plus size={14} />
-            {t('Pre-Register Guest', 'নতুন অতিথি প্রাক-নিবন্ধন', lang)}
-          </button>
+          {canInvite && (
+            <button
+              className="btn-primary"
+              style={{ fontSize: '12px', padding: '7px 14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={() => setShowRegisterModal(true)}
+            >
+              <Plus size={14} />
+              {t('Invite a guest', 'অতিথি আমন্ত্রণ', lang)}
+            </button>
+          )}
 
-          {/* Quick QR Scanner Simulator */}
-          <button
-            className="btn-gold"
-            style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
-            onClick={() => setShowScannerModal(true)}
-            title="Open Live Gate QR Scanner & Plate Reader"
-          >
-            <Scan size={14} />
-            {t('Fast Gate Scan', 'গেট কিউআর স্ক্যানার', lang)}
-          </button>
-
-          {/* Emergency Muster Button */}
-          <button
-            className="btn-outline-danger"
-            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowMusterModal(true)}
-            title="View Live Evacuation Roll-Call Roster"
-          >
-            <Flame size={14} />
-            {t('Evacuation Roll-Call', 'জরুরি ইভাকুয়েশন তালিকা', lang)} ({stats.totalInside})
-          </button>
-
-          {/* Vehicle Gate Barrier Scanner Simulator */}
-          <button
-            className="btn-outline"
-            style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowALPRModal(true)}
-          >
-            <Car size={14} />
-            {t('Boom Barrier Live', 'গাড়ি গেট ও ক্যামেরা', lang)}
-          </button>
+          {isGate && (
+            <>
+              <button
+                className="btn-gold"
+                style={{ fontSize: '12px', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800 }}
+                onClick={() => setShowScannerModal(true)}
+              >
+                <Scan size={14} />
+                {t('Scan pass', 'পাস স্ক্যান', lang)}
+              </button>
+              <button
+                className="btn-outline-danger"
+                style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => setShowMusterModal(true)}
+              >
+                <Flame size={14} />
+                {t('Evacuation roll-call', 'ইভাকুয়েশন রোল-কল', lang)} ({stats.totalInside})
+              </button>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => setShowALPRModal(true)}
+              >
+                <Car size={14} />
+                {t('Vehicle gate', 'গাড়ি গেট', lang)}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Staff Workspace & Scope Notice */}
-      <div
-        style={{
-          background: isStaff ? 'rgba(59, 130, 246, 0.08)' : 'rgba(16, 185, 129, 0.08)',
-          border: `1px solid ${isStaff ? 'rgba(59, 130, 246, 0.25)' : 'rgba(16, 185, 129, 0.25)'}`,
-          borderRadius: 'var(--radius-md)',
-          padding: '10px 16px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '10px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-          <div
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              background: isStaff ? 'var(--status-info-solid)' : 'var(--status-success-solid)',
-              color: 'var(--text-on-brand)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '11px',
-            }}
-          >
-            {currentUser.initials}
-          </div>
-          <div>
-            <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>
-              {currentUserName} ({currentUserDept})
-            </span>
-            <span style={{ color: 'var(--brand-slate-500)', marginLeft: '6px' }}>
-              • {t('Active Workspace:', 'সক্রিয় মোড:', lang)}{' '}
-              <strong>
-                {scopeMode === 'my_guests'
-                  ? t('Showing guests hosted by you', 'আপনার আমন্ত্রিত অতিথি দেখা হচ্ছে', lang)
-                  : t('Showing all campus visitors across facilities', 'সকল শাখার অতিথি প্রদর্শিত হচ্ছে', lang)}
-              </strong>
-            </span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ display: 'flex', background: 'var(--brand-slate-200)', borderRadius: '6px', padding: '2px' }}>
+      {mode !== 'host' && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', background: 'var(--surface-2)', borderRadius: '6px', padding: '2px' }}>
             <button
               className={`btn-sm-ghost ${scopeMode === 'my_guests' ? 'active' : ''}`}
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '3px 10px',
-                background: scopeMode === 'my_guests' ? 'var(--surface-1)' : 'transparent',
-              }}
+              style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', background: scopeMode === 'my_guests' ? 'var(--surface-1)' : 'transparent' }}
               onClick={() => setScopeMode('my_guests')}
             >
-              {t('My Guests', 'আমার অতিথি', lang)} ({stats.myGuestsCount})
+              {t('My guests', 'আমার অতিথি', lang)} ({stats.myGuestsCount})
             </button>
             <button
               className={`btn-sm-ghost ${scopeMode === 'all' ? 'active' : ''}`}
-              style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '3px 10px',
-                background: scopeMode === 'all' ? 'var(--surface-1)' : 'transparent',
-              }}
+              style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', background: scopeMode === 'all' ? 'var(--surface-1)' : 'transparent' }}
               onClick={() => setScopeMode('all')}
             >
-              {t('All Campus Manifest', 'সকল ক্যাম্পাস তালিকা', lang)} ({visitors.length})
+              {t('All visitors', 'সকল অতিথি', lang)} ({visitors.length})
             </button>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 2. 5-KPI EXECUTIVE SECURITY & PROTOCOL CARDS */}
@@ -989,8 +633,7 @@ export default function GuestView({ role, lang }: ViewProps) {
         {/* Card 5: ALPR Barrier & Gate Protocol */}
         <div
           className="parcel-kpi-card"
-          onClick={() => setShowALPRModal(true)}
-          title="Click to view ALPR gate camera feed"
+          onClick={() => isGate && setShowALPRModal(true)}
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
@@ -998,7 +641,7 @@ export default function GuestView({ role, lang }: ViewProps) {
               <Shield size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
-              {t('ALPR ACTIVE', 'সেন্সর সক্রিয়', lang)}
+              {t('GATE', 'গেট', lang)}
             </span>
           </div>
           <div>
@@ -1032,7 +675,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 onChange={(e) => setFacilityFilter(e.target.value as any)}
                 style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--brand-slate-300)' }}
               >
-                <option value="all">All Facilities</option>
+                <option value="all">{t('All facilities', 'সকল স্থাপনা', lang)}</option>
                 <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
                 <option value="Bashundhara Corporate HQ, Baridhara">Dhaka HQ Baridhara</option>
               </select>
@@ -1133,7 +776,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                           </span>
                         ) : v.status === 'pre_registered' ? (
                           <span className="badge info" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
-                            EXPECTED {v.expectedTime}
+                            {t('Expected', 'প্রত্যাশিত', lang)} {v.expectedTime}
                           </span>
                         ) : (
                           <span className="badge neutral" style={{ fontSize: '9.5px', padding: '2px 6px' }}>
@@ -1151,7 +794,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '10.5px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ color: isHostMe ? 'var(--status-info)' : 'var(--brand-slate-600)', fontWeight: isHostMe ? 700 : 500 }}>
-                          Host: {v.hostEmployee}
+                          {t('Host', 'আমন্ত্রণকারী', lang)}: {v.hostEmployee}
                         </span>
                         <span style={{ color: 'var(--brand-slate-300)' }}>•</span>
                         <span style={{ color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>
@@ -1335,26 +978,32 @@ export default function GuestView({ role, lang }: ViewProps) {
 
                 {/* Primary Action Buttons */}
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  {selectedVisitor.status === 'pre_registered' ? (
+                  {isGate && selectedVisitor.status === 'pre_registered' ? (
                     <button
                       className="btn-primary"
                       style={{ fontSize: '12px', padding: '6px 14px', background: 'var(--status-success-solid)', display: 'flex', alignItems: 'center', gap: '6px' }}
                       onClick={() => handleCheckIn(selectedVisitor.id)}
                     >
                       <UserCheck size={14} />
-                      {t('Check-In & Issue Badge', 'চেক-ইন ও ব্যাজ প্রদান', lang)}
+                      {t('Check in & issue badge', 'চেক-ইন ও ব্যাজ প্রদান', lang)}
                     </button>
-                  ) : selectedVisitor.status === 'checked_in' ? (
+                  ) : isGate && selectedVisitor.status === 'checked_in' ? (
                     <button
                       className="btn-outline-danger"
                       style={{ fontSize: '12px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}
                       onClick={() => handleCheckOut(selectedVisitor.id)}
                     >
                       <Clock size={14} />
-                      {t('Check-Out & Surrender', 'চেক-আউট ও পাস ফেরত', lang)}
+                      {t('Check out', 'চেক-আউট', lang)}
                     </button>
                   ) : (
-                    <span className="badge" style={{ padding: '6px 12px' }}>Visit Completed</span>
+                    <span className="badge" style={{ padding: '6px 12px' }}>
+                      {selectedVisitor.status === 'pre_registered'
+                        ? t('Expected', 'প্রত্যাশিত', lang)
+                        : selectedVisitor.status === 'checked_in'
+                        ? t('On site', 'সাইটে আছেন', lang)
+                        : t('Visit completed', 'ভিজিট সম্পন্ন', lang)}
+                    </span>
                   )}
                 </div>
               </div>
@@ -1744,7 +1393,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                      disabled={!isGate}
+                      style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', fontWeight: 700, display: isGate ? 'flex' : 'none', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
                       onClick={handleApproveAllPPE}
                     >
                       <CheckCircle2 size={15} />
@@ -1878,27 +1528,21 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
-                          ALPR SMART BARRIER GATE #1 — KERANIGANJ MAIN PERIMETER
+                          {t('Vehicle gate — main perimeter', 'গাড়ি গেট — প্রধান সীমানা', lang)}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          Camera Resolution: 4K UHD 60fps • Neural License Plate Match Algorithm
+                          {t('Guard checks the plate against the pass before raising the barrier', 'বেরিয়ার খোলার আগে গার্ড পাসের সাথে প্লেট মিলিয়ে দেখেন', lang)}
                         </div>
                       </div>
-                      <span className="badge success">
-                        SENSOR ONLINE
-                      </span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px', padding: '20px 0' }}>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
-                          RECOGNIZED NUMBER PLATE
+                          {t('Plate on pass', 'পাসে থাকা প্লেট', lang)}
                         </div>
                         <div style={{ background: 'var(--surface-0)', color: 'var(--text-1)', border: '3px solid var(--status-info)', padding: '8px 24px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '18px', fontWeight: 900, letterSpacing: '2px' }}>
                           {selectedVisitor.vehiclePlate}
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--status-success-bright)', fontWeight: 700, marginTop: '6px' }}>
-                          ✓ Plate Matched Pre-Registration (Confidence: 99.4%)
                         </div>
                       </div>
 
@@ -1911,21 +1555,23 @@ export default function GuestView({ role, lang }: ViewProps) {
                           <div className={`guest-barrier-arm ${barrierOpen ? 'open' : ''}`} />
                         </div>
                         <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 800, color: barrierOpen ? 'var(--status-success-bright)' : 'var(--status-danger)' }}>
-                          {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (CLOSED)'}
+                          {barrierOpen ? t('Barrier open', 'বেরিয়ার খোলা', lang) : t('Barrier closed', 'বেরিয়ার বন্ধ', lang)}
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
-                      <button
-                        className="btn-gold"
-                        style={{ padding: '8px 24px', fontWeight: 800 }}
-                        onClick={handleSimulateBarrier}
-                      >
-                        <Car size={16} />
-                        {t('Trigger Simulated Gate Barrier Open', 'গেট বেরিয়ার খোলার সিমুলেশন চালান', lang)}
-                      </button>
-                    </div>
+                    {isGate && (
+                      <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+                        <button
+                          className="btn-gold"
+                          style={{ padding: '8px 24px', fontWeight: 800 }}
+                          onClick={handleSimulateBarrier}
+                        >
+                          <Car size={16} />
+                          {t('Plate matches — raise barrier', 'প্লেট মিলেছে — বেরিয়ার খুলুন', lang)}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2067,12 +1713,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>{t('Host Employee', 'স্বাগতিক কর্মকর্তা', lang)}</label>
-                    <input
-                      type="text"
-                      value={formHost}
-                      onChange={(e) => setFormHost(e.target.value)}
-                      placeholder="e.g. Tanvir Ahmed (Sales)"
-                    />
+                    <input type="text" value={`${currentUserName} (${currentUserDept})`} readOnly />
                   </div>
                 </div>
 
@@ -2376,48 +2017,40 @@ export default function GuestView({ role, lang }: ViewProps) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Car size={18} color="var(--status-info-bright)" />
                 <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
-                  {t('ALPR Gate Barrier Camera Live Telemetry', 'গেট ক্যামেরা ও বেরিয়ার লাইভ ফিড', lang)}
+                  {t('Vehicle gate', 'গাড়ি গেট', lang)}
                 </h3>
               </div>
               <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowALPRModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ border: '2px solid var(--border-inverse-2)', borderRadius: '8px', background: 'var(--surface-inverse-deep)', padding: '20px', color: 'var(--text-on-brand)', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                  <span>CAM-01: KERANIGANJ GATE 1 INWARD</span>
-                  <span style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>● 60 FPS UHD LIVE</span>
-                </div>
-
-                <div style={{ border: '2px dashed var(--status-info)', borderRadius: '8px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.05)', position: 'relative' }}>
-                  <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--status-info-bright)' }}>
-                    [ DHAKA-METRO-GHA-11-9042 ]
+              <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '10px' }}>
+                {t('Vehicles registered on today’s passes. Check the plate, then raise the barrier.', 'আজকের পাসে নিবন্ধিত গাড়ি। প্লেট মিলিয়ে বেরিয়ার খুলুন।', lang)}
+              </div>
+              {(() => {
+                const expected = visitors.filter(v => (v.status === 'pre_registered' || v.status === 'checked_in') && v.vehiclePlate && !/pedestrian/i.test(v.vehiclePlate));
+                if (expected.length === 0) {
+                  return <div style={{ padding: '18px', textAlign: 'center', color: 'var(--text-3)' }}>{t('No vehicles expected.', 'কোনো গাড়ি প্রত্যাশিত নয়।', lang)}</div>;
+                }
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {expected.map(v => (
+                      <div key={v.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '10px 12px', background: 'var(--surface-0)' }}>
+                        <div>
+                          <div style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--text-1)' }}>{v.vehiclePlate}</div>
+                          <div style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>{v.name} · {v.organization} · {v.status === 'checked_in' ? t('On site', 'সাইটে', lang) : t('Expected', 'প্রত্যাশিত', lang)}</div>
+                        </div>
+                        <button className="btn-gold" style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }} onClick={handleSimulateBarrier}>
+                          <Car size={14} />
+                          {t('Raise barrier', 'বেরিয়ার খুলুন', lang)}
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
-                    Target: Dr. Shahabuddin Ahmed (Directorate of Explosives)
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--status-success-bright)', fontWeight: 700, marginTop: '2px' }}>
-                    ALPR MATCH CONFIRMED (99.4%) · PRE-REGISTERED
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Barrier Boom Status:</div>
-                    <div style={{ fontWeight: 800, color: barrierOpen ? 'var(--status-success-bright)' : 'var(--status-danger)' }}>
-                      {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (LOCKED)'}
-                    </div>
-                  </div>
-
-                  <button
-                    className="btn-gold"
-                    style={{ fontWeight: 800 }}
-                    onClick={handleSimulateBarrier}
-                  >
-                    <Car size={14} />
-                    {t('Raise Gate Barrier', 'বেরিয়ার উন্মুক্ত করুন', lang)}
-                  </button>
-                </div>
+                );
+              })()}
+              <div style={{ marginTop: '12px', fontSize: '12px', fontWeight: 800, color: barrierOpen ? 'var(--status-success)' : 'var(--text-3)' }}>
+                {barrierOpen ? t('Barrier open', 'বেরিয়ার খোলা', lang) : t('Barrier closed', 'বেরিয়ার বন্ধ', lang)}
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useFleetStore, VehicleRequisition } from '../../store/fleetStore';
-import { ROLE_META, t } from '../../types';
+import { t } from '../../types';
+import type { FleetParty } from '../../views/fleet/config';
 import { showToast } from '../ToastManager';
 import {
   MessageSquare, Send, Car, MapPin, Clock, ShieldCheck, CheckCircle2,
@@ -11,7 +12,10 @@ import {
 import DriverCallModal from './DriverCallModal';
 
 interface FleetChatCenterProps {
-  userRole: 'employee' | 'admin' | 'driver';
+  party: FleetParty;
+  senderName: string;
+  /** Requisitions the signed-in user may see; each one is a trip thread. */
+  visibleRequisitions: VehicleRequisition[];
   lang: 'en' | 'bn';
   onNavigateToTripPass?: (req: VehicleRequisition) => void;
   initialChannelId?: string;
@@ -63,7 +67,9 @@ function initials(name: string) {
 }
 
 export default function FleetChatCenter({
-  userRole,
+  party,
+  senderName,
+  visibleRequisitions,
   lang,
   onNavigateToTripPass,
   initialChannelId,
@@ -75,53 +81,10 @@ export default function FleetChatCenter({
     approveTollExpense,
   } = useFleetStore();
 
-  const isActualEmployee = userRole === 'employee';
-  const isActualDriver = userRole === 'driver';
-  const isActualAdmin = userRole === 'admin';
-  const currentPersona = ROLE_META[userRole as keyof typeof ROLE_META] || ROLE_META['employee'];
-
-  // Sender Persona Mode
-  const [activePersona, setActivePersona] = useState<'employee' | 'driver' | 'admin'>(
-    isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee'
-  );
-
-  useEffect(() => {
-    setActivePersona(isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee');
-  }, [isActualDriver, isActualAdmin]);
-
-  // Authenticated Persona Profile
-  const personaName = activePersona === 'employee'
-    ? currentPersona.name
-    : activePersona === 'driver'
-    ? (ROLE_META['driver']?.name || 'Md. Rafiqul Islam (Driver)')
-    : (ROLE_META['transport_admin']?.name || 'Md. Kamruzzaman (Transport Admin)');
-
-  const personaRole = activePersona;
-
-  // Filter requisitions relevant to role
-  const relevantRequisitions = useMemo(() => {
-    if (isActualEmployee) {
-      return requisitions.filter(
-        r =>
-          r.requesterName.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          r.requesterName.includes('Tanvir') ||
-          r.id === 'REQ-2026-441' ||
-          r.id === 'REQ-2026-435'
-      );
-    }
-    if (isActualDriver) {
-      const driverName = ROLE_META['driver']?.name || 'Md. Rafiqul Islam';
-      return requisitions.filter(
-        r =>
-          r.assignedDriverName?.toLowerCase().includes(driverName.toLowerCase()) ||
-          r.assignedDriverName?.includes('Rafiqul') ||
-          r.assignedDriverName?.includes('Shahidul') ||
-          r.id === 'REQ-2026-435' ||
-          r.id === 'REQ-2026-441'
-      );
-    }
-    return requisitions;
-  }, [requisitions, isActualEmployee, isActualDriver, currentPersona.name]);
+  const activePersona = party;
+  const personaRole = party;
+  const personaName = senderName;
+  const relevantRequisitions = visibleRequisitions;
 
   // Static Direct Hotlines & Emergency Channels
   const directChannels = useMemo(() => [
@@ -157,13 +120,12 @@ export default function FleetChatCenter({
   // Selected Channel ID
   const [selectedChannelId, setSelectedChannelId] = useState<string>(() => {
     if (initialChannelId) return initialChannelId;
-    return relevantRequisitions[0]?.id || 'REQ-2026-435';
+    return relevantRequisitions[0]?.id || 'desk_direct';
   });
 
   const [channelFilterTab, setChannelFilterTab] = useState<ChannelTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [messageText, setMessageText] = useState('');
-  const [isTypingUser, setIsTypingUser] = useState<string | null>(null);
 
   // Mobile View Toggle
   const [mobileActiveView, setMobileActiveView] = useState<'inbox' | 'conversation'>('conversation');
@@ -174,7 +136,7 @@ export default function FleetChatCenter({
   // Toll Claim Form State
   const [tollPlaza, setTollPlaza] = useState('Mayor Hanif Flyover');
   const [tollAmount, setTollAmount] = useState('260');
-  const [tollSlipNo, setTollSlipNo] = useState(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [tollSlipNo, setTollSlipNo] = useState('');
 
   // Audio Voice Note Player State
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
@@ -185,21 +147,10 @@ export default function FleetChatCenter({
 
   // Phone Call Modal State
   const [showCallModal, setShowCallModal] = useState(false);
-  const [activeCallee, setActiveCallee] = useState({
-    name: 'Md. Shahidul Islam',
-    role: 'Assigned Driver • Toyota Prado GHA-13-8821',
-    phone: '+880 1711-229944'
-  });
+  const [activeCallee, setActiveCallee] = useState({ name: '', role: '', phone: '' });
 
   const streamScrollRef = useRef<HTMLDivElement>(null);
   const composerTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const timeoutsRef = useRef<number[]>([]);
-
-  useEffect(() => () => { timeoutsRef.current.forEach(id => window.clearTimeout(id)); }, []);
-  const safeTimeout = (fn: () => void, ms: number) => {
-    timeoutsRef.current.push(window.setTimeout(fn, ms));
-  };
-
   // Timer for simulated voice recording
   useEffect(() => {
     let interval: any;
@@ -223,7 +174,7 @@ export default function FleetChatCenter({
     if (el) {
       el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     }
-  }, [activeConversationMessages.length, selectedChannelId, isTypingUser]);
+  }, [activeConversationMessages.length, selectedChannelId]);
 
   // Auto-expand composer
   useEffect(() => {
@@ -259,9 +210,6 @@ export default function FleetChatCenter({
     if (!customText) {
       setMessageText('');
     }
-
-    // Trigger realistic counterpart responses for a real chat feel
-    simulateCounterpartResponses(text, selectedChannelId);
   };
 
   // Send Voice Note Simulation
@@ -279,55 +227,6 @@ export default function FleetChatCenter({
       }
     );
     showToast(t('Voice dispatch note sent', 'ভয়েস বার্তা পাঠানো হয়েছে', lang), 'success');
-    simulateCounterpartResponses('voice note', selectedChannelId);
-  };
-
-  const simulateCounterpartResponses = (userText: string, channelId: string) => {
-    const lower = userText.toLowerCase();
-
-    if (channelId.startsWith('REQ-')) {
-      const targetReq = requisitions.find(r => r.id === channelId);
-      const driverName = targetReq?.assignedDriverName || 'Md. Shahidul Islam';
-      const vehiclePlate = targetReq?.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821';
-
-      if (activePersona === 'employee') {
-        safeTimeout(() => setIsTypingUser(`${driverName} (Driver)`), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          let reply = '';
-          if (lower.includes('where') || lower.includes('location') || lower.includes('porch') || lower.includes('gate')) {
-            reply = `Ji Tanvir Sir, I am parked at Gate-1 porch by the reception canopy with vehicle ${vehiclePlate}. AC is running at 21°C. Please come down whenever ready.`;
-          } else if (lower.includes('min') || lower.includes('down') || lower.includes('delay') || lower.includes('wait')) {
-            reply = `Noted Tanvir Sir, take your time. I have loaded chilled mineral water bottles in the vehicle. Waiting safely at the porch bay.`;
-          } else if (lower.includes('ac') || lower.includes('cool') || lower.includes('temp')) {
-            reply = `Ji Sir, cabin temperature is cooled to 20°C and fresh air circulation is running. Ready for highway transit.`;
-          } else if (lower.includes('toll') || lower.includes('flyover')) {
-            reply = `Ji Sir, I paid the Mayor Hanif Flyover toll (৳260) with my authorized e-pass and submitted the voucher for Central Transport clearance.`;
-          } else {
-            reply = `Assalamu Alaikum Tanvir Sir, message received. Vehicle ${vehiclePlate} is standing by at your service.`;
-          }
-          sendChatMessage(channelId, 'driver', `${driverName} (Driver)`, reply, { messageType: 'text' });
-        }, 2100);
-      } else if (activePersona === 'driver') {
-        safeTimeout(() => setIsTypingUser('Tanvir Ahmed (Passenger)'), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          sendChatMessage(channelId, 'employee', 'Tanvir Ahmed', `Thank you Shahidul Bhai, I have the batch test dossiers ready. We will depart in 5 minutes.`, { messageType: 'text' });
-        }, 2000);
-      } else {
-        safeTimeout(() => setIsTypingUser(`${driverName} (Driver)`), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          sendChatMessage(channelId, 'driver', `${driverName} (Driver)`, `Ji Kamruzzaman Sir, received instruction. Following designated highway corridor and maintaining safe speed limits.`, { messageType: 'text' });
-        }, 2100);
-      }
-    } else if (channelId === 'desk_direct' && activePersona === 'employee') {
-      safeTimeout(() => setIsTypingUser('Md. Kamruzzaman (Transport Supervisor)'), 800);
-      safeTimeout(() => {
-        setIsTypingUser(null);
-        sendChatMessage('desk_direct', 'admin', 'Md. Kamruzzaman (Transport Supervisor)', `Assalamu Alaikum Tanvir. Central Transport Desk has logged your query. Vehicle allocation is prioritized. Feel free to contact hotline ${EMERGENCY_PHONE} if needed.`, { messageType: 'text' });
-      }, 2000);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -360,6 +259,10 @@ export default function FleetChatCenter({
       showToast(t('Please enter valid toll amount', 'সঠিক টোলের পরিমাণ লিখুন', lang), 'info');
       return;
     }
+    if (!tollSlipNo.trim()) {
+      showToast(t('Enter the receipt number printed on the toll slip', 'টোল স্লিপে ছাপা রসিদ নম্বর লিখুন', lang), 'info');
+      return;
+    }
 
     sendChatMessage(
       currentRequisition.id,
@@ -378,7 +281,7 @@ export default function FleetChatCenter({
     );
 
     setActiveDrawer('none');
-    setTollSlipNo(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+    setTollSlipNo('');
     showToast(t(
       `✓ Toll voucher claimed: ${tollPlaza} (৳${amountNum}). Submitted for Transport Admin audit.`,
       `✓ টোল ভাউচার দাখিল সম্পন্ন: ৳${amountNum}`,
@@ -1136,65 +1039,18 @@ export default function FleetChatCenter({
               );
             })
           )}
-
-          {/* Typing Indicator */}
-          {isTypingUser && (
-            <div className="trip-chat-typing-pill">
-              <span style={{ display: 'inline-flex', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--brand-crimson)', display: 'inline-block' }} />
-              </span>
-              <span>{isTypingUser} is typing...</span>
-            </div>
-          )}
         </div>
 
-        {/* ─── SENDER IDENTITY & PERSPECTIVE BAR ─── */}
         <div className="trip-chat-persona-bar">
           <div className="trip-chat-persona-controls">
-            {isActualAdmin ? (
-              <>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)' }}>
-                  {t('Dispatch Channel Perspective:', 'প্রেরক মোড:', lang)}
-                </span>
-                <div className="trip-chat-persona-group">
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('employee')}
-                    className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
-                  >
-                    👤 Staff
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('driver')}
-                    className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
-                  >
-                    🚗 Driver
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('admin')}
-                    className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
-                  >
-                    🛡️ Dispatch Desk
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
-                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
-                <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{personaName}</span>
-                <span className="badge teal" style={{ fontSize: '10px', textTransform: 'capitalize' }}>
-                  ✓ {activePersona}
-                </span>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
+              <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{personaName}</span>
+            </div>
           </div>
 
-          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-            Press <strong>Enter</strong> to send • <strong>Shift+Enter</strong> for newline
+          <span style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
+            {t('Enter to send · Shift+Enter for a new line', 'পাঠাতে Enter · নতুন লাইনের জন্য Shift+Enter', lang)}
           </span>
         </div>
 

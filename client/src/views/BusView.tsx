@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../components/ToastManager';
+import { useCurrentUser } from '../auth/session';
+import { nextRef } from '../lib/refs';
+import { nowTime } from '../lib/clock';
 import {
   Bus, Users, MapPin, CheckCircle, Clock, AlertTriangle,
   QrCode, UserMinus, UserPlus, Phone, Compass, BellRing,
@@ -25,10 +28,11 @@ import ReassignBusRouteModal from '../components/bus/ReassignBusRouteModal';
 import BusFleetOverviewGrid from '../components/bus/BusFleetOverviewGrid';
 
 export default function BusView({ role, lang }: ViewProps) {
-  // Operational perspective: staff vs supervisor (default to supervisor if role is transport_admin)
-  const [activePerspective, setActivePerspective] = useState<'staff' | 'supervisor'>(
-    role === 'transport_admin' ? 'supervisor' : 'staff'
-  );
+  const user = useCurrentUser();
+  const canManageBus = !!user?.permissions.has('bus:manage');
+  const [perspective, setActivePerspective] = useState<'staff' | 'supervisor'>(canManageBus ? 'supervisor' : 'staff');
+  const activePerspective = canManageBus ? perspective : 'staff';
+  const [scanQuery, setScanQuery] = useState('');
 
   // Commute Direction & Date
   const [commuteDirection, setCommuteDirection] = useState<'inbound' | 'outbound'>('inbound');
@@ -113,10 +117,10 @@ export default function BusView({ role, lang }: ViewProps) {
     message: string;
     time: string;
   }>({
-    active: true,
+    active: false,
     type: 'info',
-    message: 'All GPS satellite beacons synchronised. Normal morning commute transit in progress.',
-    time: '07:22 AM'
+    message: '',
+    time: ''
   });
 
   // Form for joining waitlist
@@ -178,18 +182,13 @@ export default function BusView({ role, lang }: ViewProps) {
   const activeStops: RouteStop[] = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
 
   // Current logged-in user profile dynamically mapped to active role
-  const mySeat = useMemo(() => {
-    const byId = seats.find(s => s.staffId === currentStaffMeta.empId);
-    if (byId) return byId;
-    const byName = seats.find(s => s.assignedTo?.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase()));
-    if (byName) return byName;
-    return seats.find(s => s.num === 5) || seats[4];
-  }, [seats, currentStaffMeta]);
+  const mySeat = useMemo(
+    () => seats.find(s => s.staffId === currentStaffMeta.empId) ?? null,
+    [seats, currentStaffMeta.empId],
+  );
 
   const isMySeatVacated = mySeat?.status === 'vacated';
-  const myWaitlistEntry = waitlist.find(
-    w => w.staffId === currentStaffMeta.empId || w.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase())
-  );
+  const myWaitlistEntry = waitlist.find(w => w.staffId === currentStaffMeta.empId);
 
   // Counts
   const occupiedCount = seats.filter(s => s.status === 'occupied').length;
@@ -293,7 +292,7 @@ export default function BusView({ role, lang }: ViewProps) {
         return {
           ...s,
           assignedTo: bookForm.name,
-          staffId: bookForm.staffId || `GST-${Math.floor(1000 + Math.random() * 9000)}`,
+          staffId: bookForm.staffId || nextRef('GST'),
           dept: bookForm.dept,
           phone: bookForm.phone,
           pickupPoint: bookForm.pickupPoint,
@@ -402,7 +401,7 @@ export default function BusView({ role, lang }: ViewProps) {
       dept: joinForm.dept,
       pickupPoint: joinForm.pickupPoint,
       phone: joinForm.phone,
-      joinedAt: 'Just Now (07:35 AM)',
+      joinedAt: nowTime(),
       priority: joinForm.priority,
       shift: joinForm.shift,
       isCurrentUser: true,
@@ -423,7 +422,7 @@ export default function BusView({ role, lang }: ViewProps) {
   // Staff Cancelling their own waitlist request
   const handleCancelMyWaitlist = () => {
     setWaitlist(prev => {
-      const remaining = prev.filter(w => w.staffId !== 'EMP-1042' && w.name !== 'Tanvir Ahmed');
+      const remaining = prev.filter(w => w.staffId !== currentStaffMeta.empId);
       return remaining.map((w, idx) => ({ ...w, rank: idx + 1 }));
     });
     showToast(t('Waitlist request cancelled.', 'অপেক্ষাতালিকা থেকে আবেদন প্রত্যাহার করা হয়েছে।', lang), 'info');
@@ -536,7 +535,7 @@ export default function BusView({ role, lang }: ViewProps) {
       active: true,
       type: 'warning',
       message: broadcastMessage,
-      time: 'Just Now'
+      time: nowTime()
     });
     setShowBroadcastModal(false);
     showToast(
@@ -696,7 +695,7 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
           <p className="section-subtitle" style={{ marginTop: '4px' }}>
             {t(
-              'Interactive 52-seater coach seat map, instant seat booking, automated standby queue, live GPS route stops & passenger manifest.',
+              'Seat map for each staff coach, seat booking, standby waitlist, route timetable and gate manifest.',
               '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
               lang
             )}
@@ -761,7 +760,7 @@ export default function BusView({ role, lang }: ViewProps) {
             </button>
           </div>
 
-          {/* Operational Perspective Switcher (Staff vs Transport Supervisor) */}
+          {canManageBus && (
           <div style={{
             background: 'var(--brand-slate-100)',
             padding: '3px',
@@ -770,10 +769,7 @@ export default function BusView({ role, lang }: ViewProps) {
             border: '1px solid var(--brand-slate-300)'
           }}>
             <button
-              onClick={() => {
-                setActivePerspective('staff');
-                showToast(t(`Switched to Staff Commuter Self-Service Mode (${currentStaffMeta.name})`, 'স্টাফ সেলফ-সার্ভিস মোড সক্রিয়', lang), 'info');
-              }}
+              onClick={() => setActivePerspective('staff')}
               style={{
                 background: activePerspective === 'staff' ? 'var(--surface-1)' : 'transparent',
                 color: activePerspective === 'staff' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
@@ -793,10 +789,7 @@ export default function BusView({ role, lang }: ViewProps) {
             </button>
 
             <button
-              onClick={() => {
-                setActivePerspective('supervisor');
-                showToast(t('Switched to Transport Supervisor Administrative Mode (Md. Kamruzzaman)', 'পরিবহন পরিদর্শক মোড সক্রিয়', lang), 'gold');
-              }}
+              onClick={() => setActivePerspective('supervisor')}
               style={{
                 background: activePerspective === 'supervisor' ? 'var(--brand-gold)' : 'transparent',
                 color: activePerspective === 'supervisor' ? 'var(--text-1)' : 'var(--brand-slate-500)',
@@ -816,6 +809,7 @@ export default function BusView({ role, lang }: ViewProps) {
               <span>{t('Supervisor Deck', 'সুপারভাইজার', lang)}</span>
             </button>
           </div>
+          )}
 
           {/* Security Gate Manifest */}
           <button className="btn-outline" onClick={() => setShowManifestModal(true)} title="Security Gate Commuter Manifest">
@@ -823,9 +817,11 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
 
           {/* Conductor Scanner */}
-          <button className="btn-outline" onClick={() => setShowScannerModal(true)} title="Conductor Scanner">
-            <Smartphone size={13} /> {t('Conductor Scanner', 'স্ক্যানার', lang)}
-          </button>
+          {canManageBus && (
+            <button className="btn-outline" onClick={() => setShowScannerModal(true)}>
+              <Smartphone size={13} /> {t('Conductor Scanner', 'স্ক্যানার', lang)}
+            </button>
+          )}
 
           {/* Timetable */}
           <button className="btn-outline" onClick={() => setShowTimetableModal(true)}>
@@ -833,15 +829,17 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
 
           {/* My Boarding Pass */}
-          <button
-            className="btn-primary"
-            onClick={() => {
-              setQrSeatTarget(mySeat || seats[4]);
-              setShowQrModal(true);
-            }}
-          >
-            <QrCode size={13} /> {t('My Boarding Pass', 'বোর্ডিং পাস', lang)}
-          </button>
+          {mySeat && (
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setQrSeatTarget(mySeat);
+                setShowQrModal(true);
+              }}
+            >
+              <QrCode size={13} /> {t('My Boarding Pass', 'বোর্ডিং পাস', lang)}
+            </button>
+          )}
         </div>
       </div>
 
@@ -862,7 +860,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {routeAlert.type === 'warning' ? <AlertTriangle size={15} color="var(--status-warning)" /> : <Info size={15} color="var(--status-info)" />}
             <div>
-              <strong>{t('Live Transit Telemetry Notice:', 'লাইভ ট্রানজিট নোটিশ:', lang)}</strong>{' '}
+              <strong>{t('Route notice:', 'রুট বিজ্ঞপ্তি:', lang)}</strong>{' '}
               {routeAlert.message}{' '}
               <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginLeft: '6px' }}>({routeAlert.time})</span>
             </div>
@@ -896,10 +894,9 @@ export default function BusView({ role, lang }: ViewProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Lock size={15} color="var(--status-info)" />
             <div>
-              <strong>{t('Employee Commuter Self-Service Mode:', 'কর্মচারী সেলফ-সার্ভিস মোড:', lang)}</strong>{' '}
               {t(
-                'View live coach seat occupancy, book unassigned empty seats, release or reclaim your Seat #05, request peer seat swaps, and track GPS route progress in real-time.',
-                'লাইভ সিট দখল দেখুন, খালি সিট বুক করুন, ৫ নম্বর আসন পরিচালনা করুন, সিট সোয়াপ আবেদন এবং জিপিএস ট্র্যাকিং করুন।',
+                'See seat availability, book a free seat, release or reclaim your seat for a day, and request a seat swap.',
+                'আসনের প্রাপ্যতা দেখুন, খালি আসন বুক করুন, একদিনের জন্য আসন ছাড়ুন বা ফেরত নিন এবং আসন বদলের আবেদন করুন।',
                 lang
               )}
             </div>
@@ -1167,10 +1164,12 @@ export default function BusView({ role, lang }: ViewProps) {
             borderRadius: '12px',
             padding: '10px 14px',
             display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <div style={{
                 width: '40px',
                 height: '40px',
@@ -1184,29 +1183,31 @@ export default function BusView({ role, lang }: ViewProps) {
                 fontWeight: 900,
                 fontSize: '14px'
               }}>
-                #{mySeat?.num ? String(mySeat.num).padStart(2, '0') : '05'}
+                {mySeat ? `#${String(mySeat.num).padStart(2, '0')}` : '—'}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '12.5px', fontWeight: 800 }}>{mySeat?.assignedTo || currentStaffMeta.name}</span>
-                  <span className={`badge ${isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
-                    {isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
+                  <span className={`badge ${!mySeat ? 'info' : isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
+                    {!mySeat
+                      ? (myWaitlistEntry ? t(`Waitlist #${myWaitlistEntry.rank}`, `অপেক্ষাতালিকা #${myWaitlistEntry.rank}`, lang) : t('No seat on this route', 'এই রুটে আসন নেই', lang))
+                      : isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
                   </span>
                 </div>
                 <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {activeRoute.name} · 📍 {mySeat?.pickupPoint || 'Farmgate Overbridge'} ({commuteDirection === 'inbound' ? (mySeat?.pickupTime || '07:18 AM') : '06:05 PM'})
+                  {activeRoute.name}
+                  {mySeat && <> · 📍 {mySeat.pickupPoint} ({commuteDirection === 'inbound' ? mySeat.pickupTime : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')})</>}
                 </div>
               </div>
             </div>
 
-            {/* Quick Action for Employee */}
+            {mySeat && (
             <div style={{ display: 'flex', gap: '4px' }}>
               {isMySeatVacated ? (
                 <button
                   className="btn-gold"
                   style={{ fontSize: '10.5px', padding: '4px 8px' }}
                   onClick={handleReclaimMySeat}
-                  title="Reclaim Seat #05"
                 >
                   <UserPlus size={11} /> {t('Reclaim', 'পুনরুদ্ধার', lang)}
                 </button>
@@ -1226,12 +1227,12 @@ export default function BusView({ role, lang }: ViewProps) {
                     gap: '4px'
                   }}
                   onClick={() => setShowVacateDialog(true)}
-                  title="Release Seat for Today"
                 >
                   <UserMinus size={11} /> {t('Release', 'ছেড়ে দিন', lang)}
                 </button>
               )}
             </div>
+            )}
           </div>
 
           {/* Sub-card 2: Route Selector & Live Beacon */}
@@ -1269,24 +1270,24 @@ export default function BusView({ role, lang }: ViewProps) {
               })}
             </div>
 
-            {/* Live Progress Bar with Next Station */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Navigation size={12} color="var(--status-success-bright)" />
-                <span style={{ color: 'var(--text-muted)' }}>{t('Next Station:', 'পরবর্তী স্টপ:', lang)}</span>
-                <strong style={{ color: 'var(--status-warning-bright)' }}>
-                  {commuteDirection === 'inbound' ? activeRoute.nextStop : activeRoute.outboundStops[1]?.name || 'Babubazar Bridge Ramp'}
-                </strong>
-              </div>
-              <div style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>
-                {activeRoute.speed} · {commuteDirection === 'inbound' ? activeRoute.nextEta : '14 mins (05:32 PM)'}
-              </div>
-            </div>
-
-            {/* Simulated Track Line */}
-            <div style={{ height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
-              <div style={{ width: `${activeRoute.progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, var(--status-success-solid), var(--brand-gold))', borderRadius: '2px' }} />
-            </div>
+            {/* Timetable for the selected direction */}
+            {(() => {
+              const stops = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
+              const first = stops[0];
+              const last = stops[stops.length - 1];
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', fontSize: '11px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+                    <Navigation size={12} color="var(--status-success-bright)" />
+                    <span style={{ color: 'var(--text-muted)' }}>{t('Departs', 'ছাড়ে', lang)}</span>
+                    <strong style={{ color: 'var(--status-warning-bright)' }}>{first ? `${first.scheduledTime} · ${first.name}` : '—'}</strong>
+                  </div>
+                  <div style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>
+                    {t('Arrives', 'পৌঁছায়', lang)} {last?.scheduledTime ?? '—'} · {t(`${stops.length} stops`, `${stops.length}টি স্টপ`, lang)}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Sub-card 3: Key Shuttle Metrics */}
@@ -1467,9 +1468,9 @@ export default function BusView({ role, lang }: ViewProps) {
                   <Compass size={16} color="var(--brand-gold)" />
                   <div>
                     <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px' }}>
-                      CABIN FRONT · DRIVER COCKPIT
+                      {t('FRONT OF COACH', 'বাসের সামনের অংশ', lang)}
                     </div>
-                    <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{activeRoute.driverName} (D-1) · GPS Satellite Beacon Active</div>
+                    <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{t('Driver', 'চালক', lang)}: {activeRoute.driverName}</div>
                   </div>
                 </div>
 
@@ -1667,7 +1668,7 @@ export default function BusView({ role, lang }: ViewProps) {
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '12px', height: '12px', background: 'rgba(225, 29, 72, 0.1)', border: '2px solid var(--brand-crimson)', borderRadius: '3px' }}></span>
-                {t('My Seat (#05)', 'আমার আসন', lang)}
+                {t('My seat', 'আমার আসন', lang)}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '12px', height: '12px', background: 'var(--surface-2)', border: '1.5px dashed var(--border-2)', borderRadius: '3px' }}></span>
@@ -1916,12 +1917,11 @@ export default function BusView({ role, lang }: ViewProps) {
                     </button>
                   )}
 
-                  {/* Case 2: Current User's Seat (#5) */}
-                  {selectedSeat.num === 5 && (
+                  {selectedSeat.num === mySeat?.num && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {isMySeatVacated ? (
                         <button className="btn-gold" style={{ flex: 1, justifyContent: 'center' }} onClick={handleReclaimMySeat}>
-                          <UserPlus size={14} /> {t('Reclaim My Seat #05', 'সিট পুনরুদ্ধার করুন', lang)}
+                          <UserPlus size={14} /> {t('Reclaim My Seat', 'সিট পুনরুদ্ধার করুন', lang)}
                         </button>
                       ) : (
                         <button className="btn-outline" style={{ flex: 1, justifyContent: 'center', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }} onClick={() => setShowVacateDialog(true)}>
@@ -1941,7 +1941,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   )}
 
                   {/* Case 3: Other Occupied Seat in Staff View */}
-                  {selectedSeat.num !== 5 && selectedSeat.status === 'occupied' && activePerspective === 'staff' && (
+                  {mySeat && selectedSeat.num !== mySeat.num && selectedSeat.status === 'occupied' && activePerspective === 'staff' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         className="btn-outline"
@@ -2411,7 +2411,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   <UserMinus size={18} />
                 </div>
                 <div>
-                  <h3 className="app-modal-title">{t('Release Seat #05 for Today', 'আজকের জন্য ৫ নম্বর আসন ছাড়ুন', lang)}</h3>
+                  <h3 className="app-modal-title">{t(`Release seat #${String(mySeat?.num ?? '').padStart(2, '0')} for today`, `আজকের জন্য ${mySeat?.num ?? ''} নম্বর আসন ছাড়ুন`, lang)}</h3>
                   <div className="app-modal-subtitle">{t('Voluntary standby release for shift colleagues', 'সহকর্মীদের সুযোগ দিতে সিট ছেড়ে দিন', lang)}</div>
                 </div>
               </div>
@@ -3073,21 +3073,29 @@ export default function BusView({ role, lang }: ViewProps) {
                 <input
                   type="text"
                   className="input-text"
-                  placeholder={`Enter Staff ID or Seat # (e.g. ${currentStaffMeta.empId} or 5)`}
-                  defaultValue={currentStaffMeta.empId}
+                  placeholder={t('Staff ID or seat number', 'স্টাফ আইডি বা সিট নম্বর', lang)}
+                  value={scanQuery}
+                  onChange={(e) => setScanQuery(e.target.value)}
                   style={{ flex: 1 }}
                 />
                 <button
                   className="btn-primary"
                   onClick={() => {
-                    handleToggleBoarding(mySeat?.num || 5);
+                    const q = scanQuery.trim().toUpperCase();
+                    const seat = seats.find(s => s.status === 'occupied' && (s.staffId?.toUpperCase() === q || String(s.num) === q.replace(/^#?0*/, '')));
+                    if (!q || !seat) {
+                      showToast(t('No confirmed passenger matches that ID or seat.', 'এই আইডি বা সিটে কোনো নিশ্চিত যাত্রী নেই।', lang), 'warn');
+                      return;
+                    }
+                    if (!seat.boarded) handleToggleBoarding(seat.num);
+                    setScanQuery('');
                     showToast(
                       t(
-                        `${mySeat?.assignedTo || currentStaffMeta.name} (Seat #${String(mySeat?.num || 5).padStart(2, '0')}) verified and boarded!`,
-                        `${mySeat?.assignedTo || currentStaffMeta.name} (সিট #${String(mySeat?.num || 5).padStart(2, '0')}) বোর্ডিং যাচাই সম্পন্ন!`,
+                        `${seat.assignedTo} (Seat #${String(seat.num).padStart(2, '0')}) verified and boarded.`,
+                        `${seat.assignedTo} (সিট #${String(seat.num).padStart(2, '0')}) বোর্ডিং যাচাই সম্পন্ন।`,
                         lang
                       ),
-                      'gold'
+                      'success'
                     );
                   }}
                 >

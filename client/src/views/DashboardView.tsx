@@ -17,7 +17,6 @@ import HrAdminDashboard from './dashboard/HrAdminDashboard';
 import HodDashboard from './dashboard/HodDashboard';
 import EmployeeDashboard from './dashboard/EmployeeDashboard';
 import DriverDashboard from './dashboard/DriverDashboard';
-import ExecutiveROIDossierModal from '../components/dashboard/ExecutiveROIDossierModal';
 import SendVoiceBriefingModal from '../components/dashboard/SendVoiceBriefingModal';
 import { useVoiceBriefingStore } from '../store/voiceBriefingStore';
 
@@ -50,15 +49,12 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [showBatchReleaseModal, setShowBatchReleaseModal] = useState(false);
   const [showGatePassModal, setShowGatePassModal] = useState(false);
-  const [showROIDossierModal, setShowROIDossierModal] = useState(false);
   const [showVoiceBriefingModal, setShowVoiceBriefingModal] = useState(false);
 
   const { activeBriefing, isPlaying, setIsPlaying } = useVoiceBriefingStore();
   const data = useDashboardData();
   const cfg = DASHBOARD_CONFIG[role];
   const canBroadcast = useCan('notices:broadcast');
-  const isExecutive = useCan('dashboard:executive');
-
   const heroStats = cfg.hero(data);
   const tabs = cfg.tabs(data);
   const stats = cfg.stats(data);
@@ -121,7 +117,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           {heroStats.map((s, i) => (
             <div key={i} className="roi-stat-item">
               <div className="val" style={s.tone && s.tone !== 'gold' ? { color: TONE_COLOR[s.tone] } : undefined}>
-                <AnimatedCounter value={s.value} />
+                <AnimatedCounter value={typeof s.value === 'string' ? s.value : t(s.value[0], s.value[1], lang)} />
               </div>
               <div className="lbl">{t(s.label[0], s.label[1], lang)}</div>
             </div>
@@ -129,19 +125,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         </div>
 
         {/* Primary action for this role */}
-        {role === 'chairman' && isExecutive && (
-          <button
-            type="button"
-            className="btn-gold"
-            style={{ fontSize: '11px', padding: '6px 14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
-            onClick={() => setShowROIDossierModal(true)}
-            title={t('Open the board savings & loss-mitigation dossier', 'বোর্ড সাশ্রয় বিবরণী দেখুন', lang)}
-          >
-            <span>📊</span>
-            <span>{t('Board Dossier', 'বোর্ড বিবরণী', lang)}</span>
-          </button>
-        )}
-
         {role === 'plant_gm' && (
           <button className="btn-gold" style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800 }}
             onClick={() => setShowBatchReleaseModal(true)}>
@@ -258,8 +241,8 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                         <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-bright)' }}>
                           🎙️ {t(activeBriefing.title, activeBriefing.titleBn, lang)}
                         </span>
-                        <span className="badge" style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontSize: '9px', padding: '1px 5px' }}>
-                          {t('LIVE MEMO', 'লাইভ মেমো', lang)}
+                        <span className="badge" style={{ fontSize: '9px', padding: '1px 5px' }}>
+                          {t('Voice memo', 'ভয়েস মেমো', lang)}
                         </span>
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px', fontStyle: 'italic', maxWidth: '580px' }}>
@@ -541,14 +524,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         onClose={() => setSelectedDrawerItem(null)}
         lang={lang}
       />
-
-      {isExecutive && (
-        <ExecutiveROIDossierModal
-          isOpen={showROIDossierModal}
-          onClose={() => setShowROIDossierModal(false)}
-          lang={lang}
-        />
-      )}
 
       {canBroadcast && (
         <SendVoiceBriefingModal

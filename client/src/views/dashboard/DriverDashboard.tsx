@@ -9,6 +9,8 @@ import { showToast } from '../../components/ToastManager';
 import { useFleetStore } from '../../store/fleetStore';
 import { DashboardSubViewProps } from './types';
 import { useCurrentUser } from '../../auth/session';
+import { nextRef } from '../../lib/refs';
+import { nowTime } from '../../lib/clock';
 
 export default function DriverDashboard({
   lang,
@@ -91,10 +93,10 @@ export default function DriverDashboard({
     const amt = parseFloat(tollAmount) || 0;
     if (amt <= 0) return;
     const newSlip = {
-      id: `TOL-${Math.floor(100 + Math.random() * 900)}`,
+      id: nextRef('TOL'),
       plaza: tollPlaza,
       amount: amt,
-      time: 'Just now',
+      time: nowTime(lang),
       status: 'Pending Verification',
     };
     setTollSlips([newSlip, ...tollSlips]);
@@ -133,16 +135,16 @@ export default function DriverDashboard({
                     {activeMission.from} ➔ {activeMission.to}
                   </h3>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                    Pass No: <code style={{ color: 'var(--status-warning-bright)', fontWeight: 700 }}>{activeMission.tripPassNo || 'TC-2026-9042'}</code> • Passenger: <strong>{activeMission.requesterName}</strong>
+                    {t('Pass No', 'পাস নং', lang)}: <code style={{ color: 'var(--status-warning-bright)', fontWeight: 700 }}>{activeMission.tripPassNo ?? '—'}</code> • {t('Passenger', 'যাত্রী', lang)}: <strong>{activeMission.requesterName}</strong>
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
                   <span className={`badge ${activeMission.status === 'in_transit' ? 'success' : 'gold'}`} style={{ fontSize: '12px', padding: '4px 12px' }}>
-                    {activeMission.status === 'in_transit' ? 'IN TRANSIT' : 'ASSIGNED / READY'}
+                    {activeMission.status === 'in_transit' ? t('In transit', 'যাত্রাপথে', lang) : t('Assigned · ready', 'নির্ধারিত · প্রস্তুত', lang)}
                   </span>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Departure: {activeMission.departureTime || '09:00 AM'}
+                    {t('Departure', 'যাত্রার সময়', lang)}: {activeMission.departureTime || '—'}
                   </div>
                 </div>
               </div>
@@ -206,24 +208,24 @@ export default function DriverDashboard({
                     <div className="card-subtitle">{t('Daily fitness and vehicle verification', 'দৈনিক ফিটনেস ও যানবাহন অনুমোদন', lang)}</div>
                   </div>
                 </div>
-                <span className="badge success">On Duty</span>
+                <span className="badge success">{t('On duty', 'ডিউটিতে', lang)}</span>
               </div>
               <div className="card-body" style={{ fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Driver Name:</span>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Driver name', 'চালকের নাম', lang)}:</span>
                   <strong>{currentDriver?.name ?? user?.name ?? '—'}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Staff ID & License:</span>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Staff ID & license', 'কর্মী আইডি ও লাইসেন্স', lang)}:</span>
                   <strong>{user?.empId ?? '—'}{currentDriver ? ` · ${currentDriver.licenseType}: ${currentDriver.licenseNo}` : ''}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Today Shift Hours:</span>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Shift hours today', 'আজকের শিফট ঘণ্টা', lang)}:</span>
                   <strong>{currentDriver?.dutyHoursToday ?? 0} / 8 {t('hours', 'ঘণ্টা', lang)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Performance Rating:</span>
-                  <strong style={{ color: 'var(--status-warning)' }}>★ 4.9 / 5.0 (Safe Driving Record)</strong>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Passenger rating', 'যাত্রী রেটিং', lang)}:</span>
+                  <strong style={{ color: 'var(--status-warning)' }}>{currentDriver ? `★ ${currentDriver.rating.toFixed(1)} / 5.0` : '—'}</strong>
                 </div>
               </div>
             </div>
@@ -240,24 +242,16 @@ export default function DriverDashboard({
                     <div className="card-subtitle">{assignedVehicle.model} ({assignedVehicle.plate})</div>
                   </div>
                 </div>
-                <span className="badge info">Active</span>
+                <span className="badge info">{t('Assigned to you', 'আপনার নামে বরাদ্দ', lang)}</span>
               </div>
               <div className="card-body" style={{ fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Fuel Level:</span>
-                  <strong style={{ color: 'var(--status-success)' }}>78% Full (Approx. 38 Liters)</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Odometer:</span>
-                  <strong>42,350 km</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Tire Pressure:</span>
-                  <strong>32 PSI (Standard)</strong>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Fuel level', 'জ্বালানির মাত্রা', lang)}:</span>
+                  <strong style={{ color: assignedVehicle.fuelPct < 25 ? 'var(--status-danger)' : 'var(--status-success)' }}>{assignedVehicle.fuelPct}%</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Next Maintenance:</span>
-                  <strong>In 3,400 km</strong>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Next service due', 'পরবর্তী সার্ভিস', lang)}:</span>
+                  <strong>{t(`in ${assignedVehicle.nextServiceKm.toLocaleString('en-IN')} km`, `${assignedVehicle.nextServiceKm.toLocaleString('en-IN')} কিমি পরে`, lang)}</strong>
                 </div>
               </div>
             </div>
@@ -275,22 +269,22 @@ export default function DriverDashboard({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
                   <div>
                     <span className="badge info" style={{ marginBottom: '6px', fontSize: '11px' }}>
-                      Trip ID: {activeMission.id}
+                      {t('Trip', 'ট্রিপ', lang)}: {activeMission.id}
                     </span>
                     <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '2px 0 4px', color: 'var(--brand-slate-900)' }}>
                       {activeMission.from} ➔ {activeMission.to}
                     </h3>
                     <div style={{ fontSize: '12px', color: 'var(--brand-slate-500)' }}>
-                      Official Purpose: <strong>{activeMission.purpose}</strong>
+                      {t('Purpose', 'উদ্দেশ্য', lang)}: <strong>{activeMission.purpose}</strong>
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
                     <span className={`badge ${activeMission.status === 'in_transit' ? 'success' : 'gold'}`} style={{ fontSize: '12.5px', padding: '6px 14px' }}>
-                      {activeMission.status === 'in_transit' ? 'IN TRANSIT' : 'READY TO DEPART'}
+                      {activeMission.status === 'in_transit' ? t('In transit', 'যাত্রাপথে', lang) : t('Ready to depart', 'যাত্রার জন্য প্রস্তুত', lang)}
                     </span>
                     <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
-                      Gate Pass: <code>{activeMission.tripPassNo || 'TC-2026-9042'}</code>
+                      {t('Gate pass', 'গেট পাস', lang)}: <code>{activeMission.tripPassNo ?? '—'}</code>
                     </div>
                   </div>
                 </div>
@@ -298,12 +292,12 @@ export default function DriverDashboard({
                 {/* Progress Tracker */}
                 <div style={{ background: 'var(--brand-slate-50)', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--brand-slate-200)', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--status-success)' }}>1. Requisition Approved ✓</span>
+                    <span style={{ color: 'var(--status-success)' }}>{t('1. Request approved ✓', '১. আবেদন অনুমোদিত ✓', lang)}</span>
                     <span style={{ color: activeMission.status === 'in_transit' || activeMission.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)' }}>
-                      2. Vehicle Dispatched {activeMission.status === 'in_transit' ? '⏳' : ''}
+                      {t('2. Vehicle dispatched', '২. গাড়ি রওনা হয়েছে', lang)} {activeMission.status === 'in_transit' ? '⏳' : ''}
                     </span>
                     <span style={{ color: activeMission.status === 'completed' ? 'var(--status-success)' : 'var(--brand-slate-400)' }}>
-                      3. Return & Trip Completed
+                      {t('3. Returned & completed', '৩. ফেরত ও সম্পন্ন', lang)}
                     </span>
                   </div>
                   <div style={{ height: '6px', width: '100%', background: 'var(--brand-slate-200)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -319,13 +313,13 @@ export default function DriverDashboard({
                 {/* Mission Details Grid */}
                 <div className="responsive-col-3" style={{ gap: '14px', marginBottom: '18px', fontSize: '12.5px' }}>
                   <div style={{ padding: '12px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px' }}>
-                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>Passenger</div>
+                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>{t('Passenger', 'যাত্রী', lang)}</div>
                     <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px' }}>{activeMission.requesterName}</strong>
                     <div style={{ color: 'var(--brand-slate-600)', marginTop: '2px' }}>{activeMission.dept}</div>
                   </div>
 
                   <div style={{ padding: '12px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px' }}>
-                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>Assigned Vehicle</div>
+                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>{t('Assigned vehicle', 'বরাদ্দকৃত গাড়ি', lang)}</div>
                     <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px', fontFamily: 'monospace' }}>
                       {activeMission.assignedVehiclePlate || assignedVehicle.plate}
                     </strong>
@@ -335,9 +329,9 @@ export default function DriverDashboard({
                   </div>
 
                   <div style={{ padding: '12px', background: 'var(--brand-card-bg)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px' }}>
-                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>Schedule & Date</div>
+                    <div style={{ color: 'var(--brand-slate-500)', fontSize: '11px', textTransform: 'uppercase' }}>{t('Requested', 'আবেদনের সময়', lang)}</div>
                     <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px' }}>{activeMission.createdAt}</strong>
-                    <div style={{ color: 'var(--brand-slate-600)', marginTop: '2px' }}>Departure: {activeMission.departureTime}</div>
+                    <div style={{ color: 'var(--brand-slate-600)', marginTop: '2px' }}>{t('Departure', 'যাত্রার সময়', lang)}: {activeMission.departureTime}</div>
                   </div>
                 </div>
 

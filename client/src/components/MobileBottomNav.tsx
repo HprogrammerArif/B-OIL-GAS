@@ -95,7 +95,7 @@ export default function MobileBottomNav({
                 {tab.icon}
                 {badge && (
                   <span className={`mobile-tab-badge ${badge.type || 'danger'}`}>
-                    {badge.text}
+                    {badge.text.split(' ')[0]}
                   </span>
                 )}
               </div>

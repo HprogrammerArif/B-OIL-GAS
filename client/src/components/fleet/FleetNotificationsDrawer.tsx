@@ -10,7 +10,8 @@ import {
 interface FleetNotificationsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  userRole: 'employee' | 'admin';
+  /** Already scoped to the signed-in user (see `notificationsVisibleTo`). */
+  notifications: FleetNotification[];
   lang: 'en' | 'bn';
   onSelectRequisition?: (reqId: string) => void;
   onOpenChat?: (reqId: string) => void;
@@ -19,20 +20,15 @@ interface FleetNotificationsDrawerProps {
 export default function FleetNotificationsDrawer({
   isOpen,
   onClose,
-  userRole,
+  notifications: roleNotifications,
   lang,
   onSelectRequisition,
   onOpenChat,
 }: FleetNotificationsDrawerProps) {
-  const { notifications, markNotificationRead, markAllNotificationsRead } = useFleetStore();
+  const { markNotificationRead } = useFleetStore();
   const [filter, setFilter] = useState<'all' | 'assignment' | 'driver_status' | 'maintenance' | 'chat_message'>('all');
 
   if (!isOpen) return null;
-
-  // Filter notifications by role
-  const roleNotifications = notifications.filter(
-    n => n.targetRole === 'all' || (userRole === 'employee' ? n.targetRole === 'employee' : n.targetRole === 'admin')
-  );
 
   const filtered = filter === 'all'
     ? roleNotifications
@@ -41,7 +37,7 @@ export default function FleetNotificationsDrawer({
   const unreadCount = roleNotifications.filter(n => n.unread).length;
 
   const handleMarkAllRead = () => {
-    markAllNotificationsRead(userRole);
+    roleNotifications.filter(n => n.unread).forEach(n => markNotificationRead(n.id));
     showToast(t('All fleet notifications marked as read', 'সকল নোটিফিকেশন পঠিত হিসেবে চিহ্নিত করা হয়েছে', lang), 'info');
   };
 

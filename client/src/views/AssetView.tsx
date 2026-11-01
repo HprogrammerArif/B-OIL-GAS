@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
+import { useCurrentUser } from '../auth/session';
+import { assetConfigFor, isMyCustody, isMyRequisition } from './asset/config';
 import { showToast } from '../components/ToastManager';
 import {
   useAssetStore,
@@ -85,8 +87,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     finalizeDisposalAndArchive,
   } = useAssetStore();
 
-  const roleConfig = useMemo(() => getAssetRoleConfig(role), [role]);
-  const currentPersona = ROLE_META[role];
+  const user = useCurrentUser();
+  const roleConfig = useMemo(
+    () => (user ? assetConfigFor(user) : { ...getAssetRoleConfig('employee'), isSelfServiceOnly: true }),
+    [user],
+  );
+  const currentPersona = { ...ROLE_META[role], name: user?.name ?? '', empId: user?.empId ?? '', dept: user?.dept ?? '' };
 
   // Navigation & Layout Modes
   const [activeTab, setActiveTab] = useState<MainModuleTab>('register');
@@ -119,6 +125,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
 
+  const canReceiveTransfer = (trf: { toCustodianEmpId?: string }) =>
+    roleConfig.canTransferCustody || (!!user && trf.toCustodianEmpId === user.empId);
+
   // Sync default filter and valid tab on role switch
   useEffect(() => {
     setCategoryFilter(roleConfig.defaultCategory);
@@ -132,16 +141,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   // Role-Scoped Visible Assets
   const roleScopedAssets = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
-      return assets.filter(
-        (a) =>
-          a.custodianEmpId === currentPersona.empId ||
-          a.custodian.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          a.custodianEmpId === 'EMP-1042' ||
-          a.custodian.toLowerCase().includes('tanvir ahmed')
-      );
+      return user ? assets.filter((a) => isMyCustody(a, user)) : [];
     }
     return assets;
-  }, [assets, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
+  }, [assets, roleConfig.isSelfServiceOnly, user]);
 
   // Live Category Counts (excluding disposed unless stageFilter includes disposed)
   const categoryCounts = useMemo(() => {
@@ -282,16 +285,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
   const visibleRequisitions = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
-      return requisitions.filter(
-        (r) =>
-          r.requestedByEmpId === currentPersona.empId ||
-          r.requestedBy.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          r.requestedByEmpId === 'EMP-1042' ||
-          r.requestedBy.toLowerCase().includes('tanvir ahmed')
-      );
+      return user ? requisitions.filter((r) => isMyRequisition(r, user)) : [];
     }
     return requisitions;
-  }, [requisitions, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
+  }, [requisitions, roleConfig.isSelfServiceOnly, user]);
 
   // Portfolio KPI Aggregations
   const portfolioStats = useMemo(() => {
@@ -412,7 +409,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   // Export Master Financial Ledger CSV
   const handleExportMasterLedgerCsv = () => {
     const header =
-      'Tag,SAP_FI_AA,Title,Category,Facility,GL_Cost_Center,Lifecycle_Stage,Method,Gross_CAPEX_BDT,Accumulated_Dep_BDT,Net_Book_Value_BDT,Cumulative_OPEX_BDT,TCO_BDT,Repair_Ratio_Pct\n';
+      'Tag,Ledger_No,Title,Category,Facility,GL_Cost_Center,Lifecycle_Stage,Method,Gross_CAPEX_BDT,Accumulated_Dep_BDT,Net_Book_Value_BDT,Cumulative_OPEX_BDT,TCO_BDT,Repair_Ratio_Pct\n';
     const rows = roleScopedAssets
       .map((a) => {
         const f = calculateAssetFinancials(a);
@@ -426,7 +423,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     link.download = 'BOGCL_Enterprise_Asset_Lifetime_FI_AA_Ledger.csv';
     link.click();
     URL.revokeObjectURL(url);
-    showToast(t('Exported SAP FI-AA Fixed Asset & TCO Master Ledger (CSV).', 'সম্পূর্ণ স্থায়ী সম্পদ ও অবচয় খতিয়ান ডাউনলোড হয়েছে।', lang), 'success');
+    showToast(t('Exported fixed-asset and TCO ledger (CSV).', 'সম্পূর্ণ স্থায়ী সম্পদ ও অবচয় খতিয়ান ডাউনলোড হয়েছে।', lang), 'success');
   };
 
   const handleConfirmAssetReject = (data: RejectionData) => {
@@ -460,13 +457,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
     // 1. Custody Acceptance Signature Pending
     if (!selectedAsset.custodianAcknowledged) {
-      const isCustodianOrAdmin =
-        role === 'transport_admin' ||
-        role === 'plant_gm' ||
-        role === 'chairman' ||
-        role === 'hr_admin' ||
-        selectedAsset.custodianEmpId === currentPersona.empId ||
-        selectedAsset.custodian.toLowerCase().includes(currentPersona.name.toLowerCase());
+      const isCustodian = !!user && isMyCustody(selectedAsset, user);
 
       return (
         <div className="eam-next-action">
@@ -481,7 +472,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               )}
             </div>
           </div>
-          {isCustodianOrAdmin ? (
+          {isCustodian ? (
             <button
               type="button"
               className="btn-gold"
@@ -520,6 +511,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               )}
             </div>
           </div>
+          {canReceiveTransfer(selectedOpenTransfer) ? (
           <button
             type="button"
             className="btn-primary"
@@ -538,6 +530,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           >
             <CheckCircle size={13} /> {t('Confirm Arrival & Close Gate Pass', 'প্রাপ্তি নিশ্চিত করুন', lang)}
           </button>
+          ) : (
+            <span style={{ fontSize: '11px', color: 'var(--status-info)', fontWeight: 600 }}>
+              {t('Awaiting receipt at destination', 'গন্তব্যে প্রাপ্তির অপেক্ষায়', lang)}
+            </span>
+          )}
         </div>
       );
     }
@@ -630,7 +627,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             <div>
               <strong>{t('Stage-7 Condemned — Awaiting Write-Off & Disposal:', 'পর্যায়-৭ অকেজো ঘোষিত — চূড়ান্ত অবলোপন অপেক্ষমাণ:', lang)}</strong>{' '}
               {t(
-                'Complete the 4-point pre-disposal safety & CFO audit checklist to post SAP retirement.',
+                'Complete the 4-point pre-disposal safety & CFO audit checklist before retirement is posted.',
                 '৪-দফা প্রাক-অবলোপন যাচাইকরণ সম্পন্ন করে নিলাম নিষ্পত্তি করুন।',
                 lang
               )}
@@ -2447,7 +2444,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </button>
 
                         {trf.status === 'completed' ? (
-                          <span className="badge success">✓ Completed ({trf.completedAt})</span>
+                          <span className="badge success">✓ {t('Completed', 'সম্পন্ন', lang)} ({trf.completedAt})</span>
+                        ) : !canReceiveTransfer(trf) ? (
+                          <span className="badge info">{t('In transit', 'স্থানান্তরধীন', lang)}</span>
                         ) : (
                           <button
                             type="button"
@@ -2682,7 +2681,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                       <th>{t('NBV at Retirement', 'অবলোপনকালীন বইমূল্য', lang)}</th>
                       <th>{t('Realized Proceeds', 'প্রাপ্ত নিলাম/স্ক্র্যাপ মূল্য', lang)}</th>
                       <th>{t('IAS 16 Gain / Loss', 'লাভ / ক্ষতি (IAS 16)', lang)}</th>
-                      <th>{t('SAP Retirement Voucher', 'এসএপি ভাউচার ও অনুমোদনকারী', lang)}</th>
+                      <th>{t('Retirement Voucher', 'অবলোপন ভাউচার ও অনুমোদনকারী', lang)}</th>
                       <th style={{ textAlign: 'right' }}>{t('Audit File', 'নথি', lang)}</th>
                     </tr>
                   </thead>
@@ -2753,7 +2752,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           setViewMode('cockpit');
           showToast(
             t(
-              `✓ Asset ${created.tag} (${created.sapAssetNo}) capitalized in SAP FI-AA with QR passport!`,
+              `✓ Asset ${created.tag} (${created.sapAssetNo}) registered with QR passport.`,
               `✓ সম্পদ ${created.tag} সফলভাবে এসএপিতে নিবন্ধিত হয়েছে!`,
               lang
             ),
@@ -2855,7 +2854,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           if (res) {
             showToast(
               t(
-                `👑 Write-Off Sanctioned! SAP Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} Gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} Loss`}). Locked in 10-Yr Archive.`,
+                `👑 Write-Off Sanctioned! Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} Gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} Loss`}). Locked in 10-Yr Archive.`,
                 `👑 অবলোপন অনুমোদিত! এসএপি ভাউচার ${res.sapVoucher} পোস্ট ও ১০-বছরের আর্কাইভে সংরক্ষিত।`,
                 lang
               ),

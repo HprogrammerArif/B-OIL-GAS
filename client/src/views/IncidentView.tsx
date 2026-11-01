@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
+import { ViewProps, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../components/ToastManager';
+import { useCurrentUser } from '../auth/session';
+import { nextRef } from '../lib/refs';
+import { nowStamp, nowTime } from '../lib/clock';
+import { type IncidentMode, incidentModeFor, incidentsVisibleTo, daysSinceLostTime } from './incident/config';
 import {
   useOperationsStore,
   IncidentItem,
@@ -47,7 +51,7 @@ export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: 
   environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: 'var(--status-success)', icon: '🌱' },
 };
 
-export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
+export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const {
     incidents,
     setIncidents,
@@ -59,7 +63,14 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
     closeIncidentWithSignOff,
   } = useOperationsStore();
   const { activeEmployees } = useEmployeeStore();
-  const currentPersona = ROLE_META[role] || ROLE_META.employee;
+  const user = useCurrentUser();
+  const mode: IncidentMode = user ? incidentModeFor(user) : 'reporter';
+  const canInvestigate = mode === 'investigate';
+  const currentPersona = { name: user?.name ?? '', label: user?.label ?? '', empId: user?.empId ?? '' };
+  const visibleIncidents = useMemo(
+    () => (user ? incidentsVisibleTo(user, mode, incidents) : []),
+    [user, mode, incidents],
+  );
 
   // ── Filters & Search State ──
   const [activeTab, setActiveTab] = useState<'all' | 'spill_leak' | 'near_miss' | 'first_aid' | 'pressure_piping' | 'electrical_arc' | 'statutory'>('all');
@@ -125,24 +136,23 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
   const [newCapaPriority, setNewCapaPriority] = useState<'high' | 'medium' | 'low'>('high');
 
   // ── Sign-Off Modal State (Modal 6) ──
-  const [signoffOfficer, setSignoffOfficer] = useState('Farhana Kabir (Lead Safety Officer)');
-  const [signoffGm, setSignoffGm] = useState('Engr. Md. Harunur Rashid (Plant GM)');
-  const [signoffRemarks, setSignoffRemarks] = useState('Site inspection completed. Preventative interlocks and physical barriers confirmed in full compliance with ISO 45001.');
+  const [signoffOfficer, setSignoffOfficer] = useState('');
+  const [signoffRemarks, setSignoffRemarks] = useState('');
 
   // ─────────────────────────────────────────────────────────────────────────
   // Computed Performance Metrics & Stats
   // ─────────────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const total = incidents.length;
-    const open = incidents.filter(i => i.capaStatus !== 'closed').length;
-    const closed = incidents.filter(i => i.capaStatus === 'closed').length;
-    const critical = incidents.filter(i => i.level >= 3).length;
-    const statutory = incidents.filter(i => i.statutoryReportable).length;
+    const pool = visibleIncidents;
+    const total = pool.length;
+    const open = pool.filter(i => i.capaStatus !== 'closed').length;
+    const closed = pool.filter(i => i.capaStatus === 'closed').length;
+    const critical = pool.filter(i => i.level >= 3).length;
+    const statutory = pool.filter(i => i.statutoryReportable).length;
 
-    // CAPA actions total & completed
     let totalCapa = 0;
     let completedCapa = 0;
-    incidents.forEach(i => {
+    pool.forEach(i => {
       (i.capaItems || []).forEach(c => {
         totalCapa++;
         if (c.status === 'completed') completedCapa++;
@@ -157,17 +167,15 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       critical,
       statutory,
       capaRate,
-      safeDays: 284,
-      safeManHours: 1428500,
-      trir: '0.14',
+      safeDays: daysSinceLostTime(incidents),
     };
-  }, [incidents]);
+  }, [visibleIncidents, incidents]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Filtered Incidents
   // ─────────────────────────────────────────────────────────────────────────
   const filteredIncidents = useMemo(() => {
-    return incidents.filter(inc => {
+    return visibleIncidents.filter(inc => {
       // Tab filter
       if (activeTab === 'statutory' && !inc.statutoryReportable) return false;
       if (activeTab === 'spill_leak' && inc.incidentType !== 'spill_leak' && inc.category !== 'spill') return false;
@@ -210,7 +218,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
       return true;
     });
-  }, [incidents, activeTab, matrixFilter, selectedZone, selectedSeverity, selectedStage, searchQuery]);
+  }, [visibleIncidents, activeTab, matrixFilter, selectedZone, selectedSeverity, selectedStage, searchQuery]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // RCA Modal Handlers
@@ -280,7 +288,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       return;
     }
 
-    const nextIdx = incidents.length + 1;
+    const incRef = nextRef('INC');
     const score = wizardSeverity * wizardLikelihood;
     const riskCat = score >= 15 ? 'extreme' : score >= 10 ? 'high' : score >= 5 ? 'medium' : 'low';
 
@@ -313,18 +321,18 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
     const defaultCapa: CapaActionItem[] = [
       {
-        id: `CAPA-${Math.floor(100 + Math.random() * 900)}`,
+        id: nextRef('CAPA', 3),
         actionType: 'immediate_containment',
         description: wizardImmediateActions.trim(),
         owner: `${currentPersona.name} (${currentPersona.label})`,
         dueDate: SYSTEM_TODAY,
         priority: 'high',
         status: 'completed',
-        completedAt: 'Just Now',
+        completedAt: nowStamp(),
         verificationEvidence: 'Initial containment executed upon notification.',
       },
       {
-        id: `CAPA-${Math.floor(100 + Math.random() * 900)}`,
+        id: nextRef('CAPA', 3),
         actionType: 'corrective',
         description: `Investigate physical cause and perform safety verification on ${wizardLocation}.`,
         owner: 'Plant Maintenance & EHS Team',
@@ -335,8 +343,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
     ];
 
     const newInc: IncidentItem = {
-      id: `INC-0${nextIdx}`,
-      incNo: `BOGCL-HSE-2026-${String(43 + nextIdx).padStart(3, '0')}`,
+      id: incRef,
+      incNo: incRef,
       title: wizardTitle.trim(),
       titleBn: wizardTitle.trim(),
       incidentType: wizardType,
@@ -350,7 +358,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       shift: wizardShift,
       reportedBy: `${currentPersona.name} (${currentPersona.label})`,
       reporterEmpId: currentPersona.empId,
-      date: `${SYSTEM_TODAY}, Just Now`,
+      date: `${SYSTEM_TODAY}, ${nowTime()}`,
       workflowStage: 'reported',
       immediateActionsTaken: wizardImmediateActions.trim(),
       personsInvolved: persons,
@@ -394,10 +402,10 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       return;
     }
 
-    const nextIdx = incidents.length + 1;
+    const incRef = nextRef('INC');
     const newInc: IncidentItem = {
-      id: `INC-0${nextIdx}`,
-      incNo: `BOGCL-HSE-2026-${String(43 + nextIdx).padStart(3, '0')}`,
+      id: incRef,
+      incNo: incRef,
       title: `Hazard Observation: ${quickHazardTitle.trim()}`,
       titleBn: `বিপদ পর্যবেক্ষণ: ${quickHazardTitle.trim()}`,
       incidentType: 'hazard_observation',
@@ -411,13 +419,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       shift: 'Morning Shift (07:00 - 15:00)',
       reportedBy: `${currentPersona.name} (${currentPersona.label})`,
       reporterEmpId: currentPersona.empId,
-      date: `${SYSTEM_TODAY}, Just Now`,
+      date: `${SYSTEM_TODAY}, ${nowTime()}`,
       workflowStage: 'triaged',
       immediateActionsTaken: quickHazardFix.trim() || 'Hazard flagged with safety tape and reported to shift supervisor.',
       rootCause: quickHazardDesc.trim(),
       capaItems: [
         {
-          id: `CAPA-${Math.floor(100 + Math.random() * 900)}`,
+          id: nextRef('CAPA', 3),
           actionType: 'corrective',
           description: quickHazardFix.trim() || 'Inspect area and remediate flagged condition.',
           owner: 'Plant Maintenance Team',
@@ -475,13 +483,14 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
   // Digital Sign-Off & Closure Handler
   // ─────────────────────────────────────────────────────────────────────────
   const handleSignOffClosure = () => {
-    if (!selectedSignoffIncident) return;
-    closeIncidentWithSignOff(selectedSignoffIncident.id, signoffOfficer, signoffGm, signoffRemarks);
+    if (!selectedSignoffIncident || !signoffOfficer.trim()) return;
+    closeIncidentWithSignOff(selectedSignoffIncident.id, signoffOfficer.trim(), `${currentPersona.name} (${currentPersona.label})`, signoffRemarks);
     setSelectedSignoffIncident(null);
+    setSignoffOfficer('');
     showToast(
       t(
-        `Incident ${selectedSignoffIncident.incNo} formally closed and verified by Plant GM.`,
-        `ইনসিডেন্ট ${selectedSignoffIncident.incNo} সফলভাবে সমাপ্ত ও জিএম মহোদয় কর্তৃক অনুমোদিত হয়েছে।`,
+        `Incident ${selectedSignoffIncident.incNo} verified and closed.`,
+        `ইনসিডেন্ট ${selectedSignoffIncident.incNo} যাচাই করে সমাপ্ত করা হয়েছে।`,
         lang
       ),
       'gold'
@@ -495,31 +504,32 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
-              {t('Factory Safety & Incident Management System', 'কারখানা স্বাস্থ্য-নিরাপত্তা ও ইনসিডেন্ট ব্যবস্থাপনা', lang)}
+              {mode === 'reporter'
+                ? t('My Safety Reports', 'আমার নিরাপত্তা রিপোর্ট', lang)
+                : t('Safety & Incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
             </h2>
-            <span className="badge success" style={{ fontSize: '10px' }}>
-              OSHA & ISO 45001 STANDARDS
-            </span>
           </div>
           <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
-            {t(
-              'Zero-Harm Workplace • Fast Floor Reporting • Step-by-Step Problem Solving (5-Whys) • Action Fixes (CAPA)',
-              'শূন্য দুর্ঘটনা দর্শন • দ্রুত মেঝে পর্যায় থেকে রিপোর্ট • সমস্যার মূল কারণ অনুসন্ধান ও স্থায়ী সমাধান ব্যবস্থা',
-              lang
-            )}
+            {mode === 'investigate'
+              ? t('Triage reports, run root-cause analysis and close corrective actions.', 'রিপোর্ট যাচাই, মূল কারণ বিশ্লেষণ ও সংশোধনমূলক ব্যবস্থা সম্পন্ন করুন।', lang)
+              : mode === 'oversight'
+                ? t('All reported incidents and their investigation status.', 'সব রিপোর্টকৃত ঘটনা ও তদন্তের অবস্থা।', lang)
+                : t('Report hazards and incidents, and follow up on what you reported.', 'বিপদ ও দুর্ঘটনা রিপোর্ট করুন এবং অগ্রগতি দেখুন।', lang)}
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="btn-outline-danger"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
-            onClick={() => setShowEmergencyModal(true)}
-          >
-            <Siren size={15} color="var(--status-danger)" />
-            {t('Emergency Siren & Drill', 'জরুরি সাইরেন ও ইভাকুয়েশন ড্রিল', lang)}
-          </button>
+          {canInvestigate && (
+            <button
+              type="button"
+              className="btn-outline-danger"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+              onClick={() => setShowEmergencyModal(true)}
+            >
+              <Siren size={15} color="var(--status-danger)" />
+              {t('Emergency Alert', 'জরুরি সতর্কবার্তা', lang)}
+            </button>
+          )}
 
           <button
             type="button"
@@ -528,7 +538,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setShowQuickHazardModal(true)}
           >
             <Zap size={14} color="var(--status-purple)" />
-            {t('1-Min Quick Hazard Spotter', '১-মিনিট দ্রুত বিপদ পর্যবেক্ষণ', lang)}
+            {t('Quick Hazard Report', 'দ্রুত বিপদ রিপোর্ট', lang)}
           </button>
 
           <button
@@ -554,13 +564,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success-text)' }}>
               <ShieldCheck size={18} />
             </div>
-            <span className="badge success" style={{ fontSize: '9.5px' }}>TARGET: 365 DAYS</span>
+            <span className="badge success" style={{ fontSize: '9.5px' }}>{t('Site-wide', 'সমগ্র সাইট', lang)}</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: 'var(--status-success-text)' }}>{stats.safeDays}</div>
-            <div className="parcel-kpi-title">{t('Accident-Free Working Days', 'দুর্ঘটনামুক্ত নিরাপদ কর্মদিবস', lang)}</div>
+            <div className="parcel-kpi-title">{t('Days Without Lost-Time Injury', 'কর্মদিবস হারানো দুর্ঘটনাবিহীন দিন', lang)}</div>
             <div className="parcel-kpi-sub">
-              {stats.safeManHours.toLocaleString()} {t('Safe Work Hours (No Lost Time)', 'নিরাপদ কর্মঘণ্টা (কোনো দুর্ঘটনা নেই)', lang)}
+              {t('Counted from the last lost-time injury', 'সর্বশেষ কর্মদিবস হারানো দুর্ঘটনা থেকে গণনা', lang)}
             </div>
           </div>
         </div>
@@ -575,7 +585,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning)' }}>
               <Clock size={18} />
             </div>
-            <span className="badge warn" style={{ fontSize: '9.5px' }}>ACTIVE</span>
+            <span className="badge warn" style={{ fontSize: '9.5px' }}>{t('Active', 'চলমান', lang)}</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: 'var(--status-warning)' }}>{stats.open}</div>
@@ -592,7 +602,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)' }}>
               <CheckSquare size={18} />
             </div>
-            <span className="badge info" style={{ fontSize: '9.5px' }}>TARGET: &gt;85%</span>
+            <span className="badge info" style={{ fontSize: '9.5px' }}>{t('Target: >85%', 'লক্ষ্য: >৮৫%', lang)}</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: 'var(--status-info-text)' }}>{stats.capaRate}%</div>
@@ -613,7 +623,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' }}>
               <FileText size={18} />
             </div>
-            <span className="badge danger" style={{ fontSize: '9.5px' }}>GOVT DEADLINE</span>
+            <span className="badge danger" style={{ fontSize: '9.5px' }}>{t('Govt deadline', 'সরকারি সময়সীমা', lang)}</span>
           </div>
           <div>
             <div className="parcel-kpi-val" style={{ color: 'var(--status-danger-text)' }}>{stats.statutory}</div>
@@ -630,13 +640,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="parcel-kpi-icon" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' }}>
               <Activity size={18} />
             </div>
-            <span className="badge meeting" style={{ fontSize: '9.5px' }}>LOWER IS BETTER</span>
+            <span className="badge meeting" style={{ fontSize: '9.5px' }}>{t('Level 3+', 'স্তর ৩+', lang)}</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-purple-text)' }}>{stats.trir}</div>
-            <div className="parcel-kpi-title">{t('Safety Score (Injury Rate - TRIR)', 'নিরাপত্তা স্কোর (আঘাতের হার - TRIR)', lang)}</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-purple-text)' }}>{stats.critical}</div>
+            <div className="parcel-kpi-title">{t('Serious Incidents', 'গুরুতর ঘটনা', lang)}</div>
             <div className="parcel-kpi-sub">
-              {t('0.14 vs industry benchmark 0.85', 'শিল্প গড়ের চেয়ে অনেক নিরাপদ (০.১৪)', lang)}
+              {t('Moderate, major or critical severity', 'মাঝারি, বড় বা সংকটপূর্ণ মাত্রা', lang)}
             </div>
           </div>
         </div>
@@ -670,7 +680,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 ✕ {t('Clear Matrix Filter', 'ম্যাট্রিক্স ফিল্টার মুছুন', lang)} (Severity {matrixFilter.level} × Chance {matrixFilter.likelihood})
               </button>
             )}
-            <span className="badge gold">5×5 RISK GRID</span>
+            <span className="badge gold">{t('5×5 risk grid', '৫×৫ ঝুঁকি গ্রিড', lang)}</span>
           </div>
         </div>
 
@@ -1088,7 +1098,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             {c.status === 'completed' ? (
-                              <span className="badge success" style={{ fontSize: '9px' }}>✓ COMPLETED</span>
+                              <span className="badge success" style={{ fontSize: '9px' }}>✓ {t('COMPLETED', 'সম্পন্ন', lang)}</span>
+                            ) : !canInvestigate ? (
+                              <span className="badge" style={{ fontSize: '9px' }}>{t('OPEN', 'চলমান', lang)}</span>
                             ) : (
                               <button
                                 type="button"
@@ -1112,7 +1124,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <Award size={16} color="var(--brand-gold)" />
                       <div>
-                        <strong>ISO 45001 Closure Verified:</strong> {inc.closureSignOff.remarks}
+                        <strong>{t('Closure verified:', 'সমাপ্তি যাচাইকৃত:', lang)}</strong> {inc.closureSignOff.remarks}
                       </div>
                     </div>
                     <div style={{ fontSize: '10.5px', color: 'var(--status-warning-text)' }}>
@@ -1134,51 +1146,58 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   </button>
 
                   <div className="flex-gap" style={{ flexWrap: 'wrap' }}>
-                    {/* 5-Whys RCA Studio */}
-                    <button
-                      type="button"
-                      className="btn-sm-ghost"
-                      style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                      onClick={() => openRcaModal(inc)}
-                    >
-                      <HelpCircle size={12} color="var(--status-warning)" />
-                      {inc.fiveWhys ? t('5-Whys & Fishbone', '৫-হোয়াইজ ও ফিশবোন', lang) : t('Run RCA', 'কারণ অনুসন্ধান', lang)}
-                    </button>
-
-                    {/* Manage CAPA Tasks */}
-                    <button
-                      type="button"
-                      className="btn-sm-ghost"
-                      style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                      onClick={() => setSelectedCapaIncident(inc)}
-                    >
-                      <CheckSquare size={12} color="var(--status-info)" />
-                      {t('Manage CAPA', 'সিএপিএ পরিচালনা', lang)}
-                    </button>
-
-                    {/* Official Statutory Dossier */}
-                    <button
-                      type="button"
-                      className="btn-sm-ghost"
-                      style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                      onClick={() => setSelectedDossierIncident(inc)}
-                    >
-                      <FileText size={12} color="var(--brand-crimson)" />
-                      {t('Govt / DoE Dossier', 'সরকারি ডসিয়ার', lang)}
-                    </button>
-
-                    {/* Executive Sign-off and Close */}
-                    {inc.capaStatus !== 'closed' && (role === 'plant_gm' || role === 'chairman' || role === 'transport_admin') && (
+                    {canInvestigate && (
                       <button
                         type="button"
-                        className="btn-primary"
-                        style={{ fontSize: '11px', padding: '4px 10px', background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
-                        onClick={() => setSelectedSignoffIncident(inc)}
+                        className="btn-sm-ghost"
+                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        onClick={() => openRcaModal(inc)}
                       >
-                        <CheckCircle size={12} />
-                        {t('Verify & Close Incident', 'যাচাই ও সমাপ্তি ঘোষণা', lang)}
+                        <HelpCircle size={12} color="var(--status-warning)" />
+                        {inc.fiveWhys ? t('5-Whys & Fishbone', '৫-হোয়াইজ ও ফিশবোন', lang) : t('Run RCA', 'কারণ অনুসন্ধান', lang)}
                       </button>
                     )}
+
+                    {canInvestigate && (
+                      <button
+                        type="button"
+                        className="btn-sm-ghost"
+                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        onClick={() => setSelectedCapaIncident(inc)}
+                      >
+                        <CheckSquare size={12} color="var(--status-info)" />
+                        {t('Manage CAPA', 'সিএপিএ পরিচালনা', lang)}
+                      </button>
+                    )}
+
+                    {mode !== 'reporter' && inc.statutoryReportable && (
+                      <button
+                        type="button"
+                        className="btn-sm-ghost"
+                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+                        onClick={() => setSelectedDossierIncident(inc)}
+                      >
+                        <FileText size={12} color="var(--brand-crimson)" />
+                        {t('Statutory report', 'সংবিধিবদ্ধ প্রতিবেদন', lang)}
+                      </button>
+                    )}
+
+                    {inc.capaStatus !== 'closed' && canInvestigate && (() => {
+                      const capaDone = (inc.capaItems?.length ?? 0) > 0 && (inc.capaItems ?? []).every(c => c.status === 'completed');
+                      return (
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          disabled={!capaDone}
+                          title={capaDone ? undefined : t('Complete all CAPA actions first', 'আগে সব সিএপিএ ব্যবস্থা সম্পন্ন করুন', lang)}
+                          style={{ fontSize: '11px', padding: '4px 10px', opacity: capaDone ? 1 : 0.55, cursor: capaDone ? 'pointer' : 'not-allowed', background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
+                          onClick={() => capaDone && setSelectedSignoffIncident(inc)}
+                        >
+                          <CheckCircle size={12} />
+                          {t('Verify & Close Incident', 'যাচাই ও সমাপ্তি ঘোষণা', lang)}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -2093,8 +2112,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   </div>
                   {selectedDossierIncident.fiveWhys && (
                     <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--status-info-text)', background: 'var(--status-info-bg)', padding: '6px 10px', borderRadius: '4px' }}>
-                      Primary Factor: <strong>{selectedDossierIncident.fiveWhys.fishboneCategory}</strong> • Systemic flaw validated under ISO 45001 protocol.
-                    </div>
+                      Primary Factor: <strong>{selectedDossierIncident.fiveWhys.fishboneCategory}</strong>                    </div>
                   )}
                 </div>
 
@@ -2160,26 +2178,27 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
             <div className="modal-body">
               <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: 'var(--status-success-text)', marginBottom: '14px' }}>
-                ✓ <strong>ISO 45001 Closure Prerequisite:</strong> All assigned CAPA items must be executed and inspected before executive sign-off.
+                ✓ {t('All CAPA actions are complete. Record the safety officer who inspected them, then close.', 'সব সিএপিএ ব্যবস্থা সম্পন্ন। যাচাইকারী নিরাপত্তা কর্মকর্তার নাম লিখে সমাপ্ত করুন।', lang)}
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Lead Safety Officer Sign-Off', 'নিরাপত্তা প্রধানের স্বাক্ষর', lang)}</label>
+                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Inspected by (safety officer)', 'যাচাইকারী (নিরাপত্তা কর্মকর্তা)', lang)}</label>
                 <input
                   type="text"
                   className="form-input"
                   value={signoffOfficer}
+                  placeholder={t('Name and designation', 'নাম ও পদবি', lang)}
                   onChange={(e) => setSignoffOfficer(e.target.value)}
                 />
               </div>
 
               <div className="form-group mb-3">
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Plant General Manager Approval', 'প্ল্যান্ট জিএম মহোদয়ের অনুমোদন', lang)}</label>
+                <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Approved by', 'অনুমোদনকারী', lang)}</label>
                 <input
                   type="text"
                   className="form-input"
-                  value={signoffGm}
-                  onChange={(e) => setSignoffGm(e.target.value)}
+                  value={`${currentPersona.name} (${currentPersona.label})`}
+                  readOnly
                 />
               </div>
 
@@ -2199,26 +2218,27 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               <button
                 type="button"
                 className="btn-primary"
-                style={{ background: 'var(--status-success-solid)', borderColor: 'var(--status-success)' }}
+                style={{ background: 'var(--status-success-solid)', borderColor: 'var(--status-success)', opacity: signoffOfficer.trim() ? 1 : 0.55 }}
+                disabled={!signoffOfficer.trim()}
                 onClick={handleSignOffClosure}
               >
                 <Award size={14} />
-                {t('Seal Sign-Off & Close Incident', 'অনুমোদন নিশ্চিত করুন ও ফাইল ক্লোজ করুন', lang)}
+                {t('Sign off & close incident', 'অনুমোদন করে সমাপ্ত করুন', lang)}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── MODAL 7: EMERGENCY REFINERY EVACUATION & SIREN DRILL ─── */}
-      {showEmergencyModal && (
+      {/* ─── MODAL 7: SITE EMERGENCY ALERT ─── */}
+      {showEmergencyModal && canInvestigate && (
         <div className="modal-bg" onClick={() => setShowEmergencyModal(false)}>
           <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertOctagon size={20} color="var(--status-warning-bright)" />
                 <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
-                  {t('Emergency Refinery Shutdown & Muster Drill', 'জরুরি রিফাইনারি শাটডাউন ও ড্রিল প্রটোকল', lang)}
+                  {t('Raise Site Emergency Alert', 'সাইট জরুরি সতর্কবার্তা পাঠান', lang)}
                 </h3>
               </div>
               <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowEmergencyModal(false)}>×</button>
@@ -2229,20 +2249,21 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--status-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                   <Siren size={30} color="var(--status-danger)" />
                 </div>
-                <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-danger-text)', margin: '0 0 6px' }}>
-                  Keraniganj Complex Emergency Readiness
-                </h4>
-                <p style={{ fontSize: '12px', color: 'var(--brand-slate-600)', maxWidth: '420px', margin: '0 auto' }}>
-                  Activating this protocol triggers the refinery acoustic horn, automatically trips SCADA fuel transfer pumps, and dispatches SMS alerts to Plant GM, Fire Service, and Chairman's Office.
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', maxWidth: '420px', margin: '0 auto' }}>
+                  {t(
+                    'Sends an urgent notification to the emergency response team and starts a muster roll call. Follow the plant emergency procedure for physical shutdown.',
+                    'জরুরি সাড়াদান দলের কাছে তাৎক্ষণিক বার্তা পাঠাবে এবং হাজিরা গণনা শুরু করবে। প্ল্যান্ট বন্ধের জন্য জরুরি কার্যপ্রণালী অনুসরণ করুন।',
+                    lang
+                  )}
                 </p>
               </div>
 
-              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px', borderRadius: '6px', fontSize: '12px' }}>
-                <div style={{ fontWeight: 700, color: 'var(--status-warning-text)', marginBottom: '6px' }}>Automatic Safety Interlocks Triggered:</div>
+              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-border)', padding: '12px', borderRadius: '6px', fontSize: '12px' }}>
+                <div style={{ fontWeight: 700, color: 'var(--status-warning-text)', marginBottom: '6px' }}>{t('Who is notified', 'যাদের জানানো হবে', lang)}</div>
                 <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--status-warning-text)', lineHeight: 1.6 }}>
-                  <li>Main Crude/Bitumen Feed Valve V-101: <strong>Instant Pneumatic Closure</strong></li>
-                  <li>Nitrogen Blanket Purge System: <strong>Activated on Tanks TK-101 to TK-108</strong></li>
-                  <li>Evacuation Assembly Points A, B, C: <strong>Biometric Headcount Enabled</strong></li>
+                  <li>{t('Plant General Manager', 'প্ল্যান্ট জেনারেল ম্যানেজার', lang)}</li>
+                  <li>{t("Chairman's Office", 'চেয়ারম্যানের দপ্তর', lang)}</li>
+                  <li>{t('Transport and gate supervisors (for muster roll call)', 'পরিবহন ও গেট তত্ত্বাবধায়ক (হাজিরা গণনার জন্য)', lang)}</li>
                 </ul>
               </div>
             </div>
@@ -2255,11 +2276,11 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontWeight: 800 }}
                 onClick={() => {
                   setShowEmergencyModal(false);
-                  showToast(t('EMERGENCY SIREN TRIGGERED! All 8 refinery valves isolated. SMS dispatched to Chairman and Fire Dept.', 'জরুরি সাইরেন সক্রিয়! প্ল্যান্টের ভালভ বিচ্ছিন্ন ও চেয়ারম্যান মহোদয়ের দপ্তরে বার্তা প্রেরণ করা হয়েছে।', lang), 'gold');
+                  showToast(t(`Emergency alert sent at ${nowTime()}. Muster roll call started.`, `${nowTime(lang)}-এ জরুরি সতর্কবার্তা পাঠানো হয়েছে। হাজিরা গণনা শুরু হয়েছে।`, lang), 'danger');
                 }}
               >
                 <Siren size={14} />
-                {t('Initiate Emergency Drill Protocol', 'জরুরি ড্রিল সক্রিয় করুন', lang)}
+                {t('Send Emergency Alert', 'জরুরি সতর্কবার্তা পাঠান', lang)}
               </button>
             </div>
           </div>

@@ -22,7 +22,7 @@ export type Bilingual = readonly [en: string, bn: string];
 export type Tone = 'success' | 'info' | 'warning' | 'danger' | 'purple' | 'gold' | 'neutral';
 
 export interface HeroStat {
-  value: string;
+  value: string | Bilingual;
   label: Bilingual;
   tone?: Tone;
 }
@@ -83,7 +83,8 @@ function joinTitles(items: { title: string }[], max = 2): string {
 
 const chairman: DashboardRoleConfig = {
   hero: (d) => {
-    const awaiting = d.approvals.pending.length + d.notesheets.awaitingMe.length;
+    const mirrored = new Set(d.approvals.pending.map((a) => a.sourceId));
+    const awaiting = d.approvals.pending.length + d.notesheets.awaitingMe.filter((f) => !mirrored.has(f.id)).length;
     return [
       { value: String(awaiting), label: ['Files awaiting your decision', 'আপনার সিদ্ধান্তের অপেক্ষায় ফাইল'], tone: awaiting > 0 ? 'gold' : 'success' },
       { value: `${d.workforce.present} / ${d.workforce.roster.length}`, label: ['Staff present today', 'আজ উপস্থিত কর্মী'], tone: 'success' },
@@ -297,7 +298,7 @@ const employee: DashboardRoleConfig = {
     return [
       { value: rec ? rec.inTime : '—', label: rec ? ['Punched in today', 'আজ পাঞ্চ-ইন'] : ['Not punched in yet', 'এখনো পাঞ্চ-ইন হয়নি'], tone: rec ? 'success' : 'warning' },
       { value: d.claims.minePending.length > 0 ? fmtBdt(d.claims.minePendingBdt) : '৳0', label: [`${d.claims.minePending.length} ${plural(d.claims.minePending.length, 'claim', 'claims')} under review`, `${bn(d.claims.minePending.length)}টি দাবি পর্যালোচনাধীন`], tone: 'info' },
-      { value: `${d.workforce.myCasualLeaveBalance} days`, label: ['Casual leave remaining', 'অবশিষ্ট ক্যাজুয়াল ছুটি'], tone: 'purple' },
+      { value: [`${d.workforce.myCasualLeaveBalance} days`, `${bn(d.workforce.myCasualLeaveBalance)} দিন`], label: ['Casual leave remaining', 'অবশিষ্ট ক্যাজুয়াল ছুটি'], tone: 'purple' },
     ];
   },
   tabs: () => [
@@ -328,6 +329,7 @@ const employee: DashboardRoleConfig = {
 
 const DRIVER_STATUS: Record<string, Bilingual> = {
   available: ['Available for dispatch', 'ডিসপ্যাচের জন্য প্রস্তুত'],
+  trip_assigned: ['Trip assigned', 'ট্রিপ নির্ধারিত'],
   on_trip: ['On trip', 'ট্রিপে আছেন'],
   off_duty: ['Off duty', 'ডিউটির বাইরে'],
   rest_required: ['Rest period', 'বিশ্রামে'],
@@ -338,16 +340,21 @@ const DRIVER_STATUS: Record<string, Bilingual> = {
 const driver: DashboardRoleConfig = {
   hero: (d) => {
     const me = d.fleet.me;
-    const status = me ? DRIVER_STATUS[me.status] ?? DRIVER_STATUS.available : DRIVER_STATUS.available;
+    const tripAssigned = me?.status === 'available' && d.fleet.myMission?.status === 'assigned';
+    const status = tripAssigned
+      ? DRIVER_STATUS.trip_assigned
+      : me
+        ? DRIVER_STATUS[me.status] ?? DRIVER_STATUS.available
+        : DRIVER_STATUS.available;
     return [
-      { value: status[0], label: ['Duty status', 'ডিউটি অবস্থা'], tone: me?.status === 'on_trip' ? 'info' : 'success' },
+      { value: status, label: ['Duty status', 'ডিউটি অবস্থা'], tone: me?.status === 'on_trip' || tripAssigned ? 'info' : 'success' },
       { value: `${me?.dutyHoursToday ?? 0} / 8 hrs`, label: ['Duty hours logged today', 'আজকের ডিউটি ঘণ্টা'], tone: (me?.dutyHoursToday ?? 0) >= 7 ? 'warning' : 'info' },
       { value: me ? `${me.rating.toFixed(1)} / 5.0 ★` : '—', label: ['Passenger rating', 'যাত্রী রেটিং'], tone: 'gold' },
     ];
   },
   tabs: (d) => [
     { id: 'overview', label: ['Duty Cockpit', 'ডিউটি কক্পিট'], icon: <Gauge size={15} /> },
-    { id: 'mission', label: ['Current Trip', 'বর্তমান ট্রিপ'], icon: <Navigation size={15} />, badge: d.fleet.myMission?.status === 'in_transit' ? 'LIVE' : d.fleet.myMission ? 1 : undefined, badgeType: 'info' },
+    { id: 'mission', label: ['Current Trip', 'বর্তমান ট্রিপ'], icon: <Navigation size={15} />, badge: d.fleet.myMission ? 1 : undefined, badgeType: 'info' },
     { id: 'tolls', label: ['Toll & Slips', 'টোল ও স্লিপ'], icon: <Receipt size={15} /> },
   ],
   stats: (d) => {

@@ -1019,13 +1019,14 @@
 /* ─── GUEST & VIP PROTOCOL MANAGEMENT STYLES ───────────────────────────────── */
 .guest-two-col-layout {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 360px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
+.guest-two-col-layout > * { min-width: 0; }
 @media (max-width: 1024px) {
   .guest-two-col-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2501,7 +2502,9 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
   border: 1px solid var(--border-2);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 32px);
   font-size: 12px;
 }
 
@@ -2544,7 +2547,7 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
   margin-bottom: 8px;
 }
 
-.demo-panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.demo-panel-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 
 .demo-panel-persona {
   display: flex;
@@ -2557,6 +2560,7 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
   color: var(--text-1);
   cursor: pointer;
   text-align: left;
+  min-width: 0;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
@@ -2608,6 +2612,32 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
 }
 
 .demo-panel-foot code { font-family: monospace; color: var(--text-1); }
+
+.demo-panel-scenarios { display: flex; flex-direction: column; gap: 4px; }
+
+.demo-panel-scenario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-2);
+  color: var(--text-1);
+  cursor: pointer;
+  text-align: left;
+}
+
+.demo-panel-scenario:hover { border-color: var(--brand-crimson); }
+.demo-panel-scenario strong { font-size: 11.5px; }
+.demo-panel-scenario span { font-size: 10px; color: var(--text-3); }
+.demo-panel-btn.active { border-color: var(--brand-crimson); color: var(--brand-crimson); }
+
+/* Presentation mode: larger UI for projectors, no wall clock. */
+html[data-presentation='on'] body { zoom: 1.12; }
+html[data-presentation='on'] .telemetry-clock,
+html[data-presentation='on'] .telemetry-divider { display: none !important; }
 
 .form-group-clean {
   display: flex;
@@ -3449,15 +3479,19 @@ label { font-size:11.5px; font-weight:700; color:var(--brand-slate-700); display
 
 .bus-two-col-layout {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
 
+.bus-two-col-layout > * { min-width: 0; }
+
 @media (max-width: 1024px) {
   .bus-two-col-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+  /* The 52-seat cabin keeps its geometry; the card scrolls sideways on phones. */
+  .bus-two-col-layout > .card { overflow-x: auto; }
 }
 
 .bus-fuselage-frame {

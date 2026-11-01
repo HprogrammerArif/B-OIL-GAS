@@ -48,6 +48,21 @@ const SEED_START: Counters = {
   CNV: 1002,  // local conveyance claims
   TOUR: 8,    // event / tour settlements
   PR: 0,      // purchase requisitions referenced from note-sheets
+  PASS: 3180, // fleet trip passes
+  FUEL: 1240, // fuel vouchers
+  TOL: 2260,  // toll receipts
+  PKG: 9100,  // parcel waybills
+  RET: 860,   // parcel return (RTO) waybills
+  SEAL: 99460, // tamper-seal roll
+  BDG: 140,   // visitor badges
+  CAPA: 240,  // incident corrective / preventive actions
+  TAG: 109,   // asset QR tag serials
+  GST: 0,     // guest bus passengers without a staff ID
+  GPS: 20,    // bus GPS tracker IDs
+  DIR: 1040,  // chairman directives
+  GP: 1180,   // asset gate passes
+  CERT: 100,  // calibration / maintenance certificates
+  NTC: 310,   // notice reference numbers
 };
 
 function formatRef(prefix: string, n: number, width: number): string {

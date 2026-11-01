@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { X, Crown, CheckCircle2, ShieldCheck, Clock, Sparkles } from 'lucide-react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { DepartmentApprovalStep } from '../store/approvalStore';
+import { signatureCode } from '../lib/hash';
+import { nowStamp } from '../lib/clock';
 
 export interface AuthorizeData {
   directive: string;
@@ -96,16 +98,13 @@ export default function AuthorizeDirectiveModal({
       ? 'Engr. Md. Harunur Rashid'
       : 'Ahmed Akbar Sobhan');
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const stampCode =
-      'APPROVED-' +
-      new Date().getFullYear() +
-      '-' +
-      Math.floor(100000 + Math.random() * 900000);
+    const text = directive.trim() || DIRECTIVE_PRESETS[0].text;
+    const stampCode = await signatureCode([text, displaySigner, displayTitle, nowStamp()]);
 
     onConfirm({
-      directive: directive.trim() || DIRECTIVE_PRESETS[0].text,
+      directive: text,
       notifySms,
       signatureHash: stampCode,
     });

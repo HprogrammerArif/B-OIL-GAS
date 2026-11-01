@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ViewProps, t, ROLE_META } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
@@ -10,6 +10,10 @@ import {
   MicOff, VideoOff, Maximize2, ShieldCheck, Zap, Crown, CheckCircle
 } from 'lucide-react';
 import { operationsStore, useOperationsStore, type ChatMessage, type ChatMember } from '../store/operationsStore';
+import { useCurrentUser } from '../auth/session';
+import { nextRef } from '../lib/refs';
+import { nowTime, today } from '../lib/clock';
+import { CHAIRMAN_ID, chatSelfId, dmKey } from './chat/config';
 
 export default function InnerCircleChat({ role, lang }: ViewProps) {
   // Channels, members and message history are owned by operationsStore (shared + persisted)
@@ -19,7 +23,20 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
     chatMessages: allMessages,
     setChatMessages: setAllMessages,
   } = useOperationsStore();
+  const user = useCurrentUser();
+  const canIssueDirective = !!user?.permissions.has('chat:directive');
+  const selfId = user ? chatSelfId(user, INNER_CIRCLE_MEMBERS) : '';
+  const members = useMemo<ChatMember[]>(() => {
+    const others = INNER_CIRCLE_MEMBERS.filter((m) => m.id !== selfId);
+    if (selfId === CHAIRMAN_ID) return others;
+    const c = ROLE_META.chairman;
+    return [
+      { id: CHAIRMAN_ID, name: c.name, role: c.label, initials: c.initials, color: c.avatarColor, status: 'online', statusLabel: "Chairman's Office", location: 'Head Office', phone: c.phone },
+      ...others,
+    ];
+  }, [INNER_CIRCLE_MEMBERS, selfId]);
   const [activeTarget, setActiveTarget] = useState<{ type: 'channel' | 'dm'; id: string }>({ type: 'channel', id: 'ch_executive' });
+  const conversationKey = activeTarget.type === 'channel' ? activeTarget.id : dmKey(selfId, activeTarget.id);
   const [messageInput, setMessageInput] = useState('');
   const [isDirectiveMode, setIsDirectiveMode] = useState(false);
   const [isUrgentFlag, setIsUrgentFlag] = useState(false);
@@ -52,8 +69,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
   // Opening a conversation clears its unread counter
   useEffect(() => {
-    operationsStore.markConversationRead(activeTarget.type, activeTarget.id);
-  }, [activeTarget]);
+    if (activeTarget.type === 'channel' || selfId === CHAIRMAN_ID) {
+      operationsStore.markConversationRead(activeTarget.type, activeTarget.id);
+    }
+  }, [activeTarget, selfId]);
 
   // Voice recording timer simulation
   useEffect(() => {
@@ -68,42 +87,43 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
     return () => clearInterval(interval);
   }, [isRecordingVoice]);
 
-  const activeMessages = allMessages[activeTarget.id] || [];
+  const activeMessages = allMessages[conversationKey] || [];
 
   const activeChannel = activeTarget.type === 'channel'
     ? CHANNELS.find((c) => c.id === activeTarget.id)
     : null;
 
   const activeMember = activeTarget.type === 'dm'
-    ? INNER_CIRCLE_MEMBERS.find((m) => m.id === activeTarget.id)
+    ? members.find((m) => m.id === activeTarget.id)
     : null;
 
   const handleSendMessage = () => {
     if (!messageInput.trim()) return;
+    const asDirective = isDirectiveMode && canIssueDirective;
 
-    const currentMeta = ROLE_META[role] || ROLE_META.chairman;
+    const currentMeta = ROLE_META[role];
 
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
-      senderId: role,
-      senderName: `${currentMeta.name} (You)`,
+      senderId: selfId,
+      senderName: currentMeta.name,
       senderRole: currentMeta.label,
       senderInitials: currentMeta.initials,
       senderColor: currentMeta.avatarColor,
       content: messageInput.trim(),
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-      type: isDirectiveMode ? 'directive' : 'text',
-      directiveId: isDirectiveMode ? `BOGCL-DIR-2026-${Math.floor(1000 + Math.random() * 9000)}` : undefined,
+      timestamp: nowTime(),
+      type: asDirective ? 'directive' : 'text',
+      directiveId: asDirective ? nextRef('DIR') : undefined,
       directiveAcknowledged: false,
-      isChairman: role === 'chairman',
-      isUrgent: isUrgentFlag || isDirectiveMode,
+      isChairman: canIssueDirective,
+      isUrgent: isUrgentFlag || asDirective,
       readBy: [],
       reactions: {},
     };
 
     setAllMessages((prev) => ({
       ...prev,
-      [activeTarget.id]: [...(prev[activeTarget.id] || []), newMsg],
+      [conversationKey]: [...(prev[conversationKey] || []), newMsg],
     }));
 
     setMessageInput('');
@@ -111,55 +131,55 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
     setIsUrgentFlag(false);
 
     showToast(
-      isDirectiveMode
-        ? '👑 Executive Directive dispatched with cryptographic seal. Leadership notified.'
-        : '✓ Message securely delivered to Inner Circle Enclave.',
-      isDirectiveMode ? 'success' : 'info'
+      asDirective
+        ? t('Directive issued. Recipients have been notified.', 'নির্দেশনা জারি হয়েছে। প্রাপকদের জানানো হয়েছে।', lang)
+        : t('Message sent.', 'বার্তা পাঠানো হয়েছে।', lang),
+      asDirective ? 'success' : 'info'
     );
   };
 
   const handleSendVoiceMemo = () => {
-    const currentMeta = ROLE_META[role] || ROLE_META.chairman;
+    const currentMeta = ROLE_META[role];
 
     const newMsg: ChatMessage = {
       id: `voice-${Date.now()}`,
-      senderId: role,
-      senderName: `${currentMeta.name} (You)`,
+      senderId: selfId,
+      senderName: currentMeta.name,
       senderRole: currentMeta.label,
       senderInitials: currentMeta.initials,
       senderColor: currentMeta.avatarColor,
       content: `${currentMeta.label} Voice Memo`,
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      timestamp: nowTime(),
       type: 'voice',
       voiceDuration: `0:${recordingSeconds < 10 ? '0' : ''}${recordingSeconds || 24}`,
-      isChairman: role === 'chairman',
+      isChairman: canIssueDirective,
       readBy: [],
       reactions: {},
     };
 
     setAllMessages((prev) => ({
       ...prev,
-      [activeTarget.id]: [...(prev[activeTarget.id] || []), newMsg],
+      [conversationKey]: [...(prev[conversationKey] || []), newMsg],
     }));
 
     setIsRecordingVoice(false);
-    showToast('🎙️ Audio memo encrypted and dispatched.', 'success');
+    showToast(t('Voice memo sent.', 'ভয়েস বার্তা পাঠানো হয়েছে।', lang), 'success');
   };
 
   const handleAcknowledgeDirective = (msgId: string) => {
     setAllMessages((prev) => ({
       ...prev,
-      [activeTarget.id]: (prev[activeTarget.id] || []).map((m) =>
+      [conversationKey]: (prev[conversationKey] || []).map((m) =>
         m.id === msgId ? { ...m, directiveAcknowledged: true } : m
       ),
     }));
-    showToast('✓ Directive formally acknowledged & recorded in SAP Governance log.', 'success');
+    showToast(t('Directive acknowledged.', 'নির্দেশনা স্বীকার করা হয়েছে।', lang), 'success');
   };
 
   const handleAddReaction = (msgId: string, emoji: string) => {
     setAllMessages((prev) => ({
       ...prev,
-      [activeTarget.id]: (prev[activeTarget.id] || []).map((m) => {
+      [conversationKey]: (prev[conversationKey] || []).map((m) => {
         if (m.id === msgId) {
           const current = m.reactions || {};
           return {
@@ -201,14 +221,13 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           <div className="ic-hub-title-row">
             <div className="ic-hub-badge">
               <Lock size={13} className="ic-lock-icon" />
-              <span>SOVEREIGN ENCLAVE</span>
+              <span>{t('Private', 'ব্যক্তিগত', lang)}</span>
             </div>
-            <span className="ic-cipher-tag">AES-256</span>
           </div>
           <h3 className="ic-hub-heading">{t("Chairman's Inner Circle", 'চেয়ারম্যানের ইনার সার্কেল', lang)}</h3>
           <div className="ic-hub-subtext">
             <ShieldCheck size={12} color="var(--status-success)" />
-            <span>Bashundhara Corporate Security Node #01</span>
+            <span>{t('Chairman and department heads only', 'শুধু চেয়ারম্যান ও বিভাগীয় প্রধানগণ', lang)}</span>
           </div>
         </div>
 
@@ -281,9 +300,9 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             <div className="ic-section-group">
               <div className="ic-section-title">
                 <span>{t('EXECUTIVE HOTLINES (1-ON-1)', 'শীর্ষ নেতৃত্ব হটলাইন', lang)}</span>
-                <span className="ic-section-count">{INNER_CIRCLE_MEMBERS.length}</span>
+                <span className="ic-section-count">{members.length}</span>
               </div>
-              {INNER_CIRCLE_MEMBERS.map((member) => (
+              {members.map((member) => (
                 <div
                   key={member.id}
                   className={`ic-list-item contact-item ${activeTarget.type === 'dm' && activeTarget.id === member.id ? 'active' : ''}`}
@@ -309,7 +328,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                     <div className="ic-item-role">{member.role}</div>
                     <div className="ic-item-status-note">📍 {member.statusLabel}</div>
                   </div>
-                  {member.unread && <span className="ic-unread-pill danger">{member.unread}</span>}
+                  {selfId === CHAIRMAN_ID && member.unread && <span className="ic-unread-pill danger">{member.unread}</span>}
                 </div>
               ))}
             </div>
@@ -378,14 +397,16 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           </div>
 
           <div className="ic-topbar-actions">
-            <button
-              className={`ic-topbar-tool-btn ${showQuickDirectives ? 'active' : ''}`}
-              onClick={() => setShowQuickDirectives(!showQuickDirectives)}
-              title={t('Toggle Directive Presets', 'দ্রুত নির্দেশাবলি টগল করুন', lang)}
-            >
-              <Zap size={13} color={showQuickDirectives ? 'var(--brand-gold)' : 'var(--text-muted)'} />
-              <span>{t('Directives', 'নির্দেশাবলি', lang)}</span>
-            </button>
+            {canIssueDirective && (
+              <button
+                className={`ic-topbar-tool-btn ${showQuickDirectives ? 'active' : ''}`}
+                onClick={() => setShowQuickDirectives(!showQuickDirectives)}
+                title={t('Toggle Directive Presets', 'দ্রুত নির্দেশাবলি টগল করুন', lang)}
+              >
+                <Zap size={13} color={showQuickDirectives ? 'var(--brand-gold)' : 'var(--text-muted)'} />
+                <span>{t('Directives', 'নির্দেশাবলি', lang)}</span>
+              </button>
+            )}
             <button
               className="ic-btn-call"
               onClick={() => setShowCallModal('voice')}
@@ -420,7 +441,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 <ShieldCheck size={14} color="var(--brand-gold)" />
                 <span>
                   <strong>{t('Sovereign Enclave Active', 'সার্বভৌম এনক্রিপশন সক্রিয়', lang)}:</strong>{' '}
-                  {t('Signed with Chairman AAS token. Logged in SAP compliance audit trails.', 'চেয়ারম্যান ডিজিটাল কি দিয়ে স্বাক্ষরিত ও স্যাপ অডিটে সংরক্ষিত।', lang)}
+                  {t('Messages here are restricted to leadership members and kept in the audit log.', 'এখানকার বার্তা শুধু নেতৃত্ব পর্যায়ের সদস্যদের জন্য এবং অডিট লগে সংরক্ষিত।', lang)}
                 </span>
               </div>
               <button
@@ -435,12 +456,12 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
           {/* Date Divider */}
           <div className="ic-date-divider">
-            <span className="ic-date-chip">{t('Today, 17 October 2026', 'আজ, ১৭ অক্টোবর ২০২৬', lang)}</span>
+            <span className="ic-date-chip">{t(`Today, ${today()}`, `আজ, ${today()}`, lang)}</span>
           </div>
 
           {/* Message List */}
           {activeMessages.map((msg) => {
-            const isMe = msg.isChairman || msg.senderId === 'chairman';
+            const isMe = msg.senderId === selfId;
 
             return (
               <div
@@ -469,7 +490,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                       <div className="ic-directive-header">
                         <div className="ic-directive-title">
                           <Zap size={15} color="var(--brand-gold)" />
-                          <span>CHAIRMAN EXECUTIVE DIRECTIVE</span>
+                          <span>{t('CHAIRMAN DIRECTIVE', 'চেয়ারম্যানের নির্দেশনা', lang)}</span>
                         </div>
                         <code className="ic-directive-id">{msg.directiveId}</code>
                       </div>
@@ -478,7 +499,12 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                         {msg.directiveAcknowledged ? (
                           <div className="ic-ack-status success">
                             <CheckCheck size={15} color="var(--status-success)" />
-                            <span>Formal Execution Certified in SAP Governance</span>
+                            <span>{t('Acknowledged', 'স্বীকৃত', lang)}</span>
+                          </div>
+                        ) : isMe ? (
+                          <div className="ic-ack-status">
+                            <Clock size={14} />
+                            <span>{t('Awaiting acknowledgement', 'স্বীকৃতির অপেক্ষায়', lang)}</span>
                           </div>
                         ) : (
                           <div className="ic-ack-action">
@@ -486,9 +512,9 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                               className="ic-btn-ack"
                               onClick={() => handleAcknowledgeDirective(msg.id)}
                             >
-                              <CheckCircle size={14} /> {t('Sign Acknowledgment & Execute', 'স্বাক্ষর ও কার্যকর করুন', lang)}
+                              <CheckCircle size={14} /> {t('Acknowledge', 'স্বীকার করুন', lang)}
                             </button>
-                            <span className="ic-ack-sla">SLA: 48h Response Window</span>
+                            <span className="ic-ack-sla">{t('Response due within 48h', '৪৮ ঘণ্টার মধ্যে সাড়া দিন', lang)}</span>
                           </div>
                         )}
                       </div>
@@ -604,7 +630,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
         </div>
 
         {/* Executive Quick Directive Bar (collapsible) */}
-        {showQuickDirectives && (
+        {showQuickDirectives && canIssueDirective && (
           <div className="ic-quick-directives">
             <div className="ic-quick-label">
               <Zap size={12} color="var(--brand-gold)" />
@@ -630,9 +656,9 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             </button>
             <button
               className="ic-quick-chip"
-              onClick={() => handleQuickDirective('REQUEST REAL-TIME TELEMETRY STREAM FOR CRUDE TANK FARM LEVEL.')}
+              onClick={() => handleQuickDirective('SUBMIT TODAY\'S TANK FARM STOCK POSITION BY 5:00 PM.')}
             >
-              📊 Live Telemetry Requisition
+              📊 Stock Position Report
             </button>
           </div>
         )}
@@ -696,15 +722,16 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
             <div className="ic-composer-bottom-bar">
               <div className="ic-composer-tools">
-                <button
-                  type="button"
-                  className={`ic-tool-btn ${isDirectiveMode ? 'active' : ''}`}
-                  onClick={() => setIsDirectiveMode(!isDirectiveMode)}
-                  title="Toggle Formal Executive Order Mode"
-                >
-                  <Crown size={15} color={isDirectiveMode ? 'var(--brand-gold)' : 'inherit'} />
-                  <span>{t('Executive Order', 'নির্বাহী আদেশ', lang)}</span>
-                </button>
+                {canIssueDirective && (
+                  <button
+                    type="button"
+                    className={`ic-tool-btn ${isDirectiveMode ? 'active' : ''}`}
+                    onClick={() => setIsDirectiveMode(!isDirectiveMode)}
+                  >
+                    <Crown size={15} color={isDirectiveMode ? 'var(--brand-gold)' : 'inherit'} />
+                    <span>{t('Directive', 'নির্দেশনা', lang)}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className={`ic-tool-btn ${isUrgentFlag ? 'active danger' : ''}`}
@@ -722,15 +749,16 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 >
                   <Paperclip size={15} />
                 </button>
-                <button
-                  type="button"
-                  className={`ic-tool-btn ${showQuickDirectives ? 'active' : ''}`}
-                  onClick={() => setShowQuickDirectives(!showQuickDirectives)}
-                  title="Toggle Quick Directive Presets"
-                >
-                  <Zap size={14} color={showQuickDirectives ? 'var(--brand-gold)' : 'inherit'} />
-                  <span>{t('Presets', 'প্রিসেট', lang)}</span>
-                </button>
+                {canIssueDirective && (
+                  <button
+                    type="button"
+                    className={`ic-tool-btn ${showQuickDirectives ? 'active' : ''}`}
+                    onClick={() => setShowQuickDirectives(!showQuickDirectives)}
+                  >
+                    <Zap size={14} color={showQuickDirectives ? 'var(--brand-gold)' : 'inherit'} />
+                    <span>{t('Presets', 'প্রিসেট', lang)}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className="ic-tool-btn"
@@ -801,7 +829,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   <span>ROOM MEMBERS ({activeChannel?.membersCount})</span>
                 </div>
                 <div className="ic-roster-list">
-                  {INNER_CIRCLE_MEMBERS.map((m) => (
+                  {members.map((m) => (
                     <div key={m.id} className="ic-roster-row">
                       <div className="ic-mini-avatar" style={{ background: m.color }}>{m.initials}</div>
                       <div className="ic-roster-info">

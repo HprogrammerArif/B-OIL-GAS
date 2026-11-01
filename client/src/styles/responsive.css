@@ -1456,25 +1456,31 @@
 /* ─── DEDICATED RESPONSIVE GRIDS & HERO BANNERS ────────────────────────────── */
 .notesheet-grid-2col {
   display: grid;
-  grid-template-columns: 1.9fr 1.1fr;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1.1fr);
   gap: 16px;
+}
+.notesheet-grid-2col > * { min-width: 0; }
+
+@media (min-width: 769px) {
+  .telemetry-hide-desktop { display: none !important; }
 }
 @media (max-width: 1024px) {
   .notesheet-grid-2col {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 18px !important;
   }
 }
 
 .bus-hero-dossier-grid {
   display: grid;
-  grid-template-columns: 1.15fr 1.35fr 1.1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.35fr) minmax(0, 1.1fr);
   gap: 16px;
   align-items: center;
 }
+.bus-hero-dossier-grid > * { min-width: 0; }
 @media (max-width: 1024px) {
   .bus-hero-dossier-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
   }
 }

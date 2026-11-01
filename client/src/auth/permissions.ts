@@ -25,11 +25,13 @@ export type Permission =
   | 'notesheet:view_all'
   // Leadership chat & notices
   | 'chat:leadership'
+  | 'chat:directive'
   | 'notices:broadcast'
   | 'notices:publish'
   // Compliance
   | 'compliance:view'
   | 'compliance:manage'
+  | 'compliance:dispatch_letter'
   // Fleet & bus
   | 'fleet:request'
   | 'fleet:dispatch'
@@ -74,8 +76,8 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'dashboard:executive',
     'approvals:view', 'approvals:decide',
     'notesheet:sign', 'notesheet:view_all',
-    'chat:leadership', 'notices:broadcast', 'notices:publish',
-    'compliance:view',
+    'chat:leadership', 'chat:directive', 'notices:broadcast', 'notices:publish',
+    'compliance:view', 'compliance:dispatch_letter',
     'guest:view_all', 'incident:view_all',
     'attendance:all', 'workforce:view',
     'asset:view_all', 'asset:approve_disposal',
