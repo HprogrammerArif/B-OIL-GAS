@@ -1,0 +1,19 @@
+---
+description: Template for a development handoff summary at the end of a work session (use when asked for a handoff, status, or session summary)
+alwaysApply: false
+---
+
+# Development Handoff Summary
+
+When asked for a handoff, produce:
+
+- **Implemented** — what works now, by module (`MOD-xx`) and app (`server`/`frontend`/`app`).
+- **Files modified/created** — grouped by app, with one-line purpose each.
+- **Architecture touched** — engines, schemas, routes, slices affected; any new patterns introduced.
+- **Decisions** — technical choices made and why; link the ADR or spec section (`docs/platform/..`).
+- **Spec updates** — which docs in `docs/platform/` were changed (or still need changing) to match the code.
+- **Remaining tasks** — ordered, with acceptance references (`BR-xx-nn`, endpoint, screen).
+- **Known issues / risks** — bugs, flaky tests, TODOs, security follow-ups.
+- **Verification** — exact commands run (`npm test`, `npm run typecheck`, `prisma validate`, …) and their results.
+
+Make it detailed enough that a fresh agent conversation can continue the work without repeating the investigation.

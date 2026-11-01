@@ -1,0 +1,18 @@
+---
+description: How to use the frozen prototype in client/ as a read-only functional and visual reference
+globs: client/**
+alwaysApply: false
+---
+
+# Prototype Reference (`client/`) — READ ONLY
+
+`client/` is the interactive prototype demonstrated to the client. **Do not edit, refactor, lint-fix, or upgrade anything in it.** Production work happens in `server/`, `frontend/`, `app/`.
+
+## How to use it
+- Functional truth: `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md` (module deep-dives, constants, defects). Open prototype files only to confirm a detail (labels, constants, flow order, colours).
+- Business constants (grade DA rates, bus routes, regulators, risk matrix, PPE lists) have been promoted to rules/settings in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md` — cite the `BR-` id, not the prototype line.
+- Known prototype defects (fake SHA-256, OTP auto-accept, missing FIFO window, views not using their stores, mislabelled rejections) must **not** be reproduced; the spec defines the corrected behaviour.
+- Visual language (crimson `#A51C30`, navy `#0B132B`, gold `#D4AF37`, surface `#F8FAFC`, bilingual `t(en, bn)` labels) is reproduced via the design tokens in `frontend/` and `app/`, not by copying CSS files.
+
+## Running it
+`cd client && npm run dev` (Vite, http://localhost:5173). Persona switcher in the top bar. No backend needed.

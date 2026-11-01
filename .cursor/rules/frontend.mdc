@@ -1,3 +1,38 @@
 ---
-alwaysApply: true
+description: Web frontend (frontend/) conventions for React 19 + React Router 7 + Redux Toolkit + RTK Query + Tailwind
+globs: frontend/**
+alwaysApply: false
 ---
+
+# Web Frontend Rules (`frontend/`)
+
+Spec: `docs/platform/04_WEB_FRONTEND_SPECIFICATION.md`. Visual reference: the prototype in `client/` (read-only).
+
+## Structure
+- Feature-sliced: `src/features/<module>/{api,components,pages,hooks,schemas,model}`; shared code in `src/shared/*`; shell in `src/widgets/*`; `src/app/*` for store/router/providers.
+- Features import from `shared`/`entities` only — never from another feature's internals.
+- Pages are lazy route modules (`export default`); everything else uses named exports.
+
+## Data & state
+- All server data goes through RTK Query (`baseApi.injectEndpoints` per feature). Never copy server data into slices or `useState`.
+- Use `providesTags`/`invalidatesTags` with the `{ type, id }` + `LIST` convention; prefer tag invalidation over manual refetch.
+- Socket events → `dispatch(baseApi.util.invalidateTags(...))` or `updateQueryData`; no ad-hoc fetch calls.
+- Redux slices only for client state (auth meta, UI prefs, drafts). Persist only `auth` and `ui`.
+- Generated API types come from `src/shared/api/generated/` (openapi-typescript); do not hand-write DTO types.
+
+## UI
+- Tailwind v4 + shadcn/ui primitives; design tokens from `src/shared/styles/theme.css` (prototype colours `#A51C30`, `#0B132B`, `#D4AF37`, `#F8FAFC`). No inline hex values.
+- Every async view handles loading (skeleton), error (retry), empty state.
+- Text via `useTranslation('<module>')`; bilingual EN/BN keys in `src/shared/i18n/locales/{en,bn}/<module>.json`.
+- Permission checks (`useCan('parcels:create')`) gate UI only; the server is authoritative.
+- Forms: react-hook-form + zod resolver; map server `error.details[].path` to `setError`.
+- Money shown with `formatBDT()`, dates with `formatDhaka()` from `src/shared/lib`.
+
+## Performance & a11y
+- Route-level code splitting; virtualize lists > 100 rows (`@tanstack/react-virtual`).
+- `React.memo`/`useMemo` only when a measurement justifies it.
+- Dialogs trap focus; icons have labels; status colours also carry text.
+
+## Tests
+- Vitest + Testing Library + MSW handlers under `src/test/msw/`; test behaviour, not implementation.
+- Playwright specs for the critical paths listed in doc 04 §16.

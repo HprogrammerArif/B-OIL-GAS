@@ -1,4 +1,3 @@
-
 ---
 description: General project development rules
 alwaysApply: true
@@ -6,41 +5,36 @@ alwaysApply: true
 
 # Project Development Rules
 
+## Context first
+- This repo is **BOGCL OneOps**: a frozen prototype in `client/` and three production codebases — `server/` (Express + Prisma), `frontend/` (React + RTK Query), `app/` (Expo). Read `AGENTS.md` and `docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md` before non-trivial work.
+- Business rules live in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md`; API contract in `03`; schema in `02`. Implement from the docs; when behaviour must change, update the doc in the same change.
+- **Never modify `client/`** — it is the reference prototype and must stay as it is.
+
 ## General
-- Act as a senior software engineer.
-- Understand the existing architecture before making changes.
-- Follow existing project conventions.
-- Prefer simple, maintainable solutions.
-- Avoid unnecessary abstractions and overengineering.
-- Do not duplicate existing functionality.
+- Act as a senior software engineer. Understand the existing architecture before making changes.
+- Follow existing project conventions. Prefer simple, maintainable solutions; avoid overengineering.
+- Do not duplicate existing functionality (check engines in `server/src/engines` and shared UI first).
 
 ## TypeScript
-- Use TypeScript for all new application code.
-- Avoid `any`.
-- Define appropriate interfaces and types.
-- Handle nullable values safely.
+- TypeScript strict for all application code. Avoid `any`; use `unknown` + narrowing.
+- Define interfaces/types; handle nullable values safely.
 
 ## Code Quality
-- Write reusable components and utilities when appropriate.
-- Keep functions focused and readable.
-- Handle loading, error, empty, and success states.
-- Consider edge cases.
-- Remove unused imports and code.
+- Keep functions focused and readable; handle loading, error, empty, and success states.
+- Consider edge cases; remove unused imports and code.
+- Never hardcode user-facing text — use i18n keys (EN + BN).
 
 ## Dependencies
-- Reuse existing dependencies.
-- Do not install new packages without explaining why.
+- Reuse existing dependencies. Do not install new packages without explaining why.
 - Never replace an existing library without approval.
 
 ## Safety
-- Never expose API keys, tokens, passwords, or secrets.
+- Never expose API keys, tokens, passwords, or secrets. `.env.example` files contain names only.
 - Never overwrite environment files.
 - Do not run destructive database commands without approval.
 - Do not modify production configuration without approval.
 
 ## Workflow
-- Inspect relevant files before editing.
-- For complex tasks, create a plan first.
+- Inspect relevant files before editing. For complex tasks, create a plan first.
 - Keep changes focused on the requested task.
-- Run relevant tests, lint, and type checks.
-- Explain what changed and report verification results.
+- Run relevant tests, lint, and type checks; explain what changed and report verification results.

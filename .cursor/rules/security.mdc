@@ -1,0 +1,20 @@
+---
+description: Security requirements for auth, secrets, PII and file handling across all apps
+alwaysApply: true
+---
+
+# Security Rules
+
+Reference: `docs/platform/07_SECURITY_COMPLIANCE_AND_NFR.md`.
+
+- Secrets never enter the repo: no keys, DSNs with tokens, or passwords in code, docs, tests, or `.env.example` (names only). If you find one, report it and do not copy it anywhere.
+- Passwords: argon2id only. Tokens/OTPs/reset codes stored hashed; compared with constant-time functions.
+- Web auth uses httpOnly `SameSite=Strict` cookies + CSRF header; mobile uses bearer tokens from SecureStore. Never store tokens in `localStorage`/AsyncStorage.
+- Every mutating endpoint has `authorize(permission)`; scope filters are applied in repositories — never rely on client-side checks.
+- PII (NID, ID proofs, phone, location, signatures) is classified Restricted/Confidential: encrypt where doc 02 §5 says so, redact from logs, exclude from analytics, respect retention jobs.
+- Files: presigned uploads only, MIME sniffed server-side, AV-scanned before download, private buckets. Never serve user files from the API process.
+- Validate all external input with zod (body, query, params, headers, socket payloads, job data).
+- No `eval`, no dynamic `require`, no shelling out with user input; raw SQL only via tagged templates.
+- Rate-limit auth, OTP and upload endpoints per doc 07; return generic messages for login failures.
+- Dependency changes: run `npm audit`; do not add packages with known critical CVEs or unmaintained forks.
+- E-signature and audit paths are tamper-evident: hash chains and `audit_logs` are append-only — never add update/delete code paths for them.

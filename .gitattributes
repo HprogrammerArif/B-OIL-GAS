@@ -1,0 +1,4 @@
+# Normalise line endings (Windows developers + Linux containers)
+* text=auto eol=lf
+*.{png,jpg,jpeg,gif,webp,ico,pdf,docx,ttf,otf,woff,woff2,jks,keystore,p12,p8} binary
+*.{cmd,bat,ps1} text eol=crlf

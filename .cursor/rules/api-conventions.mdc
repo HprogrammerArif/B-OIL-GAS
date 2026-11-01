@@ -1,0 +1,20 @@
+---
+description: REST API contract conventions (envelope, errors, pagination, naming) shared by server and clients
+globs: server/src/**/*.router.ts, server/src/**/*.schemas.ts, server/src/**/*.controller.ts, frontend/src/**/api/**, app/src/**/api.ts
+alwaysApply: false
+---
+
+# API Conventions
+
+Contract: `docs/platform/03_API_SPECIFICATION.md`. Conventions summarised from doc 00 §5.1.
+
+- Base path `/api/v1`; resources plural kebab-case (`/note-sheets`, `/vehicle-requisitions`); ids are UUIDs.
+- State transitions are verbs: `POST /parcels/:id/dispatch`, `POST /claims/:id/submit`, `POST /workflow/instances/:id/actions`. Never encode transitions as `PATCH status`.
+- Success envelope `{ "data": …, "meta": { page, pageSize, total } }`; error envelope `{ "error": { code, message, details?, requestId } }`.
+- Error codes: `VALIDATION_ERROR` 422, `UNAUTHENTICATED` 401, `FORBIDDEN` 403, `NOT_FOUND` 404, `CONFLICT` 409, `INVALID_STATE_TRANSITION` 409, `PRECONDITION_FAILED` 412, `RATE_LIMITED` 429, `INTERNAL` 500.
+- Lists: `?page=1&pageSize=20&sort=-createdAt&q=…&<field>=…`; `pageSize ≤ 100`; feeds use `?cursor=`.
+- Timestamps ISO-8601 UTC (`2026-03-01T04:30:00.000Z`); date-only fields `YYYY-MM-DD`; money as decimal strings (`"12500.00"`); enums UPPER_SNAKE exactly as in doc 02.
+- Headers: `Authorization: Bearer` (mobile) or httpOnly cookie + `X-CSRF-Token` (web); `Idempotency-Key` on every POST that creates or transitions; `Accept-Language: en|bn`; `X-Request-Id` echoed back.
+- Permission keys `module:action` (e.g. `parcels:verify-otp`); every endpoint documents its key and scope.
+- Request/response schemas are zod in `*.schemas.ts` and registered with the OpenAPI registry; clients regenerate types (`npm run api:types`) after contract changes — never hand-edit generated files.
+- Breaking changes require a new resource/version, not silent field changes; additive changes are fine.

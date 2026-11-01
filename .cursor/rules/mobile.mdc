@@ -1,0 +1,34 @@
+---
+description: Mobile app (app/) conventions for Expo + Expo Router + Redux Toolkit + RTK Query
+globs: app/**
+alwaysApply: false
+---
+
+# Mobile Rules (`app/`)
+
+Spec: `docs/platform/05_MOBILE_APP_SPECIFICATION.md`. Also follow `app/.agents/AGENTS.md` and `app/.agents/skills/*` (starter conventions) where they do not conflict with the spec.
+
+## Structure
+- Expo Router groups: `src/app/(auth)`, `src/app/(app)/(tabs)`, module stacks under `src/app/(app)/<module>/`. Typed routes are on — use `href` objects, not string concatenation.
+- Features: `src/features/<module>/{api.ts,screens,components,schemas}`; `api.ts` uses `baseApi.injectEndpoints` with the same tag names as the web app.
+- Wrap every screen in `Screen` from `src/components/ui`; use the shared UI kit before adding new primitives.
+
+## Data, offline, auth
+- Server data only via RTK Query; persisted slices limited to `auth`, `ui`, `offlineQueue`.
+- Mutations that must work offline go through the offline queue middleware with an `Idempotency-Key`; never retry by hand.
+- Tokens only in `expo-secure-store`; never AsyncStorage. Refresh handled in `baseQueryWithReauth`.
+- Attendance punch and trip tracking use `src/lib/location`; send `lat, lng, accuracyM, isMock, deviceId` and let the server decide.
+
+## UX
+- Handle loading/empty/error/offline states; show a banner when offline.
+- Lists use `@shopify/flash-list`; images use `expo-image`.
+- Text via i18next (`useTranslation`), EN + BN; Bengali font loaded in root layout.
+- Touch targets ≥ 44 pt; `accessibilityLabel` on icon buttons.
+- Confidential screens (note-sheets, chat) enable screenshot prevention per spec.
+
+## Dependencies & native
+- Adding a native module requires a one-line justification and an EAS build (OTA cannot ship native changes).
+- No `console.log` — use `src/lib/logger`.
+
+## Tests
+- jest-expo unit/component tests with MSW; Maestro flows for login, punch, approve, parcel scan.

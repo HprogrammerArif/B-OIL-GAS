@@ -12,7 +12,35 @@ While BOGCL leadership originally asked for a prototype based on a high-level di
 
 ---
 
-## 📂 Master Documentation Suite
+## 🏗️ Repository Layout
+
+| Path | Contents |
+| :--- | :--- |
+| `client/` | **Frozen interactive prototype** (React + Vite, 7 personas, 17 modules, no backend). Reference only — not modified. |
+| `server/` | Production API — Express 5 · TypeScript · Prisma 6 · PostgreSQL 16 · Redis · BullMQ · Socket.IO (to be built from `docs/platform/01`) |
+| `frontend/` | Production web app — React 19 · React Router 7 · Redux Toolkit + RTK Query · Tailwind v4 (to be built from `docs/platform/04`) |
+| `app/` | Production mobile app — Expo SDK 56 · Expo Router · RTK Query (starter present; adapt per `docs/platform/05`) |
+| `infra/` | docker-compose, Dockerfiles, CI/CD (per `docs/platform/08`) |
+| `docs/platform/` | **Production specification suite 00–10** (below) |
+| `.cursor/rules`, `.cursor/skills`, `AGENTS.md` | AI-agent guidance: always-on and path-scoped rules, task skills, entry point |
+
+## 🧭 Production Platform Specification Suite (`docs/platform/`)
+
+| Doc | Title | Scope |
+| :-- | :--- | :--- |
+| [00](docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md) | Platform Overview & Architecture | system context, repo layout, ADR-01..25, shared conventions, engines, module registry MOD-01..18, environments |
+| [01](docs/platform/01_BACKEND_SPECIFICATION.md) | Backend Specification | process topology, folder layout, request lifecycle, core components, engines, jobs, integrations, testing, dependencies |
+| [02](docs/platform/02_DATABASE_SCHEMA.md) | Database Schema | complete Prisma schema (108 tables, validated), views, indexes, data protection, seed, migration policy |
+| [03](docs/platform/03_API_SPECIFICATION.md) | API Specification | `/api/v1` conventions, auth, platform endpoints, per-module endpoints, realtime events, permission keys |
+| [04](docs/platform/04_WEB_FRONTEND_SPECIFICATION.md) | Web Frontend Specification | stack, structure, routing, RTK Query model, design system, per-module pages, performance, a11y, testing |
+| [05](docs/platform/05_MOBILE_APP_SPECIFICATION.md) | Mobile App Specification | starter adaptation, offline queue, auth, push, geolocation, per-module screens, EAS release |
+| [06](docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md) | Module Functional Specifications | state machines, `BR-xx-nn` business rules, workflows, notifications, KPIs, acceptance criteria for MOD-01..18 |
+| [07](docs/platform/07_SECURITY_COMPLIANCE_AND_NFR.md) | Security, Compliance & NFRs | threat model, IAM, data protection, app security, e-sign integrity, NFR targets |
+| [08](docs/platform/08_DEVOPS_ENVIRONMENTS_AND_CICD.md) | DevOps, Environments & CI/CD | local stack, env catalog, containers, pipelines, deployment, observability, backups |
+| [09](docs/platform/09_DELIVERY_ROADMAP_AND_WORKPLAN.md) | Delivery Roadmap & Work Plan | phases, sprints, backlog seed, risks, quality gates, traceability |
+| [10](docs/platform/10_CODING_STANDARDS_AND_CONVENTIONS.md) | Coding Standards & Conventions | TypeScript, server/web/mobile conventions, git workflow, tooling, doc standards |
+
+## 📂 Pitch & Planning Documentation Suite
 
 | Document | Purpose | Key Contents |
 | :--- | :--- | :--- |
