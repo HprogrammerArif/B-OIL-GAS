@@ -10,23 +10,25 @@ import {
   FileText,
   UploadCloud,
   CheckCircle2,
-  AlertCircle,
   Plus,
   Trash2,
   DollarSign,
   ShieldCheck,
   Building,
-  User,
   CreditCard,
   Send,
   Sparkles,
 } from 'lucide-react';
 import { t, AppRole, ROLE_META } from '../../types';
 import { showToast } from '../ToastManager';
+import { currentUser } from '../../auth/session';
+import { nextRef } from '../../lib/refs';
+import { today } from '../../lib/clock';
 
 export interface ClaimSubmissionData {
   id: string;
   claimant: string;
+  claimantEmpId: string;
   designation: string;
   dept: string;
   type: 'tada' | 'conveyance' | 'tour_event';
@@ -237,21 +239,18 @@ export default function SubmitClaimModal({
       return;
     }
 
-    const newId = claimType === 'tada'
-      ? `TADA-2026-${Math.floor(1000 + Math.random() * 9000)}`
-      : claimType === 'tour_event'
-      ? `TOUR-2026-${Math.floor(1000 + Math.random() * 9000)}`
-      : `CNV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newId = nextRef(claimType === 'tada' ? 'TADA' : claimType === 'tour_event' ? 'TOUR' : 'CNV');
 
     const periodStr = claimType === 'conveyance'
       ? 'Oct 01 – Oct 31, 2026'
       : `${startDate} to ${endDate}`;
 
-    const meta = ROLE_META[currentRole || 'employee'];
+    const meta = currentUser() ?? ROLE_META[currentRole || 'employee'];
 
     const submissionData: ClaimSubmissionData = {
       id: newId,
       claimant: meta.name,
+      claimantEmpId: meta.empId,
       designation: meta.label,
       dept: meta.dept,
       type: claimType,
@@ -262,7 +261,7 @@ export default function SubmitClaimModal({
       advanceTaken: advanceTaken > 0 ? advanceTaken : undefined,
       netSettlement: netSettlement,
       status: 'pending_hod',
-      dateSubmitted: 'Today, Just now',
+      dateSubmitted: today(),
       items: items.map((it) => ({
         desc: it.desc,
         date: it.date,

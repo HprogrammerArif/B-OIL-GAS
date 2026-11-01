@@ -1,25 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { ViewProps, t } from '../types';
-import {
-  Users, FileCheck, Crown, Gauge, Truck, Car, Briefcase,
-  BarChart3, Navigation, Bell, UserCheck, Activity,
-  Lock, ArrowRight, MapPin, Bus, Receipt, QrCode
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ViewProps, t, AppView } from '../types';
+import { Car, ArrowRight, MapPin, Bus, Receipt, QrCode, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { showToast } from '../components/ToastManager';
 import AnimatedCounter from '../components/AnimatedCounter';
-import Sparkline from '../components/Sparkline';
 import DetailDrawer, { DetailDrawerData } from '../components/DetailDrawer';
-import { useFleetStore } from '../store/fleetStore';
-import { useNoticeStore } from '../store/noticeStore';
+import { useCan } from '../auth/session';
+import { StatusPill, type StatusTone } from '../components/ui';
 
-import {
-  ROLE_STATS,
-  PENDING_APPROVALS,
-  INNER_CIRCLE,
-  DCS_ALARMS,
-  INITIAL_LOTO_PERMITS,
-  INITIAL_HOD_QUEUE
-} from './dashboard/dashboardData';
+import { DASHBOARD_CONFIG, type Tone } from './dashboard/config';
+import { useDashboardData } from './dashboard/useDashboardData';
 
 import ChairmanDashboard from './dashboard/ChairmanDashboard';
 import PlantGmDashboard from './dashboard/PlantGmDashboard';
@@ -33,8 +22,28 @@ import SendVoiceBriefingModal from '../components/dashboard/SendVoiceBriefingMod
 import { useVoiceBriefingStore } from '../store/voiceBriefingStore';
 
 interface DashboardViewProps extends ViewProps {
-  onNavigate?: (view: any) => void;
+  onNavigate?: (view: AppView) => void;
 }
+
+const TONE_COLOR: Record<Tone, string> = {
+  success: 'var(--status-success-bright)',
+  info: 'var(--status-info-bright)',
+  warning: 'var(--status-warning-bright)',
+  danger: 'var(--status-danger-bright)',
+  purple: 'var(--status-purple-bright)',
+  gold: 'var(--brand-gold)',
+  neutral: 'var(--text-inverse-2)',
+};
+
+const TONE_PILL: Record<Tone, StatusTone> = {
+  success: 'success',
+  info: 'info',
+  warning: 'warn',
+  danger: 'danger',
+  purple: 'purple',
+  gold: 'gold',
+  neutral: 'neutral',
+};
 
 export default function DashboardView({ role, lang, onNavigate }: DashboardViewProps) {
   const [selectedDrawerItem, setSelectedDrawerItem] = useState<DetailDrawerData | null>(null);
@@ -43,12 +52,17 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   const [showGatePassModal, setShowGatePassModal] = useState(false);
   const [showROIDossierModal, setShowROIDossierModal] = useState(false);
   const [showVoiceBriefingModal, setShowVoiceBriefingModal] = useState(false);
-  const [approvedAmountSum, setApprovedAmountSum] = useState(0);
 
   const { activeBriefing, isPlaying, setIsPlaying } = useVoiceBriefingStore();
-  const { requisitions: sharedRequisitions } = useFleetStore();
-  const { notices: sharedNotices } = useNoticeStore();
-  const stats = ROLE_STATS[role] || ROLE_STATS.chairman;
+  const data = useDashboardData();
+  const cfg = DASHBOARD_CONFIG[role];
+  const canBroadcast = useCan('notices:broadcast');
+  const isExecutive = useCan('dashboard:executive');
+
+  const heroStats = cfg.hero(data);
+  const tabs = cfg.tabs(data);
+  const stats = cfg.stats(data);
+  const jumpCards = cfg.jumpCards(data);
 
   const handleToggleRibbonPlay = () => {
     if (isPlaying) {
@@ -75,226 +89,79 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     setActiveTab('overview');
   }, [role]);
 
-  const getRoleTabs = () => {
-    switch (role) {
-      case 'chairman':
-        return [
-          { id: 'overview',     label: 'Executive Overview',   labelBn: 'এক্সিকিউটিভ ওভারভিউ', icon: <Crown size={15} /> },
-          { id: 'approvals',    label: 'Priority Approvals',   labelBn: 'জরুরি অনুমোদন',    icon: <FileCheck size={15} />, badge: PENDING_APPROVALS.length, badgeType: 'danger' as const },
-          { id: 'inner_circle', label: 'Leadership Team',      labelBn: 'নেতৃত্বের তালিকা',  icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' as const },
-          { id: 'notices',      label: 'Company Notices',      labelBn: 'নোটিশ বোর্ড',      icon: <Bell size={15} />, badge: sharedNotices.filter(n => !n.read).length || undefined, badgeType: 'warn' as const },
-        ];
-      case 'plant_gm':
-        return [
-          { id: 'overview',    label: 'Factory Status & Alarms', labelBn: 'কারখানা স্ট্যাটাস', icon: <Gauge size={15} />, badge: DCS_ALARMS.length, badgeType: 'danger' as const },
-          { id: 'refinery',    label: 'Factory Production',    labelBn: 'উৎপাদন চার্ট',      icon: <BarChart3 size={15} /> },
-          { id: 'safety_loto', label: 'Machine Safety Locks & Shifts', labelBn: 'মেশিন নিরাপত্তা লক ও শিফট নোট', icon: <Lock size={15} />, badge: INITIAL_LOTO_PERMITS.length, badgeType: 'warn' as const },
-        ];
-      case 'transport_admin':
-        return [
-          { id: 'overview',     label: 'Fleet Operations',     labelBn: 'ফ্লিট হাব',         icon: <Truck size={15} /> },
-          { id: 'requisitions', label: 'Vehicle Requests',     labelBn: 'যানবাহন আবেদন',    icon: <Car size={15} />, badge: sharedRequisitions.filter(r => r.status === 'pending').length, badgeType: 'warn' as const },
-          { id: 'corridor',     label: 'Live Highway Travel',  labelBn: 'হাইওয়ে ট্রিপ ট্র্যাকার', icon: <Navigation size={15} /> },
-        ];
-      case 'hod':
-        return [
-          { id: 'overview',  label: 'Department Hub',        labelBn: 'বিভাগ হাব',          icon: <Briefcase size={15} /> },
-          { id: 'approvals', label: 'Pending Approvals',     labelBn: 'অনুমোদন তালিকা',     icon: <FileCheck size={15} />, badge: INITIAL_HOD_QUEUE.length, badgeType: 'danger' as const },
-        ];
-      case 'hr_admin':
-        return [
-          { id: 'overview',  label: 'Workforce Overview',    labelBn: 'কর্মী ওভারভিউ',      icon: <Users size={15} /> },
-          { id: 'clearance', label: 'Exit Clearances',       labelBn: 'ছাড়পত্র অডিট',     icon: <UserCheck size={15} />, badge: '1', badgeType: 'warn' as const },
-          { id: 'sites',     label: 'Office & Plant Locations', labelBn: 'অফিস ও প্ল্যান্ট এলাকা', icon: <Building2Icon size={15} /> },
-        ];
-      case 'driver':
-        return [
-          { id: 'overview', label: 'Duty Cockpit',     labelBn: 'ডিউটি কক্পিট',  icon: <Gauge size={15} /> },
-          { id: 'mission',  label: 'Active Mission',   labelBn: 'বর্তমান ট্রিপ',   icon: <Navigation size={15} />, badge: 'LIVE', badgeType: 'info' as const },
-          { id: 'tolls',    label: 'Toll & Slips',     labelBn: 'টোল ও স্লিপ',   icon: <Receipt size={15} /> },
-        ];
-      case 'employee':
-      default:
-        return [
-          { id: 'overview', label: 'Employee Dashboard', labelBn: 'কর্মী ড্যাশবোর্ড', icon: <Users size={15} /> },
-          { id: 'activity', label: 'Activity & Leave',   labelBn: 'কার্যক্রম ও ছুটি', icon: <Activity size={15} /> },
-        ];
-    }
-  };
+  /* Chairman's briefing — three points derived from live data */
+  const briefingPoints = (() => {
+    const top = data.approvals.highestValue;
+    const lic = data.compliance.nearest;
+    const open = data.incidents.open.length;
+    return [
+      top
+        ? t(`Highest-value file awaiting you: ${top.title}${top.amount ? ` (${top.amount})` : ''}`, `আপনার অপেক্ষায় সর্বোচ্চ মূল্যের ফাইল: ${top.titleBn || top.title}${top.amount ? ` (${top.amount})` : ''}`, lang)
+        : t('No high-value files are waiting on your signature', 'আপনার স্বাক্ষরের অপেক্ষায় কোনো উচ্চমূল্যের ফাইল নেই', lang),
+      lic
+        ? t(`${lic.title} renewal due in ${lic.daysLeft} days`, `${lic.titleBn} নবায়ন ${lic.daysLeft.toLocaleString('bn-BD')} দিনের মধ্যে`, lang)
+        : t('No statutory permits fall due in the next 90 days', 'আগামী ৯০ দিনে কোনো লাইসেন্স নবায়ন নেই', lang),
+      t(`${open} open incident ${open === 1 ? 'file' : 'files'}, ${data.incidents.highRisk} rated high or extreme risk`, `${open.toLocaleString('bn-BD')}টি খোলা দুর্ঘটনা ফাইল, ${data.incidents.highRisk.toLocaleString('bn-BD')}টি উচ্চ ঝুঁকির`, lang),
+    ];
+  })();
+
+  const topRiskIncident = data.incidents.open.find((i) => i.riskCategory === 'extreme' || i.riskCategory === 'high') ?? null;
+  const myRequisition = data.fleet.myRequisitions[0] ?? null;
+  const myRecord = data.workforce.myRecord;
+  const punchedIn = !!myRecord && myRecord.locationStatus !== 'absent';
 
   return (
     <div className="view-container page-enter-active">
 
       {/* ═══════════════════════════════════════════
-          ROI BANNER — Role-specific messaging
+          HERO STRIP — three live numbers for this role
           ═══════════════════════════════════════════ */}
       <div className="roi-banner">
         <div className="roi-stats-row">
-          {role === 'chairman' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="৳ 4,82,50,000" /></div>
-                <div className="lbl">{t('Net Realized Savings & Loss Mitigation', 'সাশ্রয় ও ক্ষতি প্রতিরোধ (চলতি অর্থবছর)', lang)}</div>
+          {heroStats.map((s, i) => (
+            <div key={i} className="roi-stat-item">
+              <div className="val" style={s.tone && s.tone !== 'gold' ? { color: TONE_COLOR[s.tone] } : undefined}>
+                <AnimatedCounter value={s.value} />
               </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="284 Days" /></div>
-                <div className="lbl">{t('Zero-Shutdown Safety Record', 'শূন্য শাটডাউন নিরাপদ কর্মদিবস', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="৳ 18.2 Cr" /></div>
-                <div className="lbl">{t('October Revenue (Running)', 'অক্টোবর রাজস্ব (চলমান)', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'plant_gm' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="5,000 MT/Day" /></div>
-                <div className="lbl">{t('Refinery Output — Keraniganj', 'রিফাইনারি উৎপাদন — কেরানীগঞ্জ', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="96.3%" /></div>
-                <div className="lbl">{t('Overall Equipment Effectiveness (OEE)', 'যন্ত্রপাতি সামগ্রিক কার্যকারিতা', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-warning-bright)' }}><AnimatedCounter value="2 Active LOTO" /></div>
-                <div className="lbl">{t('Lockout-Tagout Safety Isolations', 'সক্রিয় এলওটিও নিরাপত্তা ট্যাগ', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'transport_admin' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="24 Heavy Fleet" /></div>
-                <div className="lbl">{t('Tankers & Executive Pool', 'ট্যাংকার ও নির্বাহী বহর', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="0.00% Zero Theft" /></div>
-                <div className="lbl">{t('Fuel Dip-Rod Variance Today', 'জ্বালানি পরিমাপ নির্ভুলতা', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="৳ 14,80,000" /></div>
-                <div className="lbl">{t('Fleet Cost Savings (AI Pooling)', 'ফ্লিট পুলিং সাশ্রয়', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'hr_admin' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="743 Personnel" /></div>
-                <div className="lbl">{t('Active Group Workforce (3 Sites)', 'মোট জনবল (৩টি আঞ্চলিক নোড)', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="94.8%" /></div>
-                <div className="lbl">{t('Haversine Geofence Punch Compliance', 'বায়োমেট্রিক উপস্থিতি হার', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-purple-bright)' }}><AnimatedCounter value="100% SAP Synced" /></div>
-                <div className="lbl">{t('Zero Payroll Variance in S/4HANA', 'এসএপি পেরোল নির্ভুলতা', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'hod' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="৳ 38,40,000" /></div>
-                <div className="lbl">{t('Department OPEX Burned (72% utilized)', 'চলতি প্রান্তিকে বাজেট ব্যয় (৭২%)', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="৳ 14,80,000" /></div>
-                <div className="lbl">{t('Approved Buffer Remaining', 'অনুমোদিত অবশিষ্ট তহবিল', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-danger-bright)' }}><AnimatedCounter value="2 Overdue" /></div>
-                <div className="lbl">{t('Claims Requiring Action Today', 'জরুরি অনুমোদন বাকি', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'employee' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val"><AnimatedCounter value="22 Days" /></div>
-                <div className="lbl">{t('On-Time Attendance This Month', 'চলতি মাসে পূর্ণ উপস্থিতি', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="৳ 4,850" /></div>
-                <div className="lbl">{t('Conveyance Claim Under Review', 'যাতায়াত বিল প্রক্রিয়াধীন', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="8 Days Leave" /></div>
-                <div className="lbl">{t('Casual Leave Balance Remaining', 'অবশিষ্ট ক্যাজুয়াল ছুটি স্থিতি', lang)}</div>
-              </div>
-            </>
-          )}
-          {role === 'driver' && (
-            <>
-              <div className="roi-stat-item">
-                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="0.00% BAC" /></div>
-                <div className="lbl">{t('Pre-Trip Breathalyzer Verified', 'ব্রিদলাইজার অ্যালকোহল টেস্ট উত্তীর্ণ', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="4.2 / 8.0 Hrs" /></div>
-                <div className="lbl">{t('Duty Hours Logged Today', 'দৈনিক ড্রাইভিং কর্মঘণ্টা', lang)}</div>
-              </div>
-              <div className="roi-stat-item divider">
-                <div className="val" style={{ color: 'var(--status-warning-bright)' }}><AnimatedCounter value="4.9 / 5.0 ★" /></div>
-                <div className="lbl">{t('Passenger Safety & Punctuality Rating', 'যাত্রী নিরাপত্তা ও সময়ানুবর্তিতা রেটিং', lang)}</div>
-              </div>
-            </>
-          )}
+              <div className="lbl">{t(s.label[0], s.label[1], lang)}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Action button inside banner */}
-        {role === 'chairman' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              type="button"
-              className="btn-gold"
-              style={{ fontSize: '11px', padding: '6px 14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-              onClick={() => setShowROIDossierModal(true)}
-              title={t('Open Comprehensive Executive ROI & Loss Mitigation Dossier', 'বোর্ড আরওআই বিবরণী দেখুন', lang)}
-            >
-              <span>📊</span>
-              <span>{t('Executive ROI Dossier', 'আরওআই বিবরণী', lang)}</span>
-            </button>
-          </div>
+        {/* Primary action for this role */}
+        {role === 'chairman' && isExecutive && (
+          <button
+            type="button"
+            className="btn-gold"
+            style={{ fontSize: '11px', padding: '6px 14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowROIDossierModal(true)}
+            title={t('Open the board savings & loss-mitigation dossier', 'বোর্ড সাশ্রয় বিবরণী দেখুন', lang)}
+          >
+            <span>📊</span>
+            <span>{t('Board Dossier', 'বোর্ড বিবরণী', lang)}</span>
+          </button>
         )}
 
         {role === 'plant_gm' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-gold" style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800 }}
-              onClick={() => setShowBatchReleaseModal(true)}>
-              ★ {t('Release Bitumen Batch', 'বিটুমিন ব্যাচ রিলিজ', lang)}
-            </button>
-          </div>
-        )}
-
-        {role === 'hr_admin' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
-              onClick={() => showToast(t('Workforce monthly compliance digest dispatched to Chairman.', 'কর্মশক্তি মাসিক কমপ্লায়েন্স রিপোর্ট প্রস্তুত।', lang), 'gold')}>
-              📋 {t('Workforce Audit Dossier', 'কর্মী অডিট বিবরণী', lang)}
-            </button>
-          </div>
+          <button className="btn-gold" style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800 }}
+            onClick={() => setShowBatchReleaseModal(true)}>
+            ★ {t('Release Bitumen Batch', 'বিটুমিন ব্যাচ রিলিজ', lang)}
+          </button>
         )}
 
         {role === 'employee' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
-              onClick={() => setShowGatePassModal(true)}>
-              <QrCode size={13} style={{ display: 'inline', marginRight: '5px' }} />
-              {t('Digital Gate Pass', 'ডিজিটাল গেট পাস', lang)}
-            </button>
-          </div>
+          <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
+            onClick={() => setShowGatePassModal(true)}>
+            <QrCode size={13} style={{ display: 'inline', marginRight: '5px' }} />
+            {t('Digital Gate Pass', 'ডিজিটাল গেট পাস', lang)}
+          </button>
         )}
 
         {role === 'driver' && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
-              onClick={() => showToast(t('🚨 Central Dispatch notified: GPS location locked and assistance alerted.', 'জরুরি সংকেত ডিসপ্যাচ ডেস্কে পাঠানো হয়েছে।', lang), 'danger')}>
-              🚨 {t('Emergency SOS Alert', 'জরুরি রোডসাইড এসওএস', lang)}
-            </button>
-          </div>
+          <button className="btn-gold" style={{ fontSize: '11px', padding: '6px 14px' }}
+            onClick={() => showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger')}>
+            🚨 {t('Emergency SOS', 'জরুরি এসওএস', lang)}
+          </button>
         )}
       </div>
 
@@ -302,14 +169,14 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           COCKPIT SEGMENTED TABS BAR
           ═══════════════════════════════════════════ */}
       <div className="cockpit-tabs-container mb-4">
-        {getRoleTabs().map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
             className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.icon}
-            <span>{t(tab.label, tab.labelBn, lang)}</span>
+            <span>{t(tab.label[0], tab.label[1], lang)}</span>
             {tab.badge !== undefined && (
               <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>
                 {tab.badge}
@@ -320,26 +187,22 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
       </div>
 
       {/* ═══════════════════════════════════════════
-          TAB CONTENT: OVERVIEW (Lightweight & Uncluttered)
+          TAB CONTENT: OVERVIEW
           ═══════════════════════════════════════════ */}
       {activeTab === 'overview' && (
         <div className="tab-pane-fade">
-          {/* CHAIRMAN: Executive Ribbon with Active Voice Memo HUD */}
+          {/* CHAIRMAN: Decision briefing with voice memo player */}
           {role === 'chairman' && (
             <div className="exec-ribbon" style={{ flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                 <div className="ribbon-left">
                   <div className="ribbon-icon">👑</div>
                   <div className="ribbon-text">
-                    <h4>{t('Chairman\'s 3-Point Decision Briefing', 'চেয়ারম্যান মহোদয়ের ৩-দফা নীতিগত ব্রিফিং', lang)}</h4>
-                    <p>{t(
-                      '1. Factory Production: 5,000 MT/Day (On Target) • 2. Urgent Generator Overhaul Sanction: ৳ 48.5L • 3. Annual Plant Safety License Due: 18 Days',
-                      '১. কারখানা উৎপাদন: ৫,০০০ মে.টন/দিন (অন-টার্গেট) • ২. জরুরি জেনারেটর মেরামত অনুমোদন: ৪৮.৫ লাখ • ৩. বার্ষিক কারখানা লাইসেন্স: ১৮ দিন বাকি',
-                      lang
-                    )}</p>
+                    <h4>{t('Today\'s decision briefing', 'আজকের সিদ্ধান্ত ব্রিফিং', lang)}</h4>
+                    <p>{briefingPoints.map((p, i) => `${i + 1}. ${p}`).join(' • ')}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                {canBroadcast && (
                   <button
                     type="button"
                     className="btn-ribbon"
@@ -348,10 +211,9 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                   >
                     🎙️ {t('Send Voice Briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
                   </button>
-                </div>
+                )}
               </div>
 
-              {/* Active Voice Briefing Broadcast Player HUD */}
               {activeBriefing && (
                 <div
                   style={{
@@ -386,7 +248,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                         flexShrink: 0,
                         boxShadow: isPlaying ? '0 0 12px rgba(16, 185, 129, 0.6)' : '0 2px 6px rgba(0,0,0,0.3)',
                       }}
-                      title={isPlaying ? 'Pause voice briefing' : 'Listen to voice briefing'}
+                      title={isPlaying ? t('Pause voice briefing', 'ভয়েস ব্রিফিং থামান', lang) : t('Listen to voice briefing', 'ভয়েস ব্রিফিং শুনুন', lang)}
                     >
                       {isPlaying ? '⏸' : '▶'}
                     </button>
@@ -397,7 +259,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                           🎙️ {t(activeBriefing.title, activeBriefing.titleBn, lang)}
                         </span>
                         <span className="badge" style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontSize: '9px', padding: '1px 5px' }}>
-                          LIVE MEMO
+                          {t('LIVE MEMO', 'লাইভ মেমো', lang)}
                         </span>
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px', fontStyle: 'italic', maxWidth: '580px' }}>
@@ -406,7 +268,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                     </div>
                   </div>
 
-                  {/* Equalizer & Timer */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '3px', height: '18px' }}>
                       {[12, 18, 8, 22, 14, 20, 10, 16].map((h, i) => (
@@ -422,11 +283,9 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                         />
                       ))}
                     </div>
-
                     <div style={{ fontSize: '11.5px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                       00:{activeBriefing.durationSeconds < 10 ? `0${activeBriefing.durationSeconds}` : activeBriefing.durationSeconds}
                     </div>
-
                     <span style={{ fontSize: '10px', color: 'var(--text-3)' }}>
                       • {activeBriefing.recordedAt}
                     </span>
@@ -436,337 +295,177 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
             </div>
           )}
 
-          {/* PLANT GM: DCS Alarm Banner */}
+          {/* PLANT GM: Safety status strip driven by the incident register */}
           {role === 'plant_gm' && (
-            <div className="dcs-alarm-banner">
-              <div className="ribbon-left">
-                <div className="ribbon-icon">🔴</div>
-                <div className="ribbon-text">
-                  <h4>{t('DCS SCADA Alarm Console — Keraniganj Complex Unit-1 & Unit-2', 'ডিসিএস স্ক্যাডা অ্যালার্ম কনসোল', lang)}</h4>
-                  <p>{t('Distillation Column C-102 cooling alert: Temperature 342°C (Normal 335°C). Automatic cooling water pump activated at 85% capacity. All backup safety systems operating normally.', 'কলাম C-102 কুলিং সতর্কতা: তাপমাত্রা ৩৪২°C (স্বাভাবিক ৩৩৫°C)। স্বয়ংক্রিয় কুলিং ওয়াটার পাম্প ৮৫% গতিতে সক্রিয়। সকল ব্যাকআপ নিরাপত্তা ব্যবস্থা স্বাভাবিক।', lang)}</p>
+            topRiskIncident ? (
+              <div className="dcs-alarm-banner">
+                <div className="ribbon-left">
+                  <div className="ribbon-icon"><ShieldAlert size={22} /></div>
+                  <div className="ribbon-text">
+                    <h4>{t('High-risk incident open', 'উচ্চ ঝুঁকির দুর্ঘটনা খোলা আছে', lang)} — {topRiskIncident.incNo}</h4>
+                    <p>{t(topRiskIncident.title, topRiskIncident.titleBn, lang)} · {topRiskIncident.location} · {t('Risk score', 'ঝুঁকি স্কোর', lang)} {topRiskIncident.riskScore}/25</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-ribbon" style={{ background: 'var(--status-danger-solid)' }} onClick={() => showToast('🔴 Alarm acknowledged. Set point trimmed by 2°C.', 'danger')}>
-                  ⚡ {t('Acknowledge Alarm', 'অ্যালার্ম স্বীকৃতি', lang)}
+                <button className="btn-ribbon" style={{ background: 'var(--status-danger-solid)' }} onClick={() => onNavigate?.('incident')}>
+                  {t('Open incident file', 'দুর্ঘটনা ফাইল খুলুন', lang)}
                 </button>
               </div>
-            </div>
+            ) : (
+              <div className="exec-ribbon">
+                <div className="ribbon-left">
+                  <div className="ribbon-icon"><ShieldCheck size={22} /></div>
+                  <div className="ribbon-text">
+                    <h4>{t('No high-risk incidents open', 'কোনো উচ্চ ঝুঁকির দুর্ঘটনা খোলা নেই', lang)}</h4>
+                    <p>{t(`${data.incidents.open.length} incident files in progress · ${data.maintenance.openWorkOrders} open work orders`, `${data.incidents.open.length.toLocaleString('bn-BD')}টি দুর্ঘটনা ফাইল চলমান · ${data.maintenance.openWorkOrders.toLocaleString('bn-BD')}টি খোলা কার্যাদেশ`, lang)}</p>
+                  </div>
+                </div>
+                <button className="btn-ribbon" onClick={() => onNavigate?.('incident')}>
+                  {t('Incident register', 'দুর্ঘটনা রেজিস্টার', lang)}
+                </button>
+              </div>
+            )
           )}
 
-          {/* EMPLOYEE: Quick Action Launchpad */}
+          {/* EMPLOYEE: Quick actions */}
           {role === 'employee' && (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-info-border)', background: 'var(--status-info-bg)' }}
-                  onClick={() => onNavigate ? onNavigate('attendance') : showToast('📍 Geofence verified: South Gate Keraniganj Complex', 'success')}
+                  onClick={() => onNavigate?.('attendance')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-info-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <MapPin size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-info-text)' }}>Clock-In Geofence</div>
-                  <div style={{ fontSize: '11px', color: 'var(--status-info-bright)', marginTop: '2px' }}>Verified Biometric GPS</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-info-text)' }}>{t('Attendance', 'উপস্থিতি', lang)}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-info-bright)', marginTop: '2px' }}>
+                    {punchedIn && myRecord ? t(`Punched in ${myRecord.inTime}`, `পাঞ্চ-ইন ${myRecord.inTime}`, lang) : t('Punch in now', 'এখন পাঞ্চ-ইন করুন', lang)}
+                  </div>
                 </div>
 
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--brand-gold-muted)', background: 'var(--brand-card-bg)' }}
-                  onClick={() => onNavigate ? onNavigate('fleet') : showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
+                  onClick={() => onNavigate?.('fleet')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-warning-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Car size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-gold-dark)' }}>Request Vehicle</div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>Inter-terminal transit</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-gold-dark)' }}>{t('Request Vehicle', 'গাড়ি আবেদন', lang)}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                    {data.fleet.myRequisitions.length > 0
+                      ? t(`${data.fleet.myRequisitions.length} active request${data.fleet.myRequisitions.length === 1 ? '' : 's'}`, `${data.fleet.myRequisitions.length.toLocaleString('bn-BD')}টি সক্রিয় আবেদন`, lang)
+                      : t('Duty travel', 'অফিসিয়াল ভ্রমণ', lang)}
+                  </div>
                 </div>
 
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-success-border)', background: 'var(--status-success-bg)' }}
-                  onClick={() => onNavigate ? onNavigate('bus') : showToast('🚌 Commuter Shuttle Pass: Seat #7 Active', 'success')}
+                  onClick={() => onNavigate?.('bus')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Bus size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-success-text)' }}>Shuttle Bus Pass</div>
-                  <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '2px' }}>Seat #7 Confirmed</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-success-text)' }}>{t('Shuttle Bus', 'শাটল বাস', lang)}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '2px' }}>
+                    {data.shuttle.mySeat
+                      ? t(`Seat #${data.shuttle.mySeat.num} confirmed`, `আসন #${data.shuttle.mySeat.num} নিশ্চিত`, lang)
+                      : t('Book a seat', 'আসন বুক করুন', lang)}
+                  </div>
                 </div>
 
                 <div
                   className="card interactive-row"
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-purple-border)', background: 'var(--status-purple-bg)' }}
-                  onClick={() => onNavigate ? onNavigate('claims') : showToast('🧾 Opening Claim Submission...', 'info')}
+                  onClick={() => onNavigate?.('claims')}
                 >
                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-purple-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Receipt size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-purple-text)' }}>Submit Claim</div>
-                  <div style={{ fontSize: '11px', color: 'var(--status-purple)', marginTop: '2px' }}>Grade 7-10 Matrix</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-purple-text)' }}>{t('Submit Claim', 'দাবি জমা দিন', lang)}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-purple)', marginTop: '2px' }}>
+                    {data.claims.minePending.length > 0
+                      ? t(`${data.claims.minePending.length} under review`, `${data.claims.minePending.length.toLocaleString('bn-BD')}টি পর্যালোচনাধীন`, lang)
+                      : t('TA/DA & conveyance', 'টিএ/ডিএ ও যাতায়াত', lang)}
+                  </div>
                 </div>
               </div>
 
-              {/* Active Requisition Status Banner for Employee */}
-              {sharedRequisitions.filter(r => r.requesterName.includes('Tanvir')).slice(0, 1).map(myReq => (
-                <div key={myReq.id} className="card mb-4" style={{ background: myReq.status === 'assigned' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)', border: myReq.status === 'assigned' ? '1px solid var(--status-success-bright)' : '1px solid var(--status-warning-bright)', padding: '14px 18px' }}>
+              {/* My active vehicle requisition */}
+              {myRequisition && (
+                <div className="card mb-4" style={{ background: myRequisition.status === 'pending' ? 'var(--status-warning-bg)' : 'var(--status-success-bg)', border: `1px solid ${myRequisition.status === 'pending' ? 'var(--status-warning-bright)' : 'var(--status-success-bright)'}`, padding: '14px 18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Car size={20} color={myReq.status === 'assigned' ? 'var(--status-success)' : 'var(--status-warning)'} />
+                      <Car size={20} color={myRequisition.status === 'pending' ? 'var(--status-warning)' : 'var(--status-success)'} />
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                          {myReq.status === 'assigned' ? '✓ Vehicle & Driver Allocated for Your Duty Travel' : '⏳ Vehicle Requisition Under Review by Transport Admin (Md. Kamruzzaman)'}
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-1)' }}>
+                          {myRequisition.status === 'pending'
+                            ? t('Vehicle requisition awaiting the transport desk', 'যানবাহন আবেদন পরিবহন ডেস্কের অপেক্ষায়', lang)
+                            : myRequisition.status === 'in_transit'
+                              ? t('Your trip is in progress', 'আপনার ট্রিপ চলমান', lang)
+                              : t('Vehicle and driver allocated for your trip', 'আপনার ট্রিপের জন্য গাড়ি ও চালক বরাদ্দ', lang)}
                         </div>
-                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-                          {myReq.id} • {myReq.from.split(',')[0]} ➔ {myReq.to.split(',')[0]} ({myReq.tripType === 'round_trip' ? 'Round Trip' : 'One-Way'}) • Departure: {myReq.departureTime}
+                        <div style={{ fontSize: '11.5px', color: 'var(--text-2)' }}>
+                          {myRequisition.id} • {myRequisition.from.split(',')[0]} ➔ {myRequisition.to.split(',')[0]} ({myRequisition.tripType === 'round_trip' ? t('Round trip', 'যাওয়া-আসা', lang) : t('One-way', 'একমুখী', lang)}) • {t('Departure', 'ছাড়বে', lang)}: {myRequisition.departureTime}
                         </div>
-                        {myReq.status === 'assigned' && (
+                        {myRequisition.assignedVehiclePlate && (
                           <div style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 700, marginTop: '3px' }}>
-                            Car: {myReq.assignedVehiclePlate} • Driver: {myReq.assignedDriverName} (📞 {myReq.assignedDriverPhone}) • Pass #{myReq.tripPassNo}
+                            {myRequisition.assignedVehiclePlate} • {myRequisition.assignedDriverName}{myRequisition.assignedDriverPhone ? ` (📞 ${myRequisition.assignedDriverPhone})` : ''}{myRequisition.tripPassNo ? ` • ${t('Pass', 'পাস', lang)} #${myRequisition.tripPassNo}` : ''}
                           </div>
                         )}
                       </div>
                     </div>
-                    <span className={`badge ${myReq.status === 'assigned' ? 'success' : 'warn'}`}>
-                      {myReq.status === 'assigned' ? 'DISPATCH READY' : 'PENDING ADMIN'}
+                    <span className={`badge ${myRequisition.status === 'pending' ? 'warn' : 'success'}`}>
+                      {myRequisition.status === 'pending' ? t('Pending', 'অপেক্ষমান', lang) : myRequisition.status === 'in_transit' ? t('In transit', 'চলমান', lang) : t('Assigned', 'বরাদ্দকৃত', lang)}
                     </span>
                   </div>
                 </div>
-              ))}
+              )}
             </>
           )}
 
-          {/* STATS GRID — High-level KPI cards with sparklines */}
+          {/* KPI GRID */}
           <div className="stats-grid mb-5">
             {stats.map((s, i) => (
               <div key={i} className={`stat-card ${s.type}`}>
                 <div className="stat-top">
-                  <div className="stat-label">{t(s.label, s.labelBn, lang)}</div>
+                  <div className="stat-label">{t(s.label[0], s.label[1], lang)}</div>
                   <div className="stat-icon-wrap">{s.icon}</div>
                 </div>
                 <div className="stat-main-row">
                   <div className="stat-value"><AnimatedCounter value={s.value} /></div>
-                  <Sparkline data={s.sparkline} color={s.sparkColor} />
                 </div>
-                <div className="stat-sub">{s.sub}</div>
+                <div className="stat-sub">{t(s.sub[0], s.sub[1], lang)}</div>
               </div>
             ))}
           </div>
 
-          {/* PROGRESSIVE DISCLOSURE JUMP CARDS (Zero clutter — clean direct pathways) */}
+          {/* JUMP CARDS */}
           <div className="tab-jump-grid">
-            {role === 'chairman' && (
-              <>
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('approvals')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <FileCheck size={18} color="var(--brand-crimson)" />
-                      <span>{t('Priority Approvals', 'জরুরি অনুমোদন', lang)}</span>
-                    </div>
-                    <span className="badge danger">3 {t('Pending', 'অপেক্ষমান', lang)}</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('High-value files awaiting Chairman\'s signature: Factory Generator Overhaul (৳48.5L), Shift Staff Salary Policy, and Corporate IT ERP Renewal (৳18.5L).', 'চেয়ারম্যান মহোদয়ের স্বাক্ষরের অপেক্ষায় ৩টি উচ্চমূল্যের ফাইল: কারখানা জেনারেটর মেরামত (৪৮.৫ লাখ), কর্মী বেতন নীতি ও কর্পোরেট আইটি ইআরপি নবায়ন (১৮.৫ লাখ)।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Open Approval Queue', 'অনুমোদন সারি দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('inner_circle')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Users size={18} color="var(--brand-gold-dark)" />
-                      <span>{t('Executive Inner Circle', 'ইনার সার্কেল নেতৃত্ব', lang)}</span>
-                    </div>
-                    <span className="badge info">8 {t('Tracked', 'ট্র্যাকড', lang)}</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Live presence roster of key leadership: 4 Present at Plant/HQ, 1 Board Meeting, 1 BSTI Travel, 🔴 1 Uninformed Absent.', 'মূল নেতৃত্বের রিয়েল-টাইম উপস্থিতি: ৪ জন কর্মস্থলে, ১ জন মিটিংয়ে, ১ জন সরকারি পরিদর্শনে, ১ জন অননুমোদিত অনুপস্থিত।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('View Executive Roster', 'নেতৃত্ব উপস্থিতি তালিকা', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('notices')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Bell size={18} color="var(--status-info)" />
-                      <span>{t('Enterprise Notices', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</span>
-                    </div>
-                    <span className="badge gold">{sharedNotices.length} {t('Circulars', 'বিজ্ঞপ্তি', lang)}</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Latest circulars & announcements: Chairman\'s Eid Message, Mandatory Q4 Plant Safety Briefing, HSE Incident protocol.', 'সর্বশেষ নোটিশ ও ঘোষণা: চেয়ারম্যানের বার্তা, চতুর্থ ত্রৈমাসিক নিরাপত্তা ব্রিফিং ও এইচএসই প্রটোকল।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Open Notice Board', 'নোটিশ বোর্ড দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {role === 'plant_gm' && (
-              <>
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('refinery')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <BarChart3 size={18} color="var(--status-info)" />
-                      <span>{t('Refinery Telemetry & Output', 'উৎপাদন ও ডিস্টিলেশন চার্ট', lang)}</span>
-                    </div>
-                    <span className="badge success">5,000 MT/Day</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('96.3% Overall Equipment Effectiveness (OEE). 24-hour Bitumen 60/70 & 80/100 production yield graph and furnace vacuum seals.', '৯৬.৩% সামগ্রিক কার্যকারিতা। ২৪ ঘণ্টার বিটুমিন উৎপাদন লেখচিত্র এবং ফার্নেস ভ্যাকুয়াম অবস্থা।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Inspect Refinery Production', 'উৎপাদন গ্রাফ দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('safety_loto')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Lock size={18} color="var(--brand-crimson)" />
-                      <span>{t('LOTO Safety & Shift Handover', 'এলওটিও নিরাপত্তা ও শিফট লগ', lang)}</span>
-                    </div>
-                    <span className="badge danger">{INITIAL_LOTO_PERMITS.length} {t('Active Isolations', 'সক্রিয় আইসোলেশন', lang)}</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('OSHA 1910.147 Control of Hazardous Energy permits & shift handover continuity between Shift-A, B and C engineers.', 'ঝুঁকিপূর্ণ শক্তি নিয়ন্ত্রণ পারমিট এবং এ, বি ও সি শিফটের প্রকৌশলীদের ধারাবাহিকতা লগ।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('View LOTO Permits & Shifts', 'পারমিট ও শিফট লগ দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {role === 'transport_admin' && (
-              <>
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('requisitions')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Car size={18} color="var(--status-warning)" />
-                      <span>{t('Duty Travel Requisitions', 'অফিসিয়াল যানবাহন আবেদন', lang)}</span>
-                    </div>
-                    <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} {t('Pending', 'বাকি', lang)}</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Review inter-depot and headquarters transport applications. Assign roadworthy vehicles and certified drivers.', 'হেডকোয়ার্টার ও ডিপো যাতায়াত আবেদন পর্যালোচনা এবং চালক ও গাড়ি বরাদ্দ নিশ্চিত করুন।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Manage Requisitions', 'আবেদন নিষ্পত্তি করুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('corridor')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Navigation size={18} color="var(--status-success)" />
-                      <span>{t('Corridor Transit & Toll Alerts', 'ট্যাংকার করিডোর ও টোল সতর্কতা', lang)}</span>
-                    </div>
-                    <span className="badge success">Live Telematics</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Live telematics for Babubazar Bridge, Postogola Toll Plaza and Padma Bridge Expressway heavy carrier corridor.', 'বাবুবাজার ব্রিজ, পোস্তগোলা টোল ও পদ্মা সেতু এক্সপ্রেসওয়েতে ভারী ট্যাংকার করিডোরের লাইভ তথ্য।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Open Corridor HUD', 'করিডোর ট্র্যাকার দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {role === 'hr_admin' && (
-              <>
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('clearance')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <UserCheck size={18} color="var(--brand-crimson)" />
-                      <span>{t('Exit Clearance Audits', 'বহির্গমন ছাড়পত্র অডিট', lang)}</span>
-                    </div>
-                    <span className="badge warn">1 In Progress</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Track 4-way separation audits (IT, Security, Fleet, Finance) for resigning personnel prior to final settlement.', 'চাকরি ইস্তফাদানকারী কর্মীদের ৪-ধাপ নিরীক্ষা (আইটি, সিকিউরিটি, ফ্লিট, ফিন্যান্স) ট্র্যাকিং।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('View Clearance Checklists', 'ছাড়পত্র বিবরণী দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-
-                <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('sites')}>
-                  <div className="tab-jump-top">
-                    <div className="tab-jump-title">
-                      <Building2Icon size={18} color="var(--status-info)" />
-                      <span>{t('Regional Deployment Nodes', 'আঞ্চলিক জনবল ডেপ্লয়মেন্ট', lang)}</span>
-                    </div>
-                    <span className="badge info">743 Staff</span>
-                  </div>
-                  <div className="tab-jump-desc">
-                    {t('Deployment distribution across Dhaka HQ (420), Keraniganj Bitumen Refinery (218) and Chattogram Terminal (105).', 'ঢাকা সদর দপ্তর (৪২০), কেরানীগঞ্জ রিফাইনারি (২১৮) ও চট্টগ্রাম টার্মিনালে (১০৫) জনবল বণ্টন।', lang)}
-                  </div>
-                  <div className="tab-jump-footer">
-                    <span>{t('Inspect Site Nodes', 'আঞ্চলিক নোড দেখুন', lang)}</span>
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </>
-            )}
-
-            {role === 'hod' && (
-              <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('approvals')}>
+            {jumpCards.map((card) => (
+              <div key={card.tab} className="tab-jump-card interactive-row" onClick={() => setActiveTab(card.tab)}>
                 <div className="tab-jump-top">
                   <div className="tab-jump-title">
-                    <FileCheck size={18} color="var(--brand-crimson)" />
-                    <span>{t('Omni-Approval Inbox & OPEX Ceiling', 'বিভাগীয় অনুমোদন ইনবক্স ও বাজেট', lang)}</span>
+                    {card.icon}
+                    <span>{t(card.title[0], card.title[1], lang)}</span>
                   </div>
-                  <span className="badge danger">{INITIAL_HOD_QUEUE.length} {t('Pending', 'বাকি', lang)}</span>
+                  <StatusPill tone={TONE_PILL[card.badge.tone]}>{t(card.badge.text[0], card.badge.text[1], lang)}</StatusPill>
                 </div>
-                <div className="tab-jump-desc">
-                  {t('Multi-category triage for employee conveyance claims, duty travel, stationery POs, and leave applications. Safe OPEX buffer remaining: ৳', 'যাতায়াত দাবি, ভ্রমণ, স্টেশনারি ক্রয় ও ছুটির অনুমোদন। অবশিষ্ট নিরাপদ পরিচালন বাজেট: ৳', lang)}{(5320000 - (3840000 + approvedAmountSum)).toLocaleString()}.
-                </div>
+                <div className="tab-jump-desc">{t(card.desc[0], card.desc[1], lang)}</div>
                 <div className="tab-jump-footer">
-                  <span>{t('Open Approval Queue & Batch Actions', 'অনুমোদন সারি ও ব্যাচ অ্যাকশন খুলুন', lang)}</span>
+                  <span>{t(card.cta[0], card.cta[1], lang)}</span>
                   <ArrowRight size={14} />
                 </div>
               </div>
-            )}
-
-            {role === 'employee' && (
-              <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('activity')}>
-                <div className="tab-jump-top">
-                  <div className="tab-jump-title">
-                    <Activity size={18} color="var(--status-success)" />
-                    <span>{t('Recent Activity & Leave Entitlements', 'সাম্প্রতিক কার্যক্রম ও ছুটি স্থিতি', lang)}</span>
-                  </div>
-                  <span className="badge success">Active</span>
-                </div>
-                <div className="tab-jump-desc">
-                  {t('Check your biometric punch timeline, shuttle pass details, approved requisitions, and casual/sick leave balances.', 'আপনার বায়োমেট্রিক পাঞ্চ টাইমলাইন, শাটল পাস, অনুমোদিত রিকুইজিশন এবং ক্যাজুয়াল/মেডিকেল ছুটি স্থিতি দেখুন।', lang)}
-                </div>
-                <div className="tab-jump-footer">
-                  <span>{t('View Detailed Activity & Leave Ledger', 'বিস্তারিত কার্যক্রম ও ছুটি লেজার দেখুন', lang)}</span>
-                  <ArrowRight size={14} />
-                </div>
-              </div>
-            )}
+            ))}
           </div>
         </div>
       )}
 
       {/* ═══════════════════════════════════════════
-          DELEGATED ROLE SUB-DASHBOARDS
+          ROLE SUB-DASHBOARDS
           ═══════════════════════════════════════════ */}
       {role === 'chairman' && (
         <ChairmanDashboard
@@ -804,6 +503,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           lang={lang}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          onNavigate={onNavigate}
         />
       )}
 
@@ -813,8 +513,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           lang={lang}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          approvedAmountSum={approvedAmountSum}
-          setApprovedAmountSum={setApprovedAmountSum}
         />
       )}
 
@@ -838,40 +536,27 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         />
       )}
 
-      {/* Slide-in Detail Drawer */}
       <DetailDrawer
         data={selectedDrawerItem}
         onClose={() => setSelectedDrawerItem(null)}
         lang={lang}
       />
 
-      {/* Executive Board ROI Dossier Modal */}
-      <ExecutiveROIDossierModal
-        isOpen={showROIDossierModal}
-        onClose={() => setShowROIDossierModal(false)}
-        lang={lang}
-      />
+      {isExecutive && (
+        <ExecutiveROIDossierModal
+          isOpen={showROIDossierModal}
+          onClose={() => setShowROIDossierModal(false)}
+          lang={lang}
+        />
+      )}
 
-      {/* Chairman Send Voice Briefing Studio Modal */}
-      <SendVoiceBriefingModal
-        isOpen={showVoiceBriefingModal}
-        onClose={() => setShowVoiceBriefingModal(false)}
-        lang={lang}
-      />
+      {canBroadcast && (
+        <SendVoiceBriefingModal
+          isOpen={showVoiceBriefingModal}
+          onClose={() => setShowVoiceBriefingModal(false)}
+          lang={lang}
+        />
+      )}
     </div>
-  );
-}
-
-function Building2Icon({ size = 16, color }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color || 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
-      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
-      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
-      <path d="M10 6h4"/>
-      <path d="M10 10h4"/>
-      <path d="M10 14h4"/>
-      <path d="M10 18h4"/>
-    </svg>
   );
 }

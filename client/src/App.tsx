@@ -175,7 +175,7 @@ export default function App() {
               {(view === 'fleet' || view === 'vehicle_request') && <FleetView role={role} lang={lang} />}
               {view === 'bus'            && <BusView            role={role} lang={lang} />}
               {view === 'parcel'         && <ParcelView         role={role} lang={lang} />}
-              {view === 'attendance'     && <AttendanceView     role={role} lang={lang} />}
+              {view === 'attendance'     && <AttendanceView     role={role} lang={lang} onNavigate={onNavigate} />}
               {view === 'incident'       && <IncidentView       role={role} lang={lang} onNavigate={onNavigate} />}
               {view === 'claims'         && <ClaimsView         role={role} lang={lang} />}
               {view === 'asset'          && <AssetView          role={role} lang={lang} onNavigate={onNavigate} />}

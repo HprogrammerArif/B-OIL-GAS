@@ -334,7 +334,7 @@
     gap: 14px !important;
   }
 
-  .roi-stats {
+  .roi-stats-row {
     width: 100% !important;
     justify-content: space-between !important;
     flex-wrap: wrap !important;
@@ -567,7 +567,7 @@
     width: 100% !important;
   }
 
-  .roi-stat-item.divider {
+  .roi-stat-item + .roi-stat-item {
     border-left: none !important;
     padding-left: 0 !important;
   }

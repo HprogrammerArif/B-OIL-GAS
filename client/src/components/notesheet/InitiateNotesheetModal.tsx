@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
 import { showToast } from '../ToastManager';
+import { deptCodeOf, nextNoteSheetRef, nextRef, peekNoteSheetRef, peekRef } from '../../lib/refs';
 import {
   FileSignature,
   FileText,
   X,
-  Check,
-  Plus,
-  Trash2,
   Sparkles,
-  ArrowRight,
   Shield,
   Layers,
-  Building2,
-  DollarSign,
-  AlertTriangle,
-  Clock,
-  Crown,
   ChevronRight,
-  UserCheck,
 } from 'lucide-react';
 
 export interface SignatoryStep {
@@ -193,12 +184,11 @@ export default function InitiateNotesheetModal({
   const [dept, setDept] = useState('Plant Maintenance & Reliability');
   const [amount, setAmount] = useState('৳4,50,000');
   const [urgency, setUrgency] = useState<'urgent' | 'high' | 'normal'>('high');
-  const [sapRef, setSapRef] = useState(
-    `SAP-PR-2026-${Math.floor(10000 + Math.random() * 90000)}`
-  );
-  const [fileNo, setFileNo] = useState(
-    `BOGCL/PROC/KER-2026/${Math.floor(1000 + Math.random() * 9000)}`
-  );
+  // Reference numbers are previewed from the sequential counters and only
+  // allocated when the form is submitted.
+  const initiatorDeptCode = deptCodeOf(currentMeta.dept);
+  const [sapRef, setSapRef] = useState(() => peekRef('PR', 5));
+  const fileNo = peekNoteSheetRef(initiatorDeptCode);
   const [initialNote, setInitialNote] = useState(
     'Submitted for administrative and technical approval. Mandatory ultrasonic thickness testing of Unit-1 heat exchanger shell completed; replacement of seal rings and calibration required prior to peak asphalt refining run.'
   );
@@ -258,7 +248,7 @@ export default function InitiateNotesheetModal({
         ...prev,
         {
           ...officer,
-          id: `step-${Date.now()}-${Math.random()}`,
+          id: `step-${officer.roleId}`,
           status: 'upcoming',
         },
       ]);
@@ -301,14 +291,17 @@ export default function InitiateNotesheetModal({
     }
 
     const finalApprover = selectedRoute[selectedRoute.length - 1];
+    const allocatedFileNo = nextNoteSheetRef(initiatorDeptCode);
+    const allocatedSapRef = sapRef === peekRef('PR', 5) ? nextRef('PR', 5) : sapRef;
+    setSapRef(peekRef('PR', 5));
 
     onSubmit({
-      fileNo,
+      fileNo: allocatedFileNo,
       title,
       dept,
       amount,
       urgency,
-      sapRef,
+      sapRef: allocatedSapRef,
       initiatorName: currentMeta.name,
       initiatorRole: currentMeta.label,
       initiatorDept: currentMeta.dept,

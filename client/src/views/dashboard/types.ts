@@ -1,4 +1,3 @@
-import React from 'react';
 import { Lang, AppRole } from '../../types';
 import { DetailDrawerData } from '../../components/DetailDrawer';
 
@@ -8,17 +7,6 @@ export interface DashboardSubViewProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenDetailDrawer?: (item: DetailDrawerData) => void;
-}
-
-export interface StatDef {
-  label: string;
-  labelBn: string;
-  value: string;
-  sub: string;
-  type: string;
-  icon: React.ReactNode;
-  sparkline: number[];
-  sparkColor: string;
 }
 
 export interface InnerCircleMember {
@@ -53,17 +41,6 @@ export interface NoticeItem {
   acknowledgedCount?: number;
   totalRecipients?: number;
   referenceNo?: string;
-}
-
-export interface DcsAlarmItem {
-  id: string;
-  tag: string;
-  desc: string;
-  value: string;
-  limit: string;
-  severity: 'high' | 'medium' | 'low';
-  time: string;
-  ack: boolean;
 }
 
 export interface LotoPermitItem {
@@ -104,29 +81,4 @@ export interface ShiftHandoverItem {
   notes: string;
   criticalWatchItems?: string[];
   safetyChecklistSigned?: boolean;
-}
-
-export interface VehicleRequestItem {
-  id: string;
-  requester: string;
-  designation: string;
-  from: string;
-  to: string;
-  date: string;
-  time: string;
-  passengers: number;
-  priority: string;
-  status: string;
-}
-
-export interface HodQueueItem {
-  id: string;
-  type: string;
-  icon: string;
-  title: string;
-  detail: string;
-  dept: string;
-  time: string;
-  urgency: string;
-  costTk: number;
 }

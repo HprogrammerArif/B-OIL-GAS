@@ -12,6 +12,8 @@ import { advanceAssetRequisitionById, rejectAssetRequisitionById } from './asset
 export interface ClaimItem {
   id: string;
   claimant: string;
+  /** Canonical employee id of the claimant (identity checks use this, not the name). */
+  claimantEmpId?: string;
   designation: string;
   dept: string;
   type: 'tada' | 'conveyance' | 'tour_event';
@@ -24,6 +26,8 @@ export interface ClaimItem {
   status: 'pending_hod' | 'pending_finance' | 'approved' | 'settled' | 'rejected';
   dateSubmitted: string;
   sapVoucher?: string;
+  /** Set when finance marks the voucher as paid. */
+  settledAt?: string;
   items?: { desc: string; date: string; amount: number; category: string }[];
   rejectionReason?: string;
   rejectionObservation?: string;
@@ -77,6 +81,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'TOUR-2026-008',
     claimant: 'Engr. Md. Harunur Rashid',
+    claimantEmpId: 'EMP-0012',
     designation: 'Plant General Manager',
     dept: 'Plant Operations',
     type: 'tour_event',
@@ -98,6 +103,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'SPRT-2026-003',
     claimant: 'Md. Kamruzzaman',
+    claimantEmpId: 'EMP-0045',
     designation: 'Transport & Admin Supervisor',
     dept: 'Transport & Logistics',
     type: 'tour_event',
@@ -118,6 +124,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'TADA-2026-0419',
     claimant: 'Tanvir Ahmed',
+    claimantEmpId: 'EMP-1042',
     designation: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
     type: 'tada',
@@ -136,6 +143,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'CNV-2026-1002',
     claimant: 'Tanvir Ahmed',
+    claimantEmpId: 'EMP-1042',
     designation: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
     type: 'conveyance',
@@ -150,6 +158,45 @@ const INITIAL_CLAIMS: ClaimItem[] = [
       { desc: 'Ride-Share Car: Motijheel to Tejgaon Depot', date: '21 Oct', amount: 620, category: 'Car Fare' },
       { desc: 'CNG Auto: Narayanganj Distributor Visit', date: '24 Oct', amount: 850, category: 'CNG' },
       { desc: 'Local Transport: Retail Hardware & Bitumen Dealers', date: '26-28 Oct', amount: 3500, category: 'Local Travel' },
+    ],
+  },
+  {
+    id: 'TADA-2026-0402',
+    claimant: 'Nazmul Huda',
+    claimantEmpId: 'EMP-1104',
+    designation: 'HSE Officer',
+    dept: 'HSE & Compliance',
+    type: 'tada',
+    purpose: 'DoE Environmental Clearance Hearing — Agargaon',
+    destination: 'Dhaka (Agargaon)',
+    period: '14 Oct – 15 Oct 2026 (2 days)',
+    amount: 9800,
+    status: 'pending_finance',
+    dateSubmitted: '17 Oct 2026',
+    items: [
+      { desc: 'Daily Allowance (2 days @ ৳2,000/day)', date: '14-15 Oct', amount: 4000, category: 'Daily Allowance' },
+      { desc: 'Document notarisation & DoE filing fees (receipts attached)', date: '14 Oct', amount: 4600, category: 'Official Fees' },
+      { desc: 'Local transport Keraniganj – Agargaon return', date: '14-15 Oct', amount: 1200, category: 'Local Transport' },
+    ],
+  },
+  {
+    id: 'TADA-2026-0388',
+    claimant: 'Md. Rafiqul Islam',
+    claimantEmpId: 'EMP-0821',
+    designation: 'Senior Driver',
+    dept: 'Transport & Logistics',
+    type: 'tada',
+    purpose: 'Outstation delivery run — Bogura depot (night halt)',
+    destination: 'Bogura',
+    period: '09 Oct – 10 Oct 2026 (2 days)',
+    amount: 3600,
+    status: 'settled',
+    dateSubmitted: '12 Oct 2026',
+    sapVoucher: 'VCH-2026-10471',
+    settledAt: '22 Oct 2026',
+    items: [
+      { desc: 'Driver night-halt allowance (2 days @ ৳1,200/day)', date: '09-10 Oct', amount: 2400, category: 'Daily Allowance' },
+      { desc: 'Meals en route (receipts attached)', date: '09-10 Oct', amount: 1200, category: 'Food' },
     ],
   },
 ];
@@ -505,6 +552,7 @@ class ApprovalStore {
     const newClaim: ClaimItem = {
       id: data.id,
       claimant: data.claimant,
+      claimantEmpId: data.claimantEmpId,
       designation: data.designation,
       dept: data.dept,
       type: data.type,
@@ -575,8 +623,8 @@ class ApprovalStore {
   }
 
   // 3. Mirror Official Notesheet into Pending Approvals
-  addNotesheetApproval(fileNo: string, title: string, initiator: string, dept: string, amount: string) {
-    if (this.approvalItems.some((a) => a.sourceId === fileNo)) return;
+  addNotesheetApproval(fileId: string, fileNo: string, title: string, initiator: string, dept: string, amount: string) {
+    if (this.approvalItems.some((a) => a.sourceId === fileId || a.sapDocRef === fileNo)) return;
     const numericAmount = parseInt(amount.replace(/[^0-9]/g, ''), 10) || 0;
     const approvalItem: ApprovalItem = {
       id: nextRef('APR'),
@@ -594,7 +642,7 @@ class ApprovalStore {
       sapDocRef: fileNo,
       details: `Official approval document submitted by ${initiator} (${dept}).`,
       sourceType: 'notesheet',
-      sourceId: fileNo,
+      sourceId: fileId,
     };
 
     this.approvalItems = [approvalItem, ...this.approvalItems];
@@ -703,14 +751,14 @@ class ApprovalStore {
           c.id === item.sourceId ? { ...c, status: 'approved', sapVoucher: generatedVoucher } : c
         );
       } else if (item.sourceType === 'notesheet' && item.sourceId) {
-        notesheetStore.approveFile({
+        notesheetStore.signStep({
           fileIdOrNo: item.sourceId,
           actorName: meta.name,
           actorRoleTitle: meta.label,
           actorDept: meta.dept,
           actorRole: authorizerRole,
           remark: directive || 'Approved via Approvals Center.',
-          stampCode: generatedVoucher,
+          hash: generatedVoucher,
         });
       } else if (item.sourceType === 'requisition' && item.sourceId) {
         fleetStore.endorseHOD(item.sourceId, 'approved');
@@ -881,7 +929,7 @@ class ApprovalStore {
           dept: updatedClaim.dept,
           amount: `৳${updatedClaim.amount.toLocaleString()}`,
           costTk: updatedClaim.amount,
-          date: 'Today, Resubmitted',
+          date: nowStamp(),
           slaHoursLeft: 24,
           urgency: 'high',
           sapDocRef: updatedClaim.id,
@@ -940,6 +988,14 @@ class ApprovalStore {
 
     this.notify();
   }
+
+  // 12. Finance marks an approved voucher as paid
+  settleClaim(id: string) {
+    this.claims = this.claims.map((c) =>
+      c.id === id && c.status === 'approved' ? { ...c, status: 'settled', settledAt: nowStamp() } : c
+    );
+    this.notify();
+  }
 }
 
 export const approvalStore = new ApprovalStore();
@@ -973,6 +1029,7 @@ export function useApprovalStore() {
     rejectApprovalItem: approvalStore.rejectApprovalItem.bind(approvalStore),
     rejectClaim: approvalStore.rejectClaim.bind(approvalStore),
     resubmitClaim: approvalStore.resubmitClaim.bind(approvalStore),
+    settleClaim: approvalStore.settleClaim.bind(approvalStore),
     batchApproveItems: approvalStore.batchApproveItems.bind(approvalStore),
   };
 }

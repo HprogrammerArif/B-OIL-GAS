@@ -9,6 +9,7 @@
 import { useSyncExternalStore } from 'react';
 import { AppRole, ROLE_META, RoleMetaItem } from '../types';
 import { Permission, ScopeKind, can, permissionsFor, scopeKindFor } from './permissions';
+import { sha256Hex } from '../lib/hash';
 
 export interface CurrentUser extends RoleMetaItem {
   role: AppRole;
@@ -35,12 +36,6 @@ const SESSION_KEY = 'oneops.session.v1';
 // sha256('bogcl2026') — demo credential; real deployments use argon2id server-side.
 const DEMO_PASSWORD_SHA256 = '95665bd975b309827cbc17b25a0776ba447701bd70909ae63ba8da93560de34d';
 const MAX_ATTEMPTS = 5;
-
-async function sha256Hex(text: string): Promise<string> {
-  const data = new TextEncoder().encode(text);
-  const buf = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 function buildUser(role: AppRole): CurrentUser {
   const meta = ROLE_META[role];

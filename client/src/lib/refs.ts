@@ -44,24 +44,62 @@ const SEED_START: Counters = {
   BC: 40,     // broadcasts
   VCH: 7120,  // payment / sanction vouchers
   ARQ: 23,    // asset purchase requests
+  TADA: 419,  // outstation travel claims
+  CNV: 1002,  // local conveyance claims
+  TOUR: 8,    // event / tour settlements
+  PR: 0,      // purchase requisitions referenced from note-sheets
 };
 
-/** `nextRef('APR')` → `APR-2026-0901` */
+function formatRef(prefix: string, n: number, width: number): string {
+  return `${prefix}-${YEAR}-${String(n).padStart(width, '0')}`;
+}
+
+/** `nextRef('APR')` → `APR-2026-0901` (allocates the number). */
 export function nextRef(prefix: string, width = 4): string {
   counters ??= load();
   const current = counters[prefix] ?? SEED_START[prefix] ?? 0;
   const next = current + 1;
   counters[prefix] = next;
   save();
-  return `${prefix}-${YEAR}-${String(next).padStart(width, '0')}`;
+  return formatRef(prefix, next, width);
 }
 
-/** Department note-sheet numbers: `BOGCL/FIN/2026/0042` */
+/** The number `nextRef(prefix)` would return, without allocating it (for form previews). */
+export function peekRef(prefix: string, width = 4): string {
+  counters ??= load();
+  const current = counters[prefix] ?? SEED_START[prefix] ?? 0;
+  return formatRef(prefix, current + 1, width);
+}
+
+function formatNoteSheetRef(deptCode: string, n: number): string {
+  return `BOGCL/${deptCode}/${YEAR}/${String(n).padStart(4, '0')}`;
+}
+
+/** Department note-sheet numbers: `BOGCL/FIN/2026/0042` (allocates the number). */
 export function nextNoteSheetRef(deptCode: string): string {
   counters ??= load();
   const key = `NS:${deptCode}`;
   const next = (counters[key] ?? 40) + 1;
   counters[key] = next;
   save();
-  return `BOGCL/${deptCode}/${YEAR}/${String(next).padStart(4, '0')}`;
+  return formatNoteSheetRef(deptCode, next);
+}
+
+/** Preview of the next note-sheet number for a department, without allocating it. */
+export function peekNoteSheetRef(deptCode: string): string {
+  counters ??= load();
+  return formatNoteSheetRef(deptCode, (counters[`NS:${deptCode}`] ?? 40) + 1);
+}
+
+/** Short department code used in note-sheet file numbers. */
+export function deptCodeOf(dept: string): string {
+  const known: Record<string, string> = {
+    "Chairman's Office": 'CMD',
+    'Plant Operations': 'PLANT',
+    'Human Resources': 'HR',
+    'Transport & Logistics': 'TRN',
+    'Finance & Accounts': 'FIN',
+    'Sales & Distribution': 'SLS',
+  };
+  return known[dept] ?? dept.replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase();
 }

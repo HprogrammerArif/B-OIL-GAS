@@ -1,135 +1,20 @@
-import React from 'react';
 import {
-  Users, FileCheck, AlertTriangle, TrendingUp, Clock, CheckCircle,
-  Zap, Truck, Package, Bus, Receipt, PieChart, Navigation, Gauge, Fuel
-} from 'lucide-react';
-import { AppRole } from '../../types';
-import { DetailDrawerData } from '../../components/DetailDrawer';
-import {
-  StatDef, InnerCircleMember, NoticeItem, DcsAlarmItem,
-  LotoPermitItem, ShiftHandoverItem, VehicleRequestItem, HodQueueItem
+  InnerCircleMember, NoticeItem, LotoPermitItem, ShiftHandoverItem
 } from './types';
 
 /* ═══════════════════════════════════════════
-   INNER CIRCLE DATA (Chairman only)
+   LEADERSHIP PRESENCE (Chairman dashboard)
+   Names and titles match ROLE_META / chat members.
    ═══════════════════════════════════════════ */
 export const INNER_CIRCLE: InnerCircleMember[] = [
-  { name: 'Engr. M. Harunur Rashid', role: 'Plant GM, Keraniganj', initials: 'HR', color: 'var(--status-info)', status: 'present', statusLabel: 'Present at Plant', statusLabelBn: 'প্ল্যান্টে উপস্থিত', badge: 'present', location: 'Control Room Unit-1', phone: '+880 1711-002101' },
-  { name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: 'var(--status-purple)', status: 'meeting', statusLabel: 'In Board Meeting', statusLabelBn: 'বোর্ড মিটিংয়ে আছেন', badge: 'meeting', location: 'Boardroom A, Dhaka HQ', phone: '+880 1711-002102' },
-  { name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: 'var(--status-success)', status: 'travel', statusLabel: 'At BSTI Inspection', statusLabelBn: 'বিএসটিআই পরিদর্শনে', badge: 'travel', location: 'BSTI Directorate, Tejgaon', phone: '+880 1711-002103' },
-  { name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: 'var(--status-warning)', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'present', location: 'Level-8 Commercial Wing', phone: '+880 1711-002104' },
-  { name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: 'var(--brand-crimson)', status: 'leave', statusLabel: 'Informed Leave (Pre-Approved)', statusLabelBn: 'অনুমোদিত ছুটি (অবহিত)', badge: 'leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105' },
-  { name: 'Dr. Rafiqul Huq', role: 'Chief Chemist & Lab Head', initials: 'RH', color: 'var(--status-warning)', status: 'sick', statusLabel: 'Sick Leave (Medical Cert)', statusLabelBn: 'অসুস্থতাজনিত ছুটি (মেডিকেল)', badge: 'warn', location: 'Apollo Hospital Dhaka', phone: '+880 1711-002107' },
-  { name: 'Kazi Moinul Islam', role: 'Chief SCADA DCS Automation', initials: 'MI', color: 'var(--status-danger)', status: 'uninformed', statusLabel: '⚠️ Uninformed Absent', statusLabelBn: '⚠️ অননুমোদিত অনুপস্থিত', badge: 'danger', location: 'Unknown (No Biometric/App Punch)', phone: '+880 1711-002108' },
-  { name: 'Nusrat Jahan', role: 'GM, Human Resources', initials: 'NJ', color: 'var(--status-info)', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'present', location: 'HR Suite, Dhaka HQ', phone: '+880 1711-002106' },
-];
-
-export const PENDING_APPROVALS: DetailDrawerData[] = [
-  {
-    id: 'BOGCL/PROC/KER-2026/0894',
-    title: 'Emergency Power Generator Overhaul — Keraniganj Plant',
-    amount: '৳48,50,000',
-    dept: 'Plant Maintenance',
-    urgency: 'urgent',
-    time: '2h pending',
-    initiator: 'Engr. Md. Harunur Rashid',
-    description: 'Urgent overhaul of 1,200 kVA emergency backup power generator and replacement spare parts to prevent factory downtime during upcoming peak manufacturing season.',
-    sapRef: 'SAP-PR-2026-90412',
-    approvalTrail: [
-      {
-        stepNo: 1,
-        officerName: 'Engr. Tariq Ahmed',
-        roleName: 'Senior Plant Maintenance Engineer',
-        department: 'Plant Operations',
-        status: 'completed',
-        timestamp: '14 Oct 2026, 09:30 AM',
-        note: 'Diagnostic inspection revealed rotor thermal imbalance and alternator bearing wear. Overhaul critical to avert 24/7 continuous factory power blackout.',
-        signatureHash: 'SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
-      },
-      {
-        stepNo: 2,
-        officerName: 'Engr. Md. Harunur Rashid',
-        roleName: 'Plant General Manager',
-        department: 'Keraniganj Plant',
-        status: 'completed',
-        timestamp: '14 Oct 2026, 02:45 PM',
-        note: 'Technically vetted & endorsed. Energypac Cummins OEM quote verified against 2 competitor bids. Scope includes 12-month on-site warranty.',
-        signatureHash: 'SHA256: d5a7a93a8905b6324d2b380645495c64393962d85d77aa5d7c862bc2b557b707',
-      },
-      {
-        stepNo: 3,
-        officerName: 'Farida Begum',
-        roleName: 'CFO & Head of Finance',
-        department: 'Corporate Finance & Accounts',
-        status: 'completed',
-        timestamp: '15 Oct 2026, 11:15 AM',
-        note: 'Pre-audited. Provision exists under CAPEX Plant Maintenance (GL-4102-KER). Recommended for Chairman sanction with 5% retention clause.',
-        signatureHash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      },
-    ],
-  },
-  {
-    id: 'BOGCL/HR/2026/0342',
-    title: 'Annual Staff Salary Increment Policy — Operations Team',
-    amount: 'HR Policy',
-    dept: 'Human Resources',
-    urgency: 'normal',
-    time: '1d pending',
-    initiator: 'Nusrat Jahan',
-    description: 'Annual statutory performance increment framework covering 482 factory shift workers, technicians, and transport drivers.',
-    sapRef: 'SAP-HR-POL-0342',
-    approvalTrail: [
-      {
-        stepNo: 1,
-        officerName: 'Nusrat Jahan',
-        roleName: 'GM, Human Resources',
-        department: 'Corporate HR Directorate',
-        status: 'completed',
-        timestamp: '13 Oct 2026, 11:00 AM',
-        note: 'Performance evaluations completed for 482 shift workers. Increments aligned with inflation index and collective bargaining guidelines.',
-      },
-      {
-        stepNo: 2,
-        officerName: 'Farida Begum',
-        roleName: 'CFO & Head of Finance',
-        department: 'Corporate Finance & Accounts',
-        status: 'completed',
-        timestamp: '14 Oct 2026, 03:20 PM',
-        note: 'Financial model audited. Total incremental annual payroll impact is ৳22.4L, well within FY27 personnel OPEX budget.',
-      },
-    ],
-  },
-  {
-    id: 'BOGCL/IT/2026/0211',
-    title: 'Annual Office IT Cloud ERP & Software License Renewal',
-    amount: '৳18,50,000',
-    dept: 'Information Technology',
-    urgency: 'normal',
-    time: '3h pending',
-    initiator: 'Farida Begum',
-    description: 'Annual enterprise SAP S/4HANA cloud system, corporate email accounts, and database cybersecurity licenses for 750 employees.',
-    sapRef: 'SAP-IT-LIC-0211',
-    approvalTrail: [
-      {
-        stepNo: 1,
-        officerName: 'S. M. Mahbubur Rahman',
-        roleName: 'Head of IT & Digital Systems',
-        department: 'Information Technology',
-        status: 'completed',
-        timestamp: '14 Oct 2026, 10:00 AM',
-        note: 'SAP S/4HANA enterprise cloud subscription and AWS redundant cluster backup. Essential for 24/7 refinery SCADA billing and accounting.',
-      },
-      {
-        stepNo: 2,
-        officerName: 'Farida Begum',
-        roleName: 'CFO & Head of Finance',
-        department: 'Corporate Finance & Accounts',
-        status: 'completed',
-        timestamp: '14 Oct 2026, 04:30 PM',
-        note: 'Commercial terms verified. 8% multi-year volume discount applied by SAP Southeast Asia. Verified under OPEX software budget (GL-520101).',
-      },
-    ],
-  },
+  { name: 'Engr. Md. Harunur Rashid', role: 'Plant General Manager, Keraniganj', initials: 'HR', color: 'var(--status-info)', status: 'present', statusLabel: 'Present at plant', statusLabelBn: 'প্ল্যান্টে উপস্থিত', badge: 'success', location: 'Control Room, Unit-1', phone: '+880 1713-441199' },
+  { name: 'Farida Begum', role: 'Head of Finance & Accounts', initials: 'FB', color: 'var(--status-purple)', status: 'meeting', statusLabel: 'In budget review', statusLabelBn: 'বাজেট পর্যালোচনায়', badge: 'info', location: 'Boardroom A, Dhaka HQ', phone: '+880 1819-223344' },
+  { name: 'Sayeda Afroza Sultana', role: 'GM, HR & Administration', initials: 'SAS', color: 'var(--status-info)', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'success', location: 'HR Office, Level 6', phone: '+880 1714-882200' },
+  { name: 'Md. Kamruzzaman', role: 'Transport & Admin Supervisor', initials: 'KZ', color: 'var(--status-success)', status: 'present', statusLabel: 'At dispatch yard', statusLabelBn: 'ডিসপ্যাচ ইয়ার্ডে', badge: 'success', location: 'Dispatch Yard, Keraniganj', phone: '+880 1712-990011' },
+  { name: 'Adv. Karim Molla', role: 'Head of Legal & Permits', initials: 'KM', color: 'var(--status-warning)', status: 'travel', statusLabel: 'At BSTI inspection', statusLabelBn: 'বিএসটিআই পরিদর্শনে', badge: 'purple', location: 'BSTI Directorate, Tejgaon', phone: '+880 1711-002103' },
+  { name: 'Md. Shafiqul Islam', role: 'Head of Sales & Marketing', initials: 'SI', color: 'var(--status-warning)', status: 'present', statusLabel: 'Present at HQ', statusLabelBn: 'সদর দপ্তরে উপস্থিত', badge: 'success', location: 'Commercial Wing, Level 4', phone: '+880 1711-002104' },
+  { name: 'Dr. Rafiqul Huq', role: 'Chief Chemist & Lab Head', initials: 'RH', color: 'var(--brand-crimson)', status: 'sick', statusLabel: 'Sick leave (medical certificate)', statusLabelBn: 'অসুস্থতাজনিত ছুটি (মেডিকেল)', badge: 'warn', location: 'Dhaka', phone: '+880 1711-002107' },
+  { name: 'Kazi Moinul Islam', role: 'Chief Instrumentation Engineer', initials: 'MI', color: 'var(--status-danger)', status: 'uninformed', statusLabel: 'Absent — no punch, uninformed', statusLabelBn: 'অনুপস্থিত — পাঞ্চ নেই, অনবহিত', badge: 'danger', location: 'Unknown', phone: '+880 1711-002108' },
 ];
 
 export const NOTICE_BOARD: NoticeItem[] = [
@@ -193,61 +78,6 @@ export const NOTICE_BOARD: NoticeItem[] = [
     totalRecipients: 1240,
     referenceNo: 'BOGCL/HR/MED-2026-012'
   },
-];
-
-export const ROLE_STATS: Record<AppRole, StatDef[]> = {
-  chairman: [
-    { label: 'Present Today', labelBn: 'আজকের উপস্থিতি', value: '743', sub: '94.2% of total workforce', type: 'green', icon: <Users size={16}/>, sparkline: [710, 725, 718, 730, 738, 740, 743], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Urgent Approvals', labelBn: 'জরুরি অনুমোদন', value: '3', sub: '2 files >48hrs overdue', type: 'red', icon: <FileCheck size={16}/>, sparkline: [8, 6, 5, 4, 3, 4, 3], sparkColor: 'var(--status-danger-solid)' },
-    { label: 'License Alerts', labelBn: 'লাইসেন্স সতর্কতা', value: '5', sub: '2 critical <30 days', type: 'warn', icon: <AlertTriangle size={16}/>, sparkline: [6, 6, 5, 5, 5, 4, 5], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Revenue This Month', labelBn: 'এই মাসের রাজস্ব', value: '৳18.2 Cr', sub: '+8% vs target', type: 'blue', icon: <TrendingUp size={16}/>, sparkline: [14.2, 15.1, 16.0, 16.8, 17.5, 17.9, 18.2], sparkColor: 'var(--status-info-solid)' },
-  ],
-  plant_gm: [
-    { label: 'Plant Headcount', labelBn: 'প্ল্যান্টে উপস্থিত', value: '218', sub: 'Keraniganj Refinery, today', type: 'green', icon: <Users size={16}/>, sparkline: [205, 210, 212, 215, 214, 217, 218], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Sensor & Heat Alerts', labelBn: 'সেন্সর ও তাপমাত্রা সতর্কতা', value: '3', sub: '1 high priority — Column C-102 temp', type: 'red', icon: <Zap size={16}/>, sparkline: [5, 4, 4, 3, 2, 3, 3], sparkColor: 'var(--status-danger-solid)' },
-    { label: 'Active Work Orders', labelBn: 'সক্রিয় কার্যাদেশ', value: '14', sub: '4 preventive, 10 corrective', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [18, 16, 15, 14, 15, 14, 14], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Refinery Efficiency', labelBn: 'রিফাইনারি দক্ষতা', value: '96.3%', sub: '+1.2% vs last week', type: 'blue', icon: <Gauge size={16}/>, sparkline: [94.1, 94.8, 95.2, 95.7, 95.9, 96.1, 96.3], sparkColor: 'var(--status-info-solid)' },
-  ],
-  transport_admin: [
-    { label: 'Fleet Available', labelBn: 'গাড়ি উপলব্ধ', value: '8/24', sub: '16 assigned to active trips', type: 'green', icon: <Truck size={16}/>, sparkline: [10, 9, 8, 11, 7, 9, 8], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Pending Requests', labelBn: 'অনিষ্পন্ন আবেদন', value: '5', sub: '2 urgent from Directors', type: 'warn', icon: <Clock size={16}/>, sparkline: [8, 7, 6, 5, 4, 6, 5], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Active Trips Now', labelBn: 'চলমান ট্রিপ', value: '11', sub: '3 to Keraniganj Plant', type: 'blue', icon: <Navigation size={16}/>, sparkline: [7, 8, 9, 10, 11, 12, 11], sparkColor: 'var(--status-info-solid)' },
-    { label: 'Fuel Consumed Today', labelBn: 'আজকের জ্বালানি ব্যবহার', value: '340 L', sub: '৳32,640 — within daily budget', type: 'green', icon: <Fuel size={16}/>, sparkline: [280, 310, 295, 320, 330, 335, 340], sparkColor: 'var(--status-success-solid)' },
-  ],
-  hr_admin: [
-    { label: 'Active Workforce', labelBn: 'সক্রিয় কর্মী', value: '743', sub: 'Across HQ, Plant & Terminal', type: 'green', icon: <Users size={16}/>, sparkline: [730, 735, 738, 740, 741, 742, 743], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Pending Clearances', labelBn: 'বহির্গমন ছাড়পত্র', value: '1', sub: '1 separation in-progress (50%)', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [3, 2, 2, 1, 1, 1, 1], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Staff Attendance', labelBn: 'আজকের উপস্থিতি', value: '94.8%', sub: 'Verified inside office boundary (GPS)', type: 'blue', icon: <TrendingUp size={16}/>, sparkline: [92, 93, 93.5, 94, 94.2, 94.5, 94.8], sparkColor: 'var(--status-info-solid)' },
-    { label: 'HR Master Records', labelBn: 'এইচআর মাস্টার রেকর্ড', value: '100%', sub: 'All employee profiles up to date', type: 'green', icon: <ShieldCheckIcon />, sparkline: [100, 100, 100, 100, 100, 100, 100], sparkColor: 'var(--status-success-solid)' },
-  ],
-  hod: [
-    { label: 'Pending Approvals', labelBn: 'অনুমোদন বাকি', value: '7', sub: '3 expense + 2 travel + 2 leave', type: 'warn', icon: <FileCheck size={16}/>, sparkline: [12, 10, 9, 8, 7, 8, 7], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Dept. Attendance', labelBn: 'বিভাগীয় উপস্থিতি', value: '96%', sub: 'Finance & Accounts, today', type: 'green', icon: <Users size={16}/>, sparkline: [92, 94, 93, 95, 96, 95, 96], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Budget Utilization', labelBn: 'বাজেট ব্যবহার', value: '72%', sub: '৳38.4L of ৳53.2L Q4 allocation', type: 'blue', icon: <PieChart size={16}/>, sparkline: [45, 52, 58, 63, 68, 70, 72], sparkColor: 'var(--status-info-solid)' },
-    { label: 'Overdue Actions', labelBn: 'মেয়াদোত্তীর্ণ কাজ', value: '2', sub: 'SLA breach in 24hrs', type: 'red', icon: <AlertTriangle size={16}/>, sparkline: [5, 4, 4, 3, 2, 2, 2], sparkColor: 'var(--status-danger-solid)' },
-  ],
-  employee: [
-    { label: 'My Attendance', labelBn: 'আমার উপস্থিতি', value: '22/23', sub: 'October 2026 — 1 sick leave', type: 'green', icon: <CheckCircle size={16}/>, sparkline: [18, 19, 20, 21, 22], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Pending Claims', labelBn: 'দাবিপত্র বাকি', value: '৳4,850', sub: 'Oct conveyance — awaiting HOD', type: 'warn', icon: <Receipt size={16}/>, sparkline: [2100, 3200, 4850], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'My Parcel', labelBn: 'আমার পার্সেল', value: '1 In Transit', sub: 'From Head Office → Keraniganj', type: 'blue', icon: <Package size={16}/>, sparkline: [0, 1, 1], sparkColor: 'var(--status-info-solid)' },
-    { label: 'Bus Seat', labelBn: 'বাস সিট', value: 'Seat #7', sub: 'Route 3 — Mirpur ↔ Plant', type: 'green', icon: <Bus size={16}/>, sparkline: [7, 7, 7], sparkColor: 'var(--status-success-solid)' },
-  ],
-  driver: [
-    { label: 'Assigned Mission', labelBn: 'বরাদ্দকৃত ট্রিপ', value: '1 Active', sub: 'Baridhara HQ ➔ Keraniganj', type: 'green', icon: <Truck size={16}/>, sparkline: [1, 2, 1, 2, 1], sparkColor: 'var(--status-success-solid)' },
-    { label: 'Alcohol Breath Test', labelBn: 'অ্যালকোহল টেস্ট', value: '100% Passed', sub: 'Zero alcohol (0.00% BAC) verified', type: 'blue', icon: <CheckCircle size={16}/>, sparkline: [0, 0, 0, 0, 0], sparkColor: 'var(--status-info-solid)' },
-    { label: 'Toll Slips Claimed', labelBn: 'টোল দাবি স্লিপ', value: '৳410', sub: '2 claims awaiting reimbursement', type: 'warn', icon: <Receipt size={16}/>, sparkline: [150, 260, 410], sparkColor: 'var(--status-warning-solid)' },
-    { label: 'Safety Rating', labelBn: 'নিরাপত্তা স্কোর', value: '4.9/5.0', sub: 'Top Chauffeur Category', type: 'green', icon: <TrendingUp size={16}/>, sparkline: [4.7, 4.8, 4.8, 4.9, 4.9], sparkColor: 'var(--status-success-solid)' },
-  ],
-};
-
-function ShieldCheckIcon() {
-  return <CheckCircle size={16} />;
-}
-
-export const DCS_ALARMS: DcsAlarmItem[] = [
-  { id: 'ALM-001', tag: 'TI-C102-14', desc: 'Column C-102 Top Temperature HIGH', value: '342°C', limit: '335°C', severity: 'high', time: '10:42 AM', ack: false },
-  { id: 'ALM-002', tag: 'PI-R201-03', desc: 'Reactor R-201 Pressure Warning', value: '4.2 bar', limit: '4.5 bar', severity: 'medium', time: '10:15 AM', ack: true },
-  { id: 'ALM-003', tag: 'LI-TK-05', desc: 'Tank TK-05 Base Oil Level Low', value: '22%', limit: '25%', severity: 'low', time: '09:30 AM', ack: true },
 ];
 
 export const INITIAL_LOTO_PERMITS: LotoPermitItem[] = [
@@ -378,29 +208,4 @@ export const SHIFT_HANDOVER: ShiftHandoverItem[] = [
     ],
     safetyChecklistSigned: false,
   },
-];
-
-export const INITIAL_VEHICLE_REQUESTS: VehicleRequestItem[] = [
-  { id: 'VR-2026-142', requester: 'Md. Shafiqul Islam', designation: 'Director, Sales', from: 'HQ Baridhara', to: 'Chittagong Port', date: 'Oct 18', time: '08:00 AM', passengers: 2, priority: 'high', status: 'pending' },
-  { id: 'VR-2026-143', requester: 'Farida Begum', designation: 'CFO', from: 'HQ Baridhara', to: 'Bangladesh Bank', date: 'Oct 17', time: '02:00 PM', passengers: 1, priority: 'high', status: 'pending' },
-  { id: 'VR-2026-144', requester: 'Tanvir Ahmed', designation: 'Sr. Sales Executive', from: 'HQ Baridhara', to: 'Keraniganj Plant', date: 'Oct 17', time: '11:00 AM', passengers: 3, priority: 'normal', status: 'pending' },
-  { id: 'VR-2026-145', requester: 'Kamrul Hasan', designation: 'Boiler Operator', from: 'Mirpur-10', to: 'Keraniganj Plant', date: 'Oct 17', time: '06:00 AM', passengers: 1, priority: 'normal', status: 'assigned' },
-  { id: 'VR-2026-146', requester: 'Nusrat Jahan', designation: 'GM, HR', from: 'HQ Baridhara', to: 'BGMEA Building', date: 'Oct 18', time: '10:00 AM', passengers: 2, priority: 'normal', status: 'pending' },
-];
-
-export const INITIAL_HOD_QUEUE: HodQueueItem[] = [
-  { id: 'APR-001', type: 'Leave', icon: '📅', title: 'Annual Leave Application — Tanvir Ahmed (5 Days)', detail: 'Oct 20-24, 2026 — Sales duty handed over to Kabir', dept: 'Sales', time: '2h ago', urgency: 'normal', costTk: 0 },
-  { id: 'APR-002', type: 'Expense', icon: '💰', title: 'Sales Tour Expense Claim — Chittagong Depot Visit', detail: '4-day dealer network audit, hotel & travel vouchers verified', dept: 'Sales', time: '1d ago', urgency: 'normal', costTk: 14850 },
-  { id: 'APR-003', type: 'Conveyance', icon: '🚌', title: 'Monthly Local Travel Allowance — September 2026', detail: '22 field client visits across Dhaka, Motijheel & Tejgaon', dept: 'Sales', time: '3d ago', urgency: 'overdue', costTk: 5420 },
-  { id: 'APR-004', type: 'Transport', icon: '🚗', title: 'Official Duty Pool Car Booking — Head Office to Factory', detail: 'Executive site visit with visiting financial auditors (Oct 18)', dept: 'Finance', time: '4h ago', urgency: 'normal', costTk: 0 },
-  { id: 'APR-005', type: 'Purchase', icon: '🛒', title: 'Quarterly Office Stationery & Laser Printer Toners', detail: 'A4 paper (150 reams) + high-speed printer toner cartridges', dept: 'Admin', time: '2d ago', urgency: 'normal', costTk: 85000 },
-  { id: 'APR-006', type: 'Document', icon: '📄', title: 'Corporate Flexible Hours & Work From Home Guidelines', detail: 'Updated HR policy draft for corporate head office staff', dept: 'HR', time: '5h ago', urgency: 'normal', costTk: 0 },
-  { id: 'APR-007', type: 'Leave', icon: '📅', title: 'Medical Sick Leave — Md. Rahim Uddin (5 Days)', detail: 'Post-surgery recovery, Evercare Hospital certificate attached', dept: 'Finance', time: '1d ago', urgency: 'overdue', costTk: 0 },
-];
-
-export const MY_RECENT_ACTIVITY = [
-  { icon: '✅', title: 'Attendance logged', detail: 'Punch-in at 08:52 AM — Inside geofence (South Gate)', time: 'Today, 08:52 AM' },
-  { icon: '📄', title: 'Conveyance claim submitted', detail: '৳4,850 for October 2026 — Pending HOD review', time: 'Today, 09:30 AM' },
-  { icon: '📦', title: 'Parcel dispatched to you', detail: 'From Head Office → Keraniganj — In Transit', time: 'Yesterday, 04:15 PM' },
-  { icon: '🚌', title: 'Bus seat confirmed', detail: 'Seat #7, Route 3 (Mirpur → Plant) — Active Pass', time: 'Oct 14, 2026' },
 ];

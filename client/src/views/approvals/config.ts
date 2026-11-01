@@ -14,6 +14,7 @@
 import { useMemo } from 'react';
 import type { AppRole } from '../../types';
 import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
+import { useNotesheetStore, isTurnOf, type NoteFile } from '../../store/notesheetStore';
 import { useCurrentUser, type CurrentUser } from '../../auth/session';
 
 type Category = ApprovalItem['category'];
@@ -97,15 +98,27 @@ export const CATEGORY_LABELS: Record<Category, [string, string]> = {
   hr: ['HR Files', 'মানবসম্পদ নথি'],
 };
 
-/** Predicate selecting the items this user decides. */
-export function approvalQueuePredicate(user: CurrentUser): (item: ApprovalItem) => boolean {
+/**
+ * Predicate selecting the items this user decides. Items mirrored from a
+ * note-sheet additionally follow the file's signatory route: they appear
+ * only in the inbox of the officer whose signature is due next.
+ */
+export function approvalQueuePredicate(
+  user: CurrentUser,
+  noteFiles: readonly NoteFile[] = [],
+): (item: ApprovalItem) => boolean {
   const cfg = APPROVALS_CONFIG[user.role];
   if (!cfg) return () => false;
   const cats = new Set<Category>(cfg.categories);
-  return (item) =>
-    cats.has(item.category) &&
-    item.requester !== user.name &&
-    (cfg.accepts ? cfg.accepts(item, user) : true);
+  return (item) => {
+    if (!cats.has(item.category) || item.requester === user.name) return false;
+    if (cfg.accepts && !cfg.accepts(item, user)) return false;
+    if (item.sourceType === 'notesheet' && item.sourceId) {
+      const file = noteFiles.find((f) => f.id === item.sourceId || f.fileNo === item.sourceId);
+      if (file) return isTurnOf(file, user.role);
+    }
+    return true;
+  };
 }
 
 /**
@@ -116,7 +129,11 @@ export function approvalQueuePredicate(user: CurrentUser): (item: ApprovalItem) 
 export function useMyApprovalQueue() {
   const user = useCurrentUser();
   const { approvalItems, decidedItems } = useApprovalStore();
-  const inQueue = useMemo(() => (user ? approvalQueuePredicate(user) : () => false), [user]);
+  const { files: noteFiles } = useNotesheetStore();
+  const inQueue = useMemo(
+    () => (user ? approvalQueuePredicate(user, noteFiles) : () => false),
+    [user, noteFiles],
+  );
   const pending = useMemo(() => approvalItems.filter(inQueue), [approvalItems, inQueue]);
   const decided = useMemo(
     () =>

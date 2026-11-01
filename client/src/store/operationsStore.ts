@@ -1,6 +1,8 @@
 import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
+import { nextRef } from '../lib/refs';
+import { nowStamp } from '../lib/clock';
 import type {
   CustodyLogEntry,
   ReturnDetails,
@@ -1459,9 +1461,15 @@ export interface ShiftWorker {
   shift: string;
   inTime: string;
   outTime: string;
-  locationStatus: 'inside_geofence' | 'remote_approved' | 'late' | 'absent';
+  /** `manual_review`: checked in without a usable GPS fix; flagged for the supervisor. */
+  locationStatus: 'inside_geofence' | 'remote_approved' | 'late' | 'absent' | 'manual_review';
   overtimeHours: number;
   distanceMeters: number;
+}
+
+export interface PunchDetail {
+  locationStatus?: ShiftWorker['locationStatus'];
+  distanceMeters?: number;
 }
 
 export interface LeaveRequestItem {
@@ -2204,9 +2212,16 @@ class OperationsStore {
   }
 
   // ── 5. Daily Attendance & Leave Actions ──
-  punchAttendance(role: AppRole, action: 'in' | 'out', site?: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ') {
+  punchAttendance(
+    role: AppRole,
+    action: 'in' | 'out',
+    site?: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ',
+    detail: PunchDetail = {},
+  ) {
     const meta = ROLE_META[role];
     const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const locationStatus = detail.locationStatus ?? 'inside_geofence';
+    const distanceMeters = detail.distanceMeters ?? 0;
 
     const exists = this.attendanceRoster.some((w) => w.id === meta.empId);
     if (exists) {
@@ -2218,8 +2233,8 @@ class OperationsStore {
             site: site || w.site,
             inTime: nowTime,
             outTime: 'On Duty',
-            locationStatus: 'inside_geofence',
-            distanceMeters: 28,
+            locationStatus,
+            distanceMeters,
           };
         }
         return {
@@ -2237,11 +2252,11 @@ class OperationsStore {
           dept: meta.dept,
           site: site || (meta.site === 'PLANT_KERANIGANJ' ? 'PLANT_KERANIGANJ' : 'HQ_BARIDHARA'),
           shift: 'General (09:00 AM – 06:00 PM)',
-          inTime: action === 'in' ? nowTime : '08:55 AM',
+          inTime: nowTime,
           outTime: action === 'out' ? nowTime : 'On Duty',
-          locationStatus: 'inside_geofence',
+          locationStatus,
           overtimeHours: 0,
-          distanceMeters: 25,
+          distanceMeters,
         },
         ...this.attendanceRoster,
       ];
@@ -2252,9 +2267,9 @@ class OperationsStore {
   addLeaveRequest(data: Omit<LeaveRequestItem, 'id' | 'status' | 'submittedAt'>): LeaveRequestItem {
     const newLeave: LeaveRequestItem = {
       ...data,
-      id: `LV-2026-${Math.floor(100 + Math.random() * 899)}`,
+      id: nextRef('LV'),
       status: 'pending',
-      submittedAt: `${SYSTEM_TODAY}, Just Now`,
+      submittedAt: nowStamp(),
     };
     this.leaveRequests = [newLeave, ...this.leaveRequests];
     this.notify();

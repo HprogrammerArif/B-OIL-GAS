@@ -8,6 +8,7 @@ import { t } from '../../types';
 import { showToast } from '../../components/ToastManager';
 import { useFleetStore } from '../../store/fleetStore';
 import { DashboardSubViewProps } from './types';
+import { useCurrentUser } from '../../auth/session';
 
 export default function DriverDashboard({
   lang,
@@ -22,13 +23,16 @@ export default function DriverDashboard({
     sendChatMessage
   } = useFleetStore();
 
-  // Active driver persona: Md. Rafiqul Islam (DRV-01)
-  const currentDriver = drivers.find(d => d.id === 'DRV-01') || drivers[0];
-  const activeMission = requisitions.find(
-    r => r.assignedDriverId === currentDriver?.id || r.status === 'in_transit' || r.status === 'assigned'
-  ) || requisitions[0];
+  // The signed-in driver's record, matched on the session identity.
+  const user = useCurrentUser();
+  const currentDriver = drivers.find(d => d.name === user?.name) || null;
+  const activeMission =
+    requisitions.find(r => r.assignedDriverId === currentDriver?.id && r.status === 'in_transit') ||
+    requisitions.find(r => r.assignedDriverId === currentDriver?.id && r.status === 'assigned') ||
+    null;
 
-  const assignedVehicle = vehicles.find(v => v.plate === activeMission?.assignedVehiclePlate) || vehicles[0];
+  const assignedVehicle =
+    vehicles.find(v => v.plate === (activeMission?.assignedVehiclePlate ?? currentDriver?.assignedVehiclePlate)) || vehicles[0];
 
   const [tollModalOpen, setTollModalOpen] = useState(false);
   const [tollPlaza, setTollPlaza] = useState('Babubazar Buriganga Second Bridge');
@@ -207,15 +211,15 @@ export default function DriverDashboard({
               <div className="card-body" style={{ fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Driver Name:</span>
-                  <strong>{currentDriver ? currentDriver.name : 'Md. Rafiqul Islam'}</strong>
+                  <strong>{currentDriver?.name ?? user?.name ?? '—'}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Staff ID & License:</span>
-                  <strong>DRV-01 (Heavy License: DL-DH-90142)</strong>
+                  <strong>{user?.empId ?? '—'}{currentDriver ? ` · ${currentDriver.licenseType}: ${currentDriver.licenseNo}` : ''}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Today Shift Hours:</span>
-                  <strong>4.5 / 8.0 Hours (Normal limit)</strong>
+                  <strong>{currentDriver?.dutyHoursToday ?? 0} / 8 {t('hours', 'ঘণ্টা', lang)}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Performance Rating:</span>

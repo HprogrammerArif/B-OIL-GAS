@@ -21,7 +21,9 @@
 
 /* Status pill */
 .ui-pill-neutral { background: var(--surface-2); color: var(--text-3); }
+.badge.purple { background: var(--status-purple-bg); color: var(--status-purple-text); }
 .ui-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge.ui-pill-sm { font-size: 9.5px; padding: 1px 5px; }
 
 /* Card */
 .ui-card-title { font-size: 13.5px; font-weight: 800; color: var(--text-1); margin: 0; }
