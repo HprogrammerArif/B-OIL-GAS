@@ -6,8 +6,8 @@
 
 /* ─── 1. MODAL COORDINATION DESK (TripChatModal) ─── */
 .trip-chat-dialog {
-  background: var(--brand-card-bg, #FFFFFF);
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--brand-card-bg, var(--surface-1));
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   border-radius: 24px;
   width: 100%;
   max-width: 820px;
@@ -24,7 +24,7 @@
 }
 
 [data-theme="dark"] .trip-chat-dialog {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-color: rgba(255, 255, 255, 0.09);
   box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.75);
 }
@@ -34,7 +34,7 @@
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(135deg, #0A1128 0%, #162447 100%);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -46,8 +46,8 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #A51C30 0%, #7F1424 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%);
+  color: var(--text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +59,7 @@
 .trip-chat-header-title {
   font-size: 15px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   margin: 0;
   line-height: 1.3;
   display: flex;
@@ -72,15 +72,15 @@
   border-radius: 9999px;
   font-size: 11px;
   font-weight: 900;
-  background: var(--brand-gold, #D4AF37);
-  color: #060D1F;
+  background: var(--brand-gold, var(--brand-gold));
+  color: var(--text-1);
   letter-spacing: 0.3px;
   flex-shrink: 0;
 }
 
 .trip-chat-header-sub {
   font-size: 12px;
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
   margin-top: 2px;
   display: flex;
   align-items: center;
@@ -101,8 +101,8 @@
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
-  background: #059669;
-  color: #FFFFFF;
+  background: var(--status-success-solid);
+  color: var(--text-on-brand);
   font-size: 11px;
   font-weight: 700;
   display: inline-flex;
@@ -114,7 +114,7 @@
   transition: all 0.15s ease;
 }
 .trip-chat-btn-call:hover {
-  background: #10B981;
+  background: var(--status-success-solid);
 }
 
 .trip-chat-btn-tool {
@@ -123,7 +123,7 @@
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   font-size: 12px;
   font-weight: 600;
   display: inline-flex;
@@ -142,7 +142,7 @@
   border-radius: 10px;
   border: none;
   background: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -157,8 +157,8 @@
 .trip-chat-roster-bar {
   flex-shrink: 0;
   padding: 4px 14px;
-  background: #F8FAFC;
-  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-0);
+  border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -184,7 +184,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  color: var(--brand-slate-400, #94A3B8);
+  color: var(--brand-slate-400, var(--text-muted));
   display: flex;
   align-items: center;
   gap: 4px;
@@ -194,10 +194,10 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: #FFFFFF;
+  background: var(--surface-1);
   padding: 2px 8px;
   border-radius: 7px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   font-size: 10.5px;
 }
@@ -209,7 +209,7 @@
 
 .trip-chat-presence-name {
   font-weight: 700;
-  color: var(--brand-slate-900, #0F172A);
+  color: var(--brand-slate-900, var(--text-1));
   max-width: 105px;
   white-space: nowrap;
   overflow: hidden;
@@ -217,7 +217,7 @@
 }
 
 [data-theme="dark"] .trip-chat-presence-name {
-  color: #F8FAFC;
+  color: var(--text-inverse);
 }
 
 .trip-chat-presence-role {
@@ -227,36 +227,36 @@
   border-radius: 3px;
 }
 .trip-chat-presence-role.staff {
-  background: #EFF6FF;
-  color: #1D4ED8;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 [data-theme="dark"] .trip-chat-presence-role.staff {
-  background: #1E3A8A;
-  color: #93C5FD;
+  background: var(--status-info-solid-dark);
+  color: var(--status-info-bright);
 }
 .trip-chat-presence-role.driver {
-  background: #ECFDF5;
-  color: #047857;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 [data-theme="dark"] .trip-chat-presence-role.driver {
-  background: #064E3B;
-  color: #6EE7B7;
+  background: var(--status-success-solid-dark);
+  color: var(--status-success-bright);
 }
 .trip-chat-presence-role.admin {
-  background: #EEF2FF;
-  color: #4338CA;
+  background: var(--status-purple-bg);
+  color: var(--status-purple-text);
 }
 [data-theme="dark"] .trip-chat-presence-role.admin {
-  background: #312E81;
-  color: #A5B4FC;
+  background: var(--status-purple-solid-dark);
+  color: var(--status-purple-bright);
 }
 
 /* ─── 3. PERSONA SWITCHER STRIP ─── */
 .trip-chat-persona-bar {
   flex-shrink: 0;
   padding: 4px 14px;
-  background: #F1F5F9;
-  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -278,10 +278,10 @@
 .trip-chat-persona-group {
   display: flex;
   align-items: center;
-  background: #FFFFFF;
+  background: var(--surface-1);
   padding: 2px;
   border-radius: 8px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   gap: 2px;
 }
 
@@ -297,30 +297,30 @@
   font-weight: 700;
   border: none;
   background: transparent;
-  color: var(--brand-slate-600, #475569);
+  color: var(--brand-slate-600, var(--text-2));
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 [data-theme="dark"] .trip-chat-persona-btn {
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 
 .trip-chat-persona-btn.active-employee {
-  background: #2563EB;
-  color: #FFFFFF;
+  background: var(--status-info-solid);
+  color: var(--text-on-brand);
   box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
 }
 
 .trip-chat-persona-btn.active-driver {
-  background: #059669;
-  color: #FFFFFF;
+  background: var(--status-success-solid);
+  color: var(--text-on-brand);
   box-shadow: 0 1px 4px rgba(5, 150, 105, 0.35);
 }
 
 .trip-chat-persona-btn.active-admin {
-  background: #4F46E5;
-  color: #FFFFFF;
+  background: var(--status-purple-solid);
+  color: var(--text-on-brand);
   box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35);
 }
 
@@ -333,7 +333,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background-color: #F8FAFC;
+  background-color: var(--surface-0);
   background-image: radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 0);
   background-size: 24px 24px;
   box-sizing: border-box;
@@ -353,19 +353,19 @@
 .trip-chat-day-pill {
   padding: 2px 10px;
   border-radius: 9999px;
-  background: #FFFFFF;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-1);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.5px;
-  color: var(--brand-slate-500, #64748B);
+  color: var(--brand-slate-500, var(--text-3));
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 [data-theme="dark"] .trip-chat-day-pill {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 
 /* Message Rows */
@@ -386,7 +386,7 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,13 +397,13 @@
   margin-top: 2px;
 }
 .trip-chat-avatar.staff {
-  background: #2563EB;
+  background: var(--status-info-solid);
 }
 .trip-chat-avatar.driver {
-  background: #059669;
+  background: var(--status-success-solid);
 }
 .trip-chat-avatar.admin {
-  background: #4F46E5;
+  background: var(--status-purple-solid);
 }
 
 .trip-chat-msg-column {
@@ -426,20 +426,20 @@
   align-items: center;
   gap: 6px;
   padding: 0 4px;
-  color: var(--brand-slate-600, #475569);
+  color: var(--brand-slate-600, var(--text-2));
 }
 
 [data-theme="dark"] .trip-chat-sender-header {
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 
 .trip-chat-sender-title {
   font-weight: 800;
-  color: var(--brand-slate-900, #0F172A);
+  color: var(--brand-slate-900, var(--text-1));
 }
 
 [data-theme="dark"] .trip-chat-sender-title {
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 
 .trip-chat-role-badge {
@@ -450,40 +450,40 @@
   border: 1px solid transparent;
 }
 .trip-chat-role-badge.driver {
-  background: #ECFDF5;
-  color: #047857;
-  border-color: #A7F3D0;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border-color: var(--status-success-border);
 }
 [data-theme="dark"] .trip-chat-role-badge.driver {
-  background: #064E3B;
-  color: #6EE7B7;
-  border-color: #047857;
+  background: var(--status-success-solid-dark);
+  color: var(--status-success-bright);
+  border-color: var(--status-success-solid-dark);
 }
 .trip-chat-role-badge.admin {
-  background: #EEF2FF;
-  color: #4338CA;
-  border-color: #C7D2FE;
+  background: var(--status-purple-bg);
+  color: var(--status-purple-text);
+  border-color: var(--status-purple-border);
 }
 [data-theme="dark"] .trip-chat-role-badge.admin {
-  background: #312E81;
-  color: #A5B4FC;
-  border-color: #4338CA;
+  background: var(--status-purple-solid-dark);
+  color: var(--status-purple-bright);
+  border-color: var(--status-purple-solid-dark);
 }
 .trip-chat-role-badge.staff {
-  background: #EFF6FF;
-  color: #1D4ED8;
-  border-color: #BFDBFE;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+  border-color: var(--status-info-border);
 }
 [data-theme="dark"] .trip-chat-role-badge.staff {
-  background: #1E3A8A;
-  color: #93C5FD;
-  border-color: #1D4ED8;
+  background: var(--status-info-solid-dark);
+  color: var(--status-info-bright);
+  border-color: var(--status-info-solid-dark);
 }
 
 .trip-chat-timestamp {
   font-size: 9.5px;
   font-weight: normal;
-  color: var(--brand-slate-400, #94A3B8);
+  color: var(--brand-slate-400, var(--text-muted));
 }
 
 /* Speech Bubble */
@@ -500,23 +500,23 @@
 }
 
 .trip-chat-bubble.mine {
-  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%);
+  color: var(--text-on-brand);
   border-bottom-right-radius: 3px;
   box-shadow: 0 2px 8px rgba(165, 28, 48, 0.28);
 }
 
 .trip-chat-bubble.theirs {
-  background: #FFFFFF;
-  color: #1E293B;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-1);
+  color: var(--text-1);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   border-top-left-radius: 3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .trip-chat-bubble.theirs {
   background: #111C35;
-  color: #E2E8F0;
+  color: var(--text-inverse);
   border-color: rgba(255, 255, 255, 0.09);
 }
 
@@ -532,7 +532,7 @@
   color: rgba(255, 255, 255, 0.85);
 }
 .trip-chat-bubble.theirs .trip-chat-bubble-footer {
-  color: var(--brand-slate-400, #94A3B8);
+  color: var(--brand-slate-400, var(--text-muted));
 }
 
 /* System Pill */
@@ -542,8 +542,8 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: 9999px;
-  background: #E2E8F0;
-  color: #334155;
+  background: var(--surface-3);
+  color: var(--text-2);
   font-size: 11px;
   font-weight: 600;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -552,15 +552,15 @@
 
 [data-theme="dark"] .trip-chat-system-pill {
   background: #162447;
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Rich Cards in Stream */
 .trip-chat-toll-card {
   width: 100%;
-  background: #FFFFFF;
-  border: 2px solid #FCD34D;
+  background: var(--surface-1);
+  border: 2px solid var(--status-warning-bright);
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
@@ -572,7 +572,7 @@
 
 [data-theme="dark"] .trip-chat-toll-card {
   background: #141E38;
-  border-color: #B45309;
+  border-color: var(--status-warning-solid-dark);
 }
 
 .trip-chat-toll-grid {
@@ -580,21 +580,21 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   font-size: 12px;
-  background: #F8FAFC;
+  background: var(--surface-0);
   padding: 10px;
   border-radius: 12px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
 }
 
 [data-theme="dark"] .trip-chat-toll-grid {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
 .trip-chat-location-card {
   width: 100%;
-  background: #FFFFFF;
-  border: 1.5px solid #BFDBFE;
+  background: var(--surface-1);
+  border: 1.5px solid var(--status-info-border);
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
@@ -606,7 +606,7 @@
 
 [data-theme="dark"] .trip-chat-location-card {
   background: #111C35;
-  border-color: #1E40AF;
+  border-color: var(--status-info-solid-dark);
 }
 
 .trip-chat-gps-badge {
@@ -614,18 +614,18 @@
   font-family: monospace;
   font-size: 11px;
   font-weight: 700;
-  color: #1D4ED8;
-  background: #EFF6FF;
+  color: var(--status-info-text);
+  background: var(--status-info-bg);
   padding: 4px 10px;
   border-radius: 8px;
-  border: 1px solid #BFDBFE;
+  border: 1px solid var(--status-info-border);
   width: fit-content;
 }
 
 [data-theme="dark"] .trip-chat-gps-badge {
-  background: #1E3A8A;
-  color: #93C5FD;
-  border-color: #1D4ED8;
+  background: var(--status-info-solid-dark);
+  color: var(--status-info-bright);
+  border-color: var(--status-info-solid-dark);
 }
 
 /* Audio Voice Bubble */
@@ -641,19 +641,19 @@
   box-sizing: border-box;
 }
 .trip-chat-voice-bubble.mine {
-  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%);
+  color: var(--text-on-brand);
   border-bottom-right-radius: 3px;
 }
 .trip-chat-voice-bubble.theirs {
-  background: #FFFFFF;
-  color: #1E293B;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-1);
+  color: var(--text-1);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   border-top-left-radius: 3px;
 }
 [data-theme="dark"] .trip-chat-voice-bubble.theirs {
   background: #111C35;
-  color: #F8FAFC;
+  color: var(--text-inverse);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -672,12 +672,12 @@
   transition: all 0.15s ease;
 }
 .trip-chat-voice-bubble.mine .trip-chat-voice-play-btn {
-  background: #FFFFFF;
-  color: #A51C30;
+  background: var(--surface-1);
+  color: var(--brand-crimson);
 }
 .trip-chat-voice-bubble.theirs .trip-chat-voice-play-btn {
-  background: #A51C30;
-  color: #FFFFFF;
+  background: var(--brand-crimson);
+  color: var(--text-on-brand);
 }
 
 /* Typing Indicator Pill */
@@ -686,12 +686,12 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: var(--brand-slate-500, #64748B);
+  color: var(--brand-slate-500, var(--text-3));
   font-style: italic;
-  background: #FFFFFF;
+  background: var(--surface-1);
   padding: 6px 14px;
   border-radius: 9999px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   width: fit-content;
 }
@@ -699,14 +699,14 @@
 [data-theme="dark"] .trip-chat-typing-pill {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 
 /* ─── 5. QUICK REPLIES BAR ─── */
 .trip-chat-quick-bar {
   padding: 5px 14px;
-  background: #F8FAFC;
-  border-top: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-0);
+  border-top: 1px solid var(--brand-slate-200, var(--border-1));
   display: flex;
   gap: 6px;
   overflow-x: auto;
@@ -715,18 +715,18 @@
 }
 
 [data-theme="dark"] .trip-chat-quick-bar {
-  background: #091024;
+  background: var(--surface-inverse);
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 .trip-chat-quick-pill {
   padding: 3px 10px;
   border-radius: 9999px;
-  background: #FFFFFF;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-1);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   font-size: 11px;
   font-weight: 600;
-  color: var(--brand-slate-700, #334155);
+  color: var(--brand-slate-700, var(--text-2));
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -737,31 +737,31 @@
 [data-theme="dark"] .trip-chat-quick-pill {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
 }
 
 .trip-chat-quick-pill:hover {
-  background: var(--brand-slate-100, #F1F5F9);
-  border-color: var(--brand-slate-300, #CBD5E1);
-  color: var(--brand-slate-900, #0F172A);
+  background: var(--brand-slate-100, var(--surface-2));
+  border-color: var(--brand-slate-300, var(--border-2));
+  color: var(--brand-slate-900, var(--text-1));
 }
 
 [data-theme="dark"] .trip-chat-quick-pill:hover {
   background: #162447;
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 
 /* ─── 6. COMPOSER BAR ─── */
 .trip-chat-composer {
   padding: 6px 14px;
-  border-top: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #FFFFFF;
+  border-top: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-1);
   flex-shrink: 0;
   box-sizing: border-box;
 }
 
 [data-theme="dark"] .trip-chat-composer {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -775,9 +775,9 @@
   height: 30px;
   padding: 0 8px;
   border-radius: 8px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #F8FAFC;
-  color: var(--brand-slate-700, #334155);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-0);
+  color: var(--brand-slate-700, var(--text-2));
   font-size: 11px;
   font-weight: 700;
   display: inline-flex;
@@ -790,22 +790,22 @@
 [data-theme="dark"] .trip-chat-tool-btn {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
 }
 
 .trip-chat-tool-btn:hover {
-  background: #EFF6FF;
-  border-color: #93C5FD;
+  background: var(--status-info-bg);
+  border-color: var(--status-info-bright);
 }
 
 .trip-chat-input-field {
   flex: 1 1 0;
-  background: #F8FAFC;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   border-radius: 8px;
   padding: 7px 12px;
   font-size: 12px;
-  color: var(--brand-slate-900, #0F172A);
+  color: var(--brand-slate-900, var(--text-1));
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
@@ -813,13 +813,13 @@
 [data-theme="dark"] .trip-chat-input-field {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 
 .trip-chat-input-field:focus {
   outline: none;
-  border-color: var(--brand-crimson, #A51C30);
-  background: #FFFFFF;
+  border-color: var(--brand-crimson, var(--brand-crimson));
+  background: var(--surface-1);
   box-shadow: 0 0 0 3px rgba(165, 28, 48, 0.1);
 }
 
@@ -831,8 +831,8 @@
   height: 30px;
   padding: 0 12px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #A51C30 0%, #871424 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%);
+  color: var(--text-on-brand);
   font-size: 11.5px;
   font-weight: 800;
   display: inline-flex;
@@ -855,14 +855,14 @@
   align-items: center;
   justify-content: space-between;
   border-radius: 12px;
-  border: 1px solid #FDA4AF;
-  background: #FFF1F2;
+  border: 1px solid var(--status-danger-bright);
+  background: var(--brand-crimson-soft);
   padding: 10px 14px;
 }
 
 [data-theme="dark"] .trip-chat-recording-box {
   background: #3B0D14;
-  border-color: #881337;
+  border-color: var(--brand-crimson-dark);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -875,14 +875,14 @@
   min-height: 0;
   overflow: hidden;
   border-radius: 16px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #FFFFFF;
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-1);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
 }
 
 [data-theme="dark"] .fleet-chat-center-container {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
 }
@@ -895,8 +895,8 @@
   min-width: 340px;
   max-width: 340px;
   flex-shrink: 0;
-  border-right: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #F8FAFC;
+  border-right: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-0);
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -911,12 +911,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #FFFFFF;
+  border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-1);
 }
 
 [data-theme="dark"] .fleet-chat-user-strip {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -924,8 +924,8 @@
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: var(--brand-crimson, #A51C30);
-  color: #FFFFFF;
+  background: var(--brand-crimson, var(--brand-crimson));
+  color: var(--text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -950,10 +950,10 @@
   position: relative;
   cursor: pointer;
   border-radius: 11px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
+  border: 1px solid var(--brand-slate-200, var(--border-1));
   padding: 7px 10px;
   font-size: 11.5px;
-  background: #FFFFFF;
+  background: var(--surface-1);
   transition: all 0.15s ease;
   box-sizing: border-box;
 }
@@ -964,8 +964,8 @@
 }
 
 .fleet-chat-channel-card:hover {
-  background: #F1F5F9;
-  border-color: var(--brand-slate-300, #CBD5E1);
+  background: var(--surface-2);
+  border-color: var(--brand-slate-300, var(--border-2));
   transform: translateY(-1px);
 }
 
@@ -974,15 +974,15 @@
 }
 
 .fleet-chat-channel-card.active {
-  border-left: 4px solid var(--brand-crimson, #A51C30);
-  background: linear-gradient(90deg, rgba(255, 241, 242, 0.95) 0%, #FFFFFF 100%);
-  border-color: #FECDD3;
+  border-left: 4px solid var(--brand-crimson, var(--brand-crimson));
+  background: linear-gradient(90deg, rgba(255, 241, 242, 0.95) 0%, var(--surface-1) 100%);
+  border-color: var(--status-danger-border);
   box-shadow: 0 2px 8px rgba(165, 28, 48, 0.08);
 }
 
 [data-theme="dark"] .fleet-chat-channel-card.active {
   background: linear-gradient(90deg, rgba(76, 5, 25, 0.4) 0%, #0D162B 100%);
-  border-color: #881337;
+  border-color: var(--brand-crimson-dark);
 }
 
 /* Main Stream Column */
@@ -993,12 +993,12 @@
   flex: 1 1 0;
   min-width: 0;
   min-height: 0;
-  background: #FFFFFF;
+  background: var(--surface-1);
   box-sizing: border-box;
 }
 
 [data-theme="dark"] .fleet-chat-main-section {
-  background: #0B132B;
+  background: var(--surface-inverse);
 }
 
 .fleet-chat-main-header {
@@ -1006,13 +1006,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #FFFFFF;
+  border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-1);
   flex-shrink: 0;
 }
 
 [data-theme="dark"] .fleet-chat-main-header {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -1024,8 +1024,8 @@
   min-width: 330px;
   max-width: 330px;
   flex-shrink: 0;
-  border-left: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #F8FAFC;
+  border-left: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-0);
   padding: 16px;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
   overflow-y: auto;
@@ -1082,54 +1082,54 @@
   flex-shrink: 0;
 }
 .fleet-status-badge.completed {
-  background: #ECFDF5;
-  color: #047857;
-  border-color: #A7F3D0;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border-color: var(--status-success-border);
 }
 [data-theme="dark"] .fleet-status-badge.completed {
-  background: #064E3B;
-  color: #6EE7B7;
-  border-color: #047857;
+  background: var(--status-success-solid-dark);
+  color: var(--status-success-bright);
+  border-color: var(--status-success-solid-dark);
 }
 .fleet-status-badge.in_transit {
-  background: #EFF6FF;
-  color: #1D4ED8;
-  border-color: #BFDBFE;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+  border-color: var(--status-info-border);
 }
 [data-theme="dark"] .fleet-status-badge.in_transit {
-  background: #1E3A8A;
-  color: #93C5FD;
-  border-color: #1D4ED8;
+  background: var(--status-info-solid-dark);
+  color: var(--status-info-bright);
+  border-color: var(--status-info-solid-dark);
 }
 .fleet-status-badge.assigned {
-  background: #EEF2FF;
-  color: #4338CA;
-  border-color: #C7D2FE;
+  background: var(--status-purple-bg);
+  color: var(--status-purple-text);
+  border-color: var(--status-purple-border);
 }
 [data-theme="dark"] .fleet-status-badge.assigned {
-  background: #312E81;
-  color: #A5B4FC;
-  border-color: #4338CA;
+  background: var(--status-purple-solid-dark);
+  color: var(--status-purple-bright);
+  border-color: var(--status-purple-solid-dark);
 }
 .fleet-status-badge.pending {
-  background: #FFFBEB;
-  color: #B45309;
-  border-color: #FDE68A;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+  border-color: var(--status-warning-bright);
 }
 [data-theme="dark"] .fleet-status-badge.pending {
-  background: #78350F;
-  color: #FDE68A;
-  border-color: #B45309;
+  background: var(--status-warning-solid-dark);
+  color: var(--status-warning-bright);
+  border-color: var(--status-warning-solid-dark);
 }
 .fleet-status-badge.default {
-  background: #F1F5F9;
-  color: #475569;
-  border-color: #CBD5E1;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border-color: var(--border-2);
 }
 [data-theme="dark"] .fleet-status-badge.default {
-  background: #1E293B;
-  color: #94A3B8;
-  border-color: #334155;
+  background: var(--surface-inverse-2);
+  color: var(--text-muted);
+  border-color: var(--border-inverse-2);
 }
 
 .fleet-chat-tab-pill {
@@ -1140,42 +1140,42 @@
   font-weight: 700;
   border: none;
   background: transparent;
-  color: var(--brand-slate-600, #475569);
+  color: var(--brand-slate-600, var(--text-2));
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: center;
 }
 [data-theme="dark"] .fleet-chat-tab-pill {
-  color: #94A3B8;
+  color: var(--text-muted);
 }
 .fleet-chat-tab-pill.active {
-  background: #FFFFFF;
-  color: var(--brand-slate-900, #0F172A);
+  background: var(--surface-1);
+  color: var(--brand-slate-900, var(--text-1));
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 [data-theme="dark"] .fleet-chat-tab-pill.active {
   background: #162447;
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 
 .fleet-chat-search-wrap {
   padding: 6px 12px;
-  background: #FFFFFF;
-  border-bottom: 1px solid var(--brand-slate-200, #E2E8F0);
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
   box-sizing: border-box;
 }
 [data-theme="dark"] .fleet-chat-search-wrap {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 .fleet-chat-search-input {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #F8FAFC;
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-0);
   padding: 5px 28px 5px 30px;
   font-size: 11.5px;
-  color: var(--brand-slate-900, #0F172A);
+  color: var(--brand-slate-900, var(--text-1));
   box-sizing: border-box;
   outline: none;
   transition: all 0.15s ease;
@@ -1183,11 +1183,11 @@
 [data-theme="dark"] .fleet-chat-search-input {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 .fleet-chat-search-input:focus {
-  border-color: var(--brand-crimson, #A51C30);
-  background: #FFFFFF;
+  border-color: var(--brand-crimson, var(--brand-crimson));
+  background: var(--surface-1);
 }
 [data-theme="dark"] .fleet-chat-search-input:focus {
   background: #162447;
@@ -1200,32 +1200,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
+  color: var(--text-on-brand);
   font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.15s ease;
 }
 .fleet-channel-avatar.in_transit {
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  background: linear-gradient(135deg, var(--status-info-solid) 0%, var(--status-info-solid-dark) 100%);
 }
 .fleet-channel-avatar.assigned {
-  background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+  background: linear-gradient(135deg, var(--status-purple-solid) 0%, var(--status-purple-solid-dark) 100%);
 }
 .fleet-channel-avatar.completed {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%);
 }
 .fleet-channel-avatar.pending {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  background: linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%);
 }
 .fleet-channel-avatar.sos {
-  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  background: linear-gradient(135deg, var(--status-danger-solid) 0%, var(--status-danger-solid-dark) 100%);
 }
 .fleet-channel-avatar.broadcast {
-  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  background: linear-gradient(135deg, var(--status-info-solid) 0%, var(--status-info-solid-dark) 100%);
 }
 .fleet-channel-avatar.hotline {
-  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+  background: linear-gradient(135deg, var(--status-purple-solid) 0%, var(--status-purple-solid-dark) 100%);
 }
 
 .fleet-presence-dot {
@@ -1235,22 +1235,22 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid #FFFFFF;
+  border: 2px solid var(--surface-1);
 }
 [data-theme="dark"] .fleet-presence-dot {
   border-color: #0B132B;
 }
 .fleet-presence-dot.green {
-  background: #10B981;
+  background: var(--status-success-solid);
 }
 .fleet-presence-dot.blue {
-  background: #3B82F6;
+  background: var(--status-info-solid);
 }
 .fleet-presence-dot.amber {
-  background: #F59E0B;
+  background: var(--status-warning-solid);
 }
 .fleet-presence-dot.red {
-  background: #EF4444;
+  background: var(--status-danger-solid);
 }
 
 .fleet-chat-composer-textarea {
@@ -1258,12 +1258,12 @@
   max-height: 130px;
   resize: none;
   border-radius: 12px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #F8FAFC;
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-0);
   padding: 10px 14px;
   font-size: 12.5px;
   line-height: 1.5;
-  color: var(--brand-slate-900, #0F172A);
+  color: var(--brand-slate-900, var(--text-1));
   box-sizing: border-box;
   outline: none;
   transition: all 0.15s ease;
@@ -1271,11 +1271,11 @@
 [data-theme="dark"] .fleet-chat-composer-textarea {
   background: #111C35;
   border-color: rgba(255, 255, 255, 0.08);
-  color: #FFFFFF;
+  color: var(--text-on-brand);
 }
 .fleet-chat-composer-textarea:focus {
-  border-color: var(--brand-crimson, #A51C30);
-  background: #FFFFFF;
+  border-color: var(--brand-crimson, var(--brand-crimson));
+  background: var(--surface-1);
 }
 [data-theme="dark"] .fleet-chat-composer-textarea:focus {
   background: #162447;
@@ -1283,14 +1283,14 @@
 
 .fleet-hud-card {
   border-radius: 14px;
-  border: 1px solid var(--brand-slate-200, #E2E8F0);
-  background: #FFFFFF;
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  background: var(--surface-1);
   padding: 12px 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
 }
 [data-theme="dark"] .fleet-hud-card {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-color: rgba(255, 255, 255, 0.08);
 }
 

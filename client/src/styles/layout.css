@@ -9,7 +9,7 @@
   height: var(--topbar-height, 60px);
   min-height: var(--topbar-height, 60px);
   max-height: var(--topbar-height, 60px);
-  background: #fff;
+  background: var(--surface-1);
   border-bottom: 1px solid var(--brand-slate-200);
   display: flex;
   align-items: center;
@@ -23,7 +23,7 @@
 }
 
 [data-theme="dark"] .topbar {
-  background: #0B132B;
+  background: var(--surface-inverse);
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -57,7 +57,7 @@
 }
 
 [data-theme="dark"] .topbar-page-title {
-  color: #F8FAFC;
+  color: var(--text-inverse);
 }
 
 .topbar-breadcrumb {
@@ -136,21 +136,21 @@
 
 .topbar-search-trigger:hover {
   border-color: var(--brand-gold);
-  background: #fff;
+  background: var(--surface-1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   color: var(--brand-slate-800);
 }
 
 [data-theme="dark"] .topbar-search-trigger {
-  background: #111E3D;
-  border-color: #1E293B;
-  color: #94A3B8;
+  background: var(--surface-inverse);
+  border-color: var(--border-inverse);
+  color: var(--text-muted);
 }
 
 [data-theme="dark"] .topbar-search-trigger:hover {
   background: #16254C;
   border-color: var(--brand-gold);
-  color: #F8FAFC;
+  color: var(--text-inverse);
 }
 
 .search-placeholder {
@@ -169,7 +169,7 @@
 
 [data-theme="dark"] .search-kbd {
   background: rgba(255, 255, 255, 0.1);
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
 }
 
 /* 2. Unified Enterprise Telemetry Capsule (SAP + Clock) */
@@ -208,15 +208,15 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #0284C7;
-  box-shadow: 0 0 6px #0284C7;
+  background: var(--status-info-solid);
+  box-shadow: 0 0 6px var(--status-info);
   animation: dot-pulse 2s infinite;
 }
 
 .sap-label {
   font-size: 11px;
   font-weight: 700;
-  color: #0284C7;
+  color: var(--status-info);
   letter-spacing: 0.3px;
   white-space: nowrap;
 }
@@ -247,7 +247,7 @@
 }
 
 [data-theme="dark"] .clock-time {
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
 }
 
 /* 3. Quick Utilities Dock (Notifs, Theme, Lang) */
@@ -264,8 +264,8 @@
 }
 
 [data-theme="dark"] .topbar-utility-dock {
-  background: #111E3D;
-  border-color: #1E293B;
+  background: var(--surface-inverse);
+  border-color: var(--border-inverse);
 }
 
 .btn-dock-tool {
@@ -287,13 +287,13 @@
 }
 
 .btn-dock-tool:hover {
-  background: #fff;
+  background: var(--surface-1);
   color: var(--brand-crimson);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] .btn-dock-tool {
-  color: #CBD5E1;
+  color: var(--text-inverse-2);
 }
 
 [data-theme="dark"] .btn-dock-tool:hover {
@@ -313,7 +313,7 @@
   height: 34px;
   padding: 0 12px;
   background: linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%);
-  color: #fff;
+  color: var(--text-on-brand);
   border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 8px;
   font-size: 11.5px;
@@ -361,8 +361,8 @@
 }
 
 [data-theme="dark"] .user-widget-interactive:hover {
-  background: #111E3D;
-  border-color: #1E293B;
+  background: var(--surface-inverse);
+  border-color: var(--border-inverse);
 }
 
 .user-avatar {
@@ -387,8 +387,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10B981;
-  border: 1.5px solid #fff;
+  background: var(--status-success-solid);
+  border: 1.5px solid var(--surface-1);
 }
 
 [data-theme="dark"] .avatar-status-dot {
@@ -406,7 +406,7 @@
 }
 
 [data-theme="dark"] .user-meta .name {
-  color: #F8FAFC;
+  color: var(--text-inverse);
 }
 
 .user-meta .dept {
@@ -501,7 +501,7 @@ body:has(.fleet-chat-active) {
 
 /* ─── EXECUTIVE ALERT RIBBON ─────────────────────────────────────────────── */
 .exec-ribbon {
-  background:linear-gradient(90deg, var(--brand-slate-900) 0%, var(--brand-slate-800) 100%);
+  background:linear-gradient(90deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%);
   border-left:5px solid var(--brand-gold);
   border-radius:var(--radius-md); padding:14px 20px;
   display:flex; align-items:center; justify-content:space-between;
@@ -509,7 +509,7 @@ body:has(.fleet-chat-active) {
 }
 .ribbon-left { display:flex; align-items:center; gap:14px; }
 .ribbon-icon { font-size:22px; }
-.ribbon-text h4 { font-size:13.5px; font-weight:700; color:#fff; }
+.ribbon-text h4 { font-size:13.5px; font-weight:700; color:var(--text-on-brand); }
 .ribbon-text p { font-size:11.5px; color:rgba(255,255,255,0.65); }
 .btn-ribbon {
   padding:6px 14px; background:rgba(212,175,55,0.15);
@@ -525,7 +525,7 @@ body:has(.fleet-chat-active) {
   margin-bottom:24px;
 }
 .stat-card {
-  background:#fff; border:1px solid var(--brand-slate-200);
+  background:var(--surface-1); border:1px solid var(--brand-slate-200);
   border-radius:var(--radius-lg); padding:18px 20px;
   box-shadow:var(--shadow-xs); position:relative; overflow:hidden;
   transition:transform var(--transition), box-shadow var(--transition);

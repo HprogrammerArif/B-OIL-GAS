@@ -28,7 +28,7 @@
   height: 36px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--brand-slate-200);
-  background: #ffffff;
+  background: var(--surface-1);
   color: var(--brand-slate-800);
   cursor: pointer;
   flex-shrink: 0;
@@ -41,14 +41,14 @@
 }
 
 [data-theme="dark"] .topbar-mobile-hamburger {
-  background: #111A38;
-  border-color: #1E293B;
-  color: #E2E8F0;
+  background: var(--surface-inverse);
+  border-color: var(--border-inverse);
+  color: var(--text-inverse);
 }
 
 [data-theme="dark"] .topbar-mobile-hamburger:hover {
   background: #16254C;
-  color: #fff;
+  color: var(--text-on-brand);
 }
 
 .sidebar-mobile-close {
@@ -60,7 +60,7 @@
   border-radius: var(--radius-xs);
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  color: var(--text-on-brand);
   cursor: pointer;
   margin-left: auto;
   transition: all var(--transition-fast);
@@ -90,13 +90,13 @@
 
 .ic-mobile-back-btn:hover {
   background: var(--brand-crimson);
-  color: #fff;
+  color: var(--text-on-brand);
 }
 
 [data-theme="dark"] .ic-mobile-back-btn {
   background: rgba(165, 28, 48, 0.25);
   border-color: rgba(165, 28, 48, 0.5);
-  color: #F87171;
+  color: var(--status-danger-bright);
 }
 
 /* ─── MOBILE BOTTOM NAVIGATION DOCK (Industry Standard iOS/Android App Bar) ── */
@@ -217,8 +217,8 @@
   line-height: 13px;
   border-radius: 999px;
   text-align: center;
-  color: #fff;
-  border: 1.5px solid #fff;
+  color: var(--text-on-brand);
+  border: 1.5px solid var(--surface-1);
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
 }
 
@@ -1039,7 +1039,7 @@
 }
 
 .visitor-card-item {
-  background: var(--brand-card-bg, #fff);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-md);
   padding: 14px;
@@ -1053,7 +1053,7 @@
 }
 [data-theme="dark"] .visitor-card-item {
   background: #0E1834;
-  border-color: #1E293B;
+  border-color: var(--border-inverse);
 }
 [data-theme="dark"] .visitor-card-item:hover, [data-theme="dark"] .visitor-card-item.selected {
   border-color: var(--brand-gold);
@@ -1115,7 +1115,7 @@
 }
 
 .workforce-card-item {
-  background: var(--brand-card-bg, #fff);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-md);
   padding: 14px;
@@ -1125,8 +1125,8 @@
 
 [data-theme="dark"] .workforce-card-item {
   background: #0E1834;
-  border-color: #1E293B;
-  color: #E2E8F0;
+  border-color: var(--border-inverse);
+  color: var(--text-inverse);
 }
 
 @media (max-width: 768px) {
@@ -1161,7 +1161,7 @@
 }
 
 .kpi-card {
-  background: var(--brand-card-bg, #fff);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
@@ -1200,8 +1200,8 @@
 
 [data-theme="dark"] .kpi-card {
   background: #0E1834;
-  border-color: #1E293B;
-  color: #E2E8F0;
+  border-color: var(--border-inverse);
+  color: var(--text-inverse);
 }
 
 @media (max-width: 1024px) {
@@ -1311,7 +1311,7 @@
 }
 
 .approval-mobile-card {
-  background: var(--brand-card-bg, #FFFFFF);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: 10px;
   padding: 14px;
@@ -1327,7 +1327,7 @@
 }
 [data-theme="dark"] .approval-mobile-card {
   background: #0E1834;
-  border-color: #1E293B;
+  border-color: var(--border-inverse);
 }
 
 /* ─── CLAIMS MOBILE CARD STYLING ─── */
@@ -1351,7 +1351,7 @@
 }
 
 .claim-mobile-card {
-  background: var(--brand-card-bg, #FFFFFF);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: 10px;
   padding: 12px 14px;
@@ -1364,7 +1364,7 @@
 }
 [data-theme="dark"] .claim-mobile-card {
   background: #0E1834;
-  border-color: #1E293B;
+  border-color: var(--border-inverse);
 }
 
 /* ─── ASSET MOBILE CARD STYLING ─── */
@@ -1388,7 +1388,7 @@
 }
 
 .asset-mobile-card {
-  background: var(--brand-card-bg, #FFFFFF);
+  background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: 10px;
   padding: 12px 14px;
@@ -1401,7 +1401,7 @@
 }
 [data-theme="dark"] .asset-mobile-card {
   background: #0E1834;
-  border-color: #1E293B;
+  border-color: var(--border-inverse);
 }
 
 /* ─── MOBILE SEGMENTED VIEW SWITCHER BUTTONS ─── */
@@ -1436,17 +1436,17 @@
     gap: 6px;
   }
   .mobile-view-toggle button.active {
-    background: #FFFFFF;
+    background: var(--surface-1);
     color: var(--brand-crimson);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   [data-theme="dark"] .mobile-view-toggle {
-    background: #0B132B;
-    border-color: #1E293B;
+    background: var(--surface-inverse);
+    border-color: var(--border-inverse);
   }
   [data-theme="dark"] .mobile-view-toggle button.active {
     background: #16254C;
-    color: #FFFFFF;
+    color: var(--text-on-brand);
   }
   .mobile-hide {
     display: none !important;

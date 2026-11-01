@@ -25,6 +25,8 @@
   --surface-inverse-2: #1E293B;    /* raised element on an inverse panel */
   --surface-inverse-3: #334155;    /* hover/selected on an inverse panel */
   --surface-overlay: rgba(11, 19, 43, 0.55);
+  --surface-selected: #0B132B;     /* active chip / segmented tab fill */
+  --text-on-selected: #FFFFFF;
 
   /* Text */
   --text-1: #0F172A;               /* headings, primary values */
@@ -110,6 +112,8 @@
   --surface-inverse-2: #111A38;
   --surface-inverse-3: #1E2A4A;
   --surface-overlay: rgba(0, 0, 0, 0.7);
+  --surface-selected: #F1F5F9;
+  --text-on-selected: #0B132B;
 
   --text-1: #F8FAFC;
   --text-2: #CBD5E1;
