@@ -38,16 +38,16 @@ export default function HrAdminDashboard({
                 Resignation notice submitted · Last working day: <strong>Nov 15, 2026</strong> · Keraniganj Plant
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '10.5px' }}>
-                <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
+                <div style={{ background: 'var(--status-success-bg)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--status-success-border)', color: 'var(--status-success-text)' }}>
                   ✓ IT Accounts Revoked
                 </div>
-                <div style={{ background: '#ECFDF5', padding: '6px 8px', borderRadius: '4px', border: '1px solid #A7F3D0', color: '#065F46' }}>
+                <div style={{ background: 'var(--status-success-bg)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--status-success-border)', color: 'var(--status-success-text)' }}>
                   ✓ Security RFID Surrendered
                 </div>
-                <div style={{ background: '#FEF3C7', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FDE68A', color: '#92400E' }}>
+                <div style={{ background: 'var(--status-warning-bg)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--status-warning-bright)', color: 'var(--status-warning-text)' }}>
                   ⏳ Fleet: Pool Car Return
                 </div>
-                <div style={{ background: '#FEE2E2', padding: '6px 8px', borderRadius: '4px', border: '1px solid #FECACA', color: '#991B1B' }}>
+                <div style={{ background: 'var(--status-danger-bg)', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--status-danger-border)', color: 'var(--status-danger-text)' }}>
                   ⏳ Finance: TA/DA Reconciliation
                 </div>
               </div>
@@ -88,7 +88,7 @@ export default function HrAdminDashboard({
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Plot-3, Block-G, Umme Kulsum Road, Baridhara</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#059669' }}>420 Staff</div>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--status-success)' }}>420 Staff</div>
                   <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Corporate, Finance & Sales</div>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function HrAdminDashboard({
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Industrial Area, Dhaleshwari River Corridor</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#0284C7' }}>218 Staff</div>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--status-info)' }}>218 Staff</div>
                   <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Engineering, QC & Plant Ops</div>
                 </div>
               </div>
@@ -110,7 +110,7 @@ export default function HrAdminDashboard({
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Guptakhal, Patenga River Jetty</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 800, color: '#D97706' }}>105 Staff</div>
+                  <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--status-warning)' }}>105 Staff</div>
                   <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>Maritime Discharge & Heavy Fleet</div>
                 </div>
               </div>

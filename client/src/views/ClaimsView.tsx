@@ -470,7 +470,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--brand-border)', paddingTop: '6px', fontWeight: 700 }}>
                         <span>{t('Final Balance:', 'চূড়ান্ত সমন্বয় স্থিতি:', lang)}</span>
-                        <span style={{ color: (selectedClaim.netSettlement || 0) >= 0 ? '#15803D' : '#DC2626' }}>
+                        <span style={{ color: (selectedClaim.netSettlement || 0) >= 0 ? 'var(--status-success-text)' : 'var(--status-danger)' }}>
                           {(selectedClaim.netSettlement || 0) >= 0
                             ? `+ ৳${(selectedClaim.netSettlement || 0).toLocaleString()} (Payable to Staff)`
                             : `- ৳${Math.abs(selectedClaim.netSettlement || 0).toLocaleString()} (Refund to Company)`}
@@ -488,7 +488,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
 
                   {selectedClaim.sapVoucher && (
                     <div style={{ background: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.2)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                      <CheckCircle size={16} color="#059669" />
+                      <CheckCircle size={16} color="var(--status-success)" />
                       <div>
                         <strong>Payment Voucher Generated:</strong> <code>{selectedClaim.sapVoucher}</code>
                       </div>
@@ -499,22 +499,22 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   {selectedClaim.status === 'rejected' && (
                     <div
                       style={{
-                        background: '#FEF2F2',
-                        border: '1.5px solid #FCA5A5',
+                        background: 'var(--status-danger-bg)',
+                        border: '1.5px solid var(--status-danger-bright)',
                         borderRadius: '8px',
                         padding: '14px 16px',
                         marginBottom: '16px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#991B1B', fontWeight: 800, fontSize: '13px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--status-danger-text)', fontWeight: 800, fontSize: '13px' }}>
                         <AlertTriangle size={16} />
                         <span>{t('Returned for Correction', 'সংশোধনের জন্য ফেরত পাঠানো হয়েছে', lang)}</span>
-                        <span style={{ fontSize: '11px', color: '#B91C1C', marginLeft: 'auto', fontWeight: 500 }}>
+                        <span style={{ fontSize: '11px', color: 'var(--status-danger-text)', marginLeft: 'auto', fontWeight: 500 }}>
                           {selectedClaim.rejectedBy || 'Audit Approver'} • {selectedClaim.rejectedAt || 'Recent'}
                         </span>
                       </div>
 
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: '#7F1D1D' }}>
+                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--status-danger-text)' }}>
                         <strong>{t('Reason:', 'কারণ:', lang)}</strong> {selectedClaim.rejectionReason || 'Voucher Incomplete'}
                       </div>
 
@@ -523,11 +523,11 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                           style={{
                             marginTop: '6px',
                             fontSize: '11.5px',
-                            color: '#991B1B',
+                            color: 'var(--status-danger-text)',
                             background: 'rgba(255,255,255,0.7)',
                             padding: '6px 10px',
                             borderRadius: '4px',
-                            border: '1px solid #FECACA',
+                            border: '1px solid var(--status-danger-border)',
                           }}
                         >
                           <strong>{t('Observation:', 'পর্যবেক্ষণ:', lang)}</strong> {selectedClaim.rejectionObservation}
@@ -539,11 +539,11 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                           style={{
                             marginTop: '6px',
                             fontSize: '11.5px',
-                            color: '#065F46',
-                            background: '#ECFDF5',
+                            color: 'var(--status-success-text)',
+                            background: 'var(--status-success-bg)',
                             padding: '6px 10px',
                             borderRadius: '4px',
-                            border: '1px solid #A7F3D0',
+                            border: '1px solid var(--status-success-border)',
                           }}
                         >
                           <strong>{t('Changes Requested:', 'করণীয় সংশোধন:', lang)}</strong> {selectedClaim.rejectionImprovementNotes}
@@ -553,7 +553,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                       <div style={{ marginTop: '12px', textAlign: 'right' }}>
                         <button
                           className="btn-primary"
-                          style={{ fontSize: '11.5px', padding: '6px 14px', background: '#059669', borderColor: '#059669', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                          style={{ fontSize: '11.5px', padding: '6px 14px', background: 'var(--status-success-solid)', borderColor: 'var(--status-success)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                           onClick={() => handleResubmit(selectedClaim.id)}
                         >
                           <Check size={14} />
@@ -579,7 +579,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                       {selectedClaim.status === 'pending_finance' && (
                         <button
                           className="btn-primary"
-                          style={{ flex: 1, background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
+                          style={{ flex: 1, background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
                           onClick={() => handleApprove(selectedClaim.id)}
                         >
                           <Check size={16} /> {t('Approve & Issue Voucher', 'পেমেন্ট অনুমোদন ও ভাউচার ইস্যু', lang)}

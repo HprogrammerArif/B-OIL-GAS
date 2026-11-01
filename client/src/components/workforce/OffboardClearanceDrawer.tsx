@@ -103,18 +103,18 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
   return (
     <div className="modal-bg" style={{ zIndex: 1000 }}>
       <div className="modal" style={{ maxWidth: '640px' }}>
-        <div className="modal-hd" style={{ background: isOffboarded ? '#0A1227' : 'linear-gradient(135deg, #7F1424 0%, #A51C30 100%)', borderBottom: '2px solid var(--brand-gold)' }}>
+        <div className="modal-hd" style={{ background: isOffboarded ? 'var(--surface-inverse)' : 'linear-gradient(135deg, var(--brand-crimson-dark) 0%, var(--brand-crimson) 100%)', borderBottom: '2px solid var(--brand-gold)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(255,255,255,0.15)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(255,255,255,0.15)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldAlert size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', color: '#F8FAFC' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-inverse)' }}>
                 {isOffboarded
                   ? t('Former Employee Clearance Record', 'সাবেক কর্মচারীর ছাড়পত্র রেকর্ড', lang)
                   : t('Employee Exit & Department Clearance', 'কর্মচারী ছাড়পত্র ও বিভাগীয় ক্লিয়ারেন্স', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#FDE68A' }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-warning-bright)' }}>
                 {currentEmp.name} · {currentEmp.id} · {currentEmp.dept}
               </div>
             </div>
@@ -125,7 +125,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
         <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
           {/* Identity Capsule */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: 'var(--brand-slate-100)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)', marginBottom: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: currentEmp.avatarColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '16px', flexShrink: 0 }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: currentEmp.avatarColor, color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '16px', flexShrink: 0 }}>
               {currentEmp.initials}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -168,7 +168,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
             <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px', borderRadius: '6px', fontSize: '12px', marginBottom: '16px' }}>
               <div><strong>Exit Date:</strong> {currentEmp.exitDate}</div>
               <div style={{ marginTop: '3px' }}><strong>Reason for Leaving:</strong> {currentEmp.exitReason}</div>
-              <div style={{ marginTop: '3px', color: '#059669', fontWeight: 700 }}>
+              <div style={{ marginTop: '3px', color: 'var(--status-success)', fontWeight: 700 }}>
                 ✓ Cleared & Authorized by: {clearance.clearedBy} ({clearance.clearedAt})
               </div>
             </div>
@@ -180,13 +180,13 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
               marginBottom: '16px',
               padding: '12px 14px',
               borderRadius: '8px',
-              border: heldAssets.length > 0 ? '1.5px solid #F59E0B' : '1px solid rgba(16, 185, 129, 0.35)',
+              border: heldAssets.length > 0 ? '1.5px solid var(--status-warning)' : '1px solid rgba(16, 185, 129, 0.35)',
               background: heldAssets.length > 0 ? 'rgba(245, 158, 11, 0.08)' : 'rgba(16, 185, 129, 0.07)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: heldAssets.length > 0 ? '10px' : 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Wrench size={15} color={heldAssets.length > 0 ? '#D97706' : '#059669'} />
+                <Wrench size={15} color={heldAssets.length > 0 ? 'var(--status-warning)' : 'var(--status-success)'} />
                 <div>
                   <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                     {t('Company Equipment & Asset Return', 'কোম্পানির সম্পদ ও যন্ত্রপাতি জমা', lang)}
@@ -279,7 +279,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Laptop size={18} color={clearance.itAccessRevoked ? '#059669' : '#64748B'} />
+                  <Laptop size={18} color={clearance.itAccessRevoked ? 'var(--status-success)' : 'var(--text-3)'} />
                   <div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
                       1. IT, Email & System Accounts
@@ -309,7 +309,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Key size={18} color={clearance.rfidGateBadgeSurrendered ? '#059669' : '#64748B'} />
+                  <Key size={18} color={clearance.rfidGateBadgeSurrendered ? 'var(--status-success)' : 'var(--text-3)'} />
                   <div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
                       2. Office & Plant Gate Pass / Security Badge
@@ -339,7 +339,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <CreditCard size={18} color={clearance.vehicleFuelCardReturned ? '#059669' : '#64748B'} />
+                  <CreditCard size={18} color={clearance.vehicleFuelCardReturned ? 'var(--status-success)' : 'var(--text-3)'} />
                   <div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
                       3. Company Bus Seat & Vehicle Fuel Cards
@@ -369,7 +369,7 @@ export default function OffboardClearanceDrawer({ employee, onClose, lang }: Off
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <DollarSign size={18} color={clearance.financeAccountsSettled ? '#059669' : '#64748B'} />
+                  <DollarSign size={18} color={clearance.financeAccountsSettled ? 'var(--status-success)' : 'var(--text-3)'} />
                   <div>
                     <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
                       4. Finance, Travel Advance & Final Dues

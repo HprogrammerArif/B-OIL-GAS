@@ -5,6 +5,7 @@ import Topbar from './components/Topbar';
 import CommandPalette from './components/CommandPalette';
 import { AppRole, AppView, Lang, t } from './types';
 import { useNoticeStore } from './store/noticeStore';
+import { applyTheme, getInitialTheme, type Theme } from './lib/theme';
 import { Megaphone, CheckCircle2, X } from 'lucide-react';
 
 // Views
@@ -34,7 +35,7 @@ export default function App() {
   const [role, setRole] = useState<AppRole>('chairman');
   const [view, setView] = useState<AppView>('dashboard');
   const [lang, setLang] = useState<Lang>('en');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
@@ -42,9 +43,9 @@ export default function App() {
 
   const { activeBroadcast, dismissActiveBroadcast, acknowledgeNotice } = useNoticeStore();
 
-  // Sync theme to HTML root element
+  // Sync theme to <html> and persist the choice
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    applyTheme(theme);
   }, [theme]);
 
   // Global Keyboard Shortcuts (Ctrl+K / Cmd+K, Escape)
@@ -156,15 +157,15 @@ export default function App() {
           <div
             className="announcement-banner"
             style={{
-              background: 'linear-gradient(135deg, #881337 0%, #A51C30 60%, #7F1D1D 100%)',
-              color: '#FFFFFF',
+              background: 'linear-gradient(135deg, var(--brand-crimson-dark) 0%, var(--brand-crimson) 60%, var(--status-danger-solid-dark) 100%)',
+              color: 'var(--text-on-brand)',
               padding: '10px 20px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '14px',
               flexWrap: 'wrap',
-              borderBottom: '2px solid var(--brand-gold, #D4AF37)',
+              borderBottom: '2px solid var(--brand-gold)',
               boxShadow: '0 4px 12px rgba(165, 28, 48, 0.2)',
             }}
           >
@@ -182,17 +183,17 @@ export default function App() {
                   marginTop: '2px',
                 }}
               >
-                <Megaphone size={16} color="#FDE047" />
+                <Megaphone size={16} color="var(--status-warning-bright)" />
               </div>
               <div>
                 <div style={{ fontSize: '12.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ background: '#FDE047', color: '#78350F', padding: '1px 7px', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>
+                  <span style={{ background: 'var(--status-warning-bright)', color: 'var(--status-warning-text)', padding: '1px 7px', borderRadius: '4px', fontSize: '10px', fontWeight: 900 }}>
                     {t('COMPANY ANNOUNCEMENT', 'বিশেষ ঘোষণা', lang)}
                   </span>
                   <span>{activeBroadcast.title}</span>
                 </div>
                 <div style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.9)', marginTop: '2px', lineHeight: 1.45 }}>
-                  {activeBroadcast.body} — <strong style={{ color: '#FDE047' }}>{activeBroadcast.author}</strong>
+                  {activeBroadcast.body} — <strong style={{ color: 'var(--status-warning-bright)' }}>{activeBroadcast.author}</strong>
                 </div>
               </div>
             </div>
@@ -210,8 +211,8 @@ export default function App() {
                     );
                   }}
                   style={{
-                    background: '#FDE047',
-                    color: '#78350F',
+                    background: 'var(--status-warning-bright)',
+                    color: 'var(--status-warning-text)',
                     border: 'none',
                     borderRadius: '6px',
                     padding: '6px 12px',
@@ -233,7 +234,7 @@ export default function App() {
                 title={t('Dismiss banner', 'বন্ধ করুন', lang)}
                 style={{
                   background: 'rgba(255,255,255,0.14)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-on-brand)',
                   border: '1px solid rgba(255,255,255,0.25)',
                   borderRadius: '6px',
                   padding: '5px 8px',

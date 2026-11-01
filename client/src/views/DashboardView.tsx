@@ -137,11 +137,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('Net Realized Savings & Loss Mitigation', 'সাশ্রয় ও ক্ষতি প্রতিরোধ (চলতি অর্থবছর)', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="284 Days" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="284 Days" /></div>
                 <div className="lbl">{t('Zero-Shutdown Safety Record', 'শূন্য শাটডাউন নিরাপদ কর্মদিবস', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="৳ 18.2 Cr" /></div>
+                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="৳ 18.2 Cr" /></div>
                 <div className="lbl">{t('October Revenue (Running)', 'অক্টোবর রাজস্ব (চলমান)', lang)}</div>
               </div>
             </>
@@ -153,11 +153,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('Refinery Output — Keraniganj', 'রিফাইনারি উৎপাদন — কেরানীগঞ্জ', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="96.3%" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="96.3%" /></div>
                 <div className="lbl">{t('Overall Equipment Effectiveness (OEE)', 'যন্ত্রপাতি সামগ্রিক কার্যকারিতা', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="2 Active LOTO" /></div>
+                <div className="val" style={{ color: 'var(--status-warning-bright)' }}><AnimatedCounter value="2 Active LOTO" /></div>
                 <div className="lbl">{t('Lockout-Tagout Safety Isolations', 'সক্রিয় এলওটিও নিরাপত্তা ট্যাগ', lang)}</div>
               </div>
             </>
@@ -169,11 +169,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('Tankers & Executive Pool', 'ট্যাংকার ও নির্বাহী বহর', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="0.00% Zero Theft" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="0.00% Zero Theft" /></div>
                 <div className="lbl">{t('Fuel Dip-Rod Variance Today', 'জ্বালানি পরিমাপ নির্ভুলতা', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="৳ 14,80,000" /></div>
+                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="৳ 14,80,000" /></div>
                 <div className="lbl">{t('Fleet Cost Savings (AI Pooling)', 'ফ্লিট পুলিং সাশ্রয়', lang)}</div>
               </div>
             </>
@@ -185,11 +185,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('Active Group Workforce (3 Sites)', 'মোট জনবল (৩টি আঞ্চলিক নোড)', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="94.8%" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="94.8%" /></div>
                 <div className="lbl">{t('Haversine Geofence Punch Compliance', 'বায়োমেট্রিক উপস্থিতি হার', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#A78BFA' }}><AnimatedCounter value="100% SAP Synced" /></div>
+                <div className="val" style={{ color: 'var(--status-purple-bright)' }}><AnimatedCounter value="100% SAP Synced" /></div>
                 <div className="lbl">{t('Zero Payroll Variance in S/4HANA', 'এসএপি পেরোল নির্ভুলতা', lang)}</div>
               </div>
             </>
@@ -201,11 +201,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('Department OPEX Burned (72% utilized)', 'চলতি প্রান্তিকে বাজেট ব্যয় (৭২%)', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="৳ 14,80,000" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="৳ 14,80,000" /></div>
                 <div className="lbl">{t('Approved Buffer Remaining', 'অনুমোদিত অবশিষ্ট তহবিল', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#F87171' }}><AnimatedCounter value="2 Overdue" /></div>
+                <div className="val" style={{ color: 'var(--status-danger-bright)' }}><AnimatedCounter value="2 Overdue" /></div>
                 <div className="lbl">{t('Claims Requiring Action Today', 'জরুরি অনুমোদন বাকি', lang)}</div>
               </div>
             </>
@@ -217,11 +217,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="lbl">{t('On-Time Attendance This Month', 'চলতি মাসে পূর্ণ উপস্থিতি', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="৳ 4,850" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="৳ 4,850" /></div>
                 <div className="lbl">{t('Conveyance Claim Under Review', 'যাতায়াত বিল প্রক্রিয়াধীন', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="8 Days Leave" /></div>
+                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="8 Days Leave" /></div>
                 <div className="lbl">{t('Casual Leave Balance Remaining', 'অবশিষ্ট ক্যাজুয়াল ছুটি স্থিতি', lang)}</div>
               </div>
             </>
@@ -229,15 +229,15 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           {role === 'driver' && (
             <>
               <div className="roi-stat-item">
-                <div className="val" style={{ color: '#34D399' }}><AnimatedCounter value="0.00% BAC" /></div>
+                <div className="val" style={{ color: 'var(--status-success-bright)' }}><AnimatedCounter value="0.00% BAC" /></div>
                 <div className="lbl">{t('Pre-Trip Breathalyzer Verified', 'ব্রিদলাইজার অ্যালকোহল টেস্ট উত্তীর্ণ', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#38BDF8' }}><AnimatedCounter value="4.2 / 8.0 Hrs" /></div>
+                <div className="val" style={{ color: 'var(--status-info-bright)' }}><AnimatedCounter value="4.2 / 8.0 Hrs" /></div>
                 <div className="lbl">{t('Duty Hours Logged Today', 'দৈনিক ড্রাইভিং কর্মঘণ্টা', lang)}</div>
               </div>
               <div className="roi-stat-item divider">
-                <div className="val" style={{ color: '#FBBF24' }}><AnimatedCounter value="4.9 / 5.0 ★" /></div>
+                <div className="val" style={{ color: 'var(--status-warning-bright)' }}><AnimatedCounter value="4.9 / 5.0 ★" /></div>
                 <div className="lbl">{t('Passenger Safety & Punctuality Rating', 'যাত্রী নিরাপত্তা ও সময়ানুবর্তিতা রেটিং', lang)}</div>
               </div>
             </>
@@ -374,9 +374,9 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                         width: '34px',
                         height: '34px',
                         borderRadius: '50%',
-                        background: isPlaying ? '#10B981' : '#D4AF37',
+                        background: isPlaying ? 'var(--status-success-solid)' : 'var(--brand-gold)',
                         border: 'none',
-                        color: '#000000',
+                        color: 'var(--text-1)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -393,14 +393,14 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 800, color: '#FDE047' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-bright)' }}>
                           🎙️ {t(activeBriefing.title, activeBriefing.titleBn, lang)}
                         </span>
-                        <span className="badge" style={{ background: '#DC2626', color: '#fff', fontSize: '9px', padding: '1px 5px' }}>
+                        <span className="badge" style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontSize: '9px', padding: '1px 5px' }}>
                           LIVE MEMO
                         </span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px', fontStyle: 'italic', maxWidth: '580px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px', fontStyle: 'italic', maxWidth: '580px' }}>
                         "{t(activeBriefing.transcript, activeBriefing.transcriptBn, lang)}"
                       </div>
                     </div>
@@ -415,7 +415,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                           style={{
                             width: '2.5px',
                             height: isPlaying ? `${Math.max(4, (h * (1 + Math.sin(i + Date.now() / 150))) % 20)}px` : '4px',
-                            background: isPlaying ? '#34D399' : '#64748B',
+                            background: isPlaying ? 'var(--status-success-bright)' : 'var(--surface-inverse-3)',
                             borderRadius: '1px',
                             transition: 'height 0.15s ease',
                           }}
@@ -423,11 +423,11 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                       ))}
                     </div>
 
-                    <div style={{ fontSize: '11.5px', fontFamily: 'monospace', color: '#94A3B8' }}>
+                    <div style={{ fontSize: '11.5px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                       00:{activeBriefing.durationSeconds < 10 ? `0${activeBriefing.durationSeconds}` : activeBriefing.durationSeconds}
                     </div>
 
-                    <span style={{ fontSize: '10px', color: '#64748B' }}>
+                    <span style={{ fontSize: '10px', color: 'var(--text-3)' }}>
                       • {activeBriefing.recordedAt}
                     </span>
                   </div>
@@ -447,7 +447,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-ribbon" style={{ background: '#DC2626' }} onClick={() => showToast('🔴 Alarm acknowledged. Set point trimmed by 2°C.', 'danger')}>
+                <button className="btn-ribbon" style={{ background: 'var(--status-danger-solid)' }} onClick={() => showToast('🔴 Alarm acknowledged. Set point trimmed by 2°C.', 'danger')}>
                   ⚡ {t('Acknowledge Alarm', 'অ্যালার্ম স্বীকৃতি', lang)}
                 </button>
               </div>
@@ -460,14 +460,14 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '20px' }}>
                 <div
                   className="card interactive-row"
-                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #BFDBFE', background: '#EFF6FF' }}
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-info-border)', background: 'var(--status-info-bg)' }}
                   onClick={() => onNavigate ? onNavigate('attendance') : showToast('📍 Geofence verified: South Gate Keraniganj Complex', 'success')}
                 >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-info-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <MapPin size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#1E40AF' }}>Clock-In Geofence</div>
-                  <div style={{ fontSize: '11px', color: '#60A5FA', marginTop: '2px' }}>Verified Biometric GPS</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-info-text)' }}>Clock-In Geofence</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-info-bright)', marginTop: '2px' }}>Verified Biometric GPS</div>
                 </div>
 
                 <div
@@ -475,7 +475,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                   style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--brand-gold-muted)', background: 'var(--brand-card-bg)' }}
                   onClick={() => onNavigate ? onNavigate('fleet') : showToast('🚗 Duty Vehicle requisition modal initiated.', 'info')}
                 >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F59E0B', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-warning-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Car size={20} />
                   </div>
                   <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-gold-dark)' }}>Request Vehicle</div>
@@ -484,35 +484,35 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
                 <div
                   className="card interactive-row"
-                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #A7F3D0', background: '#ECFDF5' }}
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-success-border)', background: 'var(--status-success-bg)' }}
                   onClick={() => onNavigate ? onNavigate('bus') : showToast('🚌 Commuter Shuttle Pass: Seat #7 Active', 'success')}
                 >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Bus size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#065F46' }}>Shuttle Bus Pass</div>
-                  <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px' }}>Seat #7 Confirmed</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-success-text)' }}>Shuttle Bus Pass</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '2px' }}>Seat #7 Confirmed</div>
                 </div>
 
                 <div
                   className="card interactive-row"
-                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid #DDD6FE', background: '#F5F3FF' }}
+                  style={{ padding: '16px', textAlign: 'center', cursor: 'pointer', border: '1px solid var(--status-purple-border)', background: 'var(--status-purple-bg)' }}
                   onClick={() => onNavigate ? onNavigate('claims') : showToast('🧾 Opening Claim Submission...', 'info')}
                 >
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#8B5CF6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-purple-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
                     <Receipt size={20} />
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#5B21B6' }}>Submit Claim</div>
-                  <div style={{ fontSize: '11px', color: '#7C3AED', marginTop: '2px' }}>Grade 7-10 Matrix</div>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-purple-text)' }}>Submit Claim</div>
+                  <div style={{ fontSize: '11px', color: 'var(--status-purple)', marginTop: '2px' }}>Grade 7-10 Matrix</div>
                 </div>
               </div>
 
               {/* Active Requisition Status Banner for Employee */}
               {sharedRequisitions.filter(r => r.requesterName.includes('Tanvir')).slice(0, 1).map(myReq => (
-                <div key={myReq.id} className="card mb-4" style={{ background: myReq.status === 'assigned' ? '#F0FDF4' : '#FFFBEB', border: myReq.status === 'assigned' ? '1px solid #86EFAC' : '1px solid #FDE68A', padding: '14px 18px' }}>
+                <div key={myReq.id} className="card mb-4" style={{ background: myReq.status === 'assigned' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)', border: myReq.status === 'assigned' ? '1px solid var(--status-success-bright)' : '1px solid var(--status-warning-bright)', padding: '14px 18px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Car size={20} color={myReq.status === 'assigned' ? '#16A34A' : '#D97706'} />
+                      <Car size={20} color={myReq.status === 'assigned' ? 'var(--status-success)' : 'var(--status-warning)'} />
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                           {myReq.status === 'assigned' ? '✓ Vehicle & Driver Allocated for Your Duty Travel' : '⏳ Vehicle Requisition Under Review by Transport Admin (Md. Kamruzzaman)'}
@@ -521,7 +521,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                           {myReq.id} • {myReq.from.split(',')[0]} ➔ {myReq.to.split(',')[0]} ({myReq.tripType === 'round_trip' ? 'Round Trip' : 'One-Way'}) • Departure: {myReq.departureTime}
                         </div>
                         {myReq.status === 'assigned' && (
-                          <div style={{ fontSize: '12px', color: '#15803D', fontWeight: 700, marginTop: '3px' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 700, marginTop: '3px' }}>
                             Car: {myReq.assignedVehiclePlate} • Driver: {myReq.assignedDriverName} (📞 {myReq.assignedDriverPhone}) • Pass #{myReq.tripPassNo}
                           </div>
                         )}
@@ -594,7 +594,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('notices')}>
                   <div className="tab-jump-top">
                     <div className="tab-jump-title">
-                      <Bell size={18} color="#0284C7" />
+                      <Bell size={18} color="var(--status-info)" />
                       <span>{t('Enterprise Notices', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</span>
                     </div>
                     <span className="badge gold">{sharedNotices.length} {t('Circulars', 'বিজ্ঞপ্তি', lang)}</span>
@@ -615,7 +615,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('refinery')}>
                   <div className="tab-jump-top">
                     <div className="tab-jump-title">
-                      <BarChart3 size={18} color="#0284C7" />
+                      <BarChart3 size={18} color="var(--status-info)" />
                       <span>{t('Refinery Telemetry & Output', 'উৎপাদন ও ডিস্টিলেশন চার্ট', lang)}</span>
                     </div>
                     <span className="badge success">5,000 MT/Day</span>
@@ -653,7 +653,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('requisitions')}>
                   <div className="tab-jump-top">
                     <div className="tab-jump-title">
-                      <Car size={18} color="#D97706" />
+                      <Car size={18} color="var(--status-warning)" />
                       <span>{t('Duty Travel Requisitions', 'অফিসিয়াল যানবাহন আবেদন', lang)}</span>
                     </div>
                     <span className="badge warn">{sharedRequisitions.filter(r => r.status === 'pending').length} {t('Pending', 'বাকি', lang)}</span>
@@ -670,7 +670,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('corridor')}>
                   <div className="tab-jump-top">
                     <div className="tab-jump-title">
-                      <Navigation size={18} color="#059669" />
+                      <Navigation size={18} color="var(--status-success)" />
                       <span>{t('Corridor Transit & Toll Alerts', 'ট্যাংকার করিডোর ও টোল সতর্কতা', lang)}</span>
                     </div>
                     <span className="badge success">Live Telematics</span>
@@ -708,7 +708,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('sites')}>
                   <div className="tab-jump-top">
                     <div className="tab-jump-title">
-                      <Building2Icon size={18} color="#0284C7" />
+                      <Building2Icon size={18} color="var(--status-info)" />
                       <span>{t('Regional Deployment Nodes', 'আঞ্চলিক জনবল ডেপ্লয়মেন্ট', lang)}</span>
                     </div>
                     <span className="badge info">743 Staff</span>
@@ -747,7 +747,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
               <div className="tab-jump-card interactive-row" onClick={() => setActiveTab('activity')}>
                 <div className="tab-jump-top">
                   <div className="tab-jump-title">
-                    <Activity size={18} color="#059669" />
+                    <Activity size={18} color="var(--status-success)" />
                     <span>{t('Recent Activity & Leave Entitlements', 'সাম্প্রতিক কার্যক্রম ও ছুটি স্থিতি', lang)}</span>
                   </div>
                   <span className="badge success">Active</span>

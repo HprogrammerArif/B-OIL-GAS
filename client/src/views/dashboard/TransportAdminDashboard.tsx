@@ -58,7 +58,7 @@ export default function TransportAdminDashboard({
                       </td>
                       <td>
                         <div>{req.from.split(',')[0]} → {req.to.split(',')[0]}</div>
-                        <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontWeight: 600 }}>
+                        <div style={{ fontSize: '10.5px', color: 'var(--status-info-text)', fontWeight: 600 }}>
                           {req.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One-Way Drop'}
                         </div>
                       </td>
@@ -67,7 +67,7 @@ export default function TransportAdminDashboard({
                         <span className="badge info">{req.passengersCount} Passengers</span>
                       </td>
                       <td>
-                        <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}>
+                        <span className="badge" style={{ background: 'var(--surface-2)', color: 'var(--text-1)', fontWeight: 700 }}>
                           {req.requiredCapacity === 'sedan_4' ? '4-Seat Sedan' : req.requiredCapacity === 'microbus_7' ? '7-Seat HiAce' : '4x4 Pickup'}
                         </span>
                       </td>
@@ -117,10 +117,10 @@ export default function TransportAdminDashboard({
           TRANSPORT ADMIN: TAB "corridor"
           ═══════════════════════════════════════════ */}
       {activeTab === 'corridor' && (
-        <div className="card mb-5 tab-pane-fade" style={{ background: '#0F172A', color: '#fff', border: '1px solid #334155' }}>
+        <div className="card mb-5 tab-pane-fade" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)', border: '1px solid var(--border-inverse-2)' }}>
           <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Navigation size={16} color="#FBBF24" />
+              <Navigation size={16} color="var(--status-warning-bright)" />
               <strong style={{ fontSize: '13px' }}>
                 {t('Live Tanker Corridor Transit & Toll Alert HUD', 'ট্যাংকার করিডোর ট্রানজিট ও টোল প্লাজা সতর্কতা', lang)}
               </strong>
@@ -129,21 +129,21 @@ export default function TransportAdminDashboard({
           </div>
           <div style={{ padding: '16px 18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Babubazar Bridge Corridor</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#34D399', marginTop: '2px' }}>Normal Flow (18m)</div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>4 Tankers in Transit • Zero Delay</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Babubazar Bridge Corridor</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--status-success-bright)', marginTop: '2px' }}>Normal Flow (18m)</div>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>4 Tankers in Transit • Zero Delay</div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Postogola Bridge Toll Plaza</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#FBBF24', marginTop: '2px' }}>Moderate Congestion (38m)</div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Reroute Bitumen Bulk to Mawa Expressway</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Postogola Bridge Toll Plaza</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--status-warning-bright)', marginTop: '2px' }}>Moderate Congestion (38m)</div>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Reroute Bitumen Bulk to Mawa Expressway</div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>Padma Bridge Expressway Corridor</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#60A5FA', marginTop: '2px' }}>High Speed Clear (80 km/h)</div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8' }}>Mongla Depot Carrier #V-05 Passing Toll</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Padma Bridge Expressway Corridor</div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--status-info-bright)', marginTop: '2px' }}>High Speed Clear (80 km/h)</div>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Mongla Depot Carrier #V-05 Passing Toll</div>
             </div>
           </div>
         </div>

@@ -956,7 +956,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   fontSize: '11px',
                   fontWeight: 700,
                   padding: '4px 10px',
-                  background: scopeMode === 'personal' ? '#FFF' : 'transparent',
+                  background: scopeMode === 'personal' ? 'var(--surface-1)' : 'transparent',
                 }}
                 onClick={() => setScopeMode('personal')}
               >
@@ -968,7 +968,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   fontSize: '11px',
                   fontWeight: 700,
                   padding: '4px 10px',
-                  background: scopeMode === 'master' ? '#FFF' : 'transparent',
+                  background: scopeMode === 'master' ? 'var(--surface-1)' : 'transparent',
                 }}
                 onClick={() => setScopeMode('master')}
               >
@@ -991,7 +991,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {/* Quick Search & Instant Tracking Hero Bar */}
       <div
         style={{
-          background: '#fff',
+          background: 'var(--surface-1)',
           border: '1px solid var(--brand-slate-200)',
           borderRadius: 'var(--radius-md)',
           padding: '12px 16px',
@@ -1044,21 +1044,21 @@ export default function ParcelView({ role, lang }: ViewProps) {
               className={`parcel-quick-chip ${selectedParcelId === 'P-TA-01' ? 'active' : ''}`}
               onClick={() => setSelectedParcelId('P-TA-01')}
             >
-              <Key size={12} color="#F59E0B" />
+              <Key size={12} color="var(--status-warning)" />
               ⚡ Awaiting Your OTP (Bonus Docket)
             </button>
             <button
               className={`parcel-quick-chip ${selectedParcelId === 'P-TA-05' ? 'active' : ''}`}
               onClick={() => setSelectedParcelId('P-TA-05')}
             >
-              <Truck size={12} color="#3B82F6" />
+              <Truck size={12} color="var(--status-info)" />
               🚚 In Transit (RHD Contract)
             </button>
             <button
               className={`parcel-quick-chip ${selectedParcelId === 'P-TA-04' ? 'active' : ''}`}
               onClick={() => setSelectedParcelId('P-TA-04')}
             >
-              <RotateCcw size={12} color="#EF4444" />
+              <RotateCcw size={12} color="var(--status-danger)" />
               ↩️ Returned Sample (RTO)
             </button>
           </div>
@@ -1076,7 +1076,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           title={t('Click to filter incoming & received parcels', 'আসা পার্সেল ফিল্টার করতে ক্লিক করুন', lang)}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info)' }}>
               <Inbox size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
@@ -1084,7 +1084,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-info-text)' }}>
               {stats.totalReceived}
             </div>
             <div className="parcel-kpi-title">
@@ -1092,7 +1092,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
             <div className="parcel-kpi-sub">
               {stats.receivedPendingCount > 0 ? (
-                <span style={{ color: '#D97706', fontWeight: 600 }}>
+                <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>
                   ● {stats.receivedPendingCount} {t('Pending Handover / Gate', 'অপেক্ষমাণ ডেলিভারি', lang)}
                 </span>
               ) : (
@@ -1109,7 +1109,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           title={t('Click to filter parcels dispatched by you', 'আপনার পাঠানো পার্সেল ফিল্টার করতে ক্লিক করুন', lang)}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#F5F3FF', color: '#7C3AED' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple)' }}>
               <Send size={18} />
             </div>
             <span className="badge meeting" style={{ fontSize: '10px' }}>
@@ -1117,7 +1117,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#7C3AED' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-purple)' }}>
               {stats.totalSent}
             </div>
             <div className="parcel-kpi-title">
@@ -1125,7 +1125,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
             <div className="parcel-kpi-sub">
               {stats.sentInTransitCount > 0 ? (
-                <span style={{ color: '#2563EB', fontWeight: 600 }}>
+                <span style={{ color: 'var(--status-info)', fontWeight: 600 }}>
                   ● {stats.sentInTransitCount} {t('In Courier Transit', 'কুরিয়ার ট্রানজিটে আছে', lang)}
                 </span>
               ) : (
@@ -1142,7 +1142,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           title={t('Click to view currently moving consignments', 'চলমান চালান দেখতে ক্লিক করুন', lang)}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#FFFBEB', color: '#D97706' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning)' }}>
               <Truck size={18} />
             </div>
             <span className="badge warn" style={{ fontSize: '10px' }}>
@@ -1150,7 +1150,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#B45309' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-warning-text)' }}>
               {stats.inTransitCount}
             </div>
             <div className="parcel-kpi-title">
@@ -1169,7 +1169,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           title={t('Click to view pending handovers requiring OTP PIN', 'ওটিপি যাচাইয়ের পার্সেল দেখতে ক্লিক করুন', lang)}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#ECFDF5', color: '#059669' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success)' }}>
               <Key size={18} />
             </div>
             <span className={`badge ${stats.actionRequiredCount > 0 ? 'danger' : 'success'}`} style={{ fontSize: '10px' }}>
@@ -1177,7 +1177,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#059669' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-success)' }}>
               {stats.actionRequiredCount}
             </div>
             <div className="parcel-kpi-title">
@@ -1185,7 +1185,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
             <div className="parcel-kpi-sub">
               {stats.actionRequiredCount > 0 ? (
-                <span style={{ color: '#DC2626', fontWeight: 700 }}>
+                <span style={{ color: 'var(--status-danger)', fontWeight: 700 }}>
                   ● {t('Recipient OTP entry ready', 'প্রাপকের ওটিপি যাচাই প্রস্তুত', lang)}
                 </span>
               ) : (
@@ -1202,7 +1202,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           title={t('Click to view return parcels and tamper discrepancies', 'ফেরত ও ত্রুটিপূর্ণ পার্সেল দেখতে ক্লিক করুন', lang)}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#FEF2F2', color: '#DC2626' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger)' }}>
               <RotateCcw size={18} />
             </div>
             <span className={`badge ${stats.returnsCount > 0 ? 'danger' : 'neutral'}`} style={{ fontSize: '10px' }}>
@@ -1210,7 +1210,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#DC2626' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-danger)' }}>
               {stats.returnsCount}
             </div>
             <div className="parcel-kpi-title">
@@ -1218,7 +1218,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
             <div className="parcel-kpi-sub">
               {stats.returnsCount > 0 ? (
-                <span style={{ color: '#B91C1C', fontWeight: 600 }}>
+                <span style={{ color: 'var(--status-danger-text)', fontWeight: 600 }}>
                   ● {t('Reverse custody tracked', 'রিভার্স কাস্টডি ট্র্যাকিং', lang)}
                 </span>
               ) : (
@@ -1256,7 +1256,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
         {/* ── LEFT COLUMN: MY CONSIGNMENTS FEED ── */}
         <div className={`parcel-feed-col ${mobileTab === 'tracker' ? 'mobile-hide' : ''}`}>
           {/* Feed Header with Pill Filters */}
-          <div style={{ background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
+          <div style={{ background: 'var(--surface-1)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
                 {t('Consignment Feed', 'চালান তালিকা', lang)} ({displayedParcels.length})
@@ -1298,7 +1298,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               </button>
               <button
                 className={`parcel-pill-tab ${activeTab === 'returned' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px', color: stats.returnsCount > 0 ? '#DC2626' : undefined }}
+                style={{ padding: '4px 10px', fontSize: '11px', color: stats.returnsCount > 0 ? 'var(--status-danger)' : undefined }}
                 onClick={() => setActiveTab('returned')}
               >
                 Returns ({stats.returnsCount})
@@ -1309,7 +1309,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
           {/* Vertical Parcel Cards Feed */}
           <div className="parcel-feed-list">
             {displayedParcels.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
+              <div style={{ textAlign: 'center', padding: '32px 16px', background: 'var(--surface-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
                 <Package size={28} style={{ opacity: 0.4, margin: '0 auto 8px' }} />
                 <div style={{ fontWeight: 700, fontSize: '13px' }}>No shipments found</div>
                 <div style={{ fontSize: '11px' }}>Try switching filter tabs or clearing search.</div>
@@ -1370,7 +1370,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
                     {/* Route line */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: 'var(--brand-slate-500)', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px' }}>
-                      <span style={{ color: isIncoming ? '#2563EB' : '#7C3AED', fontWeight: 700 }}>
+                      <span style={{ color: isIncoming ? 'var(--status-info)' : 'var(--status-purple)', fontWeight: 700 }}>
                         {isIncoming ? '📥 Inward' : '📤 Outward'}
                       </span>
                       <span>•</span>
@@ -1394,10 +1394,10 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#93C5FD', fontWeight: 700 }}>
+                      <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--status-info-bright)', fontWeight: 700 }}>
                         TAMPER-EVIDENT OFFICIAL WAYBILL
                       </span>
-                      <span className="badge" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: '10px' }}>
+                      <span className="badge" style={{ background: 'rgba(255,255,255,0.15)', color: 'var(--text-on-brand)', fontSize: '10px' }}>
                         {selectedParcel.category.replace('_', ' ').toUpperCase()}
                       </span>
                       {selectedParcel.tamperStatus === 'flagged' && (
@@ -1407,14 +1407,14 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       )}
                     </div>
 
-                    <h1 style={{ fontSize: '26px', fontWeight: 900, color: '#fff', margin: '4px 0 2px', fontFamily: 'monospace' }}>
+                    <h1 style={{ fontSize: '26px', fontWeight: 900, color: 'var(--text-on-brand)', margin: '4px 0 2px', fontFamily: 'monospace' }}>
                       {selectedParcel.trackingNo}
                     </h1>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#CBD5E1' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--text-inverse-2)' }}>
                       <span>Seal: <strong>{selectedParcel.sealNo}</strong></span>
                       <span>•</span>
-                      <span style={{ color: '#34D399', fontWeight: 700 }}>✓ {t('Tamper-Check Validated', 'নিরাপত্তা সিল যাচাইকৃত', lang)}</span>
+                      <span style={{ color: 'var(--status-success-bright)', fontWeight: 700 }}>✓ {t('Tamper-Check Validated', 'নিরাপত্তা সিল যাচাইকৃত', lang)}</span>
                     </div>
                   </div>
 
@@ -1423,14 +1423,14 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)', fontSize: '11.5px', fontWeight: 700 }}
+                      style={{ background: 'rgba(255,255,255,0.2)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.35)', fontSize: '11.5px', fontWeight: 700 }}
                       onClick={() => setMobileTab('feed')}
                     >
                       ← {t('Back to List', 'তালিকায় ফিরুন', lang)}
                     </button>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
                       onClick={handleCopyLink}
                     >
                       <Copy size={13} />
@@ -1438,7 +1438,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     </button>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
                       onClick={() => setShowManifestModal(true)}
                     >
                       <Printer size={13} />
@@ -1446,7 +1446,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     </button>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
+                      style={{ background: 'rgba(255,255,255,0.12)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11.5px' }}
                       onClick={() => setShowAuditModal(true)}
                     >
                       <FileText size={13} />
@@ -1459,8 +1459,8 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 <div style={{ marginTop: '22px', position: 'relative', zIndex: 2 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-                      <strong style={{ color: '#F8FAFC' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-success-solid)', display: 'inline-block' }} />
+                      <strong style={{ color: 'var(--text-inverse)' }}>
                         {selectedParcel.status === 'returned'
                           ? 'Return to Origin (RTO) in Progress'
                           : selectedParcel.currentStage === 5
@@ -1470,7 +1470,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                           : 'In Active Vehicle Corridor Transit'}
                       </strong>
                     </div>
-                    <div style={{ color: '#93C5FD', fontWeight: 700 }}>
+                    <div style={{ color: 'var(--status-info-bright)', fontWeight: 700 }}>
                       {selectedParcel.eta}
                     </div>
                   </div>
@@ -1481,14 +1481,14 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       style={{
                         width: `${selectedParcel.corridorProgressPercent}%`,
                         height: '100%',
-                        background: selectedParcel.status === 'returned' ? '#EF4444' : 'linear-gradient(90deg, #10B981, #60A5FA)',
+                        background: selectedParcel.status === 'returned' ? 'var(--status-danger-solid)' : 'linear-gradient(90deg, var(--status-success-solid), var(--status-info-bright))',
                         borderRadius: '4px',
                         transition: 'width 0.5s ease',
                       }}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: '#94A3B8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px', color: 'var(--text-muted)' }}>
                     <span>{selectedParcel.origin.split(',')[0]}</span>
                     <span>Toll Gate Postogola</span>
                     <span>{selectedParcel.destination.split(',')[0]}</span>
@@ -1498,33 +1498,33 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
               {/* ── ACTION REQUIRED CALLOUT (Zero Ambiguity for Users) ── */}
               {selectedParcel.currentStage === 4 && selectedParcel.status !== 'returned' && (
-                <div style={{ padding: '16px 22px', background: '#ECFDF5', borderBottom: '1px solid #A7F3D0' }}>
+                <div style={{ padding: '16px 22px', background: 'var(--status-success-bg)', borderBottom: '1px solid var(--status-success-border)' }}>
                   <div className="parcel-otp-callout">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#10B981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Key size={22} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: '14px', color: '#065F46' }}>
+                        <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--status-success-text)' }}>
                           {t('CONSIGNMENT READY FOR PICKUP & HANDOVER', 'পার্সেল হস্তান্তরের জন্য প্রস্তুত', lang)}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#047857', marginTop: '2px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--status-success-text)', marginTop: '2px' }}>
                           {t('Provide this 4-digit Delivery PIN to Station Reception or Courier to accept goods:', 'পণ্য গ্রহণের জন্য রিসিপশন বা কুরিয়ারকে এই ৪ ডিজিটের পিন কোড দিন:', lang)}
                         </div>
                       </div>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <div style={{ background: '#fff', border: '2px dashed #059669', padding: '6px 16px', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '10px', color: '#065F46', fontWeight: 700, textTransform: 'uppercase' }}>DELIVERY PIN</div>
-                        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '6px', color: '#065F46', fontFamily: 'monospace' }}>
+                      <div style={{ background: 'var(--surface-1)', border: '2px dashed var(--status-success)', padding: '6px 16px', borderRadius: '8px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '10px', color: 'var(--status-success-text)', fontWeight: 700, textTransform: 'uppercase' }}>DELIVERY PIN</div>
+                        <div style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '6px', color: 'var(--status-success-text)', fontFamily: 'monospace' }}>
                           {selectedParcel.deliveryOtp}
                         </div>
                       </div>
 
                       <button
                         className="btn-primary"
-                        style={{ height: '46px', padding: '0 20px', fontWeight: 800, background: '#059669', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ height: '46px', padding: '0 20px', fontWeight: 800, background: 'var(--status-success-solid)', display: 'flex', alignItems: 'center', gap: '6px' }}
                         onClick={() => handleAdvanceStage(selectedParcel.id)}
                       >
                         <UserCheck size={16} />
@@ -1537,15 +1537,15 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
               {/* ── RETURN TO SENDER CALLOUT (If Returned) ── */}
               {selectedParcel.status === 'returned' && selectedParcel.returnDetails && (
-                <div style={{ padding: '16px 22px', background: '#FEF2F2', borderBottom: '1px solid #FECACA' }}>
+                <div style={{ padding: '16px 22px', background: 'var(--status-danger-bg)', borderBottom: '1px solid var(--status-danger-border)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ color: '#DC2626' }}><RotateCcw size={24} /></div>
+                      <div style={{ color: 'var(--status-danger)' }}><RotateCcw size={24} /></div>
                       <div>
-                        <div style={{ fontWeight: 800, color: '#991B1B', fontSize: '13.5px' }}>
+                        <div style={{ fontWeight: 800, color: 'var(--status-danger-text)', fontSize: '13.5px' }}>
                           RETURN TO ORIGIN (RTO) — {selectedParcel.returnDetails.returnTrackingNo}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#7F1D1D' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--status-danger-text)' }}>
                           <strong>Reason:</strong> {selectedParcel.returnDetails.reasonText} • "{selectedParcel.returnDetails.notes}"
                         </div>
                       </div>
@@ -1554,7 +1554,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     {selectedParcel.returnDetails.returnStage === 2 && selectedParcel.sender.includes(currentUserName) && (
                       <button
                         className="btn-primary"
-                        style={{ background: '#DC2626', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ background: 'var(--status-danger-solid)', display: 'flex', alignItems: 'center', gap: '6px' }}
                         onClick={() => handleAdvanceStage(selectedParcel.id)}
                       >
                         <RotateCcw size={14} />
@@ -1595,7 +1595,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   {selectedParcel.status !== 'returned' && selectedParcel.currentStage < 5 && (
                     <button
                       className="btn-sm-ghost"
-                      style={{ color: '#DC2626', borderColor: '#FCA5A5', background: '#FFF5F5', fontSize: '11px' }}
+                      style={{ color: 'var(--status-danger)', borderColor: 'var(--status-danger-bright)', background: 'var(--brand-crimson-soft)', fontSize: '11px' }}
                       onClick={handleInitiateReturn}
                     >
                       <RotateCcw size={12} />
@@ -1650,7 +1650,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                           <div className="corridor-vehicle-bubble">
                             <Truck size={16} />
                           </div>
-                          <div style={{ background: '#1E293B', color: '#fff', fontSize: '9.5px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', marginTop: '4px', whiteSpace: 'nowrap' }}>
+                          <div style={{ background: 'var(--surface-inverse-2)', color: 'var(--text-on-brand)', fontSize: '9.5px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', marginTop: '4px', whiteSpace: 'nowrap' }}>
                             {selectedParcel.courier.currentSpeed || 'En Route'}
                           </div>
                         </div>
@@ -1691,9 +1691,9 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     </div>
 
                     {/* Courier Custody Card (Practical & Actionable!) */}
-                    <div style={{ marginTop: '24px', background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+                    <div style={{ marginTop: '24px', background: 'var(--surface-1)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#3B82F6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--status-info-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>
                           {selectedParcel.courier.avatarInitials}
                         </div>
                         <div>
@@ -1756,7 +1756,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                             <div>
-                              <div style={{ fontWeight: 800, fontSize: '13.5px', color: isCurrent ? '#2563EB' : 'var(--brand-slate-900)' }}>
+                              <div style={{ fontWeight: 800, fontSize: '13.5px', color: isCurrent ? 'var(--status-info)' : 'var(--brand-slate-900)' }}>
                                 {t(st.label, st.labelBn, lang)}
                               </div>
                               <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
@@ -1787,7 +1787,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               {cockpitView === 'details' && (
                 <div style={{ padding: '24px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         CONSIGNMENT CONTENT
                       </div>
@@ -1799,7 +1799,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       </div>
                     </div>
 
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         WEIGHT & DECLARED VALUE
                       </div>
@@ -1814,7 +1814,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       </div>
                     </div>
 
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         SENDER PARTICULARS
                       </div>
@@ -1829,7 +1829,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                       </div>
                     </div>
 
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         RECIPIENT PARTICULARS
                       </div>
@@ -1859,29 +1859,29 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showScannerModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowScannerModal(false)}>
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Camera size={18} color="#FBBF24" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Camera size={18} color="var(--status-warning-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Scan Tamper-Evident Security Seal', 'সিকিউরিটি সিল স্ক্যান করুন', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowScannerModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowScannerModal(false)}>×</button>
             </div>
 
             <div className="modal-body" style={{ textAlign: 'center' }}>
-              <div style={{ border: '2px dashed #3B82F6', borderRadius: '12px', padding: '24px 16px', background: '#F8FAFC', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ width: '80%', height: '3px', background: '#DC2626', margin: '0 auto 16px', boxShadow: '0 0 10px #DC2626' }} />
-                <QrCode size={90} color="#1E293B" style={{ margin: '0 auto 12px' }} />
-                <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '14px', color: '#0F172A' }}>
+              <div style={{ border: '2px dashed var(--status-info)', borderRadius: '12px', padding: '24px 16px', background: 'var(--surface-0)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ width: '80%', height: '3px', background: 'var(--status-danger-solid)', margin: '0 auto 16px', boxShadow: '0 0 10px var(--status-danger)' }} />
+                <QrCode size={90} color="var(--text-1)" style={{ margin: '0 auto 12px' }} />
+                <div style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '14px', color: 'var(--text-1)' }}>
                   {selectedParcel.sealNo}
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  Waybill: <strong>{selectedParcel.trackingNo}</strong> • Security Seal: <span style={{ color: '#059669', fontWeight: 700 }}>✓ Verified Intact</span>
+                <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>
+                  Waybill: <strong>{selectedParcel.trackingNo}</strong> • Security Seal: <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified Intact</span>
                 </div>
               </div>
 
-              <div style={{ marginTop: '16px', fontSize: '12px', color: 'var(--brand-slate-600)', background: '#ECFDF5', padding: '10px 14px', borderRadius: '6px', border: '1px solid #A7F3D0', textAlign: 'left' }}>
+              <div style={{ marginTop: '16px', fontSize: '12px', color: 'var(--brand-slate-600)', background: 'var(--status-success-bg)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--status-success-border)', textAlign: 'left' }}>
                 ✓ Barcode recognized. Geo-location verified at <strong>Babubazar / Postogola Toll Transit Post</strong>. Custody will advance to <strong>Stage {selectedParcel.currentStage + 1}</strong>.
               </div>
             </div>
@@ -1901,16 +1901,16 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showOtpModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowOtpModal(false)}>
           <div className="modal" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: isReturnOtpMode ? '#DC2626' : '#059669', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: isReturnOtpMode ? 'var(--status-danger-solid)' : 'var(--status-success-solid)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Key size={18} color="#fff" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Key size={18} color="var(--text-on-brand)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {isReturnOtpMode
                     ? t('Sender Return Receipt PIN Verification', 'প্রেরকের রিটার্ন গ্রহণ পিন যাচাই', lang)
                     : t('Recipient OTP Handover Verification', 'প্রাপকের ওটিপি যাচাই ও ডেলিভারি', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowOtpModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowOtpModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
@@ -1922,7 +1922,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <>A 4-digit security PIN was dispatched to <strong>{selectedParcel.receiver}</strong>.</>
                   )}
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#D97706', marginTop: '6px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--status-warning)', marginTop: '6px' }}>
                   (Testing Simulation Hint: <strong>{isReturnOtpMode ? selectedParcel.returnDetails?.returnOtp : selectedParcel.deliveryOtp}</strong> or 1234)
                 </div>
               </div>
@@ -1966,32 +1966,32 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showReturnModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowReturnModal(false)}>
           <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <RotateCcw size={18} color="#FCA5A5" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <RotateCcw size={18} color="var(--status-danger-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Initiate Return Consignment (RTO)', 'পার্সেল ফেরত প্রক্রিয়া (RTO) শুরু করুন', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowReturnModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowReturnModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ background: '#FFF5F5', border: '1px solid #FECACA', borderRadius: '6px', padding: '12px 14px', marginBottom: '16px', fontSize: '12px' }}>
-                <div style={{ fontWeight: 700, color: '#991B1B' }}>
+              <div style={{ background: 'var(--brand-crimson-soft)', border: '1px solid var(--status-danger-border)', borderRadius: '6px', padding: '12px 14px', marginBottom: '16px', fontSize: '12px' }}>
+                <div style={{ fontWeight: 700, color: 'var(--status-danger-text)' }}>
                   Waybill: {selectedParcel.trackingNo} • Seal: {selectedParcel.sealNo}
                 </div>
-                <div style={{ color: '#7F1D1D', marginTop: '2px' }}>
+                <div style={{ color: 'var(--status-danger-text)', marginTop: '2px' }}>
                   {t('Original Sender:', 'মূল প্রেরক:', lang)} <strong>{selectedParcel.sender}</strong> ({selectedParcel.origin})
                 </div>
-                <div style={{ color: '#7F1D1D' }}>
+                <div style={{ color: 'var(--status-danger-text)' }}>
                   {t('Package:', 'পণ্যের বিবরণ:', lang)} {selectedParcel.contents}
                 </div>
               </div>
 
               <div className="form-group">
                 <label style={{ fontWeight: 700, fontSize: '12.5px' }}>
-                  {t('Primary Reason for Rejection / Return', 'প্রত্যাখ্যান ও ফেরতের মূল কারণ', lang)} <span style={{ color: '#DC2626' }}>*</span>
+                  {t('Primary Reason for Rejection / Return', 'প্রত্যাখ্যান ও ফেরতের মূল কারণ', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                 </label>
                 <select
                   value={returnReason}
@@ -2008,7 +2008,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
 
               <div className="form-group">
                 <label style={{ fontWeight: 700, fontSize: '12.5px' }}>
-                  {t('Physical Inspection Remarks & Discrepancy Notes', 'শারীরিক পরিদর্শন মন্তব্য ও বিস্তারিত বিবরণ', lang)} <span style={{ color: '#DC2626' }}>*</span>
+                  {t('Physical Inspection Remarks & Discrepancy Notes', 'শারীরিক পরিদর্শন মন্তব্য ও বিস্তারিত বিবরণ', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                 </label>
                 <textarea
                   rows={3}
@@ -2053,7 +2053,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               <button className="btn-sm-ghost" onClick={() => setShowReturnModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
               <button
                 className="btn-primary"
-                style={{ background: '#991B1B' }}
+                style={{ background: 'var(--status-danger-solid-dark)' }}
                 onClick={confirmReturnSubmission}
               >
                 <RotateCcw size={14} />
@@ -2068,20 +2068,20 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showTamperModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowTamperModal(false)}>
           <div className="modal" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#7F1D1D', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldAlert size={18} color="#FCA5A5" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <ShieldAlert size={18} color="var(--status-danger-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Flag Broken Security Seal & Breach Incident', 'সিল ত্রুটি ও নিরাপত্তা লঙ্ঘন রিপোর্ট', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowTamperModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowTamperModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
               <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
-                <AlertTriangle size={48} color="#DC2626" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: '14.5px', fontWeight: 800, color: '#991B1B' }}>
+                <AlertTriangle size={48} color="var(--status-danger)" style={{ margin: '0 auto 8px' }} />
+                <div style={{ fontSize: '14.5px', fontWeight: 800, color: 'var(--status-danger-text)' }}>
                   SECURITY SEAL INTEGRITY BREACH
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginTop: '4px' }}>
@@ -2089,7 +2089,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ background: '#FFF5F5', padding: '12px 14px', borderRadius: '6px', fontSize: '12px', color: '#7F1D1D', marginBottom: '16px' }}>
+              <div style={{ background: 'var(--brand-crimson-soft)', padding: '12px 14px', borderRadius: '6px', fontSize: '12px', color: 'var(--status-danger-text)', marginBottom: '16px' }}>
                 Flagging this consignment will automatically dispatch a priority alarm to:
                 <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
                   <li>Chief Security Officer (CSO) HQ Desk</li>
@@ -2101,7 +2101,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button
                   className="btn-primary"
-                  style={{ background: '#DC2626', justifyContent: 'center' }}
+                  style={{ background: 'var(--status-danger-solid)', justifyContent: 'center' }}
                   onClick={() => {
                     setShowTamperModal(false);
                     setReturnReason('tamper_broken');
@@ -2125,34 +2125,34 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showAuditModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowAuditModal(false)}>
           <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} color="#38BDF8" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={18} color="var(--status-info-bright)" />
                   {t('Digital Chain-of-Custody Audit Ledger', 'ডিজিটাল কাস্টডি অডিট লেজার', lang)}
                 </h3>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Waybill: <strong>{selectedParcel.trackingNo}</strong> • Seal: <strong>{selectedParcel.sealNo}</strong>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowAuditModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowAuditModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px 16px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px' }}>
+              <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '12px 16px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                   <div><strong>Origin:</strong> {selectedParcel.origin}</div>
                   <div><strong>Destination:</strong> {selectedParcel.destination}</div>
                   <div><strong>Security Level:</strong> {selectedParcel.urgency.toUpperCase()}</div>
                 </div>
-                <div style={{ marginTop: '6px', fontSize: '11px', color: '#64748B' }}>
-                  {t('Digital Custody Verification:', 'ডিজিটাল কাস্টডি যাচাই:', lang)} <span style={{ color: '#059669', fontWeight: 700 }}>● {t('Verified Intact', 'অক্ষত ও সুরক্ষিত', lang)}</span>
+                <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-3)' }}>
+                  {t('Digital Custody Verification:', 'ডিজিটাল কাস্টডি যাচাই:', lang)} <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>● {t('Verified Intact', 'অক্ষত ও সুরক্ষিত', lang)}</span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {selectedParcel.chainOfCustody.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '24px', color: '#64748B', fontSize: '12px' }}>
+                  <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-3)', fontSize: '12px' }}>
                     No historical logs recorded.
                   </div>
                 ) : (
@@ -2160,7 +2160,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
                     <div
                       key={index}
                       style={{
-                        borderLeft: '3px solid #3B82F6',
+                        borderLeft: '3px solid var(--status-info)',
                         paddingLeft: '14px',
                         position: 'relative',
                       }}
@@ -2178,12 +2178,12 @@ export default function ParcelView({ role, lang }: ViewProps) {
                         👤 <strong>Logged By:</strong> {log.actor} ({log.actorRole})
                       </div>
                       {log.notes && (
-                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-700)', background: '#F1F5F9', padding: '6px 10px', borderRadius: '4px', marginTop: '4px' }}>
+                        <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-700)', background: 'var(--surface-2)', padding: '6px 10px', borderRadius: '4px', marginTop: '4px' }}>
                           "{log.notes}"
                         </div>
                       )}
                       {log.securityHash && (
-                        <div style={{ fontSize: '10px', fontFamily: 'monospace', color: '#64748B', marginTop: '3px' }}>
+                        <div style={{ fontSize: '10px', fontFamily: 'monospace', color: 'var(--text-3)', marginTop: '3px' }}>
                           Hash: {log.securityHash}
                         </div>
                       )}
@@ -2214,23 +2214,23 @@ export default function ParcelView({ role, lang }: ViewProps) {
       {showManifestModal && selectedParcel && (
         <div className="modal-bg" onClick={() => setShowManifestModal(false)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#1E293B', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse-2)', color: 'var(--text-on-brand)' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Official Inter-Office Consignment Manifest', 'অফিসিয়াল চালান স্লিপ ও ডেলিভারি চালান', lang)}
                 </h3>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>{selectedParcel.trackingNo}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{selectedParcel.trackingNo}</div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowManifestModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowManifestModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ border: '2px solid #CBD5E1', padding: '18px', borderRadius: '4px', background: '#FFF' }}>
-                <div style={{ textAlign: 'center', borderBottom: '2px solid #0F172A', paddingBottom: '12px', marginBottom: '14px' }}>
+              <div style={{ border: '2px solid var(--border-2)', padding: '18px', borderRadius: '4px', background: 'var(--surface-1)' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--border-strong)', paddingBottom: '12px', marginBottom: '14px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--brand-crimson)' }}>
                     BASHUNDHARA OIL AND GAS COMPANY LIMITED
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Corporate Dispatch & Secure Document Transit Desk</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Corporate Dispatch & Secure Document Transit Desk</div>
                   <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '4px', letterSpacing: '0.5px' }}>
                     TAMPER-EVIDENT WAYBILL & SECURITY CUSTODY CERTIFICATE
                   </div>
@@ -2247,20 +2247,20 @@ export default function ParcelView({ role, lang }: ViewProps) {
                   <div><strong>Declared Value:</strong> {selectedParcel.declaredValue}</div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '10px', fontSize: '12px', marginBottom: '14px' }}>
+                <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: '10px', fontSize: '12px', marginBottom: '14px' }}>
                   <strong>Package Description:</strong> {selectedParcel.contents}
-                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>
                     Special Handling Instructions: <strong>{selectedParcel.specialHandling}</strong>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '14px' }}>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-1)', paddingTop: '14px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                     Security Seal Barcode Verification:<br />
-                    <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#0F172A' }}>*{selectedParcel.trackingNo}*</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--text-1)' }}>*{selectedParcel.trackingNo}*</span>
                     <div style={{ fontSize: '10px', marginTop: '2px' }}>BOGCL OneOps Automated Log: {selectedParcel.lastUpdated}</div>
                   </div>
-                  <QrCode size={56} color="#0F172A" />
+                  <QrCode size={56} color="var(--text-1)" />
                 </div>
               </div>
             </div>
@@ -2295,15 +2295,15 @@ export default function ParcelView({ role, lang }: ViewProps) {
             </div>
 
             <div className="modal-body">
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 14px', borderRadius: '6px', marginBottom: '14px', fontSize: '12px' }}>
-                <span style={{ color: '#64748B' }}>{t('Consignment Originator (Sender):', 'প্রেরকের বিবরণ:', lang)} </span>
+              <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '10px 14px', borderRadius: '6px', marginBottom: '14px', fontSize: '12px' }}>
+                <span style={{ color: 'var(--text-3)' }}>{t('Consignment Originator (Sender):', 'প্রেরকের বিবরণ:', lang)} </span>
                 <strong style={{ color: 'var(--brand-slate-900)' }}>{currentUserName}</strong>
-                <span style={{ color: '#64748B' }}> ({currentUserDept})</span>
+                <span style={{ color: 'var(--text-3)' }}> ({currentUserDept})</span>
               </div>
 
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>{t('Recipient Name & Officer', 'প্রাপকের নাম ও পদবি', lang)} <span style={{ color: '#DC2626' }}>*</span></label>
+                  <label>{t('Recipient Name & Officer', 'প্রাপকের নাম ও পদবি', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span></label>
                   <input
                     type="text"
                     placeholder="e.g. Engr. Md. Harunur Rashid (Plant GM)"
@@ -2393,7 +2393,7 @@ export default function ParcelView({ role, lang }: ViewProps) {
               </div>
 
               <div className="form-group">
-                <label>{t('Contents Description & Sealed Items', 'পণ্যের বিস্তারিত বিবরণ ও নথির তালিকা', lang)} <span style={{ color: '#DC2626' }}>*</span></label>
+                <label>{t('Contents Description & Sealed Items', 'পণ্যের বিস্তারিত বিবরণ ও নথির তালিকা', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span></label>
                 <textarea
                   rows={2}
                   placeholder="Specify confidential documents, sample vials, or spare part serial numbers..."

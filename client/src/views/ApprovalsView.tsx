@@ -205,7 +205,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
             fontSize: '12px',
             padding: '7px 16px',
             background: activeTab === 'pending' ? 'var(--brand-crimson)' : 'transparent',
-            color: activeTab === 'pending' ? '#fff' : 'var(--brand-slate-600)',
+            color: activeTab === 'pending' ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
             borderColor: activeTab === 'pending' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
             fontWeight: 700,
             display: 'flex',
@@ -216,7 +216,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
         >
           <ClipboardCheck size={14} />
           {t('Actionable Pending Requests', 'অপেক্ষমাণ আবেদনসমূহ', lang)}
-          <span style={{ background: activeTab === 'pending' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'pending' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+          <span style={{ background: activeTab === 'pending' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'pending' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
             {approvalItems.length}
           </span>
         </button>
@@ -238,7 +238,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
         >
           <FileText size={14} />
           {t('Approval History & Archive', 'অনুমোদন খতিয়ান ও ইতিহাস', lang)}
-          <span style={{ background: activeTab === 'history' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'history' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+          <span style={{ background: activeTab === 'history' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'history' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
             {decidedItems.length}
           </span>
         </button>
@@ -250,35 +250,35 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           <div className="flex-gap" style={{ flexWrap: 'wrap' }}>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'all' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'all' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'all' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'all' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'all' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('all')}
             >
               {t('All Categories', 'সকল ক্যাটাগরি', lang)} ({listToDisplay.length})
             </button>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'procurement' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'procurement' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'procurement' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'procurement' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'procurement' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('procurement')}
             >
               {t('Procurement & Spares', 'ক্রয় ও খুচরা যন্ত্রাংশ', lang)}
             </button>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'finance' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'finance' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'finance' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'finance' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'finance' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('finance')}
             >
               {t('Travel & Expense Claims', 'ভ্রমণ ও যাতায়াত বিল', lang)}
             </button>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'fleet' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'fleet' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'fleet' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'fleet' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'fleet' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('fleet')}
             >
               {t('Vehicle Requisitions', 'গাড়ির আবেদন', lang)}
             </button>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'leave' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'leave' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'leave' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'leave' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'leave' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('leave')}
             >
               {t('Staff Leave', 'ছুটির আবেদন', lang)}
@@ -383,13 +383,13 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                     borderRadius: '6px',
                                     fontSize: '11px',
                                     fontWeight: 700,
-                                    background: expandedTrails[item.id] ? '#EEF2FF' : '#F1F5F9',
-                                    color: expandedTrails[item.id] ? '#4338CA' : '#475569',
-                                    border: '1px solid #E2E8F0',
+                                    background: expandedTrails[item.id] ? 'var(--status-purple-bg)' : 'var(--surface-2)',
+                                    color: expandedTrails[item.id] ? 'var(--status-purple-text)' : 'var(--text-2)',
+                                    border: '1px solid var(--border-1)',
                                     cursor: 'pointer',
                                   }}
                                 >
-                                  <ShieldCheck size={13} color="#059669" />
+                                  <ShieldCheck size={13} color="var(--status-success)" />
                                   <span>{t('Review History', 'অনুমোদন খতিয়ান', lang)} ({item.approvalTrail.length})</span>
                                   <span style={{ fontSize: '9px' }}>{expandedTrails[item.id] ? '▲' : '▼'}</span>
                                 </button>
@@ -398,8 +398,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                   <div
                                     style={{
                                       marginTop: '8px',
-                                      background: '#F8FAFC',
-                                      border: '1px solid #CBD5E1',
+                                      background: 'var(--surface-0)',
+                                      border: '1px solid var(--border-2)',
                                       borderRadius: '8px',
                                       padding: '10px 12px',
                                       display: 'flex',
@@ -408,15 +408,15 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                     }}
                                   >
                                     {item.approvalTrail.map((step, idx) => (
-                                      <div key={idx} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
+                                      <div key={idx} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
                                           <div>
-                                            <strong style={{ color: '#0F172A' }}>✓ {step.officerName}</strong>
-                                            <span style={{ color: '#64748B', marginLeft: '6px' }}>({step.roleName} · {step.department})</span>
+                                            <strong style={{ color: 'var(--text-1)' }}>✓ {step.officerName}</strong>
+                                            <span style={{ color: 'var(--text-3)', marginLeft: '6px' }}>({step.roleName} · {step.department})</span>
                                           </div>
-                                          <span style={{ fontSize: '10px', color: '#94A3B8' }}>{step.timestamp}</span>
+                                          <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{step.timestamp}</span>
                                         </div>
-                                        <div style={{ color: '#334155', fontStyle: 'italic', paddingLeft: '14px' }}>
+                                        <div style={{ color: 'var(--text-2)', fontStyle: 'italic', paddingLeft: '14px' }}>
                                           "{step.note}"
                                         </div>
                                       </div>
@@ -466,7 +466,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                               <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
                                 <button
                                   className="btn-sm-ghost"
-                                  style={{ color: '#DC2626', borderColor: 'rgba(220,38,38,0.2)' }}
+                                  style={{ color: 'var(--status-danger)', borderColor: 'rgba(220,38,38,0.2)' }}
                                   onClick={() => handleRejectSingle(item)}
                                   title={t('Return with Query', 'আপত্তিসহ ফেরত', lang)}
                                 >
@@ -482,7 +482,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                 </button>
                               </div>
                             ) : (
-                              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>
+                              <span style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700 }}>
                                 Completed
                               </span>
                             )}

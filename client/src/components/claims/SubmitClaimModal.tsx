@@ -285,18 +285,18 @@ export default function SubmitClaimModal({
         <div className="claims-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div className="claims-modal-icon">
-              <Receipt size={22} color="#FFFFFF" />
+              <Receipt size={22} color="var(--text-on-brand)" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.2px' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)', letterSpacing: '-0.2px' }}>
                   {t('Submit TA / DA & Conveyance Expense Claim', 'ভ্রমণ ও যাতায়াত ভাতা দাবি দাখিল', lang)}
                 </h3>
-                <span style={{ backgroundColor: 'var(--brand-gold, #D4AF37)', color: '#0F172A', fontSize: '10px', fontWeight: 900, padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
+                <span style={{ backgroundColor: 'var(--brand-gold)', color: 'var(--text-1)', fontSize: '10px', fontWeight: 900, padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase' }}>
                   Official Claim
                 </span>
               </div>
-              <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#CBD5E1', lineHeight: 1.4 }}>
+              <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: 'var(--text-inverse-2)', lineHeight: 1.4 }}>
                 {t(
                   'Verified against company expense limits with departmental review and accounts payment.',
                   'কোম্পানি নীতিমালা অনুযায়ী যাচাই, বিভাগীয় অনুমোদন এবং সরাসরি একাউন্টস নিষ্পত্তি।',
@@ -320,27 +320,27 @@ export default function SubmitClaimModal({
         <div className="claims-modal-profile-strip">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--brand-crimson, #A51C30)', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--brand-crimson)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800 }}>
                 {ROLE_META[currentRole || 'employee'].initials}
               </div>
               <div>
-                <strong style={{ color: 'var(--brand-slate-900, #0F172A)' }}>{ROLE_META[currentRole || 'employee'].name}</strong>
-                <span style={{ color: 'var(--brand-slate-500, #64748B)', marginLeft: '6px' }}>({ROLE_META[currentRole || 'employee'].label})</span>
+                <strong style={{ color: 'var(--brand-slate-900)' }}>{ROLE_META[currentRole || 'employee'].name}</strong>
+                <span style={{ color: 'var(--brand-slate-500)', marginLeft: '6px' }}>({ROLE_META[currentRole || 'employee'].label})</span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600, #475569)' }}>
-              <Building size={14} style={{ color: '#2563EB' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600)' }}>
+              <Building size={14} style={{ color: 'var(--status-info)' }} />
               <span>Dept: <strong>{ROLE_META[currentRole || 'employee'].dept}</strong></span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600, #475569)' }}>
-              <CreditCard size={14} style={{ color: '#059669' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-slate-600)' }}>
+              <CreditCard size={14} style={{ color: 'var(--status-success)' }} />
               <span>Cost Center: <strong style={{ fontFamily: 'monospace' }}>CC-BOGCL-2026</strong></span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ECFDF5', padding: '4px 10px', borderRadius: '8px', border: '1px solid #A7F3D0', color: '#047857', fontWeight: 700, fontSize: '11px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--status-success-border)', color: 'var(--status-success-text)', fontWeight: 700, fontSize: '11px' }}>
             <ShieldCheck size={14} />
             <span>Monthly Conveyance Limit: ৳8,000</span>
           </div>
@@ -360,16 +360,16 @@ export default function SubmitClaimModal({
                 onClick={() => setClaimType('tada')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tada' ? 'var(--brand-crimson, #A51C30)' : undefined }}>
-                    <Plane size={18} style={{ color: '#2563EB' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tada' ? 'var(--brand-crimson)' : undefined }}>
+                    <Plane size={18} style={{ color: 'var(--status-info)' }} />
                     <span>TA / DA Tour Expense</span>
                   </div>
-                  {claimType === 'tada' && <CheckCircle2 size={16} color="#A51C30" />}
+                  {claimType === 'tada' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
                 </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500, #64748B)', lineHeight: 1.4 }}>
+                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
                   Outstation official travel, daily allowances, hotel lodging bills & inter-district bus/rail transport.
                 </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#2563EB', background: '#EFF6FF', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-info)', background: 'var(--status-info-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
                   Statutory DA: ৳1,500 – ৳2,000/day
                 </span>
               </div>
@@ -380,16 +380,16 @@ export default function SubmitClaimModal({
                 onClick={() => setClaimType('conveyance')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'conveyance' ? 'var(--brand-crimson, #A51C30)' : undefined }}>
-                    <Car size={18} style={{ color: '#059669' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'conveyance' ? 'var(--brand-crimson)' : undefined }}>
+                    <Car size={18} style={{ color: 'var(--status-success)' }} />
                     <span>Monthly Local Conveyance</span>
                   </div>
-                  {claimType === 'conveyance' && <CheckCircle2 size={16} color="#A51C30" />}
+                  {claimType === 'conveyance' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
                 </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500, #64748B)', lineHeight: 1.4 }}>
+                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
                   Intra-city official movement: Uber, CNG, rickshaw fares, plant courier & factory shuttles.
                 </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669', background: '#ECFDF5', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-success)', background: 'var(--status-success-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
                   Monthly Ceiling: ৳8,000 (Grade 8)
                 </span>
               </div>
@@ -400,16 +400,16 @@ export default function SubmitClaimModal({
                 onClick={() => setClaimType('tour_event')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tour_event' ? 'var(--brand-crimson, #A51C30)' : undefined }}>
-                    <Trophy size={18} style={{ color: '#D97706' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tour_event' ? 'var(--brand-crimson)' : undefined }}>
+                    <Trophy size={18} style={{ color: 'var(--status-warning)' }} />
                     <span>Tour & Event Advance Settlement</span>
                   </div>
-                  {claimType === 'tour_event' && <CheckCircle2 size={16} color="#A51C30" />}
+                  {claimType === 'tour_event' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
                 </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500, #64748B)', lineHeight: 1.4 }}>
+                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
                   Corporate events, sports tournament delegation, and plant shutdown advance reconciliation.
                 </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#D97706', background: '#FFFBEB', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-warning)', background: 'var(--status-warning-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
                   Treasury Balance Settlement
                 </span>
               </div>
@@ -418,8 +418,8 @@ export default function SubmitClaimModal({
 
           {/* Quick Preset Buttons */}
           <div className="claims-preset-bar">
-            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500, #64748B)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={13} style={{ color: '#D97706' }} />
+            <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Sparkles size={13} style={{ color: 'var(--status-warning)' }} />
               <span>{t('Quick Presets / Recent Tour Orders:', 'দ্রুত টেমপ্লেট ও সাম্প্রতিক সফর অর্ডার:', lang)}</span>
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -440,7 +440,7 @@ export default function SubmitClaimModal({
           <div>
             <div style={{ marginBottom: '14px' }}>
               <label className="form-label" style={{ fontWeight: 800, fontSize: '12px' }}>
-                {t('2. Official Purpose & Tour Authorization Reference', '২. দাপ্তরিক উদ্দেশ্য ও ট্যুর অনুমোদন নম্বর', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                {t('2. Official Purpose & Tour Authorization Reference', '২. দাপ্তরিক উদ্দেশ্য ও ট্যুর অনুমোদন নম্বর', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
               </label>
               <input
                 type="text"
@@ -463,7 +463,7 @@ export default function SubmitClaimModal({
                 <div>
                   <label className="form-label">{t('Destination / Location', 'গন্তব্য / স্থান', lang)}</label>
                   <div style={{ position: 'relative' }}>
-                    <MapPin size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: '#EF4444' }} />
+                    <MapPin size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--status-danger)' }} />
                     <input
                       type="text"
                       className="form-input"
@@ -478,7 +478,7 @@ export default function SubmitClaimModal({
                 <div>
                   <label className="form-label">{t('Start Date', 'শুরুর তারিখ', lang)}</label>
                   <div style={{ position: 'relative' }}>
-                    <Calendar size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: '#64748B' }} />
+                    <Calendar size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-3)' }} />
                     <input
                       type="date"
                       className="form-input"
@@ -492,7 +492,7 @@ export default function SubmitClaimModal({
                 <div>
                   <label className="form-label">{t('End Date', 'শেষের তারিখ', lang)}</label>
                   <div style={{ position: 'relative' }}>
-                    <Calendar size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: '#64748B' }} />
+                    <Calendar size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: 'var(--text-3)' }} />
                     <input
                       type="date"
                       className="form-input"
@@ -540,7 +540,7 @@ export default function SubmitClaimModal({
                 <label className="form-label" style={{ fontWeight: 800, fontSize: '12px', margin: 0 }}>
                   {t('3. Itemized Expense Breakdown & Receipts', '৩. খরচের বিবরণ ও ভাউচার সংযুক্তি', lang)}
                 </label>
-                <span style={{ fontSize: '11px', color: 'var(--brand-slate-500, #64748B)' }}>
+                <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
                   Break down individual line items with dates, voucher slip numbers and amounts.
                 </span>
               </div>
@@ -553,9 +553,9 @@ export default function SubmitClaimModal({
                     style={{
                       padding: '6px 12px',
                       borderRadius: '8px',
-                      border: '1px solid #BFDBFE',
-                      background: '#EFF6FF',
-                      color: '#1D4ED8',
+                      border: '1px solid var(--status-info-border)',
+                      background: 'var(--status-info-bg)',
+                      color: 'var(--status-info-text)',
                       fontSize: '11.5px',
                       fontWeight: 700,
                       cursor: 'pointer',
@@ -575,9 +575,9 @@ export default function SubmitClaimModal({
                   style={{
                     padding: '6px 12px',
                     borderRadius: '8px',
-                    border: '1px solid var(--brand-slate-300, #CBD5E1)',
-                    background: '#FFFFFF',
-                    color: 'var(--brand-slate-800, #1E293B)',
+                    border: '1px solid var(--brand-slate-300)',
+                    background: 'var(--surface-1)',
+                    color: 'var(--brand-slate-800)',
                     fontSize: '11.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -664,7 +664,7 @@ export default function SubmitClaimModal({
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(it.id)}
-                          style={{ border: 'none', background: 'transparent', color: '#94A3B8', cursor: 'pointer', padding: '4px' }}
+                          style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                           title="Remove item"
                         >
                           <Trash2 size={14} />
@@ -680,19 +680,19 @@ export default function SubmitClaimModal({
           {/* Section D: Advance Reconciliation (Tour / Event) */}
           {claimType === 'tour_event' && (
             <div className="claims-advance-box">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: '#92400E', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: 'var(--status-warning-text)', marginBottom: '8px' }}>
                 <DollarSign size={16} />
                 <span>Advance Reconciliation & Settlement</span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', alignItems: 'center' }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: '#78350F', display: 'block' }}>Total Incurred Expense:</span>
-                  <strong style={{ fontSize: '16px', color: '#92400E' }}>৳{totalAmount.toLocaleString()}</strong>
+                  <span style={{ fontSize: '11px', color: 'var(--status-warning-text)', display: 'block' }}>Total Incurred Expense:</span>
+                  <strong style={{ fontSize: '16px', color: 'var(--status-warning-text)' }}>৳{totalAmount.toLocaleString()}</strong>
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', color: '#78350F', display: 'block', marginBottom: '4px' }}>Advance Received (৳ BDT):</label>
+                  <label style={{ fontSize: '11px', color: 'var(--status-warning-text)', display: 'block', marginBottom: '4px' }}>Advance Received (৳ BDT):</label>
                   <input
                     type="number"
                     value={advanceTaken}
@@ -702,14 +702,14 @@ export default function SubmitClaimModal({
                   />
                 </div>
 
-                <div style={{ background: '#FFFFFF', padding: '8px 12px', borderRadius: '10px', border: '1px solid #FDE68A' }}>
-                  <span style={{ fontSize: '10px', color: '#64748B', display: 'block' }}>Net Settlement Status:</span>
+                <div style={{ background: 'var(--surface-1)', padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--status-warning-bright)' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-3)', display: 'block' }}>Net Settlement Status:</span>
                   {netSettlement && netSettlement >= 0 ? (
-                    <strong style={{ fontSize: '14px', color: '#059669' }}>
+                    <strong style={{ fontSize: '14px', color: 'var(--status-success)' }}>
                       + ৳{netSettlement.toLocaleString()} (Payable to Staff)
                     </strong>
                   ) : (
-                    <strong style={{ fontSize: '14px', color: '#D97706' }}>
+                    <strong style={{ fontSize: '14px', color: 'var(--status-warning)' }}>
                       - ৳{Math.abs(netSettlement || 0).toLocaleString()} (Refund to BOGCL Treasury)
                     </strong>
                   )}
@@ -726,13 +726,13 @@ export default function SubmitClaimModal({
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               {vouchers.map((v, i) => (
                 <div key={i} className="claims-voucher-chip">
-                  <FileText size={14} style={{ color: '#2563EB' }} />
-                  <span style={{ fontWeight: 600, color: 'var(--brand-slate-800, #1E293B)' }}>{v.name}</span>
-                  <span style={{ color: '#94A3B8', fontSize: '10px' }}>({v.size})</span>
+                  <FileText size={14} style={{ color: 'var(--status-info)' }} />
+                  <span style={{ fontWeight: 600, color: 'var(--brand-slate-800)' }}>{v.name}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>({v.size})</span>
                   <button
                     type="button"
                     onClick={() => setVouchers(vouchers.filter((_, idx) => idx !== i))}
-                    style={{ border: 'none', background: 'transparent', color: '#94A3B8', cursor: 'pointer', padding: '2px' }}
+                    style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
                   >
                     ✕
                   </button>
@@ -748,11 +748,11 @@ export default function SubmitClaimModal({
                 showToast(t(`Attached voucher: ${sampleName}`, `ভাউচার সংযুক্ত করা হয়েছে`, lang), 'success');
               }}
             >
-              <UploadCloud size={24} style={{ color: '#2563EB', margin: '0 auto 6px' }} />
-              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-700, #334155)' }}>
+              <UploadCloud size={24} style={{ color: 'var(--status-info)', margin: '0 auto 6px' }} />
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-700)' }}>
                 {t('Click or drag receipts here to attach', 'রসিদ বা ইনভয়েস সংযুক্ত করতে ক্লিক করুন', lang)}
               </div>
-              <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '2px' }}>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
                 PDF, JPG, PNG up to 15MB each (Tax invoice, Shohoz tickets, Uber receipts)
               </div>
             </div>
@@ -763,15 +763,15 @@ export default function SubmitClaimModal({
         <div className="claims-modal-footer">
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div>
-              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>
+              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', display: 'block', textTransform: 'uppercase', fontWeight: 800 }}>
                 {t('Total Requisition Claim:', 'মোট দাবি:', lang)}
               </span>
-              <strong style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-crimson, #A51C30)' }}>
+              <strong style={{ fontSize: '20px', fontWeight: 900, color: 'var(--brand-crimson)' }}>
                 ৳{totalAmount.toLocaleString()}
               </strong>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#059669', background: '#ECFDF5', padding: '4px 10px', borderRadius: '8px', border: '1px solid #A7F3D0', fontWeight: 700 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--status-success)', background: 'var(--status-success-bg)', padding: '4px 10px', borderRadius: '8px', border: '1px solid var(--status-success-border)', fontWeight: 700 }}>
               <CheckCircle2 size={14} />
               <span>{items.length} Line Items Verified</span>
             </div>

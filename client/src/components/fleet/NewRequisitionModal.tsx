@@ -48,14 +48,14 @@ export interface CompanyColleague {
 }
 
 export const COMPANY_COLLEAGUES: CompanyColleague[] = [
-  { id: 'EMP-1042', name: 'Tanvir Ahmed', designation: 'Sr. Sales & Distribution Specialist', dept: 'Sales & Distribution', phone: '+880 1712-334455', email: 'tanvir.ahmed@bashundhara.com', avatarColor: '#D97706' },
-  { id: 'EMP-2019', name: 'Engr. Tariq Ahmed', designation: 'Refinery Process Lead Engineer', dept: 'Keraniganj Refinery', phone: '+880 1819-445566', email: 'tariq.ahmed@bashundhara.com', avatarColor: '#0284C7' },
-  { id: 'EMP-3104', name: 'Kabir Hossain', designation: 'QA/QC Inspection Engineer', dept: 'Quality Assurance', phone: '+880 1715-998811', email: 'kabir.hossain@bashundhara.com', avatarColor: '#059669' },
-  { id: 'EMP-1182', name: 'Farhana Yeasmin', designation: 'Commercial Contract Analyst', dept: 'Commercial & Sales', phone: '+880 1912-778899', email: 'farhana.yeasmin@bashundhara.com', avatarColor: '#7C3AED' },
-  { id: 'EMP-4008', name: 'Syed Golam Faruq', designation: 'Procurement & Logistics Manager', dept: 'Supply Chain', phone: '+880 1719-887722', email: 'golam.faruq@bashundhara.com', avatarColor: '#DC2626' },
-  { id: 'EMP-2201', name: 'Engr. Mizanur Rahman', designation: 'Plant Reliability Lead', dept: 'Plant Maintenance', phone: '+880 1815-443322', email: 'mizanur.rahman@bashundhara.com', avatarColor: '#2563EB' },
-  { id: 'EMP-5011', name: 'Dr. Nasreen Akter', designation: 'Occupational Health & HSE Officer', dept: 'Health & Safety', phone: '+880 1711-889900', email: 'nasreen.akter@bashundhara.com', avatarColor: '#0D9488' },
-  { id: 'EMP-3309', name: 'Rashedul Islam', designation: 'Internal Audit & Accounts Lead', dept: 'Finance & Accounts', phone: '+880 1714-332211', email: 'rashedul.islam@bashundhara.com', avatarColor: '#B45309' },
+  { id: 'EMP-1042', name: 'Tanvir Ahmed', designation: 'Sr. Sales & Distribution Specialist', dept: 'Sales & Distribution', phone: '+880 1712-334455', email: 'tanvir.ahmed@bashundhara.com', avatarColor: 'var(--status-warning-solid)' },
+  { id: 'EMP-2019', name: 'Engr. Tariq Ahmed', designation: 'Refinery Process Lead Engineer', dept: 'Keraniganj Refinery', phone: '+880 1819-445566', email: 'tariq.ahmed@bashundhara.com', avatarColor: 'var(--status-info-solid)' },
+  { id: 'EMP-3104', name: 'Kabir Hossain', designation: 'QA/QC Inspection Engineer', dept: 'Quality Assurance', phone: '+880 1715-998811', email: 'kabir.hossain@bashundhara.com', avatarColor: 'var(--status-success-solid)' },
+  { id: 'EMP-1182', name: 'Farhana Yeasmin', designation: 'Commercial Contract Analyst', dept: 'Commercial & Sales', phone: '+880 1912-778899', email: 'farhana.yeasmin@bashundhara.com', avatarColor: 'var(--status-purple-solid)' },
+  { id: 'EMP-4008', name: 'Syed Golam Faruq', designation: 'Procurement & Logistics Manager', dept: 'Supply Chain', phone: '+880 1719-887722', email: 'golam.faruq@bashundhara.com', avatarColor: 'var(--status-danger-solid)' },
+  { id: 'EMP-2201', name: 'Engr. Mizanur Rahman', designation: 'Plant Reliability Lead', dept: 'Plant Maintenance', phone: '+880 1815-443322', email: 'mizanur.rahman@bashundhara.com', avatarColor: 'var(--status-info-solid)' },
+  { id: 'EMP-5011', name: 'Dr. Nasreen Akter', designation: 'Occupational Health & HSE Officer', dept: 'Health & Safety', phone: '+880 1711-889900', email: 'nasreen.akter@bashundhara.com', avatarColor: 'var(--status-teal)' },
+  { id: 'EMP-3309', name: 'Rashedul Islam', designation: 'Internal Audit & Accounts Lead', dept: 'Finance & Accounts', phone: '+880 1714-332211', email: 'rashedul.islam@bashundhara.com', avatarColor: 'var(--status-warning-solid-dark)' },
 ];
 
 // Operational Mission Quick Presets
@@ -318,8 +318,8 @@ export default function NewRequisitionModal({
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #A51C30 0%, #E11D48 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-light) 100%)',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -327,7 +327,7 @@ export default function NewRequisitionModal({
                 flexShrink: 0,
               }}
             >
-              <Car size={22} color="#FFFFFF" />
+              <Car size={22} color="var(--text-on-brand)" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -336,7 +336,7 @@ export default function NewRequisitionModal({
                     margin: 0,
                     fontSize: '16px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: 'var(--text-on-brand)',
                     letterSpacing: '-0.2px',
                   }}
                 >
@@ -344,8 +344,8 @@ export default function NewRequisitionModal({
                 </h3>
                 <span
                   style={{
-                    backgroundColor: '#D97706',
-                    color: '#FFFFFF',
+                    backgroundColor: 'var(--status-warning-solid)',
+                    color: 'var(--text-on-brand)',
                     fontSize: '10px',
                     fontWeight: 800,
                     padding: '2px 8px',
@@ -361,7 +361,7 @@ export default function NewRequisitionModal({
                 style={{
                   margin: '3px 0 0 0',
                   fontSize: '12px',
-                  color: '#CBD5E1',
+                  color: 'var(--text-inverse-2)',
                   lineHeight: 1.4,
                 }}
               >
@@ -383,7 +383,7 @@ export default function NewRequisitionModal({
               borderRadius: '10px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -392,11 +392,11 @@ export default function NewRequisitionModal({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.color = '#FFFFFF';
+              e.currentTarget.style.color = 'var(--text-on-brand)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.color = '#CBD5E1';
+              e.currentTarget.style.color = 'var(--text-inverse-2)';
             }}
             title="Close"
           >
@@ -412,14 +412,14 @@ export default function NewRequisitionModal({
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
-                color: '#D97706',
+                background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-3) 100%)',
+                color: 'var(--status-warning)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 800,
                 fontSize: '12px',
-                border: '1px solid #D97706',
+                border: '1px solid var(--status-warning)',
               }}
             >
               TA
@@ -436,7 +436,7 @@ export default function NewRequisitionModal({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px' }}>
-              <ShieldCheck size={14} color="#059669" />
+              <ShieldCheck size={14} color="var(--status-success)" />
               <span>
                 <strong>{t('Policy Entitlement:', 'নীতিমালা বরাদ্দ:', lang)}</strong> Pool Sedan (1-4 Pax) / Microbus (5-7 Pax)
               </span>
@@ -447,7 +447,7 @@ export default function NewRequisitionModal({
                 padding: '2px 8px',
                 borderRadius: '6px',
                 background: 'rgba(37, 99, 235, 0.1)',
-                color: '#2563EB',
+                color: 'var(--status-info)',
                 fontWeight: 700,
                 border: '1px solid rgba(37, 99, 235, 0.25)',
               }}
@@ -480,7 +480,7 @@ export default function NewRequisitionModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Sparkles size={14} color="#D97706" />
+                <Sparkles size={14} color="var(--status-warning)" />
                 <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('1-Click Operational Mission Presets', '১-ক্লিকে তাৎক্ষণিক মিশন প্রিসেট', lang)}
                 </span>
@@ -528,14 +528,14 @@ export default function NewRequisitionModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Gauge size={14} color="#2563EB" />
+                <Gauge size={14} color="var(--status-info)" />
                 <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('Live Route Telemetry & Allocation Recommendation', 'রুট টেলিমেট্রি ও যানবাহন বরাদ্দ রিকমেন্ডেশন', lang)}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
                 <span style={{ opacity: 0.75 }}>Mode:</span>
-                <strong style={{ color: '#2563EB' }}>
+                <strong style={{ color: 'var(--status-info)' }}>
                   {tripType === 'round_trip' ? 'Round Trip (2x)' : 'One-Way Transit'}
                 </strong>
               </div>
@@ -553,7 +553,7 @@ export default function NewRequisitionModal({
               {/* Stat 1: Est. Distance */}
               <div className="fleet-route-stat-box">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', opacity: 0.75 }}>
-                  <Navigation size={13} color="#2563EB" />
+                  <Navigation size={13} color="var(--status-info)" />
                   <span>{t('Est. Distance', 'দূরত্ব', lang)}</span>
                 </div>
                 <div style={{ fontSize: '17px', fontWeight: 900, marginTop: '3px' }}>
@@ -568,7 +568,7 @@ export default function NewRequisitionModal({
               {/* Stat 2: Est. Travel Duration */}
               <div className="fleet-route-stat-box">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', opacity: 0.75 }}>
-                  <Clock size={13} color="#D97706" />
+                  <Clock size={13} color="var(--status-warning)" />
                   <span>{t('Est. Duration', 'সময়কাল', lang)}</span>
                 </div>
                 <div style={{ fontSize: '17px', fontWeight: 900, marginTop: '3px' }}>
@@ -582,10 +582,10 @@ export default function NewRequisitionModal({
               {/* Stat 3: Fuel Requirement */}
               <div className="fleet-route-stat-box">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', opacity: 0.75 }}>
-                  <Fuel size={13} color="#059669" />
+                  <Fuel size={13} color="var(--status-success)" />
                   <span>{t('Fuel Reqn.', 'জ্বালানি চাহিদা', lang)}</span>
                 </div>
-                <div style={{ fontSize: '17px', fontWeight: 900, marginTop: '3px', color: '#059669' }}>
+                <div style={{ fontSize: '17px', fontWeight: 900, marginTop: '3px', color: 'var(--status-success)' }}>
                   ~{telemetry.fuelLiters}{' '}
                   <span style={{ fontSize: '11.5px', fontWeight: 600, opacity: 0.8 }}>L</span>
                 </div>
@@ -598,12 +598,12 @@ export default function NewRequisitionModal({
               <div
                 className="fleet-route-stat-box"
                 style={{
-                  borderColor: telemetry.isMicrobus ? '#D97706' : '#2563EB',
+                  borderColor: telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)',
                   borderWidth: '1.5px',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', opacity: 0.75 }}>
-                  <Car size={13} color={telemetry.isMicrobus ? '#D97706' : '#2563EB'} />
+                  <Car size={13} color={telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)'} />
                   <span>{t('Assigned Tier', 'বরাদ্দকৃত শ্রেণী', lang)}</span>
                 </div>
                 <div
@@ -611,7 +611,7 @@ export default function NewRequisitionModal({
                     fontSize: '15px',
                     fontWeight: 900,
                     marginTop: '3px',
-                    color: telemetry.isMicrobus ? '#D97706' : '#2563EB',
+                    color: telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)',
                   }}
                 >
                   {telemetry.isMicrobus ? 'Microbus (HiAce 7-Pax)' : 'Sedan (Allion 4-Pax)'}
@@ -635,7 +635,7 @@ export default function NewRequisitionModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
-                <Users size={14} color={telemetry.isMicrobus ? '#D97706' : '#2563EB'} />
+                <Users size={14} color={telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)'} />
                 <span>
                   <strong>{telemetry.paxCount}</strong> of <strong>{telemetry.maxCapacity}</strong> passenger seats utilized
                 </span>
@@ -645,7 +645,7 @@ export default function NewRequisitionModal({
                     padding: '1px 6px',
                     borderRadius: '4px',
                     background: telemetry.isMicrobus ? 'rgba(217, 119, 6, 0.15)' : 'rgba(37, 99, 235, 0.12)',
-                    color: telemetry.isMicrobus ? '#D97706' : '#2563EB',
+                    color: telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)',
                     fontWeight: 700,
                   }}
                 >
@@ -668,7 +668,7 @@ export default function NewRequisitionModal({
                     width: `${telemetry.capacityPct}%`,
                     height: '100%',
                     borderRadius: '999px',
-                    backgroundColor: telemetry.isMicrobus ? '#D97706' : '#2563EB',
+                    backgroundColor: telemetry.isMicrobus ? 'var(--status-warning-solid)' : 'var(--status-info-solid)',
                     transition: 'width 0.3s ease',
                   }}
                 />
@@ -702,7 +702,7 @@ export default function NewRequisitionModal({
                     style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: tripType === 'round_trip' ? '#2563EB' : 'inherit',
+                      color: tripType === 'round_trip' ? 'var(--status-info)' : 'inherit',
                     }}
                   >
                     🔄 {t('Round Trip (Return Transit)', 'রাউন্ড ট্রিপ (প্রত্যাবর্তন সহ)', lang)}
@@ -711,7 +711,7 @@ export default function NewRequisitionModal({
                     {t('Driver stays on site & returns officials to origin office', 'চালক কাজ শেষে যাত্রীদের মূল অফিসে ফেরত আনবেন', lang)}
                   </div>
                 </div>
-                {tripType === 'round_trip' && <Check size={18} color="#2563EB" style={{ flexShrink: 0 }} />}
+                {tripType === 'round_trip' && <Check size={18} color="var(--status-info)" style={{ flexShrink: 0 }} />}
               </button>
 
               <button
@@ -724,7 +724,7 @@ export default function NewRequisitionModal({
                     style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: tripType === 'one_way' ? '#2563EB' : 'inherit',
+                      color: tripType === 'one_way' ? 'var(--status-info)' : 'inherit',
                     }}
                   >
                     ➡️ {t('One-Way Transit Only', 'একমুখী যাত্রা (ড্রপ-অফ)', lang)}
@@ -733,7 +733,7 @@ export default function NewRequisitionModal({
                     {t('Drop-off at destination, vehicle returns to central yard', 'শুধুমাত্র গন্তব্যে নামিয়ে দেওয়া হবে, গাড়ি ইয়ার্ডে ফিরবে', lang)}
                   </div>
                 </div>
-                {tripType === 'one_way' && <Check size={18} color="#2563EB" style={{ flexShrink: 0 }} />}
+                {tripType === 'one_way' && <Check size={18} color="var(--status-info)" style={{ flexShrink: 0 }} />}
               </button>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function NewRequisitionModal({
             <div>
               <div className="notice-field-label">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <MapPin size={14} color="#2563EB" />
+                  <MapPin size={14} color="var(--status-info)" />
                   {t('Departure Hub / Origin Office', 'যাত্রা শুরুর অফিস / স্থান', lang)}
                 </span>
               </div>
@@ -771,9 +771,9 @@ export default function NewRequisitionModal({
             <div>
               <div className="notice-field-label">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <MapPin size={14} color="#A51C30" />
+                  <MapPin size={14} color="var(--brand-crimson)" />
                   {t('Destination / Inspection Venue', 'গন্তব্য অফিস / পরিদর্শন এলাকা', lang)}{' '}
-                  <span style={{ color: '#A51C30' }}>*</span>
+                  <span style={{ color: 'var(--brand-crimson)' }}>*</span>
                 </span>
               </div>
               <input
@@ -793,7 +793,7 @@ export default function NewRequisitionModal({
               padding: '14px 18px',
               borderRadius: '12px',
               background: 'rgba(0, 0, 0, 0.02)',
-              border: '1px solid var(--brand-slate-200, #E2E8F0)',
+              border: '1px solid var(--brand-slate-200)',
               marginBottom: '18px',
               boxSizing: 'border-box',
             }}
@@ -818,7 +818,7 @@ export default function NewRequisitionModal({
                   margin: 0,
                 }}
               >
-                <CornerDownRight size={14} color="#2563EB" />
+                <CornerDownRight size={14} color="var(--status-info)" />
                 <span>{t('Via Stops / Intermediate Waypoints (Optional)', 'যাত্রাপথের বিরতি বা স্টপ (ঐচ্ছিক)', lang)}</span>
               </label>
               <span style={{ fontSize: '11px', opacity: 0.7, fontWeight: 600 }}>
@@ -847,8 +847,8 @@ export default function NewRequisitionModal({
                 style={{
                   padding: '9px 16px',
                   borderRadius: '10px',
-                  backgroundColor: '#E2E8F0',
-                  color: '#0F172A',
+                  backgroundColor: 'var(--surface-3)',
+                  color: 'var(--text-1)',
                   fontWeight: 700,
                   fontSize: '12.5px',
                   border: 'none',
@@ -859,8 +859,8 @@ export default function NewRequisitionModal({
                   transition: 'all 0.15s ease',
                   flexShrink: 0,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#CBD5E1')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#E2E8F0')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-4)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-3)')}
               >
                 <Plus size={14} />
                 <span>{t('Add Stop', 'যুক্ত করুন', lang)}</span>
@@ -879,8 +879,8 @@ export default function NewRequisitionModal({
                         width: '20px',
                         height: '20px',
                         borderRadius: '50%',
-                        backgroundColor: '#EFF6FF',
-                        color: '#1E40AF',
+                        backgroundColor: 'var(--status-info-bg)',
+                        color: 'var(--status-info-text)',
                         fontWeight: 800,
                         fontSize: '10.5px',
                         display: 'flex',
@@ -897,7 +897,7 @@ export default function NewRequisitionModal({
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: '#94A3B8',
+                        color: 'var(--text-muted)',
                         cursor: 'pointer',
                         padding: '2px',
                         display: 'flex',
@@ -924,7 +924,7 @@ export default function NewRequisitionModal({
             <div>
               <div className="notice-field-label">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <Clock size={14} color="#2563EB" />
+                  <Clock size={14} color="var(--status-info)" />
                   {t('Departure Date & Time', 'যাত্রার সময় ও তারিখ', lang)}
                 </span>
               </div>
@@ -942,7 +942,7 @@ export default function NewRequisitionModal({
               <div>
                 <div className="notice-field-label">
                   <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Clock size={14} color="#2563EB" />
+                    <Clock size={14} color="var(--status-info)" />
                     {t('Expected Return Time', 'প্রত্যাবর্তনের সম্ভাব্য সময়', lang)}
                   </span>
                 </div>
@@ -962,14 +962,14 @@ export default function NewRequisitionModal({
           <div className="notice-field-group" style={{ marginBottom: '20px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Users size={14} color="#059669" />
+                <Users size={14} color="var(--status-success)" />
                 {t('Passenger Names & Official Designations', 'যাত্রীদের তালিকা ও পদবী', lang)}
               </span>
               <span
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  color: telemetry.isMicrobus ? '#D97706' : '#2563EB',
+                  color: telemetry.isMicrobus ? 'var(--status-warning)' : 'var(--status-info)',
                   backgroundColor: telemetry.isMicrobus ? 'rgba(217, 119, 6, 0.12)' : 'rgba(37, 99, 235, 0.12)',
                   padding: '2px 10px',
                   borderRadius: '999px',
@@ -989,7 +989,7 @@ export default function NewRequisitionModal({
                 gap: '8px',
                 padding: '10px 14px',
                 borderRadius: '12px',
-                border: '1.5px solid var(--brand-slate-200, #CBD5E1)',
+                border: '1.5px solid var(--brand-slate-200)',
                 background: 'rgba(0, 0, 0, 0.02)',
                 minHeight: '48px',
                 boxSizing: 'border-box',
@@ -1006,7 +1006,7 @@ export default function NewRequisitionModal({
                       height: '24px',
                       borderRadius: '6px',
                       backgroundColor: p.avatarColor,
-                      color: '#FFFFFF',
+                      color: 'var(--text-on-brand)',
                       fontWeight: 800,
                       fontSize: '10px',
                       display: 'flex',
@@ -1027,7 +1027,7 @@ export default function NewRequisitionModal({
                     style={{
                       background: 'transparent',
                       border: 'none',
-                      color: '#94A3B8',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                       padding: '2px',
                       display: 'flex',
@@ -1046,8 +1046,8 @@ export default function NewRequisitionModal({
                 style={{
                   padding: '6px 12px',
                   borderRadius: '8px',
-                  border: '1.5px dashed #3B82F6',
-                  color: '#2563EB',
+                  border: '1.5px dashed var(--status-info)',
+                  color: 'var(--status-info)',
                   backgroundColor: 'rgba(37, 99, 235, 0.08)',
                   fontSize: '12px',
                   fontWeight: 700,
@@ -1068,7 +1068,7 @@ export default function NewRequisitionModal({
             {showPassengerDropdown && (
               <div className="fleet-passenger-dropdown">
                 <div style={{ position: 'relative', marginBottom: '8px' }}>
-                  <Search size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '10px' }} />
+                  <Search size={14} color="var(--text-muted)" style={{ position: 'absolute', left: '10px', top: '10px' }} />
                   <input
                     type="text"
                     value={passengerSearchQuery}
@@ -1092,7 +1092,7 @@ export default function NewRequisitionModal({
                         className="fleet-colleague-row"
                         style={{
                           backgroundColor: isSelected ? 'rgba(37, 99, 235, 0.1)' : undefined,
-                          color: isSelected ? '#2563EB' : 'inherit',
+                          color: isSelected ? 'var(--status-info)' : 'inherit',
                           fontWeight: isSelected ? 700 : 500,
                         }}
                       >
@@ -1103,7 +1103,7 @@ export default function NewRequisitionModal({
                               height: '24px',
                               borderRadius: '6px',
                               backgroundColor: c.avatarColor,
-                              color: '#FFFFFF',
+                              color: 'var(--text-on-brand)',
                               fontWeight: 800,
                               fontSize: '10px',
                               display: 'flex',
@@ -1121,7 +1121,7 @@ export default function NewRequisitionModal({
                             </div>
                           </div>
                         </div>
-                        {isSelected && <Check size={14} color="#2563EB" />}
+                        {isSelected && <Check size={14} color="var(--status-info)" />}
                       </div>
                     );
                   })}
@@ -1134,9 +1134,9 @@ export default function NewRequisitionModal({
           <div className="notice-field-group" style={{ marginBottom: '20px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileText size={14} color="#64748B" />
+                <FileText size={14} color="var(--text-3)" />
                 {t('Official Purpose / Transit Justification', 'দাপ্তরিক কাজের উদ্দেশ্য ও যৌক্তিকতা', lang)}{' '}
-                <span style={{ color: '#A51C30' }}>*</span>
+                <span style={{ color: 'var(--brand-crimson)' }}>*</span>
               </span>
               <span style={{ fontSize: '11px', opacity: 0.7, textTransform: 'none', fontWeight: 500 }}>
                 {purpose.length} characters
@@ -1201,7 +1201,7 @@ export default function NewRequisitionModal({
         {/* ─── 4. EXECUTIVE MODAL FOOTER ─── */}
         <div className="fleet-modal-ft">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', opacity: 0.8 }}>
-            <ShieldCheck size={16} color="#059669" />
+            <ShieldCheck size={16} color="var(--status-success)" />
             <span>Digital Trip Pass & Gate Pass generated upon Transport Admin approval</span>
           </div>
 
@@ -1216,7 +1216,7 @@ export default function NewRequisitionModal({
                 fontWeight: 600,
                 color: 'inherit',
                 backgroundColor: 'transparent',
-                border: '1.5px solid var(--brand-slate-200, #CBD5E1)',
+                border: '1.5px solid var(--brand-slate-200)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
@@ -1240,8 +1240,8 @@ export default function NewRequisitionModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
-                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
+                color: 'var(--text-on-brand)',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)',
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',

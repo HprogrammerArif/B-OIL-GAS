@@ -81,7 +81,7 @@ export default function TelemetryLoader({ role, lang, onComplete }: TelemetryLoa
             return (
               <div key={idx} className={`loader-step-row ${isCurrent ? 'active' : 'done'}`}>
                 {isDone ? (
-                  <CheckCircle2 size={13} color="#34D399" />
+                  <CheckCircle2 size={13} color="var(--status-success-bright)" />
                 ) : (
                   <Activity size={13} color="var(--brand-gold)" className="spin-anim" />
                 )}

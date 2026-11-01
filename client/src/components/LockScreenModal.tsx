@@ -43,13 +43,13 @@ export default function LockScreenModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'radial-gradient(ellipse at center, #111A38 0%, #060D1F 100%)',
+        background: 'radial-gradient(ellipse at center, var(--surface-inverse) 0%, var(--surface-inverse-deep) 100%)',
         zIndex: 2000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
-        color: '#fff',
+        color: 'var(--text-on-brand)',
         animation: 'fadeInBackdrop 0.25s ease',
       }}
     >
@@ -101,7 +101,7 @@ export default function LockScreenModal({
             height: '74px',
             borderRadius: '50%',
             background: meta.avatarColor,
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             border: '3px solid var(--brand-gold)',
             display: 'flex',
             alignItems: 'center',
@@ -115,13 +115,13 @@ export default function LockScreenModal({
           {meta.initials}
         </div>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-on-brand)' }}>
           {t(meta.name, meta.nameBn, lang)}
         </h2>
         <div style={{ fontSize: '12.5px', color: 'var(--brand-gold)', fontWeight: 600 }}>
           {t(meta.label, meta.labelBn, lang)}
         </div>
-        <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', marginBottom: '20px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', marginBottom: '20px' }}>
           {t(`${meta.dept} • ${meta.empId}`, `${meta.deptBn} • ${meta.empId}`, lang)}
         </div>
 
@@ -145,14 +145,14 @@ export default function LockScreenModal({
                 letterSpacing: '3px',
                 fontSize: '15px',
                 borderRadius: '8px',
-                border: error ? '2px solid #EF4444' : '1px solid rgba(255, 255, 255, 0.2)',
+                border: error ? '2px solid var(--status-danger)' : '1px solid rgba(255, 255, 255, 0.2)',
                 background: 'rgba(255, 255, 255, 0.08)',
-                color: '#fff',
+                color: 'var(--text-on-brand)',
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
-            <div style={{ color: error ? '#F87171' : '#94A3B8', fontSize: '11px', marginTop: '6px' }}>
+            <div style={{ color: error ? 'var(--status-danger-bright)' : 'var(--text-muted)', fontSize: '11px', marginTop: '6px' }}>
               {error
                 ? t('Incorrect PIN. Please enter 1234 to unlock.', 'ভুল পিন। আনলক করতে 1234 টাইপ করুন।', lang)
                 : t('Demo PIN: 1234', 'ডেমো পিন: 1234', lang)}
@@ -188,14 +188,14 @@ export default function LockScreenModal({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#94A3B8',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '5px',
             }}
           >
-            <ShieldCheck size={13} color="#10B981" />
+            <ShieldCheck size={13} color="var(--status-success)" />
             <span>{t('Quick Fingerprint Unlock', 'দ্রুত ফিঙ্গারপ্রিন্ট আনলক', lang)}</span>
           </button>
 
@@ -207,7 +207,7 @@ export default function LockScreenModal({
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#F87171',
+              color: 'var(--status-danger-bright)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',

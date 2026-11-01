@@ -8,7 +8,7 @@ alwaysApply: true
 ## Context first
 - This repo is **BOGCL OneOps**: a frozen prototype in `client/` and three production codebases — `server/` (Express + Prisma), `frontend/` (React + RTK Query), `app/` (Expo). Read `AGENTS.md` and `docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md` before non-trivial work.
 - Business rules live in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md`; API contract in `03`; schema in `02`. Implement from the docs; when behaviour must change, update the doc in the same change.
-- **Never modify `client/`** — it is the reference prototype and must stay as it is.
+- `client/` is the interactive prototype being polished for presentation (`docs/PROTOTYPE_ENHANCEMENT_PLAN.md`, rule `prototype-reference`). Keep it self-contained; production code goes only in `server/`, `frontend/`, `app/`.
 
 ## General
 - Act as a senior software engineer. Understand the existing architecture before making changes.

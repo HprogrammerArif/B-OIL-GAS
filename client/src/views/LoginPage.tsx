@@ -95,7 +95,7 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
           onClick={onLangToggle}
           style={{
             background: 'rgba(255,255,255,0.08)',
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             borderColor: 'rgba(255,255,255,0.18)',
             padding: '6px 14px',
             borderRadius: '20px',

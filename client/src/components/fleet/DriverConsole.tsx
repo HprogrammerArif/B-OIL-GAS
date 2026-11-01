@@ -188,31 +188,31 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.3px' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-on-brand)', letterSpacing: '-0.3px' }}>
                 {currentDriver.name}
               </h2>
-              <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(217, 119, 6, 0.2)', border: '1px solid rgba(217, 119, 6, 0.4)', color: '#FCD34D' }}>
+              <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(217, 119, 6, 0.2)', border: '1px solid rgba(217, 119, 6, 0.4)', color: 'var(--status-warning-bright)' }}>
                 Badge #{currentDriver.id}
               </span>
-              <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#6EE7B7', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.4)', color: 'var(--status-success-bright)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <ShieldCheck size={13} />
                 {t('0.00% BAC Sobriety Cleared', 'মদ্যপানমুক্ত ০.০০% সনদপ্রাপ্ত', lang)}
               </span>
             </div>
 
-            <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#CBD5E1', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span>{t('Assigned Vehicle:', 'বরাদ্দকৃত গাড়ি:', lang)} <strong style={{ color: '#FFFFFF', fontFamily: 'monospace' }}>{currentDriver.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821'}</strong></span>
+            <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span>{t('Assigned Vehicle:', 'বরাদ্দকৃত গাড়ি:', lang)} <strong style={{ color: 'var(--text-on-brand)', fontFamily: 'monospace' }}>{currentDriver.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821'}</strong></span>
               <span>•</span>
-              <span>{t('License:', 'ড্রাইভিং লাইসেন্স:', lang)} <strong style={{ color: '#FFFFFF' }}>{currentDriver.licenseNo}</strong></span>
+              <span>{t('License:', 'ড্রাইভিং লাইসেন্স:', lang)} <strong style={{ color: 'var(--text-on-brand)' }}>{currentDriver.licenseNo}</strong></span>
               <span>•</span>
-              <span>{t('Safety Rating:', 'নিরাপত্তা রেটিং:', lang)} <strong style={{ color: '#FBBF24' }}>★ {currentDriver.rating} / 5.0</strong></span>
+              <span>{t('Safety Rating:', 'নিরাপত্তা রেটিং:', lang)} <strong style={{ color: 'var(--status-warning-bright)' }}>★ {currentDriver.rating} / 5.0</strong></span>
             </p>
           </div>
         </div>
 
         {/* Driver Availability Quick Switcher */}
         <div className="driver-status-switcher">
-          <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#94A3B8', padding: '0 4px' }}>
+          <span style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--text-muted)', padding: '0 4px' }}>
             {t('My Duty Status:', 'আমার বর্তমান অবস্থা:', lang)}
           </span>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -220,7 +220,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
               onClick={() => handleStatusChange('available')}
               className={`driver-status-btn ${currentDriver.status === 'available' ? 'active-available' : ''}`}
             >
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34D399' }} />
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--status-success-bright)' }} />
               {t('On Duty (Ready)', 'উপস্থিত', lang)}
             </button>
             <button
@@ -247,7 +247,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
           {/* Mission Top Bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid var(--brand-slate-200)', marginBottom: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span style={{ padding: '4px 10px', borderRadius: '6px', background: '#D97706', color: '#FFFFFF', fontWeight: 800, fontSize: '11px', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'var(--status-warning-solid)', color: 'var(--text-on-brand)', fontWeight: 800, fontSize: '11px', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                 <Navigation size={13} />
                 {activeMission.status === 'in_transit' ? t('IN TRANSIT', 'চলমান ট্রিপ', lang) : t('ASSIGNED MISSION', 'বরাদ্দকৃত মিশন', lang)}
               </span>
@@ -262,14 +262,14 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 onClick={() => onOpenChat(activeMission)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--status-info-bg)', color: 'var(--status-info-text)', border: '1px solid var(--status-info-border)', cursor: 'pointer' }}
               >
                 <MessageSquare size={13} />
                 {t('Mission Chat (3-Way)', 'ট্রিপ চ্যাট', lang)}
               </button>
               <button
                 onClick={() => initiateCall(activeMission.requesterName, activeMission.dept, activeMission.phone || '+880 1712-334455')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: '#ECFDF5', color: '#047857', border: '1px solid #A7F3D0', cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--status-success-bg)', color: 'var(--status-success-text)', border: '1px solid var(--status-success-border)', cursor: 'pointer' }}
               >
                 <Phone size={13} />
                 {t('Call Passenger Lead', 'যাত্রীকে কল দিন', lang)}
@@ -282,16 +282,16 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
             {/* Route & Passenger Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div className="driver-route-block">
-                <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#B45309', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Navigation size={14} color="#D97706" />
+                <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-warning-text)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Navigation size={14} color="var(--status-warning)" />
                   {t('Transit Route & Multi-Stop Waypoints', 'যাত্রাপথ ও ভায়া স্টপসমূহ', lang)}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '4px' }}>
-                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }} />
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-success-solid)' }} />
                     <span style={{ width: '2px', height: '36px', background: 'var(--brand-slate-300)', margin: '4px 0' }} />
-                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444' }} />
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--status-danger-solid)' }} />
                   </div>
 
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -318,8 +318,8 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {activeMission.intermediateStops.map((stop, i) => (
-                        <span key={i} style={{ padding: '3px 8px', borderRadius: '6px', background: '#FFFFFF', fontSize: '11px', fontWeight: 600, color: 'var(--brand-slate-700)', border: '1px solid var(--brand-slate-200)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', color: '#D97706', fontSize: '9px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                        <span key={i} style={{ padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-1)', fontSize: '11px', fontWeight: 600, color: 'var(--brand-slate-700)', border: '1px solid var(--brand-slate-200)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'rgba(217, 119, 6, 0.15)', color: 'var(--status-warning)', fontSize: '9px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
                             {i + 1}
                           </span>
                           {stop.location}
@@ -336,7 +336,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>{t('Passenger Manifest', 'যাত্রীদের তালিকা', lang)}</div>
                   <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>{activeMission.passengerNames}</span>
-                    <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '10px', background: '#E2E8F0', color: '#334155', fontWeight: 700 }}>
+                    <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '10px', background: 'var(--surface-3)', color: 'var(--text-2)', fontWeight: 700 }}>
                       {activeMission.passengersCount} Pax
                     </span>
                   </div>
@@ -350,7 +350,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                   <div style={{ fontSize: '12px', color: 'var(--brand-slate-700)', fontWeight: 600, marginTop: '2px', lineHeight: 1.4 }}>
                     {activeMission.purpose}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#D97706', fontWeight: 700, marginTop: '4px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--status-warning)', fontWeight: 700, marginTop: '4px' }}>
                     Departure: {activeMission.departureTime}
                   </div>
                 </div>
@@ -360,8 +360,8 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
             {/* Quick Action Progression Controls */}
             <div className="driver-progression-panel">
               <div>
-                <h4 style={{ margin: '0 0 14px 0', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#B45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Gauge size={15} color="#D97706" />
+                <h4 style={{ margin: '0 0 14px 0', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Gauge size={15} color="var(--status-warning)" />
                   {t('Mission Action Progression', 'মিশন বাস্তবায়ন ধাপসমূহ', lang)}
                 </h4>
 
@@ -402,7 +402,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                     onClick={() => setShowTollModal(true)}
                     className="driver-progression-btn toll"
                   >
-                    <Receipt size={18} color="#D97706" />
+                    <Receipt size={18} color="var(--status-warning)" />
                     <span>{t('Log Highway Toll Voucher', 'হাইওয়ে টোল ভাউচার এন্ট্রি', lang)}</span>
                   </button>
                 </div>
@@ -425,7 +425,7 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       ) : (
         <div className="driver-mission-card" style={{ padding: '36px', textAlign: 'center' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--brand-slate-100)', color: 'var(--brand-slate-400)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CheckCircle2 size={30} color="#10B981" />
+            <CheckCircle2 size={30} color="var(--status-success)" />
           </div>
           <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
             {t('No Active Missions Pending', 'এই মুহূর্তে কোনো নতুন ট্রিপ নেই', lang)}
@@ -440,14 +440,14 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       <div className="driver-ledger-card">
         <div className="driver-ledger-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Receipt size={18} color="#D97706" />
+            <Receipt size={18} color="var(--status-warning)" />
             <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
               {t('My Toll & Conveyance Slips (Reimbursement Ledger)', 'আমার টোল ও কনভেয়েন্স স্লিপসমূহ', lang)}
             </h3>
           </div>
           <button
             onClick={() => setShowTollModal(true)}
-            style={{ fontSize: '12px', fontWeight: 700, color: '#D97706', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-warning)', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             + {t('Submit New Voucher', 'নতুন ভাউচার', lang)}
           </button>
@@ -477,17 +477,17 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       {showStartTripDialog && activeMission && (
         <div className="modal-bg" onClick={() => setShowStartTripDialog(false)}>
           <div className="fleet-modal-dialog" style={{ maxWidth: '480px', width: '92%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
+            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Navigation size={18} color="#F59E0B" />
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
+                <Navigation size={18} color="var(--status-warning)" />
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                   {t('Start Highway Journey (Gate-Out Pass)', 'যাত্রা শুরু ও গেট পাস লগ', lang)}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowStartTripDialog(false)}
-                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={15} />
               </button>
@@ -526,24 +526,24 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                 </div>
               </div>
 
-              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#FEF3C7', border: '1px solid #FDE68A', fontSize: '11.5px', color: '#92400E', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', fontSize: '11.5px', color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertTriangle size={16} style={{ flexShrink: 0 }} />
                 <span>Speed limit: 60 km/h on Dhaka corridors, 80 km/h on expressways. Seatbelts mandatory.</span>
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
                 onClick={() => setShowStartTripDialog(false)}
-                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmStartJourney}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: 'var(--text-on-brand)', background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)' }}
               >
                 <Navigation size={14} />
                 {t('Confirm Departure & Open Gate', 'যাত্রা শুরু নিশ্চিত করুন', lang)}
@@ -557,17 +557,17 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       {showCompleteDialog && activeMission && (
         <div className="modal-bg" onClick={() => setShowCompleteDialog(false)}>
           <div className="fleet-modal-dialog" style={{ maxWidth: '480px', width: '92%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, #065F46 0%, #047857 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
+            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, var(--status-success-solid-dark) 0%, var(--status-success-solid-dark) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <CheckCircle2 size={18} color="#34D399" />
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
+                <CheckCircle2 size={18} color="var(--status-success-bright)" />
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                   {t('Complete Journey (Inward Security Gate Pass)', 'যাত্রা সমাপ্তি ও ইনওয়ার্ড গেট পাস', lang)}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowCompleteDialog(false)}
-                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={15} />
               </button>
@@ -606,24 +606,24 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
                 </div>
               </div>
 
-              <div style={{ padding: '12px 14px', borderRadius: '10px', background: '#ECFDF5', border: '1px solid #A7F3D0', fontSize: '11.5px', color: '#047857', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', fontSize: '11.5px', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
                 <span>Distance Traveled: ~{(parseInt(closingOdoInput, 10) || 42435) - 42350} km recorded in BOGCL fleet log.</span>
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
                 onClick={() => setShowCompleteDialog(false)}
-                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCompleteJourney}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: 'var(--text-on-brand)', background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(5, 150, 105, 0.35)' }}
               >
                 <CheckCircle2 size={14} />
                 {t('Submit Inward Gate Pass', 'ইনওয়ার্ড পাস নিশ্চিত করুন', lang)}
@@ -637,17 +637,17 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
       {showTollModal && (
         <div className="modal-bg" onClick={() => setShowTollModal(false)}>
           <div className="fleet-modal-dialog" style={{ maxWidth: '440px', width: '92%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
+            <div className="fleet-modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Receipt size={18} color="#F59E0B" />
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
+                <Receipt size={18} color="var(--status-warning)" />
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                   {t('Submit Highway Toll Voucher', 'হাইওয়ে টোল ভাউচার দাখিল', lang)}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowTollModal(false)}
-                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={15} />
               </button>
@@ -686,18 +686,18 @@ export default function DriverConsole({ lang, onOpenChat }: DriverConsoleProps) 
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '14px 24px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
                 onClick={() => setShowTollModal(false)}
-                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleAddTollClaim}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', borderRadius: '8px', fontSize: '12.5px', fontWeight: 800, color: 'var(--text-on-brand)', background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)' }}
               >
                 <Receipt size={14} />
                 {t('Submit Voucher', 'ভাউচার দাখিল করুন', lang)}

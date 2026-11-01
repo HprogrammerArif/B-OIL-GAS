@@ -5,7 +5,7 @@
 **Audience:** Engineering (backend, web, mobile), DevOps, QA, Product
 **Source of truth for:** system boundaries, technology decisions, shared conventions, module registry, cross-cutting engines. Every other document in `docs/platform/` must stay consistent with this one.
 
-> The interactive prototype in `client/` (documented in `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md`) is the **functional reference**. It is frozen and is not modified. The production system is built as three new codebases — `server/`, `frontend/`, `app/` — that reproduce the prototype's 17 modules with real persistence, security and integrations.
+> The interactive prototype in `client/` (documented in `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md`) is the **functional reference** and the client-facing demo; it is kept self-contained and evolves per `docs/PROTOTYPE_ENHANCEMENT_PLAN.md`. The production system is built as three new codebases — `server/`, `frontend/`, `app/` — that reproduce the prototype's 17 modules with real persistence, security and integrations.
 
 ---
 
@@ -51,7 +51,7 @@ BOGCL OneOps is the internal operations platform for Bashundhara Oil & Gas Compa
 
 ```
 B-OIL-GAS/
-├── client/            FROZEN interactive prototype (reference only — do not modify)
+├── client/            Interactive prototype / client demo (self-contained; no backend)
 ├── server/            Express 5 + TypeScript + Prisma + PostgreSQL + Redis + BullMQ + Socket.IO
 ├── frontend/          React 19 + Vite + TypeScript + React Router 7 + Redux Toolkit + RTK Query
 ├── app/               Expo SDK 56 + Expo Router + Redux Toolkit + RTK Query (adapted from starter)

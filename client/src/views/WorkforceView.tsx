@@ -127,7 +127,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                 fontSize: '12px',
                 padding: '6px 14px',
                 background: activeTab === 'active' ? 'var(--brand-crimson)' : 'transparent',
-                color: activeTab === 'active' ? '#fff' : 'var(--brand-slate-600)',
+                color: activeTab === 'active' ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
                 borderColor: activeTab === 'active' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
                 fontWeight: 700,
                 display: 'flex',
@@ -138,7 +138,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
             >
               <Users size={14} />
               {t('Active Staff', 'সক্রিয় কর্মকর্তা-কর্মচারী', lang)}
-              <span style={{ background: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'active' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+              <span style={{ background: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'active' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
                 {activeEmployees.length}
               </span>
             </button>
@@ -160,7 +160,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
             >
               <UserX size={14} />
               {t('Former Staff / Exit Archive', 'সাবেক কর্মী / আর্কাইভ', lang)}
-              <span style={{ background: activeTab === 'offboarded' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'offboarded' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+              <span style={{ background: activeTab === 'offboarded' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'offboarded' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
                 {offboardedEmployees.length}
               </span>
             </button>
@@ -235,7 +235,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
                   <tr key={emp.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: emp.avatarColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: emp.avatarColor, color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
                           {emp.initials}
                         </div>
                         <div>
@@ -345,7 +345,7 @@ export default function WorkforceView({ role, lang }: ViewProps) {
               <div key={emp.id} className="workforce-card-item">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: emp.avatarColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
+                    <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: emp.avatarColor, color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>
                       {emp.initials}
                     </div>
                     <div>

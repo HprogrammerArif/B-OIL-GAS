@@ -273,11 +273,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
 ];
 
 const STAGES = [
-  { id: 1, title: '1. Internal Review', titleBn: '১. অভ্যন্তরীণ মূল্যায়ন', color: '#7C3AED', badgeColor: '#EDE9FE', textColor: '#6D28D9' },
-  { id: 2, title: '2. Application Filed', titleBn: '২. আবেদন দাখিল', color: '#0284C7', badgeColor: '#E0F2FE', textColor: '#0369A1' },
-  { id: 3, title: '3. Field Inspection', titleBn: '৩. মাঠ পরিদর্শন', color: '#D97706', badgeColor: '#FEF3C7', textColor: '#B45309' },
-  { id: 4, title: '4. Ministry Vetting', titleBn: '৪. মন্ত্রণালয়ে যাচাই', color: '#A51C30', badgeColor: '#FEE2E2', textColor: '#991B1B' },
-  { id: 5, title: '5. Renewed & Active', titleBn: '৫. সক্রিয় ও নবায়িত', color: '#059669', badgeColor: '#ECFDF5', textColor: '#065F46' },
+  { id: 1, title: '1. Internal Review', titleBn: '১. অভ্যন্তরীণ মূল্যায়ন', color: 'var(--status-purple)', badgeColor: 'var(--status-purple-bg)', textColor: 'var(--status-purple-text)' },
+  { id: 2, title: '2. Application Filed', titleBn: '২. আবেদন দাখিল', color: 'var(--status-info)', badgeColor: 'var(--status-info-bg)', textColor: 'var(--status-info)' },
+  { id: 3, title: '3. Field Inspection', titleBn: '৩. মাঠ পরিদর্শন', color: 'var(--status-warning)', badgeColor: 'var(--status-warning-bg)', textColor: 'var(--status-warning-text)' },
+  { id: 4, title: '4. Ministry Vetting', titleBn: '৪. মন্ত্রণালয়ে যাচাই', color: 'var(--brand-crimson)', badgeColor: 'var(--status-danger-bg)', textColor: 'var(--status-danger-text)' },
+  { id: 5, title: '5. Renewed & Active', titleBn: '৫. সক্রিয় ও নবায়িত', color: 'var(--status-success)', badgeColor: 'var(--status-success-bg)', textColor: 'var(--status-success-text)' },
 ];
 
 export default function ComplianceView({ role, lang }: ViewProps) {
@@ -396,9 +396,9 @@ export default function ComplianceView({ role, lang }: ViewProps) {
         </div>
 
         <div className="flex-gap" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ padding: '8px 14px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ShieldCheck size={20} color="#059669" />
-            <div style={{ fontSize: '11.5px', color: '#065F46' }}>
+          <div style={{ padding: '8px 14px', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <ShieldCheck size={20} color="var(--status-success)" />
+            <div style={{ fontSize: '11.5px', color: 'var(--status-success-text)' }}>
               <div style={{ fontWeight: 800, fontSize: '13px' }}>{t('Audit Readiness Score: 94.2%', 'প্ল্যান্ট অডিট প্রস্তুতি স্কোর: ৯৪.২%', lang)}</div>
               <div>{t('Complies with Petroleum Act & DoE 2026', 'পেট্রোলিয়াম আইন ও পরিবেশ সংরক্ষণ বিধি সম্মত', lang)}</div>
             </div>
@@ -417,14 +417,14 @@ export default function ComplianceView({ role, lang }: ViewProps) {
 
       {/* 4-Stat Executive Regulatory Risk Barometer */}
       <div className="responsive-col-4 mb-4" style={{ gap: '14px' }}>
-        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid #DC2626' }}>
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-danger)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
               {t('Immediate Expiry Alert', 'আসন্ন মেয়াদোত্তীর্ণ সতর্কতা', lang)}
             </span>
-            <AlertTriangle size={16} color="#DC2626" />
+            <AlertTriangle size={16} color="var(--status-danger)" />
           </div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: '#DC2626', marginTop: '4px' }}>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-danger)', marginTop: '4px' }}>
             {closestExpiry} {t('Days Left', 'দিন বাকি', lang)}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
@@ -432,14 +432,14 @@ export default function ComplianceView({ role, lang }: ViewProps) {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid #D97706' }}>
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-warning)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
               {t('Shutdown Exposure Risk', 'শাটডাউন রাজস্ব ঝুঁকি', lang)}
             </span>
-            <DollarSign size={16} color="#D97706" />
+            <DollarSign size={16} color="var(--status-warning)" />
           </div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: '#92400E', marginTop: '4px' }}>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-warning-text)', marginTop: '4px' }}>
             ৳ 2.65 Cr <span style={{ fontSize: '12px', fontWeight: 600 }}>/ {t('day', 'দিন', lang)}</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
@@ -447,12 +447,12 @@ export default function ComplianceView({ role, lang }: ViewProps) {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid #059669' }}>
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-success)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
               {t('Active Filings Monitored', 'সক্রিয় তদারকি নথি', lang)}
             </span>
-            <Building size={16} color="#059669" />
+            <Building size={16} color="var(--status-success)" />
           </div>
           <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
             {licenses.length} <span style={{ fontSize: '12px', fontWeight: 600 }}>{t('Permits', 'টি পারমিট', lang)}</span>
@@ -462,14 +462,14 @@ export default function ComplianceView({ role, lang }: ViewProps) {
           </div>
         </div>
 
-        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid #0284C7' }}>
+        <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-info)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
               {t('DoE CEMS Continuous Stream', 'অনলাইন নির্গমন পরিবীক্ষণ', lang)}
             </span>
-            <Leaf size={16} color="#0284C7" />
+            <Leaf size={16} color="var(--status-info)" />
           </div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: '#0369A1', marginTop: '4px' }}>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-info)', marginTop: '4px' }}>
             100% <span style={{ fontSize: '12px', fontWeight: 600 }}>{t('Compliant', 'সম্মত', lang)}</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
@@ -480,8 +480,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
 
       {/* Critical Countdown Warning Strip */}
       <div style={{
-        background: 'linear-gradient(90deg, #7F1424 0%, #A51C30 100%)',
-        color: '#fff',
+        background: 'linear-gradient(90deg, var(--brand-crimson-dark) 0%, var(--brand-crimson) 100%)',
+        color: 'var(--text-on-brand)',
         padding: '14px 20px',
         borderRadius: 'var(--radius-md)',
         marginBottom: '20px',
@@ -494,16 +494,16 @@ export default function ComplianceView({ role, lang }: ViewProps) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 500px' }}>
           <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px', borderRadius: '8px', display: 'flex' }}>
-            <AlertTriangle size={22} color="#F0DFA0" />
+            <AlertTriangle size={22} color="var(--brand-gold-light)" />
           </div>
           <div style={{ fontSize: '13px', lineHeight: 1.5 }}>
-            <div style={{ fontWeight: 800, color: '#FDE68A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ fontWeight: 800, color: 'var(--status-warning-bright)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>{t('CRITICAL COMPLIANCE NOTICE:', 'জরুরি বিধিবদ্ধ নোটিশ:', lang)}</span>
-              <span className="badge danger" style={{ background: '#450A0A', color: '#FCA5A5', border: '1px solid #7F1D1D', fontSize: '10px' }}>
+              <span className="badge danger" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--status-danger-bright)', border: '1px solid var(--status-danger-solid-dark)', fontSize: '10px' }}>
                 {t(`ACTION REQUIRED WITHIN ${mostCriticalLicense?.daysLeft || 7} DAYS`, `${mostCriticalLicense?.daysLeft || 7} দিনের মধ্যে সমাধান প্রয়োজন`, lang)}
               </span>
             </div>
-            <div style={{ color: '#F8FAFC', marginTop: '2px' }}>
+            <div style={{ color: 'var(--text-inverse)', marginTop: '2px' }}>
               {mostCriticalLicense ? (
                 t(
                   `${mostCriticalLicense.title} (${mostCriticalLicense.agency}) has ${mostCriticalLicense.daysLeft} days remaining. Regulatory review pending. Daily shutdown risk: ${mostCriticalLicense.dailyShutdownRiskTk}.`,
@@ -552,8 +552,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                   padding: '4px 10px',
                   borderRadius: 'var(--radius-full)',
                   border: selectedAgencyFilter === f.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                  background: selectedAgencyFilter === f.id ? 'var(--brand-crimson)' : '#fff',
-                  color: selectedAgencyFilter === f.id ? '#fff' : 'var(--brand-slate-700)',
+                  background: selectedAgencyFilter === f.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
+                  color: selectedAgencyFilter === f.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
                   fontWeight: selectedAgencyFilter === f.id ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
@@ -580,7 +580,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--brand-slate-200)',
                   outline: 'none',
-                  background: '#F8FAFC'
+                  background: 'var(--surface-0)'
                 }}
               />
               {searchQuery && (
@@ -641,7 +641,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                           className="k-card"
                           onClick={() => setSelectedLicense(lic)}
                           style={{
-                            borderLeft: isUrgent ? '4px solid #DC2626' : isWarn ? '4px solid #D97706' : '4px solid #059669',
+                            borderLeft: isUrgent ? '4px solid var(--status-danger)' : isWarn ? '4px solid var(--status-warning)' : '4px solid var(--status-success)',
                             cursor: 'pointer',
                             position: 'relative',
                             transition: 'all 0.2s ease',
@@ -650,7 +650,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                             <span className={`k-tag ${lic.tag}`}>{lic.tagLabel}</span>
                             <span className={`k-countdown ${isUrgent ? 'urgent' : isWarn ? 'warning' : 'ok'}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              {isUrgent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#DC2626', animation: 'pulse 1.5s infinite' }} />}
+                              {isUrgent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-danger-solid)', animation: 'pulse 1.5s infinite' }} />}
                               {lic.daysLeft <= 0 ? t('EXPIRED', 'মেয়াদোত্তীর্ণ', lang) : `${lic.daysLeft}d left`}
                             </span>
                           </div>
@@ -674,11 +674,11 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                           <div style={{
                             margin: '8px 0',
                             padding: '4px 8px',
-                            background: isUrgent ? '#FEF2F2' : '#F8FAFC',
+                            background: isUrgent ? 'var(--status-danger-bg)' : 'var(--surface-0)',
                             borderRadius: '4px',
-                            border: `1px solid ${isUrgent ? '#FECACA' : '#E2E8F0'}`,
+                            border: `1px solid ${isUrgent ? 'var(--status-danger-border)' : 'var(--border-1)'}`,
                             fontSize: '10.5px',
-                            color: isUrgent ? '#991B1B' : '#475569',
+                            color: isUrgent ? 'var(--status-danger-text)' : 'var(--text-2)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between'
@@ -702,7 +702,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                               {lic.stage < 5 && (
                                 <button
                                   className="btn-sm-ghost"
-                                  style={{ padding: '3px 8px', fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '2px', color: '#0369A1' }}
+                                  style={{ padding: '3px 8px', fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '2px', color: 'var(--status-info)' }}
                                   onClick={(e) => { e.stopPropagation(); moveLicense(lic.id, 1); }}
                                   title="Advance to next stage"
                                 >
@@ -780,7 +780,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                     <td><span className="badge success">Passed (10 Sep)</span></td>
                     <td><span className="badge success">Operational</span></td>
                   </tr>
-                  <tr style={{ background: '#FFFDF5' }}>
+                  <tr style={{ background: 'var(--status-warning-bg)' }}>
                     <td><strong>Tank #TK-201</strong></td>
                     <td>Emulsion SS-1 (2,000 MT)</td>
                     <td>11.2 mm (Threshold 10.8)</td>
@@ -811,39 +811,39 @@ export default function ComplianceView({ role, lang }: ViewProps) {
               </div>
             </div>
             <span className="badge success" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#059669', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-success-solid)', animation: 'pulse 1.5s infinite' }} />
               Live Telemetry
             </span>
           </div>
           <div className="card-body">
             <div className="responsive-col-2-eq" style={{ gap: '12px' }}>
-              <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
+              <div style={{ background: 'var(--surface-0)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>SO2 Stack Emission</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>142 mg/Nm³</div>
-                <div style={{ fontSize: '10px', color: '#64748B' }}>Limit: &lt; 500 mg/Nm³ (Passed)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>142 mg/Nm³</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Limit: &lt; 500 mg/Nm³ (Passed)</div>
               </div>
 
-              <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
+              <div style={{ background: 'var(--surface-0)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>NOx Stack Emission</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>210 mg/Nm³</div>
-                <div style={{ fontSize: '10px', color: '#64748B' }}>Limit: &lt; 400 mg/Nm³ (Passed)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>210 mg/Nm³</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Limit: &lt; 400 mg/Nm³ (Passed)</div>
               </div>
 
-              <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
+              <div style={{ background: 'var(--surface-0)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>Particulate Matter (PM)</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>38 mg/Nm³</div>
-                <div style={{ fontSize: '10px', color: '#64748B' }}>Limit: &lt; 150 mg/Nm³ (Passed)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>38 mg/Nm³</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Limit: &lt; 150 mg/Nm³ (Passed)</div>
               </div>
 
-              <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #E2E8F0' }}>
+              <div style={{ background: 'var(--surface-0)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>ETP Water Discharge COD</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>82 mg/L</div>
-                <div style={{ fontSize: '10px', color: '#64748B' }}>Limit: &lt; 200 mg/L (Passed)</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>82 mg/L</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Limit: &lt; 200 mg/L (Passed)</div>
               </div>
             </div>
 
-            <div style={{ marginTop: '14px', fontSize: '11px', color: 'var(--brand-slate-700)', background: '#ECFDF5', padding: '10px 14px', borderRadius: '6px', border: '1px solid #A7F3D0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle size={15} color="#059669" />
+            <div style={{ marginTop: '14px', fontSize: '11px', color: 'var(--brand-slate-700)', background: 'var(--status-success-bg)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--status-success-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle size={15} color="var(--status-success)" />
               <span>{t('Telemetry streams 24/7 to DoE Paribesh Bhaban central gateway under ECR 2023 regulations.', 'পরিবেশ সংরক্ষণ বিধিমালা ২০২৩ অনুযায়ী পরিবেশ অধিদপ্তরের কেন্দ্রীয় সার্ভারে অবিচ্ছিন্ন ডাটা সম্প্রচারিত হচ্ছে।', lang)}</span>
             </div>
           </div>
@@ -854,53 +854,53 @@ export default function ComplianceView({ role, lang }: ViewProps) {
       {selectedLicense && (
         <div className="modal-bg" onClick={() => setSelectedLicense(null)}>
           <div className="modal" style={{ maxWidth: '780px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse-2) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ background: 'rgba(255,255,255,0.1)', padding: '8px', borderRadius: '6px' }}>
-                  <Building size={20} color="#FBBF24" />
+                  <Building size={20} color="var(--status-warning-bright)" />
                 </div>
                 <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', fontWeight: 800 }}>
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', fontWeight: 800 }}>
                     {t(selectedLicense.title, selectedLicense.titleBn, lang)}
                   </h3>
-                  <div style={{ fontSize: '11.5px', color: '#94A3B8', marginTop: '2px' }}>
-                    {selectedLicense.agency} • Ref: <span style={{ fontFamily: 'monospace', color: '#CBD5E1' }}>{selectedLicense.refNo}</span>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {selectedLicense.agency} • Ref: <span style={{ fontFamily: 'monospace', color: 'var(--text-inverse-2)' }}>{selectedLicense.refNo}</span>
                   </div>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedLicense(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedLicense(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '76vh', overflowY: 'auto', padding: '20px' }}>
               {/* Summary 4-Metrics Strip */}
               <div className="responsive-col-4" style={{ gap: '10px', marginBottom: '18px' }}>
-                <div style={{ background: '#F8FAFC', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>Statutory Law</div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '2px', lineHeight: 1.3 }}>{selectedLicense.sroLawRef}</div>
                 </div>
 
-                <div style={{ background: '#F8FAFC', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>Renewal Fee</div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#059669', marginTop: '2px' }}>{selectedLicense.feeAmountTk}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>{selectedLicense.feeAmountTk}</div>
                 </div>
 
-                <div style={{ background: '#F8FAFC', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>Days to Expiry</div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: selectedLicense.daysLeft <= 30 ? '#DC2626' : '#D97706', marginTop: '2px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: selectedLicense.daysLeft <= 30 ? 'var(--status-danger)' : 'var(--status-warning)', marginTop: '2px' }}>
                     {selectedLicense.daysLeft} Days
                   </div>
                 </div>
 
-                <div style={{ background: '#F8FAFC', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>Stoppage Risk</div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#991B1B', marginTop: '2px' }}>{selectedLicense.dailyShutdownRiskTk}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-danger-text)', marginTop: '2px' }}>{selectedLicense.dailyShutdownRiskTk}</div>
                 </div>
               </div>
 
               {/* Statutory Non-Compliance Penalty Alert */}
               <div style={{
-                background: '#FEF2F2',
-                border: '1px solid #FCA5A5',
+                background: 'var(--status-danger-bg)',
+                border: '1px solid var(--status-danger-bright)',
                 borderRadius: '8px',
                 padding: '12px 14px',
                 marginBottom: '18px',
@@ -908,10 +908,10 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                 alignItems: 'flex-start',
                 gap: '10px'
               }}>
-                <ShieldAlert size={18} color="#DC2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <ShieldAlert size={18} color="var(--status-danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '12px', lineHeight: 1.5 }}>
-                  <strong style={{ color: '#991B1B' }}>{t('Statutory Non-Compliance Penalty Exposure:', 'বিধিবদ্ধ আইন অমান্যের সম্ভাব্য দণ্ড ও ঝুঁকি:', lang)}</strong>
-                  <div style={{ color: '#7F1D1D', marginTop: '2px' }}>
+                  <strong style={{ color: 'var(--status-danger-text)' }}>{t('Statutory Non-Compliance Penalty Exposure:', 'বিধিবদ্ধ আইন অমান্যের সম্ভাব্য দণ্ড ও ঝুঁকি:', lang)}</strong>
+                  <div style={{ color: 'var(--status-danger-text)', marginTop: '2px' }}>
                     {t(selectedLicense.statutoryPenalty, selectedLicense.statutoryPenaltyBn, lang)}
                   </div>
                 </div>
@@ -919,7 +919,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
 
               {/* Inspector & Government Vetting Dossier */}
               <div style={{
-                background: '#F1F5F9',
+                background: 'var(--surface-2)',
                 padding: '12px 14px',
                 borderRadius: '8px',
                 marginBottom: '18px',
@@ -956,7 +956,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>
                     {t('Last Physical Site Inspection', 'সর্বশেষ সরেজমিন পরিদর্শন', lang)}
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#0369A1', marginTop: '2px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info)', marginTop: '2px' }}>
                     {selectedLicense.lastInspection}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
@@ -966,7 +966,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
               </div>
 
               {/* Pipeline Stage Visual Stepper */}
-              <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+              <div style={{ marginBottom: '18px', background: 'var(--surface-0)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                     {t('Regulatory Approval Life-Cycle Progress:', 'অনুমোদন ও নবায়ন অগ্রগতির ধাপ:', lang)}
@@ -988,8 +988,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                           textAlign: 'center',
                           fontSize: '11px',
                           borderRadius: '6px',
-                          background: isCurrent ? s.color : isPassed ? '#059669' : '#E2E8F0',
-                          color: isCurrent || isPassed ? '#fff' : '#64748B',
+                          background: isCurrent ? s.color : isPassed ? 'var(--status-success)' : 'var(--text-inverse)',
+                          color: isCurrent || isPassed ? 'var(--text-on-brand)' : 'var(--text-3)',
                           fontWeight: isCurrent ? 800 : 600,
                           transition: 'all 0.2s ease',
                           display: 'flex',
@@ -999,7 +999,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         }}
                       >
                         {isPassed && <Check size={12} />}
-                        {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#fff' }} />}
+                        {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--surface-1)' }} />}
                         <span>{s.id}. {t(s.title.split('. ')[1], s.titleBn.split('. ')[1], lang)}</span>
                       </div>
                     );
@@ -1028,8 +1028,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         alignItems: 'center',
                         gap: '12px',
                         padding: '10px 14px',
-                        background: c.passed ? '#ECFDF5' : '#FFFDF5',
-                        border: c.passed ? '1px solid #A7F3D0' : '1px solid #FDE68A',
+                        background: c.passed ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                        border: c.passed ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
                         borderRadius: '6px',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
@@ -1040,9 +1040,9 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         type="checkbox"
                         checked={c.passed}
                         onChange={() => {}}
-                        style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#059669' }}
+                        style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--status-success-solid)' }}
                       />
-                      <span style={{ fontSize: '12.5px', color: c.passed ? '#065F46' : '#92400E', flex: 1, fontWeight: 500 }}>
+                      <span style={{ fontSize: '12.5px', color: c.passed ? 'var(--status-success-text)' : 'var(--status-warning-text)', flex: 1, fontWeight: 500 }}>
                         {c.item}
                       </span>
                       <span style={{
@@ -1050,8 +1050,8 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         fontWeight: 800,
                         padding: '2px 8px',
                         borderRadius: '4px',
-                        background: c.passed ? '#D1FAE5' : '#FEF3C7',
-                        color: c.passed ? '#059669' : '#D97706'
+                        background: c.passed ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                        color: c.passed ? 'var(--status-success)' : 'var(--status-warning)'
                       }}>
                         {c.passed ? t('VERIFIED', 'যাচাইকৃত', lang) : t('ACTION REQUIRED', 'পদক্ষেপ প্রয়োজন', lang)}
                       </span>
@@ -1075,13 +1075,13 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         padding: '10px 14px',
-                        background: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
+                        background: 'var(--surface-0)',
+                        border: '1px solid var(--border-1)',
                         borderRadius: '6px'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '6px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
+                        <div style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)', padding: '6px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
                           PDF
                         </div>
                         <div>
@@ -1144,26 +1144,26 @@ export default function ComplianceView({ role, lang }: ViewProps) {
       {showDoLetterModal && (
         <div className="modal-bg" onClick={() => setShowDoLetterModal(null)}>
           <div className="modal" style={{ maxWidth: '720px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#7F1424', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ background: 'rgba(255,255,255,0.15)', padding: '6px', borderRadius: '6px' }}>
-                  <FileText size={18} color="#FDE68A" />
+                  <FileText size={18} color="var(--status-warning-bright)" />
                 </div>
                 <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px', fontWeight: 800 }}>
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px', fontWeight: 800 }}>
                     {t('Demi-Official (DO) Expedited Clearance Letter', 'জরুরি ডিও লেটার ড্রাফট ও প্রেরণ', lang)}
                   </h3>
-                  <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
                     {t("Office of the Chairman & Managing Director • Bashundhara Group", "চেয়ারম্যানের নির্বাহী দপ্তর • বসুন্ধরা গ্রুপ", lang)}
                   </div>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowDoLetterModal(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowDoLetterModal(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto', padding: '20px' }}>
               {/* Delivery Channel Selector */}
-              <div style={{ marginBottom: '14px', background: '#F8FAFC', padding: '10px 14px', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+              <div style={{ marginBottom: '14px', background: 'var(--surface-0)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', marginBottom: '6px' }}>
                   {t('Select Official Dispatch Channel:', 'সরকারি প্রেরণ মাধ্যম নির্বাচন করুন:', lang)}
                 </div>
@@ -1179,7 +1179,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                         name="deliveryMode"
                         checked={doLetterDeliveryMode === c.id}
                         onChange={() => setDoLetterDeliveryMode(c.id as any)}
-                        style={{ accentColor: '#7F1424' }}
+                        style={{ accentColor: 'var(--brand-crimson-dark)' }}
                       />
                       <span>{t(c.label, c.labelBn, lang)}</span>
                     </label>
@@ -1189,24 +1189,24 @@ export default function ComplianceView({ role, lang }: ViewProps) {
 
               {/* Official Letterhead Simulation */}
               <div style={{
-                border: '2px solid #E2E8F0',
+                border: '2px solid var(--border-1)',
                 padding: '24px',
                 borderRadius: '6px',
-                background: '#FFFFFF',
+                background: 'var(--surface-1)',
                 fontSize: '12.5px',
                 lineHeight: 1.6,
                 boxShadow: 'var(--shadow-xs)',
                 position: 'relative'
               }}>
                 {/* Official Letterhead Crest */}
-                <div style={{ textAlign: 'center', borderBottom: '2px solid #7F1424', paddingBottom: '12px', marginBottom: '16px' }}>
-                  <div style={{ fontWeight: 900, fontSize: '16px', color: '#7F1424', letterSpacing: '0.8px' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--brand-crimson-dark)', paddingBottom: '12px', marginBottom: '16px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '16px', color: 'var(--brand-crimson-dark)', letterSpacing: '0.8px' }}>
                     BASHUNDHARA GROUP
                   </div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-1)', marginTop: '2px' }}>
                     OFFICE OF THE CHAIRMAN & MANAGING DIRECTOR
                   </div>
-                  <div style={{ fontSize: '10px', color: '#64748B', marginTop: '2px' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '2px' }}>
                     Corporate HQ, Plot-3, Block-G, Umme Kulsum Road, Bashundhara R/A, Dhaka-1229, Bangladesh
                   </div>
                 </div>
@@ -1219,7 +1219,7 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <strong>Date:</strong> 29 October 2026<br />
-                    <span style={{ fontSize: '10.5px', color: '#DC2626', fontWeight: 700 }}>PRIORITY: IMMEDIATE EXPEDITE</span>
+                    <span style={{ fontSize: '10.5px', color: 'var(--status-danger)', fontWeight: 700 }}>PRIORITY: IMMEDIATE EXPEDITE</span>
                   </div>
                 </div>
 
@@ -1227,24 +1227,24 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                 <div style={{ marginBottom: '14px' }}>
                   <strong>To:</strong><br />
                   <strong>{showDoLetterModal.ministryRecipient}</strong><br />
-                  <span style={{ color: '#475569' }}>{showDoLetterModal.ministryAddress}</span>
+                  <span style={{ color: 'var(--text-2)' }}>{showDoLetterModal.ministryAddress}</span>
                 </div>
 
                 {/* Subject Line */}
                 <div style={{
                   fontWeight: 800,
                   marginBottom: '12px',
-                  color: '#0F172A',
-                  background: '#F8FAFC',
+                  color: 'var(--text-1)',
+                  background: 'var(--surface-0)',
                   padding: '8px 10px',
                   borderRadius: '4px',
-                  borderLeft: '4px solid #7F1424'
+                  borderLeft: '4px solid var(--brand-crimson-dark)'
                 }}>
                   SUBJECT: REQUEST FOR EXPEDITIOUS ISSUANCE OF STATUTORY RENEWAL FOR {showDoLetterModal.title.toUpperCase()} — KERANIGANJ REFINERY & TANK FARM COMPLEX.
                 </div>
 
                 {/* Letter Body */}
-                <div style={{ color: '#334155', textAlign: 'justify' }}>
+                <div style={{ color: 'var(--text-2)', textAlign: 'justify' }}>
                   Dear Sir,<br /><br />
                   Greetings from Bashundhara Oil & Gas Company Limited (BOGCL).<br /><br />
                   I have the honor to bring to your kind notice that all mandatory statutory safety audits, engineering validations, and technical inspection requisites for the subject filing (<strong>{showDoLetterModal.refNo}</strong>) have been executed with 100% compliance in accordance with the <strong>{showDoLetterModal.sroLawRef}</strong>.<br /><br />
@@ -1261,11 +1261,11 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      border: '2px dashed #DC2626',
+                      border: '2px dashed var(--status-danger)',
                       borderRadius: '50%',
                       width: '64px',
                       height: '64px',
-                      color: '#DC2626',
+                      color: 'var(--status-danger)',
                       fontSize: '9px',
                       fontWeight: 800,
                       transform: 'rotate(-10deg)',
@@ -1273,9 +1273,9 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                     }}>
                       BOGCL<br />SEAL
                     </div>
-                    <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>Ahmed Akbar Sobhan</div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>Chairman & Managing Director</div>
-                    <div style={{ fontSize: '10px', color: '#64748B' }}>Bashundhara Group</div>
+                    <div style={{ fontWeight: 800, color: 'var(--text-1)', fontSize: '13px' }}>Ahmed Akbar Sobhan</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Chairman & Managing Director</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Bashundhara Group</div>
                   </div>
                 </div>
               </div>
@@ -1318,21 +1318,21 @@ export default function ComplianceView({ role, lang }: ViewProps) {
       {showSyncModal && (
         <div className="modal-bg" onClick={() => setShowSyncModal(false)}>
           <div className="modal" style={{ maxWidth: '640px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px', borderRadius: '6px' }}>
-                  <RefreshCw size={18} color="#38BDF8" className={isSyncing ? 'spin' : ''} />
+                  <RefreshCw size={18} color="var(--status-info-bright)" className={isSyncing ? 'spin' : ''} />
                 </div>
                 <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px', fontWeight: 800 }}>
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px', fontWeight: 800 }}>
                     {t('Bangladesh Govt Regulatory Telemetry Gateway', 'সরকারি নিয়ন্ত্রক টেলিমেট্রি গেটওয়ে', lang)}
                   </h3>
-                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     {t('Real-time connection with National Single Window (NSW) & e-Nothi', 'জাতীয় সিঙ্গেল উইন্ডো ও ই-নথি সিস্টেম সিঙ্ক্রোনাইজেশন', lang)}
                   </div>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowSyncModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowSyncModal(false)}>×</button>
             </div>
 
             <div className="modal-body" style={{ padding: '20px' }}>
@@ -1358,15 +1358,15 @@ export default function ComplianceView({ role, lang }: ViewProps) {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '12px 14px',
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
+                      background: 'var(--surface-0)',
+                      border: '1px solid var(--border-1)',
                       borderRadius: '8px'
                     }}
                   >
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>{gate.name}</div>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                        {gate.entity} • Protocol: <span style={{ fontFamily: 'monospace', color: '#0369A1' }}>{gate.code}</span>
+                        {gate.entity} • Protocol: <span style={{ fontFamily: 'monospace', color: 'var(--status-info)' }}>{gate.code}</span>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>

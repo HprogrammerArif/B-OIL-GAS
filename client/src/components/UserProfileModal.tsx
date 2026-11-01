@@ -113,9 +113,9 @@ export default function UserProfileModal({
         {/* Header */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0B132B 0%, #111A38 100%)',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)',
             padding: '20px 24px',
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             borderBottom: '2px solid var(--brand-gold)',
             position: 'relative',
           }}
@@ -131,7 +131,7 @@ export default function UserProfileModal({
               borderRadius: '50%',
               width: '32px',
               height: '32px',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -148,7 +148,7 @@ export default function UserProfileModal({
                 height: '56px',
                 borderRadius: '50%',
                 background: meta.avatarColor,
-                color: '#fff',
+                color: 'var(--text-on-brand)',
                 border: '2.5px solid var(--brand-gold)',
                 display: 'flex',
                 alignItems: 'center',
@@ -162,7 +162,7 @@ export default function UserProfileModal({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#fff' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                   {t(meta.name, meta.nameBn, lang)}
                 </h3>
                 <span className="badge gold" style={{ fontSize: '10px', fontFamily: 'monospace' }}>{meta.empId}</span>
@@ -199,7 +199,7 @@ export default function UserProfileModal({
                   fontSize: '11.5px',
                   fontWeight: activeTab === tab.id ? 700 : 500,
                   background: activeTab === tab.id ? 'var(--brand-crimson)' : 'rgba(255,255,255,0.06)',
-                  color: '#fff',
+                  color: 'var(--text-on-brand)',
                   border: activeTab === tab.id ? '1px solid var(--brand-gold)' : '1px solid transparent',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -226,7 +226,7 @@ export default function UserProfileModal({
                   <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '2px', wordBreak: 'break-all' }}>
                     {meta.email}
                   </div>
-                  <div style={{ fontSize: '10.5px', color: '#059669', marginTop: '2px' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '2px' }}>
                     ✓ {t('Verified Company Account', 'যাচাইকৃত অফিস ইমেইল', lang)}
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export default function UserProfileModal({
                 </div>
               </div>
 
-              <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '10px 14px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', color: '#065F46' }}>
+              <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 14px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', color: 'var(--status-success-text)' }}>
                 <CheckCircle size={16} />
                 <span>
                   <strong>{t('Employee Gate ID Active:', 'কর্মী গেট আইডি সক্রিয়:', lang)}</strong>{' '}
@@ -304,14 +304,14 @@ export default function UserProfileModal({
           {/* 2. Security Tab */}
           {activeTab === 'security' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50, #F8FAFC)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Key size={18} />
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '13px' }}>{t('2-Step Login Verification', '২-ধাপ লগইন যাচাইকরণ', lang)}</div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                       {t('Protects your account with mobile verification on new computers', 'নতুন ডিভাইসে লগইনের সময় মোবাইল কোড যাচাই সক্রিয়', lang)}
                     </div>
                   </div>
@@ -319,14 +319,14 @@ export default function UserProfileModal({
                 <span className="badge success">{t('Active', 'চালু আছে', lang)}</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50, #F8FAFC)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--status-info-bg)', color: 'var(--status-info)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Shield size={18} />
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '13px' }}>{t('Official Digital Approval Stamp', 'দাপ্তরিক ডিজিটাল স্বাক্ষর সনদ', lang)}</div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                       {t('Verified employee signature for official documents and vouchers', 'নোট-শিট ও ভাউচার স্বাক্ষরের জন্য অনুমোদিত ডিজিটাল সিল', lang)}
                     </div>
                   </div>
@@ -334,14 +334,14 @@ export default function UserProfileModal({
                 <span className="badge gold">{t('Valid till Dec 2027', 'ডিসেম্বর ২০২৭ পর্যন্ত বৈধ', lang)}</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50, #F8FAFC)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#FDF2F8', color: '#DB2777', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--status-pink-bg)', color: 'var(--status-pink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Lock size={18} />
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '13px' }}>{t('Account Password', 'অ্যাকাউন্ট পাসওয়ার্ড', lang)}</div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                       {t('Last updated 35 days ago', 'সর্বশেষ পরিবর্তন ৩৫ দিন আগে', lang)}
                     </div>
                   </div>
@@ -369,12 +369,12 @@ export default function UserProfileModal({
           {/* 3. Leave Handover / Delegation Tab (Persisted in OperationsStore!) */}
           {activeTab === 'delegation' && (
             <div>
-              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#92400E', fontSize: '13px' }}>
+              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: 'var(--status-warning-text)', fontSize: '13px' }}>
                   <Award size={16} />
                   <span>{t('Leave & Travel Duty Handover', 'ছুটি বা সফরকালীন দায়িত্ব হস্তান্তর', lang)}</span>
                 </div>
-                <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: '#B45309' }}>
+                <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--status-warning-text)' }}>
                   {t(
                     'When you are away on leave or visiting a site, choose a trusted senior colleague to review urgent requests on your behalf.',
                     'আপনি ছুটিতে বা সফরে থাকলে জরুরি অনুমোদন ও কাজ পরিচালনার জন্য একজন সহকর্মীকে দায়িত্ব দিন।',
@@ -436,7 +436,7 @@ export default function UserProfileModal({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 14px',
-                    background: profilePrefs.delegationActive ? '#ECFDF5' : 'var(--brand-slate-50, #F8FAFC)',
+                    background: profilePrefs.delegationActive ? 'var(--status-success-bg)' : 'var(--brand-slate-50)',
                     borderRadius: '8px',
                     border: '1px solid var(--brand-slate-200)',
                     marginTop: '6px',
@@ -445,12 +445,12 @@ export default function UserProfileModal({
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: profilePrefs.delegationActive ? '#065F46' : 'var(--brand-slate-800)' }}>
+                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: profilePrefs.delegationActive ? 'var(--status-success-text)' : 'var(--brand-slate-800)' }}>
                       {profilePrefs.delegationActive
                         ? t(`Handover Active → ${profilePrefs.delegateToName}`, `হস্তান্তর চালু → ${profilePrefs.delegateToName}`, lang)
                         : t('Status: Off (You are handling your own requests)', 'স্ট্যাটাস: বন্ধ (আপনি নিজেই দায়িত্ব পালন করছেন)', lang)}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#64748B' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                       {profilePrefs.delegationActive
                         ? t(`Active until ${profilePrefs.delegateUntil}. Saved automatically.`, `${profilePrefs.delegateUntil} পর্যন্ত কার্যকর থাকবে।`, lang)
                         : t('Turn this on before starting annual leave or outstation travel.', 'ছুটি বা সফরে যাওয়ার আগে এটি চালু করুন।', lang)}
@@ -485,9 +485,9 @@ export default function UserProfileModal({
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '10px 14px',
-                      background: sess.isCurrent ? '#F0FDF4' : 'var(--brand-slate-50, #F8FAFC)',
+                      background: sess.isCurrent ? 'var(--status-success-bg)' : 'var(--brand-slate-50)',
                       borderRadius: '8px',
-                      border: sess.isCurrent ? '1px solid #BBF7D0' : '1px solid var(--brand-slate-200)',
+                      border: sess.isCurrent ? '1px solid var(--status-success-border)' : '1px solid var(--brand-slate-200)',
                       fontSize: '12px',
                       gap: '10px',
                       flexWrap: 'wrap',
@@ -495,7 +495,7 @@ export default function UserProfileModal({
                   >
                     <div>
                       <div style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{sess.device}</div>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                         {sess.location} • {sess.lastActive}
                       </div>
                     </div>
@@ -537,7 +537,7 @@ export default function UserProfileModal({
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '10px 14px',
-                      background: 'var(--brand-slate-50, #F8FAFC)',
+                      background: 'var(--brand-slate-50)',
                       borderRadius: '6px',
                       border: '1px solid var(--brand-slate-200)',
                       fontSize: '11.5px',
@@ -548,7 +548,7 @@ export default function UserProfileModal({
                     <div>
                       <strong style={{ color: 'var(--brand-slate-900)' }}>{log.time}</strong> •{' '}
                       <span style={{ color: 'var(--brand-slate-600)' }}>{log.loc}</span>
-                      <div style={{ fontSize: '10.5px', color: '#64748B' }}>{log.device}</div>
+                      <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>{log.device}</div>
                     </div>
                     <span className="badge success" style={{ fontSize: '10px' }}>{log.status}</span>
                   </div>
@@ -562,7 +562,7 @@ export default function UserProfileModal({
         <div
           style={{
             padding: '14px 24px',
-            background: 'var(--brand-slate-50, #F8FAFC)',
+            background: 'var(--brand-slate-50)',
             borderTop: '1px solid var(--brand-slate-200)',
             display: 'flex',
             justifyContent: 'space-between',

@@ -34,17 +34,17 @@ export const PLANT_ZONES = [
 ] as const;
 
 export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: string; color: string; icon: string }> = {
-  near_miss: { label: 'Near-Miss (Zero Injury)', labelBn: 'নিয়ার-মিস (ক্ষতিহীন)', color: '#3B82F6', icon: '⚡' },
-  hazard_observation: { label: 'Hazard / Unsafe Condition', labelBn: 'বিপদ পর্যবেক্ষণ', color: '#8B5CF6', icon: '👁️' },
-  first_aid: { label: 'First-Aid Case (FAC)', labelBn: 'প্রাথমিক চিকিৎসা ঘটনা', color: '#10B981', icon: '🩹' },
-  medical_treatment: { label: 'Medical Treatment (MTC)', labelBn: 'চিকিৎসাকেন্দ্রে চিকিৎসা', color: '#F59E0B', icon: '🏥' },
-  lost_time: { label: 'Lost Time Injury (LTI)', labelBn: 'কর্মবিরতিজনিত আঘাত', color: '#DC2626', icon: '🛑' },
-  spill_leak: { label: 'Spill / Leak (LOPC)', labelBn: 'তেল / বিটুমিন নিঃসরণ', color: '#EA580C', icon: '🛢️' },
-  pressure_piping: { label: 'Pressure & Piping Alert', labelBn: 'পাইপলাইন ও চাপ ত্রুটি', color: '#D97706', icon: '⚠️' },
-  fire_thermal: { label: 'Thermal / Flare Anomaly', labelBn: 'অগ্নিকাণ্ড বা অতিরিক্ত তাপ', color: '#B91C1C', icon: '🔥' },
-  electrical_arc: { label: 'Electrical Arc / Fault', labelBn: 'বৈদ্যুতিক ত্রুটি', color: '#6366F1', icon: '⚡' },
-  equipment_damage: { label: 'Equipment / Asset Damage', labelBn: 'যন্ত্রাংশের ক্ষতি', color: '#64748B', icon: '⚙️' },
-  environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: '#059669', icon: '🌱' },
+  near_miss: { label: 'Near-Miss (Zero Injury)', labelBn: 'নিয়ার-মিস (ক্ষতিহীন)', color: 'var(--status-info)', icon: '⚡' },
+  hazard_observation: { label: 'Hazard / Unsafe Condition', labelBn: 'বিপদ পর্যবেক্ষণ', color: 'var(--status-purple)', icon: '👁️' },
+  first_aid: { label: 'First-Aid Case (FAC)', labelBn: 'প্রাথমিক চিকিৎসা ঘটনা', color: 'var(--status-success)', icon: '🩹' },
+  medical_treatment: { label: 'Medical Treatment (MTC)', labelBn: 'চিকিৎসাকেন্দ্রে চিকিৎসা', color: 'var(--status-warning)', icon: '🏥' },
+  lost_time: { label: 'Lost Time Injury (LTI)', labelBn: 'কর্মবিরতিজনিত আঘাত', color: 'var(--status-danger)', icon: '🛑' },
+  spill_leak: { label: 'Spill / Leak (LOPC)', labelBn: 'তেল / বিটুমিন নিঃসরণ', color: 'var(--status-warning)', icon: '🛢️' },
+  pressure_piping: { label: 'Pressure & Piping Alert', labelBn: 'পাইপলাইন ও চাপ ত্রুটি', color: 'var(--status-warning)', icon: '⚠️' },
+  fire_thermal: { label: 'Thermal / Flare Anomaly', labelBn: 'অগ্নিকাণ্ড বা অতিরিক্ত তাপ', color: 'var(--status-danger-text)', icon: '🔥' },
+  electrical_arc: { label: 'Electrical Arc / Fault', labelBn: 'বৈদ্যুতিক ত্রুটি', color: 'var(--status-purple)', icon: '⚡' },
+  equipment_damage: { label: 'Equipment / Asset Damage', labelBn: 'যন্ত্রাংশের ক্ষতি', color: 'var(--text-3)', icon: '⚙️' },
+  environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: 'var(--status-success)', icon: '🌱' },
 };
 
 export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
@@ -517,17 +517,17 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
             onClick={() => setShowEmergencyModal(true)}
           >
-            <Siren size={15} color="#DC2626" />
+            <Siren size={15} color="var(--status-danger)" />
             {t('Emergency Siren & Drill', 'জরুরি সাইরেন ও ইভাকুয়েশন ড্রিল', lang)}
           </button>
 
           <button
             type="button"
             className="btn-sm-ghost"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, background: '#F5F3FF', color: '#7C3AED', border: '1px solid #DDD6FE' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, background: 'var(--status-purple-bg)', color: 'var(--status-purple)', border: '1px solid var(--status-purple-border)' }}
             onClick={() => setShowQuickHazardModal(true)}
           >
-            <Zap size={14} color="#7C3AED" />
+            <Zap size={14} color="var(--status-purple)" />
             {t('1-Min Quick Hazard Spotter', '১-মিনিট দ্রুত বিপদ পর্যবেক্ষণ', lang)}
           </button>
 
@@ -549,15 +549,15 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {/* ─── 2. REFINERY SAFETY LEADERSHIP KPI DECK ─── */}
       <div className="parcel-kpi-grid mb-4">
         {/* Card 1: Safe Days */}
-        <div className="parcel-kpi-card" style={{ borderColor: '#A7F3D0', background: 'linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%)' }}>
+        <div className="parcel-kpi-card" style={{ borderColor: 'var(--status-success-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-success-bg) 100%)' }}>
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#DCFCE7', color: '#15803D' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success-text)' }}>
               <ShieldCheck size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '9.5px' }}>TARGET: 365 DAYS</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#15803D' }}>{stats.safeDays}</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-success-text)' }}>{stats.safeDays}</div>
             <div className="parcel-kpi-title">{t('Accident-Free Working Days', 'দুর্ঘটনামুক্ত নিরাপদ কর্মদিবস', lang)}</div>
             <div className="parcel-kpi-sub">
               {stats.safeManHours.toLocaleString()} {t('Safe Work Hours (No Lost Time)', 'নিরাপদ কর্মঘণ্টা (কোনো দুর্ঘটনা নেই)', lang)}
@@ -572,13 +572,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#FFFBEB', color: '#D97706' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning)' }}>
               <Clock size={18} />
             </div>
             <span className="badge warn" style={{ fontSize: '9.5px' }}>ACTIVE</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#D97706' }}>{stats.open}</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-warning)' }}>{stats.open}</div>
             <div className="parcel-kpi-title">{t('Open Issues & Investigations', 'চলমান তদন্ত ও সমাধান', lang)}</div>
             <div className="parcel-kpi-sub">
               {stats.closed} {t('Resolved Safely This Year', 'টি ঘটনা সফলভাবে সমাধান হয়েছে', lang)}
@@ -587,15 +587,15 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
         </div>
 
         {/* Card 3: CAPA Closure Rate */}
-        <div className="parcel-kpi-card" style={{ borderColor: '#BFDBFE', background: 'linear-gradient(180deg, #FFFFFF 0%, #EFF6FF 100%)' }}>
+        <div className="parcel-kpi-card" style={{ borderColor: 'var(--status-info-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-info-bg) 100%)' }}>
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#DBEAFE', color: '#1D4ED8' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)' }}>
               <CheckSquare size={18} />
             </div>
             <span className="badge info" style={{ fontSize: '9.5px' }}>TARGET: &gt;85%</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>{stats.capaRate}%</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-info-text)' }}>{stats.capaRate}%</div>
             <div className="parcel-kpi-title">{t('Safety Fix Rate (CAPA)', 'নিরাপত্তা প্রতিকারের হার (CAPA)', lang)}</div>
             <div className="parcel-kpi-sub">
               {t('Fixing problems & preventing recurrence', 'সমস্যা সমাধান ও পুনরাবৃত্তি রোধ', lang)}
@@ -607,16 +607,16 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
         <div
           className={`parcel-kpi-card ${activeTab === 'statutory' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'statutory' ? 'all' : 'statutory')}
-          style={{ cursor: 'pointer', borderColor: '#FECACA', background: 'linear-gradient(180deg, #FFFFFF 0%, #FEF2F2 100%)' }}
+          style={{ cursor: 'pointer', borderColor: 'var(--status-danger-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-danger-bg) 100%)' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#FEE2E2', color: '#B91C1C' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' }}>
               <FileText size={18} />
             </div>
             <span className="badge danger" style={{ fontSize: '9.5px' }}>GOVT DEADLINE</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#B91C1C' }}>{stats.statutory}</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-danger-text)' }}>{stats.statutory}</div>
             <div className="parcel-kpi-title">{t('Govt-Reportable Issues (DoE)', 'সরকারিভাবে রিপোর্টযোগ্য বিষয়', lang)}</div>
             <div className="parcel-kpi-sub">
               {t('Explosives Dept Form B-12 Ready', 'বিস্ফোরক পরিদপ্তর ফর্ম বি-১২ প্রস্তুত', lang)}
@@ -627,13 +627,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
         {/* Card 5: TRIR Safety Frequency */}
         <div className="parcel-kpi-card">
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#F3E8FF', color: '#7E22CE' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' }}>
               <Activity size={18} />
             </div>
             <span className="badge meeting" style={{ fontSize: '9.5px' }}>LOWER IS BETTER</span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#7E22CE' }}>{stats.trir}</div>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-purple-text)' }}>{stats.trir}</div>
             <div className="parcel-kpi-title">{t('Safety Score (Injury Rate - TRIR)', 'নিরাপত্তা স্কোর (আঘাতের হার - TRIR)', lang)}</div>
             <div className="parcel-kpi-sub">
               {t('0.14 vs industry benchmark 0.85', 'শিল্প গড়ের চেয়ে অনেক নিরাপদ (০.১৪)', lang)}
@@ -646,7 +646,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       <div className="card mb-4" style={{ overflow: 'hidden' }}>
         <div className="card-hd">
           <div className="card-hd-left">
-            <div className="card-hd-icon" style={{ background: '#FEF3C7', color: '#B45309' }}>
+            <div className="card-hd-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' }}>
               <Activity size={18} />
             </div>
             <div>
@@ -664,7 +664,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               <button
                 type="button"
                 className="btn-sm-ghost"
-                style={{ fontSize: '11px', background: '#F1F5F9', color: '#0F172A', fontWeight: 700 }}
+                style={{ fontSize: '11px', background: 'var(--surface-2)', color: 'var(--text-1)', fontWeight: 700 }}
                 onClick={() => setMatrixFilter(null)}
               >
                 ✕ {t('Clear Matrix Filter', 'ম্যাট্রিক্স ফিল্টার মুছুন', lang)} (Severity {matrixFilter.level} × Chance {matrixFilter.likelihood})
@@ -727,7 +727,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                                   fontSize: '9px',
                                   fontWeight: 800,
                                   background: 'rgba(0,0,0,0.6)',
-                                  color: '#fff',
+                                  color: 'var(--text-on-brand)',
                                   padding: '1px 4px',
                                   borderRadius: '3px',
                                   whiteSpace: 'nowrap',
@@ -806,7 +806,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
           <button
             type="button"
             className={`parcel-pill-tab ${activeTab === 'statutory' ? 'active' : ''}`}
-            style={{ color: stats.statutory > 0 ? '#DC2626' : undefined }}
+            style={{ color: stats.statutory > 0 ? 'var(--status-danger)' : undefined }}
             onClick={() => { setActiveTab('statutory'); setMatrixFilter(null); }}
           >
             🚨 {t('Govt-Reportable (Explosives Dept)', 'সরকারি নোটিশ রিপোর্টযোগ্য', lang)} ({stats.statutory})
@@ -891,7 +891,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       <div className="incident-list">
         {filteredIncidents.length === 0 ? (
           <div className="card text-center" style={{ padding: '40px 20px', color: 'var(--brand-slate-500)' }}>
-            <ShieldCheck size={36} style={{ margin: '0 auto 10px', color: '#10B981', opacity: 0.8 }} />
+            <ShieldCheck size={36} style={{ margin: '0 auto 10px', color: 'var(--status-success)', opacity: 0.8 }} />
             <h4 style={{ margin: '0 0 4px', fontSize: '15px', color: 'var(--brand-slate-800)' }}>
               {t('No safety incidents match current filter criteria', 'কোনো ইনসিডেন্ট পাওয়া যায়নি', lang)}
             </h4>
@@ -917,7 +917,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       Level {inc.level} · {inc.riskCategory ? inc.riskCategory.toUpperCase() : 'RISK'} (Score {inc.riskScore || (inc.level * 2)})
                     </span>
 
-                    <span className="badge" style={{ background: 'var(--brand-slate-100)', color: typeMeta.color, border: `1px solid ${typeMeta.color}40`, fontSize: '10px', fontWeight: 700 }}>
+                    <span className="badge" style={{ background: 'var(--brand-slate-100)', color: typeMeta.color, border: `1px solid color-mix(in srgb, ${typeMeta.color} 25%, transparent)`, fontSize: '10px', fontWeight: 700 }}>
                       {typeMeta.icon} {typeMeta.label}
                     </span>
 
@@ -950,19 +950,19 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   <div className={`hse-pipeline-step ${currentStage === 'reported' ? 'active' : 'completed'}`}>
                     1. {t('Reported', 'দাখিল', lang)}
                   </div>
-                  <ChevronRight size={10} color="#94A3B8" />
+                  <ChevronRight size={10} color="var(--text-muted)" />
                   <div className={`hse-pipeline-step ${currentStage === 'triaged' ? 'active' : currentStage === 'reported' ? '' : 'completed'}`}>
                     2. {t('Risk Evaluated', 'ঝুঁকি যাচাই', lang)}
                   </div>
-                  <ChevronRight size={10} color="#94A3B8" />
+                  <ChevronRight size={10} color="var(--text-muted)" />
                   <div className={`hse-pipeline-step ${currentStage === 'under_investigation' ? 'active' : (currentStage === 'capa_execution' || currentStage === 'closed') ? 'completed' : ''}`}>
                     3. {t('Root Cause Found', 'তদন্ত ও আরসিএ', lang)}
                   </div>
-                  <ChevronRight size={10} color="#94A3B8" />
+                  <ChevronRight size={10} color="var(--text-muted)" />
                   <div className={`hse-pipeline-step ${currentStage === 'capa_execution' ? 'active' : currentStage === 'closed' ? 'completed' : ''}`}>
                     4. {t('Fixing Problem (CAPA)', 'সিএপিএ প্রয়োগ', lang)}
                   </div>
-                  <ChevronRight size={10} color="#94A3B8" />
+                  <ChevronRight size={10} color="var(--text-muted)" />
                   <div className={`hse-pipeline-step ${currentStage === 'closed' ? 'active' : ''}`}>
                     5. {t('Approved & Closed', 'সমাপ্ত ও অনুমোদিত', lang)}
                   </div>
@@ -982,9 +982,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                 {/* Immediate Containment Banner */}
                 {inc.immediateActionsTaken && (
-                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: '#166534' }}>
+                  <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: 'var(--status-success-text)' }}>
                     <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                      <ShieldCheck size={14} color="#15803D" />
+                      <ShieldCheck size={14} color="var(--status-success-text)" />
                       {t('Immediate Safety Containment Actions Executed:', 'তাৎক্ষণিক গৃহীত নিরাপত্তা পদক্ষেপ:', lang)}
                     </div>
                     <div>{inc.immediateActionsTaken}</div>
@@ -993,9 +993,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                 {/* Injured Person Info (if any) */}
                 {inc.personsInvolved && inc.personsInvolved.some(p => p.involvementType === 'injured') && (
-                  <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: '#991B1B' }}>
+                  <div style={{ background: 'var(--status-danger-bg)', border: '1px solid var(--status-danger-border)', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: 'var(--status-danger-text)' }}>
                     <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                      <HeartPulse size={14} color="#DC2626" />
+                      <HeartPulse size={14} color="var(--status-danger)" />
                       {t('First-Aid / Occupational Health Record:', 'পেশাগত স্বাস্থ্য ও প্রাথমিক চিকিৎসা বিবরণ:', lang)}
                     </div>
                     {inc.personsInvolved.filter(p => p.involvementType === 'injured').map((p, idx) => (
@@ -1013,7 +1013,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       <strong>{t('Root Cause:', 'মূল কারণ:', lang)}</strong> {inc.rootCause}
                     </div>
                     {inc.fiveWhys?.fishboneCategory && (
-                      <span className="badge" style={{ background: '#DBEAFE', color: '#1D4ED8', fontSize: '9.5px', fontWeight: 800 }}>
+                      <span className="badge" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)', fontSize: '9.5px', fontWeight: 800 }}>
                         {inc.fiveWhys.fishboneCategory.toUpperCase()} CAUSE
                       </span>
                     )}
@@ -1030,7 +1030,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                         ({completedCount}/{totalCapaCount || 1} {t('Completed', 'সম্পন্ন', lang)})
                       </span>
                     </div>
-                    <span style={{ fontWeight: 800, color: capaPct === 100 ? '#15803D' : '#D97706' }}>
+                    <span style={{ fontWeight: 800, color: capaPct === 100 ? 'var(--status-success-text)' : 'var(--status-warning)' }}>
                       {capaPct}%
                     </span>
                   </div>
@@ -1040,7 +1040,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       style={{
                         height: '100%',
                         width: `${capaPct}%`,
-                        background: capaPct === 100 ? '#10B981' : 'linear-gradient(90deg, #F59E0B 0%, #10B981 100%)',
+                        background: capaPct === 100 ? 'var(--status-success-solid)' : 'linear-gradient(90deg, var(--status-warning-solid) 0%, var(--status-success-solid) 100%)',
                         transition: 'width 0.3s ease',
                       }}
                     />
@@ -1053,8 +1053,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                         <div
                           key={c.id}
                           style={{
-                            background: c.status === 'completed' ? '#F0FDF4' : '#FFFDF5',
-                            border: c.status === 'completed' ? '1px solid #BBF7D0' : '1px solid #FDE68A',
+                            background: c.status === 'completed' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                            border: c.status === 'completed' ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
                             padding: '8px 12px',
                             borderRadius: '6px',
                             display: 'flex',
@@ -1072,8 +1072,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                                 style={{
                                   fontSize: '8.5px',
                                   padding: '1px 5px',
-                                  background: c.actionType === 'immediate_containment' ? '#EFF6FF' : c.actionType === 'preventive' ? '#F5F3FF' : '#FEF3C7',
-                                  color: c.actionType === 'immediate_containment' ? '#1D4ED8' : c.actionType === 'preventive' ? '#7C3AED' : '#B45309',
+                                  background: c.actionType === 'immediate_containment' ? 'var(--status-info-bg)' : c.actionType === 'preventive' ? 'var(--status-purple-bg)' : 'var(--status-warning-bg)',
+                                  color: c.actionType === 'immediate_containment' ? 'var(--status-info-text)' : c.actionType === 'preventive' ? 'var(--status-purple)' : 'var(--status-warning-text)',
                                 }}
                               >
                                 {c.actionType.replace('_', ' ').toUpperCase()}
@@ -1082,7 +1082,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                             </div>
                             <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
                               Owner: <strong>{c.owner}</strong> • Target: {c.dueDate}
-                              {c.verificationEvidence && <span style={{ color: '#059669', marginLeft: '8px' }}>✓ {c.verificationEvidence}</span>}
+                              {c.verificationEvidence && <span style={{ color: 'var(--status-success)', marginLeft: '8px' }}>✓ {c.verificationEvidence}</span>}
                             </div>
                           </div>
 
@@ -1093,7 +1093,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                               <button
                                 type="button"
                                 className="btn-sm-ghost"
-                                style={{ fontSize: '10.5px', padding: '3px 8px', background: '#10B981', color: '#fff' }}
+                                style={{ fontSize: '10.5px', padding: '3px 8px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)' }}
                                 onClick={() => toggleCapaStatus(inc.id, c.id, 'completed', 'Verified compliant on site')}
                               >
                                 <Check size={11} /> {t('Mark Done', 'সম্পন্ন করুন', lang)}
@@ -1108,14 +1108,14 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                 {/* Closure Stamp (if closed) */}
                 {inc.closureSignOff && (
-                  <div style={{ background: '#FFFDF5', border: '1.5px dashed #D4AF37', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ background: 'var(--status-warning-bg)', border: '1.5px dashed var(--brand-gold)', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Award size={16} color="#D4AF37" />
+                      <Award size={16} color="var(--brand-gold)" />
                       <div>
                         <strong>ISO 45001 Closure Verified:</strong> {inc.closureSignOff.remarks}
                       </div>
                     </div>
-                    <div style={{ fontSize: '10.5px', color: '#92400E' }}>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-warning-text)' }}>
                       Safety: {inc.closureSignOff.safetyOfficerName} • GM: {inc.closureSignOff.gmName}
                     </div>
                   </div>
@@ -1141,7 +1141,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
                       onClick={() => openRcaModal(inc)}
                     >
-                      <HelpCircle size={12} color="#D97706" />
+                      <HelpCircle size={12} color="var(--status-warning)" />
                       {inc.fiveWhys ? t('5-Whys & Fishbone', '৫-হোয়াইজ ও ফিশবোন', lang) : t('Run RCA', 'কারণ অনুসন্ধান', lang)}
                     </button>
 
@@ -1152,7 +1152,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
                       onClick={() => setSelectedCapaIncident(inc)}
                     >
-                      <CheckSquare size={12} color="#2563EB" />
+                      <CheckSquare size={12} color="var(--status-info)" />
                       {t('Manage CAPA', 'সিএপিএ পরিচালনা', lang)}
                     </button>
 
@@ -1172,7 +1172,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       <button
                         type="button"
                         className="btn-primary"
-                        style={{ fontSize: '11px', padding: '4px 10px', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
+                        style={{ fontSize: '11px', padding: '4px 10px', background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
                         onClick={() => setSelectedSignoffIncident(inc)}
                       >
                         <CheckCircle size={12} />
@@ -1191,34 +1191,34 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {showLogWizard && (
         <div className="modal-bg" onClick={() => setShowLogWizard(false)}>
           <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #0B132B 0%, #1A2649 100%)', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldAlert size={18} color="#FBBF24" />
-                  <h3 style={{ color: '#fff', margin: 0 }}>
+                  <ShieldAlert size={18} color="var(--status-warning-bright)" />
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                     {t('Industrial Incident & Near-Miss Reporting Wizard', 'কারখানা ইনসিডেন্ট ও নিয়ার-মিস রিপোর্টিং উইজার্ড', lang)}
                   </h3>
                 </div>
-                <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
                   Step {wizardStep} of 3: {wizardStep === 1 ? 'Event Category & Plant Zone' : wizardStep === 2 ? 'Severity & Immediate Containment' : 'Personnel & Evidence'}
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowLogWizard(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowLogWizard(false)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '76vh', overflowY: 'auto' }}>
               {/* Wizard Steps Tracker */}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 1 ? 800 : 500, color: wizardStep === 1 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 1 ? 'var(--brand-crimson)' : '#CBD5E1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>1</span>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 1 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>1</span>
                   <span>1. Event Details</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 2 ? 800 : 500, color: wizardStep === 2 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 2 ? 'var(--brand-crimson)' : '#CBD5E1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>2</span>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 2 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>2</span>
                   <span>2. Risk & Containment</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 3 ? 800 : 500, color: wizardStep === 3 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 3 ? 'var(--brand-crimson)' : '#CBD5E1', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>3</span>
+                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 3 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>3</span>
                   <span>3. People & Evidence</span>
                 </div>
               </div>
@@ -1241,7 +1241,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                               padding: '8px 10px',
                               borderRadius: '6px',
                               border: isSelected ? `2px solid ${m.color}` : '1px solid var(--brand-slate-200)',
-                              background: isSelected ? `${m.color}15` : '#fff',
+                              background: isSelected ? `color-mix(in srgb, ${m.color} 8%, transparent)` : 'var(--surface-1)',
                               color: isSelected ? m.color : 'var(--brand-slate-700)',
                               fontWeight: isSelected ? 800 : 600,
                               fontSize: '11px',
@@ -1366,8 +1366,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   {/* Dynamic Risk Score Preview */}
                   <div
                     style={{
-                      background: wizardSeverity * wizardLikelihood >= 15 ? '#FEF2F2' : wizardSeverity * wizardLikelihood >= 10 ? '#FFF7ED' : '#F0FDF4',
-                      border: wizardSeverity * wizardLikelihood >= 15 ? '1px solid #F87171' : wizardSeverity * wizardLikelihood >= 10 ? '1px solid #FDBA74' : '1px solid #86EFAC',
+                      background: wizardSeverity * wizardLikelihood >= 15 ? 'var(--status-danger-bg)' : wizardSeverity * wizardLikelihood >= 10 ? 'var(--status-warning-bg)' : 'var(--status-success-bg)',
+                      border: wizardSeverity * wizardLikelihood >= 15 ? '1px solid var(--status-danger-bright)' : wizardSeverity * wizardLikelihood >= 10 ? '1px solid var(--status-warning-border)' : '1px solid var(--status-success-bright)',
                       padding: '10px 14px',
                       borderRadius: '8px',
                       display: 'flex',
@@ -1379,7 +1379,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', textTransform: 'uppercase' }}>
                         Calculated Petroleum Risk Rating:
                       </div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: wizardSeverity * wizardLikelihood >= 15 ? '#991B1B' : wizardSeverity * wizardLikelihood >= 10 ? '#C2410C' : '#15803D' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: wizardSeverity * wizardLikelihood >= 15 ? 'var(--status-danger-text)' : wizardSeverity * wizardLikelihood >= 10 ? 'var(--status-warning-text)' : 'var(--status-success-text)' }}>
                         Score: {wizardSeverity * wizardLikelihood} / 25 ({wizardSeverity * wizardLikelihood >= 15 ? 'EXTREME RISK' : wizardSeverity * wizardLikelihood >= 10 ? 'HIGH RISK' : wizardSeverity * wizardLikelihood >= 5 ? 'MEDIUM RISK' : 'LOW RISK'})
                       </div>
                     </div>
@@ -1420,7 +1420,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   </div>
 
                   {wizardHasInjury && (
-                    <div style={{ background: '#FFFDF5', border: '1px solid #FDE68A', padding: '12px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div className="form-group">
                         <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Select Injured Personnel', 'আহত কর্মী নির্বাচন', lang)}</label>
                         <select
@@ -1479,13 +1479,13 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       borderRadius: '8px',
                       padding: '14px',
                       textAlign: 'center',
-                      background: wizardSimulatePhoto ? '#F0FDF4' : '#FAFAFA',
+                      background: wizardSimulatePhoto ? 'var(--status-success-bg)' : 'var(--surface-0)',
                       cursor: 'pointer',
                     }}
                     onClick={() => setWizardSimulatePhoto(!wizardSimulatePhoto)}
                   >
-                    <Camera size={24} style={{ color: wizardSimulatePhoto ? '#15803D' : 'var(--brand-slate-400)', margin: '0 auto 6px' }} />
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: wizardSimulatePhoto ? '#15803D' : 'var(--brand-slate-700)' }}>
+                    <Camera size={24} style={{ color: wizardSimulatePhoto ? 'var(--status-success-text)' : 'var(--brand-slate-400)', margin: '0 auto 6px' }} />
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: wizardSimulatePhoto ? 'var(--status-success-text)' : 'var(--brand-slate-700)' }}>
                       {wizardSimulatePhoto ? '✓ 2 Photographs Attached (Site Perimeter & Valve Flange)' : '+ Click to Simulate On-Site Camera Photo Evidence'}
                     </div>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
@@ -1533,7 +1533,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 <button
                   type="button"
                   className="btn-primary"
-                  style={{ background: 'linear-gradient(135deg, #A51C30 0%, #7F1424 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)' }}
                   onClick={handleWizardSubmit}
                 >
                   <ShieldAlert size={15} />
@@ -1549,18 +1549,18 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {showQuickHazardModal && (
         <div className="modal-bg" onClick={() => setShowQuickHazardModal(false)}>
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#7C3AED', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-purple-solid)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Zap size={18} color="#FDE047" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Zap size={18} color="var(--status-warning-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('1-Minute "Good Catch" / Hazard Observation', '১-মিনিট বিপদ ও নিয়ার-মিস পর্যবেক্ষণ রিপোর্ট', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowQuickHazardModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowQuickHazardModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', padding: '10px 12px', borderRadius: '6px', fontSize: '11.5px', color: '#6D28D9', marginBottom: '14px' }}>
+              <div style={{ background: 'var(--status-purple-bg)', border: '1px solid var(--status-purple-border)', padding: '10px 12px', borderRadius: '6px', fontSize: '11.5px', color: 'var(--status-purple-text)', marginBottom: '14px' }}>
                 💡 <strong>Zero-Blame Culture:</strong> Reporting an unsafe condition or near-miss protects everyone. Observations are logged positively in the refinery safety recognition roster.
               </div>
 
@@ -1616,7 +1616,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               <button
                 type="button"
                 className="btn-primary"
-                style={{ background: '#7C3AED', borderColor: '#7C3AED' }}
+                style={{ background: 'var(--status-purple-solid)', borderColor: 'var(--status-purple)' }}
                 onClick={handleQuickHazardSubmit}
               >
                 <Send size={13} />
@@ -1631,19 +1631,19 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {selectedRcaIncident && (
         <div className="modal-bg" onClick={() => setSelectedRcaIncident(null)}>
           <div className="modal" style={{ maxWidth: '720px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse-2) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <HelpCircle size={18} color="#FBBF24" />
-                  <h3 style={{ color: '#fff', margin: 0 }}>
+                  <HelpCircle size={18} color="var(--status-warning-bright)" />
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                     {t('Problem Root Cause Finder (5-Whys & Fishbone Diagram)', 'সমস্যার মূল কারণ অনুসন্ধান (৫-কেন ও ফিশবোন চার্ট)', lang)}
                   </h3>
                 </div>
-                <div style={{ fontSize: '11px', color: '#CBD5E1', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
                   {selectedRcaIncident.incNo} • {selectedRcaIncident.title}
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedRcaIncident(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedRcaIncident(null)}>×</button>
             </div>
 
             {/* RCA Sub-Navigation */}
@@ -1685,7 +1685,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
               {rcaSubTab === '5whys' ? (
                 <div>
-                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px', color: '#92400E' }}>
+                  <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px', color: 'var(--status-warning-text)' }}>
                     💡 <strong>Easy Investigation Method:</strong> By asking "Why did this happen?" a few times in a row, we find the real underlying cause instead of just treating surface symptoms.
                   </div>
 
@@ -1700,10 +1700,10 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                             fontSize: '11px',
                             padding: '6px 12px',
                             borderRadius: '6px',
-                            border: rcaCategory === cat ? '2px solid #1D4ED8' : '1px solid var(--brand-slate-200)',
-                            background: rcaCategory === cat ? '#EFF6FF' : '#FFF',
+                            border: rcaCategory === cat ? '2px solid var(--status-info-solid-dark)' : '1px solid var(--brand-slate-200)',
+                            background: rcaCategory === cat ? 'var(--status-info-bg)' : 'var(--surface-1)',
                             fontWeight: rcaCategory === cat ? 800 : 600,
-                            color: rcaCategory === cat ? '#1D4ED8' : 'var(--brand-slate-700)',
+                            color: rcaCategory === cat ? 'var(--status-info-text)' : 'var(--brand-slate-700)',
                             cursor: 'pointer',
                           }}
                           onClick={() => setRcaCategory(cat)}
@@ -1716,8 +1716,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
 
                   {/* 5 Whys Visual Stack */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ borderLeft: '3px solid #60A5FA', paddingLeft: '12px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8' }}>1. Why did the direct physical problem occur?</label>
+                    <div style={{ borderLeft: '3px solid var(--status-info-bright)', paddingLeft: '12px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info-text)' }}>1. Why did the direct physical problem occur?</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1728,8 +1728,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       />
                     </div>
 
-                    <div style={{ borderLeft: '3px solid #3B82F6', paddingLeft: '12px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8' }}>2. Why did that happen?</label>
+                    <div style={{ borderLeft: '3px solid var(--status-info)', paddingLeft: '12px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info-text)' }}>2. Why did that happen?</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1740,8 +1740,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       />
                     </div>
 
-                    <div style={{ borderLeft: '3px solid #2563EB', paddingLeft: '12px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8' }}>3. Why did that happen?</label>
+                    <div style={{ borderLeft: '3px solid var(--status-info)', paddingLeft: '12px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info-text)' }}>3. Why did that happen?</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1752,8 +1752,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       />
                     </div>
 
-                    <div style={{ borderLeft: '3px solid #1D4ED8', paddingLeft: '12px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 800, color: '#1D4ED8' }}>4. Why did that happen?</label>
+                    <div style={{ borderLeft: '3px solid var(--status-info-solid-dark)', paddingLeft: '12px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info-text)' }}>4. Why did that happen?</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1764,12 +1764,12 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                       />
                     </div>
 
-                    <div style={{ borderLeft: '3px solid #B91C1C', paddingLeft: '12px', background: '#FEF2F2', padding: '10px 12px', borderRadius: '6px' }}>
-                      <label style={{ fontSize: '11.5px', fontWeight: 900, color: '#B91C1C' }}>5. Systemic Root Cause (The Core Preventable Flaw):</label>
+                    <div style={{ borderLeft: '3px solid var(--status-danger-solid-dark)', paddingLeft: '12px', background: 'var(--status-danger-bg)', padding: '10px 12px', borderRadius: '6px' }}>
+                      <label style={{ fontSize: '11.5px', fontWeight: 900, color: 'var(--status-danger-text)' }}>5. Systemic Root Cause (The Core Preventable Flaw):</label>
                       <textarea
                         rows={2}
                         className="form-input"
-                        style={{ fontSize: '12px', width: '100%', marginTop: '4px', borderColor: '#FCA5A5' }}
+                        style={{ fontSize: '12px', width: '100%', marginTop: '4px', borderColor: 'var(--status-danger-bright)' }}
                         value={rcaWhy5}
                         onChange={(e) => setRcaWhy5(e.target.value)}
                         placeholder="e.g. Enforce mandatory ERP safety stock of 10 Viton gaskets and require material verification in turnaround checklist."
@@ -1779,7 +1779,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 </div>
               ) : (
                 <div>
-                  <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px', color: 'var(--brand-slate-700)' }}>
+                  <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', fontSize: '12px', color: 'var(--brand-slate-700)' }}>
                     📊 <strong>Ishikawa 6M Cause Mapping:</strong> Map contributing factors across the 6 industrial dimensions (People, Machine, Method, Material, Measurement, Environment).
                   </div>
 
@@ -1869,23 +1869,23 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {selectedCapaIncident && (
         <div className="modal-bg" onClick={() => setSelectedCapaIncident(null)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckSquare size={18} color="#34D399" />
-                  <h3 style={{ color: '#fff', margin: 0 }}>
+                  <CheckSquare size={18} color="var(--status-success-bright)" />
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                     {t('Safety Action Manager (Fix & Prevent - CAPA)', 'নিরাপত্তা প্রতিকার ও প্রতিরোধমূলক কাজ (CAPA)', lang)}
                   </h3>
                 </div>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   {selectedCapaIncident.incNo} • {selectedCapaIncident.title}
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedCapaIncident(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedCapaIncident(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '9px 12px', borderRadius: '6px', fontSize: '11.5px', color: '#166534', marginBottom: '14px' }}>
+              <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '9px 12px', borderRadius: '6px', fontSize: '11.5px', color: 'var(--status-success-text)', marginBottom: '14px' }}>
                 💡 <strong>What is CAPA?</strong> Corrective actions fix the problem immediately. Preventive actions change maintenance or processes so the issue never happens again.
               </div>
 
@@ -1899,8 +1899,8 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                     <div
                       key={c.id}
                       style={{
-                        background: c.status === 'completed' ? '#F0FDF4' : '#FFFDF5',
-                        border: c.status === 'completed' ? '1px solid #BBF7D0' : '1px solid #FDE68A',
+                        background: c.status === 'completed' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                        border: c.status === 'completed' ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
                         padding: '10px 12px',
                         borderRadius: '6px',
                         display: 'flex',
@@ -1919,7 +1919,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
                           Owner: <strong>{c.owner}</strong> • Due: {c.dueDate}
-                          {c.verificationEvidence && <span style={{ color: '#059669', marginLeft: '6px' }}>({c.verificationEvidence})</span>}
+                          {c.verificationEvidence && <span style={{ color: 'var(--status-success)', marginLeft: '6px' }}>({c.verificationEvidence})</span>}
                         </div>
                       </div>
 
@@ -1930,7 +1930,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                           <button
                             type="button"
                             className="btn-primary"
-                            style={{ fontSize: '11px', padding: '4px 8px', background: '#10B981', borderColor: '#10B981' }}
+                            style={{ fontSize: '11px', padding: '4px 8px', background: 'var(--status-success-solid)', borderColor: 'var(--status-success)' }}
                             onClick={() => {
                               toggleCapaStatus(selectedCapaIncident.id, c.id, 'completed', 'Completed & tested by technician');
                               showToast(t(`Action #${c.id} marked completed!`, 'পদক্ষেপটি সম্পন্ন হয়েছে।', lang), 'success');
@@ -2030,35 +2030,35 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {selectedDossierIncident && (
         <div className="modal-bg" onClick={() => setSelectedDossierIncident(null)}>
           <div className="modal" style={{ maxWidth: '720px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#7F1424', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FileText size={18} color="#FDE68A" />
-                  <h3 style={{ color: '#fff', margin: 0 }}>
+                  <FileText size={18} color="var(--status-warning-bright)" />
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                     {t('Official Government Incident Report (Form B-12)', 'সরকারি ফর্ম বি-১২ ইনসিডেন্ট রিপোর্ট', lang)}
                   </h3>
                 </div>
-                <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
                   Department of Explosives (DoE) & Bangladesh Petroleum Act Compliance Dossier
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedDossierIncident(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedDossierIncident(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
               {/* Document Letterhead */}
-              <div style={{ border: '2px solid #E2E8F0', padding: '18px', borderRadius: '6px', background: '#FAFAFA', color: '#0F172A' }}>
-                <div style={{ textAlign: 'center', borderBottom: '2px solid #A51C30', paddingBottom: '12px', marginBottom: '14px' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 900, color: '#7F1424', letterSpacing: '0.5px' }}>
+              <div style={{ border: '2px solid var(--border-1)', padding: '18px', borderRadius: '6px', background: 'var(--surface-0)', color: 'var(--text-1)' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '12px', marginBottom: '14px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--brand-crimson-dark)', letterSpacing: '0.5px' }}>
                     BASHUNDHARA OIL AND GAS COMPANY LIMITED (BOGCL)
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                     Keraniganj Bitumen Refinery Complex & Bulk Petroleum Terminal • Dhaka, Bangladesh
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '6px', color: '#0F172A', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '6px', color: 'var(--text-1)', textTransform: 'uppercase' }}>
                     FORM B-12: STATUTORY NOTICE OF INDUSTRIAL OCCURRENCE
                   </div>
-                  <div style={{ fontSize: '10px', color: '#64748B' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>
                     Pursuant to Bangladesh Petroleum Act 1934 & Environment Conservation Rules
                   </div>
                 </div>
@@ -2072,37 +2072,37 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                   <div><strong>Severity Rating:</strong> Level {selectedDossierIncident.level} (Risk Score: {selectedDossierIncident.riskScore || 6})</div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #CBD5E1', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
-                  <div style={{ fontWeight: 800, color: '#0F172A', marginBottom: '4px' }}>1. Incident Narrative & Event Description:</div>
-                  <div style={{ color: '#334155', lineHeight: 1.5 }}>
+                <div style={{ borderTop: '1px solid var(--border-2)', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-1)', marginBottom: '4px' }}>1. Incident Narrative & Event Description:</div>
+                  <div style={{ color: 'var(--text-2)', lineHeight: 1.5 }}>
                     {selectedDossierIncident.title}. Immediate containment executed by on-duty crew.
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #CBD5E1', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
-                  <div style={{ fontWeight: 800, color: '#0F172A', marginBottom: '4px' }}>2. Immediate Safety Containment Actions Taken:</div>
-                  <div style={{ color: '#334155', lineHeight: 1.5 }}>
+                <div style={{ borderTop: '1px solid var(--border-2)', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-1)', marginBottom: '4px' }}>2. Immediate Safety Containment Actions Taken:</div>
+                  <div style={{ color: 'var(--text-2)', lineHeight: 1.5 }}>
                     {selectedDossierIncident.immediateActionsTaken || 'Area cordoned off and safety valves isolated.'}
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #CBD5E1', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
-                  <div style={{ fontWeight: 800, color: '#0F172A', marginBottom: '4px' }}>3. 5-Whys Root Cause Analysis (RCA):</div>
-                  <div style={{ color: '#334155', lineHeight: 1.5 }}>
+                <div style={{ borderTop: '1px solid var(--border-2)', paddingTop: '10px', fontSize: '12px', marginBottom: '12px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-1)', marginBottom: '4px' }}>3. 5-Whys Root Cause Analysis (RCA):</div>
+                  <div style={{ color: 'var(--text-2)', lineHeight: 1.5 }}>
                     {selectedDossierIncident.rootCause}
                   </div>
                   {selectedDossierIncident.fiveWhys && (
-                    <div style={{ marginTop: '6px', fontSize: '11px', color: '#1E40AF', background: '#EFF6FF', padding: '6px 10px', borderRadius: '4px' }}>
+                    <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--status-info-text)', background: 'var(--status-info-bg)', padding: '6px 10px', borderRadius: '4px' }}>
                       Primary Factor: <strong>{selectedDossierIncident.fiveWhys.fishboneCategory}</strong> • Systemic flaw validated under ISO 45001 protocol.
                     </div>
                   )}
                 </div>
 
-                <div style={{ borderTop: '1px solid #CBD5E1', paddingTop: '10px', fontSize: '12px', marginBottom: '14px' }}>
-                  <div style={{ fontWeight: 800, color: '#0F172A', marginBottom: '4px' }}>4. Corrective & Preventive Action (CAPA) Log:</div>
+                <div style={{ borderTop: '1px solid var(--border-2)', paddingTop: '10px', fontSize: '12px', marginBottom: '14px' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--text-1)', marginBottom: '4px' }}>4. Corrective & Preventive Action (CAPA) Log:</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {(selectedDossierIncident.capaItems || []).map((c, i) => (
-                      <div key={c.id} style={{ fontSize: '11.5px', color: '#334155' }}>
+                      <div key={c.id} style={{ fontSize: '11.5px', color: 'var(--text-2)' }}>
                         {i + 1}. [{c.actionType.toUpperCase()}] {c.description} — <em>Owner: {c.owner} ({c.status.toUpperCase()})</em>
                       </div>
                     ))}
@@ -2110,17 +2110,17 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 </div>
 
                 {/* Sign-Off Stamps */}
-                <div className="responsive-col-2-eq" style={{ gap: '16px', borderTop: '2px solid #CBD5E1', paddingTop: '14px', marginTop: '10px' }}>
-                  <div style={{ textAlign: 'center', border: '1px dashed #059669', padding: '10px', borderRadius: '4px', background: '#F0FDF4' }}>
-                    <div style={{ fontSize: '11px', color: '#059669', fontWeight: 900 }}>✓ VERIFIED BY EHS HEAD</div>
+                <div className="responsive-col-2-eq" style={{ gap: '16px', borderTop: '2px solid var(--border-2)', paddingTop: '14px', marginTop: '10px' }}>
+                  <div style={{ textAlign: 'center', border: '1px dashed var(--status-success)', padding: '10px', borderRadius: '4px', background: 'var(--status-success-bg)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 900 }}>✓ VERIFIED BY EHS HEAD</div>
                     <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '2px' }}>Farhana Kabir</div>
-                    <div style={{ fontSize: '10px', color: '#64748B' }}>Lead Safety Inspector • BOGCL</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Lead Safety Inspector • BOGCL</div>
                   </div>
 
-                  <div style={{ textAlign: 'center', border: '1px dashed #A51C30', padding: '10px', borderRadius: '4px', background: '#FEF2F2' }}>
-                    <div style={{ fontSize: '11px', color: '#A51C30', fontWeight: 900 }}>★ APPROVED BY PLANT GM</div>
+                  <div style={{ textAlign: 'center', border: '1px dashed var(--brand-crimson)', padding: '10px', borderRadius: '4px', background: 'var(--status-danger-bg)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--brand-crimson)', fontWeight: 900 }}>★ APPROVED BY PLANT GM</div>
                     <div style={{ fontSize: '12px', fontWeight: 800, marginTop: '2px' }}>Engr. Md. Harunur Rashid</div>
-                    <div style={{ fontSize: '10px', color: '#64748B' }}>Plant GM & Licensed Controller</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Plant GM & Licensed Controller</div>
                   </div>
                 </div>
               </div>
@@ -2148,18 +2148,18 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {selectedSignoffIncident && (
         <div className="modal-bg" onClick={() => setSelectedSignoffIncident(null)}>
           <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#047857', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-success-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Award size={18} color="#FDE047" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Award size={18} color="var(--status-warning-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Executive Review & Final Incident Closure Sign-Off', 'নির্বাহী মূল্যায়ন ও আনুষ্ঠানিক ইনসিডেন্ট সমাপ্তি অনুমোদন', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedSignoffIncident(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedSignoffIncident(null)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: '#166534', marginBottom: '14px' }}>
+              <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', color: 'var(--status-success-text)', marginBottom: '14px' }}>
                 ✓ <strong>ISO 45001 Closure Prerequisite:</strong> All assigned CAPA items must be executed and inspected before executive sign-off.
               </div>
 
@@ -2199,7 +2199,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               <button
                 type="button"
                 className="btn-primary"
-                style={{ background: '#059669', borderColor: '#059669' }}
+                style={{ background: 'var(--status-success-solid)', borderColor: 'var(--status-success)' }}
                 onClick={handleSignOffClosure}
               >
                 <Award size={14} />
@@ -2214,22 +2214,22 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
       {showEmergencyModal && (
         <div className="modal-bg" onClick={() => setShowEmergencyModal(false)}>
           <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertOctagon size={20} color="#FBBF24" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <AlertOctagon size={20} color="var(--status-warning-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Emergency Refinery Shutdown & Muster Drill', 'জরুরি রিফাইনারি শাটডাউন ও ড্রিল প্রটোকল', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowEmergencyModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowEmergencyModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
               <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                  <Siren size={30} color="#DC2626" />
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--status-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                  <Siren size={30} color="var(--status-danger)" />
                 </div>
-                <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#991B1B', margin: '0 0 6px' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-danger-text)', margin: '0 0 6px' }}>
                   Keraniganj Complex Emergency Readiness
                 </h4>
                 <p style={{ fontSize: '12px', color: 'var(--brand-slate-600)', maxWidth: '420px', margin: '0 auto' }}>
@@ -2237,9 +2237,9 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
                 </p>
               </div>
 
-              <div style={{ background: '#FFFDF5', border: '1px solid #FDE68A', padding: '12px', borderRadius: '6px', fontSize: '12px' }}>
-                <div style={{ fontWeight: 700, color: '#92400E', marginBottom: '6px' }}>Automatic Safety Interlocks Triggered:</div>
-                <ul style={{ margin: 0, paddingLeft: '18px', color: '#78350F', lineHeight: 1.6 }}>
+              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px', borderRadius: '6px', fontSize: '12px' }}>
+                <div style={{ fontWeight: 700, color: 'var(--status-warning-text)', marginBottom: '6px' }}>Automatic Safety Interlocks Triggered:</div>
+                <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--status-warning-text)', lineHeight: 1.6 }}>
                   <li>Main Crude/Bitumen Feed Valve V-101: <strong>Instant Pneumatic Closure</strong></li>
                   <li>Nitrogen Blanket Purge System: <strong>Activated on Tanks TK-101 to TK-108</strong></li>
                   <li>Evacuation Assembly Points A, B, C: <strong>Biometric Headcount Enabled</strong></li>
@@ -2252,7 +2252,7 @@ export default function IncidentView({ role, lang, onNavigate }: ViewProps) {
               <button
                 type="button"
                 className="btn-danger"
-                style={{ background: '#DC2626', color: '#fff', fontWeight: 800 }}
+                style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontWeight: 800 }}
                 onClick={() => {
                   setShowEmergencyModal(false);
                   showToast(t('EMERGENCY SIREN TRIGGERED! All 8 refinery valves isolated. SMS dispatched to Chairman and Fire Dept.', 'জরুরি সাইরেন সক্রিয়! প্ল্যান্টের ভালভ বিচ্ছিন্ন ও চেয়ারম্যান মহোদয়ের দপ্তরে বার্তা প্রেরণ করা হয়েছে।', lang), 'gold');

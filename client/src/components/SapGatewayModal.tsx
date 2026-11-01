@@ -12,23 +12,23 @@ export default function SapGatewayModal({ onClose, lang }: SapGatewayModalProps)
   return (
     <div className="modal-bg" onClick={onClose}>
       <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #0B132B 0%, #0369A1 100%)' }}>
-          <h3 style={{ color: '#fff' }}>
-            <Database size={18} color="#38BDF8" />
+        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid) 100%)' }}>
+          <h3 style={{ color: 'var(--text-on-brand)' }}>
+            <Database size={18} color="var(--status-info-bright)" />
             <span>{t('Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সংযোগ স্ট্যাটাস', lang)}</span>
           </h3>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
 
         <div className="modal-body">
-          <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '18px' }}>
+          <div style={{ background: 'var(--status-info-bg)', border: '1px solid var(--status-info-border)', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <Server size={18} color="#0284C7" />
-              <strong style={{ fontSize: '13px', color: '#0369A1' }}>
+              <Server size={18} color="var(--status-info)" />
+              <strong style={{ fontSize: '13px', color: 'var(--status-info)' }}>
                 {t('All Company Offices & Plant Connected Live', 'প্রধান কার্যালয় ও কেরানীগঞ্জ প্ল্যান্ট সরাসরি সংযুক্ত', lang)}
               </strong>
             </div>
-            <p style={{ fontSize: '12px', color: '#0C4A6E', lineHeight: 1.5, margin: 0 }}>
+            <p style={{ fontSize: '12px', color: 'var(--status-info-text)', lineHeight: 1.5, margin: 0 }}>
               {t(
                 'Every approval, expense voucher, vehicle fuel slip, equipment record, and daily staff check-in entered in OneOps automatically updates our central Accounting, HR, and Plant records without double entry.',
                 'ওয়ানঅপ্স-এ প্রদত্ত প্রতিটি অনুমোদন, ব্যয় ভাউচার, গাড়ির জ্বালানি স্লিপ, সম্পদের হিসাব ও কর্মী উপস্থিতি স্বয়ংক্রিয়ভাবে কেন্দ্রীয় হিসাব ও এইচআর সিস্টেমে যুক্ত হয়।',
@@ -75,15 +75,15 @@ export default function SapGatewayModal({ onClose, lang }: SapGatewayModalProps)
             </div>
           </div>
 
-          <div className="responsive-col-2-eq" style={{ gap: '12px', fontSize: '11.5px', background: 'var(--brand-slate-50, #F8FAFC)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', marginBottom: 0 }}>
+          <div className="responsive-col-2-eq" style={{ gap: '12px', fontSize: '11.5px', background: 'var(--brand-slate-50)', padding: '12px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', marginBottom: 0 }}>
             <div>
-              <span style={{ color: '#059669', fontWeight: 700 }}>✓ {t('Easy for All Staff', 'সকল কর্মীর জন্য সহজ', lang)}</span>
+              <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ {t('Easy for All Staff', 'সকল কর্মীর জন্য সহজ', lang)}</span>
               <div style={{ color: 'var(--brand-slate-500)' }}>
                 {t('Simple web & mobile screens for office staff, plant engineers, and drivers.', 'অফিস কর্মী, প্রকৌশলী ও ড্রাইভারদের জন্য সহজ ইন্টারফেস।', lang)}
               </div>
             </div>
             <div>
-              <span style={{ color: '#059669', fontWeight: 700 }}>✓ {t('Automatic Backup', 'স্বয়ংক্রিয় ব্যাকআপ', lang)}</span>
+              <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ {t('Automatic Backup', 'স্বয়ংক্রিয় ব্যাকআপ', lang)}</span>
               <div style={{ color: 'var(--brand-slate-500)' }}>
                 {t('Records stay safe even during temporary internet interruptions.', 'ইন্টারনেট ধীর থাকলেও কোনো তথ্য হারায় না।', lang)}
               </div>

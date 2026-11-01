@@ -303,11 +303,11 @@ export default function FleetView({ role, lang }: ViewProps) {
                 ? t('My Official Vehicle Requisitions & Duty Travel Desk', 'আমার দাপ্তরিক যানবাহন আবেদন ও ট্রাভেল ডেস্ক', lang)
                 : t('Fleet Command, Driver Pool & Requisition Dispatch Desk', 'যানবাহন বহর কমান্ড, চালক পুল ও ডেসপ্যাচ কন্ট্রোল রুম', lang)}
             </h2>
-            <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' }}>
+            <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: 'var(--status-info-bg)', color: 'var(--status-info-text)', border: '1px solid var(--status-info-border)' }}>
               {isDriver ? 'Driver Terminal' : isEmployee ? 'Staff Portal' : 'BOGCL Central Logistics'}
             </span>
             {!isEmployee && !isDriver && (
-              <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: '#ECFDF5', color: '#059669', border: '1px solid #A7F3D0' }}>
+              <span style={{ padding: isChatTabActive ? '1px 8px' : '3px 10px', borderRadius: '20px', fontSize: isChatTabActive ? '10px' : '11px', fontWeight: 700, background: 'var(--status-success-bg)', color: 'var(--status-success)', border: '1px solid var(--status-success-border)' }}>
                 {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
               </span>
             )}
@@ -349,9 +349,9 @@ export default function FleetView({ role, lang }: ViewProps) {
               alignItems: 'center',
               gap: '6px',
               borderRadius: isChatTabActive ? '7px' : '9px',
-              border: unreadNotifCount > 0 ? '1.5px solid #A51C30' : '1px solid #CBD5E1',
-              backgroundColor: unreadNotifCount > 0 ? 'rgba(165, 28, 48, 0.06)' : '#FFFFFF',
-              color: unreadNotifCount > 0 ? '#A51C30' : '#475569',
+              border: unreadNotifCount > 0 ? '1.5px solid var(--brand-crimson)' : '1px solid var(--border-2)',
+              backgroundColor: unreadNotifCount > 0 ? 'rgba(165, 28, 48, 0.06)' : 'var(--surface-1)',
+              color: unreadNotifCount > 0 ? 'var(--brand-crimson)' : 'var(--text-2)',
               fontSize: isChatTabActive ? '11px' : '12px',
               fontWeight: 700,
               cursor: 'pointer',
@@ -361,7 +361,7 @@ export default function FleetView({ role, lang }: ViewProps) {
             <Bell size={isChatTabActive ? 12 : 14} aria-hidden />
             <span>{t('Alerts', 'নোটিফিকেশন', lang)}</span>
             {unreadNotifCount > 0 && (
-              <span style={{ backgroundColor: '#A51C30', color: '#fff', borderRadius: '999px', padding: '1px 5px', fontSize: '9.5px', fontWeight: 800 }}>
+              <span style={{ backgroundColor: 'var(--brand-crimson)', color: 'var(--text-on-brand)', borderRadius: '999px', padding: '1px 5px', fontSize: '9.5px', fontWeight: 800 }}>
                 {unreadNotifCount}
               </span>
             )}
@@ -380,16 +380,16 @@ export default function FleetView({ role, lang }: ViewProps) {
                   alignItems: 'center',
                   gap: '6px',
                   borderRadius: '9px',
-                  border: '1.5px solid #CBD5E1',
-                  backgroundColor: '#FFFFFF',
-                  color: '#1E293B',
+                  border: '1.5px solid var(--border-2)',
+                  backgroundColor: 'var(--surface-1)',
+                  color: 'var(--text-1)',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                 }}
               >
-                <Truck size={15} color="#D97706" aria-hidden />
+                <Truck size={15} color="var(--status-warning)" aria-hidden />
                 <span>{t('Register Vehicle', 'গাড়ি যুক্ত করুন', lang)}</span>
               </button>
 
@@ -403,16 +403,16 @@ export default function FleetView({ role, lang }: ViewProps) {
                   alignItems: 'center',
                   gap: '6px',
                   borderRadius: '9px',
-                  border: '1.5px solid #CBD5E1',
-                  backgroundColor: '#FFFFFF',
-                  color: '#1E293B',
+                  border: '1.5px solid var(--border-2)',
+                  backgroundColor: 'var(--surface-1)',
+                  color: 'var(--text-1)',
                   fontSize: '12px',
                   fontWeight: 700,
                   cursor: 'pointer',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                 }}
               >
-                <UserCheck size={15} color="#10B981" aria-hidden />
+                <UserCheck size={15} color="var(--status-success)" aria-hidden />
                 <span>{t('Enroll Driver', 'চালক যুক্ত করুন', lang)}</span>
               </button>
             </>
@@ -431,8 +431,8 @@ export default function FleetView({ role, lang }: ViewProps) {
                 gap: isChatTabActive ? '5px' : '8px',
                 borderRadius: isChatTabActive ? '7px' : '9px',
                 border: 'none',
-                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)',
+                color: 'var(--text-on-brand)',
                 fontSize: isChatTabActive ? '11px' : '12.5px',
                 fontWeight: 800,
                 cursor: 'pointer',
@@ -463,11 +463,11 @@ export default function FleetView({ role, lang }: ViewProps) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 800, color: 'var(--brand-slate-900)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Activity size={14} color="#10B981" />
+              <Activity size={14} color="var(--status-success)" />
               {t('Live Fleet & Crew Availability Pulse:', 'ফ্লিট ও চালক উপস্থিতি লাইভ স্ট্যাটাস:', lang)}
             </span>
             <span className="badge success" style={{ fontSize: '10.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-success-solid)' }} />
               {availableVehiclesCount} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
             </span>
             <span className="badge info" style={{ fontSize: '10.5px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -481,13 +481,13 @@ export default function FleetView({ role, lang }: ViewProps) {
               </span>
             )}
             {sickLeaveDriversCount > 0 && (
-              <span className="badge" style={{ fontSize: '10.5px', background: '#FCE7F3', color: '#BE185D', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span className="badge" style={{ fontSize: '10.5px', background: 'var(--status-pink-bg)', color: 'var(--status-pink)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Activity size={12} />
                 {sickLeaveDriversCount} {t('Driver on Sick Leave', 'চালক অসুস্থতাজনিত ছুটিতে', lang)}
               </span>
             )}
             {onLeaveDriversCount > 0 && (
-              <span className="badge" style={{ fontSize: '10.5px', background: '#F3E8FF', color: '#7E22CE', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span className="badge" style={{ fontSize: '10.5px', background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Calendar size={12} />
                 {onLeaveDriversCount} {t('on Annual Leave', 'বার্ষিক ছুটিতে', lang)}
               </span>
@@ -503,7 +503,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       {!isChatTabActive && (isDriver ? (
         <div style={{
           background: 'rgba(16, 185, 129, 0.08)',
-          border: '1.5px solid #10B981',
+          border: '1.5px solid var(--status-success)',
           padding: '9px 14px',
           borderRadius: '10px',
           marginBottom: '14px',
@@ -514,7 +514,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           color: 'var(--brand-slate-900)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <UserCheck size={16} color="#059669" />
+            <UserCheck size={16} color="var(--status-success)" />
             <div>
               <strong>{t('Driver Mission Cockpit (Md. Rafiqul Islam - DRV-01):', 'ডিউটি ড্রাইভার ককপিট:', lang)}</strong>{' '}
               {t(
@@ -542,7 +542,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           color: 'var(--brand-slate-700)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Car size={16} color="#2563EB" />
+            <Car size={16} color="var(--status-info)" />
             <div>
               <strong>{t('Employee Self-Service Desk (Tanvir Ahmed - EMP-1042):', 'কর্মকর্তা যাতায়াত ডেস্ক:', lang)}</strong>{' '}
               {t(
@@ -559,7 +559,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       ) : (
         <div style={{
           background: 'rgba(212, 175, 55, 0.08)',
-          border: '1.5px solid #D4AF37',
+          border: '1.5px solid var(--brand-gold)',
           padding: '9px 14px',
           borderRadius: '10px',
           marginBottom: '14px',
@@ -570,7 +570,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           color: 'var(--brand-slate-900)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={16} color="#B45309" />
+            <Shield size={16} color="var(--status-warning-text)" />
             <div>
               <strong>{t('Transport Dispatch Controller Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক ও ডেসপ্যাচ মোড:', lang)}</strong>{' '}
               {t(
@@ -598,7 +598,7 @@ export default function FleetView({ role, lang }: ViewProps) {
             <>
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-info)' }}>
                     <FileText size={15} />
                   </div>
                   <div>
@@ -617,14 +617,14 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-success)' }}>
                     <CheckCircle size={15} />
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       {t('Active Duty Passes', 'সক্রিয় ডিজিটাল পাস', lang)}
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-success)', lineHeight: '1.2' }}>
                       {filteredRequisitions.filter(r => r.status === 'assigned' || r.status === 'in_transit').length}
                     </div>
                   </div>
@@ -634,14 +634,14 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-purple)' }}>
                     <MapPin size={15} />
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       {t('Departure Hub', 'প্রারম্ভিক অফিস', lang)}
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#2563EB', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info)', lineHeight: '1.2' }}>
                       Baridhara HQ
                     </div>
                   </div>
@@ -668,7 +668,7 @@ export default function FleetView({ role, lang }: ViewProps) {
             <>
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(217, 119, 6, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(217, 119, 6, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-warning)' }}>
                     <FileText size={15} />
                   </div>
                   <div>
@@ -685,14 +685,14 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-info)' }}>
                     <Truck size={15} />
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       {t('Fleet Vehicles', 'মোট যানবাহন', lang)}
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#2563EB', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-info)', lineHeight: '1.2' }}>
                       {vehicles.length}
                     </div>
                   </div>
@@ -702,14 +702,14 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-success)' }}>
                     <UserCheck size={15} />
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       {t('Driver Roster', 'চালক রোস্টার', lang)}
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#059669', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-success)', lineHeight: '1.2' }}>
                       {drivers.length}
                     </div>
                   </div>
@@ -719,14 +719,14 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div className="card" style={{ padding: '8px 12px', background: 'var(--brand-card-bg)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6' }}>
+                  <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--status-purple)' }}>
                     <Navigation size={15} />
                   </div>
                   <div>
                     <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       {t('Highway Transit', 'চলমান ট্রিপ', lang)}
                     </div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#8B5CF6', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-purple)', lineHeight: '1.2' }}>
                       {inTransitCount}
                     </div>
                   </div>
@@ -742,16 +742,16 @@ export default function FleetView({ role, lang }: ViewProps) {
       {!isChatTabActive && isTransportAdmin && (
         <div className="pool-suggestion mb-3" style={{
           background: 'linear-gradient(135deg, rgba(29, 78, 216, 0.08) 0%, rgba(212, 175, 55, 0.08) 100%)',
-          border: '1.5px solid #3B82F6',
+          border: '1.5px solid var(--status-info)',
           borderRadius: '12px',
           padding: '12px 16px'
         }}>
           <div className="pool-icon">
-            <Sparkles size={24} color="#1D4ED8" />
+            <Sparkles size={24} color="var(--status-info-text)" />
           </div>
           <div style={{ flex: 1 }}>
             <div className="pool-text">
-              <h4 style={{ margin: '0 0 2px 0', fontSize: '13.5px', fontWeight: 800, color: '#1E3A8A' }}>
+              <h4 style={{ margin: '0 0 2px 0', fontSize: '13.5px', fontWeight: 800, color: 'var(--status-info-text)' }}>
                 {t('AI Route Optimization & Smart Ride-Pooling Opportunity Detected', 'এআই রুট অপ্টিমাইজেশন ও কারপুলিং সুযোগ শনাক্ত হয়েছে', lang)}
               </h4>
               <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-700)', lineHeight: '1.4' }}>
@@ -877,7 +877,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                     cursor: 'pointer',
                     border: statusFilter === f ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                     background: statusFilter === f ? 'var(--brand-crimson)' : 'transparent',
-                    color: statusFilter === f ? '#fff' : 'var(--brand-slate-600)'
+                    color: statusFilter === f ? 'var(--text-on-brand)' : 'var(--brand-slate-600)'
                   }}
                 >
                   {f === 'all' ? t('All', 'সব', lang) : f.replace('_', ' ').toUpperCase()}
@@ -929,7 +929,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                   {filteredRequisitions.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '30px', color: 'var(--brand-slate-500)' }}>
-                        <CheckCircle2 size={28} color="#10B981" style={{ margin: '0 auto 6px' }} />
+                        <CheckCircle2 size={28} color="var(--status-success)" style={{ margin: '0 auto 6px' }} />
                         <div>{t('No vehicle requisitions matching current filter.', 'কোনো আবেদন পাওয়া যায়নি।', lang)}</div>
                       </td>
                     </tr>
@@ -949,7 +949,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 {r.id}
                               </span>
                               {r.pooledWith && (
-                                <div style={{ fontSize: '9px', color: '#1D4ED8', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                <div style={{ fontSize: '9px', color: 'var(--status-info-text)', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                   <Layers size={10} /> POOLED ({r.pooledWith})
                                 </div>
                               )}
@@ -967,7 +967,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                               <ArrowRight size={12} color="var(--brand-crimson)" />
                               <span>{r.to.split(',')[0]}</span>
                             </div>
-                            <div style={{ fontSize: '10.5px', color: r.tripType === 'round_trip' ? '#1D4ED8' : '#64748B', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div style={{ fontSize: '10.5px', color: r.tripType === 'round_trip' ? 'var(--status-info-text)' : 'var(--text-3)', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               {r.tripType === 'round_trip' ? (
                                 <>
                                   <RotateCcw size={11} /> Round Trip (Return)
@@ -982,14 +982,14 @@ export default function FleetView({ role, lang }: ViewProps) {
                           <td>
                             <div style={{ fontSize: '11.5px', fontWeight: 600 }}>{r.departureTime}</div>
                             {r.returnTime && (
-                              <div style={{ fontSize: '10.5px', color: '#1D4ED8' }}>Return: {r.returnTime}</div>
+                              <div style={{ fontSize: '10.5px', color: 'var(--status-info-text)' }}>Return: {r.returnTime}</div>
                             )}
                             <span className="badge info" style={{ marginTop: '2px', fontSize: '9px' }}>
                               {r.passengersCount} {r.passengersCount === 1 ? 'Passenger' : 'Passengers'}
                             </span>
                           </td>
                           <td>
-                            <span className="badge" style={{ background: '#F1F5F9', color: '#0F172A', fontWeight: 700, fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span className="badge" style={{ background: 'var(--surface-2)', color: 'var(--text-1)', fontWeight: 700, fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                               {r.requiredCapacity === 'sedan_4' && <><Car size={12} /> Sedan (4-Seater)</>}
                               {r.requiredCapacity === 'microbus_7' && <><Truck size={12} /> Microbus (7-Seater)</>}
                               {r.requiredCapacity === 'pickup_4x4' && <><Shield size={12} /> 4x4 Emergency Patrol</>}
@@ -998,22 +998,22 @@ export default function FleetView({ role, lang }: ViewProps) {
                           </td>
                           <td>
                             {isPending ? (
-                              <span style={{ color: '#D97706', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ color: 'var(--status-warning)', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                 <Clock size={12} /> Awaiting Allocation
                               </span>
                             ) : isRejected ? (
-                              <span style={{ color: '#EF4444', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ color: 'var(--status-danger)', fontSize: '11.5px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                 <AlertCircle size={12} /> Rejected ({r.rejectionReason || 'No Vehicle'})
                               </span>
                             ) : (
                               <div>
-                                <div style={{ fontWeight: 700, fontSize: '11.5px', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <div style={{ fontWeight: 700, fontSize: '11.5px', color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   <CheckCircle2 size={12} /> {r.assignedVehiclePlate}
                                 </div>
                                 <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-600)' }}>
                                   Driver: <strong>{r.assignedDriverName}</strong>
                                 </div>
-                                <div style={{ fontSize: '10.5px', color: '#1D4ED8', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '1px' }}>
+                                <div style={{ fontSize: '10.5px', color: 'var(--status-info-text)', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '3px', marginTop: '1px' }}>
                                   <Phone size={11} /> {r.assignedDriverPhone}
                                 </div>
                               </div>
@@ -1038,7 +1038,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                     </button>
                                     <button
                                       className="btn-outline"
-                                      style={{ fontSize: '10.5px', padding: '4px 7px', color: '#EF4444', borderColor: '#EF4444' }}
+                                      style={{ fontSize: '10.5px', padding: '4px 7px', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }}
                                       onClick={() => setRejectingReq(r)}
                                       title="Reject Requisition"
                                     >
@@ -1055,7 +1055,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 <>
                                   <button
                                     className="btn-sm-ghost"
-                                    style={{ fontSize: '10.5px', padding: '4px 8px', color: '#059669', borderColor: '#A7F3D0', background: '#ECFDF5' }}
+                                    style={{ fontSize: '10.5px', padding: '4px 8px', color: 'var(--status-success)', borderColor: 'var(--status-success-border)', background: 'var(--status-success-bg)' }}
                                     onClick={() => setSelectedTripPassReq(r)}
                                   >
                                     <QrCode size={12} /> {t('Trip Pass', 'ট্রিপ পাস', lang)}
@@ -1078,7 +1078,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 <>
                                   <button
                                     className="btn-outline"
-                                    style={{ fontSize: '10.5px', padding: '4px 8px', borderColor: '#2563EB', color: '#2563EB' }}
+                                    style={{ fontSize: '10.5px', padding: '4px 8px', borderColor: 'var(--status-info)', color: 'var(--status-info)' }}
                                     onClick={() => setTrackingReq(r)}
                                   >
                                     <Navigation size={12} /> {t('Track Live', 'ট্র্যাক', lang)}
@@ -1087,7 +1087,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                   {isTransportAdmin && (
                                     <button
                                       className="btn-primary"
-                                      style={{ fontSize: '10.5px', padding: '4px 8px', background: '#059669', borderColor: '#059669' }}
+                                      style={{ fontSize: '10.5px', padding: '4px 8px', background: 'var(--status-success-solid)', borderColor: 'var(--status-success)' }}
                                       onClick={() => {
                                         setCompletingReq(r);
                                         setEndOdometer(42430);
@@ -1119,8 +1119,8 @@ export default function FleetView({ role, lang }: ViewProps) {
                                   display: 'flex',
                                   alignItems: 'center',
                                   gap: '5px',
-                                  color: '#1D4ED8',
-                                  borderColor: '#93C5FD',
+                                  color: 'var(--status-info-text)',
+                                  borderColor: 'var(--status-info-bright)',
                                   background: 'rgba(29, 78, 216, 0.06)',
                                   fontWeight: 700,
                                   borderRadius: '8px',
@@ -1131,7 +1131,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                 }}
                                 title={t('Open Tri-Party Mission Chat (Driver ↔ Staff ↔ Admin)', 'চালক, কর্মকর্তা ও ডেসপ্যাচ ত্রি-পক্ষীয় চ্যাট খুলুন', lang)}
                               >
-                                <MessageSquare size={12} color="#2563EB" />
+                                <MessageSquare size={12} color="var(--status-info)" />
                                 <span>{t('Tri-Party Chat', 'ত্রি-পক্ষীয় চ্যাট', lang)}</span>
                               </button>
                             </div>
@@ -1163,12 +1163,12 @@ export default function FleetView({ role, lang }: ViewProps) {
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               <span className="badge success">{availableDriversCount} Available</span>
               {sickLeaveDriversCount > 0 && (
-                <span className="badge" style={{ background: '#FCE7F3', color: '#BE185D' }}>
+                <span className="badge" style={{ background: 'var(--status-pink-bg)', color: 'var(--status-pink)' }}>
                   💊 {sickLeaveDriversCount} Sick Leave
                 </span>
               )}
               {onLeaveDriversCount > 0 && (
-                <span className="badge" style={{ background: '#F3E8FF', color: '#7E22CE' }}>
+                <span className="badge" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' }}>
                   ✈️ {onLeaveDriversCount} On Leave
                 </span>
               )}
@@ -1192,7 +1192,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                       cursor: 'pointer',
                       border: driverStatusFilter === f ? '1.5px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                       background: driverStatusFilter === f ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-                      color: driverStatusFilter === f ? '#fff' : 'var(--brand-slate-600)',
+                      color: driverStatusFilter === f ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '5px'
@@ -1224,10 +1224,10 @@ export default function FleetView({ role, lang }: ViewProps) {
 
                   return (
                     <div key={d.id} style={{
-                      border: isSick ? '1.5px solid #F43F5E' : isOnLeave ? '1.5px solid #A855F7' : '1px solid var(--brand-slate-200)',
+                      border: isSick ? '1.5px solid var(--brand-crimson-light)' : isOnLeave ? '1.5px solid var(--status-purple)' : '1px solid var(--brand-slate-200)',
                       borderRadius: '8px',
                       padding: '14px',
-                      background: isSick ? '#FFF5F5' : isOnLeave ? '#FAF5FF' : 'var(--brand-card-bg)',
+                      background: isSick ? 'var(--brand-crimson-soft)' : isOnLeave ? 'var(--status-purple-bg)' : 'var(--brand-card-bg)',
                       position: 'relative'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -1245,12 +1245,12 @@ export default function FleetView({ role, lang }: ViewProps) {
                         {isAvailable && <span className="badge success">AVAILABLE</span>}
                         {isOnTrip && <span className="badge info">ON TRIP</span>}
                         {isSick && (
-                          <span className="badge" style={{ background: '#FCE7F3', color: '#BE185D', fontWeight: 800 }}>
+                          <span className="badge" style={{ background: 'var(--status-pink-bg)', color: 'var(--status-pink)', fontWeight: 800 }}>
                             💊 SICK LEAVE
                           </span>
                         )}
                         {isOnLeave && (
-                          <span className="badge" style={{ background: '#F3E8FF', color: '#7E22CE', fontWeight: 800 }}>
+                          <span className="badge" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontWeight: 800 }}>
                             ✈️ ON LEAVE
                           </span>
                         )}
@@ -1260,12 +1260,12 @@ export default function FleetView({ role, lang }: ViewProps) {
                       {/* Leave Notice Banner */}
                       {(isSick || isOnLeave) && d.leaveReason && (
                         <div style={{
-                          background: isSick ? '#FFE4E6' : '#EDE9FE',
-                          border: `1px solid ${isSick ? '#FECDD3' : '#DDD6FE'}`,
+                          background: isSick ? 'var(--status-danger-bg)' : 'var(--status-purple-bg)',
+                          border: `1px solid ${isSick ? 'var(--status-danger-border)' : 'var(--status-purple-border)'}`,
                           padding: '6px 10px',
                           borderRadius: '6px',
                           fontSize: '11px',
-                          color: isSick ? '#9F1239' : '#5B21B6',
+                          color: isSick ? 'var(--status-danger-text)' : 'var(--status-purple-text)',
                           marginBottom: '8px'
                         }}>
                           <strong>{isSick ? 'Medical Certificate Rx:' : 'HR Approved Leave:'}</strong> {d.leaveReason}
@@ -1280,7 +1280,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                       <div style={{ background: 'var(--brand-slate-100)', padding: '10px', borderRadius: '6px', fontSize: '11.5px', marginBottom: '10px' }}>
                         <div><strong>License:</strong> {d.licenseNo} ({d.licenseType})</div>
                         <div><strong>Valid Until:</strong> {d.licenseExpiry}</div>
-                        <div style={{ marginTop: '4px', color: isSick ? '#9F1239' : 'var(--status-success)', fontWeight: 700 }}>
+                        <div style={{ marginTop: '4px', color: isSick ? 'var(--status-danger-text)' : 'var(--status-success)', fontWeight: 700 }}>
                           {isSick ? '⚠ Sobriety Audit Suspended (Medical Rest)' : `✓ Breathalyzer: ${d.breathalyzerToday}`}
                         </div>
                       </div>
@@ -1294,9 +1294,9 @@ export default function FleetView({ role, lang }: ViewProps) {
                       <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         {/* Admin Status Changer */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ fontSize: '10.5px', color: '#64748B', fontWeight: 600 }}>Status:</span>
+                          <span style={{ fontSize: '10.5px', color: 'var(--text-3)', fontWeight: 600 }}>Status:</span>
                           <select
-                            style={{ fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#fff' }}
+                            style={{ fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-2)', background: 'var(--surface-1)' }}
                             value={d.status}
                             onChange={(e) => {
                               const newStatus = e.target.value as Driver['status'];
@@ -1344,54 +1344,54 @@ export default function FleetView({ role, lang }: ViewProps) {
       {isTransportAdmin && activeAdminTab === 'telematics' && (
         <>
           {selectedVehicleTelemetry && (
-            <div className="card mb-4" style={{ background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: '#fff', border: '1px solid #334155' }}>
+            <div className="card mb-4" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)', color: 'var(--text-on-brand)', border: '1px solid var(--border-inverse-2)' }}>
               <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(217, 119, 6, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Navigation size={18} color="#FBBF24" />
+                    <Navigation size={18} color="var(--status-warning-bright)" />
                   </div>
                   <div>
-                    <div style={{ fontSize: '15px', fontWeight: 800, color: '#F8FAFC' }}>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-inverse)' }}>
                       {selectedVehicleTelemetry.plate} — {selectedVehicleTelemetry.model}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                       Assigned Driver: <strong>{selectedVehicleTelemetry.driverName}</strong> • 📞 {selectedVehicleTelemetry.driverPhone}
                     </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span className="badge" style={{ background: '#059669', color: '#fff' }}>GPS ONLINE</span>
-                  <span style={{ fontSize: '12px', color: '#94A3B8' }}>Speed: <strong style={{ color: '#F8FAFC' }}>{selectedVehicleTelemetry.speed} km/h</strong></span>
+                  <span className="badge" style={{ background: 'var(--status-success-solid)', color: 'var(--text-on-brand)' }}>GPS ONLINE</span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Speed: <strong style={{ color: 'var(--text-inverse)' }}>{selectedVehicleTelemetry.speed} km/h</strong></span>
                 </div>
               </div>
 
               <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Current Geofence Location</div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: '#FDE68A' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Geofence Location</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: 'var(--status-warning-bright)' }}>
                     {selectedVehicleTelemetry.location}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Engine & Cargo Temperature</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Engine & Cargo Temperature</div>
                   <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px' }}>
-                    Engine: <strong style={{ color: '#34D399' }}>{selectedVehicleTelemetry.engineTemp}°C</strong>
+                    Engine: <strong style={{ color: 'var(--status-success-bright)' }}>{selectedVehicleTelemetry.engineTemp}°C</strong>
                     {selectedVehicleTelemetry.bitumenCargoTemp && (
-                      <span> • Cargo: <strong style={{ color: '#F87171' }}>{selectedVehicleTelemetry.bitumenCargoTemp}°C</strong></span>
+                      <span> • Cargo: <strong style={{ color: 'var(--status-danger-bright)' }}>{selectedVehicleTelemetry.bitumenCargoTemp}°C</strong></span>
                     )}
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Fuel Tank Capacity</div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: '#38BDF8' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fuel Tank Capacity</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px', color: 'var(--status-info-bright)' }}>
                     {selectedVehicleTelemetry.fuelPct}% Full Tank
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <div style={{ fontSize: '10.5px', color: '#94A3B8', textTransform: 'uppercase' }}>Next Maintenance Service</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Next Maintenance Service</div>
                   <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '4px' }}>
                     In {selectedVehicleTelemetry.nextServiceKm} km
                   </div>
@@ -1427,7 +1427,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                         cursor: 'pointer',
                         border: vehicleStatusFilter === f ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                         background: vehicleStatusFilter === f ? 'var(--brand-crimson)' : 'transparent',
-                        color: vehicleStatusFilter === f ? '#fff' : 'var(--brand-slate-600)',
+                        color: vehicleStatusFilter === f ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
                       }}
                     >
                       {f.replace('_', ' ').toUpperCase()} ({count})
@@ -1467,7 +1467,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                           <td>
                             <div>{v.location}</div>
                             {v.maintenanceDetails && (
-                              <div style={{ fontSize: '10.5px', color: '#D97706', fontWeight: 600, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <div style={{ fontSize: '10.5px', color: 'var(--status-warning)', fontWeight: 600, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Wrench size={11} /> {v.maintenanceDetails}
                               </div>
                             )}
@@ -1479,7 +1479,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                             {v.status === 'available' && <span className="badge success">AVAILABLE</span>}
                             {v.status === 'in_transit' && <span className="badge info">IN TRANSIT</span>}
                             {v.status === 'maintenance' && (
-                              <span className="badge warn" style={{ background: '#FEF3C7', color: '#B45309', fontWeight: 800 }}>
+                              <span className="badge warn" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)', fontWeight: 800 }}>
                                 🔧 WORKSHOP
                               </span>
                             )}
@@ -1501,7 +1501,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                               {v.status === 'maintenance' ? (
                                 <button
                                   className="btn-sm-ghost"
-                                  style={{ fontSize: '10.5px', color: '#059669', borderColor: '#A7F3D0', background: '#ECFDF5' }}
+                                  style={{ fontSize: '10.5px', color: 'var(--status-success)', borderColor: 'var(--status-success-border)', background: 'var(--status-success-bg)' }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateVehicleStatus(v.plate, 'available');
@@ -1514,7 +1514,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                               ) : v.status === 'available' ? (
                                 <button
                                   className="btn-sm-ghost"
-                                  style={{ fontSize: '10.5px', color: '#D97706', borderColor: '#FDE68A' }}
+                                  style={{ fontSize: '10.5px', color: 'var(--status-warning)', borderColor: 'var(--status-warning-bright)' }}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     updateVehicleStatus(v.plate, 'maintenance', 'Scheduled workshop maintenance & fluid inspection');
@@ -1690,17 +1690,17 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 2: SMART POOLING CONSOLIDATION DIALOG (Admin only) ── */}
       {isTransportAdmin && showSmartPoolModal && (
         <div className="modal-bg" onClick={() => setShowSmartPoolModal(false)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '680px', width: '95%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', boxSizing: 'border-box' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '680px', width: '95%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, var(--status-info-solid-dark) 0%, var(--status-info-solid-dark) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255, 255, 255, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Sparkles size={20} color="#FDE047" />
+                  <Sparkles size={20} color="var(--status-warning-bright)" />
                 </div>
                 <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', fontWeight: 800 }}>
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', fontWeight: 800 }}>
                     {t('AI Smart Pooling Route Consolidation', 'এআই কারপুলিং মার্জ কনফার্মেশন', lang)}
                   </h3>
-                  <div style={{ fontSize: '12px', color: '#BFDBFE', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--status-info-bright)', marginTop: '2px' }}>
                     Dhaka Corporate HQ ➔ Keraniganj Bitumen Plant Transit Corridor
                   </div>
                 </div>
@@ -1708,74 +1708,74 @@ export default function FleetView({ role, lang }: ViewProps) {
               <button
                 type="button"
                 onClick={() => setShowSmartPoolModal(false)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <div className="fleet-modal-body" style={{ flex: '1 1 auto', overflowY: 'auto', padding: '26px 30px', backgroundColor: '#FFFFFF', boxSizing: 'border-box' }}>
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '14px 18px', borderRadius: '12px', marginBottom: '18px', fontSize: '12.5px', color: '#1E40AF', lineHeight: 1.5 }}>
+            <div className="fleet-modal-body" style={{ flex: '1 1 auto', overflowY: 'auto', padding: '26px 30px', backgroundColor: 'var(--surface-1)', boxSizing: 'border-box' }}>
+              <div style={{ background: 'var(--status-info-bg)', border: '1px solid var(--status-info-border)', padding: '14px 18px', borderRadius: '12px', marginBottom: '18px', fontSize: '12.5px', color: 'var(--status-info-text)', lineHeight: 1.5 }}>
                 💡 <strong>Optimization Rationale:</strong> Two requisitions depart within 15 minutes of each other on the identical corridor. Consolidating into a 7-seater executive microbus eliminates 1 duplicate vehicle deployment.
               </div>
 
               {/* Matched Requisitions */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
-                <div style={{ border: '1.5px solid #CBD5E1', borderRadius: '12px', padding: '14px 16px', background: '#F8FAFC' }}>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#0F172A' }}>REQ-2026-441 (Tanvir Ahmed)</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px' }}>Sales & Distribution • 2 Pax</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#1D4ED8', marginTop: '6px' }}>Departure: 02:30 PM</div>
+                <div style={{ border: '1.5px solid var(--border-2)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface-0)' }}>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text-1)' }}>REQ-2026-441 (Tanvir Ahmed)</div>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '3px' }}>Sales & Distribution • 2 Pax</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-info-text)', marginTop: '6px' }}>Departure: 02:30 PM</div>
                 </div>
 
-                <div style={{ border: '1.5px solid #CBD5E1', borderRadius: '12px', padding: '14px 16px', background: '#F8FAFC' }}>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#0F172A' }}>REQ-2026-443 (Engr. Mizanur)</div>
-                  <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px' }}>Quality Assurance • 1 Pax</div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#1D4ED8', marginTop: '6px' }}>Departure: 02:45 PM</div>
+                <div style={{ border: '1.5px solid var(--border-2)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface-0)' }}>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text-1)' }}>REQ-2026-443 (Engr. Mizanur)</div>
+                  <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '3px' }}>Quality Assurance • 1 Pax</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-info-text)', marginTop: '6px' }}>Departure: 02:45 PM</div>
                 </div>
               </div>
 
               {/* Allocated Pooled Vehicle */}
-              <div style={{ border: '1.5px solid #10B981', background: '#ECFDF5', padding: '16px 20px', borderRadius: '12px', marginBottom: '20px' }}>
-                <div style={{ fontSize: '11px', color: '#047857', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ border: '1.5px solid var(--status-success)', background: 'var(--status-success-bg)', padding: '16px 20px', borderRadius: '12px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--status-success-text)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   Recommended Shared Fleet Vehicle:
                 </div>
-                <div style={{ fontSize: '15px', fontWeight: 900, color: '#065F46', marginTop: '4px' }}>
+                <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--status-success-text)', marginTop: '4px' }}>
                   DHAKA METRO CHA-53-4102 — Toyota HiAce Super GL (7-Seater)
                 </div>
-                <div style={{ fontSize: '12px', color: '#047857', marginTop: '4px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--status-success-text)', marginTop: '4px' }}>
                   Driver: <strong>Abdul Mannan</strong> (📞 +880 1819-338811) • Sobriety: <strong>0.00% BAC Passed</strong>
                 </div>
               </div>
 
               {/* Financial & Environmental ROI */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', textAlign: 'center', fontSize: '12px' }}>
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px', borderRadius: '10px' }}>
-                  <div style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>Fuel Saved</div>
-                  <strong style={{ color: '#059669', fontSize: '15px', display: 'block', marginTop: '3px' }}>৳1,850</strong>
+                <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ color: 'var(--text-3)', fontSize: '11px', fontWeight: 600 }}>Fuel Saved</div>
+                  <strong style={{ color: 'var(--status-success)', fontSize: '15px', display: 'block', marginTop: '3px' }}>৳1,850</strong>
                 </div>
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px', borderRadius: '10px' }}>
-                  <div style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>Transit Saved</div>
-                  <strong style={{ color: '#2563EB', fontSize: '15px', display: 'block', marginTop: '3px' }}>38 km</strong>
+                <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ color: 'var(--text-3)', fontSize: '11px', fontWeight: 600 }}>Transit Saved</div>
+                  <strong style={{ color: 'var(--status-info)', fontSize: '15px', display: 'block', marginTop: '3px' }}>38 km</strong>
                 </div>
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '12px', borderRadius: '10px' }}>
-                  <div style={{ color: '#64748B', fontSize: '11px', fontWeight: 600 }}>Vehicle Preserved</div>
-                  <strong style={{ color: '#D97706', fontSize: '15px', display: 'block', marginTop: '3px' }}>1 Sedan</strong>
+                <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '12px', borderRadius: '10px' }}>
+                  <div style={{ color: 'var(--text-3)', fontSize: '11px', fontWeight: 600 }}>Vehicle Preserved</div>
+                  <strong style={{ color: 'var(--status-warning)', fontSize: '15px', display: 'block', marginTop: '3px' }}>1 Sedan</strong>
                 </div>
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => setShowSmartPoolModal(false)}
-                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleExecuteSmartPool}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#FFFFFF', background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--text-on-brand)', background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)' }}
               >
                 <Check size={15} />
                 {t('Confirm & Execute Pool Merger', 'মার্জ নিশ্চিত করুন', lang)}
@@ -1810,34 +1810,34 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 4: TRIP COMPLETION & ODOMETER LOGGING (Admin only) ── */}
       {isTransportAdmin && completingReq && (
         <div className="modal-bg" onClick={() => setCompletingReq(null)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '580px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, #065F46 0%, #047857 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '580px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, var(--status-success-solid-dark) 0%, var(--status-success-solid-dark) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 800 }}>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 800 }}>
                   <CheckCircle size={18} />
                   {t('Complete Duty Trip & Reconcile Mileage', 'ট্রিপ সমাপ্তি ও ওডোমিটার হিসাব', lang)}
                 </h3>
-                <div style={{ fontSize: '12px', color: '#D1FAE5', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--status-success-bright)', marginTop: '2px' }}>
                   Requisition: {completingReq.id} • Vehicle: {completingReq.assignedVehiclePlate}
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setCompletingReq(null)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="fleet-modal-body" style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', padding: '12px 16px', borderRadius: '10px', fontSize: '12.5px' }}>
-                <div style={{ color: '#166534' }}>Start Odometer: <strong>{completingReq.odometerStart || 42350} km</strong></div>
-                <div style={{ color: '#166534', marginTop: '3px' }}>Driver: <strong>{completingReq.assignedDriverName}</strong></div>
+              <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '12px 16px', borderRadius: '10px', fontSize: '12.5px' }}>
+                <div style={{ color: 'var(--status-success-text)' }}>Start Odometer: <strong>{completingReq.odometerStart || 42350} km</strong></div>
+                <div style={{ color: 'var(--status-success-text)', marginTop: '3px' }}>Driver: <strong>{completingReq.assignedDriverName}</strong></div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px', textTransform: 'uppercase' }}>
                   {t('Ending Odometer Reading (km)', 'সমাপ্তির ওডোমিটার রিডিং (কিমি)', lang)}
                 </label>
                 <input
@@ -1845,15 +1845,15 @@ export default function FleetView({ role, lang }: ViewProps) {
                   className="notice-input"
                   value={endOdometer}
                   onChange={(e) => setEndOdometer(Number(e.target.value))}
-                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '14px', fontWeight: 700 }}
+                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '14px', fontWeight: 700 }}
                 />
-                <div style={{ fontSize: '12px', color: '#059669', marginTop: '6px', fontWeight: 600 }}>
+                <div style={{ fontSize: '12px', color: 'var(--status-success)', marginTop: '6px', fontWeight: 600 }}>
                   Calculated Transit: <strong>{endOdometer - (completingReq.odometerStart || 42350)} km traveled</strong>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px', textTransform: 'uppercase' }}>
                   {t('Driver & Trip Service Rating (1 - 5 Stars)', 'ড্রাইভার রেটিং', lang)}
                 </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
@@ -1866,12 +1866,12 @@ export default function FleetView({ role, lang }: ViewProps) {
                         flex: 1,
                         padding: '10px 0',
                         borderRadius: '10px',
-                        border: tripRating >= star ? '1.5px solid #D97706' : '1px solid #CBD5E1',
-                        background: tripRating >= star ? '#FEF3C7' : '#FFFFFF',
+                        border: tripRating >= star ? '1.5px solid var(--status-warning)' : '1px solid var(--border-2)',
+                        background: tripRating >= star ? 'var(--status-warning-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         fontSize: '14px',
                         fontWeight: 800,
-                        color: tripRating >= star ? '#B45309' : '#94A3B8',
+                        color: tripRating >= star ? 'var(--status-warning-text)' : 'var(--text-muted)',
                         transition: 'all 0.15s ease',
                       }}
                     >
@@ -1882,31 +1882,31 @@ export default function FleetView({ role, lang }: ViewProps) {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px', textTransform: 'uppercase' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px', textTransform: 'uppercase' }}>
                   {t('Passenger Feedback / Notes', 'মন্তব্য', lang)}
                 </label>
                 <input
                   type="text"
                   className="notice-input"
-                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '13px' }}
                   value={tripFeedback}
                   onChange={(e) => setTripFeedback(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => setCompletingReq(null)}
-                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmCompleteTrip}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#FFFFFF', background: '#059669', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--text-on-brand)', background: 'var(--status-success-solid)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)' }}
               >
                 <Check size={15} /> {t('Confirm Inward Clearance & Complete', 'ট্রিপ সমাপ্ত করুন', lang)}
               </button>
@@ -1918,28 +1918,28 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 5: REJECT REQUISITION MODAL (Admin only) ─────────── */}
       {isTransportAdmin && rejectingReq && (
         <div className="modal-bg" onClick={() => setRejectingReq(null)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '500px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, #991B1B 0%, #7F1D1D 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '500px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, var(--status-danger-solid-dark) 0%, var(--status-danger-solid-dark) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', fontWeight: 800 }}>{t('Reject Vehicle Requisition', 'রিকুইজিশন বাতিল', lang)}</h3>
-                <div style={{ fontSize: '12px', color: '#FECACA', marginTop: '2px' }}>Requisition: {rejectingReq.id}</div>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', fontWeight: 800 }}>{t('Reject Vehicle Requisition', 'রিকুইজিশন বাতিল', lang)}</h3>
+                <div style={{ fontSize: '12px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>Requisition: {rejectingReq.id}</div>
               </div>
               <button
                 type="button"
                 onClick={() => setRejectingReq(null)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="fleet-modal-body" style={{ padding: '24px 28px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '8px', textTransform: 'uppercase' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '8px', textTransform: 'uppercase' }}>
                 {t('Reason for Rejection / Unavailability:', 'বাতিল করার কারণ:', lang)}
               </label>
               <select
                 className="notice-select"
-                style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '13px' }}
+                style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '13px' }}
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
               >
@@ -1950,18 +1950,18 @@ export default function FleetView({ role, lang }: ViewProps) {
               </select>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => setRejectingReq(null)}
-                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmReject}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#FFFFFF', background: '#DC2626', border: 'none', cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--text-on-brand)', background: 'var(--status-danger-solid)', border: 'none', cursor: 'pointer' }}
               >
                 {t('Confirm Rejection', 'বাতিল নিশ্চিত করুন', lang)}
               </button>
@@ -1973,19 +1973,19 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 6: LIVE VEHICLE TRACKING HUD (Available to All) ──── */}
       {trackingReq && (
         <div className="modal-bg" onClick={() => setTrackingReq(null)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '640px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '640px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 800 }}>
-                  <Navigation size={18} color="#38BDF8" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 800 }}>
+                  <Navigation size={18} color="var(--status-info-bright)" />
                   {t('Live Vehicle Telematics & Route Beacon', 'লাইভ ভেহিক্যাল ট্র্যাকিং', lang)}
                 </h3>
-                <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>{trackingReq.id} • {trackingReq.assignedVehiclePlate}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{trackingReq.id} • {trackingReq.assignedVehiclePlate}</div>
               </div>
               <button
                 type="button"
                 onClick={() => setTrackingReq(null)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
@@ -1993,25 +1993,25 @@ export default function FleetView({ role, lang }: ViewProps) {
 
             <div className="fleet-modal-body" style={{ padding: '24px 28px' }}>
               <div style={{
-                background: '#0B132B',
-                color: '#fff',
+                background: 'var(--surface-inverse)',
+                color: 'var(--text-on-brand)',
                 borderRadius: '14px',
                 padding: '24px',
                 textAlign: 'center',
                 marginBottom: '18px',
-                border: '1px solid #1E293B'
+                border: '1px solid var(--border-inverse)'
               }}>
-                <div style={{ fontSize: '11px', color: '#38BDF8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--status-info-bright)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
                   GPS Satellite Beacon Synced
                 </div>
                 <div style={{ fontSize: '28px', fontWeight: 900, marginTop: '4px', letterSpacing: '-0.5px' }}>
                   48 km/h
                 </div>
-                <div style={{ fontSize: '12.5px', color: '#94A3B8', marginTop: '4px' }}>
+                <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Location: Dhaka-Mawa Expressway near Babubazar Overpass
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '16px', fontSize: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px' }}>
-                  <span>ETA to Destination: <strong style={{ color: '#34D399' }}>18 mins</strong></span>
+                  <span>ETA to Destination: <strong style={{ color: 'var(--status-success-bright)' }}>18 mins</strong></span>
                   <span>Driver: <strong>{trackingReq.assignedDriverName}</strong></span>
                 </div>
               </div>
@@ -2019,14 +2019,14 @@ export default function FleetView({ role, lang }: ViewProps) {
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   type="button"
-                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', backgroundColor: '#FFFFFF', color: '#0F172A', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', backgroundColor: 'var(--surface-1)', color: 'var(--text-1)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
                   onClick={() => showToast(`Calling Driver ${trackingReq.assignedDriverName} (${trackingReq.assignedDriverPhone})...`, 'info')}
                 >
-                  <Phone size={15} color="#2563EB" /> Call Driver
+                  <Phone size={15} color="var(--status-info)" /> Call Driver
                 </button>
                 <button
                   type="button"
-                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #EF4444', backgroundColor: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--status-danger)', backgroundColor: 'var(--status-danger-bg)', color: 'var(--status-danger)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
                   onClick={() => showToast('SOS Dispatcher notified. Emergency vehicle en route.', 'info')}
                 >
                   <AlertOctagon size={15} /> Emergency SOS
@@ -2034,11 +2034,11 @@ export default function FleetView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => setTrackingReq(null)}
-                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Close', 'বন্ধ করুন', lang)}
               </button>
@@ -2050,88 +2050,88 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 7: OFFICIAL DIGITAL TRIP CHALLAN PASS ─────────────── */}
       {selectedTripPassReq && (
         <div className="modal-bg" onClick={() => setSelectedTripPassReq(null)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '780px', width: '95%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '14px 28px', backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '780px', width: '95%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '14px 28px', backgroundColor: 'var(--surface-0)', borderBottom: '1px solid var(--border-1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 800, color: '#0F172A', backgroundColor: '#FEF3C7', border: '1px solid #F59E0B', padding: '3px 10px', borderRadius: '6px' }}>
+                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 800, color: 'var(--text-1)', backgroundColor: 'var(--status-warning-bg)', border: '1px solid var(--status-warning)', padding: '3px 10px', borderRadius: '6px' }}>
                   Challan No: {selectedTripPassReq.tripPassNo}
                 </span>
-                <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '10.5px', fontWeight: 800, backgroundColor: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE' }}>
+                <span style={{ padding: '3px 10px', borderRadius: '999px', fontSize: '10.5px', fontWeight: 800, backgroundColor: 'var(--status-info-bg)', color: 'var(--status-info-text)', border: '1px solid var(--status-info-border)' }}>
                   Security Gate Pass Verified
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedTripPassReq(null)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border-2)', backgroundColor: 'var(--surface-1)', color: 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
 
-            <div style={{ flex: '1 1 auto', overflowY: 'auto', padding: '26px 32px', backgroundColor: '#F1F5F9', boxSizing: 'border-box' }}>
-              <div className="fleet-letterhead-paper" style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '1.5px solid #CBD5E1', padding: '34px 38px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', position: 'relative' }}>
+            <div style={{ flex: '1 1 auto', overflowY: 'auto', padding: '26px 32px', backgroundColor: 'var(--surface-2)', boxSizing: 'border-box' }}>
+              <div className="fleet-letterhead-paper" style={{ backgroundColor: 'var(--surface-1)', borderRadius: '14px', border: '1.5px solid var(--border-2)', padding: '34px 38px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', position: 'relative' }}>
                 {/* Watermark */}
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-30deg)', fontSize: '42px', fontWeight: 900, color: 'rgba(165, 28, 48, 0.035)', whiteSpace: 'nowrap', pointerEvents: 'none', letterSpacing: '4px', textTransform: 'uppercase', userSelect: 'none' }}>
                   BASHUNDHARA FLEET DISPATCH
                 </div>
 
                 {/* Company Header */}
-                <div style={{ textAlign: 'center', paddingBottom: '18px', marginBottom: '22px', borderBottom: '2px solid #A51C30' }}>
+                <div style={{ textAlign: 'center', paddingBottom: '18px', marginBottom: '22px', borderBottom: '2px solid var(--brand-crimson)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '4px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#A51C30', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '16px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--brand-crimson)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '16px' }}>
                       B
                     </div>
-                    <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 900, letterSpacing: '0.8px', color: '#0F172A', textTransform: 'uppercase' }}>
+                    <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 900, letterSpacing: '0.8px', color: 'var(--text-1)', textTransform: 'uppercase' }}>
                       Bashundhara Oil & Gas Company Ltd.
                     </h2>
                   </div>
-                  <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '1px' }}>
                     Corporate Logistics & Security Gate Administration
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#A51C30', marginTop: '4px', letterSpacing: '0.5px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-crimson)', marginTop: '4px', letterSpacing: '0.5px' }}>
                     OFFICIAL DUTY TRAVEL CHALLAN & SECURITY GATE PASS
                   </div>
                 </div>
 
                 {/* 2-Column Details Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', padding: '16px 20px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', fontSize: '12px', marginBottom: '18px' }}>
-                  <div><strong style={{ color: '#64748B' }}>Pass Reference:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#0F172A' }}>{selectedTripPassReq.tripPassNo}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Date of Issue:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>22 Oct 2026</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Authorized Requester:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.requesterName}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Department:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.dept}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Assigned Vehicle:</strong> <span style={{ color: '#059669', fontWeight: 800 }}>{selectedTripPassReq.assignedVehiclePlate}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Vehicle Model:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.assignedVehicleModel}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Assigned Driver:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.assignedDriverName}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Driver Contact:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.assignedDriverPhone}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Authorized Route:</strong> <span style={{ fontWeight: 700, color: '#2563EB' }}>{selectedTripPassReq.from.split(',')[0]} ➔ {selectedTripPassReq.to.split(',')[0]}</span></div>
-                  <div><strong style={{ color: '#64748B' }}>Trip Mode:</strong> <span style={{ fontWeight: 700, color: '#0F172A' }}>{selectedTripPassReq.tripType === 'round_trip' ? 'Round Trip (Return Authorized)' : 'One-Way Drop-off'}</span></div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', padding: '16px 20px', backgroundColor: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '12px', fontSize: '12px', marginBottom: '18px' }}>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Pass Reference:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--text-1)' }}>{selectedTripPassReq.tripPassNo}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Date of Issue:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>22 Oct 2026</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Authorized Requester:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.requesterName}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Department:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.dept}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Assigned Vehicle:</strong> <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>{selectedTripPassReq.assignedVehiclePlate}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Vehicle Model:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.assignedVehicleModel}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Assigned Driver:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.assignedDriverName}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Driver Contact:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.assignedDriverPhone}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Authorized Route:</strong> <span style={{ fontWeight: 700, color: 'var(--status-info)' }}>{selectedTripPassReq.from.split(',')[0]} ➔ {selectedTripPassReq.to.split(',')[0]}</span></div>
+                  <div><strong style={{ color: 'var(--text-3)' }}>Trip Mode:</strong> <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{selectedTripPassReq.tripType === 'round_trip' ? 'Round Trip (Return Authorized)' : 'One-Way Drop-off'}</span></div>
                 </div>
 
                 {/* Purpose Block */}
-                <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '12px 16px', fontSize: '12.5px', color: '#334155', marginBottom: '18px' }}>
-                  <strong style={{ color: '#64748B', display: 'block', marginBottom: '4px', fontSize: '11px', textTransform: 'uppercase' }}>Official Duty Purpose:</strong>
+                <div style={{ backgroundColor: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '10px', padding: '12px 16px', fontSize: '12.5px', color: 'var(--text-2)', marginBottom: '18px' }}>
+                  <strong style={{ color: 'var(--text-3)', display: 'block', marginBottom: '4px', fontSize: '11px', textTransform: 'uppercase' }}>Official Duty Purpose:</strong>
                   {selectedTripPassReq.purpose}
                 </div>
 
                 {/* Gate Clearance Barcode & QR Block */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #E2E8F0', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid var(--border-1)', paddingTop: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 700 }}>Security Gate Clearance Barcode:</div>
-                    <div style={{ fontFamily: 'monospace', fontWeight: 800, color: '#0F172A', fontSize: '13px', marginTop: '2px' }}>*BOGCL-TRIP-{selectedTripPassReq.tripPassNo}*</div>
-                    <div style={{ color: '#059669', fontWeight: 700, fontSize: '12px', marginTop: '4px' }}>✓ Gate Outward Verified by Transport Admin</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>Security Gate Clearance Barcode:</div>
+                    <div style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--text-1)', fontSize: '13px', marginTop: '2px' }}>*BOGCL-TRIP-{selectedTripPassReq.tripPassNo}*</div>
+                    <div style={{ color: 'var(--status-success)', fontWeight: 700, fontSize: '12px', marginTop: '4px' }}>✓ Gate Outward Verified by Transport Admin</div>
                   </div>
-                  <div style={{ padding: '6px', background: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '8px' }}>
-                    <QrCode size={64} color="#0F172A" />
+                  <div style={{ padding: '6px', background: 'var(--surface-1)', border: '1px solid var(--border-2)', borderRadius: '8px' }}>
+                    <QrCode size={64} color="var(--text-1)" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <button
                 type="button"
-                style={{ padding: '9px 16px', borderRadius: '10px', border: '1.5px solid #3B82F6', color: '#1D4ED8', backgroundColor: '#EFF6FF', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ padding: '9px 16px', borderRadius: '10px', border: '1.5px solid var(--status-info)', color: 'var(--status-info-text)', backgroundColor: 'var(--status-info-bg)', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => {
                   const targetReq = selectedTripPassReq;
                   setSelectedTripPassReq(null);
@@ -2146,7 +2146,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                 <button
                   type="button"
                   onClick={() => setSelectedTripPassReq(null)}
-                  style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                  style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
                 >
                   {t('Close', 'বন্ধ করুন', lang)}
                 </button>
@@ -2157,7 +2157,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                     showToast(t(`Challan Pass ${selectedTripPassReq.tripPassNo} sent to printer.`, `চালান পাস প্রিন্টারে পাঠানো হয়েছে।`, lang), 'success');
                     setSelectedTripPassReq(null);
                   }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#FFFFFF', background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)' }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--text-on-brand)', background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)' }}
                 >
                   <Printer size={15} />
                   {t('Print Official Trip Pass', 'ট্রিপ পাস প্রিন্ট করুন', lang)}
@@ -2171,43 +2171,43 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ─── MODAL 8: FUEL SLIP VOUCHER (Admin only) ─────────────────── */}
       {isTransportAdmin && showFuelModal && (
         <div className="modal-bg" onClick={() => setShowFuelModal(null)} style={{ zIndex: 99999, padding: '20px', boxSizing: 'border-box' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '580px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: '#FFFFFF', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '580px', width: '95%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', backgroundColor: 'var(--surface-1)', borderRadius: '18px', overflow: 'hidden', boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4)' }} onClick={(e) => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '18px 28px', background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Fuel size={20} color="#F59E0B" />
-                <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', fontWeight: 800 }}>
+                <Fuel size={20} color="var(--status-warning)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', fontWeight: 800 }}>
                   {t('Issue Digital Fuel Requisition Slip', 'ডিজিটাল ফুয়েল স্লিপ ইস্যু', lang)}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFuelModal(null)}
-                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: 'var(--text-inverse-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
               >
                 <X size={16} />
               </button>
             </div>
 
             <div className="fleet-modal-body" style={{ padding: '24px 28px' }}>
-              <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Target Vehicle</div>
-                <div style={{ fontSize: '17px', fontWeight: 800, color: '#0F172A', marginTop: '2px', fontFamily: 'monospace' }}>
+              <div style={{ marginBottom: '18px', background: 'var(--surface-0)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-1)' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Target Vehicle</div>
+                <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-1)', marginTop: '2px', fontFamily: 'monospace' }}>
                   {showFuelModal.plate}
                 </div>
-                <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '2px' }}>
+                <div style={{ fontSize: '12.5px', color: 'var(--text-2)', marginTop: '2px' }}>
                   {showFuelModal.model} • Driver: <strong>{showFuelModal.driverName}</strong> ({showFuelModal.driverPhone})
                 </div>
               </div>
 
               <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px' }}>
                   {t('Authorized Fuel Station / Pump', 'অনুমোদিত ফিলিং স্টেশন', lang)}
                 </label>
                 <select
                   value={fuelStation}
                   onChange={(e) => setFuelStation(e.target.value)}
                   className="notice-select"
-                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '13px' }}
                 >
                   <option value="Bashundhara Filling Station, 300 Feet Road">Bashundhara Filling Station, 300 Feet Road</option>
                   <option value="Keraniganj Plant Dedicated Diesel Dispenser">Keraniganj Plant Dedicated Diesel Dispenser (In-House)</option>
@@ -2217,7 +2217,7 @@ export default function FleetView({ role, lang }: ViewProps) {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px' }}>
                     {t('Fuel Volume (Liters)', 'জ্বালানির পরিমাণ (লিটার)', lang)}
                   </label>
                   <input
@@ -2225,17 +2225,17 @@ export default function FleetView({ role, lang }: ViewProps) {
                     value={fuelLiters}
                     onChange={(e) => setFuelLiters(e.target.value)}
                     className="notice-input"
-                    style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '13px' }}
+                    style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '13px' }}
                   />
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '6px' }}>
                     {t('Fuel Category', 'জ্বালানির ধরন', lang)}
                   </label>
                   <select
                     defaultValue="Octane"
                     className="notice-select"
-                    style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid #CBD5E1', fontSize: '13px' }}
+                    style={{ width: '100%', padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', fontSize: '13px' }}
                   >
                     <option value="Octane">Octane (Euro-4 Standard)</option>
                     <option value="Diesel">Diesel (Low Sulfur - Industrial)</option>
@@ -2244,23 +2244,23 @@ export default function FleetView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '12px 16px', borderRadius: '10px', fontSize: '12px', color: '#92400E', lineHeight: 1.5 }}>
+              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px 16px', borderRadius: '10px', fontSize: '12px', color: 'var(--status-warning-text)', lineHeight: 1.5 }}>
                 🔒 <strong>OTP Security:</strong> A 4-digit verification PIN and single-use QR Code will be sent to the driver. The pump operator will scan to validate before fuel dispensing.
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 type="button"
                 onClick={() => setShowFuelModal(null)}
-                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: '#475569', backgroundColor: '#FFFFFF', border: '1.5px solid #CBD5E1', cursor: 'pointer' }}
+                style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, color: 'var(--text-2)', backgroundColor: 'var(--surface-1)', border: '1.5px solid var(--border-2)', cursor: 'pointer' }}
               >
                 {t('Cancel', 'বাতিল', lang)}
               </button>
               <button
                 type="button"
                 onClick={confirmFuelSlip}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: '#FFFFFF', background: '#D97706', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)' }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 22px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, color: 'var(--text-on-brand)', background: 'var(--status-warning-solid)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)' }}
               >
                 <QrCode size={15} />
                 {t('Issue QR Fuel Voucher', 'কিউআর ভাউচার ইস্যু করুন', lang)}

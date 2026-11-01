@@ -71,7 +71,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
       nationalId,
       bloodGroup,
       emergencyContact,
-      avatarColor: role === 'chairman' ? '#A51C30' : role === 'plant_gm' ? '#0369A1' : role === 'hr_admin' ? '#BE185D' : role === 'transport_admin' ? '#059669' : role === 'hod' ? '#7C3AED' : role === 'driver' ? '#F59E0B' : '#0284C7',
+      avatarColor: role === 'chairman' ? 'var(--brand-crimson)' : role === 'plant_gm' ? 'var(--status-info-solid)' : role === 'hr_admin' ? 'var(--status-pink)' : role === 'transport_admin' ? 'var(--status-success-solid)' : role === 'hod' ? 'var(--status-purple-solid)' : role === 'driver' ? 'var(--status-warning-solid)' : 'var(--status-info-solid)',
     });
 
     showToast(t(
@@ -86,16 +86,16 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
   return (
     <div className="modal-bg" style={{ zIndex: 1000 }}>
       <div className="modal" style={{ maxWidth: '680px' }}>
-        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #0A1227 0%, #111E3D 100%)', borderBottom: '2px solid var(--brand-crimson)' }}>
+        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)', borderBottom: '2px solid var(--brand-crimson)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(225,29,72,0.2)', color: 'var(--brand-crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <UserPlus size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', color: '#F8FAFC' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-inverse)' }}>
                 {t('Add New Employee to Directory', 'নতুন কর্মী অন্তর্ভুক্তিকরণ', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>BOGCL Staff Directory & Payroll Profile</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>BOGCL Staff Directory & Payroll Profile</div>
             </div>
           </div>
           <button className="modal-close" onClick={onClose}><X size={18} /></button>

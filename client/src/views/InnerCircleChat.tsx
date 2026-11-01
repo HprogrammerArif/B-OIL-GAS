@@ -64,12 +64,12 @@ const CHANNELS: ChatChannel[] = [
 ];
 
 const INNER_CIRCLE_MEMBERS: ChatMember[] = [
-  { id: 'hr', name: 'Engr. M. Harunur Rashid', role: 'Plant GM, Keraniganj', initials: 'HR', color: '#0369A1', status: 'online', statusLabel: 'Control Room Unit-1', location: 'Keraniganj Plant', phone: '+880 1711-002101', unread: 2 },
-  { id: 'fb', name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: '#7C3AED', status: 'in-meeting', statusLabel: 'Boardroom A (Q4 Review)', location: 'Dhaka HQ, Level 9', phone: '+880 1711-002102' },
-  { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: '#059669', status: 'away', statusLabel: 'At BSTI Tejgaon Directorate', location: 'Tejgaon, Dhaka', phone: '+880 1711-002103', unread: 1 },
-  { id: 'si', name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: '#D97706', status: 'online', statusLabel: 'Available at HQ', location: 'Level-8 Commercial', phone: '+880 1711-002104' },
-  { id: 'ta', name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: '#A51C30', status: 'offline', statusLabel: 'On Approved Medical Leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105', lastSeen: '10:15 AM' },
-  { id: 'nj', name: 'Sayeda Afroza Sultana', role: 'GM, Human Resources', initials: 'SAS', color: '#BE185D', status: 'online', statusLabel: 'Available at HR Suite', location: 'Level-6 HR Wing', phone: '+880 1711-002106' },
+  { id: 'hr', name: 'Engr. M. Harunur Rashid', role: 'Plant GM, Keraniganj', initials: 'HR', color: 'var(--status-info)', status: 'online', statusLabel: 'Control Room Unit-1', location: 'Keraniganj Plant', phone: '+880 1711-002101', unread: 2 },
+  { id: 'fb', name: 'Farida Begum', role: 'CFO & Finance Director', initials: 'FB', color: 'var(--status-purple)', status: 'in-meeting', statusLabel: 'Boardroom A (Q4 Review)', location: 'Dhaka HQ, Level 9', phone: '+880 1711-002102' },
+  { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Compliance', initials: 'KM', color: 'var(--status-success)', status: 'away', statusLabel: 'At BSTI Tejgaon Directorate', location: 'Tejgaon, Dhaka', phone: '+880 1711-002103', unread: 1 },
+  { id: 'si', name: 'Md. Shafiqul Islam', role: 'Director, Sales & Dist.', initials: 'SI', color: 'var(--status-warning)', status: 'online', statusLabel: 'Available at HQ', location: 'Level-8 Commercial', phone: '+880 1711-002104' },
+  { id: 'ta', name: 'Engr. Tariq Ahmed', role: 'Plant Engineer, Unit-2', initials: 'TA', color: 'var(--brand-crimson)', status: 'offline', statusLabel: 'On Approved Medical Leave', location: 'Dhanmondi, Dhaka', phone: '+880 1711-002105', lastSeen: '10:15 AM' },
+  { id: 'nj', name: 'Sayeda Afroza Sultana', role: 'GM, Human Resources', initials: 'SAS', color: 'var(--status-pink)', status: 'online', statusLabel: 'Available at HR Suite', location: 'Level-6 HR Wing', phone: '+880 1711-002106' },
 ];
 
 const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
@@ -80,7 +80,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. M. Harunur Rashid',
       senderRole: 'Plant GM, Keraniganj',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: 'var(--status-info-solid)',
       content: "Honourable Chairman Sir, Keraniganj Factory reached 5,000 Metric Tons today, running 12% above target. Today's production report is attached below for your review.",
       timestamp: '09:14 AM',
       type: 'text',
@@ -94,7 +94,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. M. Harunur Rashid',
       senderRole: 'Plant GM, Keraniganj',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: 'var(--status-info-solid)',
       content: 'Refinery_Output_Keraniganj_Oct2026.pdf',
       timestamp: '09:15 AM',
       type: 'document',
@@ -109,7 +109,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Ahmed Akbar Sobhan (You)',
       senderRole: 'Chairman & Managing Director',
       senderInitials: 'AAS',
-      senderColor: '#A51C30',
+      senderColor: 'var(--brand-crimson)',
       content: 'COMMENCE PREVENTIVE MAINTENANCE ON COLUMN C-102 IMMEDIATELY. SAFETY VALVES PROCUREMENT (৳48.5L) AUTHORIZED UNDER FAST-TRACK. CFO EXPEDITE L/C DISBURSEMENT WITHIN 48 HOURS.',
       timestamp: '09:22 AM',
       type: 'directive',
@@ -127,7 +127,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Farida Begum',
       senderRole: 'CFO & Finance Director',
       senderInitials: 'FB',
-      senderColor: '#7C3AED',
+      senderColor: 'var(--status-purple-solid)',
       content: 'Understood Chairman Sir. L/C instructions have been formally transmitted to Bashundhara Corporate Bank branch under GL 4102-KER. Bank assurance confirmed for 2:00 PM today.',
       timestamp: '09:28 AM',
       type: 'text',
@@ -140,7 +140,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Nusrat Jahan',
       senderRole: 'GM, Human Resources',
       senderInitials: 'NJ',
-      senderColor: '#0891B2',
+      senderColor: 'var(--status-info-solid)',
       content: 'Staff Shift Welfare & Night Duty Roster Update',
       timestamp: '11:15 AM',
       type: 'voice',
@@ -156,7 +156,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. M. Harunur Rashid',
       senderRole: 'Plant GM',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: 'var(--status-info-solid)',
       content: 'SCADA alarm C-102 reboiler skin temperature peaked at 382°C at 04:00 AM. Nitrogen purge was activated. Temperature stabilized to 365°C.',
       timestamp: '07:45 AM',
       type: 'text',
@@ -171,7 +171,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. M. Harunur Rashid',
       senderRole: 'Plant GM',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: 'var(--status-info-solid)',
       content: 'Sir, strictly confidential: DoE regulatory inspector Dr. Shahabuddin is conducting surprise site walk today. We are demonstrating compliance on the water effluent treatment plant (ETP).',
       timestamp: '08:30 AM',
       type: 'text',
@@ -183,7 +183,7 @@ const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Ahmed Akbar Sobhan (You)',
       senderRole: 'Chairman & MD',
       senderInitials: 'AAS',
-      senderColor: '#A51C30',
+      senderColor: 'var(--brand-crimson)',
       content: 'Received Harun. Ensure full cooperation, provide all laboratory sample logs, and accord him highest official hospitality. Keep me updated hourly.',
       timestamp: '08:42 AM',
       type: 'text',
@@ -354,10 +354,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
   const getStatusColor = (status: ChatMember['status']) => {
     switch (status) {
-      case 'online': return '#10B981';
-      case 'away': return '#F59E0B';
-      case 'in-meeting': return '#8B5CF6';
-      case 'offline': return '#94A3B8';
+      case 'online': return 'var(--status-success)';
+      case 'away': return 'var(--status-warning)';
+      case 'in-meeting': return 'var(--status-purple)';
+      case 'offline': return 'var(--text-muted)';
     }
   };
 
@@ -378,7 +378,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           </div>
           <h3 className="ic-hub-heading">{t("Chairman's Inner Circle", 'চেয়ারম্যানের ইনার সার্কেল', lang)}</h3>
           <div className="ic-hub-subtext">
-            <ShieldCheck size={12} color="#10B981" />
+            <ShieldCheck size={12} color="var(--status-success)" />
             <span>Bashundhara Corporate Security Node #01</span>
           </div>
         </div>
@@ -554,7 +554,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
               onClick={() => setShowQuickDirectives(!showQuickDirectives)}
               title={t('Toggle Directive Presets', 'দ্রুত নির্দেশাবলি টগল করুন', lang)}
             >
-              <Zap size={13} color={showQuickDirectives ? '#D4AF37' : '#94A3B8'} />
+              <Zap size={13} color={showQuickDirectives ? 'var(--brand-gold)' : 'var(--text-muted)'} />
               <span>{t('Directives', 'নির্দেশাবলি', lang)}</span>
             </button>
             <button
@@ -588,7 +588,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           {showSecurityBanner && (
             <div className="ic-security-banner">
               <div className="ic-sec-left">
-                <ShieldCheck size={14} color="#D4AF37" />
+                <ShieldCheck size={14} color="var(--brand-gold)" />
                 <span>
                   <strong>{t('Sovereign Enclave Active', 'সার্বভৌম এনক্রিপশন সক্রিয়', lang)}:</strong>{' '}
                   {t('Signed with Chairman AAS token. Logged in SAP compliance audit trails.', 'চেয়ারম্যান ডিজিটাল কি দিয়ে স্বাক্ষরিত ও স্যাপ অডিটে সংরক্ষিত।', lang)}
@@ -639,7 +639,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                     <div className="ic-directive-card">
                       <div className="ic-directive-header">
                         <div className="ic-directive-title">
-                          <Zap size={15} color="#D4AF37" />
+                          <Zap size={15} color="var(--brand-gold)" />
                           <span>CHAIRMAN EXECUTIVE DIRECTIVE</span>
                         </div>
                         <code className="ic-directive-id">{msg.directiveId}</code>
@@ -648,7 +648,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                       <div className="ic-directive-footer">
                         {msg.directiveAcknowledged ? (
                           <div className="ic-ack-status success">
-                            <CheckCheck size={15} color="#10B981" />
+                            <CheckCheck size={15} color="var(--status-success)" />
                             <span>Formal Execution Certified in SAP Governance</span>
                           </div>
                         ) : (
@@ -667,7 +667,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   ) : msg.type === 'document' ? (
                     <div className="ic-document-card">
                       <div className="ic-doc-icon-box">
-                        <FileText size={24} color="#A51C30" />
+                        <FileText size={24} color="var(--brand-crimson)" />
                       </div>
                       <div className="ic-doc-info">
                         <div className="ic-doc-name">{msg.fileName}</div>
@@ -705,7 +705,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                               key={idx}
                               style={{
                                 height: `${h}%`,
-                                background: idx < 8 ? '#A51C30' : 'var(--brand-slate-300)',
+                                background: idx < 8 ? 'var(--brand-crimson)' : 'var(--brand-slate-300)',
                               }}
                             />
                           ))}
@@ -757,7 +757,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
                     {isMe && (
                       <div className="ic-read-receipt" title="Read by all 6 members">
-                        <CheckCheck size={14} color="#3B82F6" />
+                        <CheckCheck size={14} color="var(--status-info)" />
                         <span>{t('Delivered & Read', 'পঠিত', lang)}</span>
                       </div>
                     )}
@@ -778,7 +778,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
         {showQuickDirectives && (
           <div className="ic-quick-directives">
             <div className="ic-quick-label">
-              <Zap size={12} color="#D4AF37" />
+              <Zap size={12} color="var(--brand-gold)" />
               <span>{t('DIRECTIVE PRESETS:', 'দ্রুত নির্দেশাবলি:', lang)}</span>
             </div>
             <button
@@ -835,7 +835,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             {isDirectiveMode && (
               <div className="ic-directive-mode-bar">
                 <div className="ic-dir-tag">
-                  <Crown size={14} color="#D4AF37" />
+                  <Crown size={14} color="var(--brand-gold)" />
                   <span>FORMAL CHAIRMAN EXECUTIVE DIRECTIVE (LEGALLY BINDING)</span>
                 </div>
                 <button className="ic-dir-close" onClick={() => setIsDirectiveMode(false)}>
@@ -873,7 +873,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   onClick={() => setIsDirectiveMode(!isDirectiveMode)}
                   title="Toggle Formal Executive Order Mode"
                 >
-                  <Crown size={15} color={isDirectiveMode ? '#D4AF37' : 'inherit'} />
+                  <Crown size={15} color={isDirectiveMode ? 'var(--brand-gold)' : 'inherit'} />
                   <span>{t('Executive Order', 'নির্বাহী আদেশ', lang)}</span>
                 </button>
                 <button
@@ -882,7 +882,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   onClick={() => setIsUrgentFlag(!isUrgentFlag)}
                   title="Flag as Urgent Red Priority"
                 >
-                  <Flag size={15} color={isUrgentFlag ? '#EF4444' : 'inherit'} />
+                  <Flag size={15} color={isUrgentFlag ? 'var(--status-danger)' : 'inherit'} />
                   <span>{t('Urgent', 'জরুরি', lang)}</span>
                 </button>
                 <button
@@ -899,7 +899,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   onClick={() => setShowQuickDirectives(!showQuickDirectives)}
                   title="Toggle Quick Directive Presets"
                 >
-                  <Zap size={14} color={showQuickDirectives ? '#D4AF37' : 'inherit'} />
+                  <Zap size={14} color={showQuickDirectives ? 'var(--brand-gold)' : 'inherit'} />
                   <span>{t('Presets', 'প্রিসেট', lang)}</span>
                 </button>
                 <button
@@ -989,7 +989,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             {/* Pinned Orders Section */}
             <div className="ic-drawer-section">
               <div className="ic-drawer-sec-title">
-                <Pin size={12} color="#D4AF37" />
+                <Pin size={12} color="var(--brand-gold)" />
                 <span>PINNED DIRECTIVES & ORDERS</span>
               </div>
               <div className="ic-pinned-list">
@@ -1009,7 +1009,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
               </div>
               <div className="ic-vault-list">
                 <div className="ic-vault-file">
-                  <div className="ic-vf-icon"><FileText size={16} color="#A51C30" /></div>
+                  <div className="ic-vf-icon"><FileText size={16} color="var(--brand-crimson)" /></div>
                   <div className="ic-vf-info">
                     <div className="ic-vf-name">Refinery_Output_Keraniganj_Oct2026.pdf</div>
                     <div className="ic-vf-size">3.4 MB · Plant Telemetry</div>
@@ -1017,7 +1017,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   <Download size={14} className="ic-vf-dl" />
                 </div>
                 <div className="ic-vault-file">
-                  <div className="ic-vf-icon"><FileText size={16} color="#059669" /></div>
+                  <div className="ic-vf-icon"><FileText size={16} color="var(--status-success)" /></div>
                   <div className="ic-vf-info">
                     <div className="ic-vf-name">DoE_Inspection_Audit_Notice.pdf</div>
                     <div className="ic-vf-size">1.8 MB · Legal Statutory</div>

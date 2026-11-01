@@ -81,19 +81,19 @@ export default function HodDashboard({
 
           <div className="card-body">
             {/* Live Q4 Budget Burn-Down Gauge */}
-            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px 18px', borderRadius: '6px', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '14px 18px', borderRadius: '6px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
                 <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>Q4 Operational Expenditure (OPEX) Ceiling: ৳53,20,000</span>
-                <span style={{ color: '#059669', fontWeight: 800 }}>
+                <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>
                   Safe Buffer: ৳{(5320000 - (3840000 + approvedAmountSum)).toLocaleString()} Remaining
                 </span>
               </div>
-              <div style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '8px', background: 'var(--surface-3)', borderRadius: '4px', overflow: 'hidden' }}>
                 <div
                   style={{
                     width: `${Math.min(100, ((3840000 + approvedAmountSum) / 5320000) * 100)}%`,
                     height: '100%',
-                    background: 'linear-gradient(90deg, #10B981, #F59E0B)',
+                    background: 'linear-gradient(90deg, var(--status-success-solid), var(--status-warning-solid))',
                     transition: 'width 0.4s ease'
                   }}
                 />
@@ -112,7 +112,7 @@ export default function HodDashboard({
                     {selectedHodIds.includes(item.id) ? (
                       <CheckSquare size={18} color="var(--brand-crimson)" />
                     ) : (
-                      <Square size={18} color="#94A3B8" />
+                      <Square size={18} color="var(--text-muted)" />
                     )}
                   </button>
 

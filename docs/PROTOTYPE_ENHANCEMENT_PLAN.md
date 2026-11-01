@@ -1,0 +1,114 @@
+# Prototype Enhancement Plan — "Make it feel like production"
+
+**Scope:** `client/` (the interactive prototype) only. Goal: a presentation-ready prototype that behaves like a real, role-separated, production operations system — without becoming the production codebase (that remains `server/`, `frontend/`, `app/` per `docs/platform/`).
+**Status:** Proposed 1 Nov 2026 — awaiting sequencing decisions (§6).
+
+---
+
+## 1. Diagnosis — why it doesn't feel real (code-verified)
+
+| # | Symptom | Root cause (measured) | Effect in a demo |
+| :-- | :--- | :--- | :--- |
+| D1 | Dark mode is broken on most screens (unreadable panels, white buttons, light cards on dark canvas) | **4,744** inline `style={{}}` blocks and **3,234** hard-coded hex colours in `.tsx`; `dark.css` (787 lines) can only override class-based styles | Any theme toggle during a demo exposes defects |
+| D2 | Every role sees almost everything; actions aren't role-appropriate | Access control is sidebar-only (`ROLE_NAV`); **105** scattered `role === '…'` / name-string checks; 7 views (Notesheet, Compliance, Claims, Approvals, Workforce, Inner Circle, Bus) have **no** gating; identity matched by `'Tanvir'`, `DRV-01`, `EMP-1042` | A driver can approve a CAPEX file; an employee can offboard staff — breaks credibility instantly |
+| D3 | Numbers disagree across screens | `BusView`, `InnerCircleChat`, `AttendanceView` ignore their stores; dead duplicate seed arrays in Compliance/Parcel/Guest; parcel logic duplicated with different percentages | Badge says 5, screen shows 3 |
+| D4 | Actions don't "stick" or propagate correctly | No persistence (refresh = reset); approvals history labels rejections "Approved"; intermediate note-sheet sign approves the whole file; `settled`/`overdue` unreachable; fuel voucher confirm is a no-op | Reviewer refreshes → everything vanishes |
+| D5 | Too much, and the wrong, information | Dashboards stacked with KPI banners, ROI dossiers, "SCADA LIVE", "AI Smart Pooling", "SHA-256 seal", "System Synced"/SAP panels for every role; marketing copy in operational screens | Reads as a pitch deck, not a tool people use daily |
+| D6 | Visible demo scaffolding | "Choose a role to preview the system", "Switch Role (Preview)" in the profile menu, OTP revealed in error toast, master code `1234`, lock PIN `1234`, fake 1.15 s "telemetry" sign-in, canned chat replies | Audience is reminded it's a mock |
+| D7 | Inconsistent visual language | Each 2–3k-line view hand-rolls its own buttons, pills, tables, modals via inline styles; spacing/typography drift between modules | Feels stitched together |
+| D8 | Dates/data inconsistencies | Hard-coded dates conflict with `SYSTEM_TODAY`; mixed ref-number formats; English-only strings in places | Sharp reviewers notice |
+| D9 | No URL / back button; 2 MB single bundle | `useState<AppView>` navigation, no code-splitting | Refresh loses place; slow first load |
+
+## 2. Definition of "feels like production"
+
+1. **One identity model.** A signed-in *user* object (not a role string) with permissions and data scope; every action and every list is filtered through it. Labels, nav, dashboards, and buttons derive from permissions — no name matching.
+2. **One design system.** Semantic tokens (`--surface-1/2/3`, `--text-1/2/3`, `--border`, `--accent`, status colours) and a small set of shared primitives (Button, Card, Badge/StatusPill, DataTable, Modal, Drawer, Tabs, EmptyState, Skeleton, FormField, Toast). Both themes derive from tokens — no hex in TSX.
+3. **One source of truth per domain** (the stores), persisted, with consistent reference numbers and dates relative to a single clock.
+4. **Operational, not promotional.** Each persona lands on "my work today"; dashboards show what that person acts on; pitch material (ROI dossier, programme KPIs) lives in a Chairman-only Executive view.
+5. **Real where cheap, honest where not.** Real SHA-256 (Web Crypto), real OTP flow (generated, never revealed), real geofence math with browser geolocation, real localStorage persistence, working routing. Things that cannot be real (SAP, SMS) are shown as *queued/integration* states, not "Up to Date" badges.
+6. **Invisible demo controls.** Persona switching, data reset, and scenario presets exist only behind a hidden shortcut (`Ctrl+Shift+D`), never in the product UI.
+
+## 3. Workstreams
+
+### WS-A Design system & theming (unblocks dark mode)
+- `styles/tokens.css`: semantic tokens for light and dark (`[data-theme]`), derived from the brand palette (`#A51C30`, `#0B132B`, `#D4AF37`, `#F8FAFC`).
+- Primitives in `components/ui/` (Button, IconButton, Card, StatCard, Badge, StatusPill, Tabs, DataTable, Modal, Drawer, EmptyState, Skeleton, FormField/Input/Select, Toast, PageHeader, FilterBar).
+- Codemod: map the 3,234 hex literals to tokens (scripted for the ~40 recurring values; manual for the tail); convert recurring inline-style patterns to classes/primitives.
+- Theme persisted; respects `prefers-color-scheme` on first visit.
+- Screen-by-screen checklist in both themes (15 views × 7 roles where they differ).
+
+### WS-B Identity, permissions & scope
+- `auth/permissions.ts`: role → `module:action` permissions with scope (`self | team | department | site | company`), aligned with `docs/platform/06` so the prototype previews the real model.
+- `auth/session.ts`: `currentUser` (id, name, role(s), department, site, grade, reports) replacing name-string checks; `useCan(permission)`, `useScope()`.
+- Store selectors accept the user and apply scope (`myClaims`, `departmentClaims`, `allClaims`).
+- Every view: tabs, columns, buttons, bulk actions gated by `useCan`; approvers only see what they can decide; employees see only their own records.
+- Login: real-looking credential flow (email/Emp-ID + password `bogcl2026` validated; wrong password → generic error); persona chips moved to the hidden demo menu; remove "preview" wording and the fake telemetry loader (replace with a short, plain progress state).
+- Topbar: remove Switch Role; profile menu shows real profile/security/handover/devices only.
+
+### WS-C Data coherence & persistence
+- Wire `BusView`, `InnerCircleChat`, `AttendanceView` to their stores; delete dead seed arrays and duplicate logic.
+- `lib/clock.ts`: one `today()`; all seed dates expressed relative to it (no hard-coded "22 Oct 2026").
+- Reference numbers via one `nextRef(prefix)` matching the production formats (`BOGCL/PROC/2026/0894`, `PKG-2026-9041`, …).
+- Persistence layer: every store serialises to `localStorage` under a versioned key; "Reset demo data" in the hidden demo menu; seed version bump invalidates old data.
+- Fix behavioural defects: signatory route advancement, approvals history attribution/outcome, reachable `settled`/`overdue`, fuel voucher issue, parcel single-source stage logic.
+- Realistic seed: names, BDT amounts, departments, plausible volumes (e.g. 788 staff → attendance numbers that add up), bilingual fields complete.
+
+### WS-D Role-based information architecture (the "clear separation" ask)
+For each persona define *daily jobs*, then prune everything else:
+
+| Persona | Lands on | Primary modules | Removed/hidden from their UI |
+| :-- | :--- | :--- | :--- |
+| Chairman | Executive Overview (approvals needing signature, leadership roster, critical alerts, briefing) | Approvals, Note-sheets (sign), Inner Circle, Notices (announce), Compliance (risk), Incidents (critical), Directory | Operational tabs (fleet dispatch, bus seats, parcels), ROI dossier moved to its own Executive Insights page |
+| Plant GM | Plant operations today (shift, production, LOTO, incidents, permits, assets due) | Incidents/CAPA, Assets, Compliance, Approvals (plant), Fleet (plant requests), Attendance (plant) | HR admin tools, bus admin, claims finance |
+| HR Admin | People operations (attendance exceptions, leave, onboarding/exit, notices, bus) | Workforce, Attendance & Leave, Notices, Bus, Claims (HR policy), Visitors (HQ) | Plant KPIs, fleet dispatch, note-sheet initiation beyond HR |
+| Transport Admin | Dispatch board (pending requisitions, live trips, driver status, vehicle docs, fuel/toll) | Fleet, Bus, Vehicle assets, Parcels (logistics), Visitors (vehicle gate) | Finance approvals, HR, compliance detail |
+| HOD (Finance) | Approval inbox + budget view | Approvals, Claims (finance), Note-sheets (finance step), Compliance fees, Asset financials | Dispatch, bus, HR admin |
+| Employee | My day (punch, leave balance, my claims, my requests, notices, bus seat) | Attendance, Claims, Vehicle request, Parcels (mine), Visitors (mine), Note-sheets (initiate), Bus (my seat) | All admin/approval views, company KPIs |
+| Driver | Today's trip console (large touch targets) | Trip console, fuel/toll, my attendance, notices | Everything else |
+
+- Dashboards rebuilt as task-oriented ("needs your action", "today", "watch") instead of KPI walls.
+- Module views: role-specific tab sets and column sets defined in one config per module, not inline conditionals.
+- Remove or re-label unverifiable claims: "SCADA LIVE" → "Shift report (manual)"; "AI Smart Pooling" → "Pooling suggestion"; SAP "Up to Date" → integration status *Not connected / Queued* in an admin-only panel; "SHA-256 seal" backed by a real hash.
+
+### WS-E Interaction realism
+- Real SHA-256 (`crypto.subtle`) for note-sheet paragraphs, parcel events, signatures; verification code + QR that actually encodes it.
+- Parcel OTP: generated, shown only on the *recipient's* device view (simulated via persona), 5 attempts, no master code.
+- Attendance: real `navigator.geolocation` + haversine against site geofences; graceful fallback with explicit "location unavailable" state (no fake face-match).
+- Loading skeletons on view entry, optimistic state transitions with undo toasts where safe, confirmation dialogs for destructive/financial actions, inline validation on forms.
+- Notification centre driven by store events (approve something → notification appears for the right persona).
+- Routing: hash-based routes (`#/approvals/APR-2026-0894`) with back/forward and deep links from notifications; lazy-load views (fixes 2 MB bundle).
+
+### WS-F Polish & quality
+- Dark/light audit per screen; contrast ≥ 4.5:1 for text; focus rings; modal focus trap; `aria-label`s on icon buttons.
+- Responsive pass for the mobile personas (employee, driver).
+- Bengali completeness audit (`t()` pairs), number formatting (৳ with en-BD grouping), dates in Asia/Dhaka.
+- Lint hygiene: enable `noUnusedLocals/Parameters`, remove unused deps (`zustand`, `tailwindcss`) or adopt them deliberately.
+
+### WS-G Demo tooling (hidden)
+- `Ctrl+Shift+D` demo panel: switch persona, reset data, load scenario (e.g. "CAPEX file awaiting Chairman", "Parcel at gate", "Incident reported 10 min ago"), toggle "presentation mode" (larger type, no clock).
+- Demo script per persona aligned to the 6 acts in `docs/05_PROTOTYPE_BLUEPRINT_AND_DEMO_SCRIPT.md`.
+
+## 4. Sequencing
+
+| Phase | Content | Why first | Effort (focused agent-days) |
+| :-- | :--- | :--- | :-- |
+| **P1 Foundations** | WS-A tokens + primitives + codemod; WS-B identity/permissions/scope + login; WS-C persistence, clock, refs, store wiring; WS-E routing | Everything else depends on these; dark mode and role separation flip from "broken" to "works" globally | 5–7 |
+| **P2 Module passes** | Per module (17): apply primitives, role config (WS-D), fix defects (WS-C), realism (WS-E), both-theme check (WS-F). Order: Approvals → Dashboards (7) → Note-sheets → Attendance/Leave → Claims → Fleet/Driver → Parcels → Visitors → Incidents → Compliance → Assets → Bus → Workforce → Chat → Notices | Highest-visibility screens first | 8–12 |
+| **P3 Demo readiness** | WS-G, responsive/BN/a11y audit, performance, final walkthrough per persona, screenshots for the deck | Last mile | 2–3 |
+
+Total ≈ 15–22 focused days. P1 alone already removes the two biggest credibility problems (dark mode, role bleed).
+
+## 5. Guardrails
+
+- Prototype stays self-contained: no backend calls, no production libraries beyond what's needed for routing/hash and Web Crypto; data remains in-browser.
+- The production specification suite (`docs/platform/`) is the reference for permissions, states and reference formats so the prototype previews the real system rather than diverging from it.
+- Changes are incremental and demoable at every step; `npm run build` must pass after each module pass.
+- Quantitative targets at the end of P2: `0` hex literals in `.tsx`, `< 300` inline style blocks (layout-only), `0` name-string identity checks, dark-mode checklist 100 %.
+
+## 6. Decisions needed before P1 starts
+
+1. **Presentation date & audience** — determines whether P2 order should favour executive screens (board) or operational ones (department heads).
+2. **Dark mode** — keep both themes (recommended; P1 makes it cheap) or ship light-only and remove the toggle.
+3. **Login realism** — password-validated login with hidden persona switcher (recommended) vs keep visible persona picker.
+4. **Routing** — add hash routing with lazy views (recommended, no new runtime dependency) vs keep state-based navigation.
+5. **Feature trimming** — confirm the "removed/hidden" column in WS-D; anything there the client specifically asked to see?

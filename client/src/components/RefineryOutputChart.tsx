@@ -18,10 +18,10 @@ const PRODUCTION_DATA = [
 ];
 
 const TANKS = [
-  { id: 'TK-01', name: 'Bitumen VG-30', temp: '162°C', capacity: '12,000 MT', fillPercent: 84, status: 'Optimal', color: '#A51C30' },
-  { id: 'TK-02', name: 'Bitumen VG-10', temp: '158°C', capacity: '10,000 MT', fillPercent: 68, status: 'Filling', color: '#0369A1' },
-  { id: 'TK-03', name: 'Industrial Fuel HFO', temp: '48°C', capacity: '15,000 MT', fillPercent: 91, status: 'Near Full', color: '#D97706' },
-  { id: 'TK-04', name: 'LPG Cryo-Sphere', temp: '-42°C', capacity: '5,000 MT', fillPercent: 74, status: 'Pressurized', color: '#059669' },
+  { id: 'TK-01', name: 'Bitumen VG-30', temp: '162°C', capacity: '12,000 MT', fillPercent: 84, status: 'Optimal', color: 'var(--brand-crimson)' },
+  { id: 'TK-02', name: 'Bitumen VG-10', temp: '158°C', capacity: '10,000 MT', fillPercent: 68, status: 'Filling', color: 'var(--status-info)' },
+  { id: 'TK-03', name: 'Industrial Fuel HFO', temp: '48°C', capacity: '15,000 MT', fillPercent: 91, status: 'Near Full', color: 'var(--status-warning)' },
+  { id: 'TK-04', name: 'LPG Cryo-Sphere', temp: '-42°C', capacity: '5,000 MT', fillPercent: 74, status: 'Pressurized', color: 'var(--status-success)' },
 ];
 
 export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) {
@@ -97,7 +97,7 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                 <span>{t('Bitumen Output (MT)', 'বিটুমিন উৎপাদন (মে.টন)', lang)}</span>
               </div>
               <div className="legend-item">
-                <span className="legend-color-dot" style={{ background: '#38BDF8' }}></span>
+                <span className="legend-color-dot" style={{ background: 'var(--status-info-bright)' }}></span>
                 <span>{t('LPG Liquefaction (MT)', 'এলপিজি লিকুইফেকশন (মে.টন)', lang)}</span>
               </div>
               <div className="legend-item">
@@ -137,8 +137,8 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                           style={{
                             height: `${bitumenHeight}px`,
                             background: isHovered
-                              ? 'linear-gradient(180deg, #C8102E 0%, #7F1424 100%)'
-                              : 'linear-gradient(180deg, #A51C30 0%, #060D1F 100%)',
+                              ? 'linear-gradient(180deg, var(--brand-crimson-light) 0%, var(--brand-crimson-dark) 100%)'
+                              : 'linear-gradient(180deg, var(--brand-crimson) 0%, var(--surface-inverse-deep) 100%)',
                           }}
                         >
                           <span className="bar-tooltip-val">{item.bitumen.toLocaleString()}</span>
@@ -148,8 +148,8 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                           style={{
                             height: `${lpgHeight}px`,
                             background: isHovered
-                              ? 'linear-gradient(180deg, #38BDF8 0%, #0284C7 100%)'
-                              : 'linear-gradient(180deg, #0284C7 0%, #0c4a6e 100%)',
+                              ? 'linear-gradient(180deg, var(--status-info-bright) 0%, var(--status-info-solid) 100%)'
+                              : 'linear-gradient(180deg, var(--status-info-solid) 0%, var(--status-info-solid-dark) 100%)',
                           }}
                         />
                       </div>
@@ -172,7 +172,7 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                 </span>
               </div>
               <div className="efficiency-badge">
-                <TrendingUp size={12} color="#059669" />
+                <TrendingUp size={12} color="var(--status-success)" />
                 <span>Operating Efficiency: <strong>{currentHover.efficiency}%</strong></span>
               </div>
             </div>

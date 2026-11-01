@@ -224,23 +224,23 @@ export default function PlantGmDashboard({
               }}
             >
               <div style={{ display: 'flex', gap: '10px' }}>
-                <HelpCircle size={20} color="#DC2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <HelpCircle size={20} color="var(--status-danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '12px', lineHeight: 1.5, color: 'var(--brand-slate-800)' }}>
-                  <div style={{ fontWeight: 800, fontSize: '13px', color: '#991B1B', marginBottom: '3px' }}>
+                  <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--status-danger-text)', marginBottom: '3px' }}>
                     {t('What is this section? (Easy Guide for Non-Technical Users)', 'এই সেকশনটি কী এবং কীভাবে কাজ করে? (সহজ নির্দেশিকা)', lang)}
                   </div>
                   <div>
                     In an oil and bitumen factory, repairing machinery is high-risk. This screen protects workers using two essential real-life safety systems:
                   </div>
                   <div style={{ marginTop: '6px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px' }}>
-                    <div style={{ background: '#FFFFFF', padding: '8px 10px', borderRadius: '6px', border: '1px solid #FCA5A5' }}>
-                      <strong style={{ color: '#B91C1C' }}>🔒 1. Machine Safety Locks (LOTO):</strong>
+                    <div style={{ background: 'var(--surface-1)', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--status-danger-bright)' }}>
+                      <strong style={{ color: 'var(--status-danger-text)' }}>🔒 1. Machine Safety Locks (LOTO):</strong>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
                         Before an engineer touches a pump, motor, or pipe, its electrical switch is <strong>physically padlocked and tagged</strong> with a warning sign. This guarantees no one can turn the power on accidentally while work is underway.
                       </div>
                     </div>
-                    <div style={{ background: '#FFFFFF', padding: '8px 10px', borderRadius: '6px', border: '1px solid #FCD34D' }}>
-                      <strong style={{ color: '#B45309' }}>📋 2. Shift Change Notes & Handover:</strong>
+                    <div style={{ background: 'var(--surface-1)', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--status-warning-bright)' }}>
+                      <strong style={{ color: 'var(--status-warning-text)' }}>📋 2. Shift Change Notes & Handover:</strong>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
                         The factory runs 24/7 across Morning, Evening, and Night shifts. Departing engineers leave crucial instructions and watch items for the incoming team so nothing is missed.
                       </div>
@@ -267,7 +267,7 @@ export default function PlantGmDashboard({
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: '#FEE2E2', color: '#DC2626' }}>
+                  <div className="card-hd-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger)' }}>
                     <Lock size={16} />
                   </div>
                   <div>
@@ -341,10 +341,10 @@ export default function PlantGmDashboard({
                       <div
                         key={p.id}
                         style={{
-                          border: isLocked ? '1.5px solid #FCA5A5' : isDeIsolated ? '1px solid #BBF7D0' : '1px solid var(--brand-slate-200)',
+                          border: isLocked ? '1.5px solid var(--status-danger-bright)' : isDeIsolated ? '1px solid var(--status-success-border)' : '1px solid var(--brand-slate-200)',
                           padding: '12px 14px',
                           borderRadius: '8px',
-                          background: isLocked ? 'linear-gradient(180deg, #FFFFFF 0%, #FEF2F2 100%)' : 'var(--brand-card-bg)',
+                          background: isLocked ? 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-danger-bg) 100%)' : 'var(--brand-card-bg)',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                         }}
                       >
@@ -353,7 +353,7 @@ export default function PlantGmDashboard({
                             <span style={{ fontFamily: 'monospace', fontWeight: 900, color: 'var(--brand-crimson)', fontSize: '12px' }}>
                               {p.id}
                             </span>
-                            <span className="badge" style={{ fontSize: '9.5px', background: '#F1F5F9', color: '#475569' }}>
+                            <span className="badge" style={{ fontSize: '9.5px', background: 'var(--surface-2)', color: 'var(--text-2)' }}>
                               {p.typeLabel || 'Machine Lockout'}
                             </span>
                           </div>
@@ -369,7 +369,7 @@ export default function PlantGmDashboard({
 
                         {/* Plain Explanation Snippet */}
                         {p.plainSummary && (
-                          <div style={{ fontSize: '11.5px', color: '#1E293B', marginTop: '4px', background: 'rgba(255,255,255,0.7)', padding: '5px 8px', borderRadius: '5px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                          <div style={{ fontSize: '11.5px', color: 'var(--text-1)', marginTop: '4px', background: 'rgba(255,255,255,0.7)', padding: '5px 8px', borderRadius: '5px', border: '1px solid rgba(0,0,0,0.06)' }}>
                             💡 <strong>Why Locked:</strong> {p.plainSummary}
                           </div>
                         )}
@@ -386,9 +386,9 @@ export default function PlantGmDashboard({
                         <div
                           style={{
                             fontSize: '11px',
-                            color: '#991B1B',
+                            color: 'var(--status-danger-text)',
                             marginTop: '6px',
-                            background: '#FEE2E2',
+                            background: 'var(--status-danger-bg)',
                             padding: '4px 8px',
                             borderRadius: '4px',
                             border: '1px solid rgba(239,68,68,0.25)',
@@ -397,7 +397,7 @@ export default function PlantGmDashboard({
                             gap: '5px',
                           }}
                         >
-                          <AlertTriangle size={12} color="#DC2626" />
+                          <AlertTriangle size={12} color="var(--status-danger)" />
                           <span><strong>Hazard Avoided:</strong> {p.hazard}</span>
                         </div>
 
@@ -442,7 +442,7 @@ export default function PlantGmDashboard({
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: '#FEF3C7', color: '#B45309' }}>
+                  <div className="card-hd-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' }}>
                     <CalendarClock size={16} />
                   </div>
                   <div>
@@ -516,11 +516,11 @@ export default function PlantGmDashboard({
                       {/* Sign-off status */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px dashed var(--brand-slate-200)', fontSize: '11px' }}>
                         {sh.safetyChecklistSigned ? (
-                          <span style={{ color: '#059669', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ color: 'var(--status-success)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <CheckCircle size={13} /> {t('Digitally Signed & Acknowledged', 'ডিজিটাল স্বাক্ষর সম্পন্ন', lang)}
                           </span>
                         ) : (
-                          <span style={{ color: '#D97706', fontWeight: 600 }}>
+                          <span style={{ color: 'var(--status-warning)', fontWeight: 600 }}>
                             ⏳ {t('Pending Incoming Shift Signature', 'স্বাক্ষর বাকি', lang)}
                           </span>
                         )}
@@ -551,23 +551,23 @@ export default function PlantGmDashboard({
       {selectedPermit && (
         <div className="modal-bg" onClick={() => setSelectedPermit(null)}>
           <div className="modal" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#7F1424', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Lock size={18} color="#FDE047" />
-                  <h3 style={{ color: '#fff', margin: 0 }}>
+                  <Lock size={18} color="var(--status-warning-bright)" />
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                     {t('Safety Isolation Checklist & Lockout Dossier', 'নিরাপত্তা আইসোলেশন ও লকআউট ডসিয়ার', lang)}
                   </h3>
                 </div>
-                <div style={{ fontSize: '11px', color: '#FECACA', marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
                   {selectedPermit.id} • {selectedPermit.equipment}
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setSelectedPermit(null)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedPermit(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', padding: '10px 12px', borderRadius: '6px', fontSize: '12px', color: '#991B1B', marginBottom: '14px' }}>
+              <div style={{ background: 'var(--status-danger-bg)', border: '1px solid var(--status-danger-border)', padding: '10px 12px', borderRadius: '6px', fontSize: '12px', color: 'var(--status-danger-text)', marginBottom: '14px' }}>
                 🛡️ <strong>Life-Saving Rule:</strong> Under no circumstances may padlocks or tags be removed until the assigned engineer confirms all personnel are clear of the machinery.
               </div>
 
@@ -586,24 +586,24 @@ export default function PlantGmDashboard({
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11.5px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F0FDF4', padding: '8px 10px', borderRadius: '5px', border: '1px solid #BBF7D0' }}>
-                    <CheckCircle size={15} color="#15803D" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '8px 10px', borderRadius: '5px', border: '1px solid var(--status-success-border)' }}>
+                    <CheckCircle size={15} color="var(--status-success-text)" />
                     <span><strong>1. Zero-Energy Test:</strong> Electrical breaker opened and tested with multimeter (0 Volts confirmed).</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F0FDF4', padding: '8px 10px', borderRadius: '5px', border: '1px solid #BBF7D0' }}>
-                    <CheckCircle size={15} color="#15803D" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '8px 10px', borderRadius: '5px', border: '1px solid var(--status-success-border)' }}>
+                    <CheckCircle size={15} color="var(--status-success-text)" />
                     <span><strong>2. Physical Padlock Clamped:</strong> Master red safety padlock attached to lockout hasp. Key held by technician.</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F0FDF4', padding: '8px 10px', borderRadius: '5px', border: '1px solid #BBF7D0' }}>
-                    <CheckCircle size={15} color="#15803D" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '8px 10px', borderRadius: '5px', border: '1px solid var(--status-success-border)' }}>
+                    <CheckCircle size={15} color="var(--status-success-text)" />
                     <span><strong>3. High-Vis Warning Tag:</strong> Waterproof "DANGER: DO NOT OPERATE" tag wired to breaker with technician contact.</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F0FDF4', padding: '8px 10px', borderRadius: '5px', border: '1px solid #BBF7D0' }}>
-                    <CheckCircle size={15} color="#15803D" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '8px 10px', borderRadius: '5px', border: '1px solid var(--status-success-border)' }}>
+                    <CheckCircle size={15} color="var(--status-success-text)" />
                     <span><strong>4. Hydraulic & Steam Isolation:</strong> Molten bitumen supply valves chained closed and drained to 0 Bar pressure.</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F0FDF4', padding: '8px 10px', borderRadius: '5px', border: '1px solid #BBF7D0' }}>
-                    <CheckCircle size={15} color="#15803D" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--status-success-bg)', padding: '8px 10px', borderRadius: '5px', border: '1px solid var(--status-success-border)' }}>
+                    <CheckCircle size={15} color="var(--status-success-text)" />
                     <span><strong>5. Combustible Gas Check:</strong> Atmospheric test confirmed 0.0% flammable vapor and 20.9% normal oxygen.</span>
                   </div>
                 </div>
@@ -635,14 +635,14 @@ export default function PlantGmDashboard({
       {showNewPermitModal && (
         <div className="modal-bg" onClick={() => setShowNewPermitModal(false)}>
           <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#1E293B', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse-2)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Plus size={18} color="#38BDF8" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Plus size={18} color="var(--status-info-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Issue New Machine Safety Lock / Permit', 'নতুন মেশিন নিরাপত্তা লক ও পারমিট ইস্যু', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowNewPermitModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowNewPermitModal(false)}>×</button>
             </div>
 
             <form onSubmit={handleCreatePermit}>
@@ -737,14 +737,14 @@ export default function PlantGmDashboard({
       {showNewShiftModal && (
         <div className="modal-bg" onClick={() => setShowNewShiftModal(false)}>
           <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#B45309', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--status-warning-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CalendarClock size={18} color="#FEF3C7" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <CalendarClock size={18} color="var(--status-warning-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Record Shift Change & Handover Notes', 'শিফট পরিবর্তন ও কাজের হস্তান্তর নোট লিপিবদ্ধকরণ', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowNewShiftModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowNewShiftModal(false)}>×</button>
             </div>
 
             <form onSubmit={handleCreateShift}>
@@ -812,7 +812,7 @@ export default function PlantGmDashboard({
 
               <div className="modal-ft">
                 <button type="button" className="btn-sm-ghost" onClick={() => setShowNewShiftModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
-                <button type="submit" className="btn-primary" style={{ background: '#B45309', borderColor: '#B45309' }}>
+                <button type="submit" className="btn-primary" style={{ background: 'var(--status-warning-solid-dark)', borderColor: 'var(--status-warning-solid-dark)' }}>
                   <Check size={13} /> {t('Save & Broadcast Handover', 'সংরক্ষণ ও শিফট হস্তান্তর সম্পন্ন', lang)}
                 </button>
               </div>
@@ -827,24 +827,24 @@ export default function PlantGmDashboard({
       {showBatchReleaseModal && (
         <div className="modal-bg" onClick={() => setShowBatchReleaseModal?.(false)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   ★ {t('Plant GM Bitumen Batch Quality Release Authority', 'বিটুমিন ব্যাচ গুণমান সনদ ও রিলিজ অনুমোদন', lang)}
                 </h3>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>BOGCL QC Lab Tested • Keraniganj Complex</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>BOGCL QC Lab Tested • Keraniganj Complex</div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowBatchReleaseModal?.(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowBatchReleaseModal?.(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ border: '2px solid #E2E8F0', padding: '16px', borderRadius: '6px', background: '#FAFAFC', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid #CBD5E1', paddingBottom: '8px', marginBottom: '10px' }}>
+              <div style={{ border: '2px solid var(--border-1)', padding: '16px', borderRadius: '6px', background: 'var(--surface-0)', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--border-2)', paddingBottom: '8px', marginBottom: '10px' }}>
                   <div>
                     <strong>Batch No:</strong> <span style={{ fontFamily: 'monospace' }}>BOGCL-BIT-2026-B88</span>
                   </div>
                   <div>
-                    <strong>Product:</strong> <span style={{ color: '#D97706', fontWeight: 800 }}>Bitumen Grade 60/70</span>
+                    <strong>Product:</strong> <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>Bitumen Grade 60/70</span>
                   </div>
                   <div>
                     <strong>Volume:</strong> 2,400 Metric Tons
@@ -853,10 +853,10 @@ export default function PlantGmDashboard({
 
                 <div style={{ fontSize: '11.5px', fontWeight: 700, marginBottom: '6px' }}>Laboratory Physical Test Parameters (BDS 1238:2020 Standard):</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '11px' }}>
-                  <div style={{ background: '#ECFDF5', padding: '8px', borderRadius: '4px', border: '1px solid #A7F3D0' }}>
+                  <div style={{ background: 'var(--status-success-bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--status-success-border)' }}>
                     Penetration @ 25°C: <strong>64 dmm</strong> (Passed)
                   </div>
-                  <div style={{ background: '#ECFDF5', padding: '8px', borderRadius: '4px', border: '1px solid #A7F3D0' }}>
+                  <div style={{ background: 'var(--status-success-bg)', padding: '8px', borderRadius: '4px', border: '1px solid var(--status-success-border)' }}>
                     Softening Point: <strong>51.2°C</strong> (Passed)
                   </div>
                   <div style={{ background: 'var(--status-success-bg)', padding: '8px', borderRadius: '4px', border: '1px solid rgba(16,185,129,0.3)' }}>

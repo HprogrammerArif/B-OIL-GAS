@@ -228,10 +228,10 @@ export default function NotificationCenter({
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
-      case 'approval': return <FileText size={14} color="#A51C30" />;
-      case 'safety': return <AlertTriangle size={14} color="#D97706" />;
-      case 'logistics': return <Truck size={14} color="#0369A1" />;
-      case 'system': return <ShieldCheck size={14} color="#059669" />;
+      case 'approval': return <FileText size={14} color="var(--brand-crimson)" />;
+      case 'safety': return <AlertTriangle size={14} color="var(--status-warning)" />;
+      case 'logistics': return <Truck size={14} color="var(--status-info)" />;
+      case 'system': return <ShieldCheck size={14} color="var(--status-success)" />;
       default: return <Bell size={14} />;
     }
   };

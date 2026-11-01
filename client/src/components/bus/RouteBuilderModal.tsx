@@ -170,8 +170,8 @@ export default function RouteBuilderModal({
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #091024 0%, #172554 100%)',
-          color: '#FFFFFF',
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
+          color: 'var(--text-on-brand)',
           padding: '18px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
@@ -185,7 +185,7 @@ export default function RouteBuilderModal({
               borderRadius: '10px',
               background: 'rgba(59, 130, 246, 0.25)',
               border: '1px solid rgba(96, 165, 250, 0.4)',
-              color: '#93C5FD',
+              color: 'var(--status-info-bright)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -194,7 +194,7 @@ export default function RouteBuilderModal({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.2px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
                   {existingRoute
                     ? t('Configure Road Corridor & Stoppages Timetable', 'রোড করিডোর ও স্টপেজ সময়সূচী রূপরেখা', lang)
                     : t('Define New Road Corridor & Sequential Stoppages', 'নতুন রোড করিডোর ও পর্যায়ক্রমিক স্টপেজ প্রণয়ন', lang)}
@@ -203,7 +203,7 @@ export default function RouteBuilderModal({
                   {selectedBusObj ? `${selectedBusObj.coachNo}` : 'Fleet Bus'}
                 </span>
               </div>
-              <p style={{ fontSize: '12px', color: '#94A3B8', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
                 {t(
                   'Set highway transit corridors, sequential boarding stations, morning departure & evening return timetables.',
                   'মহাসড়ক পথ, পর্যায়ক্রমিক যাত্রী বোর্ডিং স্টপেজ, সকাল ও সন্ধ্যার যাতায়াত সময়সূচী নির্ধারণ করুন।',
@@ -217,7 +217,7 @@ export default function RouteBuilderModal({
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#E2E8F0',
+              color: 'var(--text-inverse)',
               width: '32px',
               height: '32px',
               borderRadius: '8px',
@@ -237,15 +237,15 @@ export default function RouteBuilderModal({
             padding: '20px 24px',
             maxHeight: '74vh',
             overflowY: 'auto',
-            background: 'var(--brand-card-bg, #FFFFFF)',
+            background: 'var(--brand-card-bg)',
             display: 'flex',
             flexDirection: 'column',
             gap: '18px'
           }}>
             {/* ─── SECTION 1: Route Corridor & Bus Assignment ─── */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px',
               boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
@@ -253,7 +253,7 @@ export default function RouteBuilderModal({
               <div style={{
                 fontSize: '11.5px',
                 fontWeight: 800,
-                color: '#1E40AF',
+                color: 'var(--status-info-text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
                 marginBottom: '12px',
@@ -268,7 +268,7 @@ export default function RouteBuilderModal({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Route Code & Designation (English)', 'রুটের নাম (ইংরেজি)', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Route Code & Designation (English)', 'রুটের নাম (ইংরেজি)', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -282,7 +282,7 @@ export default function RouteBuilderModal({
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Assign Dedicated Bus Coach', 'নির্ধারিত বাস ও কোচ নির্বাচন', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Assign Dedicated Bus Coach', 'নির্ধারিত বাস ও কোচ নির্বাচন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <select
                     className="form-input"
@@ -301,7 +301,7 @@ export default function RouteBuilderModal({
 
               <div>
                 <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                  {t('Highway / Road Corridor Path Description', 'মহাসড়ক ও সংযোগ সড়ক বিবরণী', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                  {t('Highway / Road Corridor Path Description', 'মহাসড়ক ও সংযোগ সড়ক বিবরণী', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                 </label>
                 <textarea
                   className="form-input"
@@ -320,20 +320,20 @@ export default function RouteBuilderModal({
               {/* Morning Schedule Card */}
               <div style={{
                 background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(219, 234, 254, 0.4) 100%)',
-                border: '1.5px solid #93C5FD',
+                border: '1.5px solid var(--status-info-bright)',
                 borderRadius: '12px',
                 padding: '14px 16px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#1E3A8A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-info-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>🌅</span>
                     <span>{t('Morning Inbound (City ➔ Plant/HQ)', 'সকালের সময়সূচী (শহর ➔ অফিস)', lang)}</span>
                   </div>
                   <span className="badge info" style={{ fontSize: '10px' }}>Inbound</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Clock size={16} color="#2563EB" />
-                  <span style={{ fontSize: '12px', color: '#1E3A8A', fontWeight: 600 }}>{t('First Stop Departure:', 'প্রথম স্টপ থেকে রওনা:', lang)}</span>
+                  <Clock size={16} color="var(--status-info)" />
+                  <span style={{ fontSize: '12px', color: 'var(--status-info-text)', fontWeight: 600 }}>{t('First Stop Departure:', 'প্রথম স্টপ থেকে রওনা:', lang)}</span>
                   <input
                     className="form-input"
                     style={{ width: '120px', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', fontWeight: 800, textAlign: 'center' }}
@@ -347,20 +347,20 @@ export default function RouteBuilderModal({
               {/* Evening Schedule Card */}
               <div style={{
                 background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(253, 230, 138, 0.3) 100%)',
-                border: '1.5px solid #FCD34D',
+                border: '1.5px solid var(--status-warning-bright)',
                 borderRadius: '12px',
                 padding: '14px 16px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#92400E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>🌇</span>
                     <span>{t('Evening Return (Plant/HQ ➔ City)', 'সন্ধ্যার সময়সূচী (অফিস ➔ শহর)', lang)}</span>
                   </div>
                   <span className="badge gold" style={{ fontSize: '10px' }}>Outbound</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Clock size={16} color="#D97706" />
-                  <span style={{ fontSize: '12px', color: '#92400E', fontWeight: 600 }}>{t('Plant Gate Departure:', 'প্ল্যান্ট গেট থেকে রওনা:', lang)}</span>
+                  <Clock size={16} color="var(--status-warning)" />
+                  <span style={{ fontSize: '12px', color: 'var(--status-warning-text)', fontWeight: 600 }}>{t('Plant Gate Departure:', 'প্ল্যান্ট গেট থেকে রওনা:', lang)}</span>
                   <input
                     className="form-input"
                     style={{ width: '120px', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', fontWeight: 800, textAlign: 'center' }}
@@ -374,15 +374,15 @@ export default function RouteBuilderModal({
 
             {/* ─── SECTION 3: Driver & Conductor Crew Assignment ─── */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <div style={{
                 fontSize: '11.5px',
                 fontWeight: 800,
-                color: '#059669',
+                color: 'var(--status-success)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
                 marginBottom: '12px',
@@ -395,9 +395,9 @@ export default function RouteBuilderModal({
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
+                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
                   <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <User size={13} color="#2563EB" />
+                    <User size={13} color="var(--status-info)" />
                     <span>{t('Master Heavy Driver', 'মূল চালক', lang)}</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
@@ -418,9 +418,9 @@ export default function RouteBuilderModal({
                   </div>
                 </div>
 
-                <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
+                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
                   <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <User size={13} color="#059669" />
+                    <User size={13} color="var(--status-success)" />
                     <span>{t('Conductor / Passenger Marshall', 'কন্ডাক্টর', lang)}</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
@@ -445,28 +445,28 @@ export default function RouteBuilderModal({
 
             {/* ─── SECTION 4: Sequential Stoppages Builder ─── */}
             <div style={{
-              border: '1.5px solid var(--brand-border, #CBD5E1)',
+              border: '1.5px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px',
-              background: '#FFFFFF'
+              background: 'var(--surface-1)'
             }}>
               {/* Stoppage Tab Switcher */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MapPin size={17} color="#2563EB" />
+                  <MapPin size={17} color="var(--status-info)" />
                   <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                     {t('Sequential Station Stoppages & Arrival Timeline', 'পর্যায়ক্রমিক স্টপেজ তালিকা ও আগমন সময়সূচী', lang)}
                   </span>
                 </div>
 
                 {/* Sub Tab: Inbound Morning vs Outbound Evening Stops */}
-                <div style={{ display: 'flex', background: 'var(--brand-slate-100, #F1F5F9)', padding: '3px', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', background: 'var(--brand-slate-100)', padding: '3px', borderRadius: '8px' }}>
                   <button
                     type="button"
                     onClick={() => setActiveDirectionTab('inbound')}
                     style={{
-                      background: activeDirectionTab === 'inbound' ? '#FFFFFF' : 'transparent',
-                      color: activeDirectionTab === 'inbound' ? '#1E3A8A' : 'var(--brand-slate-600)',
+                      background: activeDirectionTab === 'inbound' ? 'var(--surface-1)' : 'transparent',
+                      color: activeDirectionTab === 'inbound' ? 'var(--status-info-text)' : 'var(--brand-slate-600)',
                       border: 'none',
                       padding: '5px 12px',
                       borderRadius: '6px',
@@ -485,8 +485,8 @@ export default function RouteBuilderModal({
                     type="button"
                     onClick={() => setActiveDirectionTab('outbound')}
                     style={{
-                      background: activeDirectionTab === 'outbound' ? '#FFFFFF' : 'transparent',
-                      color: activeDirectionTab === 'outbound' ? '#92400E' : 'var(--brand-slate-600)',
+                      background: activeDirectionTab === 'outbound' ? 'var(--surface-1)' : 'transparent',
+                      color: activeDirectionTab === 'outbound' ? 'var(--status-warning-text)' : 'var(--brand-slate-600)',
                       border: 'none',
                       padding: '5px 12px',
                       borderRadius: '6px',
@@ -517,8 +517,8 @@ export default function RouteBuilderModal({
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        background: isLast ? 'rgba(16, 185, 129, 0.08)' : isFirst ? 'rgba(59, 130, 246, 0.06)' : 'var(--brand-slate-50, #F8FAFC)',
-                        border: isLast ? '1.5px solid #10B981' : isFirst ? '1.5px solid #60A5FA' : '1px solid var(--brand-border)',
+                        background: isLast ? 'rgba(16, 185, 129, 0.08)' : isFirst ? 'rgba(59, 130, 246, 0.06)' : 'var(--brand-slate-50)',
+                        border: isLast ? '1.5px solid var(--status-success)' : isFirst ? '1.5px solid var(--status-info-bright)' : '1px solid var(--brand-border)',
                         padding: '10px 14px',
                         borderRadius: '10px',
                         fontSize: '12px',
@@ -530,8 +530,8 @@ export default function RouteBuilderModal({
                           width: '26px',
                           height: '26px',
                           borderRadius: '50%',
-                          background: isLast ? '#059669' : isFirst ? '#2563EB' : 'var(--brand-slate-600)',
-                          color: '#FFFFFF',
+                          background: isLast ? 'var(--status-success-solid)' : isFirst ? 'var(--status-info-solid)' : 'var(--brand-slate-600)',
+                          color: 'var(--text-on-brand)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -557,11 +557,11 @@ export default function RouteBuilderModal({
                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <span style={{
                           fontWeight: 800,
-                          color: '#D97706',
-                          background: '#FFFBEB',
+                          color: 'var(--status-warning)',
+                          background: 'var(--status-warning-bg)',
                           padding: '3px 8px',
                           borderRadius: '6px',
-                          border: '1px solid #FCD34D',
+                          border: '1px solid var(--status-warning-bright)',
                           fontSize: '11.5px'
                         }}>
                           ⏰ {st.scheduledTime}
@@ -577,7 +577,7 @@ export default function RouteBuilderModal({
                             style={{
                               background: 'transparent',
                               border: 'none',
-                              color: '#EF4444',
+                              color: 'var(--status-danger)',
                               cursor: 'pointer',
                               padding: '4px',
                               borderRadius: '4px',
@@ -597,13 +597,13 @@ export default function RouteBuilderModal({
 
               {/* Add New Intermediate Stoppage Form Strip */}
               <div style={{
-                background: 'linear-gradient(135deg, var(--brand-slate-50, #F8FAFC) 0%, #FFFFFF 100%)',
+                background: 'linear-gradient(135deg, var(--brand-slate-50) 0%, var(--surface-1) 100%)',
                 padding: '14px',
                 borderRadius: '10px',
-                border: '1.5px dashed #94A3B8'
+                border: '1.5px dashed var(--border-3)'
               }}>
                 <div style={{ fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Plus size={14} color="#059669" />
+                  <Plus size={14} color="var(--status-success)" />
                   <span>
                     {t(
                       `Add Intermediate Stoppage to ${activeDirectionTab === 'inbound' ? 'Morning Inbound' : 'Evening Outbound'}:`,
@@ -692,8 +692,8 @@ export default function RouteBuilderModal({
           {/* Footer */}
           <div style={{
             padding: '16px 24px',
-            background: 'var(--brand-slate-50, #F8FAFC)',
-            borderTop: '1px solid var(--brand-border, #E2E8F0)',
+            background: 'var(--brand-slate-50)',
+            borderTop: '1px solid var(--brand-border)',
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',

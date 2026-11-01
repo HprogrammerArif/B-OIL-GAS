@@ -218,7 +218,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
             <div style={{
               height: '240px',
               borderRadius: '12px',
-              background: 'radial-gradient(circle at center, #0B132B 0%, #030712 100%)',
+              background: 'radial-gradient(circle at center, var(--surface-inverse) 0%, var(--surface-inverse-deep) 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
               position: 'relative',
               overflow: 'hidden',
@@ -237,20 +237,20 @@ export default function AttendanceView({ role, lang }: ViewProps) {
 
               {/* Center Plant Node */}
               <div style={{ zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#D4AF37', boxShadow: '0 0 10px #D4AF37' }} />
-                <span style={{ fontSize: '9px', color: '#D4AF37', fontWeight: 700, marginTop: '4px' }}>PLANT BEACON</span>
+                <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--brand-gold)', boxShadow: '0 0 10px var(--brand-gold)' }} />
+                <span style={{ fontSize: '9px', color: 'var(--brand-gold)', fontWeight: 700, marginTop: '4px' }}>PLANT BEACON</span>
               </div>
 
               {/* Employee Current Position Dot */}
               <div style={{ position: 'absolute', top: '90px', left: '160px', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 12px #10B981', animation: 'dot-pulse 1.8s infinite' }} />
-                <span style={{ fontSize: '9px', color: '#34D399', fontWeight: 800, marginTop: '2px', background: 'rgba(0,0,0,0.6)', padding: '1px 4px', borderRadius: '4px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--status-success-solid)', boxShadow: '0 0 12px var(--status-success)', animation: 'dot-pulse 1.8s infinite' }} />
+                <span style={{ fontSize: '9px', color: 'var(--status-success-bright)', fontWeight: 800, marginTop: '2px', background: 'rgba(0,0,0,0.6)', padding: '1px 4px', borderRadius: '4px' }}>
                   YOU (42m)
                 </span>
               </div>
 
               {/* Coordinates Badge */}
-              <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10.5px', color: '#94A3B8', fontFamily: 'monospace' }}>
+              <div style={{ position: 'absolute', bottom: '10px', left: '12px', fontSize: '10.5px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                 LAT: {userCoords.lat} · LNG: {userCoords.lng}
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
             <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
               <div>
                 <span style={{ color: 'var(--brand-slate-500)' }}>Mock GPS Detection:</span>{' '}
-                <strong style={{ color: '#059669' }}>PASSED (None)</strong>
+                <strong style={{ color: 'var(--status-success)' }}>PASSED (None)</strong>
               </div>
               <div>
                 <span style={{ color: 'var(--brand-slate-500)' }}>{t('Geofence Radius:', 'জিওফেন্স ব্যাসার্ধ:', lang)}</span>{' '}
@@ -396,7 +396,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ width: '480px', maxWidth: '92vw' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: '#0284C7' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(56, 189, 248, 0.12)', color: 'var(--status-info)' }}>
                   <Camera size={18} />
                 </div>
                 <div>
@@ -416,7 +416,7 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                 height: '170px',
                 borderRadius: '50%',
                 margin: '0 auto 18px',
-                border: faceVerified ? '3px solid #10B981' : '3px dashed #0284C7',
+                border: faceVerified ? '3px solid var(--status-success)' : '3px dashed var(--status-info)',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
@@ -432,14 +432,14 @@ export default function AttendanceView({ role, lang }: ViewProps) {
                     left: 0,
                     right: 0,
                     height: '2px',
-                    background: '#0284C7',
-                    boxShadow: '0 0 12px #0284C7',
+                    background: 'var(--status-info-solid)',
+                    boxShadow: '0 0 12px var(--status-info)',
                     animation: 'recWave 1.2s infinite alternate',
                   }} />
                 )}
                 {faceVerified && (
                   <div style={{ position: 'absolute', inset: 0, background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CheckCircle size={54} color="#10B981" />
+                    <CheckCircle size={54} color="var(--status-success)" />
                   </div>
                 )}
               </div>

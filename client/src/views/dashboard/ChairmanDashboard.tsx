@@ -173,7 +173,7 @@ export default function ChairmanDashboard({
 
                       {/* Departmental Endorsement Path Preview & Accordion */}
                       {item.approvalTrail && item.approvalTrail.length > 0 && (
-                        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '8px 12px' }}>
+                        <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '8px 12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
                             <button
                               type="button"
@@ -188,10 +188,10 @@ export default function ChairmanDashboard({
                                 gap: '6px',
                                 fontSize: '11.5px',
                                 fontWeight: 700,
-                                color: '#4338CA',
+                                color: 'var(--status-purple-text)',
                               }}
                             >
-                              <ShieldCheck size={14} color="#059669" />
+                              <ShieldCheck size={14} color="var(--status-success)" />
                               <span>
                                 {t('Department Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length} {t('Notes', 'টি নোট', lang)})
                               </span>
@@ -199,11 +199,11 @@ export default function ChairmanDashboard({
                             </button>
 
                             {!isExpanded && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: '#64748B' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: 'var(--text-3)' }}>
                                 {item.approvalTrail.map((st: any, idx: number) => (
                                   <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                    {idx > 0 && <span style={{ color: '#CBD5E1', fontSize: '9px' }}>➔</span>}
-                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
+                                    {idx > 0 && <span style={{ color: 'var(--text-inverse-2)', fontSize: '9px' }}>➔</span>}
+                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
                                     <span>{st.officerName.split(' ')[0]}</span>
                                   </span>
                                 ))}
@@ -213,20 +213,20 @@ export default function ChairmanDashboard({
 
                           {/* Expanded list of departmental justification notes */}
                           {isExpanded && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E2E8F0' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-1)' }}>
                               {item.approvalTrail.map((step: any, idx: number) => (
-                                <div key={idx} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
+                                <div key={idx} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
-                                      <strong style={{ color: '#0F172A' }}>{step.officerName}</strong>
-                                      <span style={{ color: '#64748B', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
+                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
+                                      <strong style={{ color: 'var(--text-1)' }}>{step.officerName}</strong>
+                                      <span style={{ color: 'var(--text-3)', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
                                     </div>
-                                    <span style={{ fontSize: '9.5px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                    <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                       <Clock size={10} /> {step.timestamp}
                                     </span>
                                   </div>
-                                  <div style={{ paddingLeft: '19px', color: '#334155', fontStyle: 'italic', lineHeight: 1.4 }}>
+                                  <div style={{ paddingLeft: '19px', color: 'var(--text-2)', fontStyle: 'italic', lineHeight: 1.4 }}>
                                     "{step.note}"
                                   </div>
                                 </div>
@@ -273,12 +273,12 @@ export default function ChairmanDashboard({
             {/* Interactive Filter Pills */}
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', fontSize: '11px' }}>
               {[
-                { id: 'all', label: 'All Tracked (8)', bg: '#F1F5F9', color: '#334155' },
-                { id: 'present', label: '🟢 Present (4)', bg: '#ECFDF5', color: '#065F46' },
-                { id: 'meeting', label: '🔵 In Meeting (1)', bg: '#EFF6FF', color: '#1E40AF' },
-                { id: 'leave', label: '🟡 Informed Leave (1)', bg: '#FEF3C7', color: '#92400E' },
-                { id: 'sick', label: '🟠 Sick Leave (1)', bg: '#FFFBEB', color: '#B45309' },
-                { id: 'uninformed', label: '🔴 Uninformed Absent (1)', bg: '#FEE2E2', color: '#991B1B' },
+                { id: 'all', label: 'All Tracked (8)', bg: 'var(--surface-2)', color: 'var(--text-2)' },
+                { id: 'present', label: '🟢 Present (4)', bg: 'var(--status-success-bg)', color: 'var(--status-success-text)' },
+                { id: 'meeting', label: '🔵 In Meeting (1)', bg: 'var(--status-info-bg)', color: 'var(--status-info-text)' },
+                { id: 'leave', label: '🟡 Informed Leave (1)', bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
+                { id: 'sick', label: '🟠 Sick Leave (1)', bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
+                { id: 'uninformed', label: '🔴 Uninformed Absent (1)', bg: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' },
               ].map(pill => (
                 <button
                   key={pill.id}
@@ -313,8 +313,8 @@ export default function ChairmanDashboard({
                   }}
                   title="Click to view leadership detail or trigger intervention"
                   style={{
-                    background: person.status === 'uninformed' ? '#FEF2F2' : undefined,
-                    border: person.status === 'uninformed' ? '1px solid #FECACA' : undefined
+                    background: person.status === 'uninformed' ? 'var(--status-danger-bg)' : undefined,
+                    border: person.status === 'uninformed' ? '1px solid var(--status-danger-border)' : undefined
                   }}
                 >
                   <div className="presence-person">
@@ -448,7 +448,7 @@ export default function ChairmanDashboard({
                   <span className="badge gold">👑 Pinned by Chairman</span>
                 </div>
                 <div className="notice-meta" style={{ fontSize: '11.5px', marginTop: '4px' }}>
-                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#B45309' }}>BOGCL/CHAIR/EID-2026</span>
+                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-warning-text)' }}>BOGCL/CHAIR/EID-2026</span>
                 </div>
                 <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-700)', marginTop: '8px', lineHeight: 1.5 }}>
                   {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
@@ -528,7 +528,7 @@ export default function ChairmanDashboard({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {notice.requiresAck && (
                             <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--brand-slate-500)' }}>
-                              <CheckCircle2 size={13} color="#059669" />
+                              <CheckCircle2 size={13} color="var(--status-success)" />
                               <span>
                                 {notice.acknowledgedCount || 184}/{notice.totalRecipients || 218} Read ({Math.round(((notice.acknowledgedCount || 184) / (notice.totalRecipients || 218)) * 100)}%)
                               </span>
@@ -551,7 +551,7 @@ export default function ChairmanDashboard({
                             <button
                               type="button"
                               className="btn-sm-ghost"
-                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '6px' }}
+                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: 'var(--status-success-text)', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', borderRadius: '6px' }}
                               onClick={() => {
                                 acknowledgeNotice(notice.id || notice.title);
                                 showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
@@ -560,7 +560,7 @@ export default function ChairmanDashboard({
                               ✅ {t('Acknowledge', 'পড়েছি', lang)}
                             </button>
                           ) : (
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <CheckCircle2 size={12} />
                               <span>Acknowledged</span>
                             </span>
@@ -568,14 +568,14 @@ export default function ChairmanDashboard({
 
                           <button
                             type="button"
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? '#D97706' : 'var(--brand-slate-400)' }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? 'var(--status-warning)' : 'var(--brand-slate-400)' }}
                             title={notice.pinned ? "Unpin notice" : "Pin notice"}
                             onClick={() => {
                               togglePin(notice.id || notice.title);
                               showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
                             }}
                           >
-                            <Pin size={13} fill={notice.pinned ? '#D97706' : 'none'} />
+                            <Pin size={13} fill={notice.pinned ? 'var(--status-warning)' : 'none'} />
                           </button>
                         </div>
                       </div>

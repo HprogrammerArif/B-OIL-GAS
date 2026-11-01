@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, ViewProps, t, ROLE_META } from '../types';
 import { showToast } from '../App';
+import { readToken } from '../lib/theme';
 import {
   FileSignature, CheckCircle, Clock, ShieldCheck,
   Send, PenTool, Hash, ArrowRight, Stamp,
@@ -93,7 +94,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     if (!ctx) return;
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#1E293B';
+    ctx.strokeStyle = readToken('--text-1');
   }, [activeFileId, activeTab]);
 
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -242,7 +243,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#1E293B';
+        ctx.strokeStyle = readToken('--text-1');
+        ctx.fillStyle = readToken('--text-1');
         ctx.font = 'italic 700 20px "Outfit", Georgia, serif';
         ctx.fillText(activeSignatoryName, 25, 65);
         ctx.beginPath();
@@ -376,7 +378,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('sheet')}
               style={{
                 border: 'none',
-                background: activeTab === 'sheet' ? '#fff' : 'transparent',
+                background: activeTab === 'sheet' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'sheet' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -395,7 +397,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('compare')}
               style={{
                 border: 'none',
-                background: activeTab === 'compare' ? '#fff' : 'transparent',
+                background: activeTab === 'compare' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'compare' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -414,7 +416,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('audit')}
               style={{
                 border: 'none',
-                background: activeTab === 'audit' ? '#fff' : 'transparent',
+                background: activeTab === 'audit' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'audit' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -441,7 +443,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
+              background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-deep) 100%)',
               fontWeight: 700,
             }}
           >
@@ -502,7 +504,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   style={{
                     border: isSelected ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                     background: isSelected ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-                    color: isSelected ? '#fff' : 'var(--brand-slate-700)',
+                    color: isSelected ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
                     padding: '4px 11px',
                     borderRadius: '16px',
                     fontSize: '11.5px',
@@ -516,9 +518,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 >
                   <span>{file.fileNo.split('/').slice(-2).join('/')}</span>
                   {file.status === 'approved' ? (
-                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#059669' }}>✓</span>
+                    <span style={{ fontSize: '10px', color: isSelected ? 'var(--text-on-brand)' : 'var(--status-success)' }}>✓</span>
                   ) : (
-                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#D97706' }}>⏳</span>
+                    <span style={{ fontSize: '10px', color: isSelected ? 'var(--text-on-brand)' : 'var(--status-warning)' }}>⏳</span>
                   )}
                 </button>
               );
@@ -579,24 +581,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                           gap: '6px',
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          background: step.status === 'signed' ? '#ECFDF5' : step.status === 'pending' ? '#FFFBEB' : '#F1F5F9',
-                          border: step.status === 'signed' ? '1px solid #10B981' : step.status === 'pending' ? '1px solid #F59E0B' : '1px solid #E2E8F0',
+                          background: step.status === 'signed' ? 'var(--status-success-bg)' : step.status === 'pending' ? 'var(--status-warning-bg)' : 'var(--surface-2)',
+                          border: step.status === 'signed' ? '1px solid var(--status-success)' : step.status === 'pending' ? '1px solid var(--status-warning)' : '1px solid var(--border-1)',
                           fontSize: '11px',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        <span style={{ fontWeight: 800, color: step.status === 'signed' ? '#059669' : step.status === 'pending' ? '#D97706' : '#94A3B8' }}>
+                        <span style={{ fontWeight: 800, color: step.status === 'signed' ? 'var(--status-success)' : step.status === 'pending' ? 'var(--status-warning)' : 'var(--text-muted)' }}>
                           {idx + 1}. {step.officerName}
                         </span>
-                        <span style={{ fontSize: '10px', color: step.status === 'signed' ? '#059669' : '#64748B' }}>
+                        <span style={{ fontSize: '10px', color: step.status === 'signed' ? 'var(--status-success)' : 'var(--text-3)' }}>
                           ({step.roleName.split(' ')[0]})
                         </span>
                         {step.status === 'signed' ? (
-                          <span style={{ color: '#059669', fontWeight: 800 }}>✓</span>
+                          <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>✓</span>
                         ) : step.status === 'pending' ? (
-                          <span style={{ color: '#D97706', fontWeight: 800 }}>⏳</span>
+                          <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>⏳</span>
                         ) : (
-                          <span style={{ color: '#94A3B8' }}>•</span>
+                          <span style={{ color: 'var(--text-muted)' }}>•</span>
                         )}
                       </div>
                     ))}
@@ -612,13 +614,13 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     style={{
                       padding: '12px 14px',
                       borderRadius: '8px',
-                      border: n.isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-slate-200)',
+                      border: n.isChairman ? '1px solid var(--brand-gold)' : '1px solid var(--brand-slate-200)',
                       background: n.isChairman ? 'rgba(212, 175, 55, 0.04)' : 'var(--brand-card-bg)',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? '#B45309' : 'var(--brand-slate-700)' }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? 'var(--status-warning-text)' : 'var(--brand-slate-700)' }}>
                           Para {n.para}.
                         </span>
                         <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{n.author}</strong>
@@ -634,7 +636,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     {n.hash && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px', fontSize: '10px', color: 'var(--brand-slate-400)', flexWrap: 'wrap', gap: '4px' }}>
                         <span style={{ fontFamily: 'monospace' }}>🔒 Verification Code: {n.hash}</span>
-                        <span style={{ color: '#059669', fontWeight: 600 }}>✓ Verified Stamp</span>
+                        <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✓ Verified Stamp</span>
                       </div>
                     )}
                   </div>
@@ -659,7 +661,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                   <div>
                     <div style={{ color: 'var(--brand-slate-500)' }}>Available Balance:</div>
-                    <strong style={{ color: '#059669' }}>{currentFile.budgetInfo.availableBalance}</strong>
+                    <strong style={{ color: 'var(--status-success)' }}>{currentFile.budgetInfo.availableBalance}</strong>
                   </div>
                 </div>
               </div>
@@ -685,7 +687,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               <div style={{
                 padding: '9px 12px',
                 background: isFinalStep ? 'rgba(212, 175, 55, 0.1)' : 'rgba(165, 28, 48, 0.05)',
-                border: isFinalStep ? '1px solid #D4AF37' : '1px solid rgba(165, 28, 48, 0.2)',
+                border: isFinalStep ? '1px solid var(--brand-gold)' : '1px solid rgba(165, 28, 48, 0.2)',
                 borderRadius: '6px',
                 marginBottom: '10px',
                 display: 'flex',
@@ -704,7 +706,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                 </div>
                 {isFinalStep && (
-                  <span style={{ fontSize: '9px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                  <span style={{ fontSize: '9px', background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
                     FINAL APPROVAL
                   </span>
                 )}
@@ -718,9 +720,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   width: '100%',
                   padding: '8px 12px',
                   borderRadius: '6px',
-                  border: '1px dashed #D4AF37',
+                  border: '1px dashed var(--brand-gold)',
                   background: 'rgba(212, 175, 55, 0.08)',
-                  color: '#B45309',
+                  color: 'var(--status-warning-text)',
                   fontSize: '11.5px',
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -731,7 +733,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   marginBottom: '10px',
                 }}
               >
-                {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="#D4AF37" /> : <Stamp size={14} color="#B45309" />}
+                {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="var(--brand-gold)" /> : <Stamp size={14} color="var(--status-warning-text)" />}
                 <span>
                   {t(
                     `⚡ 1-Click Digital Stamp: ${activeSignatoryName}`,
@@ -742,7 +744,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               </button>
 
               {/* Canvas Pad */}
-              <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: '#FAFAFC', position: 'relative', height: '100px', marginBottom: '10px' }}>
+              <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: 'var(--surface-0)', position: 'relative', height: '100px', marginBottom: '10px' }}>
                 <canvas
                   ref={canvasRef}
                   width={340}
@@ -772,7 +774,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   Clear Signature
                 </button>
                 {isSigned && (
-                  <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 700 }}>
+                  <span style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 700 }}>
                     ✓ Signature Ready
                   </span>
                 )}
@@ -823,8 +825,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     flex: 1,
                     fontSize: '12px',
                     padding: '9px 10px',
-                    color: '#DC2626',
-                    borderColor: '#DC2626',
+                    color: 'var(--status-danger)',
+                    borderColor: 'var(--status-danger)',
                     background: 'rgba(220, 38, 38, 0.04)',
                     display: 'flex',
                     alignItems: 'center',
@@ -862,27 +864,27 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 <div
                   key={idx}
                   style={{
-                    border: quote.isRecommended ? '2px solid #059669' : '1px solid var(--brand-slate-200)',
+                    border: quote.isRecommended ? '2px solid var(--status-success)' : '1px solid var(--brand-slate-200)',
                     borderRadius: '8px',
                     padding: '16px',
-                    background: quote.isRecommended ? '#F0FDF4' : 'var(--brand-card-bg)',
+                    background: quote.isRecommended ? 'var(--status-success-bg)' : 'var(--brand-card-bg)',
                     position: 'relative',
                   }}
                 >
                   {quote.isRecommended && (
-                    <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                    <div style={{ position: 'absolute', top: '-10px', right: '14px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
                       RECOMMENDED & LOWEST BID
                     </div>
                   )}
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-900)' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-900)' }}>
                     {quote.vendor}
                   </div>
-                  <div style={{ fontSize: '11px', color: quote.isRecommended ? '#047857' : 'var(--brand-slate-500)' }}>
+                  <div style={{ fontSize: '11px', color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-500)' }}>
                     Origin: {quote.origin}
                   </div>
 
                   <div style={{ margin: '12px 0', borderTop: '1px solid var(--brand-slate-200)', borderBottom: '1px solid var(--brand-slate-200)', padding: '8px 0' }}>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-800)' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-800)' }}>
                       {quote.priceText}
                     </div>
                   </div>
@@ -925,7 +927,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {currentFile.notes.map((n, idx) => (
               <div key={n.id} style={{ display: 'flex', gap: '12px', padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: n.isChairman ? '#D4AF37' : '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '11px', flexShrink: 0 }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: n.isChairman ? 'var(--brand-gold)' : 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '11px', flexShrink: 0 }}>
                   {idx + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -940,10 +942,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                   {n.hash && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
-                      <span style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)', fontFamily: 'monospace' }}>
+                      <span style={{ background: 'var(--surface-1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)', fontFamily: 'monospace' }}>
                         {n.hash}
                       </span>
-                      <span style={{ color: '#059669', fontWeight: 700 }}>✓ Verified Digital Signature</span>
+                      <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified Digital Signature</span>
                     </div>
                   )}
                 </div>
@@ -959,7 +961,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '600px', width: '95vw' }} onClick={(e) => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--status-success)' }}>
                   <ShieldCheck size={18} />
                 </div>
                 <div>
@@ -973,8 +975,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             </div>
 
             <div className="app-modal-body">
-              <div style={{ border: '2px solid #D4AF37', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#B45309', fontWeight: 800 }}>
+              <div style={{ border: '2px solid var(--brand-gold)', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--status-warning-text)', fontWeight: 800 }}>
                   BASHUNDHARA OIL & GAS COMPANY LIMITED
                 </div>
                 <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '8px 0 4px 0', color: 'var(--brand-crimson)' }}>
@@ -989,7 +991,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   <div><strong>Amount Authorized:</strong> {currentFile.amount}</div>
                   <div><strong>Department:</strong> {currentFile.dept}</div>
                   <div><strong>Approval Date:</strong> {currentFile.date}</div>
-                  <div style={{ color: '#059669', fontWeight: 700 }}>✓ Verified by all designated authorities</div>
+                  <div style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified by all designated authorities</div>
                 </div>
               </div>
             </div>

@@ -255,7 +255,7 @@ export default function Topbar({
                     <Shield size={11} color="var(--brand-gold)" />
                     {t(accessLevel.en, accessLevel.bn, lang)}
                   </span>
-                  <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{meta.empId}</span>
+                  <span style={{ fontFamily: 'monospace', color: 'var(--status-info-bright)', fontWeight: 700 }}>{meta.empId}</span>
                 </div>
               </div>
 
@@ -264,7 +264,7 @@ export default function Topbar({
                 style={{
                   padding: '10px 14px',
                   background: 'rgba(0, 0, 0, 0.03)',
-                  borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)',
+                  borderBottom: '1px solid var(--brand-slate-200)',
                   boxSizing: 'border-box',
                 }}
               >
@@ -276,16 +276,16 @@ export default function Topbar({
                     marginBottom: '8px',
                     fontSize: '11px',
                     fontWeight: 800,
-                    color: 'var(--brand-slate-600, #475569)',
+                    color: 'var(--brand-slate-600)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={12} color="var(--brand-gold, #D97706)" />
+                    <Sparkles size={12} color="var(--brand-gold)" />
                     {t('Switch Role (Preview)', 'পদবি পরিবর্তন (প্রিভিউ)', lang)}
                   </span>
-                  <span style={{ fontSize: '9.5px', color: 'var(--brand-gold, #D97706)', fontWeight: 700 }}>
+                  <span style={{ fontSize: '9.5px', color: 'var(--brand-gold)', fontWeight: 700 }}>
                     {t('7 Roles', '৭টি পদবি', lang)}
                   </span>
                 </div>
@@ -317,14 +317,14 @@ export default function Topbar({
                           padding: '5px 8px',
                           borderRadius: '6px',
                           border: isCurrent
-                            ? '1.5px solid var(--brand-crimson, #A51C30)'
-                            : '1px solid var(--brand-slate-200, #E2E8F0)',
+                            ? '1.5px solid var(--brand-crimson)'
+                            : '1px solid var(--brand-slate-200)',
                           background: isCurrent
                             ? 'rgba(165, 28, 48, 0.08)'
-                            : 'var(--brand-card-bg, #FFFFFF)',
+                            : 'var(--brand-card-bg)',
                           color: isCurrent
-                            ? 'var(--brand-crimson, #A51C30)'
-                            : 'var(--brand-slate-700, #334155)',
+                            ? 'var(--brand-crimson)'
+                            : 'var(--brand-slate-700)',
                           fontSize: '11px',
                           fontWeight: isCurrent ? 800 : 600,
                           cursor: 'pointer',
@@ -339,7 +339,7 @@ export default function Topbar({
                             height: '18px',
                             borderRadius: '4px',
                             background: rMeta.avatarColor,
-                            color: '#fff',
+                            color: 'var(--text-on-brand)',
                             fontSize: '9px',
                             fontWeight: 800,
                             display: 'flex',
@@ -388,10 +388,10 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Key size={15} color="#059669" />
+                  <Key size={15} color="var(--status-success)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Password & Login Security', 'পাসওয়ার্ড ও নিরাপত্তা', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#059669' }}>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-success)' }}>
                       ✓ {t('2-Step Verification Active', '২-ধাপ নিরাপত্তা যাচাই চালু', lang)}
                     </div>
                   </div>
@@ -406,7 +406,7 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Award size={15} color="#D97706" />
+                  <Award size={15} color="var(--status-warning)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
@@ -424,7 +424,7 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Clock size={15} color="#0284C7" />
+                  <Clock size={15} color="var(--status-info)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Active Devices & Sign-In Log', 'সক্রিয় ডিভাইস ও লগইন ইতিহাস', lang)}</div>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
@@ -459,10 +459,10 @@ export default function Topbar({
                     onLogout();
                   }}
                 >
-                  <LogOut size={15} color="#DC2626" />
+                  <LogOut size={15} color="var(--status-danger)" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: '#DC2626' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#EF4444' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--status-danger)' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-danger)' }}>
                       {t('Close session and return to sign-in screen', 'সেশন শেষ করে লগইন পেইজে ফিরে যান', lang)}
                     </div>
                   </div>

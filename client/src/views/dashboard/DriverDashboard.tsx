@@ -115,21 +115,21 @@ export default function DriverDashboard({
             <div className="card mb-4" style={{
               background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.98) 100%)',
               border: '1.5px solid rgba(212, 175, 55, 0.4)',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               padding: '20px 24px',
               borderRadius: '16px',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', marginBottom: '14px' }}>
                 <div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(212, 175, 55, 0.2)', border: '1px solid #D4AF37', color: '#FDE047', padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 800 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(212, 175, 55, 0.2)', border: '1px solid var(--brand-gold)', color: 'var(--status-warning-bright)', padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 800 }}>
                     <Navigation size={12} />
                     <span>{t('ASSIGNED DUTY TRIP', 'নির্ধারিত অফিশিয়াল ট্রিপ', lang)}</span>
                   </div>
-                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#fff', margin: '8px 0 2px' }}>
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-on-brand)', margin: '8px 0 2px' }}>
                     {activeMission.from} ➔ {activeMission.to}
                   </h3>
-                  <div style={{ fontSize: '12px', color: '#94A3B8' }}>
-                    Pass No: <code style={{ color: '#FDE047', fontWeight: 700 }}>{activeMission.tripPassNo || 'TC-2026-9042'}</code> • Passenger: <strong>{activeMission.requesterName}</strong>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    Pass No: <code style={{ color: 'var(--status-warning-bright)', fontWeight: 700 }}>{activeMission.tripPassNo || 'TC-2026-9042'}</code> • Passenger: <strong>{activeMission.requesterName}</strong>
                   </div>
                 </div>
 
@@ -137,7 +137,7 @@ export default function DriverDashboard({
                   <span className={`badge ${activeMission.status === 'in_transit' ? 'success' : 'gold'}`} style={{ fontSize: '12px', padding: '4px 12px' }}>
                     {activeMission.status === 'in_transit' ? 'IN TRANSIT' : 'ASSIGNED / READY'}
                   </span>
-                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                     Departure: {activeMission.departureTime || '09:00 AM'}
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function DriverDashboard({
                   <button
                     type="button"
                     className="btn-primary"
-                    style={{ background: '#059669', borderColor: '#059669', fontWeight: 800, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    style={{ background: 'var(--status-success-solid)', borderColor: 'var(--status-success)', fontWeight: 800, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     onClick={handleStartMission}
                   >
                     <Play size={14} /> {t('Start Trip (Gate Out)', 'ট্রিপ শুরু করুন', lang)}
@@ -160,7 +160,7 @@ export default function DriverDashboard({
                   <button
                     type="button"
                     className="btn-primary"
-                    style={{ background: '#2563EB', borderColor: '#2563EB', fontWeight: 800, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    style={{ background: 'var(--status-info-solid)', borderColor: 'var(--status-info)', fontWeight: 800, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     onClick={handleCompleteMission}
                   >
                     <Flag size={14} /> {t('Complete Trip', 'ট্রিপ সমাপ্ত করুন', lang)}
@@ -170,7 +170,7 @@ export default function DriverDashboard({
                 <button
                   type="button"
                   className="btn-outline"
-                  style={{ color: '#FDE047', borderColor: 'rgba(212, 175, 55, 0.6)', background: 'rgba(212, 175, 55, 0.1)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ color: 'var(--status-warning-bright)', borderColor: 'rgba(212, 175, 55, 0.6)', background: 'rgba(212, 175, 55, 0.1)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                   onClick={handleNotifyPassenger}
                 >
                   <MapPin size={14} /> {t('Notify Arrival', 'পৌঁছানোর বার্তা', lang)}
@@ -179,7 +179,7 @@ export default function DriverDashboard({
                 <button
                   type="button"
                   className="btn-outline"
-                  style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ color: 'var(--text-on-brand)', borderColor: 'rgba(255,255,255,0.2)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                   onClick={() => setTollModalOpen(true)}
                 >
                   <Receipt size={14} /> {t('Add Toll Slip', 'টোল স্লিপ', lang)}
@@ -194,7 +194,7 @@ export default function DriverDashboard({
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: '#ECFDF5', color: '#059669' }}>
+                  <div className="card-hd-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success)' }}>
                     <ShieldCheck size={16} />
                   </div>
                   <div>
@@ -219,7 +219,7 @@ export default function DriverDashboard({
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Performance Rating:</span>
-                  <strong style={{ color: '#D97706' }}>★ 4.9 / 5.0 (Safe Driving Record)</strong>
+                  <strong style={{ color: 'var(--status-warning)' }}>★ 4.9 / 5.0 (Safe Driving Record)</strong>
                 </div>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function DriverDashboard({
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+                  <div className="card-hd-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info)' }}>
                     <Gauge size={16} />
                   </div>
                   <div>
@@ -241,7 +241,7 @@ export default function DriverDashboard({
               <div className="card-body" style={{ fontSize: '12.5px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Fuel Level:</span>
-                  <strong style={{ color: '#059669' }}>78% Full (Approx. 38 Liters)</strong>
+                  <strong style={{ color: 'var(--status-success)' }}>78% Full (Approx. 38 Liters)</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Odometer:</span>
@@ -294,11 +294,11 @@ export default function DriverDashboard({
                 {/* Progress Tracker */}
                 <div style={{ background: 'var(--brand-slate-50)', padding: '14px 18px', borderRadius: '8px', border: '1px solid var(--brand-slate-200)', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 700, marginBottom: '8px' }}>
-                    <span style={{ color: '#059669' }}>1. Requisition Approved ✓</span>
-                    <span style={{ color: activeMission.status === 'in_transit' || activeMission.status === 'completed' ? '#059669' : '#D97706' }}>
+                    <span style={{ color: 'var(--status-success)' }}>1. Requisition Approved ✓</span>
+                    <span style={{ color: activeMission.status === 'in_transit' || activeMission.status === 'completed' ? 'var(--status-success)' : 'var(--status-warning)' }}>
                       2. Vehicle Dispatched {activeMission.status === 'in_transit' ? '⏳' : ''}
                     </span>
-                    <span style={{ color: activeMission.status === 'completed' ? '#059669' : 'var(--brand-slate-400)' }}>
+                    <span style={{ color: activeMission.status === 'completed' ? 'var(--status-success)' : 'var(--brand-slate-400)' }}>
                       3. Return & Trip Completed
                     </span>
                   </div>
@@ -343,7 +343,7 @@ export default function DriverDashboard({
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 800, background: '#059669', borderColor: '#059669', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 800, background: 'var(--status-success-solid)', borderColor: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '8px' }}
                       onClick={handleStartMission}
                     >
                       <Play size={16} /> {t('Start Trip (Depart Gate)', 'ট্রিপ শুরু করুন (গেইট প্রস্থান)', lang)}
@@ -354,7 +354,7 @@ export default function DriverDashboard({
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 800, background: '#2563EB', borderColor: '#2563EB', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 800, background: 'var(--status-info-solid)', borderColor: 'var(--status-info)', display: 'flex', alignItems: 'center', gap: '8px' }}
                       onClick={handleCompleteMission}
                     >
                       <Flag size={16} /> {t('Complete Trip (Return to Bay)', 'ট্রিপ সমাপ্ত করুন (গাড়ির শেডে প্রত্যাবর্তন)', lang)}
@@ -367,7 +367,7 @@ export default function DriverDashboard({
                     style={{ fontSize: '12.5px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     onClick={handleNotifyPassenger}
                   >
-                    <MapPin size={15} color="#059669" />
+                    <MapPin size={15} color="var(--status-success)" />
                     {t('Send Arrival Notification', 'পৌঁছানোর নোটিফিকেশন পাঠান', lang)}
                   </button>
 
@@ -379,7 +379,7 @@ export default function DriverDashboard({
                       showToast(t(`Calling passenger ${activeMission.requesterName}...`, `যাত্রীকে কল করা হচ্ছে...`, lang), 'info');
                     }}
                   >
-                    <Phone size={15} color="#2563EB" />
+                    <Phone size={15} color="var(--status-info)" />
                     {t('Call Passenger', 'যাত্রীকে কল করুন', lang)}
                   </button>
 
@@ -389,7 +389,7 @@ export default function DriverDashboard({
                     style={{ fontSize: '12.5px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
                     onClick={() => setTollModalOpen(true)}
                   >
-                    <Receipt size={15} color="#D97706" />
+                    <Receipt size={15} color="var(--status-warning)" />
                     {t('Submit Toll Expense Slip', 'টোল স্লিপ জমা দিন', lang)}
                   </button>
                 </div>
@@ -460,13 +460,13 @@ export default function DriverDashboard({
       {/* ─── TOLL SUBMISSION MODAL ─── */}
       {tollModalOpen && (
         <div className="modal-bg" onClick={() => setTollModalOpen(false)} style={{ zIndex: 99999, padding: '20px' }}>
-          <div className="fleet-modal-dialog" style={{ maxWidth: '480px', width: '95%', background: '#fff', borderRadius: '16px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-            <div className="fleet-modal-hd" style={{ padding: '16px 22px', background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="fleet-modal-dialog" style={{ maxWidth: '480px', width: '95%', background: 'var(--surface-1)', borderRadius: '16px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+            <div className="fleet-modal-hd" style={{ padding: '16px 22px', background: 'linear-gradient(135deg, var(--surface-inverse-2) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Receipt size={18} color="#FDE047" />
+                <Receipt size={18} color="var(--status-warning-bright)" />
                 <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800 }}>{t('Submit Highway Toll Receipt', 'হাইওয়ে টোল স্লিপ জমা দিন', lang)}</h3>
               </div>
-              <button type="button" onClick={() => setTollModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+              <button type="button" onClick={() => setTollModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-on-brand)', cursor: 'pointer', fontSize: '18px' }}>✕</button>
             </div>
             <form onSubmit={handleAddToll} style={{ padding: '20px 24px' }}>
               <div style={{ marginBottom: '14px' }}>
@@ -485,13 +485,13 @@ export default function DriverDashboard({
                 <input type="number" className="form-input" value={tollAmount} onChange={e => setTollAmount(e.target.value)} style={{ fontSize: '13px', fontWeight: 700 }} required />
               </div>
 
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px 14px', borderRadius: '8px', fontSize: '11px', color: '#64748B', marginBottom: '18px' }}>
+              <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '10px 14px', borderRadius: '8px', fontSize: '11px', color: 'var(--text-3)', marginBottom: '18px' }}>
                 📷 Toll voucher will be logged under your active trip and submitted to the Transport Desk for payment.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button type="button" className="btn-outline" onClick={() => setTollModalOpen(false)}>{t('Cancel', 'বাতিল', lang)}</button>
-                <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)' }}>
+                <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-deep) 100%)' }}>
                   <Check size={14} /> {t('Submit Toll Claim', 'দাখিল করুন', lang)}
                 </button>
               </div>

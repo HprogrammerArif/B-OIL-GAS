@@ -749,7 +749,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           {/* Pre-Register Button (Primary) */}
           <button
             className="btn-primary"
-            style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--brand-crimson)', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
+            style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--brand-crimson)', color: 'var(--text-on-brand)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}
             onClick={() => {
               setFormHost(isStaff ? currentUserName : '');
               setShowRegisterModal(true);
@@ -814,8 +814,8 @@ export default function GuestView({ role, lang }: ViewProps) {
               width: '28px',
               height: '28px',
               borderRadius: '50%',
-              background: isStaff ? '#3B82F6' : '#10B981',
-              color: '#FFF',
+              background: isStaff ? 'var(--status-info-solid)' : 'var(--status-success-solid)',
+              color: 'var(--text-on-brand)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -848,7 +848,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 fontSize: '11px',
                 fontWeight: 700,
                 padding: '3px 10px',
-                background: scopeMode === 'my_guests' ? '#FFF' : 'transparent',
+                background: scopeMode === 'my_guests' ? 'var(--surface-1)' : 'transparent',
               }}
               onClick={() => setScopeMode('my_guests')}
             >
@@ -860,7 +860,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 fontSize: '11px',
                 fontWeight: 700,
                 padding: '3px 10px',
-                background: scopeMode === 'all' ? '#FFF' : 'transparent',
+                background: scopeMode === 'all' ? 'var(--surface-1)' : 'transparent',
               }}
               onClick={() => setScopeMode('all')}
             >
@@ -882,7 +882,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#ECFDF5', color: '#059669' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success)' }}>
               <UserCheck size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
@@ -890,7 +890,7 @@ export default function GuestView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#059669' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-success)' }}>
               {stats.totalInside} <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('Inside', 'জন', lang)}</span>
             </div>
             <div className="parcel-kpi-title">
@@ -910,7 +910,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#EFF6FF', color: '#2563EB' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info)' }}>
               <Clock size={18} />
             </div>
             <span className="badge info" style={{ fontSize: '10px' }}>
@@ -918,7 +918,7 @@ export default function GuestView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#1D4ED8' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-info-text)' }}>
               {stats.preRegisteredCount} <span style={{ fontSize: '14px', fontWeight: 600 }}>{t('Expected', 'জন', lang)}</span>
             </div>
             <div className="parcel-kpi-title">
@@ -938,7 +938,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#B45309' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--status-warning-text)' }}>
               <Crown size={18} />
             </div>
             <span className="badge warn" style={{ fontSize: '10px' }}>
@@ -966,7 +966,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#F0F9FF', color: '#0284C7' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info)' }}>
               <HardHat size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
@@ -974,7 +974,7 @@ export default function GuestView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ color: '#0284C7' }}>
+            <div className="parcel-kpi-val" style={{ color: 'var(--status-info)' }}>
               {stats.ppeComplianceRate}%
             </div>
             <div className="parcel-kpi-title">
@@ -994,7 +994,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           style={{ cursor: 'pointer' }}
         >
           <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: '#FEF2F2', color: '#DC2626' }}>
+            <div className="parcel-kpi-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger)' }}>
               <Shield size={18} />
             </div>
             <span className="badge success" style={{ fontSize: '10px' }}>
@@ -1002,7 +1002,7 @@ export default function GuestView({ role, lang }: ViewProps) {
             </span>
           </div>
           <div>
-            <div className="parcel-kpi-val" style={{ fontSize: '18px', color: '#991B1B' }}>
+            <div className="parcel-kpi-val" style={{ fontSize: '18px', color: 'var(--status-danger-text)' }}>
               {t('Gates 1 & 2', 'গেট ১ ও ২', lang)}
             </div>
             <div className="parcel-kpi-title">
@@ -1022,7 +1022,7 @@ export default function GuestView({ role, lang }: ViewProps) {
         {/* ── LEFT COLUMN: VISITOR DIRECTORY FEED ── */}
         <div>
           {/* Feed Header & Search Filter */}
-          <div style={{ background: '#fff', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
+          <div style={{ background: 'var(--surface-1)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
                 {t('Visitor Directory', 'অতিথি রেজিস্টার', lang)} ({displayedVisitors.length})
@@ -1100,7 +1100,7 @@ export default function GuestView({ role, lang }: ViewProps) {
           {/* Scrollable Visitor Cards Feed */}
           <div className="guest-feed-list">
             {displayedVisitors.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 16px', background: '#fff', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
+              <div style={{ textAlign: 'center', padding: '32px 16px', background: 'var(--surface-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--brand-slate-200)', color: 'var(--brand-slate-500)' }}>
                 <Users size={28} style={{ opacity: 0.4, margin: '0 auto 8px' }} />
                 <div style={{ fontWeight: 700, fontSize: '13px' }}>No visitors found</div>
                 <div style={{ fontSize: '11px' }}>Adjust filters or pre-register a new guest.</div>
@@ -1150,7 +1150,7 @@ export default function GuestView({ role, lang }: ViewProps) {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '10.5px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ color: isHostMe ? '#2563EB' : 'var(--brand-slate-600)', fontWeight: isHostMe ? 700 : 500 }}>
+                        <span style={{ color: isHostMe ? 'var(--status-info)' : 'var(--brand-slate-600)', fontWeight: isHostMe ? 700 : 500 }}>
                           Host: {v.hostEmployee}
                         </span>
                         <span style={{ color: 'var(--brand-slate-300)' }}>•</span>
@@ -1164,7 +1164,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                         <button
                           type="button"
                           className="btn-primary"
-                          style={{ fontSize: '10.5px', padding: '3px 9px', background: '#059669', color: '#fff', borderRadius: '4px', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ fontSize: '10.5px', padding: '3px 9px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', borderRadius: '4px', border: 'none', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCheckIn(v.id);
@@ -1176,7 +1176,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                       ) : v.status === 'checked_in' ? (
                         <button
                           type="button"
-                          style={{ fontSize: '10.5px', padding: '3px 9px', background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '4px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          style={{ fontSize: '10.5px', padding: '3px 9px', background: 'var(--status-danger-bg)', color: 'var(--status-danger)', border: '1px solid var(--status-danger-border)', borderRadius: '4px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCheckOut(v.id);
@@ -1207,7 +1207,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '1px', color: '#93C5FD', fontWeight: 800 }}>
+                      <span style={{ fontSize: '10.5px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--status-info-bright)', fontWeight: 800 }}>
                         BASHUNDHARA OIL & GAS · ENCRYPTED DIGITAL ACCESS CREDENTIAL
                       </span>
                       {selectedVisitor.vipProtocol && (
@@ -1217,27 +1217,27 @@ export default function GuestView({ role, lang }: ViewProps) {
                       )}
                     </div>
 
-                    <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', margin: '6px 0 2px' }}>
+                    <h1 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--text-on-brand)', margin: '6px 0 2px' }}>
                       {selectedVisitor.name}
                     </h1>
 
-                    <div style={{ fontSize: '13px', color: '#CBD5E1', fontWeight: 600 }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-inverse-2)', fontWeight: 600 }}>
                       {selectedVisitor.designation} • <strong>{selectedVisitor.organization}</strong>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', fontSize: '11.5px', color: '#94A3B8', flexWrap: 'wrap' }}>
-                      <span>Pass ID: <strong style={{ color: '#fff', fontFamily: 'monospace' }}>{selectedVisitor.id}</strong></span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '10px', fontSize: '11.5px', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                      <span>Pass ID: <strong style={{ color: 'var(--text-on-brand)', fontFamily: 'monospace' }}>{selectedVisitor.id}</strong></span>
                       <span>•</span>
-                      <span>Badge No: <strong style={{ color: '#38BDF8', fontFamily: 'monospace' }}>{selectedVisitor.badgeNo || 'UNISSUED'}</strong></span>
+                      <span>Badge No: <strong style={{ color: 'var(--status-info-bright)', fontFamily: 'monospace' }}>{selectedVisitor.badgeNo || 'UNISSUED'}</strong></span>
                       <span>•</span>
-                      <span>ALPR Plate: <code style={{ color: '#4ADE80' }}>{selectedVisitor.vehiclePlate}</code></span>
+                      <span>ALPR Plate: <code style={{ color: 'var(--status-success-bright)' }}>{selectedVisitor.vehiclePlate}</code></span>
                     </div>
                   </div>
 
                   {/* QR Code & Printable Slip */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: '#fff', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
-                    <QrCode size={64} color="#000" />
-                    <span style={{ fontSize: '9px', fontWeight: 800, color: '#0F172A', letterSpacing: '0.5px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'var(--surface-1)', padding: '10px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}>
+                    <QrCode size={64} color="var(--text-1)" />
+                    <span style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-1)', letterSpacing: '0.5px' }}>
                       SCAN AT GATE
                     </span>
                   </div>
@@ -1246,8 +1246,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                 {/* Status Bar */}
                 <div style={{ marginTop: '20px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', position: 'relative', zIndex: 2 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedVisitor.status === 'checked_in' ? '#10B981' : '#F59E0B', display: 'inline-block' }} />
-                    <strong style={{ color: '#F8FAFC' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: selectedVisitor.status === 'checked_in' ? 'var(--status-success-solid)' : 'var(--status-warning-solid)', display: 'inline-block' }} />
+                    <strong style={{ color: 'var(--text-inverse)' }}>
                       {selectedVisitor.status === 'checked_in'
                         ? t(`Inside Premises since ${selectedVisitor.checkInTime}`, `${selectedVisitor.checkInTime} হতে ক্যাম্পাসে অবস্থান করছেন`, lang)
                         : selectedVisitor.status === 'pre_registered'
@@ -1259,7 +1259,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      style={{ background: 'rgba(255,255,255,0.15)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
                       onClick={() => handleCopyPassLink(selectedVisitor.id)}
                       title="Copy Pass Link"
                     >
@@ -1268,7 +1268,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     </button>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      style={{ background: 'rgba(255,255,255,0.15)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
                       onClick={() => setShowGatePassModal(true)}
                     >
                       <Printer size={12} />
@@ -1276,7 +1276,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     </button>
                     <button
                       className="btn-sm-ghost"
-                      style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
+                      style={{ background: 'rgba(255,255,255,0.15)', color: 'var(--text-on-brand)', border: '1px solid rgba(255,255,255,0.25)', fontSize: '11px' }}
                       onClick={() => setShowSMSModal(true)}
                     >
                       <Send size={12} />
@@ -1338,7 +1338,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   {selectedVisitor.status === 'pre_registered' ? (
                     <button
                       className="btn-primary"
-                      style={{ fontSize: '12px', padding: '6px 14px', background: '#059669', display: 'flex', alignItems: 'center', gap: '6px' }}
+                      style={{ fontSize: '12px', padding: '6px 14px', background: 'var(--status-success-solid)', display: 'flex', alignItems: 'center', gap: '6px' }}
                       onClick={() => handleCheckIn(selectedVisitor.id)}
                     >
                       <UserCheck size={14} />
@@ -1364,7 +1364,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 <div style={{ padding: '24px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                     {/* Host Card */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         HOST OFFICER & ESCORT
                       </div>
@@ -1395,7 +1395,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     </div>
 
                     {/* Purpose of Visit */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         OFFICIAL PURPOSE
                       </div>
@@ -1408,14 +1408,14 @@ export default function GuestView({ role, lang }: ViewProps) {
                     </div>
 
                     {/* Identity Proof & Security Verification */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase' }}>
                         ID PROOF & CLEARANCE
                       </div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '6px' }}>
                         {selectedVisitor.idProofType}: <span style={{ fontFamily: 'monospace' }}>{selectedVisitor.idProofNumber}</span>
                       </div>
-                      <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '4px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700, marginTop: '4px' }}>
                         ✓ Biometric & ID Match Confirmed
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
@@ -1432,9 +1432,9 @@ export default function GuestView({ role, lang }: ViewProps) {
                   {/* VIP Status Banner */}
                   <div style={{
                     background: selectedVisitor.category === 'vip' || selectedVisitor.category === 'govt'
-                      ? 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)'
-                      : '#F8FAFC',
-                    border: `1px solid ${selectedVisitor.category === 'vip' ? '#FCD34D' : '#E2E8F0'}`,
+                      ? 'linear-gradient(135deg, var(--status-warning-bg) 0%, var(--status-warning-bg) 100%)'
+                      : 'var(--text-inverse)',
+                    border: `1px solid ${selectedVisitor.category === 'vip' ? 'var(--status-warning-bright)' : 'var(--border-1)'}`,
                     padding: '16px 20px',
                     borderRadius: '8px',
                     marginBottom: '20px',
@@ -1445,17 +1445,17 @@ export default function GuestView({ role, lang }: ViewProps) {
                     gap: '12px'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ background: '#F59E0B', color: '#fff', padding: '10px', borderRadius: '8px', display: 'flex' }}>
+                      <div style={{ background: 'var(--status-warning-solid)', color: 'var(--text-on-brand)', padding: '10px', borderRadius: '8px', display: 'flex' }}>
                         <Crown size={22} />
                       </div>
                       <div>
-                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-warning-text)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           {selectedVisitor.vipTier || 'VIP Tier-2 Dignitary Protocol'}
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: 900, color: '#78350F' }}>
+                        <div style={{ fontSize: '16px', fontWeight: 900, color: 'var(--status-warning-text)' }}>
                           {selectedVisitor.name} — {selectedVisitor.organization}
                         </div>
-                        <div style={{ fontSize: '11.5px', color: '#92400E', marginTop: '2px' }}>
+                        <div style={{ fontSize: '11.5px', color: 'var(--status-warning-text)', marginTop: '2px' }}>
                           {t('Priority Diplomatic / Statutory Access Granted • Dedicated Security Detail', 'বিশেষ ভিআইপি অগ্রাধিকার ও সার্বক্ষণিক নিরাপত্তা প্রটোকল সক্রিয়', lang)}
                         </div>
                       </div>
@@ -1474,7 +1474,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   {/* 4 Protocol Matrix Cards */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '20px' }}>
                     {/* Protocol Escort Officer */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
                         {t('Designated Protocol Officer', 'নির্ধারিত প্রটোকল কর্মকর্তা', lang)}
                       </div>
@@ -1496,39 +1496,39 @@ export default function GuestView({ role, lang }: ViewProps) {
                     </div>
 
                     {/* Allocated Executive Suite */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
                         {t('Executive Lounge & Suite', 'এক্সিকিউটিভ স্যুট ও লাউঞ্জ', lang)}
                       </div>
                       <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
                         {selectedVisitor.executiveSuite || 'Level 12 Chairman VIP Boardroom'}
                       </div>
-                      <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700, marginTop: '2px' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700, marginTop: '2px' }}>
                         ✓ Sanitized & Video Conference Enabled
                       </div>
                       <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '6px' }}>
-                        VIP WiFi SSID: <code style={{ color: '#0369A1' }}>BOGCL-VIP-5G</code>
+                        VIP WiFi SSID: <code style={{ color: 'var(--status-info)' }}>BOGCL-VIP-5G</code>
                       </div>
                     </div>
 
                     {/* Reserved Parking Portico */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
                         {t('Portico Parking Bay', 'নির্ধারিত ভিআইপি পার্কিং বে', lang)}
                       </div>
-                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0369A1', marginTop: '4px' }}>
+                      <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--status-info)', marginTop: '4px' }}>
                         {selectedVisitor.parkingBay || 'Reserved VIP Portico Bay #01'}
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
                         Vehicle: <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{selectedVisitor.vehiclePlate}</span>
                       </div>
-                      <div style={{ fontSize: '10.5px', color: '#059669', marginTop: '6px' }}>
+                      <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '6px' }}>
                         ✓ Valet Driver Security Clearance Passed
                       </div>
                     </div>
 
                     {/* Hospitality & Catering Preferences */}
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                    <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '16px' }}>
                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
                         {t('Hospitality & Catering Protocol', 'আপ্যায়ন ও খাবার পছন্দ', lang)}
                       </div>
@@ -1557,8 +1557,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                 <div style={{ padding: '24px' }}>
                   {/* Inspection Overview Header */}
                   <div style={{
-                    background: '#F0F9FF',
-                    border: '1px solid #BAE6FD',
+                    background: 'var(--status-info-bg)',
+                    border: '1px solid var(--status-info-border)',
                     padding: '16px',
                     borderRadius: '8px',
                     marginBottom: '20px',
@@ -1569,13 +1569,13 @@ export default function GuestView({ role, lang }: ViewProps) {
                     gap: '12px'
                   }}>
                     <div>
-                      <div style={{ fontSize: '11px', fontWeight: 800, color: '#0369A1', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         {t('STATUTORY REGULATORY INSPECTION COCKPIT', 'বিধিবদ্ধ সরকারি পরিদর্শন ককপিট', lang)}
                       </div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: '#0C4A6E', marginTop: '2px' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--status-info-text)', marginTop: '2px' }}>
                         {selectedVisitor.name} — {selectedVisitor.organization}
                       </div>
-                      <div style={{ fontSize: '11.5px', color: '#0284C7', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11.5px', color: 'var(--status-info)', marginTop: '2px' }}>
                         Facility: <strong>{selectedVisitor.facility}</strong> • Purpose: {selectedVisitor.purpose}
                       </div>
                     </div>
@@ -1593,13 +1593,13 @@ export default function GuestView({ role, lang }: ViewProps) {
                   {/* Findings Log List */}
                   <div style={{ marginBottom: '24px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <CheckCircle2 size={16} color="#059669" />
+                      <CheckCircle2 size={16} color="var(--status-success)" />
                       {t('On-Site Technical Observations & Compliance Checkpoints:', 'সরেজমিন পর্যবেক্ষণ ও কমপ্লায়েন্স পয়েন্ট:', lang)}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {(!selectedVisitor.inspectionFindings || selectedVisitor.inspectionFindings.length === 0) ? (
-                        <div style={{ padding: '24px', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', border: '1px dashed #CBD5E1', color: 'var(--brand-slate-500)', fontSize: '12px' }}>
+                        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--surface-0)', borderRadius: '8px', border: '1px dashed var(--border-2)', color: 'var(--brand-slate-500)', fontSize: '12px' }}>
                           {t('No inspection findings recorded yet. Use the form below to log technical observations.', 'এখনও কোনো পর্যবেক্ষণ লিপিবদ্ধ হয়নি। নিচের ফর্ম ব্যবহার করুন।', lang)}
                         </div>
                       ) : (
@@ -1611,7 +1611,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                               alignItems: 'flex-start',
                               justifyContent: 'space-between',
                               padding: '12px 16px',
-                              background: '#fff',
+                              background: 'var(--surface-1)',
                               border: '1px solid var(--brand-slate-200)',
                               borderRadius: '8px',
                               gap: '12px'
@@ -1624,8 +1624,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                                   fontWeight: 800,
                                   padding: '2px 8px',
                                   borderRadius: '4px',
-                                  background: finding.status === 'passed' ? '#DCFCE7' : finding.status === 'observation' ? '#FEF3C7' : '#FEE2E2',
-                                  color: finding.status === 'passed' ? '#166534' : finding.status === 'observation' ? '#92400E' : '#991B1B'
+                                  background: finding.status === 'passed' ? 'var(--status-success-bg)' : finding.status === 'observation' ? 'var(--status-warning-bg)' : 'var(--status-danger-bg)',
+                                  color: finding.status === 'passed' ? 'var(--status-success-text)' : finding.status === 'observation' ? 'var(--status-warning-text)' : 'var(--status-danger-text)'
                                 }}>
                                   {finding.status === 'passed' ? '✓ PASSED' : finding.status === 'observation' ? '⚠️ ADVISORY' : '🔴 CRITICAL'}
                                 </span>
@@ -1640,7 +1640,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                                 Verified: {finding.signOffDate}
                               </div>
                             </div>
-                            <CheckCircle size={16} color="#059669" style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <CheckCircle size={16} color="var(--status-success)" style={{ flexShrink: 0, marginTop: '2px' }} />
                           </div>
                         ))
                       )}
@@ -1648,7 +1648,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   </div>
 
                   {/* Add New Finding Form */}
-                  <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '16px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                       <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                         {t('+ Record Live Inspection Observation / Checkpoint', '+ নতুন পরিদর্শন পর্যবেক্ষণ যোগ করুন', lang)}
@@ -1689,7 +1689,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                           placeholder="e.g. Tank 1-8 Nitrogen Blanketing Pressure"
                           value={newFindingFocus}
                           onChange={(e) => setNewFindingFocus(e.target.value)}
-                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-2)', marginTop: '2px' }}
                         />
                       </div>
                       <div>
@@ -1697,7 +1697,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                         <select
                           value={newFindingStatus}
                           onChange={(e) => setNewFindingStatus(e.target.value as any)}
-                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                          style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-2)', marginTop: '2px' }}
                         >
                           <option value="passed">✓ Passed / Fully Compliant</option>
                           <option value="observation">⚠️ Advisory Observation Note</option>
@@ -1712,7 +1712,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                         placeholder="e.g. Pressure verified at 2.5 bar, nitrogen seal intact, no odor or venting detected..."
                         value={newFindingObs}
                         onChange={(e) => setNewFindingObs(e.target.value)}
-                        style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid #CBD5E1', marginTop: '2px' }}
+                        style={{ width: '100%', fontSize: '12px', padding: '6px 10px', borderRadius: '4px', border: '1px solid var(--border-2)', marginTop: '2px' }}
                       />
                     </div>
                     <button
@@ -1729,14 +1729,14 @@ export default function GuestView({ role, lang }: ViewProps) {
               {/* ── TAB 2: HSE SAFETY GEAR & INDUCTION CLEARANCE ── */}
               {cockpitSubTab === 'ppe' && (
                 <div style={{ padding: '24px' }}>
-                  <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '14px 18px', borderRadius: 'var(--radius-md)', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <HardHat size={28} color="#B45309" />
+                      <HardHat size={28} color="var(--status-warning-text)" />
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#92400E' }}>
+                        <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--status-warning-text)' }}>
                           MANDATORY PETROCHEMICAL REFINERY SAFETY INDUCTION (HSE POLICY 10.4)
                         </div>
-                        <div style={{ fontSize: '11.5px', color: '#B45309', marginTop: '2px' }}>
+                        <div style={{ fontSize: '11.5px', color: 'var(--status-warning-text)', marginTop: '2px' }}>
                           Visitors entering refinery process units must wear full PPE, undergo H2S emergency breathing briefing, and surrender non-intrinsically safe mobile phones.
                         </div>
                       </div>
@@ -1744,7 +1744,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ fontSize: '12px', padding: '7px 14px', background: '#059669', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                      style={{ fontSize: '12px', padding: '7px 14px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
                       onClick={handleApproveAllPPE}
                     >
                       <CheckCircle2 size={15} />
@@ -1758,8 +1758,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                         padding: '12px 14px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: selectedVisitor.ppeCleared.hardHat ? '#A7F3D0' : '#E2E8F0',
-                        background: selectedVisitor.ppeCleared.hardHat ? '#ECFDF5' : '#fff',
+                        borderColor: selectedVisitor.ppeCleared.hardHat ? 'var(--status-success-border)' : 'var(--border-1)',
+                        background: selectedVisitor.ppeCleared.hardHat ? 'var(--status-success-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1769,7 +1769,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Industrial Hard Hat</div>
-                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Color: White (Visitor Tag)</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Color: White (Visitor Tag)</div>
                       </div>
                       <span className={`badge ${selectedVisitor.ppeCleared.hardHat ? 'success' : 'neutral'}`}>
                         {selectedVisitor.ppeCleared.hardHat ? '✓ Issued' : 'Pending'}
@@ -1781,8 +1781,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                         padding: '12px 14px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: selectedVisitor.ppeCleared.safetyGoggles ? '#A7F3D0' : '#E2E8F0',
-                        background: selectedVisitor.ppeCleared.safetyGoggles ? '#ECFDF5' : '#fff',
+                        borderColor: selectedVisitor.ppeCleared.safetyGoggles ? 'var(--status-success-border)' : 'var(--border-1)',
+                        background: selectedVisitor.ppeCleared.safetyGoggles ? 'var(--status-success-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1792,7 +1792,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Safety Eye Goggles</div>
-                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Anti-Chemical Impact</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Anti-Chemical Impact</div>
                       </div>
                       <span className={`badge ${selectedVisitor.ppeCleared.safetyGoggles ? 'success' : 'neutral'}`}>
                         {selectedVisitor.ppeCleared.safetyGoggles ? '✓ Issued' : 'Pending'}
@@ -1804,8 +1804,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                         padding: '12px 14px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: selectedVisitor.ppeCleared.safetyShoes ? '#A7F3D0' : '#E2E8F0',
-                        background: selectedVisitor.ppeCleared.safetyShoes ? '#ECFDF5' : '#fff',
+                        borderColor: selectedVisitor.ppeCleared.safetyShoes ? 'var(--status-success-border)' : 'var(--border-1)',
+                        background: selectedVisitor.ppeCleared.safetyShoes ? 'var(--status-success-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1815,7 +1815,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Steel-Toe Boots</div>
-                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Static Dissipative Sole</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Static Dissipative Sole</div>
                       </div>
                       <span className={`badge ${selectedVisitor.ppeCleared.safetyShoes ? 'success' : 'neutral'}`}>
                         {selectedVisitor.ppeCleared.safetyShoes ? '✓ Issued' : 'Pending'}
@@ -1827,8 +1827,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                         padding: '12px 14px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: selectedVisitor.ppeCleared.hiVisVest ? '#A7F3D0' : '#E2E8F0',
-                        background: selectedVisitor.ppeCleared.hiVisVest ? '#ECFDF5' : '#fff',
+                        borderColor: selectedVisitor.ppeCleared.hiVisVest ? 'var(--status-success-border)' : 'var(--border-1)',
+                        background: selectedVisitor.ppeCleared.hiVisVest ? 'var(--status-success-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1838,7 +1838,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: '12.5px' }}>Hi-Vis Safety Vest</div>
-                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Reflective Luminescent</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Reflective Luminescent</div>
                       </div>
                       <span className={`badge ${selectedVisitor.ppeCleared.hiVisVest ? 'success' : 'neutral'}`}>
                         {selectedVisitor.ppeCleared.hiVisVest ? '✓ Issued' : 'Pending'}
@@ -1850,8 +1850,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                         padding: '12px 14px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: selectedVisitor.ppeCleared.h2sBriefing ? '#A7F3D0' : '#E2E8F0',
-                        background: selectedVisitor.ppeCleared.h2sBriefing ? '#ECFDF5' : '#fff',
+                        borderColor: selectedVisitor.ppeCleared.h2sBriefing ? 'var(--status-success-border)' : 'var(--border-1)',
+                        background: selectedVisitor.ppeCleared.h2sBriefing ? 'var(--status-success-bg)' : 'var(--surface-1)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -1861,7 +1861,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: '12.5px' }}>H2S Toxic Gas Alarm Drill</div>
-                        <div style={{ fontSize: '10.5px', color: '#64748B' }}>Assembly Point #3 briefed</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Assembly Point #3 briefed</div>
                       </div>
                       <span className={`badge ${selectedVisitor.ppeCleared.h2sBriefing ? 'success' : 'neutral'}`}>
                         {selectedVisitor.ppeCleared.h2sBriefing ? '✓ Briefed' : 'Pending'}
@@ -1877,10 +1877,10 @@ export default function GuestView({ role, lang }: ViewProps) {
                   <div className="guest-barrier-box">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#fff' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                           ALPR SMART BARRIER GATE #1 — KERANIGANJ MAIN PERIMETER
                         </div>
-                        <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                           Camera Resolution: 4K UHD 60fps • Neural License Plate Match Algorithm
                         </div>
                       </div>
@@ -1891,26 +1891,26 @@ export default function GuestView({ role, lang }: ViewProps) {
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px', padding: '20px 0' }}>
                       <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
                           RECOGNIZED NUMBER PLATE
                         </div>
-                        <div style={{ background: '#F8FAFC', color: '#0F172A', border: '3px solid #3B82F6', padding: '8px 24px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '18px', fontWeight: 900, letterSpacing: '2px' }}>
+                        <div style={{ background: 'var(--surface-0)', color: 'var(--text-1)', border: '3px solid var(--status-info)', padding: '8px 24px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '18px', fontWeight: 900, letterSpacing: '2px' }}>
                           {selectedVisitor.vehiclePlate}
                         </div>
-                        <div style={{ fontSize: '11px', color: '#34D399', fontWeight: 700, marginTop: '6px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--status-success-bright)', fontWeight: 700, marginTop: '6px' }}>
                           ✓ Plate Matched Pre-Registration (Confidence: 99.4%)
                         </div>
                       </div>
 
                       {/* Visual Barrier Arm Animation */}
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <div style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '10px' }}>
                           BOOM BARRIER GATE STATUS
                         </div>
-                        <div style={{ width: '40px', height: '60px', background: '#334155', borderRadius: '6px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '40px', height: '60px', background: 'var(--surface-inverse-3)', borderRadius: '6px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <div className={`guest-barrier-arm ${barrierOpen ? 'open' : ''}`} />
                         </div>
-                        <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 800, color: barrierOpen ? '#34D399' : '#EF4444' }}>
+                        <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 800, color: barrierOpen ? 'var(--status-success-bright)' : 'var(--status-danger)' }}>
                           {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (CLOSED)'}
                         </div>
                       </div>
@@ -1948,7 +1948,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                           padding: '12px 16px',
                           borderRadius: '8px',
                           border: '1px solid var(--brand-slate-200)',
-                          background: '#fff',
+                          background: 'var(--surface-1)',
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -2127,23 +2127,23 @@ export default function GuestView({ role, lang }: ViewProps) {
       {showGatePassModal && selectedVisitor && (
         <div className="modal-bg" onClick={() => setShowGatePassModal(false)}>
           <div className="modal" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div>
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Official Gate Security Visitor Badge Slip', 'অফিসিয়াল গেট সিকিউরিটি ভিজিটর ব্যাজ', lang)}
                 </h3>
-                <div style={{ fontSize: '11px', color: '#94A3B8' }}>Pass ID: {selectedVisitor.id}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Pass ID: {selectedVisitor.id}</div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowGatePassModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowGatePassModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ border: '2px solid #0F172A', padding: '18px', borderRadius: '8px', background: '#FFF' }}>
-                <div style={{ textAlign: 'center', borderBottom: '2px solid #0F172A', paddingBottom: '10px', marginBottom: '14px' }}>
+              <div style={{ border: '2px solid var(--border-strong)', padding: '18px', borderRadius: '8px', background: 'var(--surface-1)' }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--border-strong)', paddingBottom: '10px', marginBottom: '14px' }}>
                   <div style={{ fontSize: '15px', fontWeight: 900, color: 'var(--brand-crimson)' }}>
                     BASHUNDHARA OIL AND GAS COMPANY LIMITED
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Corporate Security & Refinery Gate Control Division</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Corporate Security & Refinery Gate Control Division</div>
                   <div style={{ fontSize: '12px', fontWeight: 900, marginTop: '4px', letterSpacing: '1px' }}>
                     OFFICIAL VISITOR PASS · {selectedVisitor.category.toUpperCase()} CLEARANCE
                   </div>
@@ -2151,29 +2151,29 @@ export default function GuestView({ role, lang }: ViewProps) {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
                   <div>
-                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#0F172A' }}>
+                    <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--text-1)' }}>
                       {selectedVisitor.name}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-2)' }}>
                       {selectedVisitor.designation} · {selectedVisitor.organization}
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '6px' }}>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '6px' }}>
                       Host Officer: <strong>{selectedVisitor.hostEmployee}</strong> ({selectedVisitor.hostDept})
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#64748B' }}>
-                      Security Badge Number: <strong style={{ fontFamily: 'monospace', color: '#0284C7' }}>{selectedVisitor.badgeNo || 'BDG-01'}</strong>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
+                      Security Badge Number: <strong style={{ fontFamily: 'monospace', color: 'var(--status-info)' }}>{selectedVisitor.badgeNo || 'BDG-01'}</strong>
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'center' }}>
-                    <QrCode size={70} color="#000" />
+                    <QrCode size={70} color="var(--text-1)" />
                     <div style={{ fontSize: '10px', fontFamily: 'monospace', fontWeight: 700, marginTop: '2px' }}>
                       {selectedVisitor.id}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '10px', fontSize: '11.5px', color: '#475569' }}>
+                <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: '10px', fontSize: '11.5px', color: 'var(--text-2)' }}>
                   <div><strong>Permitted Zones:</strong> {selectedVisitor.permittedZones.map(z => z.name).join(', ')}</div>
                   <div style={{ marginTop: '2px' }}><strong>Vehicle Plate:</strong> {selectedVisitor.vehiclePlate}</div>
                   <div style={{ marginTop: '2px' }}><strong>HSE Safety Status:</strong> PPE Allotment Verified • Assembly Point #3</div>
@@ -2208,33 +2208,33 @@ export default function GuestView({ role, lang }: ViewProps) {
         return (
           <div className="modal-bg" onClick={() => setShowMusterModal(false)}>
             <div className="modal" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
-              <div className="modal-hd" style={{ background: '#991B1B', color: '#fff' }}>
+              <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Flame size={22} color="#FCA5A5" />
+                  <Flame size={22} color="var(--status-danger-bright)" />
                   <div>
-                    <h3 style={{ color: '#fff', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {t('Emergency Evacuation Muster List (HSE Roll-Call)', 'জরুরি ইভাকুয়েশন মাস্টার রোল-কল তালিকা', lang)}
-                      <span style={{ fontSize: '11px', background: isAllSafe ? '#059669' : '#EF4444', color: '#fff', padding: '2px 8px', borderRadius: '12px', fontWeight: 800 }}>
+                      <span style={{ fontSize: '11px', background: isAllSafe ? 'var(--status-success-solid)' : 'var(--status-danger-solid)', color: 'var(--text-on-brand)', padding: '2px 8px', borderRadius: '12px', fontWeight: 800 }}>
                         {safeCount} / {totalInside} {t('Accounted Safe', 'নিরাপদ চিহ্নিত', lang)}
                       </span>
                     </h3>
-                    <div style={{ fontSize: '11px', color: '#FEE2E2', marginTop: '2px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
                       Live count of all {totalInside} external visitors currently logged inside refinery/HQ gates
                     </div>
                   </div>
                 </div>
-                <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowMusterModal(false)}>×</button>
+                <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowMusterModal(false)}>×</button>
               </div>
 
               <div className="modal-body">
                 {/* Emergency Control Bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FEF2F2', border: '1px solid #FECACA', padding: '12px 16px', borderRadius: '8px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--status-danger-bg)', border: '1px solid var(--status-danger-border)', padding: '12px 16px', borderRadius: '8px', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <div style={{ fontSize: '12px', fontWeight: 800, color: '#991B1B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-danger-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <AlertTriangle size={15} />
                       {t('Muster Point: Evacuation Assembly Point #3 (Main Security Gate Ground)', 'মাস্টার পয়েন্ট: ইভাকুয়েশন অ্যাসেম্বলি পয়েন্ট ৩ (প্রধান নিরাপত্তা গেট প্রাঙ্গণ)', lang)}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#7F1D1D', marginTop: '2px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--status-danger-text)', marginTop: '2px' }}>
                       Safety wardens must tick off each visitor upon physical verification at muster point.
                     </div>
                   </div>
@@ -2242,7 +2242,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-outline"
-                      style={{ background: '#ECFDF5', borderColor: '#10B981', color: '#047857', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px' }}
+                      style={{ background: 'var(--status-success-bg)', borderColor: 'var(--status-success)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px' }}
                       onClick={handleMarkAllEvacuatedSafe}
                     >
                       <CheckCircle2 size={14} />
@@ -2251,7 +2251,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                     <button
                       type="button"
                       className="btn-primary"
-                      style={{ background: '#DC2626', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                      style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', border: 'none', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}
                       onClick={handleBroadcastEvacuationAlert}
                     >
                       <Radio size={14} />
@@ -2280,7 +2280,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                         </tr>
                       ) : (
                         insideVisitors.map(v => (
-                          <tr key={v.id} style={{ background: v.isEvacuatedSafe ? '#F0FDF4' : 'inherit' }}>
+                          <tr key={v.id} style={{ background: v.isEvacuatedSafe ? 'var(--status-success-bg)' : 'inherit' }}>
                             <td>
                               <strong>{v.name}</strong>
                               <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{v.organization}</div>
@@ -2288,7 +2288,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                             <td>
                               <span className="badge info">{v.facility.split(',')[0]}</span>
                               {v.executiveSuite && (
-                                <div style={{ fontSize: '10.5px', color: '#6366F1', marginTop: '2px' }}>{v.executiveSuite}</div>
+                                <div style={{ fontSize: '10.5px', color: 'var(--status-purple)', marginTop: '2px' }}>{v.executiveSuite}</div>
                               )}
                             </td>
                             <td>
@@ -2296,9 +2296,9 @@ export default function GuestView({ role, lang }: ViewProps) {
                               <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>{v.hostDept}</div>
                             </td>
                             <td>
-                              <a href={`tel:${v.phone}`} style={{ fontWeight: 600, color: '#0284C7', textDecoration: 'none' }}>{v.phone}</a>
+                              <a href={`tel:${v.phone}`} style={{ fontWeight: 600, color: 'var(--status-info)', textDecoration: 'none' }}>{v.phone}</a>
                               {v.emergencyContact && (
-                                <div style={{ fontSize: '10px', color: '#DC2626' }}>{v.emergencyContact}</div>
+                                <div style={{ fontSize: '10px', color: 'var(--status-danger)' }}>{v.emergencyContact}</div>
                               )}
                             </td>
                             <td style={{ textAlign: 'center' }}>
@@ -2313,8 +2313,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   gap: '5px',
-                                  background: v.isEvacuatedSafe ? '#DCFCE7' : '#FEE2E2',
-                                  color: v.isEvacuatedSafe ? '#15803D' : '#B91C1C',
+                                  background: v.isEvacuatedSafe ? 'var(--status-success-bg)' : 'var(--status-danger-bg)',
+                                  color: v.isEvacuatedSafe ? 'var(--status-success-text)' : 'var(--status-danger-text)',
                                   boxShadow: v.isEvacuatedSafe ? '0 1px 3px rgba(34,197,94,0.2)' : '0 1px 3px rgba(239,68,68,0.2)',
                                   transition: 'all 0.15s ease'
                                 }}
@@ -2322,12 +2322,12 @@ export default function GuestView({ role, lang }: ViewProps) {
                               >
                                 {v.isEvacuatedSafe ? (
                                   <>
-                                    <CheckCircle2 size={13} color="#15803D" />
+                                    <CheckCircle2 size={13} color="var(--status-success-text)" />
                                     {t('Safe at Muster Point', 'নিরাপদ চিহ্নিত', lang)}
                                   </>
                                 ) : (
                                   <>
-                                    <AlertTriangle size={13} color="#B91C1C" />
+                                    <AlertTriangle size={13} color="var(--status-danger-text)" />
                                     {t('Unaccounted (Mark Safe)', 'অনুপস্থিত (নিরাপদ করুন)', lang)}
                                   </>
                                 )}
@@ -2342,7 +2342,7 @@ export default function GuestView({ role, lang }: ViewProps) {
               </div>
 
               <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '11.5px', color: isAllSafe ? '#15803D' : '#991B1B', fontWeight: 700 }}>
+                <div style={{ fontSize: '11.5px', color: isAllSafe ? 'var(--status-success-text)' : 'var(--status-danger-text)', fontWeight: 700 }}>
                   {isAllSafe
                     ? '✅ 100% headcount verified at Assembly Point #3.'
                     : `⚠️ ${totalInside - safeCount} visitor(s) pending physical roll-call verification.`
@@ -2352,7 +2352,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                   <button className="btn-sm-ghost" onClick={() => setShowMusterModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
                   <button
                     className="btn-primary"
-                    style={{ background: '#991B1B' }}
+                    style={{ background: 'var(--status-danger-solid-dark)' }}
                     onClick={() => {
                       showToast(t('HSE Evacuation Muster PDF generated for Incident Commander.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
                       setShowMusterModal(false);
@@ -2372,39 +2372,39 @@ export default function GuestView({ role, lang }: ViewProps) {
       {showALPRModal && (
         <div className="modal-bg" onClick={() => setShowALPRModal(false)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Car size={18} color="#38BDF8" />
-                <h3 style={{ color: '#fff', margin: 0 }}>
+                <Car size={18} color="var(--status-info-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('ALPR Gate Barrier Camera Live Telemetry', 'গেট ক্যামেরা ও বেরিয়ার লাইভ ফিড', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowALPRModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowALPRModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ border: '2px solid #334155', borderRadius: '8px', background: '#090F1E', padding: '20px', color: '#fff', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94A3B8', marginBottom: '14px' }}>
+              <div style={{ border: '2px solid var(--border-inverse-2)', borderRadius: '8px', background: 'var(--surface-inverse-deep)', padding: '20px', color: 'var(--text-on-brand)', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '14px' }}>
                   <span>CAM-01: KERANIGANJ GATE 1 INWARD</span>
-                  <span style={{ color: '#34D399', fontWeight: 800 }}>● 60 FPS UHD LIVE</span>
+                  <span style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>● 60 FPS UHD LIVE</span>
                 </div>
 
-                <div style={{ border: '2px dashed #3B82F6', borderRadius: '8px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.05)', position: 'relative' }}>
-                  <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: '#38BDF8' }}>
+                <div style={{ border: '2px dashed var(--status-info)', borderRadius: '8px', height: '140px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(59, 130, 246, 0.05)', position: 'relative' }}>
+                  <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'monospace', letterSpacing: '2px', color: 'var(--status-info-bright)' }}>
                     [ DHAKA-METRO-GHA-11-9042 ]
                   </div>
-                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
                     Target: Dr. Shahabuddin Ahmed (Directorate of Explosives)
                   </div>
-                  <div style={{ fontSize: '10px', color: '#34D399', fontWeight: 700, marginTop: '2px' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--status-success-bright)', fontWeight: 700, marginTop: '2px' }}>
                     ALPR MATCH CONFIRMED (99.4%) · PRE-REGISTERED
                   </div>
                 </div>
 
                 <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>Barrier Boom Status:</div>
-                    <div style={{ fontWeight: 800, color: barrierOpen ? '#34D399' : '#EF4444' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Barrier Boom Status:</div>
+                    <div style={{ fontWeight: 800, color: barrierOpen ? 'var(--status-success-bright)' : 'var(--status-danger)' }}>
                       {barrierOpen ? '🟢 BARRIER RAISED (OPEN)' : '🔴 BARRIER LOWERED (LOCKED)'}
                     </div>
                   </div>
@@ -2432,19 +2432,19 @@ export default function GuestView({ role, lang }: ViewProps) {
       {showSMSModal && selectedVisitor && (
         <div className="modal-bg" onClick={() => setShowSMSModal(false)}>
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Share2 size={18} color="#38BDF8" />
-                <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+                <Share2 size={18} color="var(--status-info-bright)" />
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px' }}>
                   {t('Dispatch Digital QR Pass to Guest', 'অতিথির মোবাইলে ডিজিটাল কিউআর পাস প্রেরণ', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowSMSModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowSMSModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
               {/* Channel Selector Tabs */}
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: '#F1F5F9', padding: '4px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: 'var(--surface-2)', padding: '4px', borderRadius: '8px' }}>
                 <button
                   type="button"
                   style={{
@@ -2459,8 +2459,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                     fontSize: '11.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    background: dispatchChannel === 'whatsapp' ? '#25D366' : 'transparent',
-                    color: dispatchChannel === 'whatsapp' ? '#FFF' : '#475569',
+                    background: dispatchChannel === 'whatsapp' ? 'var(--brand-whatsapp)' : 'transparent',
+                    color: dispatchChannel === 'whatsapp' ? 'var(--text-on-brand)' : 'var(--text-2)',
                     boxShadow: dispatchChannel === 'whatsapp' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                     transition: 'all 0.15s ease'
                   }}
@@ -2483,8 +2483,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                     fontSize: '11.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    background: dispatchChannel === 'sms' ? '#0284C7' : 'transparent',
-                    color: dispatchChannel === 'sms' ? '#FFF' : '#475569',
+                    background: dispatchChannel === 'sms' ? 'var(--status-info-solid)' : 'transparent',
+                    color: dispatchChannel === 'sms' ? 'var(--text-on-brand)' : 'var(--text-2)',
                     boxShadow: dispatchChannel === 'sms' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                     transition: 'all 0.15s ease'
                   }}
@@ -2507,8 +2507,8 @@ export default function GuestView({ role, lang }: ViewProps) {
                     fontSize: '11.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    background: dispatchChannel === 'email' ? '#4F46E5' : 'transparent',
-                    color: dispatchChannel === 'email' ? '#FFF' : '#475569',
+                    background: dispatchChannel === 'email' ? 'var(--status-purple-solid)' : 'transparent',
+                    color: dispatchChannel === 'email' ? 'var(--text-on-brand)' : 'var(--text-2)',
                     boxShadow: dispatchChannel === 'email' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                     transition: 'all 0.15s ease'
                   }}
@@ -2521,18 +2521,18 @@ export default function GuestView({ role, lang }: ViewProps) {
 
               {/* Channel-Specific Preview */}
               {dispatchChannel === 'whatsapp' && (
-                <div style={{ background: '#ECE5DD', border: '1px solid #D5CCC3', borderRadius: '10px', padding: '14px', position: 'relative' }}>
+                <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-1)', borderRadius: '10px', padding: '14px', position: 'relative' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#075E54', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '11px', fontWeight: 800 }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--status-teal-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-on-brand)', fontSize: '11px', fontWeight: 800 }}>
                       BOG
                     </div>
                     <div>
-                      <div style={{ fontSize: '12px', fontWeight: 800, color: '#075E54' }}>Bashundhara Oil & Gas Visitor Desk</div>
-                      <div style={{ fontSize: '10px', color: '#128C7E' }}>Official Verified Business Account</div>
+                      <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-teal-text)' }}>Bashundhara Oil & Gas Visitor Desk</div>
+                      <div style={{ fontSize: '10px', color: 'var(--status-teal-text)' }}>Official Verified Business Account</div>
                     </div>
                   </div>
 
-                  <div style={{ background: '#DCF8C6', border: '1px solid #C4E2B1', borderRadius: '8px', padding: '12px', fontSize: '12px', color: '#075E54', lineHeight: 1.55 }}>
+                  <div style={{ background: 'var(--status-teal-bg)', border: '1px solid var(--status-success-border)', borderRadius: '8px', padding: '12px', fontSize: '12px', color: 'var(--status-teal-text)', lineHeight: 1.55 }}>
                     <p style={{ margin: '0 0 6px 0' }}>
                       🌟 <strong>Official VIP & Visitor Pass: Bashundhara Oil & Gas Co. Ltd.</strong>
                     </p>
@@ -2543,7 +2543,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                       <div>🚗 PARKING: <strong>{selectedVisitor.parkingBay || 'Designated Bay'}</strong></div>
                       <div>🛡️ ESCORT: <strong>{selectedVisitor.escortOfficer || selectedVisitor.hostEmployee}</strong></div>
                     </div>
-                    <p style={{ margin: '0', fontSize: '11px', color: '#0369A1' }}>
+                    <p style={{ margin: '0', fontSize: '11px', color: 'var(--status-info)' }}>
                       📲 Tap here to view live QR Pass & Turn-by-Turn Gate GPS: <br />
                       <span style={{ textDecoration: 'underline' }}>https://oneops.bashundhara.com/pass/{selectedVisitor.id}</span>
                     </p>
@@ -2552,26 +2552,26 @@ export default function GuestView({ role, lang }: ViewProps) {
               )}
 
               {dispatchChannel === 'sms' && (
-                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
-                  <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px' }}>
+                <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px' }}>
                     Telco Route: BOGCL-SMS-GATEWAY · Recipient: <strong>{selectedVisitor.phone}</strong>
                   </div>
-                  <div style={{ background: '#E0F2FE', border: '1px solid #BAE6FD', borderRadius: '8px', padding: '12px', fontSize: '12px', color: '#0369A1', lineHeight: 1.5 }}>
+                  <div style={{ background: 'var(--status-info-bg)', border: '1px solid var(--status-info-border)', borderRadius: '8px', padding: '12px', fontSize: '12px', color: 'var(--status-info)', lineHeight: 1.5 }}>
                     [BASHUNDHARA OIL & GAS] Gate Pass confirmed for {selectedVisitor.name}. Pass ID: {selectedVisitor.id}. Host: {selectedVisitor.hostEmployee}. Show this SMS/QR at Gate 1: https://oneops.bashundhara.com/pass/{selectedVisitor.id}
                   </div>
                 </div>
               )}
 
               {dispatchChannel === 'email' && (
-                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px' }}>
-                  <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px' }}>
+                <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '10px', padding: '14px' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px' }}>
                     Subject: <strong>Official Security Gate Clearance · Pass ID {selectedVisitor.id}</strong>
                   </div>
-                  <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', padding: '12px', fontSize: '11.5px', color: '#334155', lineHeight: 1.5 }}>
+                  <div style={{ border: '1px solid var(--border-1)', borderRadius: '6px', padding: '12px', fontSize: '11.5px', color: 'var(--text-2)', lineHeight: 1.5 }}>
                     <div style={{ fontWeight: 800, color: 'var(--brand-crimson)', marginBottom: '4px' }}>Bashundhara Oil & Gas Company Ltd.</div>
                     <div>Dear {selectedVisitor.name},</div>
                     <div style={{ marginTop: '4px' }}>Attached is your encrypted digital badge and refinery safety compliance dossier. Please present your QR badge at the security turnstiles upon arrival.</div>
-                    <div style={{ marginTop: '8px', fontSize: '10.5px', color: '#64748B' }}>To: {selectedVisitor.email || `${selectedVisitor.name.toLowerCase().replace(/\s+/g, '.')}@partner.com`}</div>
+                    <div style={{ marginTop: '8px', fontSize: '10.5px', color: 'var(--text-3)' }}>To: {selectedVisitor.email || `${selectedVisitor.name.toLowerCase().replace(/\s+/g, '.')}@partner.com`}</div>
                   </div>
                 </div>
               )}
@@ -2582,8 +2582,8 @@ export default function GuestView({ role, lang }: ViewProps) {
               <button
                 className="btn-primary"
                 style={{
-                  background: dispatchChannel === 'whatsapp' ? '#25D366' : dispatchChannel === 'sms' ? '#0284C7' : '#4F46E5',
-                  color: '#fff',
+                  background: dispatchChannel === 'whatsapp' ? 'var(--brand-whatsapp)' : dispatchChannel === 'sms' ? 'var(--status-info-solid)' : 'var(--status-purple-solid)',
+                  color: 'var(--text-on-brand)',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -2607,44 +2607,44 @@ export default function GuestView({ role, lang }: ViewProps) {
       {showScannerModal && (
         <div className="modal-bg" onClick={() => setShowScannerModal(false)}>
           <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: '#0F172A', color: '#fff' }}>
+            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Scan size={20} color="#38BDF8" />
+                <Scan size={20} color="var(--status-info-bright)" />
                 <div>
-                  <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px' }}>
                     {t('Fast Optical QR Gate Scanner & ALPR Reader', 'দ্রুত অপটিক্যাল কিউআর স্ক্যানার ও বেরিয়ার সেন্সর', lang)}
                   </h3>
-                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Automated terminal check-in · Direct sync with barrier access controller
                   </div>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: '#fff' }} onClick={() => setShowScannerModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowScannerModal(false)}>×</button>
             </div>
 
             <div className="modal-body">
               {/* Camera Scanner Viewport */}
               <div style={{
                 position: 'relative',
-                background: '#020617',
-                border: '2px solid #1E293B',
+                background: 'var(--surface-inverse-deep)',
+                border: '2px solid var(--border-inverse)',
                 borderRadius: '10px',
                 padding: '24px',
-                color: '#fff',
+                color: 'var(--text-on-brand)',
                 overflow: 'hidden'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', fontSize: '11px', color: '#64748B' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', fontSize: '11px', color: 'var(--text-3)' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Camera size={13} color="#38BDF8" />
+                    <Camera size={13} color="var(--status-info-bright)" />
                     CAM-GATE-OPTICAL-02 (MAIN REFINERY INGRESS)
                   </span>
-                  <span style={{ color: '#10B981', fontWeight: 800 }}>● 60 FPS ULTRA-HD ACTIVE</span>
+                  <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>● 60 FPS ULTRA-HD ACTIVE</span>
                 </div>
 
                 {/* Laser Reticle Frame */}
                 <div style={{
                   position: 'relative',
-                  border: '2px dashed #0EA5E9',
+                  border: '2px dashed var(--status-info)',
                   borderRadius: '12px',
                   height: '180px',
                   display: 'flex',
@@ -2661,24 +2661,24 @@ export default function GuestView({ role, lang }: ViewProps) {
                     left: '5%',
                     right: '5%',
                     height: '3px',
-                    background: 'linear-gradient(90deg, transparent, #22C55E, #4ADE80, #22C55E, transparent)',
-                    boxShadow: '0 0 12px #22C55E, 0 0 24px #4ADE80',
+                    background: 'linear-gradient(90deg, transparent, var(--status-success-solid), var(--status-success-bright), var(--status-success-solid), transparent)',
+                    boxShadow: '0 0 12px var(--status-success), 0 0 24px var(--status-success-bright)',
                     transition: isScanningAnimation ? 'top 0.8s ease-in-out' : 'top 2s ease-in-out infinite alternate',
                     zIndex: 2
                   }} />
 
-                  <QrCode size={70} color={isScanningAnimation ? '#4ADE80' : '#38BDF8'} style={{ opacity: 0.85, transition: 'all 0.3s' }} />
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: isScanningAnimation ? '#4ADE80' : '#E2E8F0', marginTop: '10px', letterSpacing: '1px' }}>
+                  <QrCode size={70} color={isScanningAnimation ? 'var(--status-success-bright)' : 'var(--status-info-bright)'} style={{ opacity: 0.85, transition: 'all 0.3s' }} />
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: isScanningAnimation ? 'var(--status-success-bright)' : 'var(--text-inverse)', marginTop: '10px', letterSpacing: '1px' }}>
                     {isScanningAnimation ? t('DECRYPTING CREDENTIAL PAYLOAD...', 'কিউআর কোড ডিক্রিপ্ট করা হচ্ছে...', lang) : t('AIM CAMERA AT VISITOR QR PASS OR SMARTPHONE', 'ভিজিটর কিউআর পাস ক্যামেরার সম্মুখে প্রদর্শন করুন', lang)}
                   </div>
-                  <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '4px' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '4px' }}>
                     Optical ALPR sensor simultaneously captures vehicle registration plate
                   </div>
                 </div>
 
                 {/* Visitor Selection for Quick Scan Simulation */}
-                <div style={{ marginTop: '16px', background: '#0F172A', padding: '12px 14px', borderRadius: '8px', border: '1px solid #334155' }}>
-                  <label style={{ fontSize: '11.5px', color: '#94A3B8', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
+                <div style={{ marginTop: '16px', background: 'var(--surface-inverse)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-inverse-2)' }}>
+                  <label style={{ fontSize: '11.5px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', fontWeight: 700 }}>
                     {t('Select Pre-Registered Visitor / Incoming Vehicle to Simulate Gate Arrival:', 'গেটে আগমনকারী ভিজিটর অথবা গাড়ি নির্বাচন করুন:', lang)}
                   </label>
                   <select
@@ -2686,9 +2686,9 @@ export default function GuestView({ role, lang }: ViewProps) {
                     onChange={(e) => setScannerTargetId(e.target.value)}
                     style={{
                       width: '100%',
-                      background: '#1E293B',
-                      color: '#F8FAFC',
-                      border: '1px solid #475569',
+                      background: 'var(--surface-inverse-2)',
+                      color: 'var(--text-inverse)',
+                      border: '1px solid var(--border-inverse-2)',
                       borderRadius: '6px',
                       padding: '8px 12px',
                       fontSize: '13px',
@@ -2710,24 +2710,24 @@ export default function GuestView({ role, lang }: ViewProps) {
                   return (
                     <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '11px', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: '6px' }}>
                       <div>
-                        <span style={{ color: '#64748B' }}>Category:</span>
-                        <div style={{ fontWeight: 700, color: target.category === 'vip' ? '#F59E0B' : target.category === 'govt' ? '#60A5FA' : '#CBD5E1' }}>
+                        <span style={{ color: 'var(--text-3)' }}>Category:</span>
+                        <div style={{ fontWeight: 700, color: target.category === 'vip' ? 'var(--status-warning)' : target.category === 'govt' ? 'var(--status-info-bright)' : 'var(--text-inverse-2)' }}>
                           {target.vipTier || target.category.toUpperCase()}
                         </div>
                       </div>
                       <div>
-                        <span style={{ color: '#64748B' }}>Vehicle Plate:</span>
-                        <div style={{ fontWeight: 700, color: '#38BDF8', fontFamily: 'monospace' }}>
+                        <span style={{ color: 'var(--text-3)' }}>Vehicle Plate:</span>
+                        <div style={{ fontWeight: 700, color: 'var(--status-info-bright)', fontFamily: 'monospace' }}>
                           {target.vehiclePlate || 'Pedestrian Entry'}
                         </div>
                       </div>
                       <div>
-                        <span style={{ color: '#64748B' }}>Host Officer:</span>
-                        <div style={{ fontWeight: 700, color: '#F1F5F9' }}>{target.hostEmployee}</div>
+                        <span style={{ color: 'var(--text-3)' }}>Host Officer:</span>
+                        <div style={{ fontWeight: 700, color: 'var(--text-inverse)' }}>{target.hostEmployee}</div>
                       </div>
                       <div>
-                        <span style={{ color: '#64748B' }}>Status:</span>
-                        <div style={{ fontWeight: 800, color: target.status === 'checked_in' ? '#34D399' : '#FBBF24' }}>
+                        <span style={{ color: 'var(--text-3)' }}>Status:</span>
+                        <div style={{ fontWeight: 800, color: target.status === 'checked_in' ? 'var(--status-success-bright)' : 'var(--status-warning-bright)' }}>
                           {target.status.toUpperCase()}
                         </div>
                       </div>
@@ -2745,7 +2745,7 @@ export default function GuestView({ role, lang }: ViewProps) {
                 <button className="btn-sm-ghost" onClick={() => setShowScannerModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
                 <button
                   className="btn-primary"
-                  style={{ background: '#0284C7', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ background: 'var(--status-info-solid)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
                   disabled={isScanningAnimation}
                   onClick={() => handleExecuteQuickScan(scannerTargetId)}
                 >

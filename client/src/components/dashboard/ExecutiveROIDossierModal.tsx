@@ -85,7 +85,7 @@ export default function ExecutiveROIDossierModal({
           borderRadius: '16px',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
           overflow: 'hidden',
-          background: '#FFFFFF',
+          background: 'var(--surface-1)',
           margin: 'auto',
           animation: 'modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both',
         }}
@@ -95,8 +95,8 @@ export default function ExecutiveROIDossierModal({
         <div
           className="modal-hd"
           style={{
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%)',
-            color: '#FFFFFF',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-purple-solid-dark) 50%, var(--status-purple-solid-dark) 100%)',
+            color: 'var(--text-on-brand)',
             padding: '18px 24px',
             display: 'flex',
             alignItems: 'center',
@@ -116,20 +116,20 @@ export default function ExecutiveROIDossierModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#FDE047',
+                color: 'var(--status-warning-bright)',
               }}
             >
               <Crown size={24} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.3px' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text-on-brand)', letterSpacing: '0.3px' }}>
                   {t('BOGCL Executive Board ROI Dossier', 'বিওজিসিএল এক্সিকিউটিভ বোর্ড আরওআই বিবরণী', lang)}
                 </h3>
                 <span
                   style={{
                     background: 'rgba(212, 175, 55, 0.2)',
-                    color: '#FDE047',
+                    color: 'var(--status-warning-bright)',
                     border: '1px solid rgba(212, 175, 55, 0.4)',
                     fontSize: '10px',
                     padding: '2px 8px',
@@ -140,7 +140,7 @@ export default function ExecutiveROIDossierModal({
                   CONFIDENTIAL · BOARD ONLY
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: '#CBD5E1', marginTop: '3px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-inverse-2)', marginTop: '3px' }}>
                 {t(
                   'Consolidated Net Realized Value, Operational Loss Mitigation & Enterprise Capital Yield (FY26-27)',
                   'সঞ্চিত সাশ্রয়, পরিচালন ক্ষতি প্রতিরোধ ও বিনিয়োগের আর্থিক মূল্যায়ন অডিট খতিয়ান',
@@ -157,7 +157,7 @@ export default function ExecutiveROIDossierModal({
             style={{
               background: 'rgba(255, 255, 255, 0.15)',
               borderColor: 'rgba(255, 255, 255, 0.25)',
-              color: '#FFFFFF',
+              color: 'var(--text-on-brand)',
             }}
           >
             <X size={16} />
@@ -172,7 +172,7 @@ export default function ExecutiveROIDossierModal({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              borderBottom: '2px solid #E2E8F0',
+              borderBottom: '2px solid var(--border-1)',
               paddingBottom: '12px',
               marginBottom: '20px',
               flexWrap: 'wrap',
@@ -180,18 +180,18 @@ export default function ExecutiveROIDossierModal({
             }}
           >
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A' }}>
+              <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-1)' }}>
                 BASHUNDHARA OIL & GAS COMPANY LTD.
               </div>
-              <div style={{ fontSize: '11px', color: '#64748B' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
                 Keraniganj Bitumen Refinery Complex · Directorate of Corporate Governance & Finance
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 700, color: '#4338CA' }}>
+              <div style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-purple-text)' }}>
                 AUDIT-REF: BOGCL/BOARD/ROI-2026-Q4
               </div>
-              <div style={{ fontSize: '10.5px', color: '#64748B' }}>
+              <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
                 Validated against SAP S/4HANA General Ledger (October 2026)
               </div>
             </div>
@@ -208,76 +208,76 @@ export default function ExecutiveROIDossierModal({
           >
             <div
               style={{
-                background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
-                border: '1px solid #F59E0B',
+                background: 'linear-gradient(135deg, var(--status-warning-bg) 0%, var(--status-warning-bright) 100%)',
+                border: '1px solid var(--status-warning)',
                 borderRadius: '12px',
                 padding: '14px 16px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400E', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-warning-text)', textTransform: 'uppercase' }}>
                 {t('Net Realized Savings', 'মোট অর্জিত সাশ্রয়', lang)}
               </div>
-              <div style={{ fontSize: '20px', fontWeight: 900, color: '#78350F', marginTop: '4px' }}>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--status-warning-text)', marginTop: '4px' }}>
                 ৳ 4,82,50,000
               </div>
-              <div style={{ fontSize: '11px', color: '#B45309', marginTop: '2px', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-warning-text)', marginTop: '2px', fontWeight: 600 }}>
                 ▲ +18.4% YoY vs FY25 Baseline
               </div>
             </div>
 
             <div
               style={{
-                background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-                border: '1px solid #10B981',
+                background: 'linear-gradient(135deg, var(--status-success-bg) 0%, var(--status-success-bg) 100%)',
+                border: '1px solid var(--status-success)',
                 borderRadius: '12px',
                 padding: '14px 16px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#065F46', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-success-text)', textTransform: 'uppercase' }}>
                 {t('Loss-Free Safety Record', 'নিরাপদ কর্মদিবস রেকর্ড', lang)}
               </div>
-              <div style={{ fontSize: '20px', fontWeight: 900, color: '#047857', marginTop: '4px' }}>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--status-success-text)', marginTop: '4px' }}>
                 284 Days
               </div>
-              <div style={{ fontSize: '11px', color: '#059669', marginTop: '2px', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '2px', fontWeight: 600 }}>
                 Zero Unscheduled Plant Stoppage
               </div>
             </div>
 
             <div
               style={{
-                background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-                border: '1px solid #3B82F6',
+                background: 'linear-gradient(135deg, var(--status-info-bg) 0%, var(--status-info-bg) 100%)',
+                border: '1px solid var(--status-info)',
                 borderRadius: '12px',
                 padding: '14px 16px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#1E40AF', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-info-text)', textTransform: 'uppercase' }}>
                 {t('October Running Revenue', 'অক্টোবর চলতি রাজস্ব', lang)}
               </div>
-              <div style={{ fontSize: '20px', fontWeight: 900, color: '#1D4ED8', marginTop: '4px' }}>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--status-info-text)', marginTop: '4px' }}>
                 ৳ 18.2 Crore
               </div>
-              <div style={{ fontSize: '11px', color: '#2563EB', marginTop: '2px', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-info)', marginTop: '2px', fontWeight: 600 }}>
                 104.2% of Monthly Plan Target
               </div>
             </div>
 
             <div
               style={{
-                background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
-                border: '1px solid #6366F1',
+                background: 'linear-gradient(135deg, var(--status-purple-bg) 0%, var(--status-purple-bg) 100%)',
+                border: '1px solid var(--status-purple)',
                 borderRadius: '12px',
                 padding: '14px 16px',
               }}
             >
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#3730A3', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-purple-text)', textTransform: 'uppercase' }}>
                 {t('Capital Yield / ROI', 'বিনিয়োগ ফেরত অনুপাত', lang)}
               </div>
-              <div style={{ fontSize: '20px', fontWeight: 900, color: '#4338CA', marginTop: '4px' }}>
+              <div style={{ fontSize: '20px', fontWeight: 900, color: 'var(--status-purple-text)', marginTop: '4px' }}>
                 4.82x Multiplier
               </div>
-              <div style={{ fontSize: '11px', color: '#4F46E5', marginTop: '2px', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-purple)', marginTop: '2px', fontWeight: 600 }}>
                 OneOps Digital ROI Verified
               </div>
             </div>
@@ -286,39 +286,39 @@ export default function ExecutiveROIDossierModal({
           {/* Strategic Value Pillars Section */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={16} color="#D97706" />
+              <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={16} color="var(--status-warning)" />
                 <span>{t('4 Pillars of Realized Value & Loss Avoidance', 'সাশ্রয় ও ক্ষতি প্রতিরোধের ৪টি মূল স্তম্ভ', lang)}</span>
               </div>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>Pre-Audited for Board Review</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>Pre-Audited for Board Review</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '14px' }}>
               {/* Pillar 1 */}
               <div
                 style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-1)',
                   borderRadius: '10px',
                   padding: '14px 16px',
-                  borderLeft: '4px solid #D97706',
+                  borderLeft: '4px solid var(--status-warning)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: '#FEF3C7', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Truck size={16} />
                     </div>
                     <div>
-                      <strong style={{ fontSize: '13px', color: '#0F172A' }}>
+                      <strong style={{ fontSize: '13px', color: 'var(--text-1)' }}>
                         1. Fleet Telematics & Anti-Theft AI
                       </strong>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>Corporate Fleet Hub · 24 Heavy Road Tankers</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Corporate Fleet Hub · 24 Heavy Road Tankers</div>
                     </div>
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#B45309' }}>৳ 2,15,00,000</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--status-warning-text)' }}>৳ 2,15,00,000</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#475569', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
+                <p style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
                   Automated ultrasonic dip-rod telemetry and GPS route geo-fencing eliminated fuel pilferage across Baridhara HQ, Postogola Bridge, and Chittagong transit corridors. Zero variance maintained.
                 </p>
               </div>
@@ -326,28 +326,28 @@ export default function ExecutiveROIDossierModal({
               {/* Pillar 2 */}
               <div
                 style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-1)',
                   borderRadius: '10px',
                   padding: '14px 16px',
-                  borderLeft: '4px solid #10B981',
+                  borderLeft: '4px solid var(--status-success)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Gauge size={16} />
                     </div>
                     <div>
-                      <strong style={{ fontSize: '13px', color: '#0F172A' }}>
+                      <strong style={{ fontSize: '13px', color: 'var(--text-1)' }}>
                         2. Predictive SCADA & Loss Mitigation
                       </strong>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>Keraniganj Complex · Unit-1 & Unit-2 Columns</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Keraniganj Complex · Unit-1 & Unit-2 Columns</div>
                     </div>
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#047857' }}>৳ 1,48,50,000</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--status-success-text)' }}>৳ 1,48,50,000</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#475569', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
+                <p style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
                   Automated cooling set-point trimming on vacuum distillation column C-102 prevented emergency shutdown during 5,000 MT/day peak refining, saving estimated 48 hours of plant downtime.
                 </p>
               </div>
@@ -355,28 +355,28 @@ export default function ExecutiveROIDossierModal({
               {/* Pillar 3 */}
               <div
                 style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-1)',
                   borderRadius: '10px',
                   padding: '14px 16px',
-                  borderLeft: '4px solid #4338CA',
+                  borderLeft: '4px solid var(--status-purple-solid-dark)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: '#EEF2FF', color: '#4338CA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ShieldCheck size={16} />
                     </div>
                     <div>
-                      <strong style={{ fontSize: '13px', color: '#0F172A' }}>
+                      <strong style={{ fontSize: '13px', color: 'var(--text-1)' }}>
                         3. Vendor Competitive Sourcing & Warranties
                       </strong>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>Central Procurement & Tender Board</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Central Procurement & Tender Board</div>
                     </div>
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#3730A3' }}>৳ 76,50,000</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--status-purple-text)' }}>৳ 76,50,000</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#475569', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
+                <p style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
                   Enforced mandatory 3-quote competitive bidding and 5% advance retention warranty terms across all major capital overhauls, achieving lowest compliant bids on Cummins generator spares.
                 </p>
               </div>
@@ -384,28 +384,28 @@ export default function ExecutiveROIDossierModal({
               {/* Pillar 4 */}
               <div
                 style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
+                  background: 'var(--surface-0)',
+                  border: '1px solid var(--border-1)',
                   borderRadius: '10px',
                   padding: '14px 16px',
-                  borderLeft: '4px solid #0284C7',
+                  borderLeft: '4px solid var(--status-info)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: '#E0F2FE', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: 'var(--status-info-bg)', color: 'var(--status-info)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <FileCheck2 size={16} />
                     </div>
                     <div>
-                      <strong style={{ fontSize: '13px', color: '#0F172A' }}>
+                      <strong style={{ fontSize: '13px', color: 'var(--text-1)' }}>
                         4. Tax Pre-Audit & BEFTN Early Rebates
                       </strong>
-                      <div style={{ fontSize: '11px', color: '#64748B' }}>Corporate Finance & Statutory Accounts</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Corporate Finance & Statutory Accounts</div>
                     </div>
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#0369A1' }}>৳ 42,50,000</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--status-info)' }}>৳ 42,50,000</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#475569', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
+                <p style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '10px', lineHeight: 1.5, margin: '10px 0 0' }}>
                   Rigorous pre-audit enforcement of Mushak-6.3 tax invoices, AIT adjustments, and 2% prompt vendor electronic disbursement discounts integrated with SAP S/4HANA FI-CO.
                 </p>
               </div>
@@ -414,13 +414,13 @@ export default function ExecutiveROIDossierModal({
 
           {/* Departmental Contributions Audit Ledger */}
           <div style={{ marginBottom: '18px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', marginBottom: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-1)', marginBottom: '10px' }}>
               {t('Departmental Savings Contribution Ledger (SAP Verified)', 'বিভাগীয় সাশ্রয় অডিট লেজার (এসএপি পরীক্ষিত)', lang)}
             </div>
-            <div style={{ overflowX: 'auto', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+            <div style={{ overflowX: 'auto', border: '1px solid var(--border-1)', borderRadius: '8px' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#F1F5F9', color: '#475569', fontWeight: 700, borderBottom: '1px solid #E2E8F0' }}>
+                  <tr style={{ background: 'var(--surface-2)', color: 'var(--text-2)', fontWeight: 700, borderBottom: '1px solid var(--border-1)' }}>
                     <th style={{ padding: '8px 12px' }}>Department</th>
                     <th style={{ padding: '8px 12px' }}>Division Head</th>
                     <th style={{ padding: '8px 12px' }}>Realized Savings</th>
@@ -429,32 +429,32 @@ export default function ExecutiveROIDossierModal({
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '9px 12px', fontWeight: 700, color: '#0F172A' }}>Plant Operations</td>
-                    <td style={{ padding: '9px 12px', color: '#475569' }}>Engr. Md. Harunur Rashid</td>
-                    <td style={{ padding: '9px 12px', fontWeight: 800, color: '#059669' }}>৳ 1,62,00,000</td>
-                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: '#64748B' }}>GL-4102-KER</td>
+                  <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '9px 12px', fontWeight: 700, color: 'var(--text-1)' }}>Plant Operations</td>
+                    <td style={{ padding: '9px 12px', color: 'var(--text-2)' }}>Engr. Md. Harunur Rashid</td>
+                    <td style={{ padding: '9px 12px', fontWeight: 800, color: 'var(--status-success)' }}>৳ 1,62,00,000</td>
+                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: 'var(--text-3)' }}>GL-4102-KER</td>
                     <td style={{ padding: '9px 12px' }}><span className="badge green" style={{ fontSize: '10px' }}>✓ 100% Certified</span></td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '9px 12px', fontWeight: 700, color: '#0F172A' }}>Transport & Heavy Fleet</td>
-                    <td style={{ padding: '9px 12px', color: '#475569' }}>Md. Kamruzzaman</td>
-                    <td style={{ padding: '9px 12px', fontWeight: 800, color: '#059669' }}>৳ 1,48,00,000</td>
-                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: '#64748B' }}>GL-5108-FLT</td>
+                  <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '9px 12px', fontWeight: 700, color: 'var(--text-1)' }}>Transport & Heavy Fleet</td>
+                    <td style={{ padding: '9px 12px', color: 'var(--text-2)' }}>Md. Kamruzzaman</td>
+                    <td style={{ padding: '9px 12px', fontWeight: 800, color: 'var(--status-success)' }}>৳ 1,48,00,000</td>
+                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: 'var(--text-3)' }}>GL-5108-FLT</td>
                     <td style={{ padding: '9px 12px' }}><span className="badge green" style={{ fontSize: '10px' }}>✓ 100% Certified</span></td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '9px 12px', fontWeight: 700, color: '#0F172A' }}>Corporate Finance</td>
-                    <td style={{ padding: '9px 12px', color: '#475569' }}>Farida Begum</td>
-                    <td style={{ padding: '9px 12px', fontWeight: 800, color: '#059669' }}>৳ 1,12,00,000</td>
-                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: '#64748B' }}>GL-7101-FIN</td>
+                  <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '9px 12px', fontWeight: 700, color: 'var(--text-1)' }}>Corporate Finance</td>
+                    <td style={{ padding: '9px 12px', color: 'var(--text-2)' }}>Farida Begum</td>
+                    <td style={{ padding: '9px 12px', fontWeight: 800, color: 'var(--status-success)' }}>৳ 1,12,00,000</td>
+                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: 'var(--text-3)' }}>GL-7101-FIN</td>
                     <td style={{ padding: '9px 12px' }}><span className="badge green" style={{ fontSize: '10px' }}>✓ 100% Certified</span></td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '9px 12px', fontWeight: 700, color: '#0F172A' }}>IT & Digital Systems</td>
-                    <td style={{ padding: '9px 12px', color: '#475569' }}>S. M. Mahbubur Rahman</td>
-                    <td style={{ padding: '9px 12px', fontWeight: 800, color: '#059669' }}>৳ 60,50,000</td>
-                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: '#64748B' }}>GL-5201-IT</td>
+                    <td style={{ padding: '9px 12px', fontWeight: 700, color: 'var(--text-1)' }}>IT & Digital Systems</td>
+                    <td style={{ padding: '9px 12px', color: 'var(--text-2)' }}>S. M. Mahbubur Rahman</td>
+                    <td style={{ padding: '9px 12px', fontWeight: 800, color: 'var(--status-success)' }}>৳ 60,50,000</td>
+                    <td style={{ padding: '9px 12px', fontFamily: 'monospace', color: 'var(--text-3)' }}>GL-5201-IT</td>
                     <td style={{ padding: '9px 12px' }}><span className="badge green" style={{ fontSize: '10px' }}>✓ 100% Certified</span></td>
                   </tr>
                 </tbody>
@@ -465,8 +465,8 @@ export default function ExecutiveROIDossierModal({
           {/* Cryptographic Auditor Seal */}
           <div
             style={{
-              background: '#F0FDF4',
-              border: '1px solid #86EFAC',
+              background: 'var(--status-success-bg)',
+              border: '1px solid var(--status-success-bright)',
               borderRadius: '8px',
               padding: '10px 14px',
               display: 'flex',
@@ -477,12 +477,12 @@ export default function ExecutiveROIDossierModal({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle2 size={18} color="#16A34A" />
+              <CheckCircle2 size={18} color="var(--status-success)" />
               <div>
-                <strong style={{ fontSize: '12px', color: '#166534' }}>
+                <strong style={{ fontSize: '12px', color: 'var(--status-success-text)' }}>
                   Audited & Digitally Sealed by Corporate Secretariat
                 </strong>
-                <div style={{ fontSize: '10.5px', color: '#15803D' }}>
+                <div style={{ fontSize: '10.5px', color: 'var(--status-success-text)' }}>
                   Hash: SHA256-BOGCL-ROI-2026-OCT-88A9213F982C • SAP Connector Live Verified
                 </div>
               </div>
@@ -498,8 +498,8 @@ export default function ExecutiveROIDossierModal({
           className="modal-footer"
           style={{
             padding: '14px 24px',
-            background: '#F8FAFC',
-            borderTop: '1px solid #E2E8F0',
+            background: 'var(--surface-0)',
+            borderTop: '1px solid var(--border-1)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',

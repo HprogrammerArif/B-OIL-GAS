@@ -10,7 +10,7 @@ interface SparklineProps {
 
 export default function Sparkline({
   data,
-  color = '#A51C30',
+  color = 'var(--brand-crimson)',
   width = 84,
   height = 26,
   strokeWidth = 2,

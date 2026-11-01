@@ -118,7 +118,7 @@ export default function CommandPalette({
           title: `${f.fileNo}: ${f.title} (${f.amount})`,
           titleBn: `${f.fileNo}: ${f.title}`,
           category: 'Live Records',
-          icon: <FileSignature size={15} color="#A51C30" />,
+          icon: <FileSignature size={15} color="var(--brand-crimson)" />,
           action: () => {
             onNavigate('notesheet');
             onClose();
@@ -138,7 +138,7 @@ export default function CommandPalette({
           title: `${a.tag}: ${a.name}`,
           titleBn: `${a.tag}: ${a.name}`,
           category: 'Live Records',
-          icon: <Wrench size={15} color="#0369A1" />,
+          icon: <Wrench size={15} color="var(--status-info)" />,
           action: () => {
             onNavigate('asset');
             onClose();
@@ -157,7 +157,7 @@ export default function CommandPalette({
               title: `${r.id}: Car Booking — ${r.from} to ${r.to}`,
               titleBn: `${r.id}: গাড়ির আবেদন — ${r.from} হতে ${r.to}`,
               category: 'Live Records',
-              icon: <Truck size={15} color="#059669" />,
+              icon: <Truck size={15} color="var(--status-success)" />,
               action: () => {
                 onNavigate('fleet');
                 onClose();
@@ -173,7 +173,7 @@ export default function CommandPalette({
               title: `${r.id}: Assigned Trip — ${r.from} to ${r.to}`,
               titleBn: `${r.id}: নির্ধারিত ট্রিপ — ${r.from} হতে ${r.to}`,
               category: 'Live Records',
-              icon: <Truck size={15} color="#059669" />,
+              icon: <Truck size={15} color="var(--status-success)" />,
               action: () => {
                 onNavigate('fleet');
                 onClose();
@@ -187,7 +187,7 @@ export default function CommandPalette({
             title: `${v.plate}: ${v.model} (${v.driverName || 'Standby Pool'})`,
             titleBn: `${v.plate}: ${v.model}`,
             category: 'Live Records',
-            icon: <Truck size={15} color="#0369A1" />,
+            icon: <Truck size={15} color="var(--status-info)" />,
             action: () => {
               onNavigate('fleet');
               onClose();
@@ -204,7 +204,7 @@ export default function CommandPalette({
           title: `${l.refNo}: ${l.title} (${l.daysLeft} days left)`,
           titleBn: `${l.refNo}: ${l.titleBn}`,
           category: 'Live Records',
-          icon: <ShieldCheck size={15} color="#D97706" />,
+          icon: <ShieldCheck size={15} color="var(--status-warning)" />,
           action: () => {
             onNavigate('compliance');
             onClose();
@@ -220,7 +220,7 @@ export default function CommandPalette({
           title: `${emp.name} (${emp.id}) — ${emp.designation}`,
           titleBn: `${emp.nameBn || emp.name} (${emp.id})`,
           category: 'Live Records',
-          icon: <Users size={15} color="#7C3AED" />,
+          icon: <Users size={15} color="var(--status-purple)" />,
           action: () => {
             onNavigate('workforce');
             onClose();

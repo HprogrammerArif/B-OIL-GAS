@@ -48,21 +48,21 @@ export default function FleetNotificationsDrawer({
   const getNotifIcon = (type: FleetNotification['type']) => {
     switch (type) {
       case 'assignment':
-        return <Car size={16} color="#2563EB" />;
+        return <Car size={16} color="var(--status-info)" />;
       case 'requisition_created':
-        return <UserCheck size={16} color="#B45309" />;
+        return <UserCheck size={16} color="var(--status-warning-text)" />;
       case 'gate_out':
-        return <Shield size={16} color="#059669" />;
+        return <Shield size={16} color="var(--status-success)" />;
       case 'gate_in':
-        return <CheckCircle2 size={16} color="#10B981" />;
+        return <CheckCircle2 size={16} color="var(--status-success)" />;
       case 'chat_message':
-        return <MessageSquare size={16} color="#7C3AED" />;
+        return <MessageSquare size={16} color="var(--status-purple)" />;
       case 'driver_status':
         return <span style={{ fontSize: '14px' }}>💊</span>;
       case 'maintenance':
-        return <Wrench size={16} color="#D97706" />;
+        return <Wrench size={16} color="var(--status-warning)" />;
       default:
-        return <Bell size={16} color="#2563EB" />;
+        return <Bell size={16} color="var(--status-info)" />;
     }
   };
 
@@ -85,8 +85,8 @@ export default function FleetNotificationsDrawer({
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-          color: '#fff',
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
+          color: 'var(--text-on-brand)',
           padding: '14px 18px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -103,13 +103,13 @@ export default function FleetNotificationsDrawer({
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Bell size={17} color="#F87171" />
+              <Bell size={17} color="var(--status-danger-bright)" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#F8FAFC' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-inverse)' }}>
                 {t('Fleet Logistics Notifications', 'ফ্লিট নোটিফিকেশন ও অ্যালার্ট', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '1px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '1px' }}>
                 {unreadCount} {t('Unread Activity Alerts', 'টি নতুন নোটিফিকেশন', lang)}
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function FleetNotificationsDrawer({
                 onClick={handleMarkAllRead}
                 style={{
                   fontSize: '10.5px',
-                  color: '#93C5FD',
+                  color: 'var(--status-info-bright)',
                   borderColor: 'rgba(255,255,255,0.2)',
                   padding: '4px 8px',
                   display: 'flex',
@@ -136,7 +136,7 @@ export default function FleetNotificationsDrawer({
             )}
             <button
               className="modal-close"
-              style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '28px', height: '28px' }}
+              style={{ color: 'var(--text-on-brand)', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '28px', height: '28px' }}
               onClick={onClose}
             >
               ×
@@ -146,8 +146,8 @@ export default function FleetNotificationsDrawer({
 
         {/* Filter Pills */}
         <div style={{
-          background: '#F8FAFC',
-          borderBottom: '1px solid #E2E8F0',
+          background: 'var(--surface-0)',
+          borderBottom: '1px solid var(--border-1)',
           padding: '8px 14px',
           display: 'flex',
           gap: '6px',
@@ -170,9 +170,9 @@ export default function FleetNotificationsDrawer({
                 fontSize: '10.5px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                border: filter === f.id ? '1.5px solid var(--brand-crimson)' : '1px solid #CBD5E1',
-                background: filter === f.id ? 'var(--brand-crimson)' : '#fff',
-                color: filter === f.id ? '#fff' : '#475569',
+                border: filter === f.id ? '1.5px solid var(--brand-crimson)' : '1px solid var(--border-2)',
+                background: filter === f.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
+                color: filter === f.id ? 'var(--text-on-brand)' : 'var(--text-2)',
               }}
             >
               {f.label}
@@ -191,8 +191,8 @@ export default function FleetNotificationsDrawer({
           gap: '10px',
         }}>
           {filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '35px 10px', color: '#94A3B8' }}>
-              <Bell size={28} color="#CBD5E1" style={{ margin: '0 auto 8px' }} />
+            <div style={{ textAlign: 'center', padding: '35px 10px', color: 'var(--text-muted)' }}>
+              <Bell size={28} color="var(--text-inverse-2)" style={{ margin: '0 auto 8px' }} />
               <div style={{ fontSize: '12.5px', fontWeight: 600 }}>
                 {t('No notifications found in this category.', 'এই ক্যাটাগরিতে কোনো নোটিফিকেশন নেই।', lang)}
               </div>
@@ -203,8 +203,8 @@ export default function FleetNotificationsDrawer({
                 key={n.id}
                 onClick={() => markNotificationRead(n.id)}
                 style={{
-                  border: n.unread ? '1.5px solid #93C5FD' : '1px solid #E2E8F0',
-                  background: n.unread ? '#EFF6FF' : '#fff',
+                  border: n.unread ? '1.5px solid var(--status-info-bright)' : '1px solid var(--border-1)',
+                  background: n.unread ? 'var(--status-info-bg)' : 'var(--surface-1)',
                   borderRadius: '9px',
                   padding: '10px 12px',
                   display: 'flex',
@@ -219,7 +219,7 @@ export default function FleetNotificationsDrawer({
                   width: '32px',
                   height: '32px',
                   borderRadius: '6px',
-                  background: n.unread ? '#DBEAFE' : '#F1F5F9',
+                  background: n.unread ? 'var(--status-info-bg)' : 'var(--surface-2)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -232,15 +232,15 @@ export default function FleetNotificationsDrawer({
                 {/* Content */}
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '12.5px', color: '#0F172A' }}>
+                    <div style={{ fontWeight: 800, fontSize: '12.5px', color: 'var(--text-1)' }}>
                       {n.title}
                     </div>
-                    <span style={{ fontSize: '10px', color: '#94A3B8', fontWeight: 600 }}>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>
                       {n.time}
                     </span>
                   </div>
 
-                  <p style={{ margin: '3px 0 6px 0', fontSize: '11.5px', color: '#475569', lineHeight: '1.4' }}>
+                  <p style={{ margin: '3px 0 6px 0', fontSize: '11.5px', color: 'var(--text-2)', lineHeight: '1.4' }}>
                     {n.message}
                   </p>
 
@@ -249,7 +249,7 @@ export default function FleetNotificationsDrawer({
                     {n.requisitionId && onSelectRequisition && (
                       <button
                         className="btn-sm-ghost"
-                        style={{ fontSize: '10px', padding: '2px 7px', color: '#2563EB', borderColor: '#BFDBFE', background: '#fff' }}
+                        style={{ fontSize: '10px', padding: '2px 7px', color: 'var(--status-info)', borderColor: 'var(--status-info-border)', background: 'var(--surface-1)' }}
                         onClick={(e) => {
                           e.stopPropagation();
                           markNotificationRead(n.id);
@@ -265,7 +265,7 @@ export default function FleetNotificationsDrawer({
                     {n.requisitionId && onOpenChat && (
                       <button
                         className="btn-sm-ghost"
-                        style={{ fontSize: '10px', padding: '2px 7px', color: '#7C3AED', borderColor: '#DDD6FE', background: '#fff' }}
+                        style={{ fontSize: '10px', padding: '2px 7px', color: 'var(--status-purple)', borderColor: 'var(--status-purple-border)', background: 'var(--surface-1)' }}
                         onClick={(e) => {
                           e.stopPropagation();
                           markNotificationRead(n.id);
@@ -286,7 +286,7 @@ export default function FleetNotificationsDrawer({
                     width: '8px',
                     height: '8px',
                     borderRadius: '50%',
-                    background: '#2563EB',
+                    background: 'var(--status-info-solid)',
                     position: 'absolute',
                     top: '12px',
                     right: '12px',
