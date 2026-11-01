@@ -1,3 +1,42 @@
 ---
-alwaysApply: true
+description: Backend (server/) conventions for Express 5 + Prisma + Redis + BullMQ
+globs: server/**
+alwaysApply: false
 ---
+
+# Backend Rules (`server/`)
+
+Spec: `docs/platform/01_BACKEND_SPECIFICATION.md`, standards: `docs/platform/10_CODING_STANDARDS_AND_CONVENTIONS.md`.
+
+## Module layout (mandatory)
+`src/modules/<module>/<module>.{router,controller,service,repository,schemas,policies,events,mapper}.ts` + `__tests__/`.
+- Controllers: parse → call service → return envelope. No Prisma, no business logic.
+- Services: business rules (doc 06), one transaction per use case, call engines (`src/engines/*`).
+- Repositories: Prisma only, explicit `select`, apply `ScopeFilter`, return `null`/arrays (never throw `AppError`).
+
+## Request pipeline
+`authenticate` → `authorize('module:action')` → `validate({params, query, body})` (zod) → controller.
+Every route declares a permission key from doc 03 Appendix A. Never skip `authorize` on a mutating route.
+
+## Responses & errors
+- Success: `{ data, meta? }`. Errors: throw `AppError` subclasses from `src/core/errors.ts`; never `res.status(500).json(...)` by hand.
+- Invalid lifecycle moves throw `InvalidStateTransitionError(from, to)` (409).
+- Money: `Prisma.Decimal` in, string out via mapper. Dates: UTC ISO out; `Asia/Dhaka` only for business-day math.
+
+## Data
+- Soft delete via Prisma extension; never hard-delete audited models.
+- Reference numbers only via `sequence.next('PREFIX')` inside the creating transaction.
+- New list query on a large table → add index in migration and attach `EXPLAIN ANALYZE` to the PR.
+- Migrations: expand → backfill → contract. No destructive migration without approval.
+
+## Async & realtime
+- Anything > 300 ms (PDF, AV scan, exports, roll-ups, fan-out to many users) goes to a BullMQ job with a deterministic `jobId`; processors must be idempotent.
+- Emit Socket.IO events through `src/core/realtime` helpers after the DB transaction commits, never inside it.
+
+## Logging & security
+- `logger.child({ module })`; never log tokens, passwords, OTPs, NID, raw request bodies.
+- Validate every input with zod; no raw SQL string interpolation (`$queryRaw` tagged template only).
+
+## Tests
+- Each endpoint: happy path + authz denial + validation failure (Vitest + Supertest + Testcontainers).
+- Services with rules from doc 06: unit tests referencing the `BR-xx-nn` id in the test name.

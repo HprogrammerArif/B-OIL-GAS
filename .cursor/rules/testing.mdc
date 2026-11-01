@@ -1,0 +1,28 @@
+---
+description: Testing conventions for server, frontend and mobile test files
+globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/__tests__/**, **/e2e/**, **/.maestro/**
+alwaysApply: false
+---
+
+# Testing Rules
+
+- Name tests after behaviour, and cite the rule when one exists: `it('BR-14-03 expires a seat offer after 48 h', …)`.
+- Arrange with factories (`test/factories/*`), never with raw JSON copied from fixtures; one assertion topic per test.
+- No sleeps: use fake timers (`vi.useFakeTimers`) or await the condition.
+
+## Server (Vitest)
+- Unit tests mock repositories/engines, not Prisma internals.
+- Integration tests use Supertest against `createApp()` with Testcontainers Postgres + Redis; each endpoint has happy path, authz denial (403/404 by scope) and validation (422) cases.
+- Assert on `error.code`, not on message text.
+
+## Frontend (Vitest + Testing Library + MSW)
+- Render through `renderWithProviders` (store + router + i18n); query by role/label, not by class or test id unless unavoidable.
+- MSW handlers live in `src/test/msw/handlers/<module>.ts` and return the API envelope shape.
+- Playwright e2e only for the critical paths in doc 04; keep them data-independent via seeded personas.
+
+## Mobile (jest-expo)
+- Mock native modules (`expo-location`, `expo-camera`, `expo-secure-store`) in `jest.setup.ts`; never call real device APIs in tests.
+- Offline-queue tests cover enqueue, replay order, and 409 handling.
+
+## Coverage gates
+- server ≥ 80 % (auth/engines ≥ 90 %), frontend ≥ 70 %, app ≥ 70 %; do not lower thresholds to pass CI.
