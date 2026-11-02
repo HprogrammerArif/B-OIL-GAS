@@ -165,14 +165,7 @@ export default function Topbar({
           style={canSeeSync ? undefined : { cursor: 'default' }}
           title={canSeeSync ? t('View integration status', 'ইন্টিগ্রেশন স্ট্যাটাস দেখুন', lang) : undefined}
         >
-          {canSeeSync && (
-            <>
-              <div className="telemetry-sap">
-                <span className="sap-label">{t('Integrations', 'ইন্টিগ্রেশন', lang)}</span>
-              </div>
-              <span className="telemetry-divider telemetry-hide-mobile" />
-            </>
-          )}
+          
           <div className="telemetry-clock telemetry-hide-mobile">
             <Clock size={11} className="clock-icon" />
             <span className="clock-time">{currentTime}</span>
