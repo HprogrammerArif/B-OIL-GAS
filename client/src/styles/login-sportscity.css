@@ -1,0 +1,427 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BOGCL OneOps — Minimal Command Centre Login (Bashundhara Sports City Style)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.sc-login-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  background-color: #0B101D;
+  color: #FFFFFF;
+  font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LEFT SIDE: FULL-BLEED CINEMATIC HERO (AERIAL NIGHT REFINERY)
+   ───────────────────────────────────────────────────────────────────────────── */
+.sc-hero-backdrop {
+  flex: 1 1 auto;
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(11, 16, 29, 0.35) 0%, rgba(11, 16, 29, 0.75) 100%),
+                    url('/bogcl-refinery-night.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 52px;
+  overflow: hidden;
+}
+
+.sc-hero-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 40%, rgba(186, 28, 55, 0.2) 0%, transparent 60%),
+              linear-gradient(90deg, rgba(11, 16, 29, 0.4) 0%, transparent 60%, rgba(11, 16, 29, 0.95) 100%);
+  pointer-events: none;
+}
+
+/* Hero Top Branding Badge */
+.sc-brand-badge-box {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sc-brand-badge-emblem {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.sc-brand-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.sc-brand-logo-text strong {
+  font-family: var(--font-display, inherit);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #1A365D;
+}
+
+.sc-brand-logo-text span {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #C53030;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Center Hero Typography */
+.sc-hero-center {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24px;
+  max-width: 640px;
+}
+
+.sc-command-tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #E5B358;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.sc-hero-title {
+  font-family: var(--font-display, 'Impact', 'Trebuchet MS', sans-serif);
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 1.5px;
+  color: #E5B358;
+  text-transform: uppercase;
+  margin: 0 0 14px 0;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8), 0 0 40px rgba(229, 179, 88, 0.25);
+}
+
+.sc-hero-tagline {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+/* Hero Bottom Navigation Strip */
+.sc-hero-footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.8px;
+}
+
+.sc-hero-footer span.bullet {
+  color: #E5B358;
+  opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RIGHT SIDE: MINIMAL COMMAND CENTRE LOGIN PANEL (400px wide)
+   ───────────────────────────────────────────────────────────────────────────── */
+.sc-login-panel {
+  width: 400px;
+  min-width: 360px;
+  max-width: 440px;
+  background-color: #0B101D;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 5;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Header */
+.sc-panel-header {
+  margin-bottom: 20px;
+}
+
+.sc-panel-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sc-staff-title {
+  font-family: var(--font-display, inherit);
+  font-size: 24px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.sc-lang-toggle-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.sc-lang-toggle-btn:hover {
+  border-color: #E5B358;
+  color: #E5B358;
+}
+
+.sc-staff-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Form */
+.sc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sc-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  color: #FCA5A5;
+  font-size: 11.5px;
+}
+
+.sc-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sc-input-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sc-input-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.sc-input-forgot {
+  font-size: 11px;
+  color: #E5B358;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sc-input-forgot:hover {
+  text-decoration: underline;
+}
+
+.sc-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sc-text-input {
+  width: 100%;
+  background: #182234;
+  border: 1px solid #28364E;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-size: 13px;
+  padding: 9px 12px;
+  transition: all 0.15s ease;
+}
+
+.sc-text-input:focus {
+  border-color: #E5B358;
+  box-shadow: 0 0 0 2px rgba(229, 179, 88, 0.2);
+  outline: none;
+  background: #1C283D;
+}
+
+.sc-pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.sc-pw-toggle:hover {
+  color: #FFFFFF;
+}
+
+/* Primary Action CTA Button (Sports City Gold Bar) */
+.sc-submit-btn {
+  width: 100%;
+  padding: 11px 16px;
+  background: linear-gradient(180deg, #E5B358 0%, #C48E2E 100%);
+  color: #0B101D;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-display, inherit);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 4px 18px rgba(229, 179, 88, 0.35);
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+
+.sc-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #F0C36D 0%, #D49D38 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(229, 179, 88, 0.5);
+}
+
+.sc-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DEMO LOGIN (2-COLUMN GRID, EXACTLY LIKE SPORTS CITY)
+   ───────────────────────────────────────────────────────────────────────────── */
+.sc-demo-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sc-demo-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sc-demo-heading {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.sc-demo-pw-badge {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sc-demo-pw-badge strong {
+  color: #E5B358;
+  font-family: monospace;
+}
+
+.sc-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.sc-demo-btn {
+  background: #151E2E;
+  border: 1px solid #28364E;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #E2E8F0;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-demo-btn:hover {
+  background: #1C293F;
+  border-color: #E5B358;
+  color: #FFFFFF;
+}
+
+.sc-demo-btn.active {
+  background: rgba(229, 179, 88, 0.14);
+  border-color: #E5B358;
+  color: #E5B358;
+  box-shadow: 0 0 10px rgba(229, 179, 88, 0.2);
+}
+
+.sc-demo-btn.span-2 {
+  grid-column: span 2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sc-login-wrapper {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sc-hero-backdrop {
+    flex: none;
+    min-height: 280px;
+    padding: 24px 20px;
+  }
+  .sc-hero-title {
+    font-size: 32px;
+  }
+  .sc-login-panel {
+    width: 100%;
+    max-width: 100%;
+    min-width: auto;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 28px 20px;
+  }
+}
+

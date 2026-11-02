@@ -494,6 +494,10 @@ flowchart TD
 
 ## 8. Historical Changelog & Mutation Ledger
 
+* **2026-11-02 [REDESIGNED]:** Redesigned `LoginPage.tsx` into an ultra-clean, minimal Command Centre layout inspired directly by the Bashundhara Sports City reference architecture. Generated a fresh, cinematic aerial twilight/night photograph of the illuminated petroleum refinery and terminal (`bogcl-refinery-night.jpg`). Left hero panel displays metallic gold typography, command centre tag, and clean category footer; right panel features a focused dark staff access console with golden "ENTER COMMAND CENTRE" CTA, 2-column minimal demo buttons, and the cinematic telemetry loader.
+* **2026-11-02 [MODIFIED]:** Restored cinematic `TelemetryLoader.tsx` sign-in loading simulation overlay with animated telemetry stream, percentage counter, and persona pill before committing authenticated session.
+* **2026-11-02 [MODIFIED]:** Updated role demo selection on `LoginPage.tsx` so clicking any of the 7 roles auto-fills the login identifier (email) and password (`bogcl2026`), highlights the active role pill, and allows signing in via the primary "Sign In" button with full authentication validation.
+* **2026-11-02 [MODIFIED]:** Streamlined `LoginPage.tsx` compactness (reduced vertical padding across header, form fields, and footer to fit standard viewports without scrolling); added role demo buttons for all 7 roles (`chairman`, `plant_gm`, `hr_admin`, `transport_admin`, `hod`, `employee`, `driver`) at the bottom of the auth card.
 * **2026-10-31 [INITIALIZED]:** Created `PROJECT_MASTER_STATUS_AND_FEATURE_LEDGER.md` capturing all 16 core business modules, 7 persona dashboards, and 67k LOC architecture.
 * **2026-10-30 [ADDED]:** Implemented `GuestView.tsx` with VIP protocol passes, emergency muster roll, and parking reservation logic.
 * **2026-10-30 [ADDED]:** Implemented `AssetLifecycleStepper.tsx` and ISO 55001 EAM lifecycle tracking with LOTO safety permit management.

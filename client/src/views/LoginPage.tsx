@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Lang, ROLE_META, t } from '../types';
+import { AppRole, Lang, ROLE_META, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { sessionStore } from '../auth/session';
+import { sessionStore, resolveIdentifier } from '../auth/session';
+import { sha256Hex } from '../lib/hash';
+import TelemetryLoader from '../components/TelemetryLoader';
+import '../styles/login-sportscity.css';
 import {
-  Lock, Mail, ArrowRight, ShieldCheck,
-  Globe, Eye, EyeOff, AlertCircle, Loader2
+  Globe, Eye, EyeOff, AlertCircle, Loader2, ArrowRight
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -14,49 +16,87 @@ interface LoginPageProps {
 
 type FormError = 'invalid_credentials' | 'locked' | 'missing' | null;
 
+const DEMO_PASSWORD_SHA256 = '95665bd975b309827cbc17b25a0776ba447701bd70909ae63ba8da93560de34d';
+
 const ERROR_TEXT: Record<Exclude<FormError, null>, { en: string; bn: string }> = {
   missing: {
-    en: 'Enter your work email or employee ID and password.',
-    bn: 'আপনার অফিস ইমেইল বা কর্মী আইডি এবং পাসওয়ার্ড লিখুন।',
+    en: 'Enter your email or employee ID and password.',
+    bn: 'আপনার ইমেইল বা আইডি এবং পাসওয়ার্ড লিখুন।',
   },
-invalid_credentials  : {
-    en: 'The email/ID or password you entered is incorrect.',
+  invalid_credentials: {
+    en: 'Incorrect email/ID or password.',
     bn: 'ইমেইল/আইডি অথবা পাসওয়ার্ড সঠিক নয়।',
   },
   locked: {
-    en: 'Too many failed attempts. Contact IT Support Desk (Ext. 4401) to unlock your account.',
-    bn: 'অনেকবার ভুল চেষ্টা হয়েছে। অ্যাকাউন্ট আনলক করতে আইটি সাপোর্ট ডেস্কে (Ext. 4401) যোগাযোগ করুন।',
+    en: 'Account locked. Contact IT Support Desk (Ext. 4401).',
+    bn: 'অ্যাকাউন্ট লক করা হয়েছে। আইটি সহায়তায় (Ext. 4401) কল করুন।',
   },
 };
+
+interface DemoRoleItem {
+  role: AppRole;
+  labelEn: string;
+  labelBn: string;
+  isSpan2?: boolean;
+}
+
+const DEMO_ROLES: DemoRoleItem[] = [
+  { role: 'chairman',        labelEn: 'Chairman',        labelBn: 'চেয়ারম্যান' },
+  { role: 'plant_gm',        labelEn: 'Plant GM',        labelBn: 'প্ল্যান্ট জিএম' },
+  { role: 'hr_admin',        labelEn: 'HR Admin',        labelBn: 'এইচআর এডমিন' },
+  { role: 'transport_admin', labelEn: 'Transport Admin', labelBn: 'পরিবহন এডমিন' },
+  { role: 'hod',             labelEn: 'Finance HOD',     labelBn: 'অর্থ প্রধান' },
+  { role: 'employee',        labelEn: 'Sales Officer',   labelBn: 'সেলস অফিসার' },
+  { role: 'driver',          labelEn: 'Company Driver',  labelBn: 'কোম্পানি ড্রাইভার', isSpan2: true },
+];
 
 export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<FormError>(null);
+  const [telemetryRole, setTelemetryRole] = useState<AppRole | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || telemetryRole) return;
     if (!identifier.trim() || !password) {
       setError('missing');
       return;
     }
     setError(null);
     setIsSubmitting(true);
-    // Small delay so the state change reads as a real round-trip.
+
+    const role = resolveIdentifier(identifier);
+    const digest = await sha256Hex(password);
+    const isValid = role && digest === DEMO_PASSWORD_SHA256;
+
+    if (!isValid) {
+      setIsSubmitting(false);
+      setError('invalid_credentials');
+      setPassword('');
+      return;
+    }
+
+    // Launch the cinematic telemetry simulation
+    setTelemetryRole(role);
+  };
+
+  const handleTelemetryComplete = async () => {
     const [result] = await Promise.all([
-      sessionStore.login(identifier, password, rememberMe),
-      new Promise((r) => setTimeout(r, 650)),
+      sessionStore.login(identifier, password, true),
+      new Promise((r) => setTimeout(r, 150)),
     ]);
     setIsSubmitting(false);
+    setTelemetryRole(null);
+
     if (!result.ok) {
       setError(result.reason);
       setPassword('');
       return;
     }
+
     const user = sessionStore.getState().user;
     if (user) {
       showToast(
@@ -66,11 +106,15 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
     }
   };
 
-  const handleSso = () => {
+  const handleSelectRole = (r: AppRole) => {
+    const meta = ROLE_META[r];
+    setIdentifier(meta.email);
+    setPassword('bogcl2026');
+    if (error) setError(null);
     showToast(
       t(
-        'Office Account sign-in is available on the company network only.',
-        'অফিস অ্যাকাউন্ট সাইন-ইন শুধুমাত্র কোম্পানি নেটওয়ার্কে ব্যবহারযোগ্য।',
+        `Credentials loaded for ${meta.name} (${t(meta.label, meta.labelBn, lang)}). Click "Enter Command Centre" to proceed.`,
+        `${meta.nameBn} (${meta.labelBn})-এর তথ্য লোড করা হয়েছে। "কমান্ড সেন্টারে প্রবেশ" চাপুন।`,
         lang
       ),
       'info'
@@ -78,165 +122,241 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
   };
 
   return (
-    <div className={`login-screen${lang === 'bn' ? ' lang-bn' : ''}`}>
-      <header className="login-topbar">
-        <div className="login-brand-logo">
-          <div className="brand-emblem">B</div>
-          <div className="login-brand-title">
-            <h1>BASHUNDHARA OIL & GAS COMPANY LTD.</h1>
-            <p>{t('A Concern of Bashundhara Group • Company Operations Portal', 'বসুন্ধরা গ্রুপ — দেশ ও মানুষের কল্যাণে', lang)}</p>
+    <div className={`sc-login-wrapper${lang === 'bn' ? ' lang-bn' : ''}`}>
+      {/* ──────────────────────────────────────────────────────────────────
+          LEFT HERO: FULL-BLEED AERIAL REFINERY NIGHT PHOTOGRAPHY
+          ────────────────────────────────────────────────────────────────── */}
+      <section className="sc-hero-backdrop">
+        <header className="sc-brand-badge-box">
+          <div className="sc-brand-badge-emblem">
+            <div
+              style={{
+                width: '26px',
+                height: '26px',
+                borderRadius: '6px',
+                background: 'linear-gradient(135deg, #BA1C37 0%, #7A0C1E 100%)',
+                color: '#FFFFFF',
+                fontWeight: 900,
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              B
+            </div>
+            <div className="sc-brand-logo-text">
+              <strong>BOGCL</strong>
+              <span>OneOps</span>
+            </div>
           </div>
+        </header>
+
+        <div className="sc-hero-center">
+          <span className="sc-command-tag">
+            {t('COMMAND CENTRE', 'অপারেশনস কমান্ড সেন্টার', lang)}
+          </span>
+
+          <h1 className="sc-hero-title">
+            BASHUNDHARA<br />OIL & GAS
+          </h1>
+
+          <p className="sc-hero-tagline">
+            {t(
+              'One Platform. Complete Energy Operations.',
+              'একক প্ল্যাটফর্ম • সমন্বিত এনার্জি অপারেশনস।',
+              lang
+            )}
+          </p>
         </div>
 
-        <button
-          type="button"
-          className="btn-lang login-lang-btn"
-          onClick={onLangToggle}
-        >
-          <Globe size={14} />
-          <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
-        </button>
-      </header>
+        <footer className="sc-hero-footer">
+          <span>{t('Refining', 'পরিশোধন', lang)}</span>
+          <span className="bullet">•</span>
+          <span>{t('Storage', 'সংরক্ষণ', lang)}</span>
+          <span className="bullet">•</span>
+          <span>{t('Fleet', 'ফ্লিট', lang)}</span>
+          <span className="bullet">•</span>
+          <span>{t('Terminal', 'টার্মিনাল', lang)}</span>
+          <span className="bullet">•</span>
+          <span>{t('Compliance', 'কমপ্লায়েন্স', lang)}</span>
+        </footer>
+      </section>
 
-      <main className="login-body">
-        <div className="login-card-centered">
-          <div className="login-card-header">
-            <div className="brand-badge-ring">
-              <div className="brand-emblem-large">B</div>
-            </div>
-            <h2 className="login-main-title">
-              {t('Sign in to BOGCL OneOps', 'বসুন্ধরা ওয়ান-অপ্স পোর্টালে সাইন ইন করুন', lang)}
+      {/* ──────────────────────────────────────────────────────────────────
+          RIGHT SIDE: SLEEK MINIMAL COMMAND CENTRE PANEL (Sports City Style)
+          ────────────────────────────────────────────────────────────────── */}
+      <aside className="sc-login-panel">
+        <div className="sc-panel-header">
+          <div className="sc-panel-top-row">
+            <h2 className="sc-staff-title">
+              {t('Staff access', 'স্টাফ অ্যাক্সেস', lang)}
             </h2>
-            <p className="login-main-subtitle">
-              {t(
-                'Daily operations, approvals, vehicles, assets & staff services',
-                'দৈনন্দিন কার্যক্রম, অনুমোদন, পরিবহন, সম্পদ ও কর্মী সেবা পোর্টাল',
-                lang
-              )}
-            </p>
+
+            <button
+              type="button"
+              className="sc-lang-toggle-btn"
+              onClick={onLangToggle}
+              title={t('Toggle Language', 'ভাষা পরিবর্তন', lang)}
+            >
+              <Globe size={12} />
+              <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="login-form-clean" noValidate>
-            {error && (
-              <div className="login-error-banner" role="alert">
-                <AlertCircle size={15} />
-                <span>{t(ERROR_TEXT[error].en, ERROR_TEXT[error].bn, lang)}</span>
-              </div>
+          <p className="sc-staff-sub">
+            {t(
+              'Sign In to operate the live complex — or click a demo role below.',
+              'লাইভ প্ল্যাটফর্ম পরিচালনায় সাইন ইন করুন — অথবা নিচের ডেমো রোলে ক্লিক করুন।',
+              lang
             )}
+          </p>
+        </div>
 
-            <div className="form-group-clean">
-              <div className="label-with-link">
-                <label htmlFor="login-identifier">{t('Work Email or Employee ID', 'অফিস ইমেইল অথবা কর্মী আইডি', lang)}</label>
-              </div>
-              <div className="login-input-clean">
-                <Mail size={15} className="input-icon-clean" />
-                <input
-                  id="login-identifier"
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => { setIdentifier(e.target.value); if (error) setError(null); }}
-                  placeholder={t('name@bashundhara.com or EMP-0001', 'name@bashundhara.com অথবা EMP-0001', lang)}
-                  autoComplete="username"
-                  autoFocus
-                  disabled={isSubmitting}
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="sc-form" noValidate>
+          {error && (
+            <div className="sc-error-banner" role="alert">
+              <AlertCircle size={14} />
+              <span>{t(ERROR_TEXT[error].en, ERROR_TEXT[error].bn, lang)}</span>
             </div>
+          )}
 
-            <div className="form-group-clean">
-              <div className="label-with-link">
-                <label htmlFor="login-password">{t('Password', 'পাসওয়ার্ড', lang)}</label>
-                <a
-                  href="#forgot"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    showToast(
-                      t(
-                        'For password reset, call IT Support Desk at Ext. 4401.',
-                        'পাসওয়ার্ড রিসেটের জন্য আইটি সাপোর্ট ডেস্কে কল করুন: Ext. 4401',
-                        lang
-                      ),
-                      'info'
-                    );
-                  }}
-                  className="forgot-link-clean"
-                >
-                  {t('Forgot password?', 'পাসওয়ার্ড ভুলে গেছেন?', lang)}
-                </a>
-              </div>
-              <div className="login-input-clean">
-                <Lock size={15} className="input-icon-clean" />
-                <input
-                  id="login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
-                  autoComplete="current-password"
-                  disabled={isSubmitting}
-                />
-                <button
-                  type="button"
-                  className="pw-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  title={showPassword ? t('Hide password', 'পাসওয়ার্ড লুকান', lang) : t('Show password', 'পাসওয়ার্ড দেখান', lang)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="login-options-clean">
-              <label className="remember-checkbox-clean">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  disabled={isSubmitting}
-                />
-                <span>{t('Keep me signed in on this computer', 'এই ডিভাইসে সাইন-ইন মনে রাখুন', lang)}</span>
+          <div className="sc-input-group">
+            <div className="sc-input-label-row">
+              <label className="sc-input-label" htmlFor="sc-email">
+                {t('Email', 'ইমেইল', lang)}
               </label>
             </div>
-
-            <button type="submit" className="btn-login-primary" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={16} className="spin-anim" />
-                  <span>{t('Signing in…', 'প্রবেশ করা হচ্ছে…', lang)}</span>
-                </>
-              ) : (
-                <>
-                  <span>{t('Sign in', 'সাইন ইন', lang)}</span>
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </button>
-
-            <div className="login-divider-clean">
-              <span>{t('or', 'অথবা', lang)}</span>
+            <div className="sc-input-wrap">
+              <input
+                id="sc-email"
+                type="text"
+                className="sc-text-input"
+                value={identifier}
+                onChange={(e) => {
+                  setIdentifier(e.target.value);
+                  if (error) setError(null);
+                }}
+                placeholder={t('name@bashundhara.com or EMP-0001', 'name@bashundhara.com অথবা EMP-0001', lang)}
+                autoComplete="username"
+                autoFocus
+                disabled={isSubmitting || !!telemetryRole}
+              />
             </div>
+          </div>
 
-            <button type="button" className="btn-sso-clean" onClick={handleSso} disabled={isSubmitting}>
-              <ShieldCheck size={16} color="var(--brand-gold)" />
-              <span>{t('Sign in with Bashundhara Group Office Account', 'বসুন্ধরা গ্রুপ অফিস অ্যাকাউন্ট দিয়ে প্রবেশ করুন', lang)}</span>
-            </button>
-          </form>
-        </div>
-      </main>
+          <div className="sc-input-group">
+            <div className="sc-input-label-row">
+              <label className="sc-input-label" htmlFor="sc-password">
+                {t('Password', 'পাসওয়ার্ড', lang)}
+              </label>
+              <a
+                href="#forgot"
+                onClick={(e) => {
+                  e.preventDefault();
+                  showToast(
+                    t('For password reset, contact IT Support Desk at Ext. 4401.', 'পাসওয়ার্ড রিসেট করতে আইটি ডেস্কে (Ext. 4401) কল করুন।', lang),
+                    'info'
+                  );
+                }}
+                className="sc-input-forgot"
+              >
+                {t('Forgot?', 'ভুলে গেছেন?', lang)}
+              </a>
+            </div>
+            <div className="sc-input-wrap">
+              <input
+                id="sc-password"
+                type={showPassword ? 'text' : 'password'}
+                className="sc-text-input"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(null);
+                }}
+                autoComplete="current-password"
+                disabled={isSubmitting || !!telemetryRole}
+              />
+              <button
+                type="button"
+                className="sc-pw-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? t('Hide', 'লুকান', lang) : t('Show', 'দেখান', lang)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
 
-      <footer className="login-footer-clean">
-        <div>
-          © 2026 <strong>Bashundhara Oil & Gas Company Limited</strong>. {t('All rights reserved.', 'সর্বস্বত্ব সংরক্ষিত।', lang)}
+          <button
+            type="submit"
+            className="sc-submit-btn"
+            disabled={isSubmitting || !!telemetryRole}
+          >
+            {isSubmitting || !!telemetryRole ? (
+              <>
+                <Loader2 size={15} className="spin-anim" />
+                <span>{t('Authenticating…', 'যাচাই করা হচ্ছে…', lang)}</span>
+              </>
+            ) : (
+              <>
+                <span>{t('Enter Command Centre', 'কমান্ড সেন্টারে প্রবেশ করুন', lang)}</span>
+                <ArrowRight size={14} />
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* ──────────────────────────────────────────────────────────────
+            DEMO LOGIN (MINIMAL 2-COLUMN GRID LIKE SPORTS CITY)
+            ────────────────────────────────────────────────────────────── */}
+        <div className="sc-demo-section">
+          <div className="sc-demo-header-row">
+            <span className="sc-demo-heading">
+              {t('Demo Login', 'ডেমো লগইন', lang)}
+            </span>
+            <span className="sc-demo-pw-badge">
+              Password <strong>bogcl2026</strong>
+            </span>
+          </div>
+
+          <div className="sc-demo-grid">
+            {DEMO_ROLES.map(({ role: r, labelEn, labelBn, isSpan2 }) => {
+              const meta = ROLE_META[r];
+              const isSelected =
+                identifier.trim().toLowerCase() === meta.email.toLowerCase() ||
+                identifier.trim().toLowerCase() === meta.empId.toLowerCase();
+
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  className={`sc-demo-btn${isSpan2 ? ' span-2' : ''}${isSelected ? ' active' : ''}`}
+                  onClick={() => handleSelectRole(r)}
+                  title={t(
+                    `Load credentials for ${meta.name} (${meta.label})`,
+                    `${meta.nameBn} (${meta.labelBn})-এর তথ্য লোড করুন`,
+                    lang
+                  )}
+                  disabled={isSubmitting || !!telemetryRole}
+                >
+                  {t(labelEn, labelBn, lang)}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="login-footer-tags">
-          <span>{t('Secure connection', 'নিরাপদ সংযোগ', lang)}</span>
-          <span>•</span>
-          <span>{ROLE_META.chairman.siteLabel.split(',')[0]}</span>
-          <span>•</span>
-          <span>{t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)}</span>
-        </div>
-      </footer>
+      </aside>
+
+      {/* Cinematic Telemetry Loader Simulation */}
+      {telemetryRole && (
+        <TelemetryLoader
+          role={telemetryRole}
+          lang={lang}
+          onComplete={handleTelemetryComplete}
+        />
+      )}
     </div>
   );
 }
