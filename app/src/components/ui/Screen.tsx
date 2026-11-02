@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from "react";
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, StyleSheet, View, type ViewStyle } from "react-native";
-import { SafeAreaView, type Edge } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets, type Edge } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as ScreenCapture from "expo-screen-capture";
 import { useTranslation } from "react-i18next";
@@ -50,6 +50,7 @@ export function Screen({
 }: ScreenProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const showBack = back ?? router.canGoBack();
 
   useEffect(() => {
@@ -110,7 +111,14 @@ export function Screen({
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         {body}
         {footer ? (
-          <View style={[styles.footer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>{footer}</View>
+          <View
+            style={[
+              styles.footer,
+              { backgroundColor: theme.surface, borderTopColor: theme.border, paddingBottom: Math.max(insets.bottom, Spacing.lg) },
+            ]}
+          >
+            {footer}
+          </View>
         ) : null}
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -135,7 +143,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.lg,
     borderTopWidth: StyleSheet.hairlineWidth,
     gap: Spacing.sm,
   },

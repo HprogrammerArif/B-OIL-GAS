@@ -60,7 +60,7 @@ export const uiPersistConfig: PersistConfig<UiState> = {
 export const apiPersistConfig: PersistConfig<ApiSliceShape> = {
   key: "baseApi",
   storage: AsyncStorage,
-  whitelist: ["queries"],
+  whitelist: ["queries", "provided"],
   transforms: [apiWhitelistTransform],
   throttle: 1000,
 };

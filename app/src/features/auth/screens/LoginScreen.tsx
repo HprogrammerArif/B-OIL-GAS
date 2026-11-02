@@ -91,7 +91,7 @@ export function LoginScreen() {
         </SafeAreaView>
       </View>
 
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <KeyboardAvoidingView style={[styles.flex, styles.overlap]} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Text variant="h2">{t("welcome")}</Text>
@@ -184,7 +184,9 @@ const styles = StyleSheet.create({
   heroTop: { flexDirection: "row", justifyContent: "flex-end", paddingTop: Spacing.sm },
   langSwitch: { width: 120 },
   brandRow: { flexDirection: "row", alignItems: "center", gap: Spacing.md, marginTop: Spacing.xl },
-  scroll: { padding: Spacing.lg, marginTop: -Spacing.huge, gap: Spacing.lg, flexGrow: 1 },
+  /** Android paints by elevation, so the form needs to sit above the hero to overlap it. */
+  overlap: { marginTop: -Spacing.huge, zIndex: 1, elevation: 4 },
+  scroll: { padding: Spacing.lg, gap: Spacing.lg, flexGrow: 1 },
   card: {
     width: "100%",
     maxWidth: MaxContentWidth,

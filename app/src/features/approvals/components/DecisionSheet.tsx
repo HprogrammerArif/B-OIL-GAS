@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,8 +29,8 @@ const SUCCESS_KEY = { APPROVE: "decision.approved", RETURN: "decision.returned",
 export function DecisionSheet({ instance, decision, onClose, onDone }: DecisionSheetProps) {
   const { t } = useTranslation(["approvals", "common", "errors"]);
   const [act, { isLoading }] = useActOnApprovalMutation();
-  const [requestOtp, { isLoading: otpLoading, isSuccess: otpSent, reset: resetOtp }] = useRequestSignatureOtpMutation();
-  const [demoCode, setDemoCode] = useState<string | null>(null);
+  const [requestOtp, { data: otpData, isLoading: otpLoading, isSuccess: otpSent, reset: resetOtp }] = useRequestSignatureOtpMutation();
+  const demoCode = otpData?.demoCode ?? null;
   const step = instance.steps.find((s) => s.status === "ACTIVE");
   const needsOtp = decision === "APPROVE" && !!step?.requiresSignature;
   const group = presetGroupFor(instance.objectType);
@@ -46,7 +46,6 @@ export function DecisionSheet({ instance, decision, onClose, onDone }: DecisionS
   useEffect(() => {
     if (decision) {
       reset({ decision, comment: "", improvements: "", reasonCategory: "", otp: "", needsOtp });
-      setDemoCode(null);
       resetOtp();
     }
   }, [decision, needsOtp, reset, resetOtp]);
@@ -64,8 +63,7 @@ export function DecisionSheet({ instance, decision, onClose, onDone }: DecisionS
 
   const sendOtp = async () => {
     try {
-      const res = await requestOtp(instance.id).unwrap();
-      setDemoCode(res.demoCode ?? null);
+      await requestOtp(instance.id).unwrap();
       toast.info(t("decision.otpSent"));
     } catch (err) {
       toast.error(t(errorMessageKey(toApiError(err)) as "errors:generic"));

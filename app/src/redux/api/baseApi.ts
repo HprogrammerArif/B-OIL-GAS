@@ -89,8 +89,14 @@ export const baseApi = createApi({
   keepUnusedDataFor: 120,
   extractRehydrationInfo(action, { reducerPath }) {
     if (isRehydrate(action) && action.key === reducerPath && action.payload) {
-      // Persisted payload is the api slice itself (see redux/persist/config.ts).
-      return action.payload as never;
+      // Only `queries` and `provided` are persisted (redux/persist/config.ts); RTK Query's
+      // rehydrate handlers iterate every sub-slice, so the rest must exist (even if empty).
+      const p = action.payload;
+      return {
+        queries: p.queries ?? {},
+        mutations: {},
+        provided: p.provided ?? { tags: {}, keys: {} },
+      } as never;
     }
     return undefined;
   },
