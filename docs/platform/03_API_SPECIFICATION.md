@@ -296,7 +296,7 @@ Access rule: a file is readable if the caller may read **any** `Attachment` owne
 | GET | `/notifications/unread-count` | `{ "total": 7, "critical": 1, "byModule": { "workflow": 3, "parcels": 1 } }` (cached 10 s; also pushed via socket). |
 | POST | `/notifications/{id}/read` | Sets `readAt`. Idempotent. |
 | POST | `/notifications/read-all` | Body `{ "before": "<ISO>" }` optional. |
-| POST | `/notifications/{id}/ack` | Required when `ackRequired=true` (CRITICAL). Sets `ackedAt`; audit `NOTIFICATION_ACKED`. |
+| POST | `/notifications/{id}/ack` | Required when `ackRequired=true` (CRITICAL). Sets `ackedAt`; audit `NOTIFICATION_ACKED`. When `data.objectType = Notice`, also sets the caller's `NoticeReceipt.ackedAt` (and acknowledging the notice acks its notification), so the blocking modal and the notice never disagree. Reading the notice does not clear a pending `ackRequired` notification. |
 | GET/PATCH | `/notifications/preferences` | Same resource as `/me/preferences.notifications`. |
 
 Notification record (wire):
@@ -494,12 +494,13 @@ Module dir `notices`. Models `Notice`, `NoticeAudience`, `NoticeReceipt`, `Broad
 | :--- | :--- | :--- | :--- | :--- |
 | GET | `/notices` | `notices:read` | audience-resolved | Feed of notices visible to me (PUBLISHED, not expired, audience match) + my own drafts if `notices:create`. Filters `?category=`, `?isPinned=true`, `?unreadOnly=true`, `?requiresAck=true`, `?status=` (authors/admins), `?q=` (title/titleBn/body). Sort `-isPinned,-publishAt` default. Each item embeds `receipt: { readAt, ackedAt }`. |
 | POST | `/notices` | `notices:create` | — | Create DRAFT. |
+| GET | `/notices/compose-options` | `notices:create` or `notices:publish` | caller's publish scope | `{ categories: NoticeCategory[], audiences: [{ type, refId, label, labelBn, recipientCount }], maxPinned, pinnedCount }` — what the caller may publish (categories by role; audiences limited by the `notices:publish` scope: COMPANY all, SITE own site + own department, DEPARTMENT own department). Clients build the compose form from this instead of hardcoding role rules. |
 | GET | `/notices/{id}` | `notices:read` | audience | Full record + `audiences[]` + counts; marks `NoticeReceipt.readAt` on first read by a recipient. |
 | PATCH | `/notices/{id}` | `notices:update` (author or `notices:manage`) | — | DRAFT/SCHEDULED only; versioned. |
 | POST | `/notices/{id}/publish` | `notices:publish` | — | DRAFT/SCHEDULED → PUBLISHED (or SUBMITTED to workflow when approval required). |
 | POST | `/notices/{id}/schedule` | `notices:publish` | — | `{ publishAt }` future → SCHEDULED; job publishes at time. |
 | POST | `/notices/{id}/archive` | `notices:manage` | — | PUBLISHED/EXPIRED → ARCHIVED. |
-| POST | `/notices/{id}/pin` / `/unpin` | `notices:manage` | — | Toggle `isPinned` (max 5 pinned company-wide → `POLICY_VIOLATION` `PIN_LIMIT`). |
+| POST | `/notices/{id}/pin` / `/unpin` | `notices:manage` | — | Toggle `isPinned` (max 5 pinned company-wide → `CONFLICT` with `details[].rule = PIN_LIMIT`, BR-01-06). |
 | POST | `/notices/{id}/ack` | `notices:read` (recipient) | self | Sets `NoticeReceipt.ackedAt`; increments `ackCount`. `POLICY_VIOLATION` `ACK_NOT_REQUIRED` if `requiresAck=false`. |
 | GET | `/notices/{id}/receipts` | `notices:manage` or author | — | Per-user read/ack list, `?acked=false` for chase list; CSV `?format=csv`. |
 | GET | `/notices/{id}/pdf` | `notices:read` | audience | Letterhead PDF (rendered, cached as `FileObject`). |

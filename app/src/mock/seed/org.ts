@@ -27,6 +27,7 @@ interface PersonSeed {
   name: string;
   nameBn: string;
   shortName: string;
+  shortNameBn: string;
   initials: string;
   email: string;
   phone: string;
@@ -48,84 +49,84 @@ interface PersonSeed {
 
 const PEOPLE: PersonSeed[] = [
   {
-    code: "EMP-0001", pernr: "PR-10001", name: "Ahmed Akbar Sobhan", nameBn: "আহমেদ আকবর সোবহান", shortName: "Ahmed",
+    code: "EMP-0001", pernr: "PR-10001", name: "Ahmed Akbar Sobhan", nameBn: "আহমেদ আকবর সোবহান", shortName: "Ahmed", shortNameBn: "আহমেদ",
     initials: "AAS", email: "chairman@bashundhara.com", phone: "+880 1711-000001", dept: "dept_exec", site: "site_hq",
     title: "Chairman & Managing Director", titleBn: "চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক", grade: ["E10", "Board"],
     manager: null, joinDate: "1987-01-01", status: "ACTIVE", color: "#A51C30", nid: "1962269201928001", blood: "B+",
     emergency: "+880 1711-999999 (Chairman Office)", roles: ["CHAIRMAN"],
   },
   {
-    code: "EMP-0012", pernr: "PR-20412", name: "Engr. Md. Harunur Rashid", nameBn: "প্রকৌ. মোঃ হারুনুর রশীদ", shortName: "Harunur",
+    code: "EMP-0012", pernr: "PR-20412", name: "Engr. Md. Harunur Rashid", nameBn: "প্রকৌ. মোঃ হারুনুর রশীদ", shortName: "Harunur", shortNameBn: "হারুনুর",
     initials: "HR", email: "gm.plant@bashundhara.com", phone: "+880 1713-441199", dept: "dept_plant", site: "site_plant",
     title: "Plant General Manager", titleBn: "প্ল্যান্ট জেনারেল ম্যানেজার", grade: ["E8", "General Manager"],
     manager: "EMP-0001", joinDate: "2018-03-15", status: "ACTIVE", color: "#0369A1", nid: "1974269201928012", blood: "O+",
     emergency: "+880 1711-223344 (Spouse)", roles: ["PLANT_GM", "HSE_OFFICER"],
   },
   {
-    code: "EMP-0028", pernr: "PR-30114", name: "Sayeda Afroza Sultana", nameBn: "সৈয়দা আফরোজা সুলতানা", shortName: "Afroza",
+    code: "EMP-0028", pernr: "PR-30114", name: "Sayeda Afroza Sultana", nameBn: "সৈয়দা আফরোজা সুলতানা", shortName: "Afroza", shortNameBn: "আফরোজা",
     initials: "SAS", email: "hr.gm@bashundhara.com", phone: "+880 1714-882200", dept: "dept_hr", site: "site_hq",
     title: "GM, HR & Administration", titleBn: "মহাব্যবস্থাপক, মানবসম্পদ ও প্রশাসন", grade: ["E8", "General Manager"],
     manager: "EMP-0001", joinDate: "2019-09-01", status: "ACTIVE", color: "#BE185D", nid: "1979269201928028", blood: "A+",
     emergency: "+880 1819-554433 (Family)", roles: ["HR_ADMIN"],
   },
   {
-    code: "EMP-0045", pernr: "PR-40892", name: "Md. Kamruzzaman", nameBn: "মোঃ কামরুজ্জামান", shortName: "Kamruzzaman",
+    code: "EMP-0045", pernr: "PR-40892", name: "Md. Kamruzzaman", nameBn: "মোঃ কামরুজ্জামান", shortName: "Kamruzzaman", shortNameBn: "কামরুজ্জামান",
     initials: "KZ", email: "transport.admin@bashundhara.com", phone: "+880 1712-990011", dept: "dept_trans", site: "site_plant",
     title: "Transport & Admin Supervisor", titleBn: "পরিবহন ও প্রশাসন তত্ত্বাবধায়ক", grade: ["M3", "Supervisor"],
     manager: "EMP-0028", joinDate: "2020-02-10", status: "ACTIVE", color: "#059669", nid: "1982269201928045", blood: "B+",
     emergency: "+880 1912-334455 (Brother)", roles: ["TRANSPORT_ADMIN", "SECURITY_GATE", "MAILROOM"],
   },
   {
-    code: "EMP-0062", pernr: "PR-50119", name: "Farida Begum", nameBn: "ফরিদা বেগম", shortName: "Farida",
+    code: "EMP-0062", pernr: "PR-50119", name: "Farida Begum", nameBn: "ফরিদা বেগম", shortName: "Farida", shortNameBn: "ফরিদা",
     initials: "FB", email: "farida.finance@bashundhara.com", phone: "+880 1819-223344", dept: "dept_fin", site: "site_hq",
     title: "Head of Finance & Approver", titleBn: "প্রধান অর্থ কর্মকর্তা ও অনুমোদনকারী", grade: ["E7", "Head of Department"],
     manager: "EMP-0001", joinDate: "2021-01-12", status: "ACTIVE", color: "#7C3AED", nid: "1980269201928062", blood: "AB+",
     emergency: "+880 1715-667788 (Spouse)", roles: ["HOD", "FINANCE"],
   },
   {
-    code: "EMP-1042", pernr: "PR-60912", name: "Tanvir Ahmed", nameBn: "তানভীর আহমেদ", shortName: "Tanvir",
+    code: "EMP-1042", pernr: "PR-60912", name: "Tanvir Ahmed", nameBn: "তানভীর আহমেদ", shortName: "Tanvir", shortNameBn: "তানভীর",
     initials: "TA", email: "tanvir.sales@bashundhara.com", phone: "+880 1712-334455", dept: "dept_sales", site: "site_hq",
     title: "Senior Sales Officer", titleBn: "সিনিয়র সেলস অফিসার", grade: ["O4", "Senior Officer"],
     manager: "EMP-0062", joinDate: "2022-06-01", status: "ACTIVE", color: "#D97706", nid: "1990269201921042", blood: "O+",
     emergency: "+880 1712-887766 (Brother)", roles: ["EMPLOYEE"],
   },
   {
-    code: "EMP-0821", pernr: "PR-54821", name: "Md. Rafiqul Islam", nameBn: "মোঃ রফিকুল ইসলাম", shortName: "Rafiqul",
+    code: "EMP-0821", pernr: "PR-54821", name: "Md. Rafiqul Islam", nameBn: "মোঃ রফিকুল ইসলাম", shortName: "Rafiqul", shortNameBn: "রফিকুল",
     initials: "RI", email: "rafiqul.driver@bashundhara.com", phone: "+880 1715-882100", dept: "dept_trans", site: "site_hq",
     title: "Senior Company Driver", titleBn: "সিনিয়র কোম্পানি ড্রাইভার", grade: ["S2", "Staff"],
     manager: "EMP-0045", joinDate: "2019-05-14", status: "ACTIVE", color: "#059669", nid: "1986269201920821", blood: "B+",
     emergency: "+880 1718-994422 (Spouse)", roles: ["DRIVER"],
   },
   {
-    code: "EMP-1088", pernr: "PR-61204", name: "Engr. Tariqul Islam", nameBn: "প্রকৌ. তরিকুল ইসলাম", shortName: "Tariqul",
+    code: "EMP-1088", pernr: "PR-61204", name: "Engr. Tariqul Islam", nameBn: "প্রকৌ. তরিকুল ইসলাম", shortName: "Tariqul", shortNameBn: "তরিকুল",
     initials: "TI", email: "tariq.plant@bashundhara.com", phone: "+880 1819-445566", dept: "dept_plant", site: "site_plant",
     title: "Senior Plant Maintenance Engineer", titleBn: "সিনিয়র প্ল্যান্ট মেইনটেন্যান্স প্রকৌশলী", grade: ["O5", "Engineer"],
     manager: "EMP-0012", joinDate: "2021-08-15", status: "ON_LEAVE", color: "#0284C7", nid: "1988269201921088", blood: "A+",
     emergency: "+880 1911-332211 (Father)",
   },
   {
-    code: "EMP-1104", pernr: "PR-62340", name: "Nazmul Huda", nameBn: "নাজমুল হুদা", shortName: "Nazmul",
+    code: "EMP-1104", pernr: "PR-62340", name: "Nazmul Huda", nameBn: "নাজমুল হুদা", shortName: "Nazmul", shortNameBn: "নাজমুল",
     initials: "NH", email: "nazmul.safety@bashundhara.com", phone: "+880 1914-778899", dept: "dept_hse", site: "site_plant",
     title: "Senior Safety & Environment Officer", titleBn: "সিনিয়র নিরাপত্তা ও পরিবেশ কর্মকর্তা", grade: ["O4", "Senior Officer"],
     manager: "EMP-0012", joinDate: "2023-01-05", status: "ACTIVE", color: "#16A34A", nid: "1992269201921104", blood: "B+",
     emergency: "+880 1819-998877 (Mother)",
   },
   {
-    code: "EMP-0914", pernr: "PR-58410", name: "Mizanur Rahman", nameBn: "মিজানুর রহমান", shortName: "Mizanur",
+    code: "EMP-0914", pernr: "PR-58410", name: "Mizanur Rahman", nameBn: "মিজানুর রহমান", shortName: "Mizanur", shortNameBn: "মিজানুর",
     initials: "MR", email: "mizanur.sec@bashundhara.com", phone: "+880 1715-661122", dept: "dept_sec", site: "site_plant",
     title: "Main Gate & Security Officer", titleBn: "প্রধান গেট ও নিরাপত্তা কর্মকর্তা", grade: ["O3", "Officer"],
     manager: "EMP-0045", joinDate: "2021-07-20", status: "ACTIVE", color: "#475569", nid: "1985269201920914", blood: "O+",
     emergency: "+880 1711-445566 (Wife)",
   },
   {
-    code: "EMP-0733", pernr: "PR-57733", name: "Md. Rahim Uddin", nameBn: "মোঃ রহিম উদ্দিন", shortName: "Rahim",
+    code: "EMP-0733", pernr: "PR-57733", name: "Md. Rahim Uddin", nameBn: "মোঃ রহিম উদ্দিন", shortName: "Rahim", shortNameBn: "রহিম",
     initials: "RU", email: "rahim.accounts@bashundhara.com", phone: "+880 1716-553311", dept: "dept_fin", site: "site_hq",
     title: "Senior Accounts Executive", titleBn: "সিনিয়র হিসাব নির্বাহী", grade: ["O4", "Senior Officer"],
     manager: "EMP-0062", joinDate: "2020-04-12", status: "ON_LEAVE", color: "#0F766E", nid: "1987269201920733", blood: "A-",
     emergency: "+880 1911-552244 (Wife)",
   },
   {
-    code: "EMP-0782", pernr: "PR-51209", name: "Shakil Ahmed", nameBn: "শাকিল আহমেদ", shortName: "Shakil",
+    code: "EMP-0782", pernr: "PR-51209", name: "Shakil Ahmed", nameBn: "শাকিল আহমেদ", shortName: "Shakil", shortNameBn: "শাকিল",
     initials: "SA", email: "shakil.proc@bashundhara.com", phone: "+880 1718-332211", dept: "dept_fin", site: "site_hq",
     title: "Assistant Manager (Accounts & Billing)", titleBn: "সহকারী ব্যবস্থাপক (হিসাব ও বিলিং)", grade: ["M1", "Assistant Manager"],
     manager: "EMP-0062", joinDate: "2021-02-10", status: "OFFBOARDED", color: "#94A3B8", nid: "1991269201920782", blood: "A+",
@@ -137,7 +138,7 @@ const PEOPLE: PersonSeed[] = [
     },
   },
   {
-    code: "EMP-0640", pernr: "PR-48902", name: "Khadija Akhter", nameBn: "খাদিজা আক্তার", shortName: "Khadija",
+    code: "EMP-0640", pernr: "PR-48902", name: "Khadija Akhter", nameBn: "খাদিজা আক্তার", shortName: "Khadija", shortNameBn: "খাদিজা",
     initials: "KA", email: "khadija.lab@bashundhara.com", phone: "+880 1719-887766", dept: "dept_plant", site: "site_plant",
     title: "Quality Testing Officer", titleBn: "মান নিয়ন্ত্রণ কর্মকর্তা", grade: ["O3", "Officer"],
     manager: "EMP-0012", joinDate: "2020-11-01", status: "OFFBOARDED", color: "#94A3B8", nid: "1993269201920640", blood: "B+",
@@ -171,6 +172,7 @@ export function buildPeople(): { employees: MockEmployee[]; users: MockUser[] } 
       fullName: p.name,
       fullNameBn: p.nameBn,
       shortName: p.shortName,
+      shortNameBn: p.shortNameBn,
       initials: p.initials,
       email: p.email,
       phone: p.phone,

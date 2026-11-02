@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -24,7 +25,10 @@ export function LoginScreen() {
   const dispatch = useAppDispatch();
   const endReason = useAppSelector((s) => s.auth.endReason);
   const passwordRef = useRef<TextInput>(null);
-  const [formError, setFormError] = useState<string | null>(endReason === "expired" ? t("errors.expired") : null);
+  // Keys, not strings, so the alert follows a language switch on this screen.
+  const [formError, setFormError] = useState<{ key: string; time?: string } | null>(
+    endReason === "expired" ? { key: "errors.expired" } : null,
+  );
   const [showForgot, setShowForgot] = useState(false);
 
   const { control, handleSubmit, setValue, formState } = useForm<LoginForm>({
@@ -49,13 +53,13 @@ export function LoginScreen() {
       const reason = errorReason(apiError);
       if (reason === "ACCOUNT_LOCKED") {
         const until = apiError.details.find((d) => typeof d.lockedUntil === "string")?.lockedUntil;
-        setFormError(t("errors.locked", { time: typeof until === "string" ? fmt.time(until) : "15 min" }));
+        setFormError({ key: "errors.locked", time: typeof until === "string" ? fmt.time(until) : "15 min" });
       } else if (reason === "ACCOUNT_DISABLED" || reason === "EMPLOYEE_OFFBOARDED") {
-        setFormError(t("errors.disabled"));
+        setFormError({ key: "errors.disabled" });
       } else if (apiError.code === "UNAUTHENTICATED" || apiError.code === "VALIDATION_ERROR") {
-        setFormError(t("errors.invalid"));
+        setFormError({ key: "errors.invalid" });
       } else {
-        setFormError(t(apiError.code === "NETWORK" ? "errors:network" : "errors:generic"));
+        setFormError({ key: apiError.code === "NETWORK" ? "errors:network" : "errors:generic" });
       }
       setValue("password", "");
     }
@@ -63,7 +67,8 @@ export function LoginScreen() {
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.background }]}>
-      <View style={[styles.hero, { backgroundColor: theme.surfaceInverse }]}>
+      <StatusBar style="light" />
+      <View style={[styles.hero, { backgroundColor: theme.brand }]}>
         <SafeAreaView edges={["top"]}>
           <View style={styles.heroTop}>
             <View style={styles.langSwitch}>
@@ -80,7 +85,7 @@ export function LoginScreen() {
           <View style={styles.brandRow}>
             <BrandMark size={56} />
             <View style={styles.flex}>
-              <Text variant="h1" color="textInverse">
+              <Text variant="h1" color="onBrand">
                 {t("common:appName")}
               </Text>
               <Text variant="bodySmall" tint={theme.executiveSolid}>
@@ -103,7 +108,7 @@ export function LoginScreen() {
               <View style={[styles.alert, { backgroundColor: theme.dangerMuted }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
                 <Icon name="alert-circle" size={18} color="danger" />
                 <Text variant="bodySmall" color="danger" style={styles.flex}>
-                  {formError}
+                  {t(formError.key as "errors.invalid", { time: formError.time })}
                 </Text>
               </View>
             ) : null}
@@ -142,7 +147,7 @@ export function LoginScreen() {
                 render={({ field }) => (
                   <View style={styles.remember}>
                     <Toggle value={field.value} onChange={field.onChange} accessibilityLabel={t("keepSignedIn")} />
-                    <Text variant="bodySmall">{t("keepSignedIn")}</Text>
+                    <Text variant="bodySmall" style={styles.flex}>{t("keepSignedIn")}</Text>
                   </View>
                 )}
               />
@@ -202,6 +207,6 @@ const styles = StyleSheet.create({
   },
   alert: { flexDirection: "row", alignItems: "center", gap: Spacing.sm, padding: Spacing.md, borderRadius: Radius.md },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  remember: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
+  remember: { flex: 1, flexDirection: "row", alignItems: "center", gap: Spacing.sm, marginRight: Spacing.md },
   footer: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: Spacing.xs },
 });

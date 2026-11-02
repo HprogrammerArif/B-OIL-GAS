@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { useTranslation } from "react-i18next";
 import { BrandMark } from "@/components/BrandMark";
 import { Avatar, Button, Text } from "@/components/ui";
@@ -45,20 +46,21 @@ export function LockScreen() {
   }, [dispatch, t]);
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: theme.surfaceInverse }]} accessibilityViewIsModal>
+    <View style={[StyleSheet.absoluteFill, styles.root, { backgroundColor: theme.brand }]} accessibilityViewIsModal>
+      <StatusBar style="light" />
       <SafeAreaView style={styles.inner}>
         <BrandMark size={48} />
         <View style={styles.center}>
           {user ? <Avatar initials={user.initials} color={user.avatarColor} size={72} ring /> : null}
           {user ? (
-            <Text variant="h2" color="textInverse" align="center">
+            <Text variant="h2" color="onBrand" align="center">
               {localized(user.fullName, user.fullNameBn)}
             </Text>
           ) : null}
-          <Text variant="h3" color="textInverse" align="center">
+          <Text variant="h3" color="onBrand" align="center">
             {t("lock.title")}
           </Text>
-          <Text variant="bodySmall" color="textTertiary" align="center">
+          <Text variant="bodySmall" color="onBrandMuted" align="center">
             {t("lock.subtitle")}
           </Text>
         </View>

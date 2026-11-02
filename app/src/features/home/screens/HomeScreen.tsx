@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useIsFocused } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useTranslation } from "react-i18next";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { BroadcastBanner } from "@/features/notices/components/BroadcastBanner";
@@ -45,6 +47,7 @@ const VARIANT_ACTIONS: Record<HomeVariant, string[]> = {
 
 export function HomeScreen() {
   const theme = useTheme();
+  const focused = useIsFocused();
   const { t } = useTranslation("home");
   const dispatch = useAppDispatch();
   const roles = useAppSelector((s) => s.auth.roles);
@@ -74,7 +77,8 @@ export function HomeScreen() {
   }, [dispatch]);
 
   return (
-    <SafeAreaView edges={["top"]} style={[styles.flex, { backgroundColor: theme.surfaceInverse }]}>
+    <SafeAreaView edges={["top"]} style={[styles.flex, { backgroundColor: theme.brand }]}>
+      {focused ? <StatusBar style="light" /> : null}
       <ScrollView
         style={{ backgroundColor: theme.background }}
         contentContainerStyle={styles.scroll}

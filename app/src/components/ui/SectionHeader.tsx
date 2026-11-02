@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Spacing } from "@/constants/theme";
+import { useFormat } from "@/hooks/useLanguage";
 import { Text } from "./Text";
 
 interface SectionHeaderProps {
@@ -11,10 +12,11 @@ interface SectionHeaderProps {
 }
 
 export const SectionHeader = memo(function SectionHeader({ title, count, actionLabel, onAction }: SectionHeaderProps) {
+  const fmt = useFormat();
   return (
     <View style={styles.row} accessibilityRole="header">
       <Text variant="overline" color="textSecondary" uppercase>
-        {count !== undefined ? `${title} · ${count}` : title}
+        {count !== undefined ? `${title} · ${fmt.number(count)}` : title}
       </Text>
       {actionLabel && onAction ? (
         <Pressable onPress={onAction} hitSlop={12} accessibilityRole="button" accessibilityLabel={actionLabel}>

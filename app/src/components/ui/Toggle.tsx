@@ -21,7 +21,7 @@ export const Toggle = memo(function Toggle({ value, onChange, accessibilityLabel
         onChange(v);
       }}
       trackColor={{ false: theme.borderStrong, true: theme.accent }}
-      thumbColor={theme.surface}
+      thumbColor={theme.onAccent}
       ios_backgroundColor={theme.borderStrong}
       accessibilityLabel={accessibilityLabel}
     />

@@ -84,6 +84,7 @@ export interface MeEmployee {
   fullName: string;
   fullNameBn: string;
   shortName: string;
+  shortNameBn: string;
   initials: string;
   designation: { id: string; title: string; titleBn: string };
   grade: { id: string; code: string; name: string };

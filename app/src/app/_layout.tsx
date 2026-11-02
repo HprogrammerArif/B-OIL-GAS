@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -44,6 +45,7 @@ export default function RootLayout() {
     NotoSansBengali_500Medium,
     NotoSansBengali_600SemiBold,
     NotoSansBengali_700Bold,
+    ...Ionicons.font,
   });
 
   return (

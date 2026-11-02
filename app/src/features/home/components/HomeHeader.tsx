@@ -30,13 +30,13 @@ export const HomeHeader = memo(function HomeHeader({ executive = false, unread =
   const e = me?.employee;
 
   return (
-    <View style={[styles.wrap, { backgroundColor: theme.surfaceInverse, borderBottomColor: executive ? theme.executiveSolid : "transparent" }]}>
+    <View style={[styles.wrap, { backgroundColor: theme.brand, borderBottomColor: executive ? theme.executiveSolid : "transparent" }]}>
       <View style={styles.topRow}>
         <BrandMark size={36} />
         <View style={styles.flex} />
         <IconButton
           icon="notifications-outline"
-          color="textInverse"
+          color="onBrand"
           accessibilityLabel={t("notifications")}
           badge={unread}
           onPress={() => router.push(routes.notifications)}
@@ -45,16 +45,16 @@ export const HomeHeader = memo(function HomeHeader({ executive = false, unread =
           {e ? <Avatar initials={e.initials} color={e.avatarColor} size={38} ring={executive} /> : null}
         </Pressable>
       </View>
-      <Text variant="bodySmall" tint={executive ? theme.executiveSolid : theme.textTertiary}>
+      <Text variant="bodySmall" tint={executive ? theme.executiveSolid : theme.onBrandMuted}>
         {t(`common:${greetingKey()}`)}
       </Text>
-      <Text variant="h1" color="textInverse" numberOfLines={1}>
-        {e ? localized(e.shortName, e.fullNameBn.split(" ").slice(-1)[0]) : " "}
+      <Text variant="h1" color="onBrand" numberOfLines={1}>
+        {e ? localized(e.shortName, e.shortNameBn) : " "}
       </Text>
-      <Text variant="caption" color="textTertiary" numberOfLines={1}>
+      <Text variant="caption" color="onBrandMuted" numberOfLines={1}>
         {e ? `${localized(e.designation.title, e.designation.titleBn)} · ${localized(e.site.name, e.site.nameBn)}` : " "}
       </Text>
-      <Text variant="caption" color="textTertiary">
+      <Text variant="caption" color="onBrandMuted">
         {fmt.date(new Date(), "EEEE, d MMMM yyyy")}
       </Text>
     </View>

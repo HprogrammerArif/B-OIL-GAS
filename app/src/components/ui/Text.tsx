@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Text as RNText, StyleSheet, type TextProps as RNTextProps, type TextStyle } from "react-native";
+import { Platform, Text as RNText, StyleSheet, type TextProps as RNTextProps, type TextStyle } from "react-native";
 import {
   BENGALI_LINE_HEIGHT_FACTOR,
   FontFamily,
@@ -18,6 +18,8 @@ export type TextColor = keyof Pick<
   | "textSecondary"
   | "textTertiary"
   | "textInverse"
+  | "onBrand"
+  | "onBrandMuted"
   | "onAccent"
   | "accent"
   | "executive"
@@ -50,6 +52,7 @@ export const Text = memo(function Text({
   align,
   uppercase,
   style,
+  children,
   ...rest
 }: TextProps) {
   const theme = useTheme();
@@ -57,6 +60,9 @@ export const Text = memo(function Text({
   const t = Typography[variant];
   const isMono = variant === "mono";
   const lineHeight = lang === "bn" ? Math.round(t.lineHeight * BENGALI_LINE_HEIGHT_FACTOR) : t.lineHeight;
+  // Android shapes Bengali a few px wider than it measures, wrapping the last word of
+  // intrinsic-width labels onto a clipped line; a trailing thin space absorbs the gap.
+  const content = lang === "bn" && Platform.OS === "android" && typeof children === "string" ? `${children}\u2009` : children;
 
   return (
     <RNText
@@ -75,7 +81,9 @@ export const Text = memo(function Text({
         isMono && weight ? styles.monoBold : null,
         style,
       ]}
-    />
+    >
+      {content}
+    </RNText>
   );
 });
 
