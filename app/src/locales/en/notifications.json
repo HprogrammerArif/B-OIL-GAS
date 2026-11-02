@@ -8,5 +8,11 @@
   "acknowledged": "Acknowledged",
   "ackRequired": "Needs acknowledgement",
   "criticalTitle": "Critical alert",
+  "critical": {
+    "message": "This alert must be acknowledged before you continue.",
+    "ackOpen": "Acknowledge and open",
+    "done": "Acknowledged",
+    "more": "{{n}} more critical alerts after this"
+  },
   "newToast": "New notification"
 }

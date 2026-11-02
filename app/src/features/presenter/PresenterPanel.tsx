@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Avatar, Badge, ListRow, SectionHeader, Segmented, Sheet, Text, Toggle } from "@/components/ui";
+import { Avatar, Badge, Button, ListRow, SectionHeader, Segmented, Sheet, Text, Toggle } from "@/components/ui";
 import { Spacing } from "@/constants/theme";
 import { useLocalized } from "@/hooks/useLanguage";
 import { setMockLatency } from "@/mock/server";
@@ -29,6 +29,7 @@ export function PresenterPanel({ visible, onClose }: Props) {
   const { data: personas } = useDemoPersonasQuery(undefined, { skip: !visible });
   const [busy, setBusy] = useState<string | null>(null);
   const [slow, setSlow] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const switchTo = async (empCode: string, name: string) => {
     setBusy(empCode);
@@ -44,20 +45,20 @@ export function PresenterPanel({ visible, onClose }: Props) {
     }
   };
 
-  const reset = () => {
-    Alert.alert(t("presenter.reset"), t("presenter.resetConfirm"), [
-      { text: t("actions.cancel"), style: "cancel" },
-      {
-        text: t("actions.confirm"),
-        style: "destructive",
-        onPress: async () => {
-          await dispatch(authApi.endpoints.demoReset.initiate()).unwrap();
-          dispatch(baseApi.util.invalidateTags([...TAG_TYPES]));
-          toast.success(t("presenter.resetDone"));
-          onClose();
-        },
-      },
-    ]);
+  // Inline confirm: Alert.alert does not surface above an open Modal on Android.
+  const reset = async () => {
+    setBusy("reset");
+    try {
+      await dispatch(authApi.endpoints.demoReset.initiate()).unwrap();
+      dispatch(baseApi.util.invalidateTags([...TAG_TYPES]));
+      toast.success(t("presenter.resetDone"));
+      setConfirmingReset(false);
+      onClose();
+    } catch (error) {
+      toast.error(toApiError(error).message);
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -123,7 +124,18 @@ export function PresenterPanel({ visible, onClose }: Props) {
         />
       </View>
 
-      <ListRow title={t("presenter.reset")} icon="refresh-outline" destructive onPress={reset} chevron={false} />
+      {confirmingReset ? (
+        <View style={styles.confirm}>
+          <Text variant="bodySmall" color="textSecondary">{t("presenter.resetConfirm")}</Text>
+          <View style={styles.confirmActions}>
+            <Button title={t("actions.cancel")} variant="ghost" size="sm" onPress={() => setConfirmingReset(false)} style={styles.flex} />
+            <Button title={t("actions.confirm")} variant="destructive" size="sm" icon="refresh-outline" loading={busy === "reset"}
+              onPress={() => void reset()} style={styles.flex} testID="presenter-reset-confirm" />
+          </View>
+        </View>
+      ) : (
+        <ListRow title={t("presenter.reset")} icon="refresh-outline" destructive onPress={() => setConfirmingReset(true)} chevron={false} />
+      )}
     </Sheet>
   );
 }
@@ -131,5 +143,7 @@ export function PresenterPanel({ visible, onClose }: Props) {
 const styles = StyleSheet.create({
   list: { marginHorizontal: -Spacing.lg },
   toggleRow: { flexDirection: "row", alignItems: "center", marginTop: Spacing.lg },
+  confirm: { gap: Spacing.sm, marginTop: Spacing.lg },
+  confirmActions: { flexDirection: "row", gap: Spacing.sm },
   flex: { flex: 1 },
 });

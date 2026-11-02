@@ -7,6 +7,7 @@ import { Button, QueryState, SearchBar, Segmented, Sheet, StatCard, Text } from 
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useIsOnline } from "@/hooks/useIsOnline";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useFormat } from "@/hooks/useLanguage";
 import { usePermissions } from "@/hooks/usePermission";
 import { useTheme } from "@/hooks/use-theme";
@@ -46,6 +47,7 @@ export function ApprovalsPane() {
   const inbox = useGetInboxQuery(args);
   const summary = useGetInboxSummaryQuery();
   const [batchApprove, batch] = useBatchApproveMutation();
+  const pull = usePullToRefresh(inbox.refetch, summary.refetch);
 
   const items = useMemo(() => inbox.data?.items ?? [], [inbox.data]);
   const selecting = selected.size > 0;
@@ -163,11 +165,8 @@ export function ApprovalsPane() {
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
-            refreshing={inbox.isFetching && !inbox.isLoading}
-            onRefresh={() => {
-              void inbox.refetch();
-              void summary.refetch();
-            }}
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
             tintColor={theme.accent}
             colors={[theme.accent]}
           />

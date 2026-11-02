@@ -1,5 +1,6 @@
-import type { Urgency } from "@/types/domain/common";
+import type { Priority, Urgency } from "@/types/domain/common";
 import type { DepartmentRef, Lang, MeEmployee, RoleKey, SiteRef } from "@/types/domain/identity";
+import type { NoticeAudienceRef, NoticeCategory, NoticeStatus } from "@/types/domain/notice";
 import type { AppNotification } from "@/types/domain/notification";
 import type {
   ApprovalCategory,
@@ -134,6 +135,51 @@ export interface MockNotification extends AppNotification {
   userId: string;
 }
 
+/* ─── Notices (doc 02 Notice / NoticeAudience / NoticeReceipt / Broadcast) ─── */
+
+export interface MockNoticeReceipt {
+  userId: string;
+  readAt: string | null;
+  ackedAt: string | null;
+}
+
+export interface MockNotice {
+  id: string;
+  refNo: string;
+  title: string;
+  titleBn: string | null;
+  body: string;
+  bodyBn: string | null;
+  category: NoticeCategory;
+  priority: Priority;
+  status: NoticeStatus;
+  isPinned: boolean;
+  requiresAck: boolean;
+  referenceNo: string | null;
+  publishAt: string | null;
+  expiresAt: string | null;
+  authorEmployeeId: string;
+  createdAt: string;
+  audiences: NoticeAudienceRef[];
+  /** Receipts snapshotted at publish for recipients with app accounts (BR-01-03). */
+  receipts: MockNoticeReceipt[];
+  /**
+   * Staff in the audience without mock accounts, so totals match the real headcount
+   * (e.g. 184 / 218 acknowledged). The live server counts every receipt instead.
+   */
+  offline: { recipients: number; reads: number; acks: number };
+}
+
+export interface MockBroadcast {
+  id: string;
+  noticeId: string;
+  authorEmployeeId: string;
+  sendSms: boolean;
+  activeUntil: string | null;
+  createdAt: string;
+  dismissedBy: string[];
+}
+
 /**
  * Whole in-app database. Module tables are added alongside their handlers;
  * bump `MOCK_DB_VERSION` whenever a table shape changes so devices reseed.
@@ -151,6 +197,8 @@ export interface MockDb {
   workflow: MockWfInstance[];
   otps: MockOtp[];
   notifications: MockNotification[];
+  notices: MockNotice[];
+  broadcasts: MockBroadcast[];
 }
 
-export const MOCK_DB_VERSION = 2;
+export const MOCK_DB_VERSION = 3;

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Icon, QueryState, Screen, Segmented, Text } from "@/components/ui";
 import { Radius, Spacing, toneColors } from "@/constants/theme";
 import { useFormat, useLocalized } from "@/hooks/useLanguage";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useTheme } from "@/hooks/use-theme";
 import { routes } from "@/lib/routes";
 import type { HistoryItem, StepDecision } from "@/types/domain/workflow";
@@ -21,6 +22,7 @@ export function ApprovalHistoryScreen() {
   const [filter, setFilter] = useState<Filter>("all");
   const history = useGetApprovalHistoryQuery(filter === "all" ? {} : { decision: filter });
   const items = history.data?.items ?? [];
+  const pull = usePullToRefresh(history.refetch);
 
   return (
     <Screen title={t("history.title")} scroll={false} padded={false}>
@@ -54,8 +56,8 @@ export function ApprovalHistoryScreen() {
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl
-            refreshing={history.isFetching && !history.isLoading}
-            onRefresh={() => void history.refetch()}
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
             tintColor={theme.accent}
             colors={[theme.accent]}
           />

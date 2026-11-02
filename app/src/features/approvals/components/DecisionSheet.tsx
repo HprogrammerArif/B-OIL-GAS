@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,29 +26,28 @@ const TITLE_KEY = { APPROVE: "decision.approveTitle", RETURN: "decision.returnTi
 const SUCCESS_KEY = { APPROVE: "decision.approved", RETURN: "decision.returned", REJECT: "decision.rejected" } as const;
 
 /** Approve / return / reject with comment, reason presets and signature OTP (doc 05 §9.1). */
-export function DecisionSheet({ instance, decision, onClose, onDone }: DecisionSheetProps) {
+export function DecisionSheet({ decision, ...rest }: DecisionSheetProps) {
+  if (!decision) return null;
+  // Remount per opening so form, OTP and idempotency state never leak between decisions.
+  return <DecisionSheetBody key={`${rest.instance.id}:${decision}`} decision={decision} {...rest} />;
+}
+
+function DecisionSheetBody({ instance, decision, onClose, onDone }: DecisionSheetProps & { decision: Decision }) {
   const { t } = useTranslation(["approvals", "common", "errors"]);
   const [act, { isLoading }] = useActOnApprovalMutation();
-  const [requestOtp, { data: otpData, isLoading: otpLoading, isSuccess: otpSent, reset: resetOtp }] = useRequestSignatureOtpMutation();
+  const [requestOtp, { data: otpData, isLoading: otpLoading, isSuccess: otpSent }] = useRequestSignatureOtpMutation();
   const demoCode = otpData?.demoCode ?? null;
   const step = instance.steps.find((s) => s.status === "ACTIVE");
   const needsOtp = decision === "APPROVE" && !!step?.requiresSignature;
   const group = presetGroupFor(instance.objectType);
   // One key per opening so a retried submit after a dropped response is not applied twice.
-  const idempotencyKey = useMemo(() => (decision ? newIdempotencyKey() : ""), [decision]);
+  const [idempotencyKey] = useState(newIdempotencyKey);
 
-  const { control, handleSubmit, reset, setValue, setError, getValues } = useForm<DecisionForm>({
+  const { control, handleSubmit, setValue, setError, getValues } = useForm<DecisionForm>({
     resolver: zodResolver(decisionSchema),
-    defaultValues: { decision: "APPROVE", comment: "", improvements: "", reasonCategory: "", otp: "", needsOtp: false },
+    defaultValues: { decision, comment: "", improvements: "", reasonCategory: "", otp: "", needsOtp },
   });
   const reasonCategory = useWatch({ control, name: "reasonCategory" });
-
-  useEffect(() => {
-    if (decision) {
-      reset({ decision, comment: "", improvements: "", reasonCategory: "", otp: "", needsOtp });
-      resetOtp();
-    }
-  }, [decision, needsOtp, reset, resetOtp]);
 
   const pickPreset = (key: string) => {
     const label = t(`presets.${group}.${key}.label` as "presets.general.papers.label");
@@ -112,7 +111,6 @@ export function DecisionSheet({ instance, decision, onClose, onDone }: DecisionS
     }
   });
 
-  if (!decision) return null;
   const isApprove = decision === "APPROVE";
 
   return (

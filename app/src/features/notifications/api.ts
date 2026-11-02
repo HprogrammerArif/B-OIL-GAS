@@ -7,6 +7,7 @@ const NOTIFICATIONS = { type: "Notification" as const, id: LIST };
 const COUNT = { type: "Notification" as const, id: "COUNT" };
 
 export const notificationsApi = baseApi.injectEndpoints({
+  overrideExisting: __DEV__,
   endpoints: (build) => ({
     getNotifications: build.query<Page<AppNotification>, NotificationQuery>({
       query: ({ unread, category, page }) => ({

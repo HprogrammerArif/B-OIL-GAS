@@ -23,6 +23,7 @@ export interface DemoPersona {
 type DeviceInfo = LoginRequest["device"];
 
 export const authApi = baseApi.injectEndpoints({
+  overrideExisting: __DEV__,
   endpoints: (build) => ({
     login: build.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),

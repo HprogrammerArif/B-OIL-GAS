@@ -55,6 +55,7 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.accessTokenExpiresAt = Date.now() + action.payload.expiresIn * 1000;
       state.roles = action.payload.roles;
+      state.user = null;
       state.locked = false;
       state.lastActiveAt = Date.now();
       state.endReason = null;

@@ -19,8 +19,6 @@ async function deviceInfo(): Promise<LoginRequest["device"]> {
 }
 
 async function establish(dispatch: AppDispatch, res: LoginResponse, rememberMe: boolean): Promise<void> {
-  // A fresh login replaces any previous user's cached data.
-  dispatch(baseApi.util.resetApiState());
   await secure.set(SecureKeys.refreshToken, res.refreshToken);
   dispatch(
     sessionStarted({
@@ -30,6 +28,9 @@ async function establish(dispatch: AppDispatch, res: LoginResponse, rememberMe: 
       keepSignedIn: rememberMe,
     }),
   );
+  // Reset only after the new token is in the store: mounted screens refetch immediately on reset,
+  // and a request sent with the previous token would win over the forced refetches below.
+  dispatch(baseApi.util.resetApiState());
   await Promise.all([
     dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true })),
     dispatch(authApi.endpoints.getMyPermissions.initiate(undefined, { forceRefetch: true })),

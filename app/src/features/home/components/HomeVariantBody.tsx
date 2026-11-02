@@ -1,5 +1,6 @@
 import { usePermissions } from "@/hooks/usePermission";
 import { ApprovalsHomeCard } from "@/features/approvals/components/ApprovalsHomeCard";
+import { NoticesHomeCard } from "@/features/notices/components/NoticesHomeCard";
 import type { HomeVariant } from "../persona-resolver";
 
 /**
@@ -9,5 +10,10 @@ import type { HomeVariant } from "../persona-resolver";
 export function HomeVariantBody({ variant }: { variant: HomeVariant }) {
   const perms = usePermissions();
   const showApprovals = (variant === "approver" || variant === "executive") && perms.can("workflow:inbox");
-  return showApprovals ? <ApprovalsHomeCard /> : null;
+  return (
+    <>
+      {showApprovals ? <ApprovalsHomeCard /> : null}
+      {perms.can("notices:read") ? <NoticesHomeCard /> : null}
+    </>
+  );
 }

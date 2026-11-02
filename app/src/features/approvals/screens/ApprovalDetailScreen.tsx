@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar, Badge, Button, Card, Divider, Icon, QueryState, Screen, SectionHeader, Sheet, Skeleton, Text } from "@/components/ui";
 import { Radius, Spacing, toneColors } from "@/constants/theme";
 import { useIsOnline } from "@/hooks/useIsOnline";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useFormat, useLocalized } from "@/hooks/useLanguage";
 import { useTheme } from "@/hooks/use-theme";
 import { errorMessageKey, toApiError } from "@/lib/api-error";
@@ -24,6 +25,7 @@ export function ApprovalDetailScreen() {
   const { t } = useTranslation(["approvals", "common"]);
   const query = useGetApprovalQuery(id ?? "", { skip: !id });
   const inst = query.data;
+  const pull = usePullToRefresh(query.refetch);
   const online = useIsOnline();
   const [decision, setDecision] = useState<Decision | null>(null);
   const [withdrawing, setWithdrawing] = useState(false);
@@ -51,8 +53,8 @@ export function ApprovalDetailScreen() {
     <Screen
       title={inst?.summary.refNo ?? t("title")}
       subtitle={inst ? t(`objectTypes.${inst.objectType}`) : undefined}
-      onRefresh={() => void query.refetch()}
-      refreshing={query.isFetching && !query.isLoading}
+      onRefresh={pull.onRefresh}
+      refreshing={pull.refreshing}
       footer={footer}
       secure={inst?.objectType === "NoteSheet"}
     >

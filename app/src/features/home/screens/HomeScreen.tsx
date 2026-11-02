@@ -3,6 +3,7 @@ import { ScrollView, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { BroadcastBanner } from "@/features/notices/components/BroadcastBanner";
 import { SectionHeader, Segmented } from "@/components/ui";
 import { MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
@@ -67,7 +68,7 @@ export function HomeScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    dispatch(baseApi.util.invalidateTags(["Dashboard", "Inbox", "AttendanceToday", "Notice", "Notification", "Permissions"]));
+    dispatch(baseApi.util.invalidateTags(["Dashboard", "Inbox", "AttendanceToday", "Notice", "Broadcast", "Notification", "Permissions"]));
     await new Promise((r) => setTimeout(r, 600));
     setRefreshing(false);
   }, [dispatch]);
@@ -83,6 +84,7 @@ export function HomeScreen() {
         <HomeHeader executive={variant === "executive"} unread={badges.unread} />
         <OfflineBanner />
         <View style={styles.body}>
+          <BroadcastBanner />
           {variants.length > 1 ? (
             <View style={styles.switcher}>
               <Segmented<HomeVariant>

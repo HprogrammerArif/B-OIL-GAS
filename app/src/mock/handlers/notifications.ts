@@ -3,6 +3,7 @@ import type { AppNotification, UnreadCount } from "@/types/domain/notification";
 import { nowIso } from "../clock";
 import { commit } from "../db";
 import type { MockNotification } from "../db/schema";
+import { ackReceipt } from "../engine/notices";
 import { mockEvents } from "../events";
 import { noContent, notFound, ok, paginate, validationError } from "../http";
 import { register, requireAuth, type HandlerContext } from "../router";
@@ -93,6 +94,10 @@ register([
       const at = nowIso();
       n.ackedAt ??= at;
       n.readAt ??= at;
+      if (n.data.objectType === "Notice") {
+        const notice = ctx.db.notices.find((x) => x.id === n.data.objectId);
+        if (notice) ackReceipt(ctx.db, notice, n.userId);
+      }
       commit();
       pushCount(ctx);
       return ok(toWire(n));

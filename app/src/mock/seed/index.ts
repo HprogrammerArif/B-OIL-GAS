@@ -1,5 +1,6 @@
 import { nowIso } from "../clock";
 import { MOCK_DB_VERSION, type MockDb } from "../db/schema";
+import { seedNotices } from "./notices";
 import { seedWorkflowNotifications } from "./notifications";
 import { buildPeople, DEPARTMENTS, SITES } from "./org";
 import { buildWorkflowSeed } from "./workflow";
@@ -20,7 +21,10 @@ export function buildSeed(): MockDb {
     workflow: buildWorkflowSeed(),
     otps: [],
     notifications: [],
+    notices: [],
+    broadcasts: [],
   };
   seedWorkflowNotifications(db);
+  seedNotices(db);
   return db;
 }

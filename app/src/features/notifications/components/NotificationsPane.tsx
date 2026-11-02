@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Button, Icon, type IconName, QueryState, Segmented, Text } from "@/components/ui";
 import { Radius, Spacing, type Tone, toneColors } from "@/constants/theme";
 import { useFormat, useLocalized } from "@/hooks/useLanguage";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { useTheme } from "@/hooks/use-theme";
 import { errorMessageKey, toApiError } from "@/lib/api-error";
 import { fromServerRoute } from "@/lib/routes";
@@ -41,6 +42,7 @@ export function NotificationsPane() {
   const { t } = useTranslation(["notifications", "errors"]);
   const [filter, setFilter] = useState<Filter>("ALL");
   const list = useGetNotificationsQuery(toQuery(filter));
+  const pull = usePullToRefresh(list.refetch);
   const [markRead] = useMarkNotificationReadMutation();
   const [markAll, markAllState] = useMarkAllNotificationsReadMutation();
   const [ack] = useAckNotificationMutation();
@@ -103,8 +105,8 @@ export function NotificationsPane() {
       contentContainerStyle={styles.list}
       refreshControl={
         <RefreshControl
-          refreshing={list.isFetching && !list.isLoading}
-          onRefresh={() => void list.refetch()}
+          refreshing={pull.refreshing}
+          onRefresh={pull.onRefresh}
           tintColor={theme.accent}
           colors={[theme.accent]}
         />

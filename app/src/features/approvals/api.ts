@@ -18,6 +18,7 @@ import type {
 const toPage = <T>(r: ListEnvelope<T>): Page<T> => ({ items: r.data, meta: r.meta });
 
 export const approvalsApi = baseApi.injectEndpoints({
+  overrideExisting: __DEV__,
   endpoints: (build) => ({
     getInbox: build.query<Page<InboxItem>, InboxQuery>({
       query: ({ category, q, sla, view, page }) => ({

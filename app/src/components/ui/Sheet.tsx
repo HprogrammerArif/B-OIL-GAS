@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { useTranslation } from "react-i18next";
 import { MaxContentWidth, Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
@@ -63,6 +64,8 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
           {footer ? <View style={styles.footer}>{footer}</View> : null}
         </Animated.View>
       </KeyboardAvoidingView>
+      {/* Modals render above the root toast host; this one takes over while the sheet is open. */}
+      <Toast topOffset={56} />
     </Modal>
   );
 }
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
   },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: Spacing.sm },
   header: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: Spacing.lg, paddingBottom: Spacing.sm, gap: Spacing.sm },
-  content: { flexGrow: 0 },
+  content: { flexGrow: 0, flexShrink: 1 },
   contentInner: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md, gap: Spacing.md },
   footer: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm, gap: Spacing.sm },
 });

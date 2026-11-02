@@ -22,9 +22,13 @@ export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: { ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER] },
-      // The API cache and seed-sized payloads make the dev-only immutability walk slow on device.
-      immutableCheck: { warnAfter: 128 },
+      // Both dev-only checks walk the state on every action; RTK Query owns (and freezes) its cache,
+      // so walking it only adds seconds of JS-thread time per screen on device.
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredPaths: [baseApi.reducerPath],
+      },
+      immutableCheck: { ignoredPaths: [baseApi.reducerPath] },
     })
       .prepend(listenerMiddleware.middleware)
       .concat(baseApi.middleware),

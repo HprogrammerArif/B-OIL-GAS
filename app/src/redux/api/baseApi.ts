@@ -87,6 +87,8 @@ export const baseApi = createApi({
   refetchOnReconnect: true,
   refetchOnFocus: true,
   keepUnusedDataFor: 120,
+  // Rehydrated offline entries render immediately, then revalidate once they are older than this.
+  refetchOnMountOrArgChange: 60,
   extractRehydrationInfo(action, { reducerPath }) {
     if (isRehydrate(action) && action.key === reducerPath && action.payload) {
       // Only `queries` and `provided` are persisted (redux/persist/config.ts); RTK Query's

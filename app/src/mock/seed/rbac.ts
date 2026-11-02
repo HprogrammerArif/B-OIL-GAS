@@ -68,6 +68,8 @@ const ROLE_GRANTS: Partial<Record<RoleKey, GrantSpec[]>> = {
     ["incidents:read", "DEPARTMENT"],
     ["compliance:read", "COMPANY"],
     ["employees:read", "DEPARTMENT"],
+    ["notices:create", "DEPARTMENT"],
+    ["notices:publish", "DEPARTMENT"],
     ["chat:use", "SELF"],
   ],
   FINANCE: [
@@ -171,6 +173,8 @@ const ROLE_GRANTS: Partial<Record<RoleKey, GrantSpec[]>> = {
     ["incidents:capa", "SITE"],
     ["incidents:capa-verify", "SITE"],
     ["incidents:statutory", "SITE"],
+    ["notices:create", "SITE"],
+    ["notices:publish", "SITE"],
   ],
   PLANT_GM: [
     ["dashboards:plant", "SITE"],
@@ -200,6 +204,8 @@ const ROLE_GRANTS: Partial<Record<RoleKey, GrantSpec[]>> = {
     ["assets:decommission", "SITE"],
     ["parcels:read", "SITE"],
     ["parcels:dispatch", "SITE"],
+    ["notices:create", "SITE"],
+    ["notices:publish", "SITE"],
     ["chat:use", "SELF"],
   ],
   CHAIRMAN: [
@@ -212,6 +218,7 @@ const ROLE_GRANTS: Partial<Record<RoleKey, GrantSpec[]>> = {
     ["note-sheets:read", "COMPANY"],
     ["note-sheets:sign", "COMPANY"],
     ["notices:broadcast", "COMPANY"],
+    ["notices:create", "COMPANY"],
     ["notices:publish", "COMPANY"],
     ["briefings:create", "COMPANY"],
     ["chat:use", "SELF"],
