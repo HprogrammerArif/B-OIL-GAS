@@ -44,7 +44,10 @@
     "tomorrow": "আগামীকাল",
     "justNow": "এইমাত্র",
     "ago": "{{time}} আগে",
-    "in": "{{time}} পরে"
+    "in": "{{time}} পরে",
+    "minutesShort": "{{n}} মিনিট",
+    "hoursShort": "{{n}} ঘণ্টা",
+    "daysShort": "{{n}} দিন"
   },
   "greeting": {
     "morning": "শুভ সকাল",

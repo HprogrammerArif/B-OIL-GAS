@@ -1,12 +1,13 @@
 import { memo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { BrandMark } from "@/components/BrandMark";
 import { Avatar, IconButton, Text } from "@/components/ui";
 import { Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useFormat, useLocalized } from "@/hooks/useLanguage";
+import { routes } from "@/lib/routes";
 import { useGetMeQuery } from "@/features/auth/api";
 
 function greetingKey(): "greeting.morning" | "greeting.afternoon" | "greeting.evening" {
@@ -38,9 +39,9 @@ export const HomeHeader = memo(function HomeHeader({ executive = false, unread =
           color="textInverse"
           accessibilityLabel={t("notifications")}
           badge={unread}
-          onPress={() => router.push("/notifications" as Href)}
+          onPress={() => router.push(routes.notifications)}
         />
-        <Pressable onPress={() => router.push("/profile" as Href)} accessibilityRole="button" accessibilityLabel={t("openProfile")} hitSlop={6}>
+        <Pressable onPress={() => router.push(routes.profile)} accessibilityRole="button" accessibilityLabel={t("openProfile")} hitSlop={6}>
           {e ? <Avatar initials={e.initials} color={e.avatarColor} size={38} ring={executive} /> : null}
         </Pressable>
       </View>

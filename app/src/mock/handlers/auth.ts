@@ -4,6 +4,7 @@ import type { LoginResponse } from "@/types/domain/identity";
 import { commit } from "../db";
 import type { MockDb, MockSession, MockUser } from "../db/schema";
 import { ms, nowIso } from "../clock";
+import { digestsEqual, sha256 } from "../crypto";
 import { HttpError, noContent, notFound, ok, validationError } from "../http";
 import { register, requireAuth } from "../router";
 import { normalisePhone } from "../seed/org";
@@ -12,16 +13,6 @@ const ACCESS_TTL_S = 15 * 60;
 const REFRESH_TTL = 30 * ms.DAY;
 const MAX_FAILED = 5;
 const LOCK_MINUTES = 15;
-
-const sha256 = (value: string) => Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, value);
-
-/** Constant-time comparison of two equal-length hex digests. */
-function digestsEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
 
 function findUser(db: MockDb, identifier: string): MockUser | undefined {
   const id = identifier.trim().toLowerCase();

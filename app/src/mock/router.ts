@@ -86,9 +86,13 @@ export function grantOf(ctx: HandlerContext, key: PermissionKey): PermissionGran
   return ctx.auth?.grants.find((g) => g.key === key);
 }
 
-export function can(ctx: HandlerContext, key: PermissionKey, atLeast: GrantScope = "SELF"): boolean {
-  const g = grantOf(ctx, key);
+export function hasGrant(auth: AuthContext, key: PermissionKey, atLeast: GrantScope = "SELF"): boolean {
+  const g = auth.grants.find((x) => x.key === key);
   return !!g && SCOPE_RANK[g.scope] >= SCOPE_RANK[atLeast];
+}
+
+export function can(ctx: HandlerContext, key: PermissionKey, atLeast: GrantScope = "SELF"): boolean {
+  return !!ctx.auth && hasGrant(ctx.auth, key, atLeast);
 }
 
 export function requirePermission(ctx: HandlerContext, key: PermissionKey, atLeast: GrantScope = "SELF"): PermissionGrant {

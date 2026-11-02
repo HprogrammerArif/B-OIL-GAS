@@ -118,6 +118,13 @@ const PEOPLE: PersonSeed[] = [
     emergency: "+880 1711-445566 (Wife)",
   },
   {
+    code: "EMP-0733", pernr: "PR-57733", name: "Md. Rahim Uddin", nameBn: "মোঃ রহিম উদ্দিন", shortName: "Rahim",
+    initials: "RU", email: "rahim.accounts@bashundhara.com", phone: "+880 1716-553311", dept: "dept_fin", site: "site_hq",
+    title: "Senior Accounts Executive", titleBn: "সিনিয়র হিসাব নির্বাহী", grade: ["O4", "Senior Officer"],
+    manager: "EMP-0062", joinDate: "2020-04-12", status: "ON_LEAVE", color: "#0F766E", nid: "1987269201920733", blood: "A-",
+    emergency: "+880 1911-552244 (Wife)",
+  },
+  {
     code: "EMP-0782", pernr: "PR-51209", name: "Shakil Ahmed", nameBn: "শাকিল আহমেদ", shortName: "Shakil",
     initials: "SA", email: "shakil.proc@bashundhara.com", phone: "+880 1718-332211", dept: "dept_fin", site: "site_hq",
     title: "Assistant Manager (Accounts & Billing)", titleBn: "সহকারী ব্যবস্থাপক (হিসাব ও বিলিং)", grade: ["M1", "Assistant Manager"],

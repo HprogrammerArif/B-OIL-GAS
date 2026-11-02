@@ -15,6 +15,7 @@ import { HomeHeader } from "../components/HomeHeader";
 import { QuickActions, type QuickAction } from "../components/QuickActions";
 import { homeVariantsFor, resolveHomeVariant, type HomeVariant } from "../persona-resolver";
 import { HomeVariantBody } from "../components/HomeVariantBody";
+import { useTabBadges } from "../useTabBadges";
 
 type ActionDef = Omit<QuickAction, "label"> & { labelKey: string; permission: PermissionKey };
 
@@ -48,6 +49,7 @@ export function HomeScreen() {
   const roles = useAppSelector((s) => s.auth.roles);
   const preferred = useAppSelector((s) => s.ui.homeVariant);
   const perms = usePermissions();
+  const badges = useTabBadges();
   const [refreshing, setRefreshing] = useState(false);
 
   const variants = useMemo(() => homeVariantsFor(roles), [roles]);
@@ -78,7 +80,7 @@ export function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={theme.accent} />}
         showsVerticalScrollIndicator={false}
       >
-        <HomeHeader executive={variant === "executive"} />
+        <HomeHeader executive={variant === "executive"} unread={badges.unread} />
         <OfflineBanner />
         <View style={styles.body}>
           {variants.length > 1 ? (

@@ -44,7 +44,10 @@
     "tomorrow": "Tomorrow",
     "justNow": "Just now",
     "ago": "{{time}} ago",
-    "in": "in {{time}}"
+    "in": "in {{time}}",
+    "minutesShort": "{{n}} min",
+    "hoursShort": "{{n}} h",
+    "daysShort": "{{n}} d"
   },
   "greeting": {
     "morning": "Good morning",

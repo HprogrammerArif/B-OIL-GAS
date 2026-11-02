@@ -1,0 +1,12 @@
+{
+  "title": "বিজ্ঞপ্তি",
+  "markAllRead": "সব পঠিত করুন",
+  "allRead": "সব দেখা হয়েছে",
+  "filters": { "ALL": "সব", "unread": "অপঠিত", "APPROVALS": "অনুমোদন", "SAFETY": "নিরাপত্তা", "TRANSPORT": "পরিবহন", "PEOPLE": "কর্মী", "GENERAL": "সাধারণ" },
+  "empty": { "title": "কোনো বিজ্ঞপ্তি নেই", "message": "আপনার আবেদন ও অনুমোদনের আপডেট এখানে দেখা যাবে।" },
+  "acknowledge": "স্বীকৃতি দিন",
+  "acknowledged": "স্বীকৃত",
+  "ackRequired": "স্বীকৃতি প্রয়োজন",
+  "criticalTitle": "জরুরি সতর্কতা",
+  "newToast": "নতুন বিজ্ঞপ্তি"
+}

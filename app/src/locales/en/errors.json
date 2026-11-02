@@ -11,5 +11,7 @@
   "crashBody": "The error has been reported. You can try again.",
   "required": "Required",
   "tooShort": "Too short",
-  "invalidAmount": "Enter a valid amount"
+  "invalidAmount": "Enter a valid amount",
+  "commentMin10": "Write at least 10 characters",
+  "otp6": "Enter the 6-digit code"
 }

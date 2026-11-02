@@ -44,6 +44,13 @@ export function useFormat() {
       dateTime: (iso: string | Date) => formatDateTime(iso, o),
       dayTime: (iso: string) =>
         formatDayTime(iso, o, { today: t("time.today"), yesterday: t("time.yesterday"), tomorrow: t("time.tomorrow") }),
+      /** Compact absolute duration, e.g. SLA "6 h" / "2 d". */
+      duration: (hours: number) => {
+        const h = Math.abs(hours);
+        if (h < 1) return t("time.minutesShort", { n: formatNumber(Math.max(1, Math.round(h * 60)), o) });
+        if (h < 48) return t("time.hoursShort", { n: formatNumber(Math.round(h), o) });
+        return t("time.daysShort", { n: formatNumber(Math.round(h / 24), o) });
+      },
       ago: (iso: string) => {
         const diff = Date.now() - new Date(iso).getTime();
         if (diff >= 0 && diff < 60_000) return t("time.justNow");

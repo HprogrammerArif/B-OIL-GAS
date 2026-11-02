@@ -1,0 +1,85 @@
+{
+  "title": "Inbox",
+  "segments": { "approvals": "Approvals", "notifications": "Notifications" },
+  "views": { "mine": "Assigned to me", "all": "Company pipeline" },
+  "summary": { "pending": "Waiting on you", "dueSoon": "Due within 12 h", "overdue": "{{count}} overdue", "value": "Total value" },
+  "categories": {
+    "ALL": "All", "PROCUREMENT": "Procurement", "CLAIMS": "Claims", "FLEET": "Vehicles",
+    "LEAVE": "Leave", "HR": "HR", "ASSETS": "Assets", "VISITORS": "Visitors"
+  },
+  "sla": { "any": "Any due date", "breached": "Overdue", "12h": "< 12 h", "24h": "< 24 h", "overdueBy": "Overdue {{time}}", "dueIn": "Due in {{time}}" },
+  "urgency": { "CRITICAL": "Critical", "HIGH": "High", "NORMAL": "Normal" },
+  "status": { "IN_REVIEW": "In review", "APPROVED": "Approved", "REJECTED": "Rejected", "RETURNED": "Returned", "WITHDRAWN": "Withdrawn" },
+  "objectTypes": {
+    "NoteSheet": "Note-sheet", "Claim": "Expense claim", "Requisition": "Vehicle request",
+    "LeaveRequest": "Leave request", "AssetRequisition": "Asset request", "Visit": "Visitor pass"
+  },
+  "searchPlaceholder": "Search title, ref no. or requester",
+  "empty": { "title": "Nothing waiting for you", "message": "New requests that need your decision will appear here.", "filtered": "No items match these filters" },
+  "readOnly": "View only",
+  "step": "Step {{no}} · {{name}}",
+  "requester": "Requested by",
+  "submitted": "Submitted {{time}}",
+  "openRecord": "Open full record",
+  "history": {
+    "title": "My approval history", "decided": "You decided", "initiated": "You requested", "empty": "No decisions yet",
+    "all": "All", "APPROVED": "Approved", "RETURNED": "Returned", "REJECTED": "Rejected"
+  },
+  "detail": {
+    "trail": "Approval trail", "activity": "Activity", "details": "Details", "waiting": "Waiting", "active": "Waiting for decision",
+    "skipped": "Skipped", "signedHash": "Signed · {{hash}}", "reason": "Reason", "improvements": "What to fix",
+    "offline": "Reconnect to approve, return or reject.", "notYours": "This step is assigned to {{name}}."
+  },
+  "actionTypes": {
+    "SUBMIT": "Submitted", "APPROVE": "Approved", "REJECT": "Rejected", "RETURN": "Returned for correction",
+    "COMMENT": "Commented", "WITHDRAW": "Withdrew the request", "ESCALATE": "Escalated"
+  },
+  "decision": {
+    "approve": "Approve", "return": "Return", "reject": "Reject", "withdraw": "Withdraw request",
+    "approveTitle": "Approve this request", "returnTitle": "Return for correction", "rejectTitle": "Reject this request",
+    "withdrawTitle": "Withdraw this request?", "withdrawMessage": "Approvers will no longer see it. You can submit a new request later.",
+    "commentOptional": "Directive or note (optional)", "commentRequired": "Explain the decision",
+    "commentHint": "At least 10 characters. The requester will see this.",
+    "reasonPreset": "Common reasons", "improvements": "What should the requester fix?",
+    "otp": "Verification code", "otpHint": "Enter the 6-digit code sent to your phone.",
+    "otpSend": "Send code", "otpResend": "Resend code", "otpSent": "Code sent. It expires in 5 minutes.",
+    "otpDemo": "Demo code: {{code}}", "signNotice": "This step needs your digital signature.",
+    "confirmApprove": "Approve & sign", "approved": "Approved", "approvedRef": "Approved · {{ref}}",
+    "returned": "Returned to requester", "rejected": "Rejected", "withdrawn": "Request withdrawn",
+    "alreadyDecided": "Already decided by {{name}}", "alreadyDecidedAnon": "This item was already decided",
+    "selfApproval": "You cannot approve your own request", "otpInvalid": "That code is invalid or expired"
+  },
+  "batch": {
+    "selected": "{{count}} selected", "approve": "Approve {{count}}", "title": "Approve {{count}} items?",
+    "message": "Total value {{amount}}. Items needing a signature are skipped.", "done": "{{ok}} approved",
+    "partial": "{{ok}} approved, {{failed}} need individual review", "hint": "Long-press items to select several"
+  },
+  "presets": {
+    "claim": {
+      "receipts": { "label": "Missing original receipts / VAT slips", "advice": "Please attach clear photos or scans of original hotel/transport receipts and resubmit." },
+      "limit": { "label": "Allowance or hotel bill above company limit", "advice": "Please adjust the hotel or daily food allowance to match your grade travel policy limit." },
+      "tripNote": { "label": "Trip approval note not attached", "advice": "Attach your manager's travel approval note and visit schedule before resubmitting." },
+      "duplicate": { "label": "Duplicate or unclear travel distance", "advice": "Please check the local travel dates and fare amounts so there are no duplicate entries." }
+    },
+    "notesheet": {
+      "budget": { "label": "Budget balance check needed", "advice": "Please confirm available budget with Finance & Accounts before sending for final signature." },
+      "quotes": { "label": "Need 3 vendor price quotes", "advice": "Please collect and attach at least 3 written vendor quotations for fair price comparison." },
+      "technical": { "label": "Technical or warranty details unclear", "advice": "Add clear model details, delivery timeline, and warranty period from the supplier." },
+      "negotiate": { "label": "Negotiate better price or payment terms", "advice": "Please ask the supplier for a better discount or standard 30-day payment after delivery." }
+    },
+    "requisition": {
+      "busy": { "label": "All office cars busy at requested time", "advice": "Please adjust your departure time slightly or share a pooled ride heading in the same direction." },
+      "shuttle": { "label": "Route covered by staff shuttle bus", "advice": "Please use the scheduled staff shuttle bus unless carrying heavy samples or urgent client files." },
+      "purpose": { "label": "Visit purpose needs more detail", "advice": "Please mention the client name, meeting time, or work purpose clearly in the booking form." }
+    },
+    "asset": {
+      "stock": { "label": "Check existing store room stock first", "advice": "Please check with HR/IT Store Room first to see if a spare unit is already available." },
+      "inspection": { "label": "Need engineer inspection report", "advice": "Attach a short inspection note confirming why the current equipment cannot be repaired." },
+      "quote": { "label": "Price estimate needs vendor quote", "advice": "Attach a recent supplier price quote matching the requested model and warranty." }
+    },
+    "general": {
+      "papers": { "label": "Supporting papers missing", "advice": "Please attach all supporting documents and receipts before submitting again." },
+      "manager": { "label": "Manager review required first", "advice": "Please review the details with your supervisor and resubmit." }
+    }
+  }
+}

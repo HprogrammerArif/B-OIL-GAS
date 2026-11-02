@@ -299,3 +299,24 @@ export const ROLE_NAMES: Record<RoleKey, string> = {
   EMPLOYEE: "Employee",
   EXECUTIVE_ASSISTANT: "Executive Assistant",
 };
+
+export const ROLE_NAMES_BN: Record<RoleKey, string> = {
+  SUPER_ADMIN: "সুপার অ্যাডমিন",
+  CHAIRMAN: "চেয়ারম্যান",
+  DIRECTOR: "পরিচালক",
+  PLANT_GM: "প্ল্যান্ট জেনারেল ম্যানেজার",
+  HOD: "বিভাগীয় প্রধান",
+  LINE_MANAGER: "লাইন ম্যানেজার",
+  HR_ADMIN: "এইচআর প্রশাসক",
+  FINANCE: "অর্থ বিভাগ",
+  TRANSPORT_ADMIN: "পরিবহন প্রশাসক",
+  COMPLIANCE_OFFICER: "কমপ্লায়েন্স কর্মকর্তা",
+  HSE_OFFICER: "এইচএসই কর্মকর্তা",
+  SECURITY_GATE: "নিরাপত্তা গেট",
+  RECEPTION: "অভ্যর্থনা",
+  MAILROOM: "মেইলরুম",
+  IT_ADMIN: "আইটি প্রশাসক",
+  DRIVER: "চালক",
+  EMPLOYEE: "কর্মচারী",
+  EXECUTIVE_ASSISTANT: "নির্বাহী সহকারী",
+};

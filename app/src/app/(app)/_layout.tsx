@@ -3,15 +3,17 @@ import { View, StyleSheet } from "react-native";
 import { LockScreen } from "@/features/lock/LockScreen";
 import { useSessionBootstrap } from "@/features/auth/useSessionBootstrap";
 import { useAutoLock } from "@/hooks/useAutoLock";
+import { useRealtime } from "@/hooks/useRealtime";
 import { useTheme } from "@/hooks/use-theme";
 import { useAppSelector } from "@/redux/hooks";
 
-/** Signed-in shell: session bootstrap, auto-lock and the biometric gate. */
+/** Signed-in shell: session bootstrap, realtime, auto-lock and the biometric gate. */
 export default function AppLayout() {
   const theme = useTheme();
   const isLocked = useAppSelector((s) => s.auth.locked);
   useSessionBootstrap();
   useAutoLock();
+  useRealtime();
   return (
     <View style={styles.flex}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.background } }}>
