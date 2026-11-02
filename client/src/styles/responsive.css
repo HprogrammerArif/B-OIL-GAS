@@ -499,7 +499,7 @@
   .user-dropdown-menu {
     right: -4px !important;
     width: calc(100vw - 16px) !important;
-    max-width: 320px !important;
+    max-width: 292px !important;
   }
 
   /* Mobile Bottom Navigation Dock Activation */

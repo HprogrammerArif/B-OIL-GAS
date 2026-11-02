@@ -286,8 +286,8 @@ export default function Topbar({
             <div className="user-dropdown-menu" role="menu" aria-label="User Account Menu">
               {/* Pinned Header */}
               <div className="user-dropdown-hd">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                  <div className="user-avatar" style={{ background: meta.avatarColor, width: '44px', height: '44px', fontSize: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <div className="user-avatar" style={{ background: meta.avatarColor, width: '38px', height: '38px', fontSize: '13px' }}>
                     {meta.avatarUrl ? (
                       <img
                         src={meta.avatarUrl}
@@ -302,14 +302,14 @@ export default function Topbar({
                     <span className="avatar-status-dot" />
                   </div>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div className="name" style={{ fontSize: '13.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <span>{t(meta.name, meta.nameBn, lang)}</span>
+                    <div className="name" style={{ fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(meta.name, meta.nameBn, lang)}</span>
                       <span className="active-pill-badge">🟢 {t('Online', 'অনলাইন', lang)}</span>
                     </div>
-                    <div className="role" style={{ fontSize: '11px', color: 'var(--brand-gold)', fontWeight: 600 }}>
+                    <div className="role" style={{ fontSize: '10.5px', color: 'var(--brand-gold)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t(meta.label, meta.labelBn, lang)}
                     </div>
-                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', marginTop: '2px', wordBreak: 'break-all' }}>
+                    <div style={{ fontSize: '9.5px', color: 'rgba(255,255,255,0.7)', marginTop: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {meta.email}
                     </div>
                   </div>
