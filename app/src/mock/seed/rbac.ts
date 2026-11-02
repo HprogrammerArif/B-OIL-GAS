@@ -46,6 +46,14 @@ const ROLE_GRANTS: Partial<Record<RoleKey, GrantSpec[]>> = {
     ["parcels:scan", "SELF"],
     ["parcels:deliver", "SELF"],
   ],
+  LINE_MANAGER: [
+    ["workflow:inbox", "SELF"],
+    ["workflow:act", "TEAM"],
+    ["leave:read", "TEAM"],
+    ["leave:approve", "TEAM"],
+    ["attendance:read", "TEAM"],
+    ["attendance:approve-regularisation", "TEAM"],
+  ],
   HOD: [
     ["dashboards:read", "DEPARTMENT"],
     ["workflow:inbox", "SELF"],

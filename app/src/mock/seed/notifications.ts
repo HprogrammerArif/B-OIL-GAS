@@ -41,13 +41,14 @@ export function seedWorkflowNotifications(db: MockDb): void {
       const initiator = db.users.find((u) => u.employeeId === inst.initiatorEmployeeId);
       if (!initiator) continue;
       const returned = inst.status === "RETURNED";
+      const verb = { RETURNED: ["returned for correction", "সংশোধনের জন্য ফেরত"], REJECTED: ["rejected", "প্রত্যাখ্যাত"] }[inst.status as string] ?? ["approved", "অনুমোদিত"];
       seedNotification(db, {
         userId: initiator.id,
         type: returned ? "APPROVAL_RETURNED" : "APPROVAL_DECIDED",
-        priority: returned ? "HIGH" : "NORMAL",
+        priority: inst.status === "APPROVED" ? "NORMAL" : "HIGH",
         category: "APPROVALS",
-        title: returned ? `${inst.summary.refNo} returned for correction` : `${inst.summary.refNo} approved`,
-        titleBn: returned ? `${inst.summary.refNo} সংশোধনের জন্য ফেরত` : `${inst.summary.refNo} অনুমোদিত`,
+        title: `${inst.summary.refNo} ${verb[0]}`,
+        titleBn: `${inst.summary.refNo} ${verb[1]}`,
         body: inst.summary.title,
         bodyBn: inst.summary.titleBn,
         data: { module: MODULE_OF[inst.objectType], objectType: inst.objectType, objectId: inst.objectId, route: `/approvals/${inst.id}` },

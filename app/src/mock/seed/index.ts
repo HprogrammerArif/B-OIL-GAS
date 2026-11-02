@@ -1,5 +1,7 @@
 import { nowIso } from "../clock";
 import { MOCK_DB_VERSION, type MockDb } from "../db/schema";
+import { seedAttendance } from "./attendance";
+import { seedLeave } from "./leave";
 import { seedNotices } from "./notices";
 import { seedWorkflowNotifications } from "./notifications";
 import { buildPeople, DEPARTMENTS, SITES } from "./org";
@@ -23,7 +25,17 @@ export function buildSeed(): MockDb {
     notifications: [],
     notices: [],
     broadcasts: [],
+    geofences: [],
+    shifts: [],
+    shiftAssignments: {},
+    punches: [],
+    regularisations: [],
+    leaveTypes: [],
+    leaveBalances: [],
+    leaveRequests: [],
   };
+  seedLeave(db);
+  seedAttendance(db);
   seedWorkflowNotifications(db);
   seedNotices(db);
   return db;

@@ -1,4 +1,6 @@
+import type { PunchResult, PunchType, RegularisationType, RequestStatus } from "@/types/domain/attendance";
 import type { Priority, Urgency } from "@/types/domain/common";
+import type { HalfDay, LeaveCode } from "@/types/domain/leave";
 import type { DepartmentRef, Lang, MeEmployee, RoleKey, SiteRef } from "@/types/domain/identity";
 import type { NoticeAudienceRef, NoticeCategory, NoticeStatus } from "@/types/domain/notice";
 import type { AppNotification } from "@/types/domain/notification";
@@ -180,6 +182,105 @@ export interface MockBroadcast {
   dismissedBy: string[];
 }
 
+/* ─── Attendance & leave (doc 02 Geofence, Shift, AttendancePunch, Regularisation, Leave*) ─── */
+
+export interface MockGeofence {
+  id: string;
+  siteId: string;
+  name: string;
+  nameBn: string;
+  centerLat: number;
+  centerLng: number;
+  radiusMeters: number;
+  isActive: boolean;
+}
+
+export interface MockShift {
+  id: string;
+  code: string;
+  name: string;
+  nameBn: string;
+  startTime: string;
+  endTime: string;
+  graceMinutes: number;
+}
+
+export interface MockPunch {
+  id: string;
+  employeeId: string;
+  /** Local `YYYY-MM-DD` the punch counts towards. */
+  date: string;
+  type: PunchType;
+  punchedAt: string;
+  receivedAt: string;
+  lat: number | null;
+  lng: number | null;
+  accuracyM: number | null;
+  geofenceId: string | null;
+  siteId: string | null;
+  distanceM: number | null;
+  isMockLocation: boolean;
+  deviceId: string | null;
+  platform: "ANDROID" | "IOS" | null;
+  result: PunchResult;
+  /** Accepted outside the fence under an approved FIELD_DUTY regularisation. */
+  fieldDuty: boolean;
+  regularisationId: string | null;
+}
+
+export interface MockRegularisation {
+  id: string;
+  refNo: string;
+  employeeId: string;
+  date: string;
+  type: RegularisationType;
+  requestedIn: string | null;
+  requestedOut: string | null;
+  reason: string;
+  status: RequestStatus;
+  createdAt: string;
+  workflowInstanceId: string | null;
+}
+
+export interface MockLeaveType {
+  id: string;
+  code: LeaveCode;
+  name: string;
+  nameBn: string;
+  annualQuota: number;
+  requiresDoc: boolean;
+  halfDayAllowed: boolean;
+  checksBalance: boolean;
+}
+
+export interface MockLeaveBalance {
+  employeeId: string;
+  leaveTypeId: string;
+  year: number;
+  entitled: number;
+  used: number;
+}
+
+export interface MockLeaveRequest {
+  id: string;
+  refNo: string;
+  employeeId: string;
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  halfDay: HalfDay | null;
+  days: number;
+  reason: string;
+  status: RequestStatus;
+  isInformed: boolean;
+  reviewedById: string | null;
+  reviewedAt: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  workflowInstanceId: string | null;
+}
+
 /**
  * Whole in-app database. Module tables are added alongside their handlers;
  * bump `MOCK_DB_VERSION` whenever a table shape changes so devices reseed.
@@ -199,6 +300,15 @@ export interface MockDb {
   notifications: MockNotification[];
   notices: MockNotice[];
   broadcasts: MockBroadcast[];
+  geofences: MockGeofence[];
+  shifts: MockShift[];
+  /** employeeId → shiftId (single open-ended assignment per employee). */
+  shiftAssignments: Record<string, string>;
+  punches: MockPunch[];
+  regularisations: MockRegularisation[];
+  leaveTypes: MockLeaveType[];
+  leaveBalances: MockLeaveBalance[];
+  leaveRequests: MockLeaveRequest[];
 }
 
-export const MOCK_DB_VERSION = 4;
+export const MOCK_DB_VERSION = 5;

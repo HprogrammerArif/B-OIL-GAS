@@ -1,6 +1,6 @@
 import type { Money, PersonRef, Urgency } from "./common";
 
-export type WorkflowObjectType = "NoteSheet" | "Claim" | "Requisition" | "LeaveRequest" | "AssetRequisition" | "Visit";
+export type WorkflowObjectType = "NoteSheet" | "Claim" | "Requisition" | "LeaveRequest" | "Regularisation" | "AssetRequisition" | "Visit";
 
 /** Inbox category chips (doc 03 §4.6 `?category=`). */
 export type ApprovalCategory = "PROCUREMENT" | "CLAIMS" | "FLEET" | "LEAVE" | "HR" | "ASSETS" | "VISITORS";
@@ -69,7 +69,7 @@ export interface WorkflowInstance {
   steps: WorkflowStep[];
   actions: WorkflowAction[];
   /** Caller-relative flags so clients never re-derive authorisation. */
-  viewer: { canAct: boolean; canWithdraw: boolean; isInitiator: boolean };
+  viewer: { canAct: boolean; canReturn: boolean; canWithdraw: boolean; isInitiator: boolean };
 }
 
 export interface InboxItem {

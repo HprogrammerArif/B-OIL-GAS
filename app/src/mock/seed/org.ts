@@ -74,7 +74,7 @@ const PEOPLE: PersonSeed[] = [
     initials: "KZ", email: "transport.admin@bashundhara.com", phone: "+880 1712-990011", dept: "dept_trans", site: "site_plant",
     title: "Transport & Admin Supervisor", titleBn: "পরিবহন ও প্রশাসন তত্ত্বাবধায়ক", grade: ["M3", "Supervisor"],
     manager: "EMP-0028", joinDate: "2020-02-10", status: "ACTIVE", color: "#059669", nid: "1982269201928045", blood: "B+",
-    emergency: "+880 1912-334455 (Brother)", roles: ["TRANSPORT_ADMIN", "SECURITY_GATE", "MAILROOM"],
+    emergency: "+880 1912-334455 (Brother)", roles: ["TRANSPORT_ADMIN", "SECURITY_GATE", "MAILROOM", "LINE_MANAGER"],
   },
   {
     code: "EMP-0062", pernr: "PR-50119", name: "Farida Begum", nameBn: "ফরিদা বেগম", shortName: "Farida", shortNameBn: "ফরিদা",

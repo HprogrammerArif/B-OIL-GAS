@@ -32,6 +32,10 @@ export interface WorkflowHooks {
   onRejected?(ctx: HookContext): void;
   onReturned?(ctx: HookContext): void;
   onWithdrawn?(ctx: HookContext): void;
+  /** Objects whose lifecycle has no RETURNED state (leave, regularisation — doc 02 `LeaveStatus`). */
+  noReturn?: boolean;
+  /** Deep link for the requester's decision notification; defaults to the approval record. */
+  initiatorRoute?(inst: MockWfInstance): string;
 }
 
 const hooks = new Map<WorkflowObjectType, WorkflowHooks>();
@@ -45,6 +49,7 @@ export const MODULE_OF: Record<WorkflowObjectType, ModuleKey> = {
   Claim: "claims",
   Requisition: "fleet",
   LeaveRequest: "leave",
+  Regularisation: "attendance",
   AssetRequisition: "assets",
   Visit: "visitors",
 };
@@ -59,6 +64,18 @@ export interface StepSpec {
   employeeId?: string;
   slaHours: number;
   requiresSignature?: boolean;
+}
+
+/**
+ * `LINE_MANAGER` approver rule (BR-17-02): the initiator's manager when they have an active account;
+ * an unresolved manager falls back to HR. `null` = top of the chain (CHAIRMAN), so the request is informational.
+ */
+export function lineManagerStep(db: MockDb, employeeId: string, slaHours: number): StepSpec | null {
+  const emp = db.employees.find((e) => e.id === employeeId);
+  if (!emp?.lineManager) return null;
+  const manager = userForEmployee(db, emp.lineManager.id);
+  if (manager) return { key: "LINE_MANAGER", name: "Line manager", nameBn: "লাইন ম্যানেজার", employeeId: manager.employeeId, slaHours };
+  return { key: "HR_REVIEW", name: "HR review", nameBn: "এইচআর পর্যালোচনা", role: "HR_ADMIN", slaHours };
 }
 
 function buildStep(spec: StepSpec, stepNo: number): MockWfStep {
@@ -204,7 +221,12 @@ function decidedNotification(db: MockDb, inst: MockWfInstance, actorEmployeeId: 
     titleBn: `${inst.summary.refNo} ${verb[1]}`,
     body: comment ? `${actor.name}: ${comment}` : `${inst.summary.title} — ${actor.name}`,
     bodyBn: comment ? `${actor.nameBn}: ${comment}` : `${inst.summary.titleBn} — ${actor.nameBn}`,
-    data: { module: MODULE_OF[inst.objectType], objectType: inst.objectType, objectId: inst.objectId, route: `/approvals/${inst.id}` },
+    data: {
+      module: MODULE_OF[inst.objectType],
+      objectType: inst.objectType,
+      objectId: inst.objectId,
+      route: hooks.get(inst.objectType)?.initiatorRoute?.(inst) ?? `/approvals/${inst.id}`,
+    },
   });
 }
 
@@ -257,6 +279,9 @@ export async function performAction(db: MockDb, auth: AuthContext, inst: MockWfI
     case "REJECT":
     case "RETURN": {
       const step = assertCanDecide(db, auth, inst);
+      if (req.type === "RETURN" && h.noReturn) {
+        throw policyViolation("RETURN_NOT_SUPPORTED", "This request can only be approved or rejected");
+      }
       if (!comment || comment.length < 10) throw validationError("comment", "Please explain the decision (at least 10 characters)");
       const decision = req.type === "REJECT" ? "REJECTED" : "RETURNED";
       Object.assign(step, { status: "COMPLETED", decision, comment, decidedAt: at, decidedByEmployeeId: me });
@@ -314,6 +339,7 @@ export function wireSummary(db: MockDb, inst: MockWfInstance) {
 
 export function toWire(db: MockDb, inst: MockWfInstance, auth: AuthContext): WorkflowInstance {
   const isInitiator = inst.initiatorEmployeeId === auth.employee.id;
+  const canAct = isAssignedTo(auth, inst) && hasGrant(auth, "workflow:act");
   return {
     id: inst.id,
     objectType: inst.objectType,
@@ -356,7 +382,8 @@ export function toWire(db: MockDb, inst: MockWfInstance, auth: AuthContext): Wor
       at: a.at,
     })),
     viewer: {
-      canAct: isAssignedTo(auth, inst) && hasGrant(auth, "workflow:act"),
+      canAct,
+      canReturn: canAct && !hooks.get(inst.objectType)?.noReturn,
       canWithdraw: isInitiator && (inst.status === "IN_REVIEW" || inst.status === "RETURNED"),
       isInitiator,
     },

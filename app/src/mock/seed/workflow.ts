@@ -16,7 +16,7 @@ interface SeedStep {
   done?: { by: string; hoursAgo: number; comment: string; decision?: StepDecision; reasonCategory?: string; improvements?: string };
 }
 
-interface SeedSpec {
+export interface SeedSpec {
   ref: string;
   type: WorkflowObjectType;
   objectId: string;
@@ -36,7 +36,7 @@ interface SeedSpec {
   steps: SeedStep[];
 }
 
-const STEP = {
+export const STEP = {
   HOD: { key: "HOD", name: "Department head", nameBn: "বিভাগীয় প্রধান" },
   LM: { key: "LINE_MANAGER", name: "Line manager", nameBn: "লাইন ম্যানেজার" },
   HR: { key: "HR", name: "HR verification", nameBn: "এইচআর যাচাই" },
@@ -47,7 +47,7 @@ const STEP = {
 
 const slug = (ref: string) => ref.toLowerCase().replace(/[^a-z0-9]+/g, "_");
 
-function build(spec: SeedSpec): MockWfInstance {
+export function buildSeedInstance(spec: SeedSpec): MockWfInstance {
   const id = `wfi_${slug(spec.ref)}`;
   const submittedAt = hoursFromNow(-spec.submittedHoursAgo);
   const initiator = empId(spec.initiator);
@@ -294,5 +294,5 @@ const SPECS: SeedSpec[] = [
 ];
 
 export function buildWorkflowSeed(): MockWfInstance[] {
-  return SPECS.map(build);
+  return SPECS.map(buildSeedInstance);
 }
