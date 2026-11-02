@@ -40,7 +40,9 @@ export function ApprovalDetailScreen() {
       {inst.viewer.canAct ? (
         <View style={styles.actions}>
           <Button title={t("decision.reject")} variant="outline" size="sm" icon="close" disabled={!online} onPress={() => setDecision("REJECT")} style={styles.flex} testID="approval-reject" />
-          <Button title={t("decision.return")} variant="secondary" size="sm" icon="arrow-undo" disabled={!online} onPress={() => setDecision("RETURN")} style={styles.flex} testID="approval-return" />
+          {inst.viewer.canReturn ? (
+            <Button title={t("decision.return")} variant="secondary" size="sm" icon="arrow-undo" disabled={!online} onPress={() => setDecision("RETURN")} style={styles.flex} testID="approval-return" />
+          ) : null}
           <Button title={t("decision.approve")} variant="success" size="sm" icon="checkmark" disabled={!online} onPress={() => setDecision("APPROVE")} style={styles.grow} testID="approval-approve" />
         </View>
       ) : (

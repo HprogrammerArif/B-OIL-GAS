@@ -12,7 +12,7 @@
   "status": { "IN_REVIEW": "In review", "APPROVED": "Approved", "REJECTED": "Rejected", "RETURNED": "Returned", "WITHDRAWN": "Withdrawn" },
   "objectTypes": {
     "NoteSheet": "Note-sheet", "Claim": "Expense claim", "Requisition": "Vehicle request",
-    "LeaveRequest": "Leave request", "AssetRequisition": "Asset request", "Visit": "Visitor pass"
+    "LeaveRequest": "Leave request", "Regularisation": "Attendance regularisation", "AssetRequisition": "Asset request", "Visit": "Visitor pass"
   },
   "searchPlaceholder": "Search title, ref no. or requester",
   "empty": { "title": "Nothing waiting for you", "message": "New requests that need your decision will appear here.", "filtered": "No items match these filters" },

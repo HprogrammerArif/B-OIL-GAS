@@ -4,6 +4,7 @@ export { Button } from "./Button";
 export type { ButtonVariant } from "./Button";
 export { Card } from "./Card";
 export { Chip } from "./Chip";
+export { DateField } from "./DateField";
 export { Divider } from "./Divider";
 export { EmptyState } from "./EmptyState";
 export { FormField } from "./FormField";

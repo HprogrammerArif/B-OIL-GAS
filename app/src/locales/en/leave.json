@@ -1,0 +1,60 @@
+{
+  "title": "Leave",
+  "balances": "Balances {{year}}",
+  "left": "{{n}} left",
+  "usedOf": "{{used}} used of {{total}}",
+  "pending": "{{n}} pending",
+  "tabs": { "mine": "My leave", "team": "Team" },
+  "status": {
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "CANCELLED": "Cancelled"
+  },
+  "filters": { "ALL": "All" },
+  "days_one": "{{count}} day",
+  "days_other": "{{count}} days",
+  "halfDay": { "FIRST": "First half", "SECOND": "Second half" },
+  "empty": { "mine": "You have not requested any leave yet", "team": "No team leave to show" },
+  "apply": "Apply for leave",
+  "new": {
+    "title": "Apply for leave",
+    "type": "Leave type",
+    "from": "From",
+    "to": "To",
+    "half": "Half day",
+    "halfHelp": "Counts as 0.5 day. Single day of casual or sick leave only.",
+    "which": "Which half",
+    "reason": "Reason",
+    "reasonHelp": "A short reason for your manager (at least 5 characters).",
+    "summary": "{{days}} · {{available}} available",
+    "willNeedHr": "This request also goes to HR for review.",
+    "route": "Goes to {{name}} for approval",
+    "submit": "Submit request",
+    "submitted": "Leave request sent",
+    "offline": "Connect to the internet to submit leave."
+  },
+  "detail": {
+    "title": "Leave request",
+    "period": "Period",
+    "type": "Type",
+    "reason": "Reason",
+    "submitted": "Submitted {{time}}",
+    "informed": "Informed in advance",
+    "approval": "Approval",
+    "cancel": "Cancel request",
+    "cancelTitle": "Cancel this leave?",
+    "cancelBody": "The days return to your balance.",
+    "cancelReason": "Reason (optional)",
+    "keep": "Keep leave",
+    "cancelled": "Leave cancelled",
+    "cancelledReason": "Cancelled: {{reason}}",
+    "openApproval": "Open approval"
+  },
+  "rules": {
+    "MAX_CONSECUTIVE_CL": "Casual leave is limited to 3 consecutive working days.",
+    "INSUFFICIENT_BALANCE": "You do not have enough balance for this leave type.",
+    "OVERLAP": "You already have leave on these dates.",
+    "NOT_ELIGIBLE": "This leave type is not available to you."
+  }
+}
