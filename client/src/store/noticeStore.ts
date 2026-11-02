@@ -1,3 +1,6 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
+import { nextRef } from '../lib/refs';
+import { nowStamp } from '../lib/clock';
 import React from 'react';
 import { NoticeItem } from '../views/dashboard/types';
 import { NOTICE_BOARD } from '../views/dashboard/dashboardData';
@@ -13,8 +16,12 @@ export interface BroadcastPayload {
   timestamp: string;
 }
 
+const PERSIST_NAME = 'notices';
+const PERSIST_VERSION = 1;
+
 class NoticeStore {
-  private notices: NoticeItem[] = [...NOTICE_BOARD];
+  private notices: NoticeItem[] = loadPersisted<NoticeItem[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...NOTICE_BOARD];
+  // The live banner is intentionally session-only: it should not reappear after a reload.
   private activeBroadcast: BroadcastPayload | null = null;
   private listeners: Set<() => void> = new Set();
 
@@ -25,6 +32,7 @@ class NoticeStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted(PERSIST_NAME, PERSIST_VERSION, () => this.notices);
   }
 
   getNotices(): NoticeItem[] {
@@ -38,8 +46,8 @@ class NoticeStore {
   addNotice(notice: NoticeItem): NoticeItem {
     const newNotice: NoticeItem = {
       ...notice,
-      id: notice.id || `NOT-2026-${Math.floor(100 + Math.random() * 900)}`,
-      date: notice.date || 'Today, Just Now',
+      id: notice.id || nextRef('NOT'),
+      date: notice.date || nowStamp(),
     };
     this.notices = [newNotice, ...this.notices];
     this.notify();
@@ -55,7 +63,7 @@ class NoticeStore {
     authorRole?: string;
   }): { notice: NoticeItem; broadcast: BroadcastPayload } {
     const id = `BC-${Date.now().toString().slice(-4)}`;
-    const timestamp = 'Today, Just Now';
+    const timestamp = nowStamp();
     const author = data.author || 'Ahmed Akbar Sobhan';
     const authorRole = data.authorRole || 'Chairman & Managing Director';
 
@@ -88,7 +96,7 @@ class NoticeStore {
       requiresAck: data.requireAck,
       acknowledgedCount: 1,
       totalRecipients: 788,
-      referenceNo: `BOGCL/NOTICE/2026-${Math.floor(100 + Math.random() * 900)}`,
+      referenceNo: `BOGCL/NOTICE/${nextRef('NTC', 3).slice(4)}`,
     };
 
     this.notices = [archivedNotice, ...this.notices];

@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "driver": "চালক",
+    "gate": "গেট",
+    "mailroom": "মেইলরুম",
+    "hse": "নিরাপত্তা",
+    "executive": "নির্বাহী",
+    "approver": "অনুমোদন",
+    "employee": "আমার দিন"
+  },
+  "quickActions": "দ্রুত কাজ",
+  "yourModules": "আপনার মডিউল",
+  "today": "আজ",
+  "actions": {
+    "applyLeave": "ছুটির আবেদন",
+    "newClaim": "নতুন দাবি",
+    "bookVehicle": "গাড়ি বুকিং",
+    "inviteGuest": "অতিথি আমন্ত্রণ",
+    "reportIncident": "ঘটনা রিপোর্ট",
+    "sendParcel": "পার্সেল পাঠান",
+    "scanPass": "পাস স্ক্যান",
+    "scanParcel": "পার্সেল স্ক্যান",
+    "punch": "পাঞ্চ",
+    "newNoteSheet": "নতুন নোট-শিট"
+  },
+  "notifications": "বিজ্ঞপ্তি",
+  "openProfile": "প্রোফাইল খুলুন"
+}

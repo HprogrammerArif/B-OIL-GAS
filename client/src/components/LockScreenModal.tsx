@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
-import { Lock, Unlock, LogOut, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { Lock, Unlock, LogOut } from 'lucide-react';
+import { showToast } from './ToastManager';
+import { sessionStore } from '../auth/session';
+
+const MAX_UNLOCK_ATTEMPTS = 5;
 
 interface LockScreenModalProps {
   role: AppRole;
@@ -18,11 +21,18 @@ export default function LockScreenModal({
 }: LockScreenModalProps) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [checking, setChecking] = useState(false);
   const meta = ROLE_META[role];
 
-  const handleUnlockAttempt = (e: React.FormEvent) => {
+  const handleUnlockAttempt = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin.trim() === '1234') {
+    if (!pin || checking) return;
+    setChecking(true);
+    const ok = await sessionStore.verifyPassword(pin);
+    setChecking(false);
+    setPin('');
+    if (ok) {
       onUnlock();
       showToast(
         t(
@@ -32,9 +42,14 @@ export default function LockScreenModal({
         ),
         'success'
       );
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 2500);
+      return;
+    }
+    const next = attempts + 1;
+    setAttempts(next);
+    setError(true);
+    if (next >= MAX_UNLOCK_ATTEMPTS) {
+      showToast(t('Too many failed attempts. Please sign in again.', 'বারবার ভুল চেষ্টা। আবার সাইন ইন করুন।', lang), 'danger');
+      onLogout();
     }
   };
 
@@ -43,13 +58,13 @@ export default function LockScreenModal({
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'radial-gradient(ellipse at center, #111A38 0%, #060D1F 100%)',
+        background: 'radial-gradient(ellipse at center, var(--surface-inverse) 0%, var(--surface-inverse-deep) 100%)',
         zIndex: 2000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
-        color: '#fff',
+        color: 'var(--text-on-brand)',
         animation: 'fadeInBackdrop 0.25s ease',
       }}
     >
@@ -101,7 +116,7 @@ export default function LockScreenModal({
             height: '74px',
             borderRadius: '50%',
             background: meta.avatarColor,
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             border: '3px solid var(--brand-gold)',
             display: 'flex',
             alignItems: 'center',
@@ -115,13 +130,13 @@ export default function LockScreenModal({
           {meta.initials}
         </div>
 
-        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: '#fff' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-on-brand)' }}>
           {t(meta.name, meta.nameBn, lang)}
         </h2>
         <div style={{ fontSize: '12.5px', color: 'var(--brand-gold)', fontWeight: 600 }}>
           {t(meta.label, meta.labelBn, lang)}
         </div>
-        <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', marginBottom: '20px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', marginBottom: '20px' }}>
           {t(`${meta.dept} • ${meta.empId}`, `${meta.deptBn} • ${meta.empId}`, lang)}
         </div>
 
@@ -130,13 +145,13 @@ export default function LockScreenModal({
           <div style={{ marginBottom: '14px' }}>
             <input
               type="password"
-              placeholder={t('Enter 4-Digit PIN (Demo PIN: 1234)', '৪-সংখ্যার পিন দিন (ডেমো পিন: 1234)', lang)}
+              placeholder={t('Enter your password', 'আপনার পাসওয়ার্ড দিন', lang)}
               value={pin}
               onChange={(e) => {
                 setPin(e.target.value);
                 if (error) setError(false);
               }}
-              maxLength={6}
+              autoComplete="current-password"
               autoFocus
               style={{
                 width: '100%',
@@ -145,18 +160,22 @@ export default function LockScreenModal({
                 letterSpacing: '3px',
                 fontSize: '15px',
                 borderRadius: '8px',
-                border: error ? '2px solid #EF4444' : '1px solid rgba(255, 255, 255, 0.2)',
+                border: error ? '2px solid var(--status-danger)' : '1px solid rgba(255, 255, 255, 0.2)',
                 background: 'rgba(255, 255, 255, 0.08)',
-                color: '#fff',
+                color: 'var(--text-on-brand)',
                 outline: 'none',
                 boxSizing: 'border-box',
               }}
             />
-            <div style={{ color: error ? '#F87171' : '#94A3B8', fontSize: '11px', marginTop: '6px' }}>
-              {error
-                ? t('Incorrect PIN. Please enter 1234 to unlock.', 'ভুল পিন। আনলক করতে 1234 টাইপ করুন।', lang)
-                : t('Demo PIN: 1234', 'ডেমো পিন: 1234', lang)}
-            </div>
+            {error && (
+              <div style={{ color: 'var(--status-danger-bright)', fontSize: '11px', marginTop: '6px' }}>
+                {t(
+                  `Incorrect password. ${MAX_UNLOCK_ATTEMPTS - attempts} attempt(s) left.`,
+                  `ভুল পাসওয়ার্ড। আর ${MAX_UNLOCK_ATTEMPTS - attempts} বার চেষ্টা করা যাবে।`,
+                  lang
+                )}
+              </div>
+            )}
           </div>
 
           <button
@@ -181,33 +200,11 @@ export default function LockScreenModal({
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '14px', fontSize: '11px', flexWrap: 'wrap' }}>
           <button
             type="button"
-            onClick={() => {
-              onUnlock();
-              showToast(t('Unlocked using quick fingerprint check.', 'দ্রুত ফিঙ্গারপ্রিন্ট যাচাইয়ে আনলক হয়েছে।', lang), 'success');
-            }}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#94A3B8',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-            }}
-          >
-            <ShieldCheck size={13} color="#10B981" />
-            <span>{t('Quick Fingerprint Unlock', 'দ্রুত ফিঙ্গারপ্রিন্ট আনলক', lang)}</span>
-          </button>
-
-          <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>•</span>
-
-          <button
-            type="button"
             onClick={onLogout}
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#F87171',
+              color: 'var(--status-danger-bright)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',

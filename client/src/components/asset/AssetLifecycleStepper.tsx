@@ -51,12 +51,12 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
 
   const healthColor =
     asset.lifecycleStage === 'disposed'
-      ? '#64748B'
+      ? 'var(--text-3)'
       : asset.healthScore >= 85
-      ? '#059669'
+      ? 'var(--status-success)'
       : asset.healthScore >= 60
-      ? '#D97706'
-      : '#DC2626';
+      ? 'var(--status-warning)'
+      : 'var(--status-danger)';
 
   return (
     <div className="eam-stepper-card">
@@ -83,7 +83,7 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
               className="badge"
               style={{
                 fontSize: '10px',
-                background: `${healthColor}18`,
+                background: `color-mix(in srgb, ${healthColor} 10%, transparent)`,
                 color: healthColor,
                 fontWeight: 800,
               }}
@@ -154,10 +154,10 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
             height: '100%',
             borderRadius: '99px',
             background: fin.isEconomicEoLCandidate
-              ? 'linear-gradient(90deg, #D97706, #DC2626)'
+              ? 'linear-gradient(90deg, var(--status-warning-solid), var(--status-danger-solid))'
               : fin.remainingUsefulLifePct <= 25
-              ? '#D97706'
-              : 'linear-gradient(90deg, #059669, #10B981)',
+              ? 'var(--status-warning)'
+              : 'linear-gradient(90deg, var(--status-success-solid), var(--status-success-solid))',
             transition: 'width 0.3s ease',
           }}
         />
@@ -171,7 +171,7 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
             borderRadius: '8px',
             background: 'rgba(220, 38, 38, 0.08)',
             border: '1px solid rgba(220, 38, 38, 0.25)',
-            color: '#DC2626',
+            color: 'var(--status-danger)',
             fontSize: '11.5px',
             display: 'flex',
             alignItems: 'center',

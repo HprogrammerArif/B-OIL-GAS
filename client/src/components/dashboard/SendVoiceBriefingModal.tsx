@@ -18,8 +18,9 @@ import {
   Layers,
 } from 'lucide-react';
 import { Lang, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { voiceBriefingStore, VoiceBriefingItem } from '../../store/voiceBriefingStore';
+import { nowStamp } from '../../lib/clock';
 
 interface SendVoiceBriefingModalProps {
   isOpen: boolean;
@@ -188,7 +189,7 @@ export default function SendVoiceBriefingModal({
       title: currentPresetObj?.title || "Chairman's Executive Voice Directive",
       titleBn: currentPresetObj?.titleBn || 'চেয়ারম্যান মহোদয়ের ভয়েস নির্দেশনা',
       durationSeconds: seconds || 42,
-      recordedAt: 'Today, Just Now',
+      recordedAt: nowStamp(),
       transcript: transcript.trim() || PRESET_VOICE_MEMOS[0].text,
       transcriptBn: transcriptBn.trim() || PRESET_VOICE_MEMOS[0].textBn,
       targetAudiences: audiences.length > 0 ? audiences : ['Inner Circle'],
@@ -244,7 +245,7 @@ export default function SendVoiceBriefingModal({
           borderRadius: '16px',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
           overflow: 'hidden',
-          background: '#FFFFFF',
+          background: 'var(--surface-1)',
           margin: 'auto',
           animation: 'modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both',
         }}
@@ -254,8 +255,8 @@ export default function SendVoiceBriefingModal({
         <div
           className="modal-hd"
           style={{
-            background: 'linear-gradient(135deg, #18181B 0%, #27272A 50%, #3F3F46 100%)',
-            color: '#FFFFFF',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 50%, var(--surface-inverse-3) 100%)',
+            color: 'var(--text-on-brand)',
             padding: '16px 22px',
             display: 'flex',
             alignItems: 'center',
@@ -275,21 +276,21 @@ export default function SendVoiceBriefingModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#FDE047',
+                color: 'var(--status-warning-bright)',
               }}
             >
               <Mic size={20} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                   {t("Executive Voice Briefing Studio", "চেয়ারম্যানের ভয়েস ব্রিফিং স্টুডিও", lang)}
                 </h3>
-                <span className="badge" style={{ background: '#DC2626', color: '#FFFFFF', fontSize: '9.5px', fontWeight: 800 }}>
+                <span className="badge" style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontSize: '9.5px', fontWeight: 800 }}>
                   CHAIRMAN DIRECT
                 </span>
               </div>
-              <div style={{ fontSize: '11.5px', color: '#D4D4D8', marginTop: '2px' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-inverse)', marginTop: '2px' }}>
                 {t('Broadcast real-time executive voice directives to Inner Circle & factory leadership', 'মূল নেতৃত্ব ও কারখানায় তাৎক্ষণিক অডিও দিকনির্দেশনা সম্প্রচার', lang)}
               </div>
             </div>
@@ -302,7 +303,7 @@ export default function SendVoiceBriefingModal({
             style={{
               background: 'rgba(255, 255, 255, 0.15)',
               borderColor: 'rgba(255, 255, 255, 0.25)',
-              color: '#FFFFFF',
+              color: 'var(--text-on-brand)',
             }}
           >
             <X size={16} />
@@ -316,12 +317,12 @@ export default function SendVoiceBriefingModal({
             {/* Audio Studio Waveform Console */}
             <div
               style={{
-                background: 'linear-gradient(135deg, #09090B 0%, #18181B 100%)',
+                background: 'linear-gradient(135deg, var(--surface-inverse-deep) 0%, var(--surface-inverse) 100%)',
                 borderRadius: '12px',
                 padding: '18px 20px',
                 marginBottom: '18px',
-                border: '1px solid #27272A',
-                color: '#FFFFFF',
+                border: '1px solid var(--border-inverse)',
+                color: 'var(--text-on-brand)',
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4)',
               }}
             >
@@ -332,12 +333,12 @@ export default function SendVoiceBriefingModal({
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      background: recordingState === 'recording' ? '#EF4444' : recordingState === 'playing' ? '#10B981' : '#EAB308',
-                      boxShadow: recordingState === 'recording' ? '0 0 10px #EF4444' : undefined,
+                      background: recordingState === 'recording' ? 'var(--status-danger-solid)' : recordingState === 'playing' ? 'var(--status-success-solid)' : 'var(--status-warning-solid)',
+                      boxShadow: recordingState === 'recording' ? '0 0 10px var(--status-danger)' : undefined,
                       animation: recordingState === 'recording' ? 'pulse 1s infinite' : undefined,
                     }}
                   />
-                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase', color: '#A1A1AA' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--text-inverse-2)' }}>
                     {recordingState === 'recording'
                       ? '🔴 RECORDING LIVE (MAX 60s)'
                       : recordingState === 'playing'
@@ -347,7 +348,7 @@ export default function SendVoiceBriefingModal({
                       : '● READY TO RECORD'}
                   </span>
                 </div>
-                <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'monospace', color: '#FDE047' }}>
+                <div style={{ fontSize: '15px', fontWeight: 800, fontFamily: 'monospace', color: 'var(--status-warning-bright)' }}>
                   00:{seconds < 10 ? `0${seconds}` : seconds} / 01:00
                 </div>
               </div>
@@ -378,7 +379,7 @@ export default function SendVoiceBriefingModal({
                       style={{
                         width: '3.5px',
                         height: `${dynamicHeight}px`,
-                        background: isActive ? 'linear-gradient(to top, #D4AF37, #FDE047)' : '#3F3F46',
+                        background: isActive ? 'linear-gradient(to top, var(--brand-gold), var(--status-warning-bright))' : 'var(--surface-inverse-3)',
                         borderRadius: '2px',
                         transition: 'height 0.15s ease',
                       }}
@@ -394,11 +395,11 @@ export default function SendVoiceBriefingModal({
                     type="button"
                     onClick={handleStartRecording}
                     style={{
-                      background: '#DC2626',
+                      background: 'var(--status-danger-solid)',
                       border: 'none',
                       borderRadius: '50px',
                       padding: '8px 18px',
-                      color: '#FFFFFF',
+                      color: 'var(--text-on-brand)',
                       fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
@@ -416,11 +417,11 @@ export default function SendVoiceBriefingModal({
                     type="button"
                     onClick={handleStopRecording}
                     style={{
-                      background: '#EA580C',
+                      background: 'var(--status-warning-solid)',
                       border: 'none',
                       borderRadius: '50px',
                       padding: '8px 18px',
-                      color: '#FFFFFF',
+                      color: 'var(--text-on-brand)',
                       fontSize: '12px',
                       fontWeight: 800,
                       cursor: 'pointer',
@@ -440,11 +441,11 @@ export default function SendVoiceBriefingModal({
                       type="button"
                       onClick={handleTogglePlay}
                       style={{
-                        background: recordingState === 'playing' ? '#059669' : '#27272A',
-                        border: '1px solid #3F3F46',
+                        background: recordingState === 'playing' ? 'var(--status-success-solid)' : 'var(--surface-inverse-2)',
+                        border: '1px solid var(--border-inverse)',
                         borderRadius: '50px',
                         padding: '8px 16px',
-                        color: '#FFFFFF',
+                        color: 'var(--text-on-brand)',
                         fontSize: '12px',
                         fontWeight: 700,
                         cursor: 'pointer',
@@ -462,10 +463,10 @@ export default function SendVoiceBriefingModal({
                       onClick={handleReset}
                       style={{
                         background: 'transparent',
-                        border: '1px solid #52525B',
+                        border: '1px solid var(--border-3)',
                         borderRadius: '50px',
                         padding: '8px 14px',
-                        color: '#A1A1AA',
+                        color: 'var(--text-inverse-2)',
                         fontSize: '11.5px',
                         cursor: 'pointer',
                         display: 'flex',
@@ -485,8 +486,8 @@ export default function SendVoiceBriefingModal({
             {/* 1-Click Executive Presets */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Sparkles size={14} color="#D97706" />
-                <label style={{ fontSize: '12px', fontWeight: 800, color: '#1E293B' }}>
+                <Sparkles size={14} color="var(--status-warning)" />
+                <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-1)' }}>
                   {t('1-Click Pre-Recorded Executive Briefings:', 'দ্রুত এক-ক্লিক ব্রিফিং নির্বাচন:', lang)}
                 </label>
               </div>
@@ -502,9 +503,9 @@ export default function SendVoiceBriefingModal({
                         fontSize: '11.5px',
                         padding: '7px 12px',
                         borderRadius: '7px',
-                        border: isSelected ? '1.5px solid #D97706' : '1px solid #CBD5E1',
-                        background: isSelected ? '#FEF3C7' : '#FFFFFF',
-                        color: isSelected ? '#92400E' : '#334155',
+                        border: isSelected ? '1.5px solid var(--status-warning)' : '1px solid var(--border-2)',
+                        background: isSelected ? 'var(--status-warning-bg)' : 'var(--surface-1)',
+                        color: isSelected ? 'var(--status-warning-text)' : 'var(--text-2)',
                         fontWeight: isSelected ? 800 : 500,
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',
@@ -520,7 +521,7 @@ export default function SendVoiceBriefingModal({
             {/* AI Speech-to-Text Live Transcript */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-1)' }}>
                   {t('Live Speech-to-Text Transcript (Dispatched with Audio Alert):', 'লাইভ অডিও ট্রান্সক্রিপ্ট ও বিবরণ:', lang)}
                 </label>
                 <span className="badge green" style={{ fontSize: '10px' }}>✓ AI Transcribed</span>
@@ -534,9 +535,9 @@ export default function SendVoiceBriefingModal({
                   fontSize: '12px',
                   padding: '10px 12px',
                   borderRadius: '8px',
-                  border: '1.5px solid #CBD5E1',
-                  background: '#F8FAFC',
-                  color: '#0F172A',
+                  border: '1.5px solid var(--border-2)',
+                  background: 'var(--surface-0)',
+                  color: 'var(--text-1)',
                   boxSizing: 'border-box',
                   lineHeight: 1.5,
                 }}
@@ -548,7 +549,7 @@ export default function SendVoiceBriefingModal({
 
             {/* Target Audience Channels */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '6px' }}>
                 {t('Broadcast Distribution Channels:', 'বার্তা প্রেরণের প্রাপক গোষ্ঠী:', lang)}
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -568,11 +569,11 @@ export default function SendVoiceBriefingModal({
                         gap: '8px',
                         padding: '8px 10px',
                         borderRadius: '6px',
-                        background: isChecked ? '#EEF2FF' : '#F8FAFC',
-                        border: isChecked ? '1px solid #818CF8' : '1px solid #E2E8F0',
+                        background: isChecked ? 'var(--status-purple-bg)' : 'var(--surface-0)',
+                        border: isChecked ? '1px solid var(--status-purple-bright)' : '1px solid var(--border-1)',
                         fontSize: '11px',
                         fontWeight: isChecked ? 700 : 500,
-                        color: isChecked ? '#3730A3' : '#475569',
+                        color: isChecked ? 'var(--status-purple-text)' : 'var(--text-2)',
                         cursor: 'pointer',
                       }}
                     >
@@ -592,8 +593,8 @@ export default function SendVoiceBriefingModal({
             {/* Priority & Delivery Protocol */}
             <div
               style={{
-                background: '#FEF2F2',
-                border: '1px solid #FECACA',
+                background: 'var(--status-danger-bg)',
+                border: '1px solid var(--status-danger-border)',
                 borderRadius: '8px',
                 padding: '10px 12px',
                 display: 'flex',
@@ -602,8 +603,8 @@ export default function SendVoiceBriefingModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldAlert size={16} color="#DC2626" />
-                <span style={{ fontSize: '11.5px', color: '#991B1B', fontWeight: 700 }}>
+                <ShieldAlert size={16} color="var(--status-danger)" />
+                <span style={{ fontSize: '11.5px', color: 'var(--status-danger-text)', fontWeight: 700 }}>
                   {t('Executive Red Alert Priority Override:', 'জরুরি অগ্রাধিকার স্তর:', lang)}
                 </span>
               </div>
@@ -616,8 +617,8 @@ export default function SendVoiceBriefingModal({
                     borderRadius: '4px',
                     fontSize: '11px',
                     border: 'none',
-                    background: priority === 'normal' ? '#475569' : '#E2E8F0',
-                    color: priority === 'normal' ? '#FFFFFF' : '#475569',
+                    background: priority === 'normal' ? 'var(--surface-inverse-3)' : 'var(--surface-3)',
+                    color: priority === 'normal' ? 'var(--text-on-brand)' : 'var(--text-2)',
                     cursor: 'pointer',
                     fontWeight: priority === 'normal' ? 800 : 500,
                   }}
@@ -632,8 +633,8 @@ export default function SendVoiceBriefingModal({
                     borderRadius: '4px',
                     fontSize: '11px',
                     border: 'none',
-                    background: priority === 'urgent' ? '#DC2626' : '#FEE2E2',
-                    color: priority === 'urgent' ? '#FFFFFF' : '#991B1B',
+                    background: priority === 'urgent' ? 'var(--status-danger-solid)' : 'var(--status-danger-bg)',
+                    color: priority === 'urgent' ? 'var(--text-on-brand)' : 'var(--status-danger-text)',
                     cursor: 'pointer',
                     fontWeight: priority === 'urgent' ? 800 : 500,
                   }}
@@ -649,8 +650,8 @@ export default function SendVoiceBriefingModal({
             className="modal-footer"
             style={{
               padding: '12px 20px',
-              background: '#F8FAFC',
-              borderTop: '1px solid #E2E8F0',
+              background: 'var(--surface-0)',
+              borderTop: '1px solid var(--border-1)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '10px',
@@ -671,13 +672,13 @@ export default function SendVoiceBriefingModal({
               style={{
                 fontSize: '12px',
                 padding: '8px 20px',
-                background: 'linear-gradient(135deg, #B45309 0%, #78350F 100%)',
-                borderColor: '#B45309',
+                background: 'linear-gradient(135deg, var(--status-warning-solid-dark) 0%, var(--status-warning-solid-dark) 100%)',
+                borderColor: 'var(--status-warning-solid-dark)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 fontWeight: 800,
-                color: '#FFFFFF',
+                color: 'var(--text-on-brand)',
                 boxShadow: '0 2px 8px rgba(180, 83, 9, 0.35)',
               }}
             >

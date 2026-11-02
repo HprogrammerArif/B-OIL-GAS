@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ViewProps, ROLE_META, t } from '../types';
-import { showToast } from '../App';
+import { useCurrentUser } from '../auth/session';
+import { assetConfigFor, isMyCustody, isMyRequisition } from './asset/config';
+import { showToast } from '../components/ToastManager';
 import {
   useAssetStore,
   AssetCategory,
@@ -85,8 +87,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     finalizeDisposalAndArchive,
   } = useAssetStore();
 
-  const roleConfig = useMemo(() => getAssetRoleConfig(role), [role]);
-  const currentPersona = ROLE_META[role];
+  const user = useCurrentUser();
+  const roleConfig = useMemo(
+    () => (user ? assetConfigFor(user) : { ...getAssetRoleConfig('employee'), isSelfServiceOnly: true }),
+    [user],
+  );
+  const currentPersona = { ...ROLE_META[role], name: user?.name ?? '', empId: user?.empId ?? '', dept: user?.dept ?? '' };
 
   // Navigation & Layout Modes
   const [activeTab, setActiveTab] = useState<MainModuleTab>('register');
@@ -119,6 +125,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const [showScanModal, setShowScanModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
 
+  const canReceiveTransfer = (trf: { toCustodianEmpId?: string }) =>
+    roleConfig.canTransferCustody || (!!user && trf.toCustodianEmpId === user.empId);
+
   // Sync default filter and valid tab on role switch
   useEffect(() => {
     setCategoryFilter(roleConfig.defaultCategory);
@@ -132,16 +141,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   // Role-Scoped Visible Assets
   const roleScopedAssets = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
-      return assets.filter(
-        (a) =>
-          a.custodianEmpId === currentPersona.empId ||
-          a.custodian.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          a.custodianEmpId === 'EMP-1042' ||
-          a.custodian.toLowerCase().includes('tanvir ahmed')
-      );
+      return user ? assets.filter((a) => isMyCustody(a, user)) : [];
     }
     return assets;
-  }, [assets, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
+  }, [assets, roleConfig.isSelfServiceOnly, user]);
 
   // Live Category Counts (excluding disposed unless stageFilter includes disposed)
   const categoryCounts = useMemo(() => {
@@ -282,16 +285,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
   const visibleRequisitions = useMemo(() => {
     if (roleConfig.isSelfServiceOnly) {
-      return requisitions.filter(
-        (r) =>
-          r.requestedByEmpId === currentPersona.empId ||
-          r.requestedBy.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          r.requestedByEmpId === 'EMP-1042' ||
-          r.requestedBy.toLowerCase().includes('tanvir ahmed')
-      );
+      return user ? requisitions.filter((r) => isMyRequisition(r, user)) : [];
     }
     return requisitions;
-  }, [requisitions, roleConfig.isSelfServiceOnly, currentPersona.empId, currentPersona.name]);
+  }, [requisitions, roleConfig.isSelfServiceOnly, user]);
 
   // Portfolio KPI Aggregations
   const portfolioStats = useMemo(() => {
@@ -390,14 +387,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const getCriticalityBadge = (crit: AssetRecord['criticality']) => {
     if (crit === 'critical_a') {
       return (
-        <span style={{ fontSize: '9.5px', fontWeight: 800, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(220,38,38,0.12)', color: '#DC2626' }}>
+        <span style={{ fontSize: '9.5px', fontWeight: 800, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(220,38,38,0.12)', color: 'var(--status-danger)' }}>
           Class-A
         </span>
       );
     }
     if (crit === 'essential_b') {
       return (
-        <span style={{ fontSize: '9.5px', fontWeight: 700, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(217,119,6,0.12)', color: '#D97706' }}>
+        <span style={{ fontSize: '9.5px', fontWeight: 700, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(217,119,6,0.12)', color: 'var(--status-warning)' }}>
           Class-B
         </span>
       );
@@ -412,7 +409,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   // Export Master Financial Ledger CSV
   const handleExportMasterLedgerCsv = () => {
     const header =
-      'Tag,SAP_FI_AA,Title,Category,Facility,GL_Cost_Center,Lifecycle_Stage,Method,Gross_CAPEX_BDT,Accumulated_Dep_BDT,Net_Book_Value_BDT,Cumulative_OPEX_BDT,TCO_BDT,Repair_Ratio_Pct\n';
+      'Tag,Ledger_No,Title,Category,Facility,GL_Cost_Center,Lifecycle_Stage,Method,Gross_CAPEX_BDT,Accumulated_Dep_BDT,Net_Book_Value_BDT,Cumulative_OPEX_BDT,TCO_BDT,Repair_Ratio_Pct\n';
     const rows = roleScopedAssets
       .map((a) => {
         const f = calculateAssetFinancials(a);
@@ -426,7 +423,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     link.download = 'BOGCL_Enterprise_Asset_Lifetime_FI_AA_Ledger.csv';
     link.click();
     URL.revokeObjectURL(url);
-    showToast(t('Exported SAP FI-AA Fixed Asset & TCO Master Ledger (CSV).', 'সম্পূর্ণ স্থায়ী সম্পদ ও অবচয় খতিয়ান ডাউনলোড হয়েছে।', lang), 'success');
+    showToast(t('Exported fixed-asset and TCO ledger (CSV).', 'সম্পূর্ণ স্থায়ী সম্পদ ও অবচয় খতিয়ান ডাউনলোড হয়েছে।', lang), 'success');
   };
 
   const handleConfirmAssetReject = (data: RejectionData) => {
@@ -460,18 +457,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
     // 1. Custody Acceptance Signature Pending
     if (!selectedAsset.custodianAcknowledged) {
-      const isCustodianOrAdmin =
-        role === 'transport_admin' ||
-        role === 'plant_gm' ||
-        role === 'chairman' ||
-        role === 'hr_admin' ||
-        selectedAsset.custodianEmpId === currentPersona.empId ||
-        selectedAsset.custodian.toLowerCase().includes(currentPersona.name.toLowerCase());
+      const isCustodian = !!user && isMyCustody(selectedAsset, user);
 
       return (
         <div className="eam-next-action">
           <div className="eam-next-action-text">
-            <UserCheck size={17} style={{ color: '#D97706', flexShrink: 0 }} />
+            <UserCheck size={17} style={{ color: 'var(--status-warning)', flexShrink: 0 }} />
             <div>
               <strong>{t('Action Required — Custody Handover Sign-Off:', 'প্রয়োজনীয় পদক্ষেপ — হেফাজত গ্রহণ স্বাক্ষর:', lang)}</strong>{' '}
               {t(
@@ -481,7 +472,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               )}
             </div>
           </div>
-          {isCustodianOrAdmin ? (
+          {isCustodian ? (
             <button
               type="button"
               className="btn-gold"
@@ -497,7 +488,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               ✍️ {t('Sign Custody Receipt', 'গ্রহণ স্বাক্ষর করুন', lang)}
             </button>
           ) : (
-            <span style={{ fontSize: '11px', color: '#B45309', fontWeight: 600, padding: '4px 8px', background: '#FEF3C7', borderRadius: '4px' }}>
+            <span style={{ fontSize: '11px', color: 'var(--status-warning-text)', fontWeight: 600, padding: '4px 8px', background: 'var(--status-warning-bg)', borderRadius: '4px' }}>
               {t('Awaiting Custodian Sign-Off', 'হেফাজতকারীর স্বাক্ষরের অপেক্ষায়', lang)}
             </span>
           )}
@@ -510,7 +501,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       return (
         <div className="eam-next-action info">
           <div className="eam-next-action-text">
-            <ArrowRightLeft size={17} style={{ color: '#0284C7', flexShrink: 0 }} />
+            <ArrowRightLeft size={17} style={{ color: 'var(--status-info)', flexShrink: 0 }} />
             <div>
               <strong>{t('In Transit under Gate Pass', 'গেট পাসের অধীনে স্থানান্তরধীন', lang)} ({selectedOpenTransfer.gatePassNo}):</strong>{' '}
               {t(
@@ -520,6 +511,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               )}
             </div>
           </div>
+          {canReceiveTransfer(selectedOpenTransfer) ? (
           <button
             type="button"
             className="btn-primary"
@@ -538,6 +530,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           >
             <CheckCircle size={13} /> {t('Confirm Arrival & Close Gate Pass', 'প্রাপ্তি নিশ্চিত করুন', lang)}
           </button>
+          ) : (
+            <span style={{ fontSize: '11px', color: 'var(--status-info)', fontWeight: 600 }}>
+              {t('Awaiting receipt at destination', 'গন্তব্যে প্রাপ্তির অপেক্ষায়', lang)}
+            </span>
+          )}
         </div>
       );
     }
@@ -547,7 +544,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       return (
         <div className="eam-next-action info">
           <div className="eam-next-action-text">
-            <Package size={17} style={{ color: '#0284C7', flexShrink: 0 }} />
+            <Package size={17} style={{ color: 'var(--status-info)', flexShrink: 0 }} />
             <div>
               <strong>{t('Ready in Central Store Pool (Stage 3):', 'কেন্দ্রীয় স্টোর পুলে প্রস্তুত:', lang)}</strong>{' '}
               {t(
@@ -579,7 +576,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       return (
         <div className="eam-next-action danger">
           <div className="eam-next-action-text">
-            <AlertTriangle size={17} style={{ color: '#DC2626', flexShrink: 0 }} />
+            <AlertTriangle size={17} style={{ color: 'var(--status-danger)', flexShrink: 0 }} />
             <div>
               <strong>{t('Statutory Calibration / Reliability Attention:', 'সংবিধিবদ্ধ ক্যালিব্রেশন / সার্ভিস সতর্কতা:', lang)}</strong>{' '}
               {t(
@@ -626,11 +623,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       return (
         <div className="eam-next-action danger">
           <div className="eam-next-action-text">
-            <ShieldAlert size={17} style={{ color: '#DC2626', flexShrink: 0 }} />
+            <ShieldAlert size={17} style={{ color: 'var(--status-danger)', flexShrink: 0 }} />
             <div>
               <strong>{t('Stage-7 Condemned — Awaiting Write-Off & Disposal:', 'পর্যায়-৭ অকেজো ঘোষিত — চূড়ান্ত অবলোপন অপেক্ষমাণ:', lang)}</strong>{' '}
               {t(
-                'Complete the 4-point pre-disposal safety & CFO audit checklist to post SAP retirement.',
+                'Complete the 4-point pre-disposal safety & CFO audit checklist before retirement is posted.',
                 '৪-দফা প্রাক-অবলোপন যাচাইকরণ সম্পন্ন করে নিলাম নিষ্পত্তি করুন।',
                 lang
               )}
@@ -1158,7 +1155,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                 {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' ? (
                                   <span className="badge warn" style={{ fontSize: '9.5px' }}>✍️ Sign Pending</span>
                                 ) : (
-                                  <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 600 }}>✓ Verified</span>
+                                  <span style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 600 }}>✓ Verified</span>
                                 )}
                               </td>
                               <td>
@@ -1174,10 +1171,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>End-of-Life</span>
                                 ) : (
                                   <>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: item.healthScore >= 85 ? '#059669' : '#D97706' }}>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: item.healthScore >= 85 ? 'var(--status-success)' : 'var(--status-warning)' }}>
                                       ♥ {item.healthScore}% Health
                                     </div>
-                                    <div style={{ fontSize: '11px', color: item.daysToService <= 15 ? '#DC2626' : 'var(--brand-slate-500)' }}>
+                                    <div style={{ fontSize: '11px', color: item.daysToService <= 15 ? 'var(--status-danger)' : 'var(--brand-slate-500)' }}>
                                       Audit in {item.daysToService}d
                                     </div>
                                   </>
@@ -1259,7 +1256,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                     filteredAssets.map((item) => {
                       const f = calculateAssetFinancials(item);
                       const isSelected = selectedAsset?.id === item.id;
-                      const healthColor = item.healthScore >= 85 ? '#059669' : item.healthScore >= 60 ? '#D97706' : '#DC2626';
+                      const healthColor = item.healthScore >= 85 ? 'var(--status-success)' : item.healthScore >= 60 ? 'var(--status-warning)' : 'var(--status-danger)';
 
                       return (
                         <button
@@ -1366,7 +1363,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             ? t('Current Value', 'বর্তমান মূল্যায়ন', lang)
                             : t('Commissioned Date', 'কমিশনিং তারিখ', lang)}
                         </div>
-                        <div className="eam-hero-tile-val" style={{ color: '#34D399' }}>
+                        <div className="eam-hero-tile-val" style={{ color: 'var(--status-success-bright)' }}>
                           {roleConfig.canViewFinancialLedger
                             ? selectedAsset.lifecycleStage === 'disposed'
                               ? '৳0 (Retired)'
@@ -1399,8 +1396,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                           style={{
                             color:
                               selectedAsset.daysToService > 0 && selectedAsset.daysToService <= 20
-                                ? '#FCA5A5'
-                                : '#FFFFFF',
+                                ? 'var(--status-danger-bright)'
+                                : 'var(--text-on-brand)',
                           }}
                         >
                           {selectedAsset.lifecycleStage === 'disposed'
@@ -1419,7 +1416,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </div>
                         <div
                           className="eam-hero-tile-sub"
-                          style={{ color: selectedAsset.custodianAcknowledged ? '#6EE7B7' : '#FDE047' }}
+                          style={{ color: selectedAsset.custodianAcknowledged ? 'var(--status-success-bright)' : 'var(--status-warning-bright)' }}
                         >
                           {selectedAsset.custodianAcknowledged ? t('✓ Handover Signed', '✓ দায়িত্ব নিশ্চিত', lang) : t('⏳ Awaiting Sign-Off', '⏳ গ্রহণ স্বাক্ষর বাকি', lang)}
                         </div>
@@ -1521,7 +1518,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             </div>
                             <div className="eam-spec-box">
                               <div className="eam-spec-lbl">{t('Current Book Value (Net Value)', 'বর্তমান বইমূল্য (Net Value)', lang)}</div>
-                              <div className="eam-spec-val" style={{ color: '#059669' }}>
+                              <div className="eam-spec-val" style={{ color: 'var(--status-success)' }}>
                                 {selectedAsset.lifecycleStage === 'disposed'
                                   ? '৳0 (Retired)'
                                   : `৳${selectedFinancials.netBookValue.toLocaleString()}`}
@@ -1534,7 +1531,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               <div className="eam-spec-lbl">{t('Total Lifetime Cost (Purchase + Repairs)', 'মোট জীবনচক্র ব্যয় (ক্রয় + মেরামত)', lang)}</div>
                               <div
                                 className="eam-spec-val"
-                                style={{ color: selectedFinancials.repairToCapexRatioPct >= 50 ? '#DC2626' : undefined }}
+                                style={{ color: selectedFinancials.repairToCapexRatioPct >= 50 ? 'var(--status-danger)' : undefined }}
                               >
                                 ৳{selectedFinancials.totalCostOfOwnership.toLocaleString()}
                               </div>
@@ -1556,14 +1553,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               marginBottom: '12px',
                             }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#DC2626', fontWeight: 800, fontSize: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--status-danger)', fontWeight: 800, fontSize: '12px' }}>
                               <AlertTriangle size={14} />
                               <span>{t('Active Maintenance / Calibration Deficiency', 'সক্রিয় ত্রুটি / ক্যালিব্রেশন আপত্তি', lang)}</span>
                             </div>
                             <div style={{ fontSize: '11.5px', marginTop: '4px' }}>
                               <strong>{selectedAsset.defectQuery.reason}:</strong> {selectedAsset.defectQuery.observation}
                             </div>
-                            <div style={{ fontSize: '11px', color: '#059669', marginTop: '3px', fontWeight: 700 }}>
+                            <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '3px', fontWeight: 700 }}>
                               ➔ {selectedAsset.defectQuery.improvementsRequired}
                             </div>
                           </div>
@@ -1581,7 +1578,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             </div>
                             <div style={{ fontSize: '11.5px', marginTop: '3px' }}>
                               Proceeds: <strong>৳{selectedAsset.disposalDossier.salvageProceedsBdt?.toLocaleString()}</strong> • IAS 16 Gain/Loss:{' '}
-                              <strong style={{ color: (selectedAsset.disposalDossier.gainOrLossBdt || 0) >= 0 ? '#059669' : '#DC2626' }}>
+                              <strong style={{ color: (selectedAsset.disposalDossier.gainOrLossBdt || 0) >= 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>
                                 {(selectedAsset.disposalDossier.gainOrLossBdt || 0) >= 0
                                   ? `+৳${selectedAsset.disposalDossier.gainOrLossBdt?.toLocaleString()}`
                                   : `-৳${Math.abs(selectedAsset.disposalDossier.gainOrLossBdt || 0).toLocaleString()}`}
@@ -1645,7 +1642,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                 <button
                                   type="button"
                                   className="btn-outline"
-                                  style={{ borderColor: 'rgba(220,38,38,0.45)', color: '#DC2626' }}
+                                  style={{ borderColor: 'rgba(220,38,38,0.45)', color: 'var(--status-danger)' }}
                                   onClick={() => setShowRejectModal(true)}
                                 >
                                   <RotateCcw size={14} />
@@ -1659,7 +1656,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               <button
                                 type="button"
                                 className="btn-outline"
-                                style={{ borderColor: 'rgba(239, 68, 68, 0.45)', color: '#DC2626', background: 'rgba(239, 68, 68, 0.05)' }}
+                                style={{ borderColor: 'rgba(239, 68, 68, 0.45)', color: 'var(--status-danger)', background: 'rgba(239, 68, 68, 0.05)' }}
                                 onClick={() => {
                                   onNavigate('incident');
                                   showToast(
@@ -1672,7 +1669,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   );
                                 }}
                               >
-                                <AlertTriangle size={14} color="#DC2626" />
+                                <AlertTriangle size={14} color="var(--status-danger)" />
                                 {t('Report Safety Incident', 'নিরাপত্তা ঝুঁকি রিপোর্ট', lang)}
                               </button>
                             )}
@@ -1750,7 +1747,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               <span>
                                 Actor: <strong>{ev.actor}</strong> ({ev.actorRole})
                               </span>
-                              <span style={{ fontFamily: 'monospace', color: '#059669', fontWeight: 700 }}>
+                              <span style={{ fontFamily: 'monospace', color: 'var(--status-success)', fontWeight: 700 }}>
                                 {ev.sapRef ? `${ev.sapRef} · ` : ''}
                                 {ev.hash.slice(0, 22)}...
                               </span>
@@ -1771,7 +1768,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                 key={ch.id}
                                 className="eam-spec-box"
                                 style={{
-                                  border: isCurrent ? '1.5px solid #059669' : undefined,
+                                  border: isCurrent ? '1.5px solid var(--status-success)' : undefined,
                                   background: isCurrent ? 'rgba(5, 150, 105, 0.05)' : undefined,
                                 }}
                               >
@@ -1790,11 +1787,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   Assigned: <strong>{ch.assignedDate}</strong>
                                   {ch.gatePassRef ? ` • Gate Pass: ${ch.gatePassRef}` : ''} •{' '}
                                   {ch.acknowledged ? (
-                                    <span style={{ color: '#059669', fontWeight: 700 }}>
+                                    <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>
                                       ✓ E-Signed {ch.acknowledgedAt ? `(${ch.acknowledgedAt})` : ''}
                                     </span>
                                   ) : (
-                                    <span style={{ color: '#D97706', fontWeight: 700 }}>⏳ Signature Pending</span>
+                                    <span style={{ color: 'var(--status-warning)', fontWeight: 700 }}>⏳ Signature Pending</span>
                                   )}
                                 </div>
                                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
@@ -1986,10 +1983,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                     style={{
                       borderLeft: `4px solid ${
                         wo.status === 'completed'
-                          ? '#059669'
+                          ? 'var(--status-success)'
                           : wo.priority === 'critical'
-                          ? '#DC2626'
-                          : '#D97706'
+                          ? 'var(--status-danger)'
+                          : 'var(--status-warning)'
                       }`,
                       background: 'var(--brand-card-bg)',
                       display: 'flex',
@@ -2137,11 +2134,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             </span>
             <span>
               <strong>Accumulated Depreciation:</strong>{' '}
-              <span style={{ color: '#DC2626', fontWeight: 700 }}>-৳{portfolioStats.totalAccDep.toLocaleString()}</span>
+              <span style={{ color: 'var(--status-danger)', fontWeight: 700 }}>-৳{portfolioStats.totalAccDep.toLocaleString()}</span>
             </span>
             <span>
               <strong>Current Book Value:</strong>{' '}
-              <span style={{ color: '#059669', fontWeight: 800 }}>৳{portfolioStats.totalNbv.toLocaleString()}</span>
+              <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>৳{portfolioStats.totalNbv.toLocaleString()}</span>
             </span>
             <span>
               <strong>Total Cost (CAPEX + OPEX):</strong> ৳{portfolioStats.totalTco.toLocaleString()}
@@ -2167,7 +2164,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                   {roleScopedAssets.map((a) => {
                     const f = calculateAssetFinancials(a);
                     const ratioBarColor =
-                      f.repairToCapexRatioPct >= 50 ? '#DC2626' : f.repairToCapexRatioPct >= 30 ? '#D97706' : '#059669';
+                      f.repairToCapexRatioPct >= 50 ? 'var(--status-danger)' : f.repairToCapexRatioPct >= 30 ? 'var(--status-warning)' : 'var(--status-success)';
 
                     return (
                       <tr key={a.id}>
@@ -2189,12 +2186,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         <td style={{ fontWeight: 700 }}>৳{f.grossCapitalizedCost.toLocaleString()}</td>
                         <td>
                           <span className="badge info" style={{ fontSize: '10px' }}>{a.depreciationMethod}</span>
-                          <div style={{ fontSize: '11px', color: '#DC2626', marginTop: '2px', fontWeight: 600 }}>
+                          <div style={{ fontSize: '11px', color: 'var(--status-danger)', marginTop: '2px', fontWeight: 600 }}>
                             -৳{f.annualDepreciation.toLocaleString()}/yr
                           </div>
                         </td>
                         <td>৳{f.accumulatedDepreciation.toLocaleString()}</td>
-                        <td style={{ fontWeight: 800, color: a.lifecycleStage === 'disposed' ? 'var(--brand-slate-400)' : '#059669' }}>
+                        <td style={{ fontWeight: 800, color: a.lifecycleStage === 'disposed' ? 'var(--brand-slate-400)' : 'var(--status-success)' }}>
                           {a.lifecycleStage === 'disposed' ? '৳0 (Retired)' : `৳${f.netBookValue.toLocaleString()}`}
                         </td>
                         <td>
@@ -2447,7 +2444,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </button>
 
                         {trf.status === 'completed' ? (
-                          <span className="badge success">✓ Completed ({trf.completedAt})</span>
+                          <span className="badge success">✓ {t('Completed', 'সম্পন্ন', lang)} ({trf.completedAt})</span>
+                        ) : !canReceiveTransfer(trf) ? (
+                          <span className="badge info">{t('In transit', 'স্থানান্তরধীন', lang)}</span>
                         ) : (
                           <button
                             type="button"
@@ -2554,7 +2553,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
                           <div style={{ textAlign: 'right', fontSize: '12px' }}>
                             <div>Orig. CAPEX: <strong>৳{fin.grossCapitalizedCost.toLocaleString()}</strong></div>
-                            <div>Carrying NBV: <strong style={{ color: '#DC2626' }}>৳{fin.netBookValue.toLocaleString()}</strong></div>
+                            <div>Carrying NBV: <strong style={{ color: 'var(--status-danger)' }}>৳{fin.netBookValue.toLocaleString()}</strong></div>
                             <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
                               Survey by: {a.disposalDossier?.initiatedBy}
                             </div>
@@ -2580,7 +2579,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                       borderRadius: '8px',
                                       border: checked ? '1.5px solid rgba(5, 150, 105, 0.4)' : '1px solid var(--brand-slate-200)',
                                       background: checked ? 'rgba(5, 150, 105, 0.09)' : 'var(--brand-canvas)',
-                                      color: checked ? '#059669' : 'var(--brand-slate-600)',
+                                      color: checked ? 'var(--status-success)' : 'var(--brand-slate-600)',
                                       fontSize: '11.5px',
                                       fontWeight: 700,
                                       cursor: 'pointer',
@@ -2682,7 +2681,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                       <th>{t('NBV at Retirement', 'অবলোপনকালীন বইমূল্য', lang)}</th>
                       <th>{t('Realized Proceeds', 'প্রাপ্ত নিলাম/স্ক্র্যাপ মূল্য', lang)}</th>
                       <th>{t('IAS 16 Gain / Loss', 'লাভ / ক্ষতি (IAS 16)', lang)}</th>
-                      <th>{t('SAP Retirement Voucher', 'এসএপি ভাউচার ও অনুমোদনকারী', lang)}</th>
+                      <th>{t('Retirement Voucher', 'অবলোপন ভাউচার ও অনুমোদনকারী', lang)}</th>
                       <th style={{ textAlign: 'right' }}>{t('Audit File', 'নথি', lang)}</th>
                     </tr>
                   </thead>
@@ -2710,7 +2709,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             </span>
                           </td>
                           <td>
-                            <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '11.5px', color: '#0284C7' }}>
+                            <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '11.5px', color: 'var(--status-info)' }}>
                               {d?.sapRetirementVoucher}
                             </div>
                             <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>
@@ -2753,7 +2752,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           setViewMode('cockpit');
           showToast(
             t(
-              `✓ Asset ${created.tag} (${created.sapAssetNo}) capitalized in SAP FI-AA with QR passport!`,
+              `✓ Asset ${created.tag} (${created.sapAssetNo}) registered with QR passport.`,
               `✓ সম্পদ ${created.tag} সফলভাবে এসএপিতে নিবন্ধিত হয়েছে!`,
               lang
             ),
@@ -2855,7 +2854,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           if (res) {
             showToast(
               t(
-                `👑 Write-Off Sanctioned! SAP Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} Gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} Loss`}). Locked in 10-Yr Archive.`,
+                `👑 Write-Off Sanctioned! Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} Gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} Loss`}). Locked in 10-Yr Archive.`,
                 `👑 অবলোপন অনুমোদিত! এসএপি ভাউচার ${res.sapVoucher} পোস্ট ও ১০-বছরের আর্কাইভে সংরক্ষিত।`,
                 lang
               ),

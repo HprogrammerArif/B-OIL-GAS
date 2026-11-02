@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { useState } from 'react';
+import { ViewProps, t } from '../types';
+import { showToast } from '../components/ToastManager';
 import {
   ClipboardCheck, Check, X, CheckSquare, Square, Search,
-  Clock, DollarSign, ShieldCheck, RefreshCw, FileText
+  Clock, DollarSign, ShieldCheck, RefreshCw, FileText, Inbox
 } from 'lucide-react';
 
 import { useApprovalStore, ApprovalItem } from '../store/approvalStore';
-import { useFleetStore } from '../store/fleetStore';
+import { useCan } from '../auth/session';
+import { CATEGORY_LABELS, useMyApprovalQueue } from './approvals/config';
+import { EmptyState } from '../components/ui';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 import AuthorizeDirectiveModal, { AuthorizeData } from '../components/AuthorizeDirectiveModal';
 
-export default function ApprovalsView({ role, lang }: ViewProps) {
-  const { approvalItems, decidedItems, approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
-  const { endorseHOD } = useFleetStore();
+export default function ApprovalsView({ lang }: ViewProps) {
+  const canDecide = useCan('approvals:decide');
+  const { approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
+  const { user, config: cfg, pending: approvalItems, decided: decidedItems } = useMyApprovalQueue();
 
   const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -22,6 +25,10 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   const [itemToReject, setItemToReject] = useState<ApprovalItem | null>(null);
   const [itemToAuthorize, setItemToAuthorize] = useState<ApprovalItem | null>(null);
   const [expandedTrails, setExpandedTrails] = useState<Record<string, boolean>>({});
+
+  const categories = cfg?.categories ?? [];
+  const canBatch = canDecide && (cfg?.canBatch ?? false);
+  const reviewer = user ? `${user.name} (${user.label})` : '';
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -44,15 +51,9 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleConfirmAuthorize = (data: AuthorizeData) => {
-    if (!itemToAuthorize) return;
-    const actor = ROLE_META[role] || ROLE_META.hod;
-    const reviewer = `${actor.name} (${actor.label})`;
+    if (!itemToAuthorize || !user) return;
 
-    const res = approveApprovalItem(itemToAuthorize.id, data.directive, reviewer);
-    if (itemToAuthorize.sourceType === 'requisition' && itemToAuthorize.sourceId) {
-      endorseHOD(itemToAuthorize.sourceId, 'approved');
-    }
-
+    const res = approveApprovalItem(itemToAuthorize.id, data.directive, reviewer, user.role);
     setSelectedIds((prev) => prev.filter((x) => x !== itemToAuthorize.id));
 
     showToast(
@@ -69,20 +70,16 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleConfirmReject = (data: RejectionData) => {
-    if (!itemToReject) return;
-    const actor = ROLE_META[role] || ROLE_META.hod;
-    const reviewer = `${actor.name} (${actor.label})`;
+    if (!itemToReject || !user) return;
 
     rejectApprovalItem(
       itemToReject.id,
       data.reasonCategory,
       data.observation,
       data.improvementsRequired,
-      reviewer
+      reviewer,
+      user.role
     );
-    if (itemToReject.sourceType === 'requisition' && itemToReject.sourceId) {
-      endorseHOD(itemToReject.sourceId, 'rejected');
-    }
     setSelectedIds((prev) => prev.filter((x) => x !== itemToReject.id));
     showToast(
       t(
@@ -96,14 +93,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
   };
 
   const handleBatchApprove = () => {
-    if (selectedIds.length === 0) return;
-    const res = batchApproveItems(selectedIds);
-    selectedIds.forEach((id) => {
-      const it = approvalItems.find((a) => a.id === id);
-      if (it?.sourceType === 'requisition' && it.sourceId) {
-        endorseHOD(it.sourceId, 'approved');
-      }
-    });
+    if (selectedIds.length === 0 || !user) return;
+    const res = batchApproveItems(selectedIds, user.role);
     setSelectedIds([]);
     showToast(
       t(
@@ -135,20 +126,18 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
       {/* Header */}
       <div className="flex-between mb-4">
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-            {t('Executive Document & Expense Approvals', 'নির্বাহী অনুমোদন ইনবক্স ও ব্যবস্থাপনা', lang)}
+          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-1)' }}>
+            {cfg ? t(cfg.title[0], cfg.title[1], lang) : t('Approvals', 'অনুমোদন', lang)}
           </h2>
           <p className="text-muted">
-            {t(
-              'Review and approve purchase requests, expense claims, vehicle requisitions, and leave applications.',
-              'ক্রয় আবেদন, ভ্রমণ বিল, গাড়ির রিকুইজিশন এবং ছুটির আবেদন পর্যালোচনা ও অনুমোদন করুন।',
-              lang
-            )}
+            {cfg
+              ? t(cfg.description[0], cfg.description[1], lang)
+              : t('You do not have an approval queue.', 'আপনার কোনো অনুমোদন তালিকা নেই।', lang)}
           </p>
         </div>
 
         <div className="flex-gap">
-          {activeTab === 'pending' && selectedIds.length > 0 && (
+          {activeTab === 'pending' && canBatch && selectedIds.length > 0 && (
             <button
               className="btn-gold"
               style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
@@ -170,29 +159,33 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           </div>
           <div className="stat-value">{approvalItems.length}</div>
           <div className="stat-sub">
-            <span className="sub-warn">Action Required</span> • Awaiting Review
+            {approvalItems.some((i) => i.slaHoursLeft < 12)
+              ? <><span className="sub-warn">{t('Due within 12 hours', '১২ ঘণ্টার মধ্যে', lang)}</span> • {approvalItems.filter((i) => i.slaHoursLeft < 12).length}</>
+              : t('Within service level', 'নির্ধারিত সময়সীমার মধ্যে', lang)}
           </div>
         </div>
 
         <div className="stat-card gold">
           <div className="stat-top">
-            <span className="stat-label">{t('Total Financial Value', 'মোট আর্থিক পরিমাণ', lang)}</span>
+            <span className="stat-label">{t('Value awaiting decision', 'সিদ্ধান্তের অপেক্ষায় থাকা অর্থ', lang)}</span>
             <div className="stat-icon-wrap"><DollarSign size={16} /></div>
           </div>
           <div className="stat-value">৳ {(totalPendingCost / 100000).toFixed(2)}L</div>
           <div className="stat-sub">
-            Approved under current quarter budget
+            {t('Across all pending files in your queue', 'আপনার তালিকার সকল অপেক্ষমাণ নথি', lang)}
           </div>
         </div>
 
         <div className="stat-card green">
           <div className="stat-top">
-            <span className="stat-label">{t('Completed Approvals', 'নিষ্পন্ন অনুমোদন', lang)}</span>
+            <span className="stat-label">{t('Decided by you', 'আপনার নিষ্পন্ন সিদ্ধান্ত', lang)}</span>
             <div className="stat-icon-wrap"><ShieldCheck size={16} /></div>
           </div>
           <div className="stat-value">{decidedItems.length}</div>
           <div className="stat-sub">
-            Archived in audit history
+            {decidedItems.filter((d) => d.decisionStatus === 'rejected').length > 0
+              ? t(`${decidedItems.filter((d) => d.decisionStatus === 'rejected').length} returned with query`, `${decidedItems.filter((d) => d.decisionStatus === 'rejected').length}টি আপত্তিসহ ফেরত`, lang)
+              : t('All approved', 'সব অনুমোদিত', lang)}
           </div>
         </div>
       </div>
@@ -205,7 +198,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
             fontSize: '12px',
             padding: '7px 16px',
             background: activeTab === 'pending' ? 'var(--brand-crimson)' : 'transparent',
-            color: activeTab === 'pending' ? '#fff' : 'var(--brand-slate-600)',
+            color: activeTab === 'pending' ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
             borderColor: activeTab === 'pending' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
             fontWeight: 700,
             display: 'flex',
@@ -216,7 +209,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
         >
           <ClipboardCheck size={14} />
           {t('Actionable Pending Requests', 'অপেক্ষমাণ আবেদনসমূহ', lang)}
-          <span style={{ background: activeTab === 'pending' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'pending' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+          <span style={{ background: activeTab === 'pending' ? 'color-mix(in srgb, var(--text-on-brand) 25%, transparent)' : 'var(--brand-slate-200)', color: activeTab === 'pending' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
             {approvalItems.length}
           </span>
         </button>
@@ -226,8 +219,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           style={{
             fontSize: '12px',
             padding: '7px 16px',
-            background: activeTab === 'history' ? 'var(--brand-slate-900)' : 'transparent',
-            color: activeTab === 'history' ? 'var(--brand-gold)' : 'var(--brand-slate-600)',
+            background: activeTab === 'history' ? 'var(--surface-selected)' : 'transparent',
+            color: activeTab === 'history' ? 'var(--text-on-selected)' : 'var(--brand-slate-600)',
             borderColor: activeTab === 'history' ? 'var(--brand-gold)' : 'var(--brand-slate-200)',
             fontWeight: 700,
             display: 'flex',
@@ -238,7 +231,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
         >
           <FileText size={14} />
           {t('Approval History & Archive', 'অনুমোদন খতিয়ান ও ইতিহাস', lang)}
-          <span style={{ background: activeTab === 'history' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'history' ? '#fff' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
+          <span style={{ background: activeTab === 'history' ? 'color-mix(in srgb, var(--text-on-selected) 20%, transparent)' : 'var(--brand-slate-200)', color: activeTab === 'history' ? 'var(--text-on-selected)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
             {decidedItems.length}
           </span>
         </button>
@@ -250,39 +243,24 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           <div className="flex-gap" style={{ flexWrap: 'wrap' }}>
             <button
               className={`btn-sm-ghost ${selectedCategory === 'all' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'all' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'all' ? '#fff' : 'inherit' }}
+              style={{ background: selectedCategory === 'all' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'all' ? 'var(--text-on-brand)' : 'inherit' }}
               onClick={() => setSelectedCategory('all')}
             >
-              {t('All Categories', 'সকল ক্যাটাগরি', lang)} ({listToDisplay.length})
+              {t('All', 'সব', lang)} ({listToDisplay.length})
             </button>
-            <button
-              className={`btn-sm-ghost ${selectedCategory === 'procurement' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'procurement' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'procurement' ? '#fff' : 'inherit' }}
-              onClick={() => setSelectedCategory('procurement')}
-            >
-              {t('Procurement & Spares', 'ক্রয় ও খুচরা যন্ত্রাংশ', lang)}
-            </button>
-            <button
-              className={`btn-sm-ghost ${selectedCategory === 'finance' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'finance' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'finance' ? '#fff' : 'inherit' }}
-              onClick={() => setSelectedCategory('finance')}
-            >
-              {t('Travel & Expense Claims', 'ভ্রমণ ও যাতায়াত বিল', lang)}
-            </button>
-            <button
-              className={`btn-sm-ghost ${selectedCategory === 'fleet' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'fleet' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'fleet' ? '#fff' : 'inherit' }}
-              onClick={() => setSelectedCategory('fleet')}
-            >
-              {t('Vehicle Requisitions', 'গাড়ির আবেদন', lang)}
-            </button>
-            <button
-              className={`btn-sm-ghost ${selectedCategory === 'leave' ? 'active' : ''}`}
-              style={{ background: selectedCategory === 'leave' ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === 'leave' ? '#fff' : 'inherit' }}
-              onClick={() => setSelectedCategory('leave')}
-            >
-              {t('Staff Leave', 'ছুটির আবেদন', lang)}
-            </button>
+            {categories.map((cat) => {
+              const count = listToDisplay.filter((i) => i.category === cat).length;
+              return (
+                <button
+                  key={cat}
+                  className={`btn-sm-ghost ${selectedCategory === cat ? 'active' : ''}`}
+                  style={{ background: selectedCategory === cat ? 'var(--brand-crimson)' : 'transparent', color: selectedCategory === cat ? 'var(--text-on-brand)' : 'inherit' }}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {t(CATEGORY_LABELS[cat][0], CATEGORY_LABELS[cat][1], lang)}{count > 0 ? ` (${count})` : ''}
+                </button>
+              );
+            })}
           </div>
 
           <div style={{ position: 'relative', flex: '1 1 240px', minWidth: '180px' }}>
@@ -303,7 +281,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
       <div className="card">
         <div className="card-hd flex-between">
           <div className="flex-gap" style={{ alignItems: 'center' }}>
-            {activeTab === 'pending' && (
+            {activeTab === 'pending' && canBatch && (
               <button className="btn-sm-ghost" onClick={selectAll} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 {selectedIds.length === filteredItems.length && filteredItems.length > 0 ? (
                   <CheckSquare size={16} color="var(--brand-crimson)" />
@@ -314,29 +292,35 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
               </button>
             )}
             <span className="text-muted" style={{ fontSize: '12px' }}>
-              Showing {filteredItems.length} requests
+              {t(`Showing ${filteredItems.length} of ${listToDisplay.length}`, `${listToDisplay.length}টির মধ্যে ${filteredItems.length}টি দেখানো হচ্ছে`, lang)}
             </span>
           </div>
 
-          <button className="btn-sm-ghost" onClick={() => showToast(t('Queue refreshed.', 'তালিকা রিফ্রেশ হয়েছে।', lang), 'info')}>
+          <button className="btn-sm-ghost" onClick={() => showToast(t('Queue is up to date.', 'তালিকা হালনাগাদ আছে।', lang), 'info')}>
             <RefreshCw size={13} /> {t('Refresh', 'রিফ্রেশ', lang)}
           </button>
         </div>
 
         <div className="card-body no-padding">
           {filteredItems.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '36px', color: 'var(--brand-slate-400)' }}>
-              {activeTab === 'pending'
-                ? t('No pending approvals matching criteria.', 'কোনো অপেক্ষমাণ আবেদন নেই।', lang)
-                : t('No historical records found.', 'কোনো ইতিহাস পাওয়া যায়নি।', lang)}
-            </div>
+            <EmptyState
+              icon={<Inbox size={20} />}
+              title={activeTab === 'pending'
+                ? t('Nothing waiting for you', 'আপনার জন্য কিছু অপেক্ষমাণ নেই', lang)
+                : t('No decisions recorded yet', 'এখনও কোনো সিদ্ধান্ত নথিভুক্ত হয়নি', lang)}
+              description={activeTab === 'pending'
+                ? (searchQuery || selectedCategory !== 'all'
+                  ? t('Try clearing the search or category filter.', 'অনুসন্ধান বা ক্যাটাগরি ফিল্টার মুছে দেখুন।', lang)
+                  : t('New files routed to you will appear here.', 'আপনার কাছে পাঠানো নতুন নথি এখানে দেখা যাবে।', lang))
+                : t('Approved and returned files will be archived here.', 'অনুমোদিত ও ফেরত পাঠানো নথি এখানে সংরক্ষিত থাকবে।', lang)}
+            />
           ) : (
             <div className="approvals-desktop-table">
               <div className="table-responsive">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      {activeTab === 'pending' && <th style={{ width: '40px' }}></th>}
+                      {activeTab === 'pending' && canBatch && <th style={{ width: '40px' }}></th>}
                       <th>{t('Request Details', 'আবেদনের বিবরণ', lang)}</th>
                       <th>{t('Requester & Department', 'আবেদনকারী ও বিভাগ', lang)}</th>
                       <th>{t('Amount', 'পরিমাণ', lang)}</th>
@@ -349,7 +333,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                       const isChecked = selectedIds.includes(item.id);
                       return (
                         <tr key={item.id} className={isChecked ? 'row-selected' : ''}>
-                          {activeTab === 'pending' && (
+                          {activeTab === 'pending' && canBatch && (
                             <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
                               <button
                                 type="button"
@@ -362,7 +346,7 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                             </td>
                           )}
                           <td style={{ verticalAlign: 'top', paddingTop: '14px' }}>
-                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
+                            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>
                               {t(item.title, item.titleBn, lang)}
                             </div>
                             <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px', lineHeight: 1.4 }}>
@@ -383,13 +367,13 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                     borderRadius: '6px',
                                     fontSize: '11px',
                                     fontWeight: 700,
-                                    background: expandedTrails[item.id] ? '#EEF2FF' : '#F1F5F9',
-                                    color: expandedTrails[item.id] ? '#4338CA' : '#475569',
-                                    border: '1px solid #E2E8F0',
+                                    background: expandedTrails[item.id] ? 'var(--status-purple-bg)' : 'var(--surface-2)',
+                                    color: expandedTrails[item.id] ? 'var(--status-purple-text)' : 'var(--text-2)',
+                                    border: '1px solid var(--border-1)',
                                     cursor: 'pointer',
                                   }}
                                 >
-                                  <ShieldCheck size={13} color="#059669" />
+                                  <ShieldCheck size={13} color="var(--status-success)" />
                                   <span>{t('Review History', 'অনুমোদন খতিয়ান', lang)} ({item.approvalTrail.length})</span>
                                   <span style={{ fontSize: '9px' }}>{expandedTrails[item.id] ? '▲' : '▼'}</span>
                                 </button>
@@ -398,8 +382,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                   <div
                                     style={{
                                       marginTop: '8px',
-                                      background: '#F8FAFC',
-                                      border: '1px solid #CBD5E1',
+                                      background: 'var(--surface-0)',
+                                      border: '1px solid var(--border-2)',
                                       borderRadius: '8px',
                                       padding: '10px 12px',
                                       display: 'flex',
@@ -408,15 +392,15 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                     }}
                                   >
                                     {item.approvalTrail.map((step, idx) => (
-                                      <div key={idx} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
+                                      <div key={idx} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '8px 10px', fontSize: '11.5px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
                                           <div>
-                                            <strong style={{ color: '#0F172A' }}>✓ {step.officerName}</strong>
-                                            <span style={{ color: '#64748B', marginLeft: '6px' }}>({step.roleName} · {step.department})</span>
+                                            <strong style={{ color: 'var(--text-1)' }}>✓ {step.officerName}</strong>
+                                            <span style={{ color: 'var(--text-3)', marginLeft: '6px' }}>({step.roleName} · {step.department})</span>
                                           </div>
-                                          <span style={{ fontSize: '10px', color: '#94A3B8' }}>{step.timestamp}</span>
+                                          <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{step.timestamp}</span>
                                         </div>
-                                        <div style={{ color: '#334155', fontStyle: 'italic', paddingLeft: '14px' }}>
+                                        <div style={{ color: 'var(--text-2)', fontStyle: 'italic', paddingLeft: '14px' }}>
                                           "{step.note}"
                                         </div>
                                       </div>
@@ -451,40 +435,58 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
                                   {item.slaHoursLeft}h left
                                 </span>
                                 <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
-                                  Submitted: {item.date}
+                                  {t('Submitted', 'দাখিল', lang)}: {item.date}
+                                </div>
+                              </>
+                            ) : item.decisionStatus === 'rejected' ? (
+                              <>
+                                <span className="badge warn">{t('Returned with query', 'আপত্তিসহ ফেরত', lang)}</span>
+                                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
+                                  {item.rejectedAt}{item.rejectionReason ? ` • ${item.rejectionReason}` : ''}
                                 </div>
                               </>
                             ) : (
-                              <span className="badge success">
-                                ✓ Approved
-                              </span>
+                              <>
+                                <span className="badge success">✓ {t('Approved', 'অনুমোদিত', lang)}</span>
+                                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
+                                  {item.authorizedAt}{item.sapVoucher ? ` • ${item.sapVoucher}` : ''}
+                                </div>
+                              </>
                             )}
                           </td>
 
                           <td style={{ textAlign: 'right', verticalAlign: 'top', paddingTop: '14px' }}>
                             {activeTab === 'pending' ? (
-                              <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
-                                <button
-                                  className="btn-sm-ghost"
-                                  style={{ color: '#DC2626', borderColor: 'rgba(220,38,38,0.2)' }}
-                                  onClick={() => handleRejectSingle(item)}
-                                  title={t('Return with Query', 'আপত্তিসহ ফেরত', lang)}
-                                >
-                                  <X size={13} />
-                                </button>
-                                <button
-                                  className="btn-primary"
-                                  style={{ padding: '6px 14px', fontSize: '11.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}
-                                  onClick={() => handleOpenAuthorize(item)}
-                                >
-                                  <Check size={14} />
-                                  {t('Approve', 'অনুমোদন', lang)}
-                                </button>
-                              </div>
+                              canDecide ? (
+                                <div className="flex-gap" style={{ justifyContent: 'flex-end' }}>
+                                  <button
+                                    className="btn-sm-ghost"
+                                    style={{ color: 'var(--status-danger)', borderColor: 'var(--status-danger-border)' }}
+                                    onClick={() => handleRejectSingle(item)}
+                                    title={t('Return with Query', 'আপত্তিসহ ফেরত', lang)}
+                                    aria-label={t('Return with Query', 'আপত্তিসহ ফেরত', lang)}
+                                  >
+                                    <X size={13} />
+                                  </button>
+                                  <button
+                                    className="btn-primary"
+                                    style={{ padding: '6px 14px', fontSize: '11.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '5px' }}
+                                    onClick={() => handleOpenAuthorize(item)}
+                                  >
+                                    <Check size={14} />
+                                    {t('Approve', 'অনুমোদন', lang)}
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="badge info">{t('View only', 'শুধু দেখার জন্য', lang)}</span>
+                              )
                             ) : (
-                              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>
-                                Completed
-                              </span>
+                              <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                                {item.decisionStatus === 'rejected'
+                                  ? t('Returned by', 'ফেরত পাঠিয়েছেন', lang)
+                                  : t('Approved by', 'অনুমোদন করেছেন', lang)}
+                                <div style={{ fontWeight: 700, color: 'var(--text-1)' }}>{item.decisionStatus === 'rejected' ? item.rejectedBy : item.authorizedBy}</div>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -512,8 +514,8 @@ export default function ApprovalsView({ role, lang }: ViewProps) {
           amount={itemToAuthorize.amount}
           sapDocRef={itemToAuthorize.sapDocRef}
           approvalTrail={itemToAuthorize.approvalTrail}
-          roleTitle={ROLE_META[role]?.label || 'Executive Approver'}
-          signerName={ROLE_META[role]?.name || 'Executive Signer'}
+          roleTitle={user?.label ?? ''}
+          signerName={user?.name ?? ''}
         />
       )}
 

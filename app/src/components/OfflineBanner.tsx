@@ -1,99 +1,57 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet, View } from "react-native";
+import Animated, { FadeInUp, FadeOutUp } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { Icon } from "./ui/Icon";
+import { Text } from "./ui/Text";
 
-const BANNER_HEIGHT = 44;
 const BACK_ONLINE_MS = 2200;
 
-/**
- * OfflineBanner — slides in from top when offline, shows "Back online" briefly before hiding.
- * Place this inside InnerLayout in _layout.tsx so it overlays all screens.
- */
-export default function OfflineBanner() {
+/** Inline strip under the header: offline notice, then a brief "back online". */
+export function OfflineBanner() {
   const { isConnected } = useNetworkStatus();
-  const [visible, setVisible] = useState(false);
-  const [showingOnline, setShowingOnline] = useState(false);
-  // Lazy useState (not useRef().current) so the stable Animated.Value isn't read during render.
-  const [translateY] = useState(() => new Animated.Value(-BANNER_HEIGHT - 40));
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const insets = useSafeAreaInsets();
-
-  const slideIn = () => {
-    Animated.spring(translateY, {
-      toValue: 0,
-      useNativeDriver: true,
-      tension: 70,
-      friction: 12,
-    }).start();
-  };
-
-  const slideOut = (onDone?: () => void) => {
-    Animated.timing(translateY, {
-      toValue: -BANNER_HEIGHT - 40,
-      duration: 280,
-      useNativeDriver: true,
-    }).start(() => onDone?.());
-  };
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const [mode, setMode] = useState<"hidden" | "offline" | "online">("hidden");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-
+    if (timer.current) clearTimeout(timer.current);
     if (!isConnected) {
-      // Driven by a real external signal (network status), not derivable during render —
-      // also kicks off the slide-in animation, so it belongs in an effect.
+      // Network status is an external signal; syncing it into local display state is intentional.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShowingOnline(false);
-      setVisible(true);
-      slideIn();
-    } else if (visible) {
-      setShowingOnline(true);
-      hideTimer.current = setTimeout(() => {
-        slideOut(() => setVisible(false));
-      }, BACK_ONLINE_MS);
+      setMode("offline");
+    } else {
+      setMode((m) => (m === "offline" ? "online" : m));
+      timer.current = setTimeout(() => setMode("hidden"), BACK_ONLINE_MS);
     }
-
     return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
+      if (timer.current) clearTimeout(timer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
-  if (!visible) return null;
-
+  if (mode === "hidden") return null;
+  const offline = mode === "offline";
   return (
-    <Animated.View
-      style={[
-        styles.banner,
-        {
-          paddingTop: insets.top > 0 ? insets.top : 10,
-          height: BANNER_HEIGHT + (insets.top > 0 ? insets.top : 10),
-          backgroundColor: showingOnline ? "#16a34a" : "#dc2626",
-          transform: [{ translateY }],
-        },
-      ]}
-    >
-      <View style={styles.row}>
-        <Text style={styles.icon}>{showingOnline ? "✓" : "⚠"}</Text>
-        <Text style={styles.text}>{showingOnline ? "Back online" : "No internet connection"}</Text>
+    <Animated.View entering={FadeInUp.duration(200)} exiting={FadeOutUp.duration(200)}>
+      <View
+        style={[styles.strip, { backgroundColor: offline ? theme.warningMuted : theme.successMuted }]}
+        accessibilityLiveRegion="polite"
+        accessibilityRole="alert"
+      >
+        <Icon name={offline ? "cloud-offline-outline" : "cloud-done-outline"} size={16} color={offline ? "warning" : "success"} />
+        <Text variant="caption" color={offline ? "warning" : "success"} style={styles.text}>
+          {offline ? t("states.offline") : t("states.backOnline")}
+        </Text>
       </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  banner: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
-    elevation: 20,
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingBottom: 6,
-  },
-  row: { flexDirection: "row", alignItems: "center", gap: 6 },
-  icon: { color: "#fff", fontSize: 14, fontWeight: "700" },
-  text: { color: "#fff", fontSize: 13, fontWeight: "600", letterSpacing: 0.2 },
+  strip: { flexDirection: "row", alignItems: "center", gap: Spacing.sm, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
+  text: { flex: 1 },
 });

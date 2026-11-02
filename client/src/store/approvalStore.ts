@@ -1,5 +1,8 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import React from 'react';
-import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
+import { AppRole, ROLE_META } from '../types';
+import { nowStamp } from '../lib/clock';
+import { nextRef } from '../lib/refs';
 import { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
 import { notesheetStore } from './notesheetStore';
 import { fleetStore } from './fleetStore';
@@ -9,6 +12,8 @@ import { advanceAssetRequisitionById, rejectAssetRequisitionById } from './asset
 export interface ClaimItem {
   id: string;
   claimant: string;
+  /** Canonical employee id of the claimant (identity checks use this, not the name). */
+  claimantEmpId?: string;
   designation: string;
   dept: string;
   type: 'tada' | 'conveyance' | 'tour_event';
@@ -21,6 +26,8 @@ export interface ClaimItem {
   status: 'pending_hod' | 'pending_finance' | 'approved' | 'settled' | 'rejected';
   dateSubmitted: string;
   sapVoucher?: string;
+  /** Set when finance marks the voucher as paid. */
+  settledAt?: string;
   items?: { desc: string; date: string; amount: number; category: string }[];
   rejectionReason?: string;
   rejectionObservation?: string;
@@ -74,6 +81,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'TOUR-2026-008',
     claimant: 'Engr. Md. Harunur Rashid',
+    claimantEmpId: 'EMP-0012',
     designation: 'Plant General Manager',
     dept: 'Plant Operations',
     type: 'tour_event',
@@ -95,6 +103,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'SPRT-2026-003',
     claimant: 'Md. Kamruzzaman',
+    claimantEmpId: 'EMP-0045',
     designation: 'Transport & Admin Supervisor',
     dept: 'Transport & Logistics',
     type: 'tour_event',
@@ -115,6 +124,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'TADA-2026-0419',
     claimant: 'Tanvir Ahmed',
+    claimantEmpId: 'EMP-1042',
     designation: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
     type: 'tada',
@@ -133,6 +143,7 @@ const INITIAL_CLAIMS: ClaimItem[] = [
   {
     id: 'CNV-2026-1002',
     claimant: 'Tanvir Ahmed',
+    claimantEmpId: 'EMP-1042',
     designation: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
     type: 'conveyance',
@@ -147,6 +158,45 @@ const INITIAL_CLAIMS: ClaimItem[] = [
       { desc: 'Ride-Share Car: Motijheel to Tejgaon Depot', date: '21 Oct', amount: 620, category: 'Car Fare' },
       { desc: 'CNG Auto: Narayanganj Distributor Visit', date: '24 Oct', amount: 850, category: 'CNG' },
       { desc: 'Local Transport: Retail Hardware & Bitumen Dealers', date: '26-28 Oct', amount: 3500, category: 'Local Travel' },
+    ],
+  },
+  {
+    id: 'TADA-2026-0402',
+    claimant: 'Nazmul Huda',
+    claimantEmpId: 'EMP-1104',
+    designation: 'HSE Officer',
+    dept: 'HSE & Compliance',
+    type: 'tada',
+    purpose: 'DoE Environmental Clearance Hearing — Agargaon',
+    destination: 'Dhaka (Agargaon)',
+    period: '14 Oct – 15 Oct 2026 (2 days)',
+    amount: 9800,
+    status: 'pending_finance',
+    dateSubmitted: '17 Oct 2026',
+    items: [
+      { desc: 'Daily Allowance (2 days @ ৳2,000/day)', date: '14-15 Oct', amount: 4000, category: 'Daily Allowance' },
+      { desc: 'Document notarisation & DoE filing fees (receipts attached)', date: '14 Oct', amount: 4600, category: 'Official Fees' },
+      { desc: 'Local transport Keraniganj – Agargaon return', date: '14-15 Oct', amount: 1200, category: 'Local Transport' },
+    ],
+  },
+  {
+    id: 'TADA-2026-0388',
+    claimant: 'Md. Rafiqul Islam',
+    claimantEmpId: 'EMP-0821',
+    designation: 'Senior Driver',
+    dept: 'Transport & Logistics',
+    type: 'tada',
+    purpose: 'Outstation delivery run — Bogura depot (night halt)',
+    destination: 'Bogura',
+    period: '09 Oct – 10 Oct 2026 (2 days)',
+    amount: 3600,
+    status: 'settled',
+    dateSubmitted: '12 Oct 2026',
+    sapVoucher: 'VCH-2026-10471',
+    settledAt: '22 Oct 2026',
+    items: [
+      { desc: 'Driver night-halt allowance (2 days @ ৳1,200/day)', date: '09-10 Oct', amount: 2400, category: 'Daily Allowance' },
+      { desc: 'Meals en route (receipts attached)', date: '09-10 Oct', amount: 1200, category: 'Food' },
     ],
   },
 ];
@@ -360,10 +410,10 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     date: 'Today, 11:20 AM',
     slaHoursLeft: 4,
     urgency: 'high',
-    sapDocRef: 'REQ-2026-441',
+    sapDocRef: 'REQ-2026-0441',
     details: 'Round trip today 2:30 PM – 6:00 PM (2 passengers) to deliver signed highway supply papers to Plant GM.',
     sourceType: 'requisition',
-    sourceId: 'REQ-2026-441',
+    sourceId: 'REQ-2026-0441',
   },
   {
     id: 'APR-REQ-443',
@@ -378,10 +428,10 @@ const INITIAL_APPROVAL_ITEMS: ApprovalItem[] = [
     date: 'Today, 11:35 AM',
     slaHoursLeft: 5,
     urgency: 'normal',
-    sapDocRef: 'REQ-2026-443',
+    sapDocRef: 'REQ-2026-0443',
     details: 'One-way trip today at 2:45 PM to carry visitor pass printer & security logbooks to Keraniganj Gate #1.',
     sourceType: 'requisition',
-    sourceId: 'REQ-2026-443',
+    sourceId: 'REQ-2026-0443',
   },
   {
     id: 'APR-2026-0744',
@@ -448,11 +498,28 @@ const INITIAL_DECIDED_ITEMS: ApprovalItem[] = [
   },
 ];
 
+interface ApprovalSnapshot {
+  claims: ClaimItem[];
+  approvalItems: ApprovalItem[];
+  decidedItems: ApprovalItem[];
+}
+const PERSIST_NAME = 'approvals';
+const PERSIST_VERSION = 1;
+
 class ApprovalStore {
   private claims: ClaimItem[] = [...INITIAL_CLAIMS];
   private approvalItems: ApprovalItem[] = [...INITIAL_APPROVAL_ITEMS];
   private decidedItems: ApprovalItem[] = [...INITIAL_DECIDED_ITEMS];
   private listeners: Set<() => void> = new Set();
+
+  constructor() {
+    const saved = loadPersisted<ApprovalSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) {
+      this.claims = saved.claims;
+      this.approvalItems = saved.approvalItems;
+      this.decidedItems = saved.decidedItems;
+    }
+  }
 
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
@@ -461,6 +528,11 @@ class ApprovalStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted<ApprovalSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      claims: this.claims,
+      approvalItems: this.approvalItems,
+      decidedItems: this.decidedItems,
+    }));
   }
 
   getClaims(): ClaimItem[] {
@@ -480,6 +552,7 @@ class ApprovalStore {
     const newClaim: ClaimItem = {
       id: data.id,
       claimant: data.claimant,
+      claimantEmpId: data.claimantEmpId,
       designation: data.designation,
       dept: data.dept,
       type: data.type,
@@ -509,7 +582,7 @@ class ApprovalStore {
       dept: data.dept,
       amount: `৳${data.amount.toLocaleString()}`,
       costTk: data.amount,
-      date: 'Today, Just Now',
+      date: nowStamp(),
       slaHoursLeft: 24,
       urgency: data.amount > 50000 ? 'critical' : 'normal',
       sapDocRef: data.id,
@@ -536,7 +609,7 @@ class ApprovalStore {
       dept,
       amount: '৳0 (Company Pool Car)',
       costTk: 0,
-      date: 'Today, Just Now',
+      date: nowStamp(),
       slaHoursLeft: 12,
       urgency: 'high',
       sapDocRef: reqId,
@@ -550,11 +623,11 @@ class ApprovalStore {
   }
 
   // 3. Mirror Official Notesheet into Pending Approvals
-  addNotesheetApproval(fileNo: string, title: string, initiator: string, dept: string, amount: string) {
-    if (this.approvalItems.some((a) => a.sourceId === fileNo)) return;
+  addNotesheetApproval(fileId: string, fileNo: string, title: string, initiator: string, dept: string, amount: string) {
+    if (this.approvalItems.some((a) => a.sourceId === fileId || a.sapDocRef === fileNo)) return;
     const numericAmount = parseInt(amount.replace(/[^0-9]/g, ''), 10) || 0;
     const approvalItem: ApprovalItem = {
-      id: `APR-NS-${Date.now().toString().slice(-4)}`,
+      id: nextRef('APR'),
       category: 'procurement',
       title: `Official Document Approval — ${title}`,
       titleBn: `দাপ্তরিক নথি অনুমোদন — ${title}`,
@@ -563,13 +636,13 @@ class ApprovalStore {
       dept,
       amount,
       costTk: numericAmount,
-      date: 'Today, Just Now',
+      date: nowStamp(),
       slaHoursLeft: 18,
       urgency: numericAmount > 500000 ? 'critical' : 'normal',
       sapDocRef: fileNo,
       details: `Official approval document submitted by ${initiator} (${dept}).`,
       sourceType: 'notesheet',
-      sourceId: fileNo,
+      sourceId: fileId,
     };
 
     this.approvalItems = [approvalItem, ...this.approvalItems];
@@ -589,7 +662,7 @@ class ApprovalStore {
       dept,
       amount: `${days} ${days === 1 ? 'Day' : 'Days'}`,
       costTk: 0,
-      date: 'Today, Just Now',
+      date: nowStamp(),
       slaHoursLeft: 24,
       urgency: 'normal',
       sapDocRef: leaveId,
@@ -614,7 +687,7 @@ class ApprovalStore {
       dept,
       amount: `৳${costBdt.toLocaleString()}`,
       costTk: costBdt,
-      date: 'Today, Just Now',
+      date: nowStamp(),
       slaHoursLeft: 24,
       urgency: costBdt >= 1000000 ? 'high' : 'normal',
       sapDocRef: reqNumber,
@@ -636,14 +709,14 @@ class ApprovalStore {
     const item = this.approvalItems.find((a) => a.sourceId === sourceId || a.sapDocRef === sourceId);
     if (!item) return;
 
-    const voucher = `VCH-2026-${Math.floor(10000 + Math.random() * 89999)}`;
+    const voucher = nextRef('VCH');
     const decided: ApprovalItem =
       decision === 'approved'
         ? {
             ...item,
             decisionStatus: 'approved',
             authorizedBy: actorName,
-            authorizedAt: `${SYSTEM_TODAY}, Just Now`,
+            authorizedAt: nowStamp(),
             executiveDirective: noteOrReason,
             sapVoucher: voucher,
           }
@@ -651,7 +724,7 @@ class ApprovalStore {
             ...item,
             decisionStatus: 'rejected',
             rejectedBy: actorName,
-            rejectedAt: `${SYSTEM_TODAY}, Just Now`,
+            rejectedAt: nowStamp(),
             rejectionReason: noteOrReason || 'Returned for revision',
           };
 
@@ -670,7 +743,7 @@ class ApprovalStore {
     const item = this.approvalItems.find((a) => a.id === itemId);
     const meta = ROLE_META[authorizerRole];
     const approverLabel = authorizedBy || `${meta.name} (${meta.label})`;
-    const generatedVoucher = `VCH-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    const generatedVoucher = nextRef('VCH');
 
     if (item) {
       if (item.sourceType === 'claim' && item.sourceId) {
@@ -678,14 +751,14 @@ class ApprovalStore {
           c.id === item.sourceId ? { ...c, status: 'approved', sapVoucher: generatedVoucher } : c
         );
       } else if (item.sourceType === 'notesheet' && item.sourceId) {
-        notesheetStore.approveFile({
+        notesheetStore.signStep({
           fileIdOrNo: item.sourceId,
           actorName: meta.name,
           actorRoleTitle: meta.label,
           actorDept: meta.dept,
           actorRole: authorizerRole,
           remark: directive || 'Approved via Approvals Center.',
-          stampCode: generatedVoucher,
+          hash: generatedVoucher,
         });
       } else if (item.sourceType === 'requisition' && item.sourceId) {
         fleetStore.endorseHOD(item.sourceId, 'approved');
@@ -699,7 +772,7 @@ class ApprovalStore {
         ...item,
         decisionStatus: 'approved',
         authorizedBy: approverLabel,
-        authorizedAt: `${SYSTEM_TODAY}, Just Now`,
+        authorizedAt: nowStamp(),
         executiveDirective: directive || item.executiveDirective,
         sapVoucher: generatedVoucher,
       };
@@ -728,7 +801,7 @@ class ApprovalStore {
   ) {
     const item = this.approvalItems.find((a) => a.id === itemId);
     const meta = ROLE_META[reviewerRole];
-    const timestamp = `${SYSTEM_TODAY}, Just Now`;
+    const timestamp = nowStamp();
     const reviewerName = reviewer || `${meta.name} (${meta.label})`;
     const reason = reasonCategory || 'Additional Details Needed';
     const obs = observation || 'Please review attached figures and supporting receipts.';
@@ -792,7 +865,7 @@ class ApprovalStore {
     improvementsRequired: string,
     reviewer?: string
   ) {
-    const timestamp = `${SYSTEM_TODAY}, Just Now`;
+    const timestamp = nowStamp();
     const reviewerName = reviewer || 'Approving Manager';
 
     this.claims = this.claims.map((c) =>
@@ -847,7 +920,7 @@ class ApprovalStore {
     if (updatedClaim) {
       this.approvalItems = [
         {
-          id: `APR-${updatedClaim.id}-${Date.now().toString().slice(-3)}`,
+          id: nextRef('APR'),
           category: 'finance',
           title: `Expense Claim (Resubmitted) — ${updatedClaim.purpose}`,
           titleBn: `${updatedClaim.purpose} (সংশোধিত দাখিল)`,
@@ -856,7 +929,7 @@ class ApprovalStore {
           dept: updatedClaim.dept,
           amount: `৳${updatedClaim.amount.toLocaleString()}`,
           costTk: updatedClaim.amount,
-          date: 'Today, Resubmitted',
+          date: nowStamp(),
           slaHoursLeft: 24,
           urgency: 'high',
           sapDocRef: updatedClaim.id,
@@ -891,7 +964,7 @@ class ApprovalStore {
 
   // 11. Direct Claim Status Updater (from ClaimsView)
   updateClaimStatus(id: string, status: ClaimItem['status'], sapVoucher?: string, actorName?: string) {
-    const voucher = sapVoucher || (status === 'approved' ? `VCH-2026-${Math.floor(10000 + Math.random() * 90000)}` : undefined);
+    const voucher = sapVoucher || (status === 'approved' ? nextRef('VCH') : undefined);
     this.claims = this.claims.map((c) =>
       c.id === id ? { ...c, status, sapVoucher: voucher || c.sapVoucher } : c
     );
@@ -904,7 +977,7 @@ class ApprovalStore {
             ...linked,
             decisionStatus: status,
             authorizedBy: status === 'approved' ? actorName || 'Finance Approver' : undefined,
-            authorizedAt: status === 'approved' ? `${SYSTEM_TODAY}, Just Now` : undefined,
+            authorizedAt: status === 'approved' ? nowStamp() : undefined,
             sapVoucher: voucher,
           },
           ...this.decidedItems,
@@ -913,6 +986,14 @@ class ApprovalStore {
       }
     }
 
+    this.notify();
+  }
+
+  // 12. Finance marks an approved voucher as paid
+  settleClaim(id: string) {
+    this.claims = this.claims.map((c) =>
+      c.id === id && c.status === 'approved' ? { ...c, status: 'settled', settledAt: nowStamp() } : c
+    );
     this.notify();
   }
 }
@@ -948,6 +1029,7 @@ export function useApprovalStore() {
     rejectApprovalItem: approvalStore.rejectApprovalItem.bind(approvalStore),
     rejectClaim: approvalStore.rejectClaim.bind(approvalStore),
     resubmitClaim: approvalStore.resubmitClaim.bind(approvalStore),
+    settleClaim: approvalStore.settleClaim.bind(approvalStore),
     batchApproveItems: approvalStore.batchApproveItems.bind(approvalStore),
   };
 }

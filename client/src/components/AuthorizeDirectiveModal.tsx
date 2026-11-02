@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { X, Crown, CheckCircle2, ShieldCheck, Clock, Sparkles } from 'lucide-react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { DepartmentApprovalStep } from '../store/approvalStore';
+import { signatureCode } from '../lib/hash';
+import { nowStamp } from '../lib/clock';
 
 export interface AuthorizeData {
   directive: string;
@@ -96,16 +98,13 @@ export default function AuthorizeDirectiveModal({
       ? 'Engr. Md. Harunur Rashid'
       : 'Ahmed Akbar Sobhan');
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const stampCode =
-      'APPROVED-' +
-      new Date().getFullYear() +
-      '-' +
-      Math.floor(100000 + Math.random() * 900000);
+    const text = directive.trim() || DIRECTIVE_PRESETS[0].text;
+    const stampCode = await signatureCode([text, displaySigner, displayTitle, nowStamp()]);
 
     onConfirm({
-      directive: directive.trim() || DIRECTIVE_PRESETS[0].text,
+      directive: text,
       notifySms,
       signatureHash: stampCode,
     });
@@ -147,7 +146,7 @@ export default function AuthorizeDirectiveModal({
           borderRadius: '16px',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08)',
           overflow: 'hidden',
-          background: '#FFFFFF',
+          background: 'var(--surface-1)',
           margin: 'auto',
           animation: 'modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both',
         }}
@@ -157,8 +156,8 @@ export default function AuthorizeDirectiveModal({
         <div
           className="modal-hd"
           style={{
-            background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)',
-            color: '#FFFFFF',
+            background: 'linear-gradient(135deg, var(--status-purple-solid-dark) 0%, var(--status-purple-solid-dark) 50%, var(--status-purple-solid-dark) 100%)',
+            color: 'var(--text-on-brand)',
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -178,16 +177,16 @@ export default function AuthorizeDirectiveModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#FDE047',
+                color: 'var(--status-warning-bright)',
               }}
             >
               <Crown size={20} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                 {t('Confirm Approval & Add Note', 'অনুমোদন নিশ্চিত করুন ও নির্দেশনা যোগ করুন', lang)}
               </h3>
-              <div style={{ fontSize: '11.5px', color: '#CBD5E1', marginTop: '2px' }}>
+              <div style={{ fontSize: '11.5px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
                 {t('Review previous checks, add any approval note, and apply your official stamp', 'পূর্ববর্তী সুপারিশ দেখে চূড়ান্ত অনুমোদন নিশ্চিত করুন', lang)}
               </div>
             </div>
@@ -200,7 +199,7 @@ export default function AuthorizeDirectiveModal({
             style={{
               background: 'rgba(255, 255, 255, 0.15)',
               borderColor: 'rgba(255, 255, 255, 0.25)',
-              color: '#FFFFFF',
+              color: 'var(--text-on-brand)',
             }}
           >
             <X size={16} />
@@ -213,8 +212,8 @@ export default function AuthorizeDirectiveModal({
             {/* Summary Card */}
             <div
               style={{
-                background: '#F8FAFC',
-                border: '1px solid #E2E8F0',
+                background: 'var(--surface-0)',
+                border: '1px solid var(--border-1)',
                 borderRadius: '10px',
                 padding: '14px 16px',
                 marginBottom: '16px',
@@ -223,7 +222,7 @@ export default function AuthorizeDirectiveModal({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: '#4338CA', fontFamily: 'monospace' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-purple-text)', fontFamily: 'monospace' }}>
                       {itemId}
                     </span>
                     {sapDocRef && sapDocRef !== itemId && (
@@ -232,27 +231,27 @@ export default function AuthorizeDirectiveModal({
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A', marginTop: '3px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-1)', marginTop: '3px' }}>
                     {itemTitle}
                   </div>
                 </div>
                 {amount && (
-                  <span className="badge" style={{ background: '#ECFDF5', color: '#047857', border: '1px solid #A7F3D0', fontWeight: 800, fontSize: '13px', padding: '4px 10px' }}>
+                  <span className="badge" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success-text)', border: '1px solid var(--status-success-border)', fontWeight: 800, fontSize: '13px', padding: '4px 10px' }}>
                     {typeof amount === 'number' ? `৳${amount.toLocaleString()}` : amount}
                   </span>
                 )}
               </div>
 
               {(requesterName || department) && (
-                <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '6px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '6px', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
                   {requesterName && (
                     <span>
-                      {t('Submitted By:', 'আবেদনকারী:', lang)} <strong style={{ color: '#1E293B' }}>{requesterName}</strong>
+                      {t('Submitted By:', 'আবেদনকারী:', lang)} <strong style={{ color: 'var(--text-1)' }}>{requesterName}</strong>
                     </span>
                   )}
                   {department && (
                     <span>
-                      {t('Department:', 'বিভাগ:', lang)} <strong style={{ color: '#1E293B' }}>{department}</strong>
+                      {t('Department:', 'বিভাগ:', lang)} <strong style={{ color: 'var(--text-1)' }}>{department}</strong>
                     </span>
                   )}
                 </div>
@@ -261,10 +260,10 @@ export default function AuthorizeDirectiveModal({
 
             {/* Prior Endorsements */}
             {approvalTrail && approvalTrail.length > 0 && (
-              <div style={{ marginBottom: '18px', background: '#F1F5F9', borderRadius: '10px', padding: '12px 14px', border: '1px solid #E2E8F0' }}>
+              <div style={{ marginBottom: '18px', background: 'var(--surface-2)', borderRadius: '10px', padding: '12px 14px', border: '1px solid var(--border-1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#1E293B' }}>
-                    <ShieldCheck size={16} color="#059669" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: 'var(--text-1)' }}>
+                    <ShieldCheck size={16} color="var(--status-success)" />
                     <span>{t('Previous Reviews & Recommendations', 'পূর্ববর্তী যাচাই ও সুপারিশ', lang)}</span>
                     <span className="badge green" style={{ fontSize: '10px', padding: '1px 6px' }}>
                       {approvalTrail.filter((s) => s.status === 'completed').length} {t('Checked', 'যাচাইকৃত', lang)}
@@ -273,7 +272,7 @@ export default function AuthorizeDirectiveModal({
                   <button
                     type="button"
                     onClick={() => setShowTrailDetails(!showTrailDetails)}
-                    style={{ background: 'none', border: 'none', color: '#4338CA', fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--status-purple-text)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                   >
                     {showTrailDetails ? t('Hide Details', 'সংক্ষিপ্ত করুন', lang) : t('Show Details', 'বিস্তারিত দেখুন', lang)}
                   </button>
@@ -285,8 +284,8 @@ export default function AuthorizeDirectiveModal({
                       <div
                         key={idx}
                         style={{
-                          background: '#FFFFFF',
-                          border: '1px solid #CBD5E1',
+                          background: 'var(--surface-1)',
+                          border: '1px solid var(--border-2)',
                           borderRadius: '8px',
                           padding: '10px 12px',
                           fontSize: '11.5px',
@@ -294,17 +293,17 @@ export default function AuthorizeDirectiveModal({
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>
+                            <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>
                               ✓
                             </span>
-                            <strong style={{ color: '#0F172A', fontSize: '12px' }}>{step.officerName}</strong>
-                            <span style={{ color: '#64748B' }}>({step.roleName})</span>
+                            <strong style={{ color: 'var(--text-1)', fontSize: '12px' }}>{step.officerName}</strong>
+                            <span style={{ color: 'var(--text-3)' }}>({step.roleName})</span>
                           </div>
-                          <span style={{ fontSize: '10.5px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                          <span style={{ fontSize: '10.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '3px' }}>
                             <Clock size={11} /> {step.timestamp}
                           </span>
                         </div>
-                        <div style={{ paddingLeft: '24px', color: '#334155', fontStyle: 'italic', lineHeight: 1.45 }}>
+                        <div style={{ paddingLeft: '24px', color: 'var(--text-2)', fontStyle: 'italic', lineHeight: 1.45 }}>
                           "{step.note}"
                         </div>
                       </div>
@@ -317,8 +316,8 @@ export default function AuthorizeDirectiveModal({
             {/* Quick Presets */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Sparkles size={14} color="#D97706" />
-                <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                <Sparkles size={14} color="var(--status-warning)" />
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-2)' }}>
                   {t('Quick Approval Note Templates:', 'দ্রুত অনুমোদন নোট নির্বাচন করুন:', lang)}
                 </label>
               </div>
@@ -334,9 +333,9 @@ export default function AuthorizeDirectiveModal({
                         fontSize: '11px',
                         padding: '6px 11px',
                         borderRadius: '6px',
-                        border: isSelected ? '1.5px solid #4338CA' : '1px solid #CBD5E1',
-                        background: isSelected ? '#EEF2FF' : '#FFFFFF',
-                        color: isSelected ? '#3730A3' : '#475569',
+                        border: isSelected ? '1.5px solid var(--status-purple-solid-dark)' : '1px solid var(--border-2)',
+                        background: isSelected ? 'var(--status-purple-bg)' : 'var(--surface-1)',
+                        color: isSelected ? 'var(--status-purple-text)' : 'var(--text-2)',
                         fontWeight: isSelected ? 800 : 500,
                         cursor: 'pointer',
                         textAlign: 'left',
@@ -352,7 +351,7 @@ export default function AuthorizeDirectiveModal({
 
             {/* Approval Remarks */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-1)', marginBottom: '4px' }}>
                 {t('Approval Note / Instructions:', 'অনুমোদন নোট বা বিশেষ নির্দেশনা:', lang)}
               </label>
               <textarea
@@ -364,9 +363,9 @@ export default function AuthorizeDirectiveModal({
                   fontSize: '12.5px',
                   padding: '10px 12px',
                   borderRadius: '8px',
-                  border: '1.5px solid #818CF8',
-                  background: '#F8FAFC',
-                  color: '#0F172A',
+                  border: '1.5px solid var(--status-purple-bright)',
+                  background: 'var(--surface-0)',
+                  color: 'var(--text-1)',
                   boxSizing: 'border-box',
                   lineHeight: 1.45,
                 }}
@@ -383,8 +382,8 @@ export default function AuthorizeDirectiveModal({
             {/* Dynamic Signer Stamp Preview */}
             <div
               style={{
-                background: '#F0FDF4',
-                border: '1px solid #BBF7D0',
+                background: 'var(--status-success-bg)',
+                border: '1px solid var(--status-success-border)',
                 borderRadius: '8px',
                 padding: '10px 14px',
                 marginBottom: '14px',
@@ -401,8 +400,8 @@ export default function AuthorizeDirectiveModal({
                     width: '30px',
                     height: '30px',
                     borderRadius: '50%',
-                    background: resolvedMeta?.avatarColor || '#166534',
-                    color: '#FFFFFF',
+                    background: resolvedMeta?.avatarColor || 'var(--status-success-solid-dark)',
+                    color: 'var(--text-on-brand)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -413,10 +412,10 @@ export default function AuthorizeDirectiveModal({
                   {resolvedMeta?.initials || '✓'}
                 </div>
                 <div>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#166534' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-success-text)' }}>
                     {displaySigner} — {displayTitle}
                   </div>
-                  <div style={{ fontSize: '10.5px', color: '#15803D' }}>
+                  <div style={{ fontSize: '10.5px', color: 'var(--status-success-text)' }}>
                     {t('Official Company Digital Approval Stamp Attached', 'অফিসিয়াল ডিজিটাল অনুমোদন সিল সংযুক্ত হবে', lang)}
                   </div>
                 </div>
@@ -427,7 +426,7 @@ export default function AuthorizeDirectiveModal({
             </div>
 
             {/* Notification Checkbox */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#475569' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-2)' }}>
               <input
                 type="checkbox"
                 id="notifyAuthSms"
@@ -446,8 +445,8 @@ export default function AuthorizeDirectiveModal({
             className="modal-footer"
             style={{
               padding: '12px 20px',
-              background: '#F8FAFC',
-              borderTop: '1px solid #E2E8F0',
+              background: 'var(--surface-0)',
+              borderTop: '1px solid var(--border-1)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '10px',
@@ -468,13 +467,13 @@ export default function AuthorizeDirectiveModal({
               style={{
                 fontSize: '12px',
                 padding: '8px 18px',
-                background: 'linear-gradient(135deg, #15803D 0%, #166534 100%)',
-                borderColor: '#15803D',
+                background: 'linear-gradient(135deg, var(--status-success-solid-dark) 0%, var(--status-success-solid-dark) 100%)',
+                borderColor: 'var(--status-success-solid-dark)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 fontWeight: 800,
-                color: '#FFFFFF',
+                color: 'var(--text-on-brand)',
                 boxShadow: '0 2px 8px rgba(22, 101, 52, 0.25)',
               }}
             >

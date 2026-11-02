@@ -1,5 +1,8 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import React from 'react';
 import { SYSTEM_TODAY } from '../types';
+import { nextRef } from '../lib/refs';
+import { nowStamp, nowTime } from '../lib/clock';
 
 export interface Driver {
   id: string;
@@ -101,6 +104,7 @@ export interface DriverTollSlip {
 export interface VehicleRequisition {
   id: string;
   requesterName: string;
+  requesterEmpId?: string;
   requesterRole: string;
   dept: string;
   phone: string;
@@ -425,7 +429,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
 
 export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
   {
-    id: 'REQ-2026-441',
+    id: 'REQ-2026-0441',
     requesterName: 'Tanvir Ahmed',
     requesterRole: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
@@ -445,7 +449,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     createdAt: `${SYSTEM_TODAY}, 11:20 AM`,
   },
   {
-    id: 'REQ-2026-435',
+    id: 'REQ-2026-0435',
     requesterName: 'Tanvir Ahmed',
     requesterRole: 'Senior Sales Officer',
     dept: 'Sales & Distribution',
@@ -471,7 +475,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     hodApproval: 'approved',
   },
   {
-    id: 'REQ-2026-443',
+    id: 'REQ-2026-0443',
     requesterName: 'Mizanur Rahman',
     requesterRole: 'Main Gate & Security Officer',
     dept: 'Security Administration',
@@ -490,7 +494,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     createdAt: `${SYSTEM_TODAY}, 11:35 AM`,
   },
   {
-    id: 'REQ-2026-445',
+    id: 'REQ-2026-0445',
     requesterName: 'Farida Begum',
     requesterRole: 'Head of Finance & Approver',
     dept: 'Finance & Accounts',
@@ -516,7 +520,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
     hodApproval: 'approved',
   },
   {
-    id: 'REQ-2026-438',
+    id: 'REQ-2026-0438',
     requesterName: 'Md. Kamruzzaman',
     requesterRole: 'Transport & Admin Supervisor',
     dept: 'Transport & Logistics',
@@ -552,7 +556,7 @@ export const INITIAL_REQUISITIONS: VehicleRequisition[] = [
 export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   {
     id: 'msg-1',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'admin',
     senderName: 'Md. Kamruzzaman (Transport Supervisor)',
     text: 'Vehicle Prado GHA-13-8821 assigned for Meghna Ghat trip. Driver Md. Rafiqul Islam passed morning fitness & safety check.',
@@ -563,7 +567,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-2',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'driver',
     senderName: 'Md. Rafiqul Islam (Driver)',
     text: 'Assalamu Alaikum Tanvir Sir. Car has 82% fuel and is waiting at Head Office Gate-1 porch with AC on.',
@@ -572,7 +576,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-3',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'employee',
     senderName: 'Tanvir Ahmed',
     text: 'Thank you Rafiqul Bhai. I am coming down with the customer contract files in 5 minutes.',
@@ -581,7 +585,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-loc-1',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'employee',
     senderName: 'Tanvir Ahmed',
     text: '📍 Shared Pickup Point: Head Office Main Reception Porch, Baridhara',
@@ -595,7 +599,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-toll-1',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'driver',
     senderName: 'Md. Rafiqul Islam (Driver)',
     text: 'Submitted bridge/flyover toll receipt: Mayor Hanif Flyover (৳260). Slip: TOL-2026-8819',
@@ -610,7 +614,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-voice-1',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'driver',
     senderName: 'Md. Rafiqul Islam (Driver)',
     text: 'Voice Note: Waiting at main porch Bay #1.',
@@ -622,7 +626,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-doc-1',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     senderRole: 'admin',
     senderName: 'Md. Kamruzzaman (Transport Supervisor)',
     text: 'Official Security Gate Pass #PASS-2026-9042',
@@ -636,10 +640,10 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
   },
   {
     id: 'msg-4',
-    requisitionId: 'REQ-2026-441',
+    requisitionId: 'REQ-2026-0441',
     senderRole: 'admin',
     senderName: 'Md. Kamruzzaman (Transport Supervisor)',
-    text: 'Booking REQ-2026-441 received. We can assign a car shortly or combine with REQ-2026-443 going to Keraniganj at 2:45 PM.',
+    text: 'Booking REQ-2026-0441 received. We can assign a car shortly or combine with REQ-2026-0443 going to Keraniganj at 2:45 PM.',
     timestamp: '11:40 AM',
     messageType: 'text',
   },
@@ -704,10 +708,10 @@ export const INITIAL_FLEET_NOTIFICATIONS: FleetNotification[] = [
     id: 'fnotif-1',
     type: 'assignment',
     title: 'Car & Driver Assigned',
-    message: 'Toyota Prado (GHA-13-8821) & Driver Md. Rafiqul Islam assigned to trip REQ-2026-435.',
+    message: 'Toyota Prado (GHA-13-8821) & Driver Md. Rafiqul Islam assigned to trip REQ-2026-0435.',
     time: '12m ago',
     targetRole: 'employee',
-    requisitionId: 'REQ-2026-435',
+    requisitionId: 'REQ-2026-0435',
     unread: true,
   },
   {
@@ -732,18 +736,29 @@ export const INITIAL_FLEET_NOTIFICATIONS: FleetNotification[] = [
     id: 'fnotif-4',
     type: 'requisition_created',
     title: 'New Vehicle Booking Request',
-    message: 'Tanvir Ahmed requested a car (REQ-2026-441) to Keraniganj Plant at 2:30 PM.',
+    message: 'Tanvir Ahmed requested a car (REQ-2026-0441) to Keraniganj Plant at 2:30 PM.',
     time: '2h ago',
     targetRole: 'admin',
-    requisitionId: 'REQ-2026-441',
+    requisitionId: 'REQ-2026-0441',
     unread: false,
   },
 ];
 
 const INITIAL_DRIVER_TOLL_SLIPS: DriverTollSlip[] = [
-  { id: 'TOL-2026-8819', reqId: 'REQ-2026-435', plaza: 'Mayor Hanif Flyover', amount: 260, time: 'Today, 09:45 AM', status: 'Pending Review' },
-  { id: 'TOL-2026-8790', reqId: 'REQ-2026-438', plaza: 'Postogola Buriganga Bridge', amount: 150, time: 'Yesterday, 02:10 PM', status: 'Paid' },
+  { id: 'TOL-2026-8819', reqId: 'REQ-2026-0435', plaza: 'Mayor Hanif Flyover', amount: 260, time: 'Today, 09:45 AM', status: 'Pending Review' },
+  { id: 'TOL-2026-8790', reqId: 'REQ-2026-0438', plaza: 'Postogola Buriganga Bridge', amount: 150, time: 'Yesterday, 02:10 PM', status: 'Paid' },
 ];
+
+interface FleetSnapshot {
+  drivers: Driver[];
+  vehicles: Vehicle[];
+  requisitions: VehicleRequisition[];
+  chatMessages: TripChatMessage[];
+  notifications: FleetNotification[];
+  driverTollSlips: DriverTollSlip[];
+}
+const PERSIST_NAME = 'fleet';
+const PERSIST_VERSION = 1;
 
 class FleetStore {
   private drivers: Driver[] = [...INITIAL_DRIVERS];
@@ -753,6 +768,11 @@ class FleetStore {
   private notifications: FleetNotification[] = [...INITIAL_FLEET_NOTIFICATIONS];
   private driverTollSlips: DriverTollSlip[] = [...INITIAL_DRIVER_TOLL_SLIPS];
   private listeners: (() => void)[] = [];
+
+  constructor() {
+    const saved = loadPersisted<FleetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) Object.assign(this, saved);
+  }
 
   getDrivers(): Driver[] { return this.drivers; }
   getVehicles(): Vehicle[] { return this.vehicles; }
@@ -772,10 +792,10 @@ class FleetStore {
   addRequisition(req: Omit<VehicleRequisition, 'id' | 'createdAt' | 'status'>): VehicleRequisition {
     const newReq: VehicleRequisition = {
       ...req,
-      id: `REQ-2026-${445 + this.requisitions.length}`,
+      id: nextRef('REQ'),
       status: 'pending',
       hodApproval: req.hodApproval || 'pending',
-      createdAt: `${SYSTEM_TODAY}, Just Now`,
+      createdAt: nowStamp(),
     };
     this.requisitions = [newReq, ...this.requisitions];
 
@@ -783,7 +803,7 @@ class FleetStore {
       type: 'requisition_created',
       title: 'New Vehicle Booking Request',
       message: `${newReq.requesterName} (${newReq.dept}) requested transport to ${newReq.to}.`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'admin',
       requisitionId: newReq.id,
       unread: true,
@@ -808,7 +828,7 @@ class FleetStore {
           assignedDriverId: driverId,
           assignedDriverName: driver?.name,
           assignedDriverPhone: driver?.phone,
-          tripPassNo: `PASS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          tripPassNo: nextRef('PASS'),
         };
       }
       return r;
@@ -828,7 +848,7 @@ class FleetStore {
       type: 'assignment',
       title: 'Vehicle & Driver Assigned',
       message: `${vehiclePlate} & Driver ${driver?.name || 'Duty Driver'} assigned to ${reqId}.`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'employee',
       requisitionId: reqId,
       unread: true,
@@ -858,7 +878,7 @@ class FleetStore {
       type: 'gate_out',
       title: 'Trip Started',
       message: `Booking ${reqId} departed gate at ${gateOutTime} (Meter: ${startKm} km).`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'all',
       requisitionId: reqId,
       unread: true,
@@ -907,7 +927,7 @@ class FleetStore {
       type: 'gate_in',
       title: 'Trip Completed',
       message: `Booking ${reqId} returned safely at ${gateInTime} (Closing Meter: ${endKm} km).`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'all',
       requisitionId: reqId,
       unread: true,
@@ -942,7 +962,7 @@ class FleetStore {
   poolRequisitions(primaryReqId: string, secondaryReqId: string, vehiclePlate: string, driverId: string): void {
     const vehicle = this.vehicles.find((v) => v.plate === vehiclePlate);
     const driver = this.drivers.find((d) => d.id === driverId);
-    const sharedPass = `SHARED-PASS-${Math.floor(1000 + Math.random() * 9000)}`;
+    const sharedPass = nextRef('PASS');
 
     this.requisitions = this.requisitions.map((r) => {
       if (r.id === primaryReqId || r.id === secondaryReqId) {
@@ -977,7 +997,7 @@ class FleetStore {
   }
 
   issueFuelVoucher(plate: string, liters: number, station: string): string {
-    const slipNo = `FUEL-2026-${Math.floor(930 + Math.random() * 600)}`;
+    const slipNo = nextRef('FUEL');
     this.vehicles = this.vehicles.map((v) => {
       if (v.plate !== plate) return v;
       const addedPct = Math.round((liters / (v.type === 'tanker' ? 250 : 75)) * 100);
@@ -992,7 +1012,7 @@ class FleetStore {
       type: 'maintenance',
       title: `Fuel Slip Issued (${slipNo})`,
       message: `${liters}L fuel voucher issued for ${plate} at ${station}.`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'admin',
       unread: true,
     });
@@ -1002,13 +1022,13 @@ class FleetStore {
   }
 
   submitDriverTollClaim(reqId: string, driverName: string, plaza: string, amount: number): DriverTollSlip {
-    const receiptNo = `TOL-2026-${Math.floor(1000 + Math.random() * 8999)}`;
+    const receiptNo = nextRef('TOL');
     const slip: DriverTollSlip = {
       id: receiptNo,
       reqId,
       plaza,
       amount,
-      time: 'Today, Just Now',
+      time: nowTime(),
       status: 'Pending Review',
     };
     this.driverTollSlips = [slip, ...this.driverTollSlips];
@@ -1043,7 +1063,7 @@ class FleetStore {
       speed: 0,
       engineTemp: 40,
       fuelPct: 100,
-      fuelSlipNo: `FUEL-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      fuelSlipNo: nextRef('FUEL'),
       nextServiceKm: 5000,
     };
     this.vehicles = [newVehicle, ...this.vehicles];
@@ -1091,7 +1111,7 @@ class FleetStore {
         type: 'maintenance',
         title: `Vehicle Sent to Workshop: ${plate}`,
         message: maintenanceDetails || 'Moved to workshop for servicing.',
-        time: 'Just now',
+        time: nowTime(),
         targetRole: 'admin',
         unread: true,
       });
@@ -1109,7 +1129,7 @@ class FleetStore {
         type: 'driver_status',
         title: `Driver Leave: ${driver?.name || driverId}`,
         message: `Marked on ${status === 'sick_leave' ? 'Sick Leave' : 'Leave'}. ${leaveReason || ''}`,
-        time: 'Just now',
+        time: nowTime(),
         targetRole: 'admin',
         unread: true,
       });
@@ -1151,7 +1171,7 @@ class FleetStore {
     }
   ): TripChatMessage {
     const newMsg: TripChatMessage = {
-      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `msg-${crypto.randomUUID()}`,
       requisitionId,
       senderRole,
       senderName,
@@ -1167,7 +1187,7 @@ class FleetStore {
         type: 'chat_message',
         title: `Trip Message: ${senderName}`,
         message: text.length > 55 ? text.slice(0, 52) + '...' : text,
-        time: 'Just now',
+        time: nowTime(),
         targetRole,
         requisitionId,
         unread: true,
@@ -1221,7 +1241,7 @@ class FleetStore {
   addNotification(notif: Omit<FleetNotification, 'id'>): FleetNotification {
     const newNotif: FleetNotification = {
       ...notif,
-      id: `fnotif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `fnotif-${crypto.randomUUID()}`,
     };
     this.notifications = [newNotif, ...this.notifications];
     this.notify();
@@ -1263,7 +1283,7 @@ class FleetStore {
       type: 'toll_claimed',
       title: 'Toll Slip Submitted',
       message: `${tollName} (৳${amount}) recorded for ${reqId} (Receipt: ${receiptNo}).`,
-      time: 'Just now',
+      time: nowTime(),
       targetRole: 'admin',
       requisitionId: reqId,
       unread: true,
@@ -1286,6 +1306,14 @@ class FleetStore {
 
   private notify(): void {
     this.listeners.forEach((listener) => listener());
+    savePersisted<FleetSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      drivers: this.drivers,
+      vehicles: this.vehicles,
+      requisitions: this.requisitions,
+      chatMessages: this.chatMessages,
+      notifications: this.notifications,
+      driverTollSlips: this.driverTollSlips,
+    }));
   }
 }
 

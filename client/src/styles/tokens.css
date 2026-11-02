@@ -1,0 +1,177 @@
+/* ==========================================================================
+   BOGCL OneOps — Semantic design tokens
+   --------------------------------------------------------------------------
+   Every colour used by a component must come from here (or from the brand
+   palette in variables.css). Light values equal the hex literals the UI was
+   originally built with, so light mode is unchanged; dark values are tuned
+   for the navy dark theme. Never put a hex literal in a .tsx file.
+
+   Naming
+     --surface-*   fills (canvas → card → subtle → muted) and inverse panels
+     --text-*      foreground on normal surfaces; --text-inverse* on inverse
+     --border-*    hairlines
+     --status-{k}-{text|bright|bg|border|solid}  per status family
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --surface-0: #F8FAFC;            /* page canvas */
+  --surface-1: #FFFFFF;            /* cards, panels, inputs */
+  --surface-2: #F1F5F9;            /* subtle fills, table headers, chips */
+  --surface-3: #E2E8F0;            /* muted fills, progress tracks */
+  --surface-4: #CBD5E1;            /* strong neutral fill */
+  --surface-inverse-deep: #020617; /* near-black hero / login panels */
+  --surface-inverse: #0F172A;      /* dark navy panels (always dark) */
+  --surface-inverse-2: #1E293B;    /* raised element on an inverse panel */
+  --surface-inverse-3: #334155;    /* hover/selected on an inverse panel */
+  --surface-overlay: rgba(11, 19, 43, 0.55);
+  --surface-selected: #0B132B;     /* active chip / segmented tab fill */
+  --text-on-selected: #FFFFFF;
+
+  /* Text */
+  --text-1: #0F172A;               /* headings, primary values */
+  --text-2: #334155;               /* body */
+  --text-3: #64748B;               /* secondary, labels */
+  --text-muted: #94A3B8;           /* placeholders, meta */
+  --text-on-brand: #FFFFFF;        /* on crimson / status solids */
+  --text-inverse: #F8FAFC;         /* on inverse panels */
+  --text-inverse-2: #CBD5E1;       /* secondary on inverse panels */
+  --text-inverse-muted: #94A3B8;   /* meta on inverse panels */
+
+  /* Borders */
+  --border-subtle: #F1F5F9;
+  --border-1: #E2E8F0;
+  --border-2: #CBD5E1;
+  --border-3: #94A3B8;
+  --border-strong: #0F172A;
+  --border-inverse: #1E293B;       /* hairlines on inverse panels */
+  --border-inverse-2: #334155;
+
+  /* Status: success */
+  --status-success-text: #065F46;  /* text on success-bg */
+  --status-success-bright: #34D399;/* on inverse panels, constant */
+  --status-success-border: #A7F3D0;
+  --status-success-solid: #059669; /* filled chip/button, white text */
+  --status-success-solid-dark: #047857;
+
+  /* Status: warning (amber) */
+  --status-warning-text: #B45309;
+  --status-warning-bright: #FBBF24;
+  --status-warning-border: #FDE68A;
+  --status-warning-solid: #D97706;
+  --status-warning-solid-dark: #B45309;
+
+  /* Status: danger */
+  --status-danger-text: #991B1B;
+  --status-danger-bright: #F87171;
+  --status-danger-border: #FECACA;
+  --status-danger-solid: #DC2626;
+  --status-danger-solid-dark: #991B1B;
+
+  /* Status: info (blue / sky) */
+  --status-info-text: #1E40AF;
+  --status-info-bright: #38BDF8;
+  --status-info-border: #BFDBFE;
+  --status-info-solid: #2563EB;
+  --status-info-solid-dark: #1E3A8A;
+
+  /* Status: purple / indigo */
+  --status-purple-text: #5B21B6;
+  --status-purple-bright: #A78BFA;
+  --status-purple-border: #DDD6FE;
+  --status-purple-solid: #7C3AED;
+  --status-purple-solid-dark: #312E81;
+
+  /* Status: pink (HR / people accents) */
+  --status-pink: #BE185D;
+  --status-pink-bg: #FCE7F3;
+  --status-pink-text: #9D174D;
+
+  /* Status: teal (chat / presence) */
+  --status-teal: #0D9488;
+  --status-teal-text: #075E54;
+  --status-teal-bg: #DCF8C6;
+
+  /* Brand extras not in variables.css */
+  --brand-crimson-deep: #700B1A;   /* gradient end for crimson heroes */
+  --brand-crimson-soft: #FFF5F5;
+  --brand-whatsapp: #25D366;       /* third-party channel colour, constant */
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(165, 28, 48, 0.25);
+}
+
+[data-theme="dark"] {
+  --surface-0: #060B18;
+  --surface-1: #0E1834;
+  --surface-2: #0A1227;
+  --surface-3: #1E293B;
+  --surface-4: #334155;
+  --surface-inverse-deep: #020612;
+  --surface-inverse: #040B1C;
+  --surface-inverse-2: #111A38;
+  --surface-inverse-3: #1E2A4A;
+  --surface-overlay: rgba(0, 0, 0, 0.7);
+  --surface-selected: #F1F5F9;
+  --text-on-selected: #0B132B;
+
+  --text-1: #F8FAFC;
+  --text-2: #CBD5E1;
+  --text-3: #94A3B8;
+  --text-muted: #6B7A94;
+  --text-on-brand: #FFFFFF;
+  --text-inverse: #F8FAFC;
+  --text-inverse-2: #CBD5E1;
+  --text-inverse-muted: #94A3B8;
+
+  --border-subtle: #141D37;
+  --border-1: #1E293B;
+  --border-2: #334155;
+  --border-3: #475569;
+  --border-strong: #CBD5E1;
+  --border-inverse: #1E293B;
+  --border-inverse-2: #334155;
+
+  --status-success-text: #6EE7B7;
+  --status-success-bright: #34D399;
+  --status-success-border: rgba(52, 211, 153, 0.35);
+  --status-success-solid: #059669;
+  --status-success-solid-dark: #047857;
+
+  --status-warning-text: #FCD34D;
+  --status-warning-bright: #FBBF24;
+  --status-warning-border: rgba(251, 191, 36, 0.35);
+  --status-warning-solid: #D97706;
+  --status-warning-solid-dark: #B45309;
+
+  --status-danger-text: #FCA5A5;
+  --status-danger-bright: #F87171;
+  --status-danger-border: rgba(248, 113, 113, 0.35);
+  --status-danger-solid: #DC2626;
+  --status-danger-solid-dark: #991B1B;
+
+  --status-info-text: #93C5FD;
+  --status-info-bright: #38BDF8;
+  --status-info-border: rgba(96, 165, 250, 0.35);
+  --status-info-solid: #2563EB;
+  --status-info-solid-dark: #1E3A8A;
+
+  --status-purple-text: #C4B5FD;
+  --status-purple-bright: #A78BFA;
+  --status-purple-border: rgba(167, 139, 250, 0.35);
+  --status-purple-solid: #7C3AED;
+  --status-purple-solid-dark: #312E81;
+
+  --status-pink: #F472B6;
+  --status-pink-bg: rgba(244, 114, 182, 0.16);
+  --status-pink-text: #F9A8D4;
+
+  --status-teal: #2DD4BF;
+  --status-teal-text: #5EEAD4;
+  --status-teal-bg: rgba(45, 212, 191, 0.16);
+
+  --brand-crimson-deep: #5C0A16;
+  --brand-crimson-soft: rgba(225, 29, 72, 0.12);
+
+  --focus-ring: 0 0 0 3px rgba(225, 29, 72, 0.35);
+}

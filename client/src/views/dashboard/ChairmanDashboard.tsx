@@ -1,12 +1,15 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronRight, Plus, Eye, Pin, CheckCircle2, Megaphone, Search, X } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import { DetailDrawerData } from '../../components/DetailDrawer';
 import { DashboardSubViewProps, NoticeItem } from './types';
-import { INNER_CIRCLE, PENDING_APPROVALS } from './dashboardData';
+import { INNER_CIRCLE } from './dashboardData';
 import { useNoticeStore } from '../../store/noticeStore';
+import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
+import { useMyApprovalQueue } from '../approvals/config';
+import { useCan } from '../../auth/session';
 import PublishNoticeModal from './PublishNoticeModal';
 import NoticeDetailModal from './NoticeDetailModal';
 import AuthorizeDirectiveModal, { AuthorizeData } from '../../components/AuthorizeDirectiveModal';
@@ -18,7 +21,9 @@ export default function ChairmanDashboard({
   onOpenDetailDrawer
 }: DashboardSubViewProps) {
   const { notices, addNotice, acknowledgeNotice, togglePin } = useNoticeStore();
-  const [approvalsList, setApprovalsList] = useState(PENDING_APPROVALS);
+  const canDecide = useCan('approvals:decide');
+  const { approveApprovalItem } = useApprovalStore();
+  const { user, pending: approvalsList } = useMyApprovalQueue();
   const [approvalsPage, setApprovalsPage] = useState(1);
   const [innerCirclePage, setInnerCirclePage] = useState(1);
   const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
@@ -27,33 +32,38 @@ export default function ChairmanDashboard({
   const [noticeSearch, setNoticeSearch] = useState<string>('');
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
   const [selectedNoticeForDetail, setSelectedNoticeForDetail] = useState<NoticeItem | null>(null);
-  const [itemToAuthorize, setItemToAuthorize] = useState<any | null>(null);
+  const [itemToAuthorize, setItemToAuthorize] = useState<ApprovalItem | null>(null);
   const [expandedTrails, setExpandedTrails] = useState<Record<string, boolean>>({});
 
   const toggleTrail = (id: string) => {
     setExpandedTrails(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleAuthorize = (item: any) => {
+  const handleAuthorize = (item: ApprovalItem) => {
     setItemToAuthorize(item);
   };
 
   const handleConfirmAuthorize = (data: AuthorizeData) => {
-    if (!itemToAuthorize) return;
+    if (!itemToAuthorize || !user) return;
     const item = itemToAuthorize;
-    setApprovalsList(prev => prev.filter(x => x.id !== item.id));
+    const res = approveApprovalItem(item.id, data.directive, `${user.name} (${user.label})`, user.role);
 
     const directiveSnippet =
       data.directive.length > 55 ? `${data.directive.slice(0, 55)}...` : data.directive;
 
     showToast(
       lang === 'en'
-        ? `👑 Chairman sanctioned ${item.id} (${item.amount}). Directive: "${directiveSnippet}". Forwarded to SAP S/4HANA.`
-        : `👑 চেয়ারম্যান মহোদয় কর্তৃক অনুমোদিত: ${item.id} (${item.amount})। নির্দেশনাসহ অর্থছাড়ের জন্য পাঠানো হয়েছে।`,
+        ? `Authorized ${item.id}${item.amount ? ` (${item.amount})` : ''}. Directive: "${directiveSnippet}". Voucher ${res.sapVoucher}.`
+        : `অনুমোদিত: ${item.id}${item.amount ? ` (${item.amount})` : ''}। নির্দেশনাসহ ভাউচার ${res.sapVoucher} তৈরি হয়েছে।`,
       'gold'
     );
     setItemToAuthorize(null);
   };
+
+  const innerCircleCounts = INNER_CIRCLE.reduce<Record<string, number>>((acc, p) => {
+    acc[p.status] = (acc[p.status] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const filteredInnerCircle = INNER_CIRCLE.filter(p => {
     if (innerCircleFilter === 'all') return true;
@@ -82,8 +92,20 @@ export default function ChairmanDashboard({
     });
   }, [notices, noticeFilter, noticeSearch]);
 
-  const handleRowClick = (item: DetailDrawerData) => {
-    if (onOpenDetailDrawer) onOpenDetailDrawer(item);
+  const handleRowClick = (item: ApprovalItem) => {
+    const drawerItem: DetailDrawerData = {
+      id: item.id,
+      title: item.title,
+      amount: item.amount,
+      dept: item.dept,
+      urgency: item.urgency,
+      time: item.date,
+      description: item.details,
+      initiator: item.requester,
+      sapRef: item.sapDocRef,
+      approvalTrail: item.approvalTrail,
+    };
+    if (onOpenDetailDrawer) onOpenDetailDrawer(drawerItem);
   };
 
   return (
@@ -97,32 +119,31 @@ export default function ChairmanDashboard({
             <div className="card-hd-left">
               <div className="card-hd-icon">⚡</div>
               <div>
-                <div className="card-title">{t('Priority Approvals — Chairman\'s Action Required', 'জরুরি অনুমোদন — চেয়ারম্যানের পদক্ষেপ প্রয়োজন', lang)}</div>
-                <div className="card-subtitle">{t('High-value files escalated to Chairman\'s office', 'উচ্চ-মূল্যের ফাইল চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
+                <div className="card-title">{t('Priority approvals awaiting your signature', 'আপনার স্বাক্ষরের অপেক্ষায় জরুরি অনুমোদন', lang)}</div>
+                <div className="card-subtitle">{t('High-value files endorsed by departments and escalated to the Chairman\'s office', 'বিভাগ কর্তৃক সুপারিশকৃত উচ্চমূল্যের ফাইল, চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
               </div>
             </div>
-            <span className="badge danger">{approvalsList.length} {t('items', 'টি ফাইল', lang)}</span>
+            <span className={`badge ${approvalsList.length > 0 ? 'danger' : 'success'}`}>{approvalsList.length} {t('files', 'টি ফাইল', lang)}</span>
           </div>
           <div className="card-body">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {approvalsList.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--brand-slate-500)', fontSize: '13px' }}>
-                  ✓ {t('All high-priority authorizations cleared by Chairman.', 'চেয়ারম্যান কর্তৃক সকল জরুরি ফাইল অনুমোদিত সম্পন্ন হয়েছে।', lang)}
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-3)', fontSize: '13px' }}>
+                  ✓ {t('No files are waiting on your signature.', 'আপনার স্বাক্ষরের অপেক্ষায় কোনো ফাইল নেই।', lang)}
                 </div>
               ) : (
-                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item, i) => {
-                  const hasTrail = item.approvalTrail && item.approvalTrail.length > 0;
+                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item) => {
                   const isExpanded = !!expandedTrails[item.id];
 
                   return (
                     <div
-                      key={item.id || i}
+                      key={item.id}
                       className="approval-interactive-card"
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '10px',
-                        borderLeft: `4px solid ${item.urgency === 'urgent' ? 'var(--brand-crimson)' : 'var(--brand-slate-400)'}`,
+                        borderLeft: `4px solid ${item.urgency === 'critical' ? 'var(--brand-crimson)' : item.urgency === 'high' ? 'var(--status-warning)' : 'var(--border-2)'}`,
                         cursor: 'default',
                       }}
                     >
@@ -136,30 +157,42 @@ export default function ChairmanDashboard({
                         }}
                       >
                         <div style={{ flex: '1 1 300px' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                            {item.title}
+                          <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-1)' }}>
+                            {t(item.title, item.titleBn || item.title, lang)}
                           </div>
-                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> · {item.dept} ·{' '}
-                            <strong style={{ color: 'var(--brand-gold-dark)', fontSize: '12px' }}>{item.amount}</strong>
-                            {item.sapRef && (
+                          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> · {item.dept} · {item.requester}
+                            {item.amount && (
+                              <>
+                                {' · '}
+                                <strong style={{ color: 'var(--brand-gold-dark)', fontSize: '12px' }}>{item.amount}</strong>
+                              </>
+                            )}
+                            {item.sapDocRef && (
                               <span className="badge info" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
-                                SAP: {item.sapRef}
+                                {t('Ref', 'রেফ', lang)}: {item.sapDocRef}
+                              </span>
+                            )}
+                            {item.slaHoursLeft <= 24 && (
+                              <span className="badge danger" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
+                                {item.slaHoursLeft <= 0 ? t('SLA breached', 'সময়সীমা অতিক্রান্ত', lang) : t(`${item.slaHoursLeft}h left`, `${item.slaHoursLeft.toLocaleString('bn-BD')} ঘণ্টা বাকি`, lang)}
                               </span>
                             )}
                           </div>
                         </div>
 
                         <div className="flex-gap" style={{ alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            className="btn-gold"
-                            style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                            onClick={() => handleAuthorize(item)}
-                            title={t('Authorize with Executive Directive & Seal', 'অনুমোদন ও নির্দেশিকা প্রদান', lang)}
-                          >
-                            👑 {t('Authorize', 'অনুমোদন', lang)}
-                          </button>
+                          {canDecide && (
+                            <button
+                              type="button"
+                              className="btn-gold"
+                              style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                              onClick={() => handleAuthorize(item)}
+                              title={t('Authorize with an executive directive and digital seal', 'নির্দেশনা ও ডিজিটাল সিলসহ অনুমোদন', lang)}
+                            >
+                              👑 {t('Authorize', 'অনুমোদন', lang)}
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="btn-outline"
@@ -173,7 +206,7 @@ export default function ChairmanDashboard({
 
                       {/* Departmental Endorsement Path Preview & Accordion */}
                       {item.approvalTrail && item.approvalTrail.length > 0 && (
-                        <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '8px 12px' }}>
+                        <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '8px 12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
                             <button
                               type="button"
@@ -188,10 +221,10 @@ export default function ChairmanDashboard({
                                 gap: '6px',
                                 fontSize: '11.5px',
                                 fontWeight: 700,
-                                color: '#4338CA',
+                                color: 'var(--status-purple-text)',
                               }}
                             >
-                              <ShieldCheck size={14} color="#059669" />
+                              <ShieldCheck size={14} color="var(--status-success)" />
                               <span>
                                 {t('Department Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length} {t('Notes', 'টি নোট', lang)})
                               </span>
@@ -199,11 +232,11 @@ export default function ChairmanDashboard({
                             </button>
 
                             {!isExpanded && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: '#64748B' }}>
-                                {item.approvalTrail.map((st: any, idx: number) => (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: 'var(--text-3)' }}>
+                                {item.approvalTrail.map((st, idx) => (
                                   <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                    {idx > 0 && <span style={{ color: '#CBD5E1', fontSize: '9px' }}>➔</span>}
-                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
+                                    {idx > 0 && <span style={{ color: 'var(--text-inverse-2)', fontSize: '9px' }}>➔</span>}
+                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
                                     <span>{st.officerName.split(' ')[0]}</span>
                                   </span>
                                 ))}
@@ -213,20 +246,20 @@ export default function ChairmanDashboard({
 
                           {/* Expanded list of departmental justification notes */}
                           {isExpanded && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #E2E8F0' }}>
-                              {item.approvalTrail.map((step: any, idx: number) => (
-                                <div key={idx} style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-1)' }}>
+                              {item.approvalTrail.map((step, idx) => (
+                                <div key={idx} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
                                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#DCFCE7', color: '#15803D', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
-                                      <strong style={{ color: '#0F172A' }}>{step.officerName}</strong>
-                                      <span style={{ color: '#64748B', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
+                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
+                                      <strong style={{ color: 'var(--text-1)' }}>{step.officerName}</strong>
+                                      <span style={{ color: 'var(--text-3)', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
                                     </div>
-                                    <span style={{ fontSize: '9.5px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                    <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
                                       <Clock size={10} /> {step.timestamp}
                                     </span>
                                   </div>
-                                  <div style={{ paddingLeft: '19px', color: '#334155', fontStyle: 'italic', lineHeight: 1.4 }}>
+                                  <div style={{ paddingLeft: '19px', color: 'var(--text-2)', fontStyle: 'italic', lineHeight: 1.4 }}>
                                     "{step.note}"
                                   </div>
                                 </div>
@@ -273,12 +306,13 @@ export default function ChairmanDashboard({
             {/* Interactive Filter Pills */}
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', fontSize: '11px' }}>
               {[
-                { id: 'all', label: 'All Tracked (8)', bg: '#F1F5F9', color: '#334155' },
-                { id: 'present', label: '🟢 Present (4)', bg: '#ECFDF5', color: '#065F46' },
-                { id: 'meeting', label: '🔵 In Meeting (1)', bg: '#EFF6FF', color: '#1E40AF' },
-                { id: 'leave', label: '🟡 Informed Leave (1)', bg: '#FEF3C7', color: '#92400E' },
-                { id: 'sick', label: '🟠 Sick Leave (1)', bg: '#FFFBEB', color: '#B45309' },
-                { id: 'uninformed', label: '🔴 Uninformed Absent (1)', bg: '#FEE2E2', color: '#991B1B' },
+                { id: 'all', label: t(`All tracked (${INNER_CIRCLE.length})`, `সকল (${INNER_CIRCLE.length.toLocaleString('bn-BD')})`, lang), bg: 'var(--surface-2)', color: 'var(--text-2)' },
+                { id: 'present', label: t(`🟢 Present (${innerCircleCounts.present ?? 0})`, `🟢 উপস্থিত (${(innerCircleCounts.present ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-success-bg)', color: 'var(--status-success-text)' },
+                { id: 'meeting', label: t(`🔵 In meeting (${innerCircleCounts.meeting ?? 0})`, `🔵 মিটিংয়ে (${(innerCircleCounts.meeting ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-info-bg)', color: 'var(--status-info-text)' },
+                { id: 'travel', label: t(`🟣 Travelling (${innerCircleCounts.travel ?? 0})`, `🟣 সফরে (${(innerCircleCounts.travel ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' },
+                { id: 'leave', label: t(`🟡 On leave (${innerCircleCounts.leave ?? 0})`, `🟡 ছুটিতে (${(innerCircleCounts.leave ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
+                { id: 'sick', label: t(`🟠 Sick leave (${innerCircleCounts.sick ?? 0})`, `🟠 অসুস্থতাজনিত ছুটি (${(innerCircleCounts.sick ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
+                { id: 'uninformed', label: t(`🔴 Absent, uninformed (${innerCircleCounts.uninformed ?? 0})`, `🔴 অননুমোদিত অনুপস্থিত (${(innerCircleCounts.uninformed ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' },
               ].map(pill => (
                 <button
                   key={pill.id}
@@ -306,15 +340,15 @@ export default function ChairmanDashboard({
                   className="presence-row interactive-row"
                   onClick={() => {
                     if (person.status === 'uninformed') {
-                      showToast(`🚨 URGENT: HR GM Sayeda Afroza instructed to initiate formal inquiry for ${person.name}.`, 'danger');
+                      showToast(t(`HR has been asked to follow up on ${person.name}'s unreported absence.`, `${person.name}-এর অনবহিত অনুপস্থিতির বিষয়ে এইচআরকে অনুসন্ধান করতে বলা হয়েছে।`, lang), 'danger');
                     } else {
-                      showToast(`📍 ${person.name} location: ${person.location} (${person.phone})`, 'info');
+                      showToast(`${person.name} · ${person.location} · ${person.phone}`, 'info');
                     }
                   }}
-                  title="Click to view leadership detail or trigger intervention"
+                  title={t('Click for location and contact', 'অবস্থান ও যোগাযোগের জন্য ক্লিক করুন', lang)}
                   style={{
-                    background: person.status === 'uninformed' ? '#FEF2F2' : undefined,
-                    border: person.status === 'uninformed' ? '1px solid #FECACA' : undefined
+                    background: person.status === 'uninformed' ? 'var(--status-danger-bg)' : undefined,
+                    border: person.status === 'uninformed' ? '1px solid var(--status-danger-border)' : undefined
                   }}
                 >
                   <div className="presence-person">
@@ -332,10 +366,10 @@ export default function ChairmanDashboard({
                         style={{ padding: '2px 8px', fontSize: '10px' }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          showToast(`🚨 Priority Notice dispatched to ${person.name} & GM HR for unauthorized absence.`, 'danger');
+                          showToast(t(`Notice sent to ${person.name} and the HR department.`, `${person.name} ও এইচআর বিভাগকে নোটিশ পাঠানো হয়েছে।`, lang), 'danger');
                         }}
                       >
-                        Alert HR
+                        {t('Alert HR', 'এইচআরকে জানান', lang)}
                       </button>
                     ) : (
                       <ChevronRight size={14} color="var(--brand-slate-300)" />
@@ -448,7 +482,7 @@ export default function ChairmanDashboard({
                   <span className="badge gold">👑 Pinned by Chairman</span>
                 </div>
                 <div className="notice-meta" style={{ fontSize: '11.5px', marginTop: '4px' }}>
-                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#B45309' }}>BOGCL/CHAIR/EID-2026</span>
+                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-warning-text)' }}>BOGCL/CHAIR/EID-2026</span>
                 </div>
                 <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-700)', marginTop: '8px', lineHeight: 1.5 }}>
                   {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
@@ -528,7 +562,7 @@ export default function ChairmanDashboard({
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {notice.requiresAck && (
                             <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--brand-slate-500)' }}>
-                              <CheckCircle2 size={13} color="#059669" />
+                              <CheckCircle2 size={13} color="var(--status-success)" />
                               <span>
                                 {notice.acknowledgedCount || 184}/{notice.totalRecipients || 218} Read ({Math.round(((notice.acknowledgedCount || 184) / (notice.totalRecipients || 218)) * 100)}%)
                               </span>
@@ -551,7 +585,7 @@ export default function ChairmanDashboard({
                             <button
                               type="button"
                               className="btn-sm-ghost"
-                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '6px' }}
+                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: 'var(--status-success-text)', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', borderRadius: '6px' }}
                               onClick={() => {
                                 acknowledgeNotice(notice.id || notice.title);
                                 showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
@@ -560,7 +594,7 @@ export default function ChairmanDashboard({
                               ✅ {t('Acknowledge', 'পড়েছি', lang)}
                             </button>
                           ) : (
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <CheckCircle2 size={12} />
                               <span>Acknowledged</span>
                             </span>
@@ -568,14 +602,14 @@ export default function ChairmanDashboard({
 
                           <button
                             type="button"
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? '#D97706' : 'var(--brand-slate-400)' }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? 'var(--status-warning)' : 'var(--brand-slate-400)' }}
                             title={notice.pinned ? "Unpin notice" : "Pin notice"}
                             onClick={() => {
                               togglePin(notice.id || notice.title);
                               showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
                             }}
                           >
-                            <Pin size={13} fill={notice.pinned ? '#D97706' : 'none'} />
+                            <Pin size={13} fill={notice.pinned ? 'var(--status-warning)' : 'none'} />
                           </button>
                         </div>
                       </div>
@@ -633,12 +667,12 @@ export default function ChairmanDashboard({
           lang={lang}
           itemId={itemToAuthorize.id}
           itemTitle={itemToAuthorize.title}
-          requesterName={itemToAuthorize.initiator || itemToAuthorize.requester}
+          requesterName={itemToAuthorize.requester}
           department={itemToAuthorize.dept}
           amount={itemToAuthorize.amount}
-          sapDocRef={itemToAuthorize.sapRef || itemToAuthorize.sapDocRef}
+          sapDocRef={itemToAuthorize.sapDocRef}
           approvalTrail={itemToAuthorize.approvalTrail}
-          roleTitle="Chairman & Managing Director"
+          roleTitle={user?.label ?? ""}
         />
       )}
     </>

@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { AppRole, Lang, t, AppView, ROLE_META } from '../types';
+import { AppRole, Lang, t, AppView } from '../types';
 import { Bell, CheckCheck, FileText, AlertTriangle, Truck, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
-import { useApprovalStore } from '../store/approvalStore';
+import { showToast } from './ToastManager';
+import { useMyApprovalQueue } from '../views/approvals/config';
 import { useFleetStore } from '../store/fleetStore';
 import { useNoticeStore } from '../store/noticeStore';
-import { getAllowedViewsForRole } from './Sidebar';
+import { useOperationsStore } from '../store/operationsStore';
+import { useAssetStore } from '../store/assetStore';
+import { useApprovalStore } from '../store/approvalStore';
+import { allowedViews as getAllowedViewsForRole, type Permission } from '../auth/permissions';
+import { useCurrentUser } from '../auth/session';
+import { fleetModeFor, notificationsVisibleTo, requisitionsVisibleTo } from '../views/fleet/config';
+import { guestModeFor, visitorsVisibleTo } from '../views/guest/config';
+import { isMine as isMyClaim, isPending as isPendingClaim } from '../views/claims/config';
 
 interface NotificationItem {
   id: string;
@@ -31,16 +38,19 @@ export default function NotificationCenter({
   onNavigate,
 }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(new Set(['sys-sync']));
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<'all' | 'approval' | 'safety' | 'logistics'>('all');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { approvalItems } = useApprovalStore();
-  const { notifications: fleetNotifs, markNotificationRead } = useFleetStore();
+  const { pending: approvalItems } = useMyApprovalQueue();
+  const { notifications: fleetNotifs, markNotificationRead, requisitions } = useFleetStore();
   const { activeBroadcast } = useNoticeStore();
+  const { licenses, visitors } = useOperationsStore();
+  const { assets } = useAssetStore();
+  const { claims } = useApprovalStore();
+  const user = useCurrentUser();
 
   const allowedViews = useMemo(() => getAllowedViewsForRole(role), [role]);
-  const meta = ROLE_META[role];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -48,8 +58,15 @@ export default function NotificationCenter({
         setIsOpen(false);
       }
     }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setIsOpen(false);
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   const notifications = useMemo<NotificationItem[]>(() => {
@@ -70,70 +87,10 @@ export default function NotificationCenter({
       });
     }
 
-    // 2. Role-Specific Relevant Notifications
-    if (role === 'driver') {
-      list.push(
-        {
-          id: 'drv-1',
-          category: 'logistics',
-          title: 'Active Trip Assigned (REQ-2026-442)',
-          titleBn: 'নির্ধারিত ট্রিপ চালু রয়েছে (REQ-2026-442)',
-          desc: 'Head Office to Motijheel Bangladesh Bank with Farida Begum (Toyota Prado GHA-13-8821).',
-          descBn: 'বারিধারা প্রধান কার্যালয় হতে মতিঝিল বাংলাদেশ ব্যাংক (ফরিদা বেগম)।',
-          time: '15m ago',
-          unread: !readIds.has('drv-1'),
-          targetView: 'fleet',
-        },
-        {
-          id: 'drv-2',
-          category: 'safety',
-          title: 'Morning Fitness & License Check Passed',
-          titleBn: 'সকালের ফিটনেস ও লাইসেন্স যাচাই সম্পন্ন',
-          desc: 'Duty check-in completed at 06:48 AM at Head Office Gate-1.',
-          descBn: 'সকাল ০৬:৪৮ মিনিটে প্রধান কার্যালয় গেট-১ এ উপস্থিতি নিশ্চিত হয়েছে।',
-          time: '2h ago',
-          unread: !readIds.has('drv-2'),
-          targetView: 'attendance',
-        }
-      );
-    } else if (role === 'employee') {
-      list.push(
-        {
-          id: 'emp-1',
-          category: 'approval',
-          title: 'Confirm Receipt of New Office Phone',
-          titleBn: 'নতুন অফিস ফোনের প্রাপ্তি নিশ্চিত করুন',
-          desc: 'iPhone 15 Business Handset (BOGCL-IT-PHN-310) is waiting for your 1-click confirmation.',
-          descBn: 'আপনার নামে বরাদ্দকৃত অফিস ফোনের প্রাপ্তি নিশ্চিত করুন।',
-          time: '20m ago',
-          unread: !readIds.has('emp-1'),
-          targetView: 'asset',
-        },
-        {
-          id: 'emp-2',
-          category: 'logistics',
-          title: 'Visitor Expected Today at 3:15 PM',
-          titleBn: 'আজ বিকাল ৩:১৫ মিনিটে অতিথি আগমন',
-          desc: 'Engr. Mahfuzur Rahman (RHD) pre-registered for Level 4 Meeting Room B.',
-          descBn: 'প্রকৌ. মাহফুজুর রহমান (সওজ) বিকাল ৩:১৫ মিনিটে ৪র্থ তলায় আসবেন।',
-          time: '1h ago',
-          unread: !readIds.has('emp-2'),
-          targetView: 'guest',
-        },
-        {
-          id: 'emp-3',
-          category: 'approval',
-          title: '2 Expense Claims Under Review',
-          titleBn: '২টি ভ্রমণ ও যাতায়াত বিল অনুমোদনের অপেক্ষায়',
-          desc: 'Chattogram Dealer Visit (৳14,850) and Local Client Visits (৳5,420) are with Finance.',
-          descBn: 'চট্টগ্রাম ডিলার ভিজিট ও স্থানীয় যাতায়াত বিল অর্থ বিভাগে পর্যালোচনায় রয়েছে।',
-          time: '3h ago',
-          unread: !readIds.has('emp-3'),
-          targetView: 'claims',
-        }
-      );
-    } else {
-      // Management / Supervisor Roles
+    // 2. Items derived from records this user is responsible for
+    if (user) {
+      const can = (p: Permission) => user.permissions.has(p);
+
       if (allowedViews.has('approvals') && approvalItems.length > 0) {
         const top = approvalItems[0];
         list.push({
@@ -141,61 +98,131 @@ export default function NotificationCenter({
           category: 'approval',
           title: `${approvalItems.length} Items Waiting for Approval`,
           titleBn: `${approvalItems.length}টি প্রস্তাব অনুমোদনের অপেক্ষায়`,
-          desc: `Priority: ${top.title} (${top.amount || top.requester}).`,
-          descBn: `অগ্রাধিকার: ${top.titleBn} (${top.amount || top.requester})।`,
-          time: '5m ago',
+          desc: `Next: ${top.title} (${top.amount || top.requester}).`,
+          descBn: `পরবর্তী: ${top.titleBn} (${top.amount || top.requester})।`,
+          time: t('Action needed', 'পদক্ষেপ প্রয়োজন', lang),
           unread: !readIds.has(`apr-top-${top.id}`),
           targetView: 'approvals',
         });
       }
 
-      if (allowedViews.has('compliance')) {
-        list.push({
-          id: 'perm-urgent',
-          category: 'safety',
-          title: 'Import Quota Permit Renews in 7 Days',
-          titleBn: 'কাঁচামাল আমদানি কোটা নবায়নে ৭ দিন বাকি',
-          desc: 'Annual Raw Material Import Permit (EMRD/BOGCL/2026/09) is at Ministry review.',
-          descBn: 'বার্ষিক কাঁচামাল আমদানি পারমিট জ্বালানি মন্ত্রণালয়ে চূড়ান্ত পর্যায়ে রয়েছে।',
-          time: '35m ago',
-          unread: !readIds.has('perm-urgent'),
-          targetView: 'compliance',
-        });
+      if (can('compliance:view')) {
+        const nearest = licenses
+          .filter((l) => l.stage < 5 && l.daysLeft <= 30)
+          .sort((a, b) => a.daysLeft - b.daysLeft)[0];
+        if (nearest) {
+          list.push({
+            id: `perm-${nearest.id}`,
+            category: 'safety',
+            title: `${nearest.title} expires in ${nearest.daysLeft} days`,
+            titleBn: `${nearest.titleBn} — মেয়াদ শেষ হতে ${nearest.daysLeft} দিন বাকি`,
+            desc: `${nearest.refNo} · ${nearest.agency} · renewal stage ${nearest.stage} of 5.`,
+            descBn: `${nearest.refNo} · ${nearest.agencyBn} · নবায়ন ধাপ ${nearest.stage}/৫।`,
+            time: t('Renewal due', 'নবায়ন বাকি', lang),
+            unread: !readIds.has(`perm-${nearest.id}`),
+            targetView: 'compliance',
+          });
+        }
+      }
+
+      if (allowedViews.has('asset')) {
+        assets
+          .filter((a) => a.custodianEmpId === user.empId && !a.custodianAcknowledged)
+          .slice(0, 2)
+          .forEach((a) => {
+            list.push({
+              id: `ast-${a.id}`,
+              category: 'approval',
+              title: `Confirm receipt: ${a.name}`,
+              titleBn: `প্রাপ্তি নিশ্চিত করুন: ${a.name}`,
+              desc: `${a.tag} is issued to you and awaits your custody sign-off.`,
+              descBn: `${a.tag} আপনার নামে বরাদ্দ — হেফাজত স্বীকৃতি প্রয়োজন।`,
+              time: t('Pending', 'অপেক্ষমাণ', lang),
+              unread: !readIds.has(`ast-${a.id}`),
+              targetView: 'asset',
+            });
+          });
+      }
+
+      if (allowedViews.has('guest')) {
+        visitorsVisibleTo(user, guestModeFor(user), visitors, 'my_guests')
+          .filter((v) => v.status === 'pre_registered' && v.expectedDate.startsWith('Today'))
+          .slice(0, 2)
+          .forEach((v) => {
+            list.push({
+              id: `vis-${v.id}`,
+              category: 'logistics',
+              title: `Visitor expected today at ${v.expectedTime}`,
+              titleBn: `আজ ${v.expectedTime}-এ অতিথি আসবেন`,
+              desc: `${v.name} (${v.organization}) — ${v.purpose}.`,
+              descBn: `${v.name} (${v.organization}) — ${v.purpose}।`,
+              time: v.expectedTime,
+              unread: !readIds.has(`vis-${v.id}`),
+              targetView: 'guest',
+            });
+          });
+      }
+
+      if (allowedViews.has('claims') && !can('claims:view_all')) {
+        const myPending = claims.filter((c) => isMyClaim(c, user) && isPendingClaim(c));
+
+        if (myPending.length > 0) {
+          const total = myPending.reduce((sum, c) => sum + c.amount, 0);
+          list.push({
+            id: `clm-mine-${myPending.map((c) => c.id).join('-')}`,
+            category: 'approval',
+            title: `${myPending.length} Expense Claim${myPending.length > 1 ? 's' : ''} Under Review`,
+            titleBn: `${myPending.length}টি খরচের দাবি পর্যালোচনায়`,
+            desc: `${myPending.map((c) => c.purpose).join(', ')} — ৳${total.toLocaleString('en-IN')} total.`,
+            descBn: `মোট ৳${total.toLocaleString('en-IN')} পর্যালোচনাধীন।`,
+            time: t('In review', 'পর্যালোচনায়', lang),
+            unread: !readIds.has(`clm-mine-${myPending.map((c) => c.id).join('-')}`),
+            targetView: 'claims',
+          });
+        }
       }
 
       if (allowedViews.has('fleet')) {
-        const recentFleet = fleetNotifs.slice(0, 2);
-        recentFleet.forEach((fn) => {
-          list.push({
-            id: `fn-${fn.id}`,
-            category: 'logistics',
-            title: fn.title,
-            titleBn: fn.title,
-            desc: fn.message,
-            descBn: fn.message,
-            time: fn.time,
-            unread: fn.unread && !readIds.has(`fn-${fn.id}`),
-            targetView: 'fleet',
+        const fleetMode = fleetModeFor(user);
+        const myReqs = requisitionsVisibleTo(user, fleetMode, requisitions);
+        if (fleetMode === 'driver') {
+          myReqs
+            .filter((r) => r.status === 'assigned' || r.status === 'in_transit')
+            .slice(0, 2)
+            .forEach((r) => {
+              list.push({
+                id: `trip-${r.id}`,
+                category: 'logistics',
+                title: `Trip assigned (${r.id})`,
+                titleBn: `ট্রিপ নির্ধারিত (${r.id})`,
+                desc: `${r.from} → ${r.to} with ${r.requesterName}.`,
+                descBn: `${r.from} হতে ${r.to} — ${r.requesterName}।`,
+                time: t('Assigned', 'নির্ধারিত', lang),
+                unread: !readIds.has(`trip-${r.id}`),
+                targetView: 'fleet',
+              });
+            });
+        }
+        notificationsVisibleTo(fleetMode, fleetNotifs, myReqs)
+          .slice(0, 2)
+          .forEach((fn) => {
+            list.push({
+              id: `fn-${fn.id}`,
+              category: 'logistics',
+              title: fn.title,
+              titleBn: fn.title,
+              desc: fn.message,
+              descBn: fn.message,
+              time: fn.time,
+              unread: fn.unread && !readIds.has(`fn-${fn.id}`),
+              targetView: 'fleet',
+            });
           });
-        });
       }
     }
 
-    // Common System Sync Notice
-    list.push({
-      id: 'sys-sync',
-      category: 'system',
-      title: 'Daily Attendance & Accounts Synced',
-      titleBn: 'দৈনন্দিন উপস্থিতি ও হিসাব সিঙ্ক সম্পন্ন',
-      desc: `All records for ${meta.siteLabel} are up to date for 29 Oct 2026.`,
-      descBn: `${meta.siteLabelBn}-এর সকল তথ্য হালনাগাদ রয়েছে।`,
-      time: 'Today, 09:00 AM',
-      unread: !readIds.has('sys-sync'),
-      targetView: 'dashboard',
-    });
-
     return list;
-  }, [activeBroadcast, role, allowedViews, approvalItems, fleetNotifs, readIds, meta]);
+  }, [activeBroadcast, user, allowedViews, approvalItems, licenses, assets, visitors, claims, requisitions, fleetNotifs, readIds, lang]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -228,10 +255,10 @@ export default function NotificationCenter({
 
   const getCategoryIcon = (cat: string) => {
     switch (cat) {
-      case 'approval': return <FileText size={14} color="#A51C30" />;
-      case 'safety': return <AlertTriangle size={14} color="#D97706" />;
-      case 'logistics': return <Truck size={14} color="#0369A1" />;
-      case 'system': return <ShieldCheck size={14} color="#059669" />;
+      case 'approval': return <FileText size={14} color="var(--brand-crimson)" />;
+      case 'safety': return <AlertTriangle size={14} color="var(--status-warning)" />;
+      case 'logistics': return <Truck size={14} color="var(--status-info)" />;
+      case 'system': return <ShieldCheck size={14} color="var(--status-success)" />;
       default: return <Bell size={14} />;
     }
   };
@@ -328,7 +355,7 @@ export default function NotificationCenter({
 
           <div className="notif-footer">
             <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-              🔔 {t(`Live Updates for ${meta.name}`, `${meta.nameBn}-এর লাইভ আপডেট`, lang)}
+              {t(`Updates for ${user?.name ?? ''}`, `${user?.name ?? ''}-এর হালনাগাদ`, lang)}
             </span>
           </div>
         </div>

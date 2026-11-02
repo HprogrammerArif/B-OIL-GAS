@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Grid, Shield, Sparkles } from 'lucide-react';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 interface DriverCallModalProps {
   isOpen: boolean;
@@ -105,10 +105,10 @@ export default function DriverCallModal({
         style={{
           width: '100%',
           maxWidth: '380px',
-          background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
+          background: 'linear-gradient(180deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
           borderRadius: '28px',
           padding: '32px 24px',
-          color: '#fff',
+          color: 'var(--text-on-brand)',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
@@ -127,11 +127,11 @@ export default function DriverCallModal({
             padding: '4px 12px',
             borderRadius: '20px',
             fontSize: '10.5px',
-            color: '#94A3B8',
+            color: 'var(--text-muted)',
             marginBottom: '24px',
           }}
         >
-          <Shield size={12} color="#10B981" />
+          <Shield size={12} color="var(--status-success)" />
           <span>BOGCL Fleet Net • VoIP 256-bit Encrypted</span>
         </div>
 
@@ -142,7 +142,7 @@ export default function DriverCallModal({
             width: '96px',
             height: '96px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1D4ED8 0%, #7C3AED 100%)',
+            background: 'linear-gradient(135deg, var(--status-info-solid-dark) 0%, var(--status-purple-solid) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -170,10 +170,10 @@ export default function DriverCallModal({
         <h3 style={{ margin: '0 0 4px 0', fontSize: '19px', fontWeight: 800, textAlign: 'center' }}>
           {calleeName}
         </h3>
-        <p style={{ margin: '0 0 6px 0', fontSize: '11.5px', color: '#94A3B8', textAlign: 'center', lineHeight: '1.4' }}>
+        <p style={{ margin: '0 0 6px 0', fontSize: '11.5px', color: 'var(--text-muted)', textAlign: 'center', lineHeight: '1.4' }}>
           {calleeRole}
         </p>
-        <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#38BDF8', marginBottom: '18px' }}>
+        <div style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--status-info-bright)', marginBottom: '18px' }}>
           {calleePhone}
         </div>
 
@@ -193,10 +193,10 @@ export default function DriverCallModal({
                 : 'rgba(59, 130, 246, 0.15)',
             color:
               callState === 'connected'
-                ? '#34D399'
+                ? 'var(--status-success-bright)'
                 : callState === 'ringing'
-                ? '#FDE047'
-                : '#60A5FA',
+                ? 'var(--status-warning-bright)'
+                : 'var(--status-info-bright)',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -211,7 +211,7 @@ export default function DriverCallModal({
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: '#10B981',
+                  background: 'var(--status-success-solid)',
                   animation: 'pulse 1.5s infinite',
                 }}
               />
@@ -232,7 +232,7 @@ export default function DriverCallModal({
               padding: '12px',
               marginBottom: '24px',
               fontSize: '12px',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               textAlign: 'center',
             }}
           >
@@ -243,14 +243,14 @@ export default function DriverCallModal({
                   style={{
                     width: '3px',
                     height: `${h}px`,
-                    background: '#10B981',
+                    background: 'var(--status-success-solid)',
                     borderRadius: '2px',
                     animation: `pulse ${0.6 + (i % 4) * 0.2}s infinite alternate`,
                   }}
                 />
               ))}
             </div>
-            <div style={{ fontStyle: 'italic', color: '#E2E8F0', fontSize: '11.5px' }}>
+            <div style={{ fontStyle: 'italic', color: 'var(--text-inverse)', fontSize: '11.5px' }}>
               &ldquo;Assalamu Alaikum Sir! I am at Gate-1 porch with the car running. How may I assist you?&rdquo;
             </div>
           </div>
@@ -274,11 +274,11 @@ export default function DriverCallModal({
               flexDirection: 'column',
               alignItems: 'center',
               gap: '6px',
-              background: isMuted ? '#EF4444' : 'rgba(255, 255, 255, 0.1)',
+              background: isMuted ? 'var(--status-danger-solid)' : 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '16px',
               padding: '12px 8px',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               cursor: 'pointer',
               fontSize: '11px',
               transition: 'all 0.2s',
@@ -296,11 +296,11 @@ export default function DriverCallModal({
               flexDirection: 'column',
               alignItems: 'center',
               gap: '6px',
-              background: showKeypad ? '#3B82F6' : 'rgba(255, 255, 255, 0.1)',
+              background: showKeypad ? 'var(--status-info-solid)' : 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '16px',
               padding: '12px 8px',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               cursor: 'pointer',
               fontSize: '11px',
               transition: 'all 0.2s',
@@ -318,11 +318,11 @@ export default function DriverCallModal({
               flexDirection: 'column',
               alignItems: 'center',
               gap: '6px',
-              background: isSpeaker ? '#10B981' : 'rgba(255, 255, 255, 0.1)',
+              background: isSpeaker ? 'var(--status-success-solid)' : 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '16px',
               padding: '12px 8px',
-              color: '#fff',
+              color: 'var(--text-on-brand)',
               cursor: 'pointer',
               fontSize: '11px',
               transition: 'all 0.2s',
@@ -340,9 +340,9 @@ export default function DriverCallModal({
             width: '64px',
             height: '64px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+            background: 'linear-gradient(135deg, var(--status-danger-solid) 0%, var(--status-danger-solid) 100%)',
             border: 'none',
-            color: '#fff',
+            color: 'var(--text-on-brand)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

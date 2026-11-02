@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
+import { deptCodeOf, nextNoteSheetRef, nextRef, peekNoteSheetRef, peekRef } from '../../lib/refs';
 import {
   FileSignature,
   FileText,
   X,
-  Check,
-  Plus,
-  Trash2,
   Sparkles,
-  ArrowRight,
   Shield,
   Layers,
-  Building2,
-  DollarSign,
-  AlertTriangle,
-  Clock,
-  Crown,
   ChevronRight,
-  UserCheck,
 } from 'lucide-react';
 
 export interface SignatoryStep {
@@ -66,7 +57,7 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleNameBn: 'প্ল্যান্ট জেনারেল ম্যানেজার',
     officerName: 'Engr. Md. Harunur Rashid',
     dept: 'Keraniganj Refinery Complex',
-    avatarColor: '#0369A1',
+    avatarColor: 'var(--status-info-solid)',
     initials: 'HR',
   },
   {
@@ -75,7 +66,7 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleNameBn: 'সিএফও ও প্রধান অর্থ কর্মকর্তা',
     officerName: 'Farida Begum',
     dept: 'Corporate Finance & Accounts',
-    avatarColor: '#7C3AED',
+    avatarColor: 'var(--status-purple-solid)',
     initials: 'FB',
   },
   {
@@ -84,7 +75,7 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleNameBn: 'মহাব্যবস্থাপক, মানবসম্পদ',
     officerName: 'Sayeda Afroza Sultana',
     dept: 'HR & Corporate Administration',
-    avatarColor: '#BE185D',
+    avatarColor: 'var(--status-pink)',
     initials: 'SAS',
   },
   {
@@ -93,7 +84,7 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleNameBn: 'পরিবহন ও প্রশাসন পরিদর্শক',
     officerName: 'Md. Kamruzzaman',
     dept: 'Admin & Transport Division',
-    avatarColor: '#059669',
+    avatarColor: 'var(--status-success-solid)',
     initials: 'KZ',
   },
   {
@@ -102,7 +93,7 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleNameBn: 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক',
     officerName: 'Ahmed Akbar Sobhan',
     dept: "Chairman's Office, Baridhara HQ",
-    avatarColor: '#A51C30',
+    avatarColor: 'var(--brand-crimson)',
     initials: 'AAS',
   },
 ];
@@ -193,12 +184,11 @@ export default function InitiateNotesheetModal({
   const [dept, setDept] = useState('Plant Maintenance & Reliability');
   const [amount, setAmount] = useState('৳4,50,000');
   const [urgency, setUrgency] = useState<'urgent' | 'high' | 'normal'>('high');
-  const [sapRef, setSapRef] = useState(
-    `SAP-PR-2026-${Math.floor(10000 + Math.random() * 90000)}`
-  );
-  const [fileNo, setFileNo] = useState(
-    `BOGCL/PROC/KER-2026/${Math.floor(1000 + Math.random() * 9000)}`
-  );
+  // Reference numbers are previewed from the sequential counters and only
+  // allocated when the form is submitted.
+  const initiatorDeptCode = deptCodeOf(currentMeta.dept);
+  const [sapRef, setSapRef] = useState(() => peekRef('PR', 5));
+  const fileNo = peekNoteSheetRef(initiatorDeptCode);
   const [initialNote, setInitialNote] = useState(
     'Submitted for administrative and technical approval. Mandatory ultrasonic thickness testing of Unit-1 heat exchanger shell completed; replacement of seal rings and calibration required prior to peak asphalt refining run.'
   );
@@ -258,7 +248,7 @@ export default function InitiateNotesheetModal({
         ...prev,
         {
           ...officer,
-          id: `step-${Date.now()}-${Math.random()}`,
+          id: `step-${officer.roleId}`,
           status: 'upcoming',
         },
       ]);
@@ -301,14 +291,17 @@ export default function InitiateNotesheetModal({
     }
 
     const finalApprover = selectedRoute[selectedRoute.length - 1];
+    const allocatedFileNo = nextNoteSheetRef(initiatorDeptCode);
+    const allocatedSapRef = sapRef === peekRef('PR', 5) ? nextRef('PR', 5) : sapRef;
+    setSapRef(peekRef('PR', 5));
 
     onSubmit({
-      fileNo,
+      fileNo: allocatedFileNo,
       title,
       dept,
       amount,
       urgency,
-      sapRef,
+      sapRef: allocatedSapRef,
       initiatorName: currentMeta.name,
       initiatorRole: currentMeta.label,
       initiatorDept: currentMeta.dept,
@@ -354,8 +347,8 @@ export default function InitiateNotesheetModal({
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #A51C30 0%, #E11D48 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-light) 100%)',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -363,7 +356,7 @@ export default function InitiateNotesheetModal({
                 flexShrink: 0,
               }}
             >
-              <FileSignature size={22} color="#FFFFFF" />
+              <FileSignature size={22} color="var(--text-on-brand)" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -372,7 +365,7 @@ export default function InitiateNotesheetModal({
                     margin: 0,
                     fontSize: '16px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: 'var(--text-on-brand)',
                     letterSpacing: '-0.2px',
                   }}
                 >
@@ -380,8 +373,8 @@ export default function InitiateNotesheetModal({
                 </h3>
                 <span
                   style={{
-                    backgroundColor: '#D97706',
-                    color: '#FFFFFF',
+                    backgroundColor: 'var(--status-warning-solid)',
+                    color: 'var(--text-on-brand)',
                     fontSize: '10px',
                     fontWeight: 800,
                     padding: '2px 8px',
@@ -397,7 +390,7 @@ export default function InitiateNotesheetModal({
                 style={{
                   margin: '3px 0 0 0',
                   fontSize: '12px',
-                  color: '#CBD5E1',
+                  color: 'var(--text-inverse-2)',
                   lineHeight: 1.4,
                 }}
               >
@@ -419,7 +412,7 @@ export default function InitiateNotesheetModal({
               borderRadius: '10px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -441,7 +434,7 @@ export default function InitiateNotesheetModal({
                 height: '32px',
                 borderRadius: '8px',
                 background: currentMeta.avatarColor,
-                color: '#FFFFFF',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -471,7 +464,7 @@ export default function InitiateNotesheetModal({
                 padding: '3px 10px',
                 borderRadius: '6px',
                 background: 'rgba(5, 150, 105, 0.12)',
-                color: '#059669',
+                color: 'var(--status-success)',
                 fontWeight: 700,
                 border: '1px solid rgba(5, 150, 105, 0.25)',
               }}
@@ -504,7 +497,7 @@ export default function InitiateNotesheetModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Sparkles size={14} color="#D97706" />
+                <Sparkles size={14} color="var(--status-warning)" />
                 <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('1-Click Signatory Routing Templates', 'স্বাক্ষরকারী রুট টেমপ্লেট নির্বাচন', lang)}
                 </span>
@@ -546,8 +539,8 @@ export default function InitiateNotesheetModal({
                         padding: '1px 5px',
                         borderRadius: '4px',
                         marginTop: '4px',
-                        backgroundColor: isActive ? '#A51C30' : 'rgba(0,0,0,0.08)',
-                        color: isActive ? '#FFFFFF' : 'inherit',
+                        backgroundColor: isActive ? 'var(--brand-crimson)' : 'rgba(0,0,0,0.08)',
+                        color: isActive ? 'var(--text-on-brand)' : 'inherit',
                         fontWeight: 700,
                       }}
                     >
@@ -573,12 +566,12 @@ export default function InitiateNotesheetModal({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Layers size={14} color="#2563EB" />
+                <Layers size={14} color="var(--status-info)" />
                 <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('Configured Approval Chain & Signatory Sequence', 'নির্বাচিত ধারাবাহিক অনুমোদনকারী চেইন', lang)}
                 </span>
               </div>
-              <div style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700 }}>
                 Final Approver: {finalSignatory ? finalSignatory.officerName : 'None'}
               </div>
             </div>
@@ -599,7 +592,7 @@ export default function InitiateNotesheetModal({
                   padding: '8px 12px',
                   borderRadius: '10px',
                   background: 'rgba(0,0,0,0.04)',
-                  border: '1px solid var(--brand-slate-200, #E2E8F0)',
+                  border: '1px solid var(--brand-slate-200)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
@@ -613,7 +606,7 @@ export default function InitiateNotesheetModal({
                     height: '24px',
                     borderRadius: '6px',
                     background: currentMeta.avatarColor,
-                    color: '#fff',
+                    color: 'var(--text-on-brand)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -629,7 +622,7 @@ export default function InitiateNotesheetModal({
                 </div>
               </div>
 
-              <ChevronRight size={14} color="#94A3B8" style={{ flexShrink: 0 }} />
+              <ChevronRight size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
 
               {/* Dynamic Signatory Steps */}
               {selectedRoute.map((step, idx) => {
@@ -641,7 +634,7 @@ export default function InitiateNotesheetModal({
                         padding: '8px 12px',
                         borderRadius: '10px',
                         background: isFinal ? 'rgba(217, 119, 6, 0.08)' : 'rgba(37, 99, 235, 0.08)',
-                        border: isFinal ? '1.5px solid #D97706' : '1.5px solid #3B82F6',
+                        border: isFinal ? '1.5px solid var(--status-warning)' : '1.5px solid var(--status-info)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
@@ -656,7 +649,7 @@ export default function InitiateNotesheetModal({
                           height: '24px',
                           borderRadius: '6px',
                           background: step.avatarColor,
-                          color: '#fff',
+                          color: 'var(--text-on-brand)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -667,7 +660,7 @@ export default function InitiateNotesheetModal({
                         {step.initials}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: '11.5px', color: isFinal ? '#B45309' : '#1E40AF' }}>
+                        <div style={{ fontWeight: 800, fontSize: '11.5px', color: isFinal ? 'var(--status-warning-text)' : 'var(--status-info-text)' }}>
                           {step.officerName.split(' ')[0]}
                         </div>
                         <div style={{ fontSize: '9.5px', opacity: 0.8 }}>
@@ -681,7 +674,7 @@ export default function InitiateNotesheetModal({
                           style={{
                             background: 'transparent',
                             border: 'none',
-                            color: '#94A3B8',
+                            color: 'var(--text-muted)',
                             cursor: 'pointer',
                             padding: '2px',
                             marginLeft: '4px',
@@ -692,7 +685,7 @@ export default function InitiateNotesheetModal({
                         </button>
                       )}
                     </div>
-                    {!isFinal && <ChevronRight size={14} color="#94A3B8" style={{ flexShrink: 0 }} />}
+                    {!isFinal && <ChevronRight size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />}
                   </React.Fragment>
                 );
               })}
@@ -713,9 +706,9 @@ export default function InitiateNotesheetModal({
                     style={{
                       padding: '4px 8px',
                       borderRadius: '6px',
-                      border: isIncluded ? '1px solid #059669' : '1px dashed var(--brand-slate-300, #CBD5E1)',
+                      border: isIncluded ? '1px solid var(--status-success)' : '1px dashed var(--brand-slate-300)',
                       background: isIncluded ? 'rgba(5, 150, 105, 0.08)' : 'transparent',
-                      color: isIncluded ? '#059669' : 'inherit',
+                      color: isIncluded ? 'var(--status-success)' : 'inherit',
                       fontSize: '11px',
                       fontWeight: isIncluded ? 700 : 500,
                       cursor: 'pointer',
@@ -736,9 +729,9 @@ export default function InitiateNotesheetModal({
           <div className="notice-field-group" style={{ marginBottom: '18px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileText size={14} color="#A51C30" />
+                <FileText size={14} color="var(--brand-crimson)" />
                 {t('Document Subject / Procurement Matter', 'নথির বিষয় / কার্যাদেশের বিবরণ', lang)}{' '}
-                <span style={{ color: '#A51C30' }}>*</span>
+                <span style={{ color: 'var(--brand-crimson)' }}>*</span>
               </span>
             </div>
             <input
@@ -821,9 +814,9 @@ export default function InitiateNotesheetModal({
           <div className="notice-field-group" style={{ marginBottom: '18px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileSignature size={14} color="#2563EB" />
+                <FileSignature size={14} color="var(--status-info)" />
                 {t('Para-1: Initiating Officer Official Note & Justification', 'প্যারা-১: উত্থাপনকারীর অফিসিয়াল নোট ও যৌক্তিকতা', lang)}{' '}
-                <span style={{ color: '#A51C30' }}>*</span>
+                <span style={{ color: 'var(--brand-crimson)' }}>*</span>
               </span>
               <span style={{ fontSize: '11px', opacity: 0.7, textTransform: 'none', fontWeight: 500 }}>
                 {initialNote.length} characters
@@ -844,7 +837,7 @@ export default function InitiateNotesheetModal({
         {/* ─── 4. MODAL FOOTER ─── */}
         <div className="fleet-modal-ft">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', opacity: 0.8 }}>
-            <Shield size={16} color="#059669" />
+            <Shield size={16} color="var(--status-success)" />
             <span>
               Cryptographic SHA-256 seal assigned at each signatory tier. Final authority:{' '}
               <strong>{finalSignatory ? finalSignatory.roleName : ''}</strong>
@@ -862,7 +855,7 @@ export default function InitiateNotesheetModal({
                 fontWeight: 600,
                 color: 'inherit',
                 backgroundColor: 'transparent',
-                border: '1.5px solid var(--brand-slate-200, #CBD5E1)',
+                border: '1.5px solid var(--brand-slate-200)',
                 cursor: 'pointer',
               }}
             >
@@ -879,8 +872,8 @@ export default function InitiateNotesheetModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
-                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
+                color: 'var(--text-on-brand)',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)',
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',

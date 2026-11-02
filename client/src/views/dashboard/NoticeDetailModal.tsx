@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { NoticeItem } from './types';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../../components/ToastManager';
 
 interface NoticeDetailModalProps {
   notice: NoticeItem | null;
@@ -60,7 +60,7 @@ export default function NoticeDetailModal({
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: 'var(--surface-1)',
           borderRadius: '18px',
           overflow: 'hidden',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
@@ -71,8 +71,8 @@ export default function NoticeDetailModal({
         <div
           style={{
             padding: '14px 28px',
-            backgroundColor: '#F8FAFC',
-            borderBottom: '1px solid #E2E8F0',
+            backgroundColor: 'var(--surface-0)',
+            borderBottom: '1px solid var(--border-1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -87,8 +87,8 @@ export default function NoticeDetailModal({
                 fontFamily: 'monospace',
                 fontSize: '12px',
                 fontWeight: 800,
-                color: '#334155',
-                backgroundColor: '#E2E8F0',
+                color: 'var(--text-2)',
+                backgroundColor: 'var(--surface-3)',
                 padding: '3px 10px',
                 borderRadius: '6px',
                 letterSpacing: '0.5px',
@@ -102,9 +102,9 @@ export default function NoticeDetailModal({
                 borderRadius: '999px',
                 fontSize: '10.5px',
                 fontWeight: 800,
-                backgroundColor: notice.pinned ? '#FEF3C7' : '#F1F5F9',
-                color: notice.pinned ? '#92400E' : '#475569',
-                border: notice.pinned ? '1px solid #F59E0B' : '1px solid #CBD5E1',
+                backgroundColor: notice.pinned ? 'var(--status-warning-bg)' : 'var(--surface-2)',
+                color: notice.pinned ? 'var(--status-warning-text)' : 'var(--text-2)',
+                border: notice.pinned ? '1px solid var(--status-warning)' : '1px solid var(--border-2)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
@@ -125,9 +125,9 @@ export default function NoticeDetailModal({
                 gap: '6px',
                 padding: '6px 14px',
                 borderRadius: '8px',
-                border: '1px solid #CBD5E1',
-                backgroundColor: '#FFFFFF',
-                color: '#334155',
+                border: '1px solid var(--border-2)',
+                backgroundColor: 'var(--surface-1)',
+                color: 'var(--text-2)',
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -135,12 +135,12 @@ export default function NoticeDetailModal({
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F1F5F9';
-                e.currentTarget.style.borderColor = '#94A3B8';
+                e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+                e.currentTarget.style.borderColor = 'var(--border-3)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#FFFFFF';
-                e.currentTarget.style.borderColor = '#CBD5E1';
+                e.currentTarget.style.backgroundColor = 'var(--surface-1)';
+                e.currentTarget.style.borderColor = 'var(--border-2)';
               }}
               title="Print Circular"
             >
@@ -154,9 +154,9 @@ export default function NoticeDetailModal({
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                border: '1px solid #CBD5E1',
-                backgroundColor: '#FFFFFF',
-                color: '#64748B',
+                border: '1px solid var(--border-2)',
+                backgroundColor: 'var(--surface-1)',
+                color: 'var(--text-3)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -164,12 +164,12 @@ export default function NoticeDetailModal({
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F1F5F9';
-                e.currentTarget.style.color = '#0F172A';
+                e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+                e.currentTarget.style.color = 'var(--text-1)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#FFFFFF';
-                e.currentTarget.style.color = '#64748B';
+                e.currentTarget.style.backgroundColor = 'var(--surface-1)';
+                e.currentTarget.style.color = 'var(--text-3)';
               }}
               title="Close"
             >
@@ -184,16 +184,16 @@ export default function NoticeDetailModal({
             flex: '1 1 auto',
             overflowY: 'auto',
             padding: '28px 32px',
-            backgroundColor: '#F1F5F9',
+            backgroundColor: 'var(--surface-2)',
             boxSizing: 'border-box',
           }}
         >
           {/* Paper Sheet Container */}
           <div
             style={{
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--surface-1)',
               borderRadius: '14px',
-              border: '1.5px solid #CBD5E1',
+              border: '1.5px solid var(--border-2)',
               padding: '36px 42px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
               position: 'relative',
@@ -226,7 +226,7 @@ export default function NoticeDetailModal({
                 textAlign: 'center',
                 paddingBottom: '20px',
                 marginBottom: '24px',
-                borderBottom: '2px solid #A51C30',
+                borderBottom: '2px solid var(--brand-crimson)',
                 position: 'relative',
               }}
             >
@@ -244,8 +244,8 @@ export default function NoticeDetailModal({
                     width: '34px',
                     height: '34px',
                     borderRadius: '8px',
-                    backgroundColor: '#A51C30',
-                    color: '#FFFFFF',
+                    backgroundColor: 'var(--brand-crimson)',
+                    color: 'var(--text-on-brand)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -263,7 +263,7 @@ export default function NoticeDetailModal({
                     fontSize: '18px',
                     fontWeight: 900,
                     letterSpacing: '1px',
-                    color: '#0F172A',
+                    color: 'var(--text-1)',
                     textTransform: 'uppercase',
                   }}
                 >
@@ -274,7 +274,7 @@ export default function NoticeDetailModal({
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  color: '#64748B',
+                  color: 'var(--text-3)',
                   letterSpacing: '1.2px',
                   textTransform: 'uppercase',
                 }}
@@ -284,7 +284,7 @@ export default function NoticeDetailModal({
               <div
                 style={{
                   fontSize: '10.5px',
-                  color: '#94A3B8',
+                  color: 'var(--text-muted)',
                   marginTop: '4px',
                 }}
               >
@@ -298,8 +298,8 @@ export default function NoticeDetailModal({
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '12px',
-                backgroundColor: '#F8FAFC',
-                border: '1px solid #E2E8F0',
+                backgroundColor: 'var(--surface-0)',
+                border: '1px solid var(--border-1)',
                 borderRadius: '12px',
                 padding: '14px 18px',
                 marginBottom: '24px',
@@ -312,7 +312,7 @@ export default function NoticeDetailModal({
                     display: 'block',
                     fontSize: '10px',
                     fontWeight: 800,
-                    color: '#94A3B8',
+                    color: 'var(--text-muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                     marginBottom: '3px',
@@ -320,7 +320,7 @@ export default function NoticeDetailModal({
                 >
                   Issue Date
                 </span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-1)' }}>
                   {notice.date}
                 </span>
               </div>
@@ -331,7 +331,7 @@ export default function NoticeDetailModal({
                     display: 'block',
                     fontSize: '10px',
                     fontWeight: 800,
-                    color: '#94A3B8',
+                    color: 'var(--text-muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                     marginBottom: '3px',
@@ -339,7 +339,7 @@ export default function NoticeDetailModal({
                 >
                   Category Tag
                 </span>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-1)' }}>
                   {notice.tag}
                 </span>
               </div>
@@ -350,7 +350,7 @@ export default function NoticeDetailModal({
                     display: 'block',
                     fontSize: '10px',
                     fontWeight: 800,
-                    color: '#94A3B8',
+                    color: 'var(--text-muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                     marginBottom: '3px',
@@ -362,7 +362,7 @@ export default function NoticeDetailModal({
                   style={{
                     fontSize: '12px',
                     fontWeight: 800,
-                    color: isSafety ? '#E11D48' : isChairman ? '#D97706' : '#2563EB',
+                    color: isSafety ? 'var(--brand-crimson-light)' : isChairman ? 'var(--status-warning)' : 'var(--status-info)',
                   }}
                 >
                   {notice.priority ? notice.priority.toUpperCase() : 'STANDARD'}
@@ -375,7 +375,7 @@ export default function NoticeDetailModal({
                     display: 'block',
                     fontSize: '10px',
                     fontWeight: 800,
-                    color: '#94A3B8',
+                    color: 'var(--text-muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
                     marginBottom: '3px',
@@ -387,13 +387,13 @@ export default function NoticeDetailModal({
                   style={{
                     fontSize: '12px',
                     fontWeight: 700,
-                    color: '#059669',
+                    color: 'var(--status-success)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
                   }}
                 >
-                  <CheckCircle2 size={13} color="#059669" />
+                  <CheckCircle2 size={13} color="var(--status-success)" />
                   Digitally Sealed
                 </span>
               </div>
@@ -407,7 +407,7 @@ export default function NoticeDetailModal({
                   fontWeight: 800,
                   textTransform: 'uppercase',
                   letterSpacing: '0.8px',
-                  color: '#64748B',
+                  color: 'var(--text-3)',
                   marginBottom: '4px',
                 }}
               >
@@ -418,7 +418,7 @@ export default function NoticeDetailModal({
                   margin: 0,
                   fontSize: '19px',
                   fontWeight: 800,
-                  color: '#0F172A',
+                  color: 'var(--text-1)',
                   lineHeight: 1.4,
                 }}
               >
@@ -429,7 +429,7 @@ export default function NoticeDetailModal({
                   style={{
                     margin: '6px 0 0 0',
                     fontSize: '14px',
-                    color: '#475569',
+                    color: 'var(--text-2)',
                     fontWeight: 500,
                   }}
                 >
@@ -444,17 +444,17 @@ export default function NoticeDetailModal({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                backgroundColor: '#EFF6FF',
-                border: '1px solid #BFDBFE',
+                backgroundColor: 'var(--status-info-bg)',
+                border: '1px solid var(--status-info-border)',
                 borderRadius: '10px',
                 padding: '10px 16px',
                 fontSize: '12.5px',
-                color: '#1E40AF',
+                color: 'var(--status-info-text)',
                 marginBottom: '22px',
                 boxSizing: 'border-box',
               }}
             >
-              <Users size={16} color="#2563EB" style={{ flexShrink: 0 }} />
+              <Users size={16} color="var(--status-info)" style={{ flexShrink: 0 }} />
               <span>
                 <strong>Target Distribution:</strong>{' '}
                 {notice.targetAudience || 'All Company Staff (1,240 Employees across 6 Locations)'}
@@ -464,13 +464,13 @@ export default function NoticeDetailModal({
             {/* Main Notice Body */}
             <div
               style={{
-                backgroundColor: '#FAFAFA',
-                border: '1px solid #E2E8F0',
+                backgroundColor: 'var(--surface-0)',
+                border: '1px solid var(--border-1)',
                 borderRadius: '12px',
                 padding: '24px 28px',
                 fontSize: '14px',
                 lineHeight: 1.8,
-                color: '#1E293B',
+                color: 'var(--text-1)',
                 marginBottom: '24px',
                 boxSizing: 'border-box',
               }}
@@ -488,9 +488,9 @@ export default function NoticeDetailModal({
                   style={{
                     margin: '16px 0 0 0',
                     paddingTop: '14px',
-                    borderTop: '1px solid #E2E8F0',
+                    borderTop: '1px solid var(--border-1)',
                     fontSize: '13px',
-                    color: '#475569',
+                    color: 'var(--text-2)',
                     fontStyle: 'italic',
                     whiteSpace: 'pre-line',
                   }}
@@ -504,8 +504,8 @@ export default function NoticeDetailModal({
             {notice.requiresAck && (
               <div
                 style={{
-                  backgroundColor: '#ECFDF5',
-                  border: '1px solid #A7F3D0',
+                  backgroundColor: 'var(--status-success-bg)',
+                  border: '1px solid var(--status-success-border)',
                   borderRadius: '12px',
                   padding: '16px 20px',
                   marginBottom: '24px',
@@ -519,12 +519,12 @@ export default function NoticeDetailModal({
                     justifyContent: 'space-between',
                     fontSize: '12.5px',
                     fontWeight: 700,
-                    color: '#065F46',
+                    color: 'var(--status-success-text)',
                     marginBottom: '8px',
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <CheckCircle2 size={15} color="#059669" />
+                    <CheckCircle2 size={15} color="var(--status-success)" />
                     <span>Workforce Read & Acknowledgment Audit</span>
                   </span>
                   <span>
@@ -535,7 +535,7 @@ export default function NoticeDetailModal({
                   style={{
                     width: '100%',
                     height: '8px',
-                    backgroundColor: '#D1FAE5',
+                    backgroundColor: 'var(--status-success-bg)',
                     borderRadius: '999px',
                     overflow: 'hidden',
                   }}
@@ -543,7 +543,7 @@ export default function NoticeDetailModal({
                   <div
                     style={{
                       height: '100%',
-                      backgroundColor: '#059669',
+                      backgroundColor: 'var(--status-success-solid)',
                       width: `${ackPercentage}%`,
                       borderRadius: '999px',
                       transition: 'width 0.5s ease',
@@ -556,7 +556,7 @@ export default function NoticeDetailModal({
             {/* Formal Executive Signatory Block */}
             <div
               style={{
-                borderTop: '1.5px solid #E2E8F0',
+                borderTop: '1.5px solid var(--border-1)',
                 paddingTop: '22px',
                 display: 'flex',
                 alignItems: 'flex-end',
@@ -564,10 +564,10 @@ export default function NoticeDetailModal({
                 boxSizing: 'border-box',
               }}
             >
-              <div style={{ fontSize: '11px', color: '#94A3B8', lineHeight: 1.6 }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
                 <div>Corporate Registry: BOGCL-DIR-HQ</div>
                 <div>Cryptographic Hash: 0x8F94...B19A</div>
-                <div style={{ color: '#059669', fontWeight: 600 }}>
+                <div style={{ color: 'var(--status-success)', fontWeight: 600 }}>
                   ✓ Official Directorate Seal Validated
                 </div>
               </div>
@@ -576,12 +576,12 @@ export default function NoticeDetailModal({
                 <div
                   style={{
                     display: 'inline-block',
-                    borderBottom: '1.5px solid #64748B',
+                    borderBottom: '1.5px solid var(--border-3)',
                     paddingBottom: '3px',
                     fontSize: '15px',
                     fontFamily: 'serif',
                     fontStyle: 'italic',
-                    color: '#1E3A8A',
+                    color: 'var(--status-info-text)',
                     fontWeight: 700,
                     letterSpacing: '0.5px',
                   }}
@@ -592,20 +592,20 @@ export default function NoticeDetailModal({
                   style={{
                     fontSize: '13.5px',
                     fontWeight: 800,
-                    color: '#0F172A',
+                    color: 'var(--text-1)',
                     marginTop: '4px',
                   }}
                 >
                   {notice.author || 'Ahmed Akbar Sobhan'}
                 </div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748B' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-3)' }}>
                   {notice.authorRole || 'Chairman & Managing Director'}
                 </div>
                 <div
                   style={{
                     fontSize: '11px',
                     fontWeight: 800,
-                    color: '#D97706',
+                    color: 'var(--status-warning)',
                     marginTop: '2px',
                   }}
                 >
@@ -620,8 +620,8 @@ export default function NoticeDetailModal({
         <div
           style={{
             padding: '16px 28px',
-            backgroundColor: '#F8FAFC',
-            borderTop: '1px solid #E2E8F0',
+            backgroundColor: 'var(--surface-0)',
+            borderTop: '1px solid var(--border-1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -637,19 +637,19 @@ export default function NoticeDetailModal({
               borderRadius: '10px',
               fontSize: '13px',
               fontWeight: 600,
-              color: '#475569',
-              backgroundColor: '#FFFFFF',
-              border: '1.5px solid #CBD5E1',
+              color: 'var(--text-2)',
+              backgroundColor: 'var(--surface-1)',
+              border: '1.5px solid var(--border-2)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#F1F5F9';
-              e.currentTarget.style.borderColor = '#94A3B8';
+              e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+              e.currentTarget.style.borderColor = 'var(--border-3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#FFFFFF';
-              e.currentTarget.style.borderColor = '#CBD5E1';
+              e.currentTarget.style.backgroundColor = 'var(--surface-1)';
+              e.currentTarget.style.borderColor = 'var(--border-2)';
             }}
           >
             {t('Close', 'বন্ধ করুন', lang)}
@@ -678,19 +678,19 @@ export default function NoticeDetailModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
-                backgroundColor: '#059669',
+                color: 'var(--text-on-brand)',
+                backgroundColor: 'var(--status-success-solid)',
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)',
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#047857';
+                e.currentTarget.style.backgroundColor = 'var(--status-success-solid-dark)';
                 e.currentTarget.style.transform = 'translateY(-1px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#059669';
+                e.currentTarget.style.backgroundColor = 'var(--status-success-solid)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
@@ -702,17 +702,17 @@ export default function NoticeDetailModal({
               style={{
                 fontSize: '12.5px',
                 fontWeight: 700,
-                color: '#059669',
+                color: 'var(--status-success)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                backgroundColor: '#ECFDF5',
+                backgroundColor: 'var(--status-success-bg)',
                 padding: '6px 14px',
                 borderRadius: '8px',
-                border: '1px solid #A7F3D0',
+                border: '1px solid var(--status-success-border)',
               }}
             >
-              <CheckCircle2 size={15} color="#059669" />
+              <CheckCircle2 size={15} color="var(--status-success)" />
               <span>{t('Already Acknowledged', 'স্বীকৃতি দেওয়া হয়েছে', lang)}</span>
             </span>
           )}

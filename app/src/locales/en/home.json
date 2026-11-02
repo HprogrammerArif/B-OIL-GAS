@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "driver": "Driver",
+    "gate": "Gate",
+    "mailroom": "Mailroom",
+    "hse": "Safety",
+    "executive": "Executive",
+    "approver": "Approvals",
+    "employee": "My day"
+  },
+  "quickActions": "Quick actions",
+  "yourModules": "Your modules",
+  "today": "Today",
+  "actions": {
+    "applyLeave": "Apply leave",
+    "newClaim": "New claim",
+    "bookVehicle": "Book vehicle",
+    "inviteGuest": "Invite guest",
+    "reportIncident": "Report incident",
+    "sendParcel": "Send parcel",
+    "scanPass": "Scan pass",
+    "scanParcel": "Scan parcel",
+    "punch": "Punch",
+    "newNoteSheet": "New note-sheet"
+  },
+  "notifications": "Notifications",
+  "openProfile": "Open profile"
+}

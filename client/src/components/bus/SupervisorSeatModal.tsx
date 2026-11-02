@@ -20,7 +20,7 @@ interface SupervisorSeatModalProps {
 
 const EMPLOYEE_PRESETS = [
   { name: 'Tanvir Ahmed', staffId: 'EMP-1042', dept: 'Sales & Distribution', phone: '+880 1720-334455', blood: 'B+' },
-  { name: 'Engr. Harunur Rashid', staffId: 'EMP-0104', dept: 'Plant GM & Operations', phone: '+880 1711-002101', blood: 'O+' },
+  { name: 'Engr. Md. Harunur Rashid', staffId: 'EMP-0012', dept: 'Plant GM & Operations', phone: '+880 1711-002101', blood: 'O+' },
   { name: 'Farhana Kabir', staffId: 'EMP-0312', dept: 'EHS Safety Lead', phone: '+880 1819-556677', blood: 'B+' },
   { name: 'Engr. Tariq Ahmed', staffId: 'EMP-0145', dept: 'Maintenance Div.', phone: '+880 1711-002105', blood: 'AB+' },
   { name: 'Mizanur Rahman', staffId: 'EMP-0219', dept: 'Quality Assurance', phone: '+880 1712-441122', blood: 'A+' },
@@ -150,8 +150,8 @@ export default function SupervisorSeatModal({
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #091024 0%, #172554 100%)',
-          color: '#FFFFFF',
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
+          color: 'var(--text-on-brand)',
           padding: '18px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
@@ -165,7 +165,7 @@ export default function SupervisorSeatModal({
               borderRadius: '10px',
               background: 'rgba(212, 175, 55, 0.25)',
               border: '1px solid rgba(212, 175, 55, 0.5)',
-              color: '#FDE68A',
+              color: 'var(--status-warning-bright)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -174,14 +174,14 @@ export default function SupervisorSeatModal({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.2px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
                   {t('Supervisor Seat Reservation & Allocation Console', 'সুপারভাইজার সিট বরাদ্দ ও কর্মী সংরক্ষণ কনসোল', lang)}
                 </h3>
                 <span className="badge gold" style={{ fontSize: '10px', padding: '2px 8px' }}>
                   {activeRoute.coachNo}
                 </span>
               </div>
-              <p style={{ fontSize: '12px', color: '#94A3B8', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
                 {activeRoute.name} • {t('Full supervisor override & permanent pass authority', 'পূর্ণ প্রশাসনিক সিট নির্ধারণ ও স্থায়ী পাস ক্ষমতা', lang)}
               </p>
             </div>
@@ -191,7 +191,7 @@ export default function SupervisorSeatModal({
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#E2E8F0',
+              color: 'var(--text-inverse)',
               width: '32px',
               height: '32px',
               borderRadius: '8px',
@@ -210,15 +210,15 @@ export default function SupervisorSeatModal({
             padding: '20px 24px',
             maxHeight: '74vh',
             overflowY: 'auto',
-            background: 'var(--brand-card-bg, #FFFFFF)',
+            background: 'var(--brand-card-bg)',
             display: 'flex',
             flexDirection: 'column',
             gap: '18px'
           }}>
             {/* ─── SECTION 1: Target Seat Status & Selector ─── */}
             <div style={{
-              background: 'linear-gradient(135deg, var(--brand-slate-50, #F8FAFC) 0%, #FFFFFF 100%)',
-              border: '1.5px solid #D4AF37',
+              background: 'linear-gradient(135deg, var(--brand-slate-50) 0%, var(--surface-1) 100%)',
+              border: '1.5px solid var(--brand-gold)',
               borderRadius: '12px',
               padding: '16px',
               display: 'flex',
@@ -233,9 +233,9 @@ export default function SupervisorSeatModal({
                   width: '52px',
                   height: '52px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #091024 0%, #1e293b 100%)',
-                  border: '2px solid #D4AF37',
-                  color: '#FDE68A',
+                  background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
+                  border: '2px solid var(--brand-gold)',
+                  color: 'var(--status-warning-bright)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -257,7 +257,7 @@ export default function SupervisorSeatModal({
                   <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginTop: '4px' }}>
                     {t('Current Status', 'বর্তমান অবস্থা', lang)}:{' '}
                     <strong style={{
-                      color: currentSelectedSeat?.status === 'occupied' ? '#059669' : currentSelectedSeat?.status === 'vacated' ? '#D97706' : '#2563EB'
+                      color: currentSelectedSeat?.status === 'occupied' ? 'var(--status-success)' : currentSelectedSeat?.status === 'vacated' ? 'var(--status-warning)' : 'var(--status-info)'
                     }}>
                       {currentSelectedSeat?.status === 'occupied'
                         ? `Occupied by ${currentSelectedSeat.assignedTo}`
@@ -291,13 +291,13 @@ export default function SupervisorSeatModal({
 
             {/* ─── SECTION 2: Quick-Fill Registered Staff Member Strip ─── */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '10px',
               padding: '12px 14px'
             }}>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={13} color="#B45309" />
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={13} color="var(--status-warning-text)" />
                 <span>{t('1-Click Quick-Fill Registered Employee:', 'কর্মচারী তালিকা থেকে সরাসরি অটোফিল:', lang)}</span>
               </div>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
@@ -307,13 +307,13 @@ export default function SupervisorSeatModal({
                     type="button"
                     onClick={() => handlePickPreset(p)}
                     style={{
-                      background: staffId === p.staffId ? 'rgba(212, 175, 55, 0.2)' : '#FFFFFF',
-                      border: staffId === p.staffId ? '1.5px solid #D4AF37' : '1px solid var(--brand-border)',
+                      background: staffId === p.staffId ? 'rgba(212, 175, 55, 0.2)' : 'var(--surface-1)',
+                      border: staffId === p.staffId ? '1.5px solid var(--brand-gold)' : '1px solid var(--brand-border)',
                       borderRadius: '8px',
                       padding: '5px 10px',
                       fontSize: '11px',
                       fontWeight: 700,
-                      color: staffId === p.staffId ? '#B45309' : 'var(--brand-slate-700)',
+                      color: staffId === p.staffId ? 'var(--status-warning-text)' : 'var(--brand-slate-700)',
                       cursor: 'pointer',
                       whiteSpace: 'nowrap',
                       display: 'flex',
@@ -332,8 +332,8 @@ export default function SupervisorSeatModal({
 
             {/* ─── SECTION 3: Passenger Profile Inputs ─── */}
             <div style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px',
               display: 'flex',
@@ -343,7 +343,7 @@ export default function SupervisorSeatModal({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Employee / Passenger Full Name', 'কর্মচারীর নাম', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Employee / Passenger Full Name', 'কর্মচারীর নাম', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -357,7 +357,7 @@ export default function SupervisorSeatModal({
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Staff ID / SAP PERNR', 'কর্মচারী আইডি', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Staff ID / SAP PERNR', 'কর্মচারী আইডি', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -402,7 +402,7 @@ export default function SupervisorSeatModal({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    <MapPin size={13} style={{ display: 'inline', marginRight: '4px', color: '#2563EB' }} />
+                    <MapPin size={13} style={{ display: 'inline', marginRight: '4px', color: 'var(--status-info)' }} />
                     {t('Designated Boarding Stoppage', 'বোর্ডিং স্টপেজ পয়েন্ট', lang)}
                   </label>
                   <select
@@ -425,7 +425,7 @@ export default function SupervisorSeatModal({
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    <Clock size={13} style={{ display: 'inline', marginRight: '4px', color: '#D97706' }} />
+                    <Clock size={13} style={{ display: 'inline', marginRight: '4px', color: 'var(--status-warning)' }} />
                     {t('Morning Boarding Time', 'পিকআপ সময়', lang)}
                   </label>
                   <input
@@ -442,7 +442,7 @@ export default function SupervisorSeatModal({
             {/* ─── SECTION 4: Priority Category & Entitlement Mode ─── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
               <div style={{
-                background: 'var(--brand-slate-50, #F8FAFC)',
+                background: 'var(--brand-slate-50)',
                 border: '1px solid var(--brand-border)',
                 borderRadius: '10px',
                 padding: '14px'
@@ -464,7 +464,7 @@ export default function SupervisorSeatModal({
               </div>
 
               <div style={{
-                background: 'var(--brand-slate-50, #F8FAFC)',
+                background: 'var(--brand-slate-50)',
                 border: '1px solid var(--brand-border)',
                 borderRadius: '10px',
                 padding: '14px'
@@ -488,7 +488,7 @@ export default function SupervisorSeatModal({
             {/* ─── SECTION 5: Supervisor Administrative Actions ─── */}
             <div style={{
               background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.4) 0%, rgba(253, 230, 138, 0.15) 100%)',
-              border: '1.5px dashed #D4AF37',
+              border: '1.5px dashed var(--brand-gold)',
               borderRadius: '12px',
               padding: '14px 16px',
               display: 'flex',
@@ -498,7 +498,7 @@ export default function SupervisorSeatModal({
               gap: '12px'
             }}>
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 800, color: '#92400E' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-text)' }}>
                   {t('Supervisor Administrative Seat Overrides:', 'প্রশাসনিক সিট বিকল্প:', lang)}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
@@ -511,9 +511,9 @@ export default function SupervisorSeatModal({
                   <button
                     type="button"
                     style={{
-                      background: '#FFFFFF',
-                      border: '1.5px solid #D4AF37',
-                      color: '#B45309',
+                      background: 'var(--surface-1)',
+                      border: '1.5px solid var(--brand-gold)',
+                      color: 'var(--status-warning-text)',
                       padding: '6px 12px',
                       borderRadius: '6px',
                       fontSize: '11.5px',
@@ -536,9 +536,9 @@ export default function SupervisorSeatModal({
                 <button
                   type="button"
                   style={{
-                    background: '#FFFFFF',
-                    border: '1.5px solid #EF4444',
-                    color: '#DC2626',
+                    background: 'var(--surface-1)',
+                    border: '1.5px solid var(--status-danger)',
+                    color: 'var(--status-danger)',
                     padding: '6px 12px',
                     borderRadius: '6px',
                     fontSize: '11.5px',
@@ -563,8 +563,8 @@ export default function SupervisorSeatModal({
           {/* Footer */}
           <div style={{
             padding: '16px 24px',
-            background: 'var(--brand-slate-50, #F8FAFC)',
-            borderTop: '1px solid var(--brand-border, #E2E8F0)',
+            background: 'var(--brand-slate-50)',
+            borderTop: '1px solid var(--brand-border)',
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',

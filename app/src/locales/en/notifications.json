@@ -1,0 +1,18 @@
+{
+  "title": "Notifications",
+  "markAllRead": "Mark all read",
+  "allRead": "All caught up",
+  "filters": { "ALL": "All", "unread": "Unread", "APPROVALS": "Approvals", "SAFETY": "Safety", "TRANSPORT": "Transport", "PEOPLE": "People", "GENERAL": "General" },
+  "empty": { "title": "No notifications", "message": "Updates about your requests and approvals will show up here." },
+  "acknowledge": "Acknowledge",
+  "acknowledged": "Acknowledged",
+  "ackRequired": "Needs acknowledgement",
+  "criticalTitle": "Critical alert",
+  "critical": {
+    "message": "This alert must be acknowledged before you continue.",
+    "ackOpen": "Acknowledge and open",
+    "done": "Acknowledged",
+    "more": "{{n}} more critical alerts after this"
+  },
+  "newToast": "New notification"
+}

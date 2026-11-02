@@ -15,13 +15,16 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": ""
+        "EXPO_PUBLIC_API_MODE": "mock"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_MODE": "mock"
       },
       "channel": "preview"
     },

@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import type { BusVehicle, RouteInfo, Seat, WaitlistEntry } from '../components/bus/busTypes';
 import { INITIAL_BUSES, INITIAL_ROUTES, generateSeatsForRoute } from '../components/bus/busData';
@@ -146,6 +147,16 @@ function buildInitialRouteSeats(): Record<string, Seat[]> {
   return initial;
 }
 
+interface BusSnapshot {
+  buses: BusVehicle[];
+  routes: Record<string, RouteInfo>;
+  routeSeats: Record<string, Seat[]>;
+  waitlist: WaitlistEntry[];
+  delayBroadcastMessage: string | null;
+}
+const PERSIST_NAME = 'bus';
+const PERSIST_VERSION = 1;
+
 class BusStore {
   private buses: BusVehicle[] = buildInitialBuses();
   private routes: Record<string, RouteInfo> = buildInitialRoutes();
@@ -154,6 +165,11 @@ class BusStore {
   private delayBroadcastMessage: string | null = null;
   private listeners: Set<() => void> = new Set();
 
+  constructor() {
+    const saved = loadPersisted<BusSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) Object.assign(this, saved);
+  }
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -161,6 +177,13 @@ class BusStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted<BusSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      buses: this.buses,
+      routes: this.routes,
+      routeSeats: this.routeSeats,
+      waitlist: this.waitlist,
+      delayBroadcastMessage: this.delayBroadcastMessage,
+    }));
   }
 
   getBuses() { return this.buses; }

@@ -5,7 +5,9 @@ import {
   Package, MapPin, AlertTriangle, CornerDownLeft, Moon, Sun, Users,
   ClipboardCheck, Wrench, Receipt, MessageSquare
 } from 'lucide-react';
-import { getAllowedViewsForRole } from './Sidebar';
+import { allowedViews as allowedViewsFor, type Permission } from '../auth/permissions';
+import { useCurrentUser } from '../auth/session';
+import { fleetModeFor, requisitionsVisibleTo } from '../views/fleet/config';
 import { useNotesheetStore } from '../store/notesheetStore';
 import { useFleetStore } from '../store/fleetStore';
 import { useAssetStore } from '../store/assetStore';
@@ -16,7 +18,6 @@ interface CommandPaletteProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (view: AppView) => void;
-  onRoleChange?: (role: AppRole) => void;
   onToggleTheme: () => void;
   lang: Lang;
   currentTheme: 'light' | 'dark';
@@ -27,7 +28,7 @@ interface CommandItem {
   id: string;
   title: string;
   titleBn: string;
-  category: 'Pages' | 'Live Records' | 'Quick Settings' | 'Switch Role (Preview)';
+  category: 'Pages' | 'Records' | 'Quick Settings';
   icon: React.ReactNode;
   action: () => void;
   shortcut?: string;
@@ -59,7 +60,6 @@ export default function CommandPalette({
   isOpen,
   onClose,
   onNavigate,
-  onRoleChange,
   onToggleTheme,
   lang,
   currentTheme,
@@ -85,11 +85,12 @@ export default function CommandPalette({
     }
   }, [isOpen]);
 
-  const allowedViews = useMemo(() => getAllowedViewsForRole(role), [role]);
-  const meta = ROLE_META[role];
+  const allowedViews = useMemo(() => allowedViewsFor(role), [role]);
+  const user = useCurrentUser();
 
   const items: CommandItem[] = useMemo(() => {
     const list: CommandItem[] = [];
+    const can = (p: Permission) => !!user?.permissions.has(p);
 
     // 1. Permitted Pages
     ALL_VIEW_COMMANDS.filter((v) => allowedViews.has(v.view)).forEach((v) => {
@@ -109,16 +110,16 @@ export default function CommandPalette({
     // 2. Live Records (Scoped to Role Permissions)
     if (allowedViews.has('notesheet')) {
       const visibleFiles =
-        role === 'employee'
-          ? files.filter((f) => f.initiatorName === meta.name)
-          : files;
+        can('notesheet:view_all')
+          ? files
+          : files.filter((f) => f.initiatorName === user?.name);
       visibleFiles.slice(0, 4).forEach((f) => {
         list.push({
           id: `doc-${f.id}`,
           title: `${f.fileNo}: ${f.title} (${f.amount})`,
           titleBn: `${f.fileNo}: ${f.title}`,
-          category: 'Live Records',
-          icon: <FileSignature size={15} color="#A51C30" />,
+          category: 'Records',
+          icon: <FileSignature size={15} color="var(--brand-crimson)" />,
           action: () => {
             onNavigate('notesheet');
             onClose();
@@ -129,16 +130,16 @@ export default function CommandPalette({
 
     if (allowedViews.has('asset')) {
       const visibleAssets =
-        role === 'employee' || role === 'driver'
-          ? assets.filter((a) => a.custodianEmpId === meta.empId)
-          : assets.slice(0, 4);
+        can('asset:view_all')
+          ? assets.slice(0, 4)
+          : assets.filter((a) => a.custodianEmpId === user?.empId);
       visibleAssets.forEach((a) => {
         list.push({
           id: `ast-${a.id}`,
           title: `${a.tag}: ${a.name}`,
           titleBn: `${a.tag}: ${a.name}`,
-          category: 'Live Records',
-          icon: <Wrench size={15} color="#0369A1" />,
+          category: 'Records',
+          icon: <Wrench size={15} color="var(--status-info)" />,
           action: () => {
             onNavigate('asset');
             onClose();
@@ -147,33 +148,32 @@ export default function CommandPalette({
       });
     }
 
-    if (allowedViews.has('fleet')) {
-      if (role === 'employee') {
-        requisitions
-          .filter((r) => r.requesterName === meta.name)
+    if (allowedViews.has('fleet') && user) {
+      const fleetMode = fleetModeFor(user);
+      if (fleetMode === 'requester') {
+        requisitionsVisibleTo(user, fleetMode, requisitions)
           .forEach((r) => {
             list.push({
               id: `req-${r.id}`,
               title: `${r.id}: Car Booking — ${r.from} to ${r.to}`,
               titleBn: `${r.id}: গাড়ির আবেদন — ${r.from} হতে ${r.to}`,
-              category: 'Live Records',
-              icon: <Truck size={15} color="#059669" />,
+              category: 'Records',
+              icon: <Truck size={15} color="var(--status-success)" />,
               action: () => {
                 onNavigate('fleet');
                 onClose();
               },
             });
           });
-      } else if (role === 'driver') {
-        requisitions
-          .filter((r) => r.assignedDriverId === 'DRV-01')
+      } else if (fleetMode === 'driver') {
+        requisitionsVisibleTo(user, fleetMode, requisitions)
           .forEach((r) => {
             list.push({
               id: `drv-req-${r.id}`,
               title: `${r.id}: Assigned Trip — ${r.from} to ${r.to}`,
               titleBn: `${r.id}: নির্ধারিত ট্রিপ — ${r.from} হতে ${r.to}`,
-              category: 'Live Records',
-              icon: <Truck size={15} color="#059669" />,
+              category: 'Records',
+              icon: <Truck size={15} color="var(--status-success)" />,
               action: () => {
                 onNavigate('fleet');
                 onClose();
@@ -186,8 +186,8 @@ export default function CommandPalette({
             id: `veh-${v.id}`,
             title: `${v.plate}: ${v.model} (${v.driverName || 'Standby Pool'})`,
             titleBn: `${v.plate}: ${v.model}`,
-            category: 'Live Records',
-            icon: <Truck size={15} color="#0369A1" />,
+            category: 'Records',
+            icon: <Truck size={15} color="var(--status-info)" />,
             action: () => {
               onNavigate('fleet');
               onClose();
@@ -203,8 +203,8 @@ export default function CommandPalette({
           id: `lic-${l.id}`,
           title: `${l.refNo}: ${l.title} (${l.daysLeft} days left)`,
           titleBn: `${l.refNo}: ${l.titleBn}`,
-          category: 'Live Records',
-          icon: <ShieldCheck size={15} color="#D97706" />,
+          category: 'Records',
+          icon: <ShieldCheck size={15} color="var(--status-warning)" />,
           action: () => {
             onNavigate('compliance');
             onClose();
@@ -219,8 +219,8 @@ export default function CommandPalette({
           id: `emp-${emp.id}`,
           title: `${emp.name} (${emp.id}) — ${emp.designation}`,
           titleBn: `${emp.nameBn || emp.name} (${emp.id})`,
-          category: 'Live Records',
-          icon: <Users size={15} color="#7C3AED" />,
+          category: 'Records',
+          icon: <Users size={15} color="var(--status-purple)" />,
           action: () => {
             onNavigate('workforce');
             onClose();
@@ -242,30 +242,10 @@ export default function CommandPalette({
       },
     });
 
-    // 4. Switch Role (Preview)
-    if (onRoleChange) {
-      (Object.keys(ROLE_META) as AppRole[]).forEach((r) => {
-        const rMeta = ROLE_META[r];
-        list.push({
-          id: `switch-role-${r}`,
-          title: `Switch Role: ${rMeta.name} (${rMeta.label})`,
-          titleBn: `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
-          category: 'Switch Role (Preview)',
-          icon: <Users size={15} color={rMeta.avatarColor} />,
-          action: () => {
-            onRoleChange(r);
-            onClose();
-          },
-          shortcut: rMeta.empId,
-        });
-      });
-    }
-
     return list;
   }, [
     allowedViews,
-    role,
-    meta,
+    user,
     files,
     assets,
     vehicles,
@@ -275,7 +255,6 @@ export default function CommandPalette({
     currentTheme,
     onNavigate,
     onToggleTheme,
-    onRoleChange,
     onClose,
   ]);
 
@@ -377,7 +356,7 @@ export default function CommandPalette({
             <span><kbd>esc</kbd> {t('Close', 'বন্ধ', lang)}</span>
           </div>
           <div className="palette-footer-badge">
-            {t(`BOGCL Quick Search • ${meta.label}`, `দ্রুত অনুসন্ধান • ${meta.labelBn}`, lang)}
+            {t(`BOGCL Quick Search • ${ROLE_META[role].label}`, `দ্রুত অনুসন্ধান • ${ROLE_META[role].labelBn}`, lang)}
           </div>
         </div>
       </div>

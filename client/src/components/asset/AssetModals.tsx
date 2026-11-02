@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
+import { peekRef } from '../../lib/refs';
 import { useEmployeeStore } from '../../store/employeeStore';
 import {
   AssetCategory,
@@ -77,7 +78,7 @@ export function RegisterAssetModal({
   );
 
   const applyPreset = (presetKey: 'pump' | 'laptop' | 'tanker' | 'safety' | 'lab') => {
-    const suffix = Math.floor(105 + Math.random() * 88);
+    const suffix = peekRef('TAG', 3).slice(-3);
     if (presetKey === 'pump') {
       setTag(`BOGCL-KER-PMP-${suffix}`);
       setName('Sulzer High-Pressure Bitumen Circulation Booster Pump');
@@ -102,7 +103,7 @@ export function RegisterAssetModal({
       setCategory('it');
       setCriticality('general_c');
       setFacility('Bashundhara Corporate HQ, Baridhara');
-      setFunctionalLocation('Level-8 SAP ERP & Finance Wing');
+      setFunctionalLocation('Level-8 Finance Wing');
       setOem('Lenovo Enterprise');
       setModelNo('P16s-G3-vPro');
       setSerialNo(`LNV-BD-${suffix}`);
@@ -233,7 +234,7 @@ export function RegisterAssetModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Commission & Capitalize Enterprise Asset', 'নতুন মূলধনী সম্পদ নিবন্ধন ও কমিশনিং', lang)}</h3>
-              <div className="eam-modal-subtitle">ISO 55001 / ISO 14224 Taxonomy • SAP S/4HANA FI-AA Capitalization</div>
+              <div className="eam-modal-subtitle">ISO 55001 / ISO 14224 taxonomy • Fixed-asset capitalization</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -388,7 +389,7 @@ export function RegisterAssetModal({
               </div>
               <div>
                 <span style={{ color: 'var(--brand-slate-500)' }}>{t('Monthly FI-AA:', 'মাসিক চার্জ:', lang)}</span>{' '}
-                <strong style={{ color: '#059669' }}>৳{livePreview.monthly.toLocaleString()}/mo</strong>
+                <strong style={{ color: 'var(--status-success)' }}>৳{livePreview.monthly.toLocaleString()}/mo</strong>
               </div>
             </div>
 
@@ -442,7 +443,7 @@ export function RegisterAssetModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-primary">
-              <CheckCircle size={15} /> {t('Capitalize in SAP FI-AA & Generate QR Tag', 'এসএপিতে নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
+              <CheckCircle size={15} /> {t('Register Asset & Generate QR Tag', 'সম্পদ নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
             </button>
           </div>
         </form>
@@ -576,7 +577,7 @@ export function TransferAssetModal({
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('New Receiving Custodian (SAP PERNR Bound)', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
+              <label className="eam-label">{t('New Receiving Custodian', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
               <select className="eam-select" value={toEmpId} onChange={(e) => setToEmpId(e.target.value)}>
                 {activeEmployees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
@@ -742,7 +743,7 @@ export function CreateWorkOrderModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Dispatch Maintenance / Calibration Work Order', 'রক্ষণাবেক্ষণ ও ক্যালিব্রেশন কার্যাদেশ তৈরি', lang)}</h3>
-              <div className="eam-modal-subtitle">SAP PM Work Order • OSHA LOTO Interlock • IAS 16 CAPEX/OPEX Split</div>
+              <div className="eam-modal-subtitle">Work order • Lock-out/tag-out • IAS 16 CAPEX/OPEX split</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -783,7 +784,7 @@ export function CreateWorkOrderModal({
                   border: '1px solid rgba(5, 150, 105, 0.3)',
                   borderRadius: '8px',
                   fontSize: '11.5px',
-                  color: '#059669',
+                  color: 'var(--status-success)',
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
@@ -937,7 +938,7 @@ export function SubmitAssetRequisitionModal({
   );
   const [justification, setJustification] = useState(
     isStaff
-      ? 'Required for multi-district bitumen dealer credit reconciliation and mobile SAP S/4HANA order entry.'
+      ? 'Required for multi-district bitumen dealer credit reconciliation and mobile ERP order entry.'
       : 'Preventive refractory & electrical hotspot diagnostics across Keraniganj Distillation Unit 1 & 2.'
   );
 
@@ -953,7 +954,7 @@ export function SubmitAssetRequisitionModal({
       setCost('185000');
       setUrgency('normal');
       setSpecs('Core i7 vPro, 32GB RAM, 1TB NVMe, 5G LTE Module & Hardware TPM');
-      setJustification('Required for real-time SAP ERP field order & distributor reconciliation.');
+      setJustification('Required for field order & distributor reconciliation.');
     } else if (p === 'thermal') {
       setTitle('Fluke Ti480 PRO Infrared Thermography Camera');
       setCategory('safety');
@@ -993,7 +994,7 @@ export function SubmitAssetRequisitionModal({
       facility,
       department: meta.dept,
       requestedBy: meta.name,
-      requestedByEmpId: role === 'employee' ? 'EMP-1042' : undefined,
+      requestedByEmpId: meta.empId,
       estimatedCapexBdt: Number(cost) || 100000,
       justification,
       specs,
@@ -1136,7 +1137,7 @@ export function InitiateDecommissionModal({
       <div className="eam-modal" onClick={(e) => e.stopPropagation()}>
         <div className="eam-modal-hd danger">
           <div className="eam-modal-hd-left">
-            <div className="eam-modal-icon" style={{ color: '#FECACA' }}>
+            <div className="eam-modal-icon" style={{ color: 'var(--status-danger-bright)' }}>
               <ShieldAlert size={18} />
             </div>
             <div>
@@ -1162,7 +1163,7 @@ export function InitiateDecommissionModal({
               <div style={{ fontWeight: 800, color: 'var(--brand-slate-900)' }}>{asset.name} ({asset.serialNo})</div>
               <div style={{ marginTop: '4px', color: 'var(--brand-slate-600)' }}>
                 Age: <strong>{asset.ageYears} / {asset.usefulLifeYears} yrs</strong> · Repair/CAPEX Ratio:{' '}
-                <strong style={{ color: '#DC2626' }}>{fin.repairToCapexRatioPct}%</strong> · Carrying NBV:{' '}
+                <strong style={{ color: 'var(--status-danger)' }}>{fin.repairToCapexRatioPct}%</strong> · Carrying NBV:{' '}
                 <strong>৳{fin.netBookValue.toLocaleString()}</strong>
               </div>
             </div>
@@ -1263,7 +1264,7 @@ export function FinalizeDisposalModal({
             </div>
             <div>
               <h3 className="eam-modal-title">{t('Executive Write-Off & Stage-8 Disposal Realization', 'চূড়ান্ত অবলোপন, নিলাম ও আর্কাইভ অনুমোদন', lang)}</h3>
-              <div className="eam-modal-subtitle">SAP S/4HANA FI-AA Asset Retirement • IAS 16.71 Gain/Loss Posting</div>
+              <div className="eam-modal-subtitle">Asset retirement • IAS 16.71 gain/loss posting</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1299,7 +1300,7 @@ export function FinalizeDisposalModal({
             {/* Live IAS 16 Gain/Loss Accounting Preview */}
             <div className="eam-spec-box" style={{ fontSize: '12px' }}>
               <div style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--brand-slate-900)' }}>
-                📊 {t('SAP FI-AA Retirement Journal Preview', 'এসএপি অবলোপন হিসাব প্রাকদর্শন', lang)} ({asset.sapAssetNo})
+                📊 {t('Retirement Journal Preview', 'অবলোপন হিসাব প্রাকদর্শন', lang)} ({asset.sapAssetNo})
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                 <span>Gross Capitalized Cost:</span>
@@ -1323,7 +1324,7 @@ export function FinalizeDisposalModal({
                 }}
               >
                 <strong>{gainOrLoss >= 0 ? 'Net Gain on Disposal (GL Income):' : 'Net Loss on Write-Off (GL Expense):'}</strong>
-                <strong style={{ color: gainOrLoss >= 0 ? '#059669' : '#DC2626' }}>
+                <strong style={{ color: gainOrLoss >= 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>
                   {gainOrLoss >= 0 ? `+৳${gainOrLoss.toLocaleString()}` : `-৳${Math.abs(gainOrLoss).toLocaleString()}`}
                 </strong>
               </div>
@@ -1333,7 +1334,7 @@ export function FinalizeDisposalModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-gold" style={{ fontWeight: 800 }}>
-              👑 {t('Sanction Write-Off, Post SAP Voucher & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
+              👑 {t('Sanction Write-Off & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
             </button>
           </div>
         </form>
@@ -1387,7 +1388,7 @@ export function DepreciationScheduleModal({
       <div className="eam-modal lg" onClick={(e) => e.stopPropagation()}>
         <div className="eam-modal-hd">
           <div className="eam-modal-hd-left">
-            <div className="eam-modal-icon" style={{ color: '#34D399' }}>
+            <div className="eam-modal-icon" style={{ color: 'var(--status-success-bright)' }}>
               <DollarSign size={18} />
             </div>
             <div>
@@ -1417,7 +1418,7 @@ export function DepreciationScheduleModal({
               </div>
               <div>
                 <strong>Carrying NBV:</strong>{' '}
-                <span style={{ color: '#059669', fontWeight: 800 }}>৳{fin.netBookValue.toLocaleString()}</span> ·{' '}
+                <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>৳{fin.netBookValue.toLocaleString()}</span> ·{' '}
                 <strong>Lifetime TCO:</strong> ৳{fin.totalCostOfOwnership.toLocaleString()}
               </div>
             </div>
@@ -1472,9 +1473,9 @@ export function DepreciationScheduleModal({
                         {isCurrentYear && <span className="badge info" style={{ fontSize: '9px' }}>Current</span>}
                       </td>
                       <td>৳{r.openingNbv.toLocaleString()}</td>
-                      <td style={{ color: '#DC2626' }}>-৳{r.annualCharge.toLocaleString()}</td>
+                      <td style={{ color: 'var(--status-danger)' }}>-৳{r.annualCharge.toLocaleString()}</td>
                       <td>৳{r.accumulatedDep.toLocaleString()}</td>
-                      <td style={{ fontWeight: 700, color: '#059669' }}>৳{r.closingNbv.toLocaleString()}</td>
+                      <td style={{ fontWeight: 700, color: 'var(--status-success)' }}>৳{r.closingNbv.toLocaleString()}</td>
                     </tr>
                   );
                 })}
@@ -1486,7 +1487,7 @@ export function DepreciationScheduleModal({
         <div className="eam-modal-ft">
           <button type="button" className="btn-outline" onClick={onClose}>{t('Close', 'বন্ধ করুন', lang)}</button>
           <button type="button" className="btn-primary" onClick={handleExportCsv}>
-            <Download size={14} /> {t('Export SAP FI-AA Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
+            <Download size={14} /> {t('Export Depreciation Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
           </button>
         </div>
       </div>
@@ -1523,7 +1524,7 @@ export function AssetPassportModal({
                 {t('Digital Equipment Passport & Metal QR Plate', 'ডিজিটাল সরঞ্জাম পাসপোর্ট ও মেটাল কিউআর ট্যাগ', lang)}
               </h3>
               <div className="eam-modal-subtitle">
-                ISO 55001 • SAP FI-AA ({asset.sapAssetNo}) • Tamper-Evident Anodized Seal
+                ISO 55001 • Ledger {asset.sapAssetNo}
               </div>
             </div>
           </div>
@@ -1533,27 +1534,27 @@ export function AssetPassportModal({
         <div className="eam-modal-body">
           <div
             style={{
-              background: 'linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 50%, #94A3B8 100%)',
+              background: 'linear-gradient(135deg, var(--surface-3) 0%, var(--surface-4) 50%, var(--surface-4) 100%)',
               padding: '18px',
               borderRadius: '10px',
-              border: '2px solid #64748B',
+              border: '2px solid var(--border-3)',
               boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.15)',
-              color: '#0F172A',
+              color: 'var(--text-1)',
               fontFamily: 'monospace',
               marginBottom: '14px',
               position: 'relative',
             }}
           >
-            <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
-            <div style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
-            <div style={{ position: 'absolute', bottom: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
-            <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: '#475569', border: '1px solid #1E293B' }} />
+            <div style={{ position: 'absolute', top: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--surface-inverse-3)', border: '1px solid var(--border-inverse)' }} />
+            <div style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--surface-inverse-3)', border: '1px solid var(--border-inverse)' }} />
+            <div style={{ position: 'absolute', bottom: '8px', left: '8px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--surface-inverse-3)', border: '1px solid var(--border-inverse)' }} />
+            <div style={{ position: 'absolute', bottom: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--surface-inverse-3)', border: '1px solid var(--border-inverse)' }} />
 
-            <div style={{ textAlign: 'center', borderBottom: '1.5px solid #475569', paddingBottom: '8px', marginBottom: '12px' }}>
-              <div style={{ fontWeight: 900, fontSize: '13px', letterSpacing: '1px', color: '#7F1424' }}>
+            <div style={{ textAlign: 'center', borderBottom: '1.5px solid var(--border-inverse-2)', paddingBottom: '8px', marginBottom: '12px' }}>
+              <div style={{ fontWeight: 900, fontSize: '13px', letterSpacing: '1px', color: 'var(--brand-crimson-dark)' }}>
                 BASHUNDHARA OIL & GAS CO. LTD.
               </div>
-              <div style={{ fontSize: '10px', color: '#334155', fontWeight: 700 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-2)', fontWeight: 700 }}>
                 {asset.facility.toUpperCase()} • CAPITAL ASSET IDENTIFIER
               </div>
             </div>
@@ -1563,37 +1564,37 @@ export function AssetPassportModal({
                 style={{
                   width: '102px',
                   height: '102px',
-                  background: '#fff',
+                  background: 'var(--surface-1)',
                   borderRadius: '8px',
                   padding: '6px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid #000',
+                  border: '1px solid var(--border-strong)',
                   flexShrink: 0,
                 }}
               >
-                <QrCode size={76} color="#0F172A" />
-                <span style={{ fontSize: '7px', fontWeight: 900, color: '#000' }}>{asset.tag}</span>
+                <QrCode size={76} color="var(--text-1)" />
+                <span style={{ fontSize: '7px', fontWeight: 900, color: 'var(--text-1)' }}>{asset.tag}</span>
               </div>
 
               <div style={{ flex: 1, fontSize: '11px', lineHeight: 1.55 }}>
-                <div><strong>TAG:</strong> <span style={{ color: '#7F1424', fontWeight: 800 }}>{asset.tag}</span></div>
-                <div><strong>SAP FI-AA:</strong> {asset.sapAssetNo} ({asset.glCostCenter})</div>
+                <div><strong>TAG:</strong> <span style={{ color: 'var(--brand-crimson-dark)', fontWeight: 800 }}>{asset.tag}</span></div>
+                <div><strong>Ledger no.:</strong> {asset.sapAssetNo} ({asset.glCostCenter})</div>
                 <div><strong>SERIAL:</strong> {asset.serialNo}</div>
                 <div><strong>CUSTODIAN:</strong> {asset.custodian}</div>
                 <div><strong>COMMISSIONED:</strong> {asset.commissioningDate}</div>
                 <div>
                   <strong>NEXT AUDIT:</strong>{' '}
-                  <span style={{ color: asset.daysToService <= 15 ? '#DC2626' : '#059669', fontWeight: 800 }}>
+                  <span style={{ color: asset.daysToService <= 15 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 800 }}>
                     {asset.nextServiceDate}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed #64748B', fontSize: '10px', color: '#1E293B' }}>
+            <div style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed var(--border-3)', fontSize: '10px', color: 'var(--text-1)' }}>
               OEM: {asset.oem} ({asset.modelNo}) • SPEC: {asset.specs}
             </div>
           </div>
@@ -1654,7 +1655,7 @@ export function AssetScannerModal({
       <div className="eam-modal sm" onClick={(e) => e.stopPropagation()}>
         <div className="eam-modal-hd">
           <div className="eam-modal-hd-left">
-            <div className="eam-modal-icon" style={{ color: '#34D399' }}>
+            <div className="eam-modal-icon" style={{ color: 'var(--status-success-bright)' }}>
               <Barcode size={18} />
             </div>
             <div>
@@ -1673,32 +1674,32 @@ export function AssetScannerModal({
           <div
             style={{
               height: '155px',
-              background: '#020617',
+              background: 'var(--surface-inverse-deep)',
               borderRadius: '10px',
               position: 'relative',
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '2px solid #334155',
+              border: '2px solid var(--border-inverse-2)',
               marginBottom: '12px',
             }}
           >
-            <div style={{ width: '115px', height: '115px', border: '2px dashed #10B981', borderRadius: '8px', position: 'relative' }}>
+            <div style={{ width: '115px', height: '115px', border: '2px dashed var(--status-success)', borderRadius: '8px', position: 'relative' }}>
               <div
                 style={{
                   position: 'absolute',
                   left: 0,
                   right: 0,
                   height: '2px',
-                  background: '#EF4444',
-                  boxShadow: '0 0 8px #EF4444',
+                  background: 'var(--status-danger-solid)',
+                  boxShadow: '0 0 8px var(--status-danger)',
                   top: '50%',
                   transform: 'translateY(-50%)',
                 }}
               />
             </div>
-            <div style={{ position: 'absolute', bottom: '8px', fontSize: '10.5px', color: '#94A3B8', fontFamily: 'monospace' }}>
+            <div style={{ position: 'absolute', bottom: '8px', fontSize: '10.5px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
               ATEX OPTICAL + NFC READER • READY
             </div>
           </div>
@@ -1708,7 +1709,7 @@ export function AssetScannerModal({
             <input
               type="text"
               className="eam-search-input"
-              placeholder={t('Filter tag, SAP ID, or equipment to simulate scan...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
+              placeholder={t('Search by tag, ledger no. or equipment...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
               value={scanQuery}
               onChange={(e) => setScanQuery(e.target.value)}
             />

@@ -88,7 +88,7 @@ export default function AssignVehicleModal({
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: 'var(--surface-1)',
           borderRadius: '18px',
           overflow: 'hidden',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
@@ -100,7 +100,7 @@ export default function AssignVehicleModal({
           className="fleet-modal-hd"
           style={{
             padding: '18px 28px',
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #871424 100%)',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 55%, var(--brand-crimson-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -114,8 +114,8 @@ export default function AssignVehicleModal({
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid) 100%)',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -123,7 +123,7 @@ export default function AssignVehicleModal({
                 flexShrink: 0,
               }}
             >
-              <ShieldCheck size={22} color="#FFFFFF" />
+              <ShieldCheck size={22} color="var(--text-on-brand)" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -132,7 +132,7 @@ export default function AssignVehicleModal({
                     margin: 0,
                     fontSize: '16px',
                     fontWeight: 800,
-                    color: '#FFFFFF',
+                    color: 'var(--text-on-brand)',
                     letterSpacing: '-0.2px',
                   }}
                 >
@@ -140,8 +140,8 @@ export default function AssignVehicleModal({
                 </h3>
                 <span
                   style={{
-                    backgroundColor: '#F59E0B',
-                    color: '#0F172A',
+                    backgroundColor: 'var(--status-warning-solid)',
+                    color: 'var(--text-1)',
                     fontSize: '11px',
                     fontWeight: 800,
                     padding: '2px 9px',
@@ -156,7 +156,7 @@ export default function AssignVehicleModal({
                 style={{
                   margin: '3px 0 0 0',
                   fontSize: '12px',
-                  color: '#CBD5E1',
+                  color: 'var(--text-inverse-2)',
                   lineHeight: 1.4,
                 }}
               >
@@ -174,7 +174,7 @@ export default function AssignVehicleModal({
               borderRadius: '10px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -183,11 +183,11 @@ export default function AssignVehicleModal({
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.color = '#FFFFFF';
+              e.currentTarget.style.color = 'var(--text-on-brand)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.color = '#CBD5E1';
+              e.currentTarget.style.color = 'var(--text-inverse-2)';
             }}
             title="Close"
           >
@@ -202,7 +202,7 @@ export default function AssignVehicleModal({
             flex: '1 1 auto',
             overflowY: 'auto',
             padding: '26px 32px',
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--surface-1)',
             boxSizing: 'border-box',
           }}
         >
@@ -211,9 +211,9 @@ export default function AssignVehicleModal({
               style={{
                 padding: '12px 16px',
                 borderRadius: '10px',
-                backgroundColor: '#FEF2F2',
-                border: '1px solid #FECACA',
-                color: '#DC2626',
+                backgroundColor: 'var(--status-danger-bg)',
+                border: '1px solid var(--status-danger-border)',
+                color: 'var(--status-danger)',
                 fontSize: '12.5px',
                 fontWeight: 600,
                 display: 'flex',
@@ -232,8 +232,8 @@ export default function AssignVehicleModal({
             style={{
               padding: '16px 20px',
               borderRadius: '12px',
-              backgroundColor: '#F8FAFC',
-              border: '1px solid #E2E8F0',
+              backgroundColor: 'var(--surface-0)',
+              border: '1px solid var(--border-1)',
               marginBottom: '22px',
               boxSizing: 'border-box',
             }}
@@ -253,10 +253,10 @@ export default function AssignVehicleModal({
                   gap: '8px',
                   fontWeight: 800,
                   fontSize: '13.5px',
-                  color: '#0F172A',
+                  color: 'var(--text-1)',
                 }}
               >
-                <MapPin size={16} color="#2563EB" />
+                <MapPin size={16} color="var(--status-info)" />
                 <span>
                   {requisition.from.split(',')[0]} ➔ {requisition.to.split(',')[0]}
                 </span>
@@ -267,9 +267,9 @@ export default function AssignVehicleModal({
                   fontWeight: 700,
                   padding: '3px 10px',
                   borderRadius: '999px',
-                  backgroundColor: '#EFF6FF',
-                  color: '#1E40AF',
-                  border: '1px solid #BFDBFE',
+                  backgroundColor: 'var(--status-info-bg)',
+                  color: 'var(--status-info-text)',
+                  border: '1px solid var(--status-info-border)',
                 }}
               >
                 {requisition.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One Way'}
@@ -282,21 +282,21 @@ export default function AssignVehicleModal({
                 gridTemplateColumns: '1fr 1fr',
                 gap: '12px',
                 fontSize: '12px',
-                color: '#475569',
+                color: 'var(--text-2)',
                 paddingTop: '6px',
               }}
             >
               <div>
-                <span style={{ color: '#94A3B8', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
                   Departure Time
                 </span>
-                <span style={{ fontWeight: 700, color: '#0F172A' }}>{requisition.departureTime}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{requisition.departureTime}</span>
               </div>
               <div>
-                <span style={{ color: '#94A3B8', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
+                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
                   Authorized Passengers
                 </span>
-                <span style={{ fontWeight: 700, color: '#0F172A' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>
                   {requisition.passengersCount} Officials ({requisition.passengerNames.split(',')[0]}...)
                 </span>
               </div>
@@ -306,9 +306,9 @@ export default function AssignVehicleModal({
               style={{
                 marginTop: '10px',
                 paddingTop: '8px',
-                borderTop: '1px solid #E2E8F0',
+                borderTop: '1px solid var(--border-1)',
                 fontSize: '11.5px',
-                color: '#64748B',
+                color: 'var(--text-3)',
                 fontStyle: 'italic',
               }}
             >
@@ -320,18 +320,18 @@ export default function AssignVehicleModal({
           <div className="notice-field-group" style={{ marginBottom: '22px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Car size={15} color="#2563EB" />
+                <Car size={15} color="var(--status-info)" />
                 <span>{t('1. Select Available Roadworthy Vehicle from Fleet', '১. বহর থেকে প্রস্তুত যানবাহন নির্বাচন করুন', lang)}</span>
               </span>
               <span
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  color: '#065F46',
-                  backgroundColor: '#ECFDF5',
+                  color: 'var(--status-success-text)',
+                  backgroundColor: 'var(--status-success-bg)',
                   padding: '2px 8px',
                   borderRadius: '6px',
-                  border: '1px solid #A7F3D0',
+                  border: '1px solid var(--status-success-border)',
                 }}
               >
                 {availableVehicles.length} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
@@ -343,10 +343,10 @@ export default function AssignVehicleModal({
                 style={{
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: '#FFFBEB',
-                  border: '1px solid #FDE68A',
+                  backgroundColor: 'var(--status-warning-bg)',
+                  border: '1px solid var(--status-warning-bright)',
                   fontSize: '12px',
-                  color: '#92400E',
+                  color: 'var(--status-warning-text)',
                 }}
               >
                 ⚠️ {t('All pool vehicles are currently in transit or undergoing maintenance.', 'সকল গাড়ি বর্তমানে সড়কে অথবা ওয়ার্কশপে রক্ষণাবেক্ষণাধীন।', lang)}
@@ -361,11 +361,11 @@ export default function AssignVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     fontWeight: 700,
-                    color: '#0F172A',
-                    backgroundColor: '#FFFFFF',
+                    color: 'var(--text-1)',
+                    backgroundColor: 'var(--surface-1)',
                     outline: 'none',
                     boxSizing: 'border-box',
                     marginBottom: '10px',
@@ -384,8 +384,8 @@ export default function AssignVehicleModal({
                     style={{
                       padding: '12px 16px',
                       borderRadius: '10px',
-                      backgroundColor: '#EFF6FF',
-                      border: '1px solid #BFDBFE',
+                      backgroundColor: 'var(--status-info-bg)',
+                      border: '1px solid var(--status-info-border)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -393,10 +393,10 @@ export default function AssignVehicleModal({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E40AF' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info-text)' }}>
                         {selectedVehicle.model} ({selectedVehicle.plate})
                       </div>
-                      <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
                         {selectedVehicle.location} • Odometer: {((selectedVehicle as any).odometerKm || selectedVehicle.nextServiceKm || 42350).toLocaleString()} km • Fuel: {selectedVehicle.fuelPct}%
                       </div>
                     </div>
@@ -406,9 +406,9 @@ export default function AssignVehicleModal({
                         borderRadius: '6px',
                         fontSize: '10px',
                         fontWeight: 800,
-                        backgroundColor: '#ECFDF5',
-                        color: '#065F46',
-                        border: '1px solid #A7F3D0',
+                        backgroundColor: 'var(--status-success-bg)',
+                        color: 'var(--status-success-text)',
+                        border: '1px solid var(--status-success-border)',
                       }}
                     >
                       ROADWORTHY
@@ -423,18 +423,18 @@ export default function AssignVehicleModal({
           <div className="notice-field-group" style={{ marginBottom: '22px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <User size={15} color="#059669" />
+                <User size={15} color="var(--status-success)" />
                 <span>{t('2. Select Certified On-Duty Driver', '২. উপস্থিত সার্টিফাইড চালক বরাদ্দ করুন', lang)}</span>
               </span>
               <span
                 style={{
                   fontSize: '11px',
                   fontWeight: 800,
-                  color: '#065F46',
-                  backgroundColor: '#ECFDF5',
+                  color: 'var(--status-success-text)',
+                  backgroundColor: 'var(--status-success-bg)',
                   padding: '2px 8px',
                   borderRadius: '6px',
-                  border: '1px solid #A7F3D0',
+                  border: '1px solid var(--status-success-border)',
                 }}
               >
                 {availableDrivers.length} {t('Drivers Ready', 'চালক প্রস্তুত', lang)}
@@ -446,10 +446,10 @@ export default function AssignVehicleModal({
                 style={{
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: '#FFFBEB',
-                  border: '1px solid #FDE68A',
+                  backgroundColor: 'var(--status-warning-bg)',
+                  border: '1px solid var(--status-warning-bright)',
                   fontSize: '12px',
-                  color: '#92400E',
+                  color: 'var(--status-warning-text)',
                 }}
               >
                 ⚠️ {t('No drivers are currently available (on trip, sick leave, or rest required).', 'কোনো চালক উপস্থিত নেই (সবাই ট্রিপে অথবা ছুটিতে আছেন)।', lang)}
@@ -464,11 +464,11 @@ export default function AssignVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     fontWeight: 700,
-                    color: '#0F172A',
-                    backgroundColor: '#FFFFFF',
+                    color: 'var(--text-1)',
+                    backgroundColor: 'var(--surface-1)',
                     outline: 'none',
                     boxSizing: 'border-box',
                     marginBottom: '10px',
@@ -487,8 +487,8 @@ export default function AssignVehicleModal({
                     style={{
                       padding: '12px 16px',
                       borderRadius: '10px',
-                      backgroundColor: '#ECFDF5',
-                      border: '1px solid #A7F3D0',
+                      backgroundColor: 'var(--status-success-bg)',
+                      border: '1px solid var(--status-success-border)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -496,10 +496,10 @@ export default function AssignVehicleModal({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#065F46' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-success-text)' }}>
                         {selectedDriver.name} ({selectedDriver.phone})
                       </div>
-                      <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '2px' }}>
+                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
                         License: {selectedDriver.licenseNo} • Breathalyzer: <strong>{selectedDriver.breathalyzerToday || '0.00% BAC'}</strong>
                       </div>
                     </div>
@@ -509,9 +509,9 @@ export default function AssignVehicleModal({
                         borderRadius: '6px',
                         fontSize: '10px',
                         fontWeight: 800,
-                        backgroundColor: '#D1FAE5',
-                        color: '#065F46',
-                        border: '1px solid #34D399',
+                        backgroundColor: 'var(--status-success-bg)',
+                        color: 'var(--status-success-text)',
+                        border: '1px solid var(--status-success-bright)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
@@ -530,7 +530,7 @@ export default function AssignVehicleModal({
           <div className="notice-field-group" style={{ marginBottom: '10px' }}>
             <div className="notice-field-label">
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FileText size={14} color="#64748B" />
+                <FileText size={14} color="var(--text-3)" />
                 <span>{t('Dispatch Instructions / Route Waypoints', 'ডেসপ্যাচ নির্দেশনা ও রুট নোট', lang)}</span>
               </span>
             </div>
@@ -543,11 +543,11 @@ export default function AssignVehicleModal({
                 width: '100%',
                 padding: '11px 16px',
                 borderRadius: '10px',
-                border: '1.5px solid #CBD5E1',
+                border: '1.5px solid var(--border-2)',
                 fontSize: '13px',
                 lineHeight: 1.6,
-                color: '#0F172A',
-                backgroundColor: '#FFFFFF',
+                color: 'var(--text-1)',
+                backgroundColor: 'var(--surface-1)',
                 outline: 'none',
                 boxSizing: 'border-box',
                 resize: 'vertical',
@@ -562,16 +562,16 @@ export default function AssignVehicleModal({
           className="fleet-modal-ft"
           style={{
             padding: '16px 28px',
-            backgroundColor: '#F8FAFC',
-            borderTop: '1px solid #E2E8F0',
+            backgroundColor: 'var(--surface-0)',
+            borderTop: '1px solid var(--border-1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             boxSizing: 'border-box',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#64748B' }}>
-            <ShieldCheck size={16} color="#059669" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-3)' }}>
+            <ShieldCheck size={16} color="var(--status-success)" />
             <span>Digital Trip Challan Pass will be generated instantly upon confirmation</span>
           </div>
 
@@ -584,19 +584,19 @@ export default function AssignVehicleModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#475569',
-                backgroundColor: '#FFFFFF',
-                border: '1.5px solid #CBD5E1',
+                color: 'var(--text-2)',
+                backgroundColor: 'var(--surface-1)',
+                border: '1.5px solid var(--border-2)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F1F5F9';
-                e.currentTarget.style.borderColor = '#94A3B8';
+                e.currentTarget.style.backgroundColor = 'var(--surface-2)';
+                e.currentTarget.style.borderColor = 'var(--border-3)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#FFFFFF';
-                e.currentTarget.style.borderColor = '#CBD5E1';
+                e.currentTarget.style.backgroundColor = 'var(--surface-1)';
+                e.currentTarget.style.borderColor = 'var(--border-2)';
               }}
             >
               {t('Cancel', 'বাতিল', lang)}
@@ -613,11 +613,11 @@ export default function AssignVehicleModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
+                color: 'var(--text-on-brand)',
                 background:
                   availableVehicles.length === 0 || availableDrivers.length === 0
-                    ? '#CBD5E1'
-                    : 'linear-gradient(135deg, #D97706 0%, #B45309 100%)',
+                    ? 'var(--text-inverse-2)'
+                    : 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)',
                 border: 'none',
                 cursor:
                   availableVehicles.length === 0 || availableDrivers.length === 0

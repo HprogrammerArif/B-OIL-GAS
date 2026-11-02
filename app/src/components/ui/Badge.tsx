@@ -1,41 +1,44 @@
-import { StyleSheet, Text, View } from "react-native";
+import { memo } from "react";
+import { StyleSheet, View } from "react-native";
+import { Radius, Spacing, type Tone, toneColors } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Radius, Spacing } from "@/constants/theme";
-
-export type BadgeVariant = "accent" | "success" | "warning" | "danger" | "neutral";
+import { Icon, type IconName } from "./Icon";
+import { Text } from "./Text";
 
 interface BadgeProps {
   label: string;
-  variant?: BadgeVariant;
+  tone?: Tone;
+  icon?: IconName;
+  /** Solid fill instead of the muted tint. */
+  solid?: boolean;
+  dot?: boolean;
 }
 
-/** Badge — small status pill, e.g. unread counts, plan tiers, item state. */
-export function Badge({ label, variant = "accent" }: BadgeProps) {
+/** Status pill used for workflow states, priorities and counts. */
+export const Badge = memo(function Badge({ label, tone = "neutral", icon, solid = false, dot = false }: BadgeProps) {
   const theme = useTheme();
-
-  const colors: Record<BadgeVariant, { bg: string; fg: string }> = {
-    accent: { bg: theme.accentMuted, fg: theme.accent },
-    success: { bg: theme.successMuted, fg: theme.success },
-    warning: { bg: theme.warningMuted, fg: theme.warning },
-    danger: { bg: theme.dangerMuted, fg: theme.danger },
-    neutral: { bg: theme.surfaceSecondary, fg: theme.textSecondary },
-  };
-
-  const { bg, fg } = colors[variant];
-
+  const c = toneColors(theme, tone);
+  const fg = solid ? theme.onAccent : c.fg;
   return (
-    <View style={[styles.badge, { backgroundColor: bg }]}>
-      <Text style={[styles.text, { color: fg }]}>{label}</Text>
+    <View style={[styles.pill, { backgroundColor: solid ? c.fg : c.bg }]} accessibilityRole="text" accessibilityLabel={label}>
+      {dot ? <View style={[styles.dot, { backgroundColor: fg }]} /> : null}
+      {icon ? <Icon name={icon} size={12} tint={fg} /> : null}
+      <Text variant="caption" weight="bold" tint={fg} numberOfLines={1}>
+        {label}
+      </Text>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
-  badge: {
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 3,
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
     alignSelf: "flex-start",
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
   },
-  text: { fontSize: 12, fontWeight: "700" },
+  dot: { width: 6, height: 6, borderRadius: 3 },
 });

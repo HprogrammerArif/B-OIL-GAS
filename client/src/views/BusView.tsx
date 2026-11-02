@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { ViewProps, ROLE_META, SYSTEM_TODAY, t } from '../types';
-import { showToast } from '../App';
+import { showToast } from '../components/ToastManager';
+import { useCurrentUser } from '../auth/session';
+import { nextRef } from '../lib/refs';
+import { nowTime } from '../lib/clock';
 import {
   Bus, Users, MapPin, CheckCircle, Clock, AlertTriangle,
   QrCode, UserMinus, UserPlus, Phone, Compass, BellRing,
@@ -16,152 +19,44 @@ import {
 import type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle } from '../components/bus/busTypes';
 export type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle };
 
-import {
-  INITIAL_BUSES,
-  INITIAL_ROUTES,
-  generateSeatsForRoute,
-} from '../components/bus/busData';
+import { INITIAL_ROUTES, generateSeatsForRoute } from '../components/bus/busData';
+import { useBusStore } from '../store/busStore';
 import RegisterBusModal from '../components/bus/RegisterBusModal';
 import RouteBuilderModal from '../components/bus/RouteBuilderModal';
 import SupervisorSeatModal from '../components/bus/SupervisorSeatModal';
 import ReassignBusRouteModal from '../components/bus/ReassignBusRouteModal';
 import BusFleetOverviewGrid from '../components/bus/BusFleetOverviewGrid';
 
-
-const INITIAL_SEATS: Seat[] = [
-  // Row 1 - Executive / Lead Engineers
-  { num: 1, row: 1, col: 'left_win', assignedTo: 'Engr. Harunur Rashid', staffId: 'EMP-0104', dept: 'Plant GM & Operations', phone: '+880 1711-002101', pickupPoint: 'Dhanmondi-27', pickupTime: '06:55 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'executive', bookingType: 'permanent' },
-  { num: 2, row: 1, col: 'left_aisle', assignedTo: 'Mizanur Rahman', staffId: 'EMP-0219', dept: 'Quality Assurance', phone: '+880 1712-441122', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'executive', bookingType: 'permanent' },
-  { num: 3, row: 1, col: 'right_aisle', assignedTo: 'Farhana Kabir', staffId: 'EMP-0312', dept: 'EHS Safety Lead', phone: '+880 1819-556677', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'lady_priority', bookingType: 'permanent' },
-  { num: 4, row: 1, col: 'right_win', assignedTo: 'Engr. Tariq Ahmed', staffId: 'EMP-0145', dept: 'Maintenance Div.', phone: '+880 1711-002105', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'vacated', vacatedReason: 'Approved Annual Leave', bloodGroup: 'AB+', boarded: false, category: 'executive', bookingType: 'permanent' },
-
-  // Row 2 (Tanvir Ahmed holds Seat #5)
-  { num: 5, row: 2, col: 'left_win', assignedTo: 'Tanvir Ahmed', staffId: 'EMP-1042', dept: 'Sales & Distribution', phone: '+880 1720-334455', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 6, row: 2, col: 'left_aisle', assignedTo: 'Shariful Islam', staffId: 'EMP-0452', dept: 'Refinery Tech', phone: '+880 1713-998877', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 7, row: 2, col: 'right_aisle', assignedTo: 'Rezaul Karim', staffId: 'EMP-0678', dept: 'Instrument Specialist', phone: '+880 1814-223344', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'vacated', vacatedReason: 'Working from Corporate HQ Dhaka', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 8, row: 2, col: 'right_win', assignedTo: 'Babul Akhter', staffId: 'EMP-0551', dept: 'Logistics Custodian', phone: '+880 1911-887766', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O-', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 3
-  { num: 9, row: 3, col: 'left_win', assignedTo: 'Nurul Amin', staffId: 'EMP-0782', dept: 'Plant Accounts', phone: '+880 1715-667788', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 10, row: 3, col: 'left_aisle', assignedTo: 'Kamrul Hasan', staffId: 'EMP-0891', dept: 'HR & Administration', phone: '+880 1816-554433', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 11, row: 3, col: 'right_aisle', assignedTo: 'Saiful Islam', staffId: 'EMP-0924', dept: 'Lab Chemist', phone: '+880 1917-443322', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 12, row: 3, col: 'right_win', assignedTo: null, staffId: undefined, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 4
-  { num: 13, row: 4, col: 'left_win', assignedTo: 'Arif Hossain', staffId: 'EMP-1102', dept: 'Security Officer', phone: '+880 1718-223311', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 14, row: 4, col: 'left_aisle', assignedTo: 'Al-Amin Mia', staffId: 'EMP-1205', dept: 'Boiler Operator', phone: '+880 1819-112233', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 15, row: 4, col: 'right_aisle', assignedTo: 'Mahbub Alam', staffId: 'EMP-1311', dept: 'Electrical Engr.', phone: '+880 1920-334455', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 16, row: 4, col: 'right_win', assignedTo: 'Tofazzal Hossain', staffId: 'EMP-1402', dept: 'Maintenance', phone: '+880 1725-889900', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'vacated', vacatedReason: 'Self-commute by motorcycle today', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 5
-  { num: 17, row: 5, col: 'left_win', assignedTo: 'Delwar Hossain', staffId: 'EMP-1520', dept: 'Plant Instrumentation', phone: '+880 1721-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 18, row: 5, col: 'left_aisle', assignedTo: 'Jahangir Alam', staffId: 'EMP-1632', dept: 'Shift Marshall', phone: '+880 1822-778899', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 19, row: 5, col: 'right_aisle', assignedTo: 'Moniruzzaman', staffId: 'EMP-1744', dept: 'Piping Specialist', phone: '+880 1923-889900', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 20, row: 5, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 6
-  { num: 21, row: 6, col: 'left_win', assignedTo: 'Zahirul Haque', staffId: 'EMP-1850', dept: 'Terminal Dispatch', phone: '+880 1726-112233', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 22, row: 6, col: 'left_aisle', assignedTo: 'Shahidul Islam', staffId: 'EMP-1901', dept: 'Warehouse Lead', phone: '+880 1827-223344', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 23, row: 6, col: 'right_aisle', assignedTo: 'Imran Nazir', staffId: 'EMP-2015', dept: 'Refinery Process', phone: '+880 1928-334455', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 24, row: 6, col: 'right_win', assignedTo: 'Anwar Sadat', staffId: 'EMP-2108', dept: 'Safety Inspector', phone: '+880 1729-445566', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 7
-  { num: 25, row: 7, col: 'left_win', assignedTo: 'Golam Mostafa', staffId: 'EMP-2210', dept: 'Turbine Mechanic', phone: '+880 1730-556677', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 26, row: 7, col: 'left_aisle', assignedTo: 'Nazrul Islam', staffId: 'EMP-2322', dept: 'Compressor Tech', phone: '+880 1831-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 27, row: 7, col: 'right_aisle', assignedTo: 'Asaduzzaman', staffId: 'EMP-2433', dept: 'LPG Bottling', phone: '+880 1932-778899', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 28, row: 7, col: 'right_win', assignedTo: 'Mustafizur Rahman', staffId: 'EMP-2544', dept: 'Instrumentation', phone: '+880 1733-889900', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O-', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 8
-  { num: 29, row: 8, col: 'left_win', assignedTo: 'Habibur Rahman', staffId: 'EMP-2655', dept: 'Control Room Tech', phone: '+880 1734-990011', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 30, row: 8, col: 'left_aisle', assignedTo: 'Rabiul Awal', staffId: 'EMP-2766', dept: 'HVAC Specialist', phone: '+880 1835-001122', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 31, row: 8, col: 'right_aisle', assignedTo: 'Kawsar Ahmed', staffId: 'EMP-2877', dept: 'Water Treatment', phone: '+880 1936-112233', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 32, row: 8, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 9
-  { num: 33, row: 9, col: 'left_win', assignedTo: 'Shamsul Alam', staffId: 'EMP-2988', dept: 'Fire & Safety Officer', phone: '+880 1737-223344', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 34, row: 9, col: 'left_aisle', assignedTo: 'Liton Das', staffId: 'EMP-3099', dept: 'Plant Chemist', phone: '+880 1838-334455', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 35, row: 9, col: 'right_aisle', assignedTo: 'Akram Hossain', staffId: 'EMP-3101', dept: 'Tank Farm Operator', phone: '+880 1939-445566', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 36, row: 9, col: 'right_win', assignedTo: 'Bazlur Rashid', staffId: 'EMP-3212', dept: 'Pipeline Welder', phone: '+880 1740-556677', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'AB+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 10
-  { num: 37, row: 10, col: 'left_win', assignedTo: 'Selim Mia', staffId: 'EMP-3323', dept: 'Generators Lead', phone: '+880 1741-667788', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 38, row: 10, col: 'left_aisle', assignedTo: 'Ashraful Islam', staffId: 'EMP-3434', dept: 'Maintenance Fitter', phone: '+880 1842-778899', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 39, row: 10, col: 'right_aisle', assignedTo: 'Farid Uddin', staffId: 'EMP-3545', dept: 'Civil Works Tech', phone: '+880 1943-889900', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 40, row: 10, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 11
-  { num: 41, row: 11, col: 'left_win', assignedTo: 'Mainul Islam', staffId: 'EMP-3656', dept: 'Flare System Tech', phone: '+880 1744-990011', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 42, row: 11, col: 'left_aisle', assignedTo: 'Badrul Huda', staffId: 'EMP-3767', dept: 'Security Escort', phone: '+880 1845-001122', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 43, row: 11, col: 'right_aisle', assignedTo: 'Nazim Uddin', staffId: 'EMP-3878', dept: 'Stores Supervisor', phone: '+880 1946-112233', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 44, row: 11, col: 'right_win', assignedTo: 'Saidur Rahman', staffId: 'EMP-3989', dept: 'Canteen Supervisor', phone: '+880 1747-223344', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-
-  // Row 12
-  { num: 45, row: 12, col: 'left_win', assignedTo: 'Touhidul Islam', staffId: 'EMP-4090', dept: 'Electrical Substation', phone: '+880 1748-334455', pickupPoint: 'Mirpur-10 Circle', pickupTime: '06:45 AM', status: 'occupied', bloodGroup: 'AB+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 46, row: 12, col: 'left_aisle', assignedTo: 'Belal Hossain', staffId: 'EMP-4101', dept: 'Laboratory Asst.', phone: '+880 1849-445566', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'A+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 47, row: 12, col: 'right_aisle', assignedTo: 'Sultan Mahmud', staffId: 'EMP-4212', dept: 'Diesel Generator Tech', phone: '+880 1950-556677', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'B+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 48, row: 12, col: 'right_win', assignedTo: null, dept: null, status: 'empty', boarded: false, category: 'regular' },
-
-  // Row 13 - Rear Row
-  { num: 49, row: 13, col: 'left_win', assignedTo: 'Enamul Haque', staffId: 'EMP-4323', dept: 'Refinery Utilities', phone: '+880 1751-667788', pickupPoint: 'Farmgate Overbridge', pickupTime: '07:18 AM', status: 'occupied', bloodGroup: 'O+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 50, row: 13, col: 'left_aisle', assignedTo: 'Firoz Ahmed', staffId: 'EMP-4434', dept: 'Logistics Handler', phone: '+880 1852-778899', pickupPoint: 'Agargaon Metro Gate', pickupTime: '07:00 AM', status: 'occupied', bloodGroup: 'B+', boarded: true, category: 'regular', bookingType: 'permanent' },
-  { num: 51, row: 13, col: 'right_aisle', assignedTo: 'Sajid Hasan', staffId: 'EMP-4545', dept: 'EHS Assistant', phone: '+880 1953-889900', pickupPoint: 'Shahbagh Square', pickupTime: '07:30 AM', status: 'occupied', bloodGroup: 'A+', boarded: false, category: 'regular', bookingType: 'permanent' },
-  { num: 52, row: 13, col: 'right_win', assignedTo: 'Rokonuzzaman', staffId: 'EMP-4656', dept: 'Security Gate Staff', phone: '+880 1754-990011', pickupPoint: 'Babubazar Bridge', pickupTime: '07:42 AM', status: 'occupied', bloodGroup: 'O+', boarded: false, category: 'regular', bookingType: 'permanent' },
-];
-
-const INITIAL_WAITLIST: WaitlistEntry[] = [
-  { rank: 1, staffId: 'EMP-5501', name: 'Shahadat Hossain', dept: 'Mechanical Tech', pickupPoint: 'Farmgate Overbridge', phone: '+880 1718-445566', joinedAt: '06:12 AM', priority: 'Emergency', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 2, staffId: 'EMP-5502', name: 'Nasir Uddin', dept: 'Refinery Operator', pickupPoint: 'Shahbagh Square', phone: '+880 1823-998811', joinedAt: '06:25 AM', priority: 'Shift', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 3, staffId: 'EMP-5503', name: 'Ziaur Rahman', dept: 'Procurement Asst.', pickupPoint: 'Babubazar Bridge', phone: '+880 1912-334455', joinedAt: '06:33 AM', priority: 'Shift', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 4, staffId: 'EMP-5504', name: 'Sabbir Ahmed', dept: 'Chemical Blending Tech', pickupPoint: 'Farmgate Overbridge', phone: '+880 1729-110022', joinedAt: '06:40 AM', priority: 'Overtime', shift: 'Morning Shift (07:00 AM)' },
-  { rank: 5, staffId: 'EMP-5505', name: 'Tarek Mansoor', dept: 'EHS Compliance Officer', pickupPoint: 'Mirpur-10 Circle', phone: '+880 1830-449922', joinedAt: '06:48 AM', priority: 'Emergency', shift: 'Morning Shift (07:00 AM)' },
-];
-
 export default function BusView({ role, lang }: ViewProps) {
-  // Operational perspective: staff vs supervisor (default to supervisor if role is transport_admin)
-  const [activePerspective, setActivePerspective] = useState<'staff' | 'supervisor'>(
-    role === 'transport_admin' ? 'supervisor' : 'staff'
-  );
+  const user = useCurrentUser();
+  const canManageBus = !!user?.permissions.has('bus:manage');
+  const [perspective, setActivePerspective] = useState<'staff' | 'supervisor'>(canManageBus ? 'supervisor' : 'staff');
+  const activePerspective = canManageBus ? perspective : 'staff';
+  const [scanQuery, setScanQuery] = useState('');
 
   // Commute Direction & Date
   const [commuteDirection, setCommuteDirection] = useState<'inbound' | 'outbound'>('inbound');
   const [selectedDate, setSelectedDate] = useState<string>(SYSTEM_TODAY);
 
-  // Bus Fleet and Routes State (All 10 Commuter Buses)
-  const [buses, setBuses] = useState<BusVehicle[]>(INITIAL_BUSES);
-  const [routes, setRoutes] = useState<Record<string, RouteInfo>>(INITIAL_ROUTES);
-  const [routeSeats, setRouteSeats] = useState<Record<string, Seat[]>>(() => {
-    const initial: Record<string, Seat[]> = {
-      'route-1': INITIAL_SEATS,
-    };
-    Object.keys(INITIAL_ROUTES).forEach(k => {
-      if (k !== 'route-1') {
-        initial[k] = generateSeatsForRoute(k, INITIAL_ROUTES[k]?.capacity || 52);
-      }
-    });
-    return initial;
-  });
+  // Bus fleet, routes, seat maps and waitlist are owned by busStore (shared + persisted)
+  const {
+    buses, routes, routeSeats, waitlist,
+    setBuses, setRoutes, setRouteSeats, setSeatsForRoute, setWaitlist,
+  } = useBusStore();
 
   // Supervisor deck sub-tab: 'fleet' (10-bus grid) vs 'seats' (52-seater layout)
   const [supervisorSubTab, setSupervisorSubTab] = useState<'fleet' | 'seats'>('fleet');
 
   // Routes & Seats State
   const [selectedRouteKey, setSelectedRouteKey] = useState<string>('route-1');
-  const [seats, setSeatsState] = useState<Seat[]>(INITIAL_SEATS);
+  const seats: Seat[] = routeSeats[selectedRouteKey] ?? [];
 
-  // Synchronized setter for seats that maintains routeSeats map
+  // Seat setter scoped to the active route (writes through to the store)
   const setSeats = (action: React.SetStateAction<Seat[]>) => {
-    setSeatsState(prev => {
-      const nextVal = typeof action === 'function' ? action(prev) : action;
-      setRouteSeats(rPrev => ({
-        ...rPrev,
-        [selectedRouteKey]: nextVal,
-      }));
-      return nextVal;
-    });
+    setSeatsForRoute(selectedRouteKey, action);
   };
 
-  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>(INITIAL_WAITLIST);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(INITIAL_SEATS[4]); // Seat #5 Tanvir Ahmed
+  const [selectedSeat, setSelectedSeat] = useState<Seat | null>(() => seats.find(s => s.num === 5) ?? seats[0] ?? null);
 
   // Filters & Tabs
   const [seatFilter, setSeatFilter] = useState<'all' | 'occupied' | 'vacated' | 'empty' | 'mine'>('all');
@@ -222,10 +117,10 @@ export default function BusView({ role, lang }: ViewProps) {
     message: string;
     time: string;
   }>({
-    active: true,
+    active: false,
     type: 'info',
-    message: 'All GPS satellite beacons synchronised. Normal morning commute transit in progress.',
-    time: '07:22 AM'
+    message: '',
+    time: ''
   });
 
   // Form for joining waitlist
@@ -287,18 +182,13 @@ export default function BusView({ role, lang }: ViewProps) {
   const activeStops: RouteStop[] = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
 
   // Current logged-in user profile dynamically mapped to active role
-  const mySeat = useMemo(() => {
-    const byId = seats.find(s => s.staffId === currentStaffMeta.empId);
-    if (byId) return byId;
-    const byName = seats.find(s => s.assignedTo?.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase()));
-    if (byName) return byName;
-    return seats.find(s => s.num === 5) || seats[4];
-  }, [seats, currentStaffMeta]);
+  const mySeat = useMemo(
+    () => seats.find(s => s.staffId === currentStaffMeta.empId) ?? null,
+    [seats, currentStaffMeta.empId],
+  );
 
   const isMySeatVacated = mySeat?.status === 'vacated';
-  const myWaitlistEntry = waitlist.find(
-    w => w.staffId === currentStaffMeta.empId || w.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase())
-  );
+  const myWaitlistEntry = waitlist.find(w => w.staffId === currentStaffMeta.empId);
 
   // Counts
   const occupiedCount = seats.filter(s => s.status === 'occupied').length;
@@ -402,7 +292,7 @@ export default function BusView({ role, lang }: ViewProps) {
         return {
           ...s,
           assignedTo: bookForm.name,
-          staffId: bookForm.staffId || `GST-${Math.floor(1000 + Math.random() * 9000)}`,
+          staffId: bookForm.staffId || nextRef('GST'),
           dept: bookForm.dept,
           phone: bookForm.phone,
           pickupPoint: bookForm.pickupPoint,
@@ -511,7 +401,7 @@ export default function BusView({ role, lang }: ViewProps) {
       dept: joinForm.dept,
       pickupPoint: joinForm.pickupPoint,
       phone: joinForm.phone,
-      joinedAt: 'Just Now (07:35 AM)',
+      joinedAt: nowTime(),
       priority: joinForm.priority,
       shift: joinForm.shift,
       isCurrentUser: true,
@@ -532,7 +422,7 @@ export default function BusView({ role, lang }: ViewProps) {
   // Staff Cancelling their own waitlist request
   const handleCancelMyWaitlist = () => {
     setWaitlist(prev => {
-      const remaining = prev.filter(w => w.staffId !== 'EMP-1042' && w.name !== 'Tanvir Ahmed');
+      const remaining = prev.filter(w => w.staffId !== currentStaffMeta.empId);
       return remaining.map((w, idx) => ({ ...w, rank: idx + 1 }));
     });
     showToast(t('Waitlist request cancelled.', 'অপেক্ষাতালিকা থেকে আবেদন প্রত্যাহার করা হয়েছে।', lang), 'info');
@@ -645,7 +535,7 @@ export default function BusView({ role, lang }: ViewProps) {
       active: true,
       type: 'warning',
       message: broadcastMessage,
-      time: 'Just Now'
+      time: nowTime()
     });
     setShowBroadcastModal(false);
     showToast(
@@ -661,8 +551,11 @@ export default function BusView({ role, lang }: ViewProps) {
   // Switch active route and load that route's seat map
   const handleSelectRoute = (routeKey: string) => {
     setSelectedRouteKey(routeKey);
-    const targetSeats = routeSeats[routeKey] || generateSeatsForRoute(routeKey, routes[routeKey]?.capacity || 52);
-    setSeatsState(targetSeats);
+    let targetSeats = routeSeats[routeKey];
+    if (!targetSeats) {
+      targetSeats = generateSeatsForRoute(routeKey, routes[routeKey]?.capacity || 52);
+      setSeatsForRoute(routeKey, targetSeats);
+    }
     setSelectedSeat(targetSeats[0] || null);
   };
 
@@ -802,7 +695,7 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
           <p className="section-subtitle" style={{ marginTop: '4px' }}>
             {t(
-              'Interactive 52-seater coach seat map, instant seat booking, automated standby queue, live GPS route stops & passenger manifest.',
+              'Seat map for each staff coach, seat booking, standby waitlist, route timetable and gate manifest.',
               '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
               lang
             )}
@@ -813,7 +706,7 @@ export default function BusView({ role, lang }: ViewProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {/* Commute Direction Switcher */}
           <div style={{
-            background: 'var(--brand-slate-100, #F1F5F9)',
+            background: 'var(--brand-slate-100)',
             padding: '3px',
             borderRadius: '8px',
             display: 'flex',
@@ -825,7 +718,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 showToast(t('Switched to Morning Inbound Shift (City ➔ Plant Gate-1)', 'সকালের শিফট (শহর ➔ প্ল্যান্ট)', lang), 'info');
               }}
               style={{
-                background: commuteDirection === 'inbound' ? '#FFFFFF' : 'transparent',
+                background: commuteDirection === 'inbound' ? 'var(--surface-1)' : 'transparent',
                 color: commuteDirection === 'inbound' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
                 border: 'none',
                 padding: '5px 9px',
@@ -848,7 +741,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 showToast(t('Switched to Evening Outbound Return (Plant Gate-1 ➔ City)', 'সন্ধ্যার ফিরতি শিফট (প্ল্যান্ট ➔ শহর)', lang), 'info');
               }}
               style={{
-                background: commuteDirection === 'outbound' ? '#FFFFFF' : 'transparent',
+                background: commuteDirection === 'outbound' ? 'var(--surface-1)' : 'transparent',
                 color: commuteDirection === 'outbound' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
                 border: 'none',
                 padding: '5px 9px',
@@ -867,21 +760,18 @@ export default function BusView({ role, lang }: ViewProps) {
             </button>
           </div>
 
-          {/* Operational Perspective Switcher (Staff vs Transport Supervisor) */}
+          {canManageBus && (
           <div style={{
-            background: 'var(--brand-slate-100, #F1F5F9)',
+            background: 'var(--brand-slate-100)',
             padding: '3px',
             borderRadius: '8px',
             display: 'flex',
             border: '1px solid var(--brand-slate-300)'
           }}>
             <button
-              onClick={() => {
-                setActivePerspective('staff');
-                showToast(t(`Switched to Staff Commuter Self-Service Mode (${currentStaffMeta.name})`, 'স্টাফ সেলফ-সার্ভিস মোড সক্রিয়', lang), 'info');
-              }}
+              onClick={() => setActivePerspective('staff')}
               style={{
-                background: activePerspective === 'staff' ? '#FFFFFF' : 'transparent',
+                background: activePerspective === 'staff' ? 'var(--surface-1)' : 'transparent',
                 color: activePerspective === 'staff' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
                 border: 'none',
                 padding: '5px 10px',
@@ -899,13 +789,10 @@ export default function BusView({ role, lang }: ViewProps) {
             </button>
 
             <button
-              onClick={() => {
-                setActivePerspective('supervisor');
-                showToast(t('Switched to Transport Supervisor Administrative Mode (Md. Kamruzzaman)', 'পরিবহন পরিদর্শক মোড সক্রিয়', lang), 'gold');
-              }}
+              onClick={() => setActivePerspective('supervisor')}
               style={{
-                background: activePerspective === 'supervisor' ? '#D4AF37' : 'transparent',
-                color: activePerspective === 'supervisor' ? '#000' : 'var(--brand-slate-500)',
+                background: activePerspective === 'supervisor' ? 'var(--brand-gold)' : 'transparent',
+                color: activePerspective === 'supervisor' ? 'var(--text-1)' : 'var(--brand-slate-500)',
                 border: 'none',
                 padding: '5px 10px',
                 borderRadius: '6px',
@@ -922,6 +809,7 @@ export default function BusView({ role, lang }: ViewProps) {
               <span>{t('Supervisor Deck', 'সুপারভাইজার', lang)}</span>
             </button>
           </div>
+          )}
 
           {/* Security Gate Manifest */}
           <button className="btn-outline" onClick={() => setShowManifestModal(true)} title="Security Gate Commuter Manifest">
@@ -929,9 +817,11 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
 
           {/* Conductor Scanner */}
-          <button className="btn-outline" onClick={() => setShowScannerModal(true)} title="Conductor Scanner">
-            <Smartphone size={13} /> {t('Conductor Scanner', 'স্ক্যানার', lang)}
-          </button>
+          {canManageBus && (
+            <button className="btn-outline" onClick={() => setShowScannerModal(true)}>
+              <Smartphone size={13} /> {t('Conductor Scanner', 'স্ক্যানার', lang)}
+            </button>
+          )}
 
           {/* Timetable */}
           <button className="btn-outline" onClick={() => setShowTimetableModal(true)}>
@@ -939,23 +829,25 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
 
           {/* My Boarding Pass */}
-          <button
-            className="btn-primary"
-            onClick={() => {
-              setQrSeatTarget(mySeat || seats[4]);
-              setShowQrModal(true);
-            }}
-          >
-            <QrCode size={13} /> {t('My Boarding Pass', 'বোর্ডিং পাস', lang)}
-          </button>
+          {mySeat && (
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setQrSeatTarget(mySeat);
+                setShowQrModal(true);
+              }}
+            >
+              <QrCode size={13} /> {t('My Boarding Pass', 'বোর্ডিং পাস', lang)}
+            </button>
+          )}
         </div>
       </div>
 
       {/* ─── Live Transit Notice / Incident Broadcast Bar ───────────── */}
       {routeAlert.active && (
         <div style={{
-          background: routeAlert.type === 'warning' ? '#FFFBEB' : 'rgba(59, 130, 246, 0.08)',
-          border: routeAlert.type === 'warning' ? '1px solid #FCD34D' : '1px solid rgba(59, 130, 246, 0.25)',
+          background: routeAlert.type === 'warning' ? 'var(--status-warning-bg)' : 'rgba(59, 130, 246, 0.08)',
+          border: routeAlert.type === 'warning' ? '1px solid var(--status-warning-bright)' : '1px solid rgba(59, 130, 246, 0.25)',
           padding: '8px 14px',
           borderRadius: '10px',
           marginBottom: '14px',
@@ -963,12 +855,12 @@ export default function BusView({ role, lang }: ViewProps) {
           justifyContent: 'space-between',
           alignItems: 'center',
           fontSize: '12px',
-          color: routeAlert.type === 'warning' ? '#92400E' : 'var(--brand-slate-800)'
+          color: routeAlert.type === 'warning' ? 'var(--status-warning-text)' : 'var(--brand-slate-800)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {routeAlert.type === 'warning' ? <AlertTriangle size={15} color="#D97706" /> : <Info size={15} color="#2563EB" />}
+            {routeAlert.type === 'warning' ? <AlertTriangle size={15} color="var(--status-warning)" /> : <Info size={15} color="var(--status-info)" />}
             <div>
-              <strong>{t('Live Transit Telemetry Notice:', 'লাইভ ট্রানজিট নোটিশ:', lang)}</strong>{' '}
+              <strong>{t('Route notice:', 'রুট বিজ্ঞপ্তি:', lang)}</strong>{' '}
               {routeAlert.message}{' '}
               <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginLeft: '6px' }}>({routeAlert.time})</span>
             </div>
@@ -976,7 +868,7 @@ export default function BusView({ role, lang }: ViewProps) {
           {activePerspective === 'supervisor' && (
             <button
               className="btn-outline"
-              style={{ fontSize: '10.5px', padding: '3px 8px', borderColor: '#D4AF37', color: '#B45309' }}
+              style={{ fontSize: '10.5px', padding: '3px 8px', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
               onClick={() => setShowBroadcastModal(true)}
             >
               <Send size={11} /> {t('Broadcast Notice', 'বিজ্ঞপ্তি পাঠান', lang)}
@@ -1000,12 +892,11 @@ export default function BusView({ role, lang }: ViewProps) {
           color: 'var(--brand-slate-700)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Lock size={15} color="#2563EB" />
+            <Lock size={15} color="var(--status-info)" />
             <div>
-              <strong>{t('Employee Commuter Self-Service Mode:', 'কর্মচারী সেলফ-সার্ভিস মোড:', lang)}</strong>{' '}
               {t(
-                'View live coach seat occupancy, book unassigned empty seats, release or reclaim your Seat #05, request peer seat swaps, and track GPS route progress in real-time.',
-                'লাইভ সিট দখল দেখুন, খালি সিট বুক করুন, ৫ নম্বর আসন পরিচালনা করুন, সিট সোয়াপ আবেদন এবং জিপিএস ট্র্যাকিং করুন।',
+                'See seat availability, book a free seat, release or reclaim your seat for a day, and request a seat swap.',
+                'আসনের প্রাপ্যতা দেখুন, খালি আসন বুক করুন, একদিনের জন্য আসন ছাড়ুন বা ফেরত নিন এবং আসন বদলের আবেদন করুন।',
                 lang
               )}
             </div>
@@ -1023,7 +914,7 @@ export default function BusView({ role, lang }: ViewProps) {
           {/* Supervisor Status Banner */}
           <div style={{
             background: 'rgba(212, 175, 55, 0.08)',
-            border: '1.5px solid #D4AF37',
+            border: '1.5px solid var(--brand-gold)',
             padding: '9px 14px',
             borderRadius: '10px',
             marginBottom: '10px',
@@ -1034,7 +925,7 @@ export default function BusView({ role, lang }: ViewProps) {
             color: 'var(--brand-slate-900)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Shield size={16} color="#B45309" />
+              <Shield size={16} color="var(--status-warning-text)" />
               <div>
                 <strong>{t('Plant Transport Supervisor Administrative Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক প্রশাসনিক মোড:', lang)}</strong>{' '}
                 {t(
@@ -1047,7 +938,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div style={{ display: 'flex', gap: '6px' }}>
               <button
                 className="btn-outline"
-                style={{ fontSize: '10.5px', padding: '4px 9px', borderColor: '#D4AF37', color: '#B45309' }}
+                style={{ fontSize: '10.5px', padding: '4px 9px', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
                 onClick={() => setShowBroadcastModal(true)}
               >
                 <Send size={11} /> {t('Broadcast Delay', 'বিলম্ব বিজ্ঞপ্তি', lang)}
@@ -1064,7 +955,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
           {/* Supervisor Command Sub-Tabs & Direct Actions */}
           <div style={{
-            background: 'linear-gradient(135deg, #091024 0%, #1e293b 100%)',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
             border: '1.5px solid rgba(212, 175, 55, 0.6)',
             borderRadius: '12px',
             padding: '10px 14px',
@@ -1078,15 +969,15 @@ export default function BusView({ role, lang }: ViewProps) {
           }}>
             {/* View Sub-Tabs */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {t('Supervisor View:', 'সুপারভাইজার ভিউ:', lang)}
               </span>
               <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', padding: '3px', borderRadius: '8px', gap: '3px' }}>
                 <button
                   onClick={() => setSupervisorSubTab('fleet')}
                   style={{
-                    background: supervisorSubTab === 'fleet' ? '#D4AF37' : 'transparent',
-                    color: supervisorSubTab === 'fleet' ? '#000000' : '#E2E8F0',
+                    background: supervisorSubTab === 'fleet' ? 'var(--brand-gold)' : 'transparent',
+                    color: supervisorSubTab === 'fleet' ? 'var(--text-1)' : 'var(--text-inverse)',
                     border: 'none',
                     padding: '5px 12px',
                     borderRadius: '6px',
@@ -1114,8 +1005,8 @@ export default function BusView({ role, lang }: ViewProps) {
                 <button
                   onClick={() => setSupervisorSubTab('seats')}
                   style={{
-                    background: supervisorSubTab === 'seats' ? '#D4AF37' : 'transparent',
-                    color: supervisorSubTab === 'seats' ? '#000000' : '#E2E8F0',
+                    background: supervisorSubTab === 'seats' ? 'var(--brand-gold)' : 'transparent',
+                    color: supervisorSubTab === 'seats' ? 'var(--text-1)' : 'var(--text-inverse)',
                     border: 'none',
                     padding: '5px 12px',
                     borderRadius: '6px',
@@ -1139,8 +1030,8 @@ export default function BusView({ role, lang }: ViewProps) {
               <button
                 onClick={() => setShowRegisterBusModal(true)}
                 style={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                  color: '#FFFFFF',
+                  background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid) 100%)',
+                  color: 'var(--text-on-brand)',
                   border: 'none',
                   padding: '5px 11px',
                   borderRadius: '6px',
@@ -1164,8 +1055,8 @@ export default function BusView({ role, lang }: ViewProps) {
                 }}
                 style={{
                   background: 'rgba(212, 175, 55, 0.18)',
-                  border: '1.5px solid #D4AF37',
-                  color: '#FDE68A',
+                  border: '1.5px solid var(--brand-gold)',
+                  color: 'var(--status-warning-bright)',
                   padding: '5px 11px',
                   borderRadius: '6px',
                   fontSize: '11.5px',
@@ -1184,8 +1075,8 @@ export default function BusView({ role, lang }: ViewProps) {
                 onClick={() => setShowSupervisorSeatModal(true)}
                 style={{
                   background: 'rgba(59, 130, 246, 0.18)',
-                  border: '1.5px solid #60A5FA',
-                  color: '#93C5FD',
+                  border: '1.5px solid var(--status-info-bright)',
+                  color: 'var(--status-info-bright)',
                   padding: '5px 11px',
                   borderRadius: '6px',
                   fontSize: '11.5px',
@@ -1209,7 +1100,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 style={{
                   background: 'rgba(255, 255, 255, 0.08)',
                   border: '1px solid rgba(255, 255, 255, 0.25)',
-                  color: '#F1F5F9',
+                  color: 'var(--text-inverse)',
                   padding: '5px 11px',
                   borderRadius: '6px',
                   fontSize: '11.5px',
@@ -1259,9 +1150,9 @@ export default function BusView({ role, lang }: ViewProps) {
         <>
           {/* ─── Unified Sleek Commuter & Fleet Command Bar ─────────────── */}
           <div className="card mb-3" style={{
-        background: 'linear-gradient(135deg, #091024 0%, #111D3B 100%)',
-        color: '#FFFFFF',
-        border: '1px solid #1E293B',
+        background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)',
+        color: 'var(--text-on-brand)',
+        border: '1px solid var(--border-inverse)',
         boxShadow: 'var(--shadow-sm)',
         padding: '14px 18px'
       }}>
@@ -1273,46 +1164,50 @@ export default function BusView({ role, lang }: ViewProps) {
             borderRadius: '12px',
             padding: '10px 14px',
             display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
               <div style={{
                 width: '40px',
                 height: '40px',
                 borderRadius: '10px',
                 background: isMySeatVacated ? 'rgba(212, 175, 55, 0.2)' : 'rgba(225, 29, 72, 0.2)',
-                border: isMySeatVacated ? '1.5px solid #D4AF37' : '1.5px solid var(--brand-crimson)',
+                border: isMySeatVacated ? '1.5px solid var(--brand-gold)' : '1.5px solid var(--brand-crimson)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: isMySeatVacated ? '#FDE68A' : '#FDA4AF',
+                color: isMySeatVacated ? 'var(--status-warning-bright)' : 'var(--status-danger-bright)',
                 fontWeight: 900,
                 fontSize: '14px'
               }}>
-                #{mySeat?.num ? String(mySeat.num).padStart(2, '0') : '05'}
+                {mySeat ? `#${String(mySeat.num).padStart(2, '0')}` : '—'}
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '12.5px', fontWeight: 800 }}>{mySeat?.assignedTo || currentStaffMeta.name}</span>
-                  <span className={`badge ${isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
-                    {isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
+                  <span className={`badge ${!mySeat ? 'info' : isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
+                    {!mySeat
+                      ? (myWaitlistEntry ? t(`Waitlist #${myWaitlistEntry.rank}`, `অপেক্ষাতালিকা #${myWaitlistEntry.rank}`, lang) : t('No seat on this route', 'এই রুটে আসন নেই', lang))
+                      : isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
                   </span>
                 </div>
-                <div style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '2px' }}>
-                  {activeRoute.name} · 📍 {mySeat?.pickupPoint || 'Farmgate Overbridge'} ({commuteDirection === 'inbound' ? (mySeat?.pickupTime || '07:18 AM') : '06:05 PM'})
+                <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  {activeRoute.name}
+                  {mySeat && <> · 📍 {mySeat.pickupPoint} ({commuteDirection === 'inbound' ? mySeat.pickupTime : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')})</>}
                 </div>
               </div>
             </div>
 
-            {/* Quick Action for Employee */}
+            {mySeat && (
             <div style={{ display: 'flex', gap: '4px' }}>
               {isMySeatVacated ? (
                 <button
                   className="btn-gold"
                   style={{ fontSize: '10.5px', padding: '4px 8px' }}
                   onClick={handleReclaimMySeat}
-                  title="Reclaim Seat #05"
                 >
                   <UserPlus size={11} /> {t('Reclaim', 'পুনরুদ্ধার', lang)}
                 </button>
@@ -1320,8 +1215,8 @@ export default function BusView({ role, lang }: ViewProps) {
                 <button
                   style={{
                     background: 'rgba(212, 175, 55, 0.15)',
-                    border: '1px solid #D4AF37',
-                    color: '#FDE68A',
+                    border: '1px solid var(--brand-gold)',
+                    color: 'var(--status-warning-bright)',
                     fontSize: '10.5px',
                     fontWeight: 700,
                     padding: '4px 8px',
@@ -1332,12 +1227,12 @@ export default function BusView({ role, lang }: ViewProps) {
                     gap: '4px'
                   }}
                   onClick={() => setShowVacateDialog(true)}
-                  title="Release Seat for Today"
                 >
                   <UserMinus size={11} /> {t('Release', 'ছেড়ে দিন', lang)}
                 </button>
               )}
             </div>
+            )}
           </div>
 
           {/* Sub-card 2: Route Selector & Live Beacon */}
@@ -1352,8 +1247,8 @@ export default function BusView({ role, lang }: ViewProps) {
                     onClick={() => handleSelectRoute(route.id)}
                     style={{
                       background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                      border: isSelected ? '1.5px solid #D4AF37' : '1px solid rgba(255, 255, 255, 0.12)',
-                      color: isSelected ? '#FDE68A' : '#CBD5E1',
+                      border: isSelected ? '1.5px solid var(--brand-gold)' : '1px solid rgba(255, 255, 255, 0.12)',
+                      color: isSelected ? 'var(--status-warning-bright)' : 'var(--text-inverse-2)',
                       padding: '3px 8px',
                       borderRadius: '5px',
                       fontSize: '10.5px',
@@ -1369,30 +1264,30 @@ export default function BusView({ role, lang }: ViewProps) {
                   >
                     <span>{route.coachNo}</span>
                     <span style={{ opacity: 0.65, fontSize: '9.5px' }}>({route.name.split(':')[0]})</span>
-                    {isSelected && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#34D399' }} />}
+                    {isSelected && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--status-success-bright)' }} />}
                   </button>
                 );
               })}
             </div>
 
-            {/* Live Progress Bar with Next Station */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Navigation size={12} color="#34D399" />
-                <span style={{ color: '#94A3B8' }}>{t('Next Station:', 'পরবর্তী স্টপ:', lang)}</span>
-                <strong style={{ color: '#FDE047' }}>
-                  {commuteDirection === 'inbound' ? activeRoute.nextStop : activeRoute.outboundStops[1]?.name || 'Babubazar Bridge Ramp'}
-                </strong>
-              </div>
-              <div style={{ color: '#34D399', fontWeight: 800 }}>
-                {activeRoute.speed} · {commuteDirection === 'inbound' ? activeRoute.nextEta : '14 mins (05:32 PM)'}
-              </div>
-            </div>
-
-            {/* Simulated Track Line */}
-            <div style={{ height: '4px', background: 'rgba(255,255,255,0.15)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
-              <div style={{ width: `${activeRoute.progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #10B981, #D4AF37)', borderRadius: '2px' }} />
-            </div>
+            {/* Timetable for the selected direction */}
+            {(() => {
+              const stops = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
+              const first = stops[0];
+              const last = stops[stops.length - 1];
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', fontSize: '11px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+                    <Navigation size={12} color="var(--status-success-bright)" />
+                    <span style={{ color: 'var(--text-muted)' }}>{t('Departs', 'ছাড়ে', lang)}</span>
+                    <strong style={{ color: 'var(--status-warning-bright)' }}>{first ? `${first.scheduledTime} · ${first.name}` : '—'}</strong>
+                  </div>
+                  <div style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>
+                    {t('Arrives', 'পৌঁছায়', lang)} {last?.scheduledTime ?? '—'} · {t(`${stops.length} stops`, `${stops.length}টি স্টপ`, lang)}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Sub-card 3: Key Shuttle Metrics */}
@@ -1406,29 +1301,29 @@ export default function BusView({ role, lang }: ViewProps) {
             padding: '8px 12px'
           }}>
             <div>
-              <div style={{ fontSize: '9.5px', color: '#94A3B8', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 {t('Occupancy', 'আসন দখল', lang)}
               </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#38BDF8' }}>
-                {occupiedCount}/{totalSeats} <span style={{ fontSize: '10px', color: '#94A3B8' }}>({fillRate}%)</span>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-info-bright)' }}>
+                {occupiedCount}/{totalSeats} <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>({fillRate}%)</span>
               </div>
             </div>
 
             <div style={{ borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '10px' }}>
-              <div style={{ fontSize: '9.5px', color: '#94A3B8', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 {t('Boarded', 'বোর্ডিং সম্পন্ন', lang)}
               </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#10B981' }}>
-                {boardedCount} <span style={{ fontSize: '9.5px', color: '#6EE7B7' }}>{t('pax', 'জন', lang)}</span>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-success)' }}>
+                {boardedCount} <span style={{ fontSize: '9.5px', color: 'var(--status-success-bright)' }}>{t('pax', 'জন', lang)}</span>
               </div>
             </div>
 
             <div style={{ borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '10px' }}>
-              <div style={{ fontSize: '9.5px', color: '#94A3B8', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 {t('Standby / Free', 'ফাঁকা / দাবিযোগ্য', lang)}
               </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#D4AF37' }}>
-                {vacatedCount + emptyCount} <span style={{ fontSize: '9.5px', color: '#FDE68A' }}>{t('Seats', 'সিট', lang)}</span>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-gold)' }}>
+                {vacatedCount + emptyCount} <span style={{ fontSize: '9.5px', color: 'var(--status-warning-bright)' }}>{t('Seats', 'সিট', lang)}</span>
               </div>
             </div>
           </div>
@@ -1518,7 +1413,7 @@ export default function BusView({ role, lang }: ViewProps) {
         <div className="card">
           <div className="card-hd">
             <div className="card-hd-left">
-              <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37' }}>
+              <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
                 <Bus size={18} />
               </div>
               <div>
@@ -1554,7 +1449,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       cursor: 'pointer',
                       border: isActive ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                       background: isActive ? 'var(--brand-crimson)' : 'transparent',
-                      color: isActive ? '#fff' : 'var(--brand-slate-600)'
+                      color: isActive ? 'var(--text-on-brand)' : 'var(--brand-slate-600)'
                     }}
                   >
                     {labels[filterKey]}
@@ -1570,16 +1465,16 @@ export default function BusView({ role, lang }: ViewProps) {
               {/* Front Cabin Windshield with Driver & Pneumatic Door */}
               <div className="bus-windshield-bar">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Compass size={16} color="#D4AF37" />
+                  <Compass size={16} color="var(--brand-gold)" />
                   <div>
                     <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px' }}>
-                      CABIN FRONT · DRIVER COCKPIT
+                      {t('FRONT OF COACH', 'বাসের সামনের অংশ', lang)}
                     </div>
-                    <div style={{ fontSize: '9px', color: '#94A3B8' }}>{activeRoute.driverName} (D-1) · GPS Satellite Beacon Active</div>
+                    <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{t('Driver', 'চালক', lang)}: {activeRoute.driverName}</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid #10B981', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', color: '#34D399', fontWeight: 700 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid var(--status-success)', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', color: 'var(--status-success-bright)', fontWeight: 700 }}>
                   <CheckCheck size={12} />
                   <span>DOOR 1 🚪</span>
                 </div>
@@ -1642,8 +1537,8 @@ export default function BusView({ role, lang }: ViewProps) {
                         style={{
                           opacity: matchesFilter && matchesSearch ? 1 : 0.22,
                           transform: matchesFilter && matchesSearch ? (matchesSearch && searchQuery ? 'scale(1.05)' : undefined) : 'scale(0.92)',
-                          boxShadow: matchesSearch && searchQuery ? '0 0 10px #3B82F6' : undefined,
-                          borderColor: matchesSearch && searchQuery ? '#2563EB' : undefined
+                          boxShadow: matchesSearch && searchQuery ? '0 0 10px var(--status-info)' : undefined,
+                          borderColor: matchesSearch && searchQuery ? 'var(--status-info)' : undefined
                         }}
                         onClick={() => setSelectedSeat(s)}
                         title={`Seat #${s.num} — ${s.assignedTo || 'Empty'} (${s.status})`}
@@ -1655,8 +1550,8 @@ export default function BusView({ role, lang }: ViewProps) {
                             position: 'absolute',
                             top: '-4px',
                             right: isVacated ? '28px' : '-2px',
-                            background: '#10B981',
-                            color: '#fff',
+                            background: 'var(--status-success-solid)',
+                            color: 'var(--text-on-brand)',
                             fontSize: '6.5px',
                             fontWeight: 900,
                             padding: '1px 3px',
@@ -1670,7 +1565,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         <div style={{
                           fontSize: '10px',
                           fontWeight: 800,
-                          color: isVacated ? '#B45309' : isMine ? 'var(--brand-crimson)' : isOccupied ? 'var(--brand-slate-700)' : '#94A3B8',
+                          color: isVacated ? 'var(--status-warning-text)' : isMine ? 'var(--brand-crimson)' : isOccupied ? 'var(--brand-slate-700)' : 'var(--text-muted)',
                           lineHeight: '1'
                         }}>
                           #{s.num < 10 ? `0${s.num}` : s.num}
@@ -1680,7 +1575,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         <div style={{
                           fontSize: '8.5px',
                           fontWeight: 700,
-                          color: isVacated ? '#92400E' : isOccupied ? 'var(--brand-slate-900)' : '#94A3B8',
+                          color: isVacated ? 'var(--status-warning-text)' : isOccupied ? 'var(--brand-slate-900)' : 'var(--text-muted)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -1692,15 +1587,15 @@ export default function BusView({ role, lang }: ViewProps) {
 
                         {/* Bottom: Category or Standby Tag */}
                         {s.isStandbyPromoted ? (
-                          <div style={{ fontSize: '6.5px', fontWeight: 800, color: '#059669', background: '#D1FAE5', padding: '0 2px', borderRadius: '2px' }}>
+                          <div style={{ fontSize: '6.5px', fontWeight: 800, color: 'var(--status-success)', background: 'var(--status-success-bg)', padding: '0 2px', borderRadius: '2px' }}>
                             STANDBY
                           </div>
                         ) : s.category === 'executive' ? (
-                          <div style={{ fontSize: '6px', fontWeight: 800, color: '#1E40AF', background: '#DBEAFE', padding: '0 2px', borderRadius: '2px' }}>
+                          <div style={{ fontSize: '6px', fontWeight: 800, color: 'var(--status-info-text)', background: 'var(--status-info-bg)', padding: '0 2px', borderRadius: '2px' }}>
                             EXEC
                           </div>
                         ) : s.category === 'lady_priority' ? (
-                          <div style={{ fontSize: '6px', fontWeight: 800, color: '#9D174D', background: '#FCE7F3', padding: '0 2px', borderRadius: '2px' }}>
+                          <div style={{ fontSize: '6px', fontWeight: 800, color: 'var(--status-pink-text)', background: 'var(--status-pink-bg)', padding: '0 2px', borderRadius: '2px' }}>
                             LADY
                           </div>
                         ) : (
@@ -1745,7 +1640,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 textAlign: 'center',
                 marginTop: '14px',
                 paddingTop: '10px',
-                borderTop: '2px dashed #CBD5E1',
+                borderTop: '2px dashed var(--border-2)',
                 fontSize: '9.5px',
                 color: 'var(--brand-slate-500)',
                 display: 'flex',
@@ -1753,7 +1648,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 alignItems: 'center'
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Shield size={11} color="#EF4444" />
+                  <Shield size={11} color="var(--status-danger)" />
                   <span>EMERGENCY DOOR 2</span>
                 </span>
                 <span style={{ fontWeight: 700, letterSpacing: '0.6px' }}>REAR CARGO & FIRST-AID STATION</span>
@@ -1764,23 +1659,23 @@ export default function BusView({ role, lang }: ViewProps) {
             {/* Coach Legend */}
             <div style={{ marginTop: '14px', display: 'flex', gap: '12px', justifyContent: 'center', fontSize: '11px', flexWrap: 'wrap' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '12px', height: '12px', background: '#fff', border: '1.5px solid #CBD5E1', borderRadius: '3px' }}></span>
+                <span style={{ width: '12px', height: '12px', background: 'var(--surface-1)', border: '1.5px solid var(--border-2)', borderRadius: '3px' }}></span>
                 {t('Occupied Staff', 'যাত্রী বরাদ্দ', lang)}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '12px', height: '12px', background: '#FFFBEB', border: '2px solid #D4AF37', borderRadius: '3px' }}></span>
+                <span style={{ width: '12px', height: '12px', background: 'var(--status-warning-bg)', border: '2px solid var(--brand-gold)', borderRadius: '3px' }}></span>
                 {t('Vacated (Standby Free)', 'ফাঁকা আসন (দাবিযোগ্য)', lang)}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: '12px', height: '12px', background: 'rgba(225, 29, 72, 0.1)', border: '2px solid var(--brand-crimson)', borderRadius: '3px' }}></span>
-                {t('My Seat (#05)', 'আমার আসন', lang)}
+                {t('My seat', 'আমার আসন', lang)}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '12px', height: '12px', background: '#F1F5F9', border: '1.5px dashed #CBD5E1', borderRadius: '3px' }}></span>
+                <span style={{ width: '12px', height: '12px', background: 'var(--surface-2)', border: '1.5px dashed var(--border-2)', borderRadius: '3px' }}></span>
                 {t('Unassigned Empty', 'খালি আসন', lang)}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: '12px', height: '12px', background: '#10B981', borderRadius: '3px', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
+                <span style={{ width: '12px', height: '12px', background: 'var(--status-success-solid)', borderRadius: '3px', color: 'var(--text-on-brand)', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
                 {t('Boarded Today', 'বোর্ডিং সম্পন্ন', lang)}
               </span>
             </div>
@@ -1817,11 +1712,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'fifo' ? '3px solid #D4AF37' : '3px solid transparent',
+                borderBottom: activeTab === 'fifo' ? '3px solid var(--brand-gold)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'fifo' ? '#B45309' : 'var(--brand-slate-600)',
+                color: activeTab === 'fifo' ? 'var(--status-warning-text)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1839,11 +1734,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'route' ? '3px solid #3B82F6' : '3px solid transparent',
+                borderBottom: activeTab === 'route' ? '3px solid var(--status-info)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'route' ? '#3B82F6' : 'var(--brand-slate-600)',
+                color: activeTab === 'route' ? 'var(--status-info)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1860,11 +1755,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'driver' ? '3px solid #10B981' : '3px solid transparent',
+                borderBottom: activeTab === 'driver' ? '3px solid var(--status-success)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'driver' ? '#10B981' : 'var(--brand-slate-600)',
+                color: activeTab === 'driver' ? 'var(--status-success)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1881,11 +1776,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'roster' ? '3px solid #8B5CF6' : '3px solid transparent',
+                borderBottom: activeTab === 'roster' ? '3px solid var(--status-purple)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'roster' ? '#8B5CF6' : 'var(--brand-slate-600)',
+                color: activeTab === 'roster' ? 'var(--status-purple)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1938,7 +1833,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     width: '46px',
                     height: '46px',
                     borderRadius: '50%',
-                    background: selectedSeat.status === 'vacated' ? '#FEF3C7' : selectedSeat.assignedTo ? 'var(--brand-slate-100)' : '#F1F5F9',
+                    background: selectedSeat.status === 'vacated' ? 'var(--status-warning-bg)' : selectedSeat.assignedTo ? 'var(--brand-slate-100)' : 'var(--surface-2)',
                     border: '1.5px solid var(--brand-slate-300)',
                     display: 'flex',
                     alignItems: 'center',
@@ -1997,12 +1892,12 @@ export default function BusView({ role, lang }: ViewProps) {
                   {selectedSeat.vacatedReason && (
                     <div style={{
                       marginTop: '6px',
-                      background: '#FFFBEB',
-                      border: '1px solid #FDE68A',
+                      background: 'var(--status-warning-bg)',
+                      border: '1px solid var(--status-warning-bright)',
                       padding: '8px 12px',
                       borderRadius: '8px',
                       fontSize: '11.5px',
-                      color: '#92400E'
+                      color: 'var(--status-warning-text)'
                     }}>
                       <strong>{t('Vacated Reason Logged', 'সিট ফাঁকা করার কারণ', lang)}:</strong> {selectedSeat.vacatedReason}
                     </div>
@@ -2022,15 +1917,14 @@ export default function BusView({ role, lang }: ViewProps) {
                     </button>
                   )}
 
-                  {/* Case 2: Current User's Seat (#5) */}
-                  {selectedSeat.num === 5 && (
+                  {selectedSeat.num === mySeat?.num && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {isMySeatVacated ? (
                         <button className="btn-gold" style={{ flex: 1, justifyContent: 'center' }} onClick={handleReclaimMySeat}>
-                          <UserPlus size={14} /> {t('Reclaim My Seat #05', 'সিট পুনরুদ্ধার করুন', lang)}
+                          <UserPlus size={14} /> {t('Reclaim My Seat', 'সিট পুনরুদ্ধার করুন', lang)}
                         </button>
                       ) : (
-                        <button className="btn-outline" style={{ flex: 1, justifyContent: 'center', borderColor: '#D4AF37', color: '#B45309' }} onClick={() => setShowVacateDialog(true)}>
+                        <button className="btn-outline" style={{ flex: 1, justifyContent: 'center', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }} onClick={() => setShowVacateDialog(true)}>
                           <UserMinus size={14} /> {t('Release My Seat Today', 'আজকের জন্য সিট ছাড়ুন', lang)}
                         </button>
                       )}
@@ -2047,7 +1941,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   )}
 
                   {/* Case 3: Other Occupied Seat in Staff View */}
-                  {selectedSeat.num !== 5 && selectedSeat.status === 'occupied' && activePerspective === 'staff' && (
+                  {mySeat && selectedSeat.num !== mySeat.num && selectedSeat.status === 'occupied' && activePerspective === 'staff' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
                         className="btn-outline"
@@ -2109,7 +2003,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         style={{ flex: 1, fontSize: '11px', justifyContent: 'center' }}
                         onClick={() => handleToggleBoarding(selectedSeat.num)}
                       >
-                        <CheckCircle2 size={13} color={selectedSeat.boarded ? '#10B981' : '#64748B'} />
+                        <CheckCircle2 size={13} color={selectedSeat.boarded ? 'var(--status-success)' : 'var(--text-3)'} />
                         {selectedSeat.boarded ? t('Mark Unboarded', 'বোর্ডিং বাতিল', lang) : t('Mark Boarded', 'বোর্ডিং নিশ্চিত', lang)}
                       </button>
 
@@ -2146,7 +2040,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37' }}>
+                  <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
                     <Users size={18} />
                   </div>
                   <div>
@@ -2164,7 +2058,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   myWaitlistEntry ? (
                     <button
                       className="btn-outline"
-                      style={{ fontSize: '11px', padding: '4px 10px', color: '#EF4444', borderColor: '#EF4444' }}
+                      style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }}
                       onClick={handleCancelMyWaitlist}
                     >
                       {t('Leave Queue', 'আবেদন বাতিল', lang)}
@@ -2193,7 +2087,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 {/* FIFO Explainer Strip */}
                 <div style={{
                   background: 'rgba(212, 175, 55, 0.08)',
-                  border: '1px solid #D4AF37',
+                  border: '1px solid var(--brand-gold)',
                   borderRadius: '8px',
                   padding: '9px 12px',
                   marginBottom: '12px',
@@ -2203,7 +2097,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   alignItems: 'center',
                   gap: '8px'
                 }}>
-                  <Info size={16} color="#D4AF37" />
+                  <Info size={16} color="var(--brand-gold)" />
                   <div>
                     <strong>{t('Standby Queue Policy:', 'স্বচ্ছ অপেক্ষমাণ তালিকা নীতি:', lang)}</strong>{' '}
                     {t(
@@ -2218,7 +2112,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {waitlist.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '30px', color: 'var(--brand-slate-500)' }}>
-                      <CheckCircle2 size={32} color="#10B981" style={{ margin: '0 auto 8px' }} />
+                      <CheckCircle2 size={32} color="var(--status-success)" style={{ margin: '0 auto 8px' }} />
                       <div style={{ fontWeight: 700 }}>{t('No Pending Waitlist Candidates', 'কোনো অপেক্ষমান প্রার্থী নেই', lang)}</div>
                     </div>
                   ) : (
@@ -2240,8 +2134,8 @@ export default function BusView({ role, lang }: ViewProps) {
                               width: '32px',
                               height: '32px',
                               borderRadius: '7px',
-                              background: isRankOne ? '#D4AF37' : 'var(--brand-slate-200)',
-                              color: isRankOne ? '#000' : 'var(--brand-slate-700)',
+                              background: isRankOne ? 'var(--brand-gold)' : 'var(--brand-slate-200)',
+                              color: isRankOne ? 'var(--text-1)' : 'var(--brand-slate-700)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -2304,7 +2198,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6' }}>
+                  <div className="card-hd-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--status-info)' }}>
                     <Navigation size={18} />
                   </div>
                   <div>
@@ -2365,7 +2259,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10B981' }}>
+                  <div className="card-hd-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--status-success)' }}>
                     <Fuel size={18} />
                   </div>
                   <div>
@@ -2382,7 +2276,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
               <div className="card-body" style={{ fontSize: '12.5px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-                  <div style={{ background: 'var(--brand-slate-50, #F8FAFC)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
+                  <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       👨‍✈️ {t('Certified Driver', 'প্রধান চালক', lang)}
                     </div>
@@ -2394,7 +2288,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     </div>
                   </div>
 
-                  <div style={{ background: 'var(--brand-slate-50, #F8FAFC)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
+                  <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
                       🎟️ {t('Bus Conductor', 'কন্ডাক্টর', lang)}
                     </div>
@@ -2411,7 +2305,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <div className="driver-score-card">
                     <span style={{ color: 'var(--brand-slate-500)' }}>Fuel Level:</span>
-                    <strong style={{ color: '#10B981' }}>82% (Full Tank)</strong>
+                    <strong style={{ color: 'var(--status-success)' }}>82% (Full Tank)</strong>
                   </div>
                   <div className="driver-score-card">
                     <span style={{ color: 'var(--brand-slate-500)' }}>Engine Temp:</span>
@@ -2419,24 +2313,24 @@ export default function BusView({ role, lang }: ViewProps) {
                   </div>
                   <div className="driver-score-card">
                     <span style={{ color: 'var(--brand-slate-500)' }}>Cabin AC:</span>
-                    <strong style={{ color: '#0284C7' }}>21.5°C Chilled</strong>
+                    <strong style={{ color: 'var(--status-info)' }}>21.5°C Chilled</strong>
                   </div>
                   <div className="driver-score-card">
                     <span style={{ color: 'var(--brand-slate-500)' }}>First-Aid Kit:</span>
-                    <strong style={{ color: '#10B981' }}>Inspected Oct 2026</strong>
+                    <strong style={{ color: 'var(--status-success)' }}>Inspected Oct 2026</strong>
                   </div>
                 </div>
 
                 <div style={{ marginTop: '14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '10px 14px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontWeight: 800, color: '#B91C1C', fontSize: '12px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--status-danger-text)', fontSize: '12px' }}>
                       🚨 24/7 Plant Roadside Assistance Hotline
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
                       Transport Operations Dispatch: +880 1711-009988
                     </div>
                   </div>
-                  <button className="btn-outline" style={{ borderColor: '#EF4444', color: '#EF4444', fontSize: '11px' }} onClick={() => showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info')}>
+                  <button className="btn-outline" style={{ borderColor: 'var(--status-danger)', color: 'var(--status-danger)', fontSize: '11px' }} onClick={() => showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info')}>
                     SOS Call
                   </button>
                 </div>
@@ -2449,7 +2343,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', color: '#8B5CF6' }}>
+                  <div className="card-hd-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', color: 'var(--status-purple)' }}>
                     <FileText size={18} />
                   </div>
                   <div>
@@ -2513,11 +2407,11 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.12)', color: '#B45309' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.12)', color: 'var(--status-warning-text)' }}>
                   <UserMinus size={18} />
                 </div>
                 <div>
-                  <h3 className="app-modal-title">{t('Release Seat #05 for Today', 'আজকের জন্য ৫ নম্বর আসন ছাড়ুন', lang)}</h3>
+                  <h3 className="app-modal-title">{t(`Release seat #${String(mySeat?.num ?? '').padStart(2, '0')} for today`, `আজকের জন্য ${mySeat?.num ?? ''} নম্বর আসন ছাড়ুন`, lang)}</h3>
                   <div className="app-modal-subtitle">{t('Voluntary standby release for shift colleagues', 'সহকর্মীদের সুযোগ দিতে সিট ছেড়ে দিন', lang)}</div>
                 </div>
               </div>
@@ -2551,7 +2445,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 <option value="Medical Sick Leave">Medical Sick Leave</option>
               </select>
 
-              <div style={{ background: '#FFFDF5', border: '1px solid #FDE68A', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: '#92400E' }}>
+              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', borderRadius: '10px', padding: '12px 14px', fontSize: '12px', color: 'var(--status-warning-text)' }}>
                 <strong>{t('Auto-Standby Recipient:', 'স্বয়ংক্রিয় প্রাপক:', lang)}</strong> {t('Eligible candidate', 'অগ্রাধিকার প্রার্থী', lang)}: <strong>{waitlist[0]?.name || 'Next Waitlist Colleague'}</strong>.
               </div>
             </div>
@@ -2575,7 +2469,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: '#10B981' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--status-success)' }}>
                   <UserPlus size={18} />
                 </div>
                 <div>
@@ -2728,7 +2622,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
 
                 <div style={{
-                  background: 'var(--brand-slate-50, #F8FAFC)',
+                  background: 'var(--brand-slate-50)',
                   border: '1px solid var(--brand-slate-200)',
                   borderRadius: '10px',
                   padding: '10px 12px',
@@ -2768,7 +2662,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--status-info)' }}>
                   <ArrowUpDown size={18} />
                 </div>
                 <div>
@@ -2800,7 +2694,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)' }}>{selectedSeat?.dept || 'Sales'}</div>
                 </div>
 
-                <div style={{ textAlign: 'center', color: '#2563EB' }}>
+                <div style={{ textAlign: 'center', color: 'var(--status-info)' }}>
                   <ArrowUpDown size={18} />
                 </div>
 
@@ -2823,7 +2717,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px', padding: '10px 12px', fontSize: '11.5px', color: '#1E40AF' }}>
+              <div style={{ background: 'var(--status-info-bg)', border: '1px solid var(--status-info-border)', borderRadius: '8px', padding: '10px 12px', fontSize: '11.5px', color: 'var(--status-info-text)' }}>
                 <strong>Mutual Agreement Protocol:</strong> Digital confirmation notification will update both boarding passes immediately upon supervisor approval.
               </div>
             </div>
@@ -2862,7 +2756,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
             <div className="app-modal-body" style={{ textAlign: 'center', padding: '20px' }}>
               <div style={{
-                background: '#FFFFFF',
+                background: 'var(--surface-1)',
                 border: '2px solid var(--brand-slate-200)',
                 borderRadius: '16px',
                 padding: '16px',
@@ -2870,7 +2764,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                 marginBottom: '14px'
               }}>
-                <QrCode size={160} color="#0F172A" />
+                <QrCode size={160} color="var(--text-1)" />
                 <div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '1.5px', marginTop: '6px', color: 'var(--brand-slate-600)' }}>
                   BOGCL-PASS-{qrSeatTarget?.staffId || '1042'}-S{qrSeatTarget?.num || 5}
                 </div>
@@ -2887,7 +2781,7 @@ export default function BusView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{
-                background: 'var(--brand-slate-50, #F8FAFC)',
+                background: 'var(--brand-slate-50)',
                 border: '1px solid var(--brand-slate-200)',
                 borderRadius: '12px',
                 padding: '12px 14px',
@@ -2904,7 +2798,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Designated Stop:</span>
-                  <span style={{ color: '#0284C7', fontWeight: 700 }}>{qrSeatTarget?.pickupPoint || 'Farmgate Overbridge'} ({qrSeatTarget?.pickupTime || '07:18 AM'})</span>
+                  <span style={{ color: 'var(--status-info)', fontWeight: 700 }}>{qrSeatTarget?.pickupPoint || 'Farmgate Overbridge'} ({qrSeatTarget?.pickupTime || '07:18 AM'})</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Blood Group:</span>
@@ -2912,7 +2806,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--brand-slate-500)' }}>Security Status:</span>
-                  <span style={{ color: '#10B981', fontWeight: 700 }}>✓ Verified Optical Hash</span>
+                  <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified Optical Hash</span>
                 </div>
               </div>
             </div>
@@ -2920,7 +2814,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="app-modal-footer">
               <button
                 className="btn-outline"
-                style={{ borderColor: '#D4AF37', color: '#B45309' }}
+                style={{ borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
                 onClick={() => {
                   window.print();
                   showToast(t('Boarding pass sent to print spooler.', 'প্রিন্ট পাঠানো হয়েছে।', lang), 'info');
@@ -2943,7 +2837,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '780px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(15, 23, 42, 0.1)', color: '#0F172A' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(15, 23, 42, 0.1)', color: 'var(--text-1)' }}>
                   <FileText size={18} />
                 </div>
                 <div>
@@ -2983,7 +2877,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
                 <div>
                   <div style={{ color: 'var(--brand-slate-500)', fontSize: '10px', textTransform: 'uppercase' }}>Headcount Boarded</div>
-                  <strong style={{ color: '#10B981' }}>{boardedCount} / {occupiedCount} Passengers</strong>
+                  <strong style={{ color: 'var(--status-success)' }}>{boardedCount} / {occupiedCount} Passengers</strong>
                 </div>
               </div>
 
@@ -3025,7 +2919,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <div className="app-modal-footer">
               <button
                 className="btn-outline"
-                style={{ borderColor: '#D4AF37', color: '#B45309' }}
+                style={{ borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
                 onClick={() => {
                   window.print();
                   showToast(t('Gate pass manifest sent to security printer.', 'গেট পাস প্রিন্ট করা হচ্ছে।', lang), 'info');
@@ -3082,21 +2976,21 @@ export default function BusView({ role, lang }: ViewProps) {
                       <td>05:15 PM</td>
                     </tr>
                     <tr>
-                      <td><strong style={{ color: '#0284C7' }}>Route-2 (Uttara)</strong></td>
+                      <td><strong style={{ color: 'var(--status-info)' }}>Route-2 (Uttara)</strong></td>
                       <td>Scania Touring (52 Seats)</td>
                       <td>06:30 AM (Azampur)</td>
                       <td><strong>08:05 AM</strong></td>
                       <td>05:15 PM</td>
                     </tr>
                     <tr>
-                      <td><strong style={{ color: '#059669' }}>Route-3 (Narayanganj)</strong></td>
+                      <td><strong style={{ color: 'var(--status-success)' }}>Route-3 (Narayanganj)</strong></td>
                       <td>Hyundai Universe (52 Seats)</td>
                       <td>06:50 AM (Chashara)</td>
                       <td><strong>07:55 AM</strong></td>
                       <td>05:15 PM</td>
                     </tr>
                     <tr>
-                      <td><strong style={{ color: '#D4AF37' }}>Route-4 (Dhanmondi)</strong></td>
+                      <td><strong style={{ color: 'var(--brand-gold)' }}>Route-4 (Dhanmondi)</strong></td>
                       <td>Ashok Leyland (52 Seats)</td>
                       <td>06:55 AM (Dhanmondi-27)</td>
                       <td><strong>08:00 AM</strong></td>
@@ -3132,7 +3026,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '540px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284C7' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(2, 132, 199, 0.1)', color: 'var(--status-info)' }}>
                   <Smartphone size={18} />
                 </div>
                 <div>
@@ -3147,8 +3041,8 @@ export default function BusView({ role, lang }: ViewProps) {
 
             <div className="app-modal-body">
               <div style={{
-                background: '#0B132B',
-                color: '#fff',
+                background: 'var(--surface-inverse)',
+                color: 'var(--text-on-brand)',
                 borderRadius: '14px',
                 padding: '16px',
                 textAlign: 'center',
@@ -3158,19 +3052,19 @@ export default function BusView({ role, lang }: ViewProps) {
                   width: '64px',
                   height: '64px',
                   margin: '0 auto 8px',
-                  border: '2px dashed #38BDF8',
+                  border: '2px dashed var(--status-info-bright)',
                   borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <QrCode size={32} color="#38BDF8" />
+                  <QrCode size={32} color="var(--status-info-bright)" />
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 700 }}>
                   {t('Conductor Optical Reader Ready', 'অপটিক্যাল রিডার স্ক্যান করতে প্রস্তুত', lang)}
                 </div>
-                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
-                  {activeRoute.conductorName} · Headcount Boarded: <strong style={{ color: '#38BDF8' }}>{boardedCount} / {occupiedCount}</strong>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  {activeRoute.conductorName} · Headcount Boarded: <strong style={{ color: 'var(--status-info-bright)' }}>{boardedCount} / {occupiedCount}</strong>
                 </div>
               </div>
 
@@ -3179,21 +3073,29 @@ export default function BusView({ role, lang }: ViewProps) {
                 <input
                   type="text"
                   className="input-text"
-                  placeholder={`Enter Staff ID or Seat # (e.g. ${currentStaffMeta.empId} or 5)`}
-                  defaultValue={currentStaffMeta.empId}
+                  placeholder={t('Staff ID or seat number', 'স্টাফ আইডি বা সিট নম্বর', lang)}
+                  value={scanQuery}
+                  onChange={(e) => setScanQuery(e.target.value)}
                   style={{ flex: 1 }}
                 />
                 <button
                   className="btn-primary"
                   onClick={() => {
-                    handleToggleBoarding(mySeat?.num || 5);
+                    const q = scanQuery.trim().toUpperCase();
+                    const seat = seats.find(s => s.status === 'occupied' && (s.staffId?.toUpperCase() === q || String(s.num) === q.replace(/^#?0*/, '')));
+                    if (!q || !seat) {
+                      showToast(t('No confirmed passenger matches that ID or seat.', 'এই আইডি বা সিটে কোনো নিশ্চিত যাত্রী নেই।', lang), 'warn');
+                      return;
+                    }
+                    if (!seat.boarded) handleToggleBoarding(seat.num);
+                    setScanQuery('');
                     showToast(
                       t(
-                        `${mySeat?.assignedTo || currentStaffMeta.name} (Seat #${String(mySeat?.num || 5).padStart(2, '0')}) verified and boarded!`,
-                        `${mySeat?.assignedTo || currentStaffMeta.name} (সিট #${String(mySeat?.num || 5).padStart(2, '0')}) বোর্ডিং যাচাই সম্পন্ন!`,
+                        `${seat.assignedTo} (Seat #${String(seat.num).padStart(2, '0')}) verified and boarded.`,
+                        `${seat.assignedTo} (সিট #${String(seat.num).padStart(2, '0')}) বোর্ডিং যাচাই সম্পন্ন।`,
                         lang
                       ),
-                      'gold'
+                      'success'
                     );
                   }}
                 >
@@ -3250,7 +3152,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#B45309' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--status-warning-text)' }}>
                   <Send size={18} />
                 </div>
                 <div>
@@ -3367,7 +3269,7 @@ export default function BusView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: '#D4AF37' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
                   <Users size={18} />
                 </div>
                 <div>
@@ -3492,7 +3394,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
 
                 <div style={{
-                  background: 'var(--brand-slate-50, #F8FAFC)',
+                  background: 'var(--brand-slate-50)',
                   border: '1px solid var(--brand-slate-200)',
                   borderRadius: '10px',
                   padding: '12px 14px',
@@ -3500,11 +3402,11 @@ export default function BusView({ role, lang }: ViewProps) {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--brand-slate-600)' }}>
                     <span>{t('Your Queue Rank will be:', 'আপনার সম্ভাব্য অপেক্ষার ক্রম:', lang)}</span>
-                    <strong style={{ color: '#D4AF37' }}>#{waitlist.length + 1}</strong>
+                    <strong style={{ color: 'var(--brand-gold)' }}>#{waitlist.length + 1}</strong>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--brand-slate-600)', marginTop: '4px' }}>
                     <span>{t('Current Vacated Standby Seats:', 'বর্তমান ফাঁকা আসন:', lang)}</span>
-                    <strong style={{ color: vacatedCount > 0 ? '#10B981' : '#EF4444' }}>{vacatedCount + emptyCount} {t('seats', 'আসন', lang)}</strong>
+                    <strong style={{ color: vacatedCount > 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>{vacatedCount + emptyCount} {t('seats', 'আসন', lang)}</strong>
                   </div>
                 </div>
               </div>

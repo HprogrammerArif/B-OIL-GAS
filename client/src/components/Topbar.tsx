@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award, Sparkles
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award
 } from 'lucide-react';
-import { showToast } from '../App';
+import { useCan } from '../auth/session';
 import SapGatewayModal from './SapGatewayModal';
 import NotificationCenter from './NotificationCenter';
 import UserProfileModal from './UserProfileModal';
@@ -52,7 +52,6 @@ interface TopbarProps {
   lang: Lang;
   view: AppView;
   theme: 'light' | 'dark';
-  onRoleChange: (r: AppRole) => void;
   onLangToggle: () => void;
   onToggleTheme: () => void;
   onOpenSearch: () => void;
@@ -67,7 +66,6 @@ export default function Topbar({
   lang,
   view,
   theme,
-  onRoleChange,
   onLangToggle,
   onToggleTheme,
   onOpenSearch,
@@ -87,6 +85,8 @@ export default function Topbar({
   const meta = ROLE_META[role];
   const accessLevel = ROLE_ACCESS_LEVEL[role];
   const page = PAGE_META[view] || DEFAULT_PAGE_META;
+  const canBroadcast = useCan('notices:broadcast');
+  const canSeeSync = useCan('settings:sync_status');
 
   // Real-time ticking clock
   useEffect(() => {
@@ -158,17 +158,21 @@ export default function Topbar({
           <span className="search-kbd">Ctrl+K</span>
         </button>
 
-        {/* 2. System Sync & Clock Capsule */}
+        {/* 2. Integrations & Clock Capsule */}
         <div
-          className="topbar-telemetry-capsule"
-          onClick={() => setShowSapModal(true)}
-          title={t('Click to view Accounting, Plant & Payroll Sync Status', 'হিসাব, প্ল্যান্ট ও বেতন সিস্টেম সিঙ্ক স্ট্যাটাস দেখুন', lang)}
+          className={`topbar-telemetry-capsule${canSeeSync ? '' : ' telemetry-hide-mobile'}`}
+          onClick={() => canSeeSync && setShowSapModal(true)}
+          style={canSeeSync ? undefined : { cursor: 'default' }}
+          title={canSeeSync ? t('View integration status', 'ইন্টিগ্রেশন স্ট্যাটাস দেখুন', lang) : undefined}
         >
-          <div className="telemetry-sap">
-            <span className="sap-dot" />
-            <span className="sap-label">{t('System Synced', 'সিস্টেম সিঙ্ক', lang)}</span>
-          </div>
-          <span className="telemetry-divider telemetry-hide-mobile" />
+          {canSeeSync && (
+            <>
+              <div className="telemetry-sap">
+                <span className="sap-label">{t('Integrations', 'ইন্টিগ্রেশন', lang)}</span>
+              </div>
+              <span className="telemetry-divider telemetry-hide-mobile" />
+            </>
+          )}
           <div className="telemetry-clock telemetry-hide-mobile">
             <Clock size={11} className="clock-icon" />
             <span className="clock-time">{currentTime}</span>
@@ -197,8 +201,8 @@ export default function Topbar({
           </button>
         </div>
 
-        {/* 4. Chairman Announcement Button */}
-        {role === 'chairman' && (
+        {/* 4. Company-wide announcement (permission-gated) */}
+        {canBroadcast && (
           <button
             className="btn-broadcast-compact"
             onClick={onBroadcastOpen}
@@ -214,7 +218,7 @@ export default function Topbar({
           <div
             className="user-widget-interactive"
             onClick={() => setShowDropdown(!showDropdown)}
-            title={t('Click to view profile, handover settings, or switch demo role', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}
+            title={t('Profile, security and sign-out', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}
           >
             <div className="user-avatar" style={{ background: meta.avatarColor }}>
               {meta.initials}
@@ -255,108 +259,7 @@ export default function Topbar({
                     <Shield size={11} color="var(--brand-gold)" />
                     {t(accessLevel.en, accessLevel.bn, lang)}
                   </span>
-                  <span style={{ fontFamily: 'monospace', color: '#38BDF8', fontWeight: 700 }}>{meta.empId}</span>
-                </div>
-              </div>
-
-              {/* Quick Role Switcher */}
-              <div
-                style={{
-                  padding: '10px 14px',
-                  background: 'rgba(0, 0, 0, 0.03)',
-                  borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)',
-                  boxSizing: 'border-box',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '8px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    color: 'var(--brand-slate-600, #475569)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={12} color="var(--brand-gold, #D97706)" />
-                    {t('Switch Role (Preview)', 'পদবি পরিবর্তন (প্রিভিউ)', lang)}
-                  </span>
-                  <span style={{ fontSize: '9.5px', color: 'var(--brand-gold, #D97706)', fontWeight: 700 }}>
-                    {t('7 Roles', '৭টি পদবি', lang)}
-                  </span>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
-                  {(Object.keys(ROLE_META) as AppRole[]).map((r) => {
-                    const rMeta = ROLE_META[r];
-                    const isCurrent = r === role;
-                    return (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => {
-                          setShowDropdown(false);
-                          onRoleChange(r);
-                          showToast(
-                            t(
-                              `Switched to: ${rMeta.name} (${rMeta.label})`,
-                              `পদবি পরিবর্তন: ${rMeta.nameBn} (${rMeta.labelBn})`,
-                              lang
-                            ),
-                            'gold'
-                          );
-                        }}
-                        title={`${rMeta.name} (${rMeta.empId}) — ${rMeta.label}`}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '5px 8px',
-                          borderRadius: '6px',
-                          border: isCurrent
-                            ? '1.5px solid var(--brand-crimson, #A51C30)'
-                            : '1px solid var(--brand-slate-200, #E2E8F0)',
-                          background: isCurrent
-                            ? 'rgba(165, 28, 48, 0.08)'
-                            : 'var(--brand-card-bg, #FFFFFF)',
-                          color: isCurrent
-                            ? 'var(--brand-crimson, #A51C30)'
-                            : 'var(--brand-slate-700, #334155)',
-                          fontSize: '11px',
-                          fontWeight: isCurrent ? 800 : 600,
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          transition: 'all 0.15s ease',
-                          boxSizing: 'border-box',
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: '18px',
-                            height: '18px',
-                            borderRadius: '4px',
-                            background: rMeta.avatarColor,
-                            color: '#fff',
-                            fontSize: '9px',
-                            fontWeight: 800,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                          }}
-                        >
-                          {rMeta.initials}
-                        </span>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                          {rMeta.shortName}
-                        </span>
-                        {isCurrent && <span style={{ fontSize: '10px', color: 'var(--brand-crimson)' }}>✓</span>}
-                      </button>
-                    );
-                  })}
+                  <span style={{ fontFamily: 'monospace', color: 'var(--status-info-bright)', fontWeight: 700 }}>{meta.empId}</span>
                 </div>
               </div>
 
@@ -388,10 +291,10 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Key size={15} color="#059669" />
+                  <Key size={15} color="var(--status-success)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Password & Login Security', 'পাসওয়ার্ড ও নিরাপত্তা', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#059669' }}>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-success)' }}>
                       ✓ {t('2-Step Verification Active', '২-ধাপ নিরাপত্তা যাচাই চালু', lang)}
                     </div>
                   </div>
@@ -406,7 +309,7 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Award size={15} color="#D97706" />
+                  <Award size={15} color="var(--status-warning)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
@@ -424,7 +327,7 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <Clock size={15} color="#0284C7" />
+                  <Clock size={15} color="var(--status-info)" />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600 }}>{t('Active Devices & Sign-In Log', 'সক্রিয় ডিভাইস ও লগইন ইতিহাস', lang)}</div>
                     <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
@@ -459,10 +362,10 @@ export default function Topbar({
                     onLogout();
                   }}
                 >
-                  <LogOut size={15} color="#DC2626" />
+                  <LogOut size={15} color="var(--status-danger)" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: '#DC2626' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: '#EF4444' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--status-danger)' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
+                    <div style={{ fontSize: '10.5px', color: 'var(--status-danger)' }}>
                       {t('Close session and return to sign-in screen', 'সেশন শেষ করে লগইন পেইজে ফিরে যান', lang)}
                     </div>
                   </div>

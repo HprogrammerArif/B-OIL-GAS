@@ -1,7 +1,7 @@
 import React from 'react';
 import { Lang, t } from '../types';
 import { Printer, Download, QrCode, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 
 export interface DocumentData {
   type: 'notesheet' | 'trip_pass' | 'gate_pass';
@@ -54,28 +54,28 @@ export default function OfficialDocumentModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Actions */}
-        <div className="modal-hd" style={{ background: '#0F172A', color: '#fff', padding: '14px 20px' }}>
+        <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)', padding: '14px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldCheck size={18} color="var(--brand-gold)" />
-            <h3 style={{ color: '#fff', margin: 0, fontSize: '15px' }}>
+            <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px' }}>
               {t('Official Company Document & Print Preview', 'দাপ্তরিক নথি ও প্রিন্ট প্রিভিউ', lang)}
             </h3>
           </div>
-          <button className="modal-close" style={{ color: '#fff' }} onClick={onClose}>×</button>
+          <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={onClose}>×</button>
         </div>
 
         {/* Printable Sheet */}
-        <div className="modal-body" style={{ overflowY: 'auto', padding: '24px', background: '#F1F5F9' }}>
+        <div className="modal-body" style={{ overflowY: 'auto', padding: '24px', background: 'var(--surface-2)' }}>
           <div
             className="printable-paper"
             style={{
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--border-2)',
               borderRadius: '8px',
               padding: '36px 40px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
               position: 'relative',
-              color: '#0F172A',
+              color: 'var(--text-1)',
               fontFamily: 'serif',
             }}
           >
@@ -99,7 +99,7 @@ export default function OfficialDocumentModal({
             </div>
 
             {/* Letterhead */}
-            <div style={{ borderBottom: '2px solid #A51C30', paddingBottom: '16px', marginBottom: '20px' }}>
+            <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '16px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -107,8 +107,8 @@ export default function OfficialDocumentModal({
                       style={{
                         width: '36px',
                         height: '36px',
-                        background: '#A51C30',
-                        color: '#D4AF37',
+                        background: 'var(--brand-crimson)',
+                        color: 'var(--brand-gold)',
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
@@ -120,24 +120,24 @@ export default function OfficialDocumentModal({
                       B
                     </div>
                     <div>
-                      <h2 style={{ fontSize: '18px', fontWeight: 900, color: '#A51C30', margin: 0, letterSpacing: '0.5px' }}>
+                      <h2 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--brand-crimson)', margin: 0, letterSpacing: '0.5px' }}>
                         BASHUNDHARA OIL & GAS COMPANY LTD.
                       </h2>
-                      <div style={{ fontSize: '11px', color: '#64748B', fontFamily: 'sans-serif' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-3)', fontFamily: 'sans-serif' }}>
                         A Concern of Bashundhara Group • Official Record
                       </div>
                     </div>
                   </div>
-                  <div style={{ fontSize: '10px', color: '#94A3B8', marginTop: '6px', fontFamily: 'sans-serif' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontFamily: 'sans-serif' }}>
                     Plot-3, Block-G, Umme Kulsum Road, Baridhara R/A, Dhaka-1229 • Keraniganj Plant
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right', fontFamily: 'sans-serif' }}>
                   <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'monospace' }}>{docData.docNumber}</div>
-                  <div style={{ fontSize: '11px', color: '#64748B' }}>Date: {docData.date}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Date: {docData.date}</div>
                   {docData.sapReference && (
-                    <div style={{ fontSize: '10px', color: '#0369A1', fontFamily: 'monospace', marginTop: '2px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--status-info)', fontFamily: 'monospace', marginTop: '2px' }}>
                       Ref: {docData.sapReference}
                     </div>
                   )}
@@ -147,14 +147,14 @@ export default function OfficialDocumentModal({
 
             {/* Subject */}
             <div style={{ fontFamily: 'sans-serif', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: '#64748B' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-3)' }}>
                 Department: {docData.department}
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A', marginTop: '4px', borderLeft: '3px solid #A51C30', paddingLeft: '10px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-1)', marginTop: '4px', borderLeft: '3px solid var(--brand-crimson)', paddingLeft: '10px' }}>
                 SUBJECT: {docData.title}
               </div>
               {docData.amountOrValue && (
-                <div style={{ fontSize: '12px', color: '#A51C30', fontWeight: 700, marginTop: '4px', paddingLeft: '10px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--brand-crimson)', fontWeight: 700, marginTop: '4px', paddingLeft: '10px' }}>
                   Approved Amount / Value: {docData.amountOrValue}
                 </div>
               )}
@@ -163,12 +163,12 @@ export default function OfficialDocumentModal({
             {/* Paragraphs */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
               {docData.paragraphs.map((para, idx) => (
-                <div key={idx} style={{ fontSize: '12.5px', lineHeight: '1.7', color: '#1E293B', textAlign: 'justify' }}>
+                <div key={idx} style={{ fontSize: '12.5px', lineHeight: '1.7', color: 'var(--text-1)', textAlign: 'justify' }}>
                   <strong>{para.label}:</strong> {para.text}
-                  <div style={{ marginTop: '4px', fontSize: '10.5px', color: '#64748B', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                  <div style={{ marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
                     <span>— {para.signedBy}</span>
                     {para.hash && (
-                      <span style={{ fontFamily: 'monospace', fontSize: '9.5px', color: '#059669' }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: '9.5px', color: 'var(--status-success)' }}>
                         ✓ Stamp Code: {para.hash.slice(0, 26)}
                       </span>
                     )}
@@ -178,10 +178,10 @@ export default function OfficialDocumentModal({
             </div>
 
             {/* Seal & Authorization Box */}
-            <div style={{ borderTop: '1px dashed #CBD5E1', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontFamily: 'sans-serif', flexWrap: 'wrap', gap: '14px' }}>
+            <div style={{ borderTop: '1px dashed var(--border-2)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontFamily: 'sans-serif', flexWrap: 'wrap', gap: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <QrCode size={64} color="#0F172A" />
-                <div style={{ fontSize: '9.5px', color: '#64748B', maxWidth: '240px', lineHeight: 1.4 }}>
+                <QrCode size={64} color="var(--text-1)" />
+                <div style={{ fontSize: '9.5px', color: 'var(--text-3)', maxWidth: '240px', lineHeight: 1.4 }}>
                   Scan this QR code at any company gate or office desk to verify this official document.
                 </div>
               </div>
@@ -190,8 +190,8 @@ export default function OfficialDocumentModal({
                 <div
                   style={{
                     display: 'inline-block',
-                    border: '2px solid #A51C30',
-                    color: '#A51C30',
+                    border: '2px solid var(--brand-crimson)',
+                    color: 'var(--brand-crimson)',
                     padding: '6px 14px',
                     borderRadius: '6px',
                     fontWeight: 900,
@@ -205,7 +205,7 @@ export default function OfficialDocumentModal({
                   ★ BOGCL APPROVED ★
                 </div>
                 <div style={{ fontSize: '12px', fontWeight: 800 }}>{docData.authorizedBy}</div>
-                <div style={{ fontSize: '10.5px', color: '#64748B' }}>{docData.authorizerRole}</div>
+                <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>{docData.authorizerRole}</div>
               </div>
             </div>
           </div>

@@ -1,0 +1,91 @@
+/* ==========================================================================
+   BOGCL OneOps — Shared UI primitives (src/components/ui)
+   Everything here uses tokens from tokens.css; no literal colours.
+   ========================================================================== */
+
+/* Button */
+.ui-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; line-height: 1.2; }
+.ui-btn-sm { padding: 6px 12px; font-size: 11.5px; }
+.ui-btn-block { width: 100%; }
+.ui-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.ui-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.ui-spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin-anim 0.8s linear infinite;
+}
+
+/* Status pill */
+.ui-pill-neutral { background: var(--surface-2); color: var(--text-3); }
+.badge.purple { background: var(--status-purple-bg); color: var(--status-purple-text); }
+.ui-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge.ui-pill-sm { font-size: 9.5px; padding: 1px 5px; }
+
+/* Card */
+.ui-card-title { font-size: 13.5px; font-weight: 800; color: var(--text-1); margin: 0; }
+.ui-card-subtitle { font-size: 11.5px; color: var(--text-3); margin: 2px 0 0; }
+.ui-card-actions { display: flex; align-items: center; gap: 8px; }
+
+/* Empty state */
+.ui-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 40px 20px;
+  color: var(--text-3);
+}
+.ui-empty.compact { padding: 20px; }
+.ui-empty-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.ui-empty-title { font-size: 13.5px; font-weight: 700; color: var(--text-1); }
+.ui-empty-desc { font-size: 12px; max-width: 420px; line-height: 1.5; }
+.ui-empty-action { margin-top: 8px; }
+
+/* Page header */
+.ui-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ui-page-title { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-1); margin: 0; }
+.ui-page-desc { font-size: 12.5px; color: var(--text-3); margin: 4px 0 0; max-width: 720px; }
+.ui-page-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.ui-page-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* Modal */
+.ui-modal-body { padding: 20px; overflow: auto; }
+.ui-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-1);
+  background: var(--surface-0);
+}
+
+/* Form field */
+.ui-field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.ui-field-required { color: var(--status-danger); }
+.ui-field-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.ui-field-error { font-size: 11px; color: var(--status-danger); margin-top: 5px; font-weight: 600; }
+.ui-field.has-error input,
+.ui-field.has-error select,
+.ui-field.has-error textarea { border-color: var(--status-danger) !important; }

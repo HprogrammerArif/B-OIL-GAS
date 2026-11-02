@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../../types';
 import { useFleetStore, Driver } from '../../store/fleetStore';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { X, UserPlus, Check, Award, Phone, ShieldCheck } from 'lucide-react';
 
 interface EnrollDriverModalProps {
@@ -15,7 +15,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('+880 17');
-  const [licenseNo, setLicenseNo] = useState(`DK-BRTA-2022-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [licenseNo, setLicenseNo] = useState('');
   const [licenseType, setLicenseType] = useState<Driver['licenseType']>('Heavy Commercial (HAZMAT)');
   const [licenseExpiry, setLicenseExpiry] = useState('18 Oct 2029');
   const [bloodGroup, setBloodGroup] = useState('B+');
@@ -72,7 +72,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: 'var(--surface-1)',
           borderRadius: '18px',
           overflow: 'hidden',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
@@ -84,7 +84,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
           className="fleet-modal-hd"
           style={{
             padding: '18px 28px',
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #871424 100%)',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 55%, var(--brand-crimson-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -98,8 +98,8 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                 width: '42px',
                 height: '42px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid) 100%)',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -107,13 +107,13 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                 flexShrink: 0,
               }}
             >
-              <UserPlus size={20} color="#FFFFFF" />
+              <UserPlus size={20} color="var(--text-on-brand)" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                 {t('Enroll New Commercial Fleet Driver', 'নতুন বাণিজ্যিক চালক তালিকাভুক্তি', lang)}
               </h3>
-              <div style={{ fontSize: '12px', color: '#CBD5E1', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
                 BRTA Commercial Fitness · Sobriety Baseline · Shift Verification
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               borderRadius: '8px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -146,7 +146,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
               flex: '1 1 auto',
               overflowY: 'auto',
               padding: '26px 32px',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--surface-1)',
               boxSizing: 'border-box',
             }}
           >
@@ -172,7 +172,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -194,7 +194,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     fontFamily: 'monospace',
                     fontWeight: 700,
@@ -228,7 +228,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     fontFamily: 'monospace',
                     fontWeight: 800,
@@ -251,7 +251,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -283,7 +283,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -306,7 +306,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     fontWeight: 700,
                     boxSizing: 'border-box',
@@ -337,7 +337,7 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                   width: '100%',
                   padding: '11px 16px',
                   borderRadius: '10px',
-                  border: '1.5px solid #CBD5E1',
+                  border: '1.5px solid var(--border-2)',
                   fontSize: '13px',
                   boxSizing: 'border-box',
                 }}
@@ -355,9 +355,9 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
             <div
               style={{
                 padding: '14px 18px',
-                background: '#F0FDF4',
+                background: 'var(--status-success-bg)',
                 borderRadius: '12px',
-                border: '1px solid #BBF7D0',
+                border: '1px solid var(--status-success-border)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '12px',
@@ -369,8 +369,8 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                   width: '32px',
                   height: '32px',
                   borderRadius: '8px',
-                  background: '#DCFCE7',
-                  color: '#16A34A',
+                  background: 'var(--status-success-bg)',
+                  color: 'var(--status-success)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -381,10 +381,10 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                 <ShieldCheck size={18} />
               </div>
               <div>
-                <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#166534' }}>
+                <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--status-success-text)' }}>
                   Sobriety & Road Safety Compliance Protocol
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#15803D', marginTop: '2px', lineHeight: 1.5 }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--status-success-text)', marginTop: '2px', lineHeight: 1.5 }}>
                   Daily breathalyzer audit records (0.00% BAC) and fitness checks automatically bind to this driver's digital profile before official trip challan passes can be dispatched.
                 </div>
               </div>
@@ -396,8 +396,8 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
             className="fleet-modal-ft"
             style={{
               padding: '16px 28px',
-              backgroundColor: '#F8FAFC',
-              borderTop: '1px solid #E2E8F0',
+              backgroundColor: 'var(--surface-0)',
+              borderTop: '1px solid var(--border-1)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '12px',
@@ -412,9 +412,9 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#475569',
-                backgroundColor: '#FFFFFF',
-                border: '1.5px solid #CBD5E1',
+                color: 'var(--text-2)',
+                backgroundColor: 'var(--surface-1)',
+                border: '1.5px solid var(--border-2)',
                 cursor: 'pointer',
               }}
             >
@@ -430,8 +430,8 @@ export default function EnrollDriverModal({ isOpen, onClose, lang }: EnrollDrive
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
-                background: 'linear-gradient(135deg, #A51C30 0%, #871424 100%)',
+                color: 'var(--text-on-brand)',
+                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)',
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',

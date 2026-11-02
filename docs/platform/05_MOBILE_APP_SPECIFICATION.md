@@ -847,9 +847,12 @@ States: empty "Nothing waiting for you"; `409 INVALID_STATE_TRANSITION` → "Alr
 | Notice list | `notices/index` | Pinned first, category chips (`NoticeCategory`), unread dot, `requiresAck` badge, search |
 | Notice detail | `notices/[id]` | EN/BN body (language toggle respects `ui.language`, falls back to EN when `bodyBn` null), attachments (open via presigned GET in `expo-web-browser`), *Acknowledge* when `requiresAck && !ackedAt` |
 | Broadcast banner | component on Home | Active `Broadcast.showBanner` notice, crimson bar with gold border (prototype), *Acknowledge*/dismiss |
-| Critical ack | modal | `priority CRITICAL` + `ackRequired` → blocking modal (§7.4) |
+| Critical ack | modal | `priority CRITICAL` + `ackRequired` → blocking modal (§7.4), mounted once in the `(app)` layout from `features/notifications/components/CriticalAckModal` |
+| Compose notice | `notices/compose` | `notices:publish` holders (HR_ADMIN, PLANT_GM, HOD, HSE_OFFICER, CHAIRMAN). Form built from `GET /notices/compose-options` (allowed categories + audiences with headcounts); templates; Write/Preview toggle; priority, pin (disabled at the pin limit), require-acknowledgement; publishes via create → publish with one idempotency key per step |
+| Announcement | `notices/broadcast` | `notices:broadcast` (CHAIRMAN): prefilled company-wide announcement, require-ack and SMS toggles → `POST /broadcasts` |
+| Receipts | sheet on detail | Author or `notices:manage`: read/ack progress and per-recipient list (unacknowledged first) |
 
-Hooks: `useGetNoticesQuery({ category?, page })` → `GET /notices` (audience-resolved server-side); `useGetNoticeQuery(id)` (marks read via `POST /notices/{id}/read` in `onQueryStarted`); `useAckNoticeMutation` → `POST /notices/{id}/ack`; `useGetActiveBroadcastQuery` → `GET /broadcasts/active`. Persisted offline (§4.5). Publishing is web-only.
+Hooks: `useGetNoticesQuery({ category?, unread?, requiresAck?, q?, page })` → `GET /notices` (audience-resolved server-side); `useGetNoticeQuery(id)` → `GET /notices/{id}`, which marks read server-side (doc 03); `onQueryStarted` patches cached lists so the unread dot clears without a refetch; `useAckNoticeMutation` → `POST /notices/{id}/ack`; `useGetActiveBroadcastQuery` → `GET /broadcasts/active`; `useDismissBroadcastMutation` (optimistic); `useGetComposeOptionsQuery`; `usePublishNoticeMutation`; `useCreateBroadcastMutation`; `useSetNoticePinnedMutation`, `useArchiveNoticeMutation`, `useGetNoticeReceiptsQuery` for managers. Publish/broadcast responses seed the `getNotice` cache so the new notice opens instantly. Lists and details are persisted offline (§4.5). Scheduling, audience preview and PDF stay web-only.
 
 ### 9.3 MOD-03 Note-Sheets (approve/sign)
 
@@ -1009,7 +1012,7 @@ Hooks: `useGetMyAssetsQuery`; `useLazyGetAssetByTagQuery(tag)` → `GET /assets/
 | 2 | `SECURITY_GATE`, `RECEPTION` | `GateHome` | *Scan visitor pass* (primary, full-width), expected next 2 h, inside count, overdue, *Scan parcel (gate-in)*, muster shortcut |
 | 3 | `MAILROOM` | `MailroomHome` | *Scan parcel*, custody queue, dwell-time alerts (> 24 h), deliveries awaiting OTP |
 | 4 | `HSE_OFFICER` | `HseHome` | Open incidents by risk, CAPA due this week, *Report incident*, muster, critical acks outstanding |
-| 5 | `CHAIRMAN`, `DIRECTOR`, `PLANT_GM`, `HOD`, `LINE_MANAGER`, `FINANCE`, `HR_ADMIN`, `TRANSPORT_ADMIN` | `ApproverHome` | Inbox summary (count, oldest SLA), top 3 pending with inline *Open*, note-sheets awaiting signature, KPI strip from `getMyDashboard`, broadcast banner, chat unread; `CHAIRMAN` adds gold accent header and *Announce* is web-only |
+| 5 | `CHAIRMAN`, `DIRECTOR`, `PLANT_GM`, `HOD`, `LINE_MANAGER`, `FINANCE`, `HR_ADMIN`, `TRANSPORT_ADMIN` | `ApproverHome` | Inbox summary (count, oldest SLA), top 3 pending with inline *Open*, note-sheets awaiting signature, KPI strip from `getMyDashboard`, broadcast banner, notice board card (unread / to-acknowledge counts, top 3), chat unread; `CHAIRMAN` adds gold accent header and *Announce* from the notice board header |
 | 6 | `EMPLOYEE` (default) | `EmployeeHome` | Punch card (status + button), leave balance mini, my claims pending, bus seat/offer, notices unread, quick actions grid: Leave · Claim · Vehicle · Guest · Incident · Parcel |
 
 Cards are components fed by their module hooks with `skip` when the permission is absent; the home screen never fetches on behalf of a card. All variants share header (greeting in EN/BN, site, date in `Asia/Dhaka`), broadcast banner, critical ack modal, and outbox chip.
@@ -1277,10 +1280,10 @@ Legend: **F** full, **P** partial (listed), **R** read-only, **—** absent.
 
 | Module | Capability | Web | Mobile | Mobile notes |
 | :--- | :--- | :---: | :---: | :--- |
-| MOD-17 | Inbox, approve/reject/return, trail | F | F | no batch approve |
+| MOD-17 | Inbox, approve/reject/return, trail | F | F | includes batch approve |
 | MOD-17 | Delegation setup | F | R | banner only |
 | MOD-01 | Read, acknowledge, broadcast banner | F | F | |
-| MOD-01 | Publish / schedule / audience | F | — | |
+| MOD-01 | Publish / schedule / audience | F | P | compose + publish (templates, preview, pin, require-ack), chairman announcement, receipts, pin/archive; scheduling, audience preview and PDF web-only |
 | MOD-03 | Read, sign (TYPED/STAMP) with OTP, return | F | P | DRAWN signature web-only in v1 |
 | MOD-03 | Initiate, quotes, budget | F | — | |
 | MOD-04 | Scan events, OTP verify, tamper, return initiate | F | F | scans offline-queued |

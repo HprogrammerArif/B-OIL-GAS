@@ -1,14 +1,15 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
+import { useColorScheme } from "react-native";
+import { Colors, type ColorSchemeName, type ThemeColors } from "@/constants/theme";
+import { useAppSelector } from "@/redux/hooks";
 
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+/** Resolved scheme: the in-app preference wins over the OS setting. */
+export function useColorSchemeName(): ColorSchemeName {
+  const system = useColorScheme();
+  const pref = useAppSelector((s) => s.ui.colorScheme);
+  if (pref === "light" || pref === "dark") return pref;
+  return system === "dark" ? "dark" : "light";
+}
 
-export function useTheme() {
-  const scheme = useColorScheme();
-  const theme = scheme === "unspecified" ? "light" : scheme;
-
-  return Colors[theme];
+export function useTheme(): ThemeColors {
+  return Colors[useColorSchemeName()];
 }

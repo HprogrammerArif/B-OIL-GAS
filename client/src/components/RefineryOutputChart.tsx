@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Lang, t } from '../types';
-import { Activity, BarChart3, Database, RefreshCw, Zap, TrendingUp, ShieldCheck } from 'lucide-react';
-import { showToast } from '../App';
+import { BarChart3, Database, TrendingUp } from 'lucide-react';
 
 interface RefineryOutputChartProps {
   lang: Lang;
@@ -18,27 +17,18 @@ const PRODUCTION_DATA = [
 ];
 
 const TANKS = [
-  { id: 'TK-01', name: 'Bitumen VG-30', temp: '162°C', capacity: '12,000 MT', fillPercent: 84, status: 'Optimal', color: '#A51C30' },
-  { id: 'TK-02', name: 'Bitumen VG-10', temp: '158°C', capacity: '10,000 MT', fillPercent: 68, status: 'Filling', color: '#0369A1' },
-  { id: 'TK-03', name: 'Industrial Fuel HFO', temp: '48°C', capacity: '15,000 MT', fillPercent: 91, status: 'Near Full', color: '#D97706' },
-  { id: 'TK-04', name: 'LPG Cryo-Sphere', temp: '-42°C', capacity: '5,000 MT', fillPercent: 74, status: 'Pressurized', color: '#059669' },
+  { id: 'TK-01', name: 'Bitumen VG-30', temp: '162°C', capacity: '12,000 MT', fillPercent: 84, status: 'Optimal', color: 'var(--brand-crimson)' },
+  { id: 'TK-02', name: 'Bitumen VG-10', temp: '158°C', capacity: '10,000 MT', fillPercent: 68, status: 'Filling', color: 'var(--status-info)' },
+  { id: 'TK-03', name: 'Industrial Fuel HFO', temp: '48°C', capacity: '15,000 MT', fillPercent: 91, status: 'Near Full', color: 'var(--status-warning)' },
+  { id: 'TK-04', name: 'LPG Cryo-Sphere', temp: '-42°C', capacity: '5,000 MT', fillPercent: 74, status: 'Pressurized', color: 'var(--status-success)' },
 ];
 
 export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) {
   const [activeTab, setActiveTab] = useState<'7d' | '30d' | 'quarter'>('7d');
   const [hoveredDay, setHoveredDay] = useState<number | null>(6);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const maxVal = 6000;
   const chartHeight = 160;
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-      showToast(t('Keraniganj DCS telemetry stream synchronized with SAP S/4HANA.', 'কেরানীগঞ্জ ডিসিএস টেলিমেট্রি সিঙ্ক সম্পন্ন।', lang), 'gold');
-    }, 700);
-  };
 
   const currentHover = hoveredDay !== null ? PRODUCTION_DATA[hoveredDay] : PRODUCTION_DATA[6];
 
@@ -51,11 +41,10 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
           </div>
           <div>
             <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>{t('Keraniganj Bitumen & Petroleum Output Telemetry', 'কেরানীগঞ্জ বিটুমিন ও পেট্রোলিয়াম উৎপাদন টেলিমেট্রি', lang)}</span>
-              <span className="badge success" style={{ fontSize: '9px', padding: '1px 6px' }}>SCADA LIVE</span>
+              <span>{t('Keraniganj Bitumen Output', 'কেরানীগঞ্জ বিটুমিন উৎপাদন', lang)}</span>
             </div>
             <div className="card-subtitle">
-              {t('Continuous DCS Stream • Baseline Target: 5,000 MT/Day • Grade 60/70 & 80/100', 'নিয়মিত ডিসিএস স্ট্রিম • দৈনিক লক্ষ্যমাত্রা: ৫,০০০ মে.টন', lang)}
+              {t('Daily target: 5,000 MT • Grade 60/70 & 80/100', 'দৈনিক লক্ষ্যমাত্রা: ৫,০০০ মে.টন • গ্রেড ৬০/৭০ ও ৮০/১০০', lang)}
             </div>
           </div>
         </div>
@@ -75,15 +64,6 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
               {t('MTD Target', 'চলতি মাস', lang)}
             </button>
           </div>
-
-          <button
-            className="btn-icon-subtle"
-            title="Poll Keraniganj DCS Stream"
-            onClick={handleRefresh}
-            style={{ padding: '6px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          >
-            <RefreshCw size={13} className={isRefreshing ? 'spin-anim' : ''} />
-          </button>
         </div>
       </div>
 
@@ -97,7 +77,7 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                 <span>{t('Bitumen Output (MT)', 'বিটুমিন উৎপাদন (মে.টন)', lang)}</span>
               </div>
               <div className="legend-item">
-                <span className="legend-color-dot" style={{ background: '#38BDF8' }}></span>
+                <span className="legend-color-dot" style={{ background: 'var(--status-info-bright)' }}></span>
                 <span>{t('LPG Liquefaction (MT)', 'এলপিজি লিকুইফেকশন (মে.টন)', lang)}</span>
               </div>
               <div className="legend-item">
@@ -137,8 +117,8 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                           style={{
                             height: `${bitumenHeight}px`,
                             background: isHovered
-                              ? 'linear-gradient(180deg, #C8102E 0%, #7F1424 100%)'
-                              : 'linear-gradient(180deg, #A51C30 0%, #060D1F 100%)',
+                              ? 'linear-gradient(180deg, var(--brand-crimson-light) 0%, var(--brand-crimson-dark) 100%)'
+                              : 'linear-gradient(180deg, var(--brand-crimson) 0%, var(--surface-inverse-deep) 100%)',
                           }}
                         >
                           <span className="bar-tooltip-val">{item.bitumen.toLocaleString()}</span>
@@ -148,8 +128,8 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                           style={{
                             height: `${lpgHeight}px`,
                             background: isHovered
-                              ? 'linear-gradient(180deg, #38BDF8 0%, #0284C7 100%)'
-                              : 'linear-gradient(180deg, #0284C7 0%, #0c4a6e 100%)',
+                              ? 'linear-gradient(180deg, var(--status-info-bright) 0%, var(--status-info-solid) 100%)'
+                              : 'linear-gradient(180deg, var(--status-info-solid) 0%, var(--status-info-solid-dark) 100%)',
                           }}
                         />
                       </div>
@@ -172,7 +152,7 @@ export default function RefineryOutputChart({ lang }: RefineryOutputChartProps) 
                 </span>
               </div>
               <div className="efficiency-badge">
-                <TrendingUp size={12} color="#059669" />
+                <TrendingUp size={12} color="var(--status-success)" />
                 <span>Operating Efficiency: <strong>{currentHover.efficiency}%</strong></span>
               </div>
             </div>

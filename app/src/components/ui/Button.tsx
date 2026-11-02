@@ -1,98 +1,107 @@
-import { ReactNode } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { memo } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { MinTouchTarget, Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { Radius, Spacing } from "@/constants/theme";
+import { haptic } from "@/lib/haptics";
+import { Icon, type IconName } from "./Icon";
+import { Text } from "./Text";
 
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "destructive";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "destructive" | "executive" | "success";
+export type ButtonSize = "md" | "sm";
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: ButtonVariant;
-  isLoading?: boolean;
+  size?: ButtonSize;
+  icon?: IconName;
+  iconRight?: IconName;
+  loading?: boolean;
   disabled?: boolean;
-  leftIcon?: ReactNode;
   fullWidth?: boolean;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
+  style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
-/**
- * Button — the single canonical button for the app. Replaces the old
- * GradientButton / CustomButton split so every screen shares one visual language.
- */
-export function Button({
+export const Button = memo(function Button({
   title,
   onPress,
   variant = "primary",
-  isLoading = false,
+  size = "md",
+  icon,
+  iconRight,
+  loading = false,
   disabled = false,
-  leftIcon,
   fullWidth = true,
   accessibilityLabel,
+  accessibilityHint,
+  style,
+  testID,
 }: ButtonProps) {
   const theme = useTheme();
-  const isDisabled = isLoading || disabled;
+  const isDisabled = loading || disabled;
 
-  const backgroundColor =
-    variant === "primary"
-      ? theme.accent
-      : variant === "secondary"
-        ? theme.surfaceSecondary
-        : variant === "destructive"
-          ? theme.danger
-          : "transparent";
-
-  const textColor =
-    variant === "primary" || variant === "destructive"
-      ? theme.onAccent
-      : variant === "secondary"
-        ? theme.text
-        : theme.accent;
-
-  const borderColor = variant === "outline" ? theme.accent : "transparent";
+  const palette: Record<ButtonVariant, { bg: string; fg: string; border: string; pressed: string }> = {
+    primary: { bg: theme.accent, fg: theme.onAccent, border: theme.accent, pressed: theme.accentPressed },
+    secondary: { bg: theme.surfaceSecondary, fg: theme.text, border: theme.surfaceSecondary, pressed: theme.border },
+    outline: { bg: "transparent", fg: theme.accent, border: theme.accent, pressed: theme.accentMuted },
+    ghost: { bg: "transparent", fg: theme.accent, border: "transparent", pressed: theme.accentMuted },
+    destructive: { bg: theme.danger, fg: theme.onAccent, border: theme.danger, pressed: theme.danger },
+    executive: { bg: theme.executiveSolid, fg: theme.textInverse, border: theme.executiveSolid, pressed: theme.executive },
+    success: { bg: theme.success, fg: theme.onAccent, border: theme.success, pressed: theme.success },
+  };
+  const p = palette[variant];
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
+    <Pressable
+      testID={testID}
+      onPress={() => {
+        haptic.tap();
+        onPress();
+      }}
       disabled={isDisabled}
-      activeOpacity={0.82}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
-      accessibilityState={{ disabled: isDisabled, busy: isLoading }}
-      style={[
-        styles.btn,
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      hitSlop={size === "sm" ? 6 : 0}
+      style={({ pressed }) => [
+        styles.base,
+        size === "sm" ? styles.sm : styles.md,
         {
-          backgroundColor,
-          borderColor,
-          borderWidth: variant === "outline" ? 1.5 : 0,
-          width: fullWidth ? "100%" : undefined,
-          opacity: isDisabled ? 0.55 : 1,
+          backgroundColor: pressed ? p.pressed : p.bg,
+          borderColor: p.border,
+          alignSelf: fullWidth ? "stretch" : "flex-start",
+          opacity: isDisabled ? 0.5 : pressed && (variant === "destructive" || variant === "success") ? 0.85 : 1,
         },
+        style,
       ]}
     >
-      {leftIcon && !isLoading && <View style={styles.iconWrap}>{leftIcon}</View>}
-      {isLoading ? (
-        <ActivityIndicator size="small" color={textColor} />
+      {loading ? (
+        <ActivityIndicator size="small" color={p.fg} />
       ) : (
-        <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+        <View style={styles.row}>
+          {icon ? <Icon name={icon} size={size === "sm" ? 16 : 18} tint={p.fg} /> : null}
+          <Text variant={size === "sm" ? "bodySmall" : "bodyStrong"} weight="bold" tint={p.fg} numberOfLines={1}>
+            {title}
+          </Text>
+          {iconRight ? <Icon name={iconRight} size={size === "sm" ? 16 : 18} tint={p.fg} /> : null}
+        </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
-  btn: {
-    height: 52,
+  base: {
     borderRadius: Radius.md,
-    flexDirection: "row",
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: Spacing.xl,
   },
-  iconWrap: { marginRight: Spacing.sm },
-  text: {
-    fontWeight: "700",
-    fontSize: 16,
-    letterSpacing: 0.2,
-  },
+  md: { minHeight: 50, paddingHorizontal: Spacing.xl },
+  sm: { minHeight: MinTouchTarget - 8, paddingHorizontal: Spacing.md, borderRadius: Radius.sm },
+  row: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
 });

@@ -1,5 +1,8 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
+import { nextRef } from '../lib/refs';
+import { nowStamp, nowTime } from '../lib/clock';
 
 export type AssetCategory = 'plant' | 'vehicle' | 'it' | 'safety' | 'lab' | 'corporate';
 
@@ -1560,13 +1563,31 @@ const INITIAL_TRANSFERS: AssetTransfer[] = [
 /* ──────────────────────────────────────────────────────────────────────────
    GLOBAL REACTIVE STORE SINGLETON
    ────────────────────────────────────────────────────────────────────────── */
-let globalAssets: AssetRecord[] = [...INITIAL_ASSETS];
-let globalWorkOrders: AssetWorkOrder[] = [...INITIAL_WORK_ORDERS];
-let globalRequisitions: AssetRequisition[] = [...INITIAL_REQUISITIONS];
-let globalTransfers: AssetTransfer[] = [...INITIAL_TRANSFERS];
+interface AssetSnapshot {
+  assets: AssetRecord[];
+  workOrders: AssetWorkOrder[];
+  requisitions: AssetRequisition[];
+  transfers: AssetTransfer[];
+}
+const PERSIST_NAME = 'assets';
+const PERSIST_VERSION = 1;
+const persistedAssets = loadPersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+
+let globalAssets: AssetRecord[] = persistedAssets?.assets ?? [...INITIAL_ASSETS];
+let globalWorkOrders: AssetWorkOrder[] = persistedAssets?.workOrders ?? [...INITIAL_WORK_ORDERS];
+let globalRequisitions: AssetRequisition[] = persistedAssets?.requisitions ?? [...INITIAL_REQUISITIONS];
+let globalTransfers: AssetTransfer[] = persistedAssets?.transfers ?? [...INITIAL_TRANSFERS];
 
 let listeners: Array<() => void> = [];
-const notify = () => listeners.forEach((fn) => fn());
+const notify = () => {
+  listeners.forEach((fn) => fn());
+  savePersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+    assets: globalAssets,
+    workOrders: globalWorkOrders,
+    requisitions: globalRequisitions,
+    transfers: globalTransfers,
+  }));
+};
 
 export function getAssetStoreSnapshot() {
   return {
@@ -1758,7 +1779,7 @@ export function useAssetStore() {
           notes: `Purchase cost ৳${input.purchaseCost.toLocaleString()} recorded under ${getCategoryGl(input.category, input.facility)}. Expected life: ${input.usefulLifeYears} years.`,
           actor: input.actorName,
           actorRole: input.actorRole,
-          timestamp: 'Today, Just Now',
+          timestamp: nowStamp(),
           financialDeltaBdt: input.purchaseCost,
           sapRef: sapAssetNo,
           hash: makeHash(`${id}-${Date.now()}`),
@@ -1777,7 +1798,7 @@ export function useAssetStore() {
       if (a.id !== assetId) return a;
       const updatedHistory = a.custodyHistory.map((ch, idx) =>
         idx === a.custodyHistory.length - 1
-          ? { ...ch, acknowledged: true, acknowledgedAt: `${SYSTEM_TODAY}, Just Now` }
+          ? { ...ch, acknowledged: true, acknowledgedAt: `${SYSTEM_TODAY}, ${nowTime()}` }
           : ch
       );
       const ev: AssetLifecycleEvent = {
@@ -1788,7 +1809,7 @@ export function useAssetStore() {
         notes: 'Staff confirmed receiving the item in good working order.',
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         hash: makeHash(`${assetId}-sign-${Date.now()}`),
       };
       return {
@@ -1818,7 +1839,7 @@ export function useAssetStore() {
     if (!target) return null;
 
     const transferRef = `TRF-2026-${String(globalTransfers.length + 20).padStart(3, '0')}`;
-    const gatePassNo = `GP-${Math.floor(1000 + Math.random() * 9000)}`;
+    const gatePassNo = nextRef('GP');
 
     const trf: AssetTransfer = {
       id: `TRF-${Date.now()}`,
@@ -1838,7 +1859,7 @@ export function useAssetStore() {
       reason: params.reason,
       status: 'in_transit',
       initiatedBy: params.actorName,
-      initiatedAt: 'Today, Just Now',
+      initiatedAt: nowStamp(),
     };
 
     globalTransfers = [trf, ...globalTransfers];
@@ -1853,7 +1874,7 @@ export function useAssetStore() {
         notes: params.reason,
         actor: params.actorName,
         actorRole: params.actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         sapRef: transferRef,
         hash: makeHash(`${a.id}-trf-${Date.now()}`),
       };
@@ -1873,7 +1894,7 @@ export function useAssetStore() {
     if (!trf || trf.status === 'completed') return;
 
     globalTransfers = globalTransfers.map((t) =>
-      t.id === transferId ? { ...t, status: 'completed', completedAt: 'Today, Just Now' } : t
+      t.id === transferId ? { ...t, status: 'completed', completedAt: nowStamp() } : t
     );
 
     globalAssets = globalAssets.map((a) => {
@@ -1903,7 +1924,7 @@ export function useAssetStore() {
         notes: `Gate Pass ${trf.gatePassNo} closed. Assigned under account ${getCategoryGl(a.category, trf.toFacility)}.`,
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         sapRef: trf.transferRef,
         hash: makeHash(`${a.id}-trfdone-${Date.now()}`),
       };
@@ -1949,7 +1970,7 @@ export function useAssetStore() {
         functionalLocation: 'Equipment Store Room — Ready Inventory',
         assignedDate: SYSTEM_TODAY,
         acknowledged: true,
-        acknowledgedAt: `${SYSTEM_TODAY}, Just Now`,
+        acknowledgedAt: `${SYSTEM_TODAY}, ${nowTime()}`,
         conditionOnHandover: `Returned by ${employeeName} (${employeeId}) during HR Exit Clearance`,
       };
       const ev: AssetLifecycleEvent = {
@@ -1960,7 +1981,7 @@ export function useAssetStore() {
         notes: 'Checked in good condition and stored for reassignment.',
         actor: actorName,
         actorRole: 'HR & Administration',
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         hash: makeHash(`${a.id}-reclaim-${Date.now()}`),
       };
 
@@ -2041,7 +2062,7 @@ export function useAssetStore() {
     const wo = globalWorkOrders.find((w) => w.id === woId);
     if (!wo || wo.status === 'completed') return;
 
-    const certNo = `CERT-${wo.type}-2026-${Math.floor(100 + Math.random() * 899)}`;
+    const certNo = `CERT-${wo.type}-${nextRef('CERT', 3).slice(5)}`;
     globalWorkOrders = globalWorkOrders.map((w) =>
       w.id === woId
         ? { ...w, status: 'completed', completedDate: SYSTEM_TODAY, certificateNo: certNo }
@@ -2074,7 +2095,7 @@ export function useAssetStore() {
           : `Service completed. Cost ৳${addOpex.toLocaleString()} added to maintenance log. Next check in ${a.calibrationCycleDays} days.`,
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         financialDeltaBdt: wo.estimatedCostBdt,
         sapRef: certNo,
         hash: makeHash(`${a.id}-${wo.woNumber}-${Date.now()}`),
@@ -2106,7 +2127,7 @@ export function useAssetStore() {
 
     globalAssets = globalAssets.map((a) => {
       if (a.id !== assetId) return a;
-      const certNo = `CERT-CHK-2026-${Math.floor(100 + Math.random() * 899)}`;
+      const certNo = `CERT-CHK-${nextRef('CERT', 3).slice(5)}`;
       const nextSvc = new Date(2026, 9, 29);
       nextSvc.setDate(nextSvc.getDate() + (a.calibrationCycleDays || 180));
       const nextDateStr = nextSvc.toLocaleDateString('en-GB', {
@@ -2123,7 +2144,7 @@ export function useAssetStore() {
         notes: `Next routine check scheduled in ${a.calibrationCycleDays} days (${nextDateStr}).`,
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         sapRef: certNo,
         hash: makeHash(`${a.id}-cal-${Date.now()}`),
       };
@@ -2161,7 +2182,7 @@ export function useAssetStore() {
         notes: `${data.observation} — Requested Fix: ${data.improvementsRequired}`,
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         hash: makeHash(`${a.id}-def-${Date.now()}`),
       };
       return {
@@ -2173,7 +2194,7 @@ export function useAssetStore() {
           observation: data.observation,
           improvementsRequired: data.improvementsRequired,
           reportedBy: `${actorName} (${actorRole})`,
-          reportedAt: 'Today, Just Now',
+          reportedAt: nowStamp(),
         },
         lifecycleEvents: [ev, ...a.lifecycleEvents],
       };
@@ -2230,7 +2251,7 @@ export function useAssetStore() {
             notes: `Cost ৳${consumedSpare.unitCostBdt.toLocaleString()} added to maintenance log (${a.glCostCenter}).`,
             actor: actorName,
             actorRole,
-            timestamp: 'Today, Just Now',
+            timestamp: nowStamp(),
             financialDeltaBdt: consumedSpare.unitCostBdt,
             hash: makeHash(`${a.id}-sp-${Date.now()}`),
           },
@@ -2274,7 +2295,7 @@ export function useAssetStore() {
             notes: `Recalculated in Asset Register (${a.sapAssetNo}).`,
             actor: actorName,
             actorRole,
-            timestamp: 'Today, Just Now',
+            timestamp: nowStamp(),
             sapRef: a.sapAssetNo,
             hash: makeHash(`${a.id}-dep-${Date.now()}`),
           },
@@ -2310,7 +2331,7 @@ export function useAssetStore() {
       department: params.department,
       requestedBy: params.requestedBy,
       requestedByEmpId: params.requestedByEmpId,
-      requestedDate: 'Today, Just Now',
+      requestedDate: nowStamp(),
       estimatedCapexBdt: params.estimatedCapexBdt,
       justification: params.justification,
       specs: params.specs,
@@ -2426,7 +2447,7 @@ export function useAssetStore() {
         notes: surveyNotes,
         actor: actorName,
         actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         hash: makeHash(`${a.id}-decom-${Date.now()}`),
       };
       return {
@@ -2484,7 +2505,7 @@ export function useAssetStore() {
     const fin = calculateAssetFinancials(asset);
     const nbvAtDisposal = fin.netBookValue;
     const gainOrLoss = params.salvageProceedsBdt - nbvAtDisposal;
-    const sapVoucher = `VCH-RET-2026-${Math.floor(1000 + Math.random() * 8999)}`;
+    const sapVoucher = `VCH-RET-${nextRef('VCH').slice(4)}`;
 
     globalAssets = globalAssets.map((a) => {
       if (a.id !== params.assetId || !a.disposalDossier) return a;
@@ -2507,7 +2528,7 @@ export function useAssetStore() {
         notes: `Sale amount: ৳${params.salvageProceedsBdt.toLocaleString()} (${params.buyerOrVendor}) vs Current Book Value ৳${nbvAtDisposal.toLocaleString()}. Finance Voucher: ${sapVoucher}.`,
         actor: params.actorName,
         actorRole: params.actorRole,
-        timestamp: 'Today, Just Now',
+        timestamp: nowStamp(),
         financialDeltaBdt: params.salvageProceedsBdt,
         sapRef: sapVoucher,
         hash: makeHash(`${a.id}-disp-${Date.now()}`),

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useFleetStore, VehicleRequisition } from '../../store/fleetStore';
-import { ROLE_META, t } from '../../types';
-import { showToast } from '../../App';
+import { t } from '../../types';
+import type { FleetParty } from '../../views/fleet/config';
+import { showToast } from '../ToastManager';
 import {
   MessageSquare, Send, Car, MapPin, Clock, ShieldCheck, CheckCircle2,
   Radio, Search, Navigation, QrCode, Receipt, Check, PhoneCall,
@@ -11,7 +12,10 @@ import {
 import DriverCallModal from './DriverCallModal';
 
 interface FleetChatCenterProps {
-  userRole: 'employee' | 'admin' | 'driver';
+  party: FleetParty;
+  senderName: string;
+  /** Requisitions the signed-in user may see; each one is a trip thread. */
+  visibleRequisitions: VehicleRequisition[];
   lang: 'en' | 'bn';
   onNavigateToTripPass?: (req: VehicleRequisition) => void;
   initialChannelId?: string;
@@ -63,7 +67,9 @@ function initials(name: string) {
 }
 
 export default function FleetChatCenter({
-  userRole,
+  party,
+  senderName,
+  visibleRequisitions,
   lang,
   onNavigateToTripPass,
   initialChannelId,
@@ -75,53 +81,10 @@ export default function FleetChatCenter({
     approveTollExpense,
   } = useFleetStore();
 
-  const isActualEmployee = userRole === 'employee';
-  const isActualDriver = userRole === 'driver';
-  const isActualAdmin = userRole === 'admin';
-  const currentPersona = ROLE_META[userRole as keyof typeof ROLE_META] || ROLE_META['employee'];
-
-  // Sender Persona Mode
-  const [activePersona, setActivePersona] = useState<'employee' | 'driver' | 'admin'>(
-    isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee'
-  );
-
-  useEffect(() => {
-    setActivePersona(isActualDriver ? 'driver' : isActualAdmin ? 'admin' : 'employee');
-  }, [isActualDriver, isActualAdmin]);
-
-  // Authenticated Persona Profile
-  const personaName = activePersona === 'employee'
-    ? currentPersona.name
-    : activePersona === 'driver'
-    ? (ROLE_META['driver']?.name || 'Md. Rafiqul Islam (Driver)')
-    : (ROLE_META['transport_admin']?.name || 'Md. Kamruzzaman (Transport Admin)');
-
-  const personaRole = activePersona;
-
-  // Filter requisitions relevant to role
-  const relevantRequisitions = useMemo(() => {
-    if (isActualEmployee) {
-      return requisitions.filter(
-        r =>
-          r.requesterName.toLowerCase().includes(currentPersona.name.toLowerCase()) ||
-          r.requesterName.includes('Tanvir') ||
-          r.id === 'REQ-2026-441' ||
-          r.id === 'REQ-2026-435'
-      );
-    }
-    if (isActualDriver) {
-      const driverName = ROLE_META['driver']?.name || 'Md. Rafiqul Islam';
-      return requisitions.filter(
-        r =>
-          r.assignedDriverName?.toLowerCase().includes(driverName.toLowerCase()) ||
-          r.assignedDriverName?.includes('Rafiqul') ||
-          r.assignedDriverName?.includes('Shahidul') ||
-          r.id === 'REQ-2026-435' ||
-          r.id === 'REQ-2026-441'
-      );
-    }
-    return requisitions;
-  }, [requisitions, isActualEmployee, isActualDriver, currentPersona.name]);
+  const activePersona = party;
+  const personaRole = party;
+  const personaName = senderName;
+  const relevantRequisitions = visibleRequisitions;
 
   // Static Direct Hotlines & Emergency Channels
   const directChannels = useMemo(() => [
@@ -157,13 +120,12 @@ export default function FleetChatCenter({
   // Selected Channel ID
   const [selectedChannelId, setSelectedChannelId] = useState<string>(() => {
     if (initialChannelId) return initialChannelId;
-    return relevantRequisitions[0]?.id || 'REQ-2026-435';
+    return relevantRequisitions[0]?.id || 'desk_direct';
   });
 
   const [channelFilterTab, setChannelFilterTab] = useState<ChannelTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [messageText, setMessageText] = useState('');
-  const [isTypingUser, setIsTypingUser] = useState<string | null>(null);
 
   // Mobile View Toggle
   const [mobileActiveView, setMobileActiveView] = useState<'inbox' | 'conversation'>('conversation');
@@ -174,7 +136,7 @@ export default function FleetChatCenter({
   // Toll Claim Form State
   const [tollPlaza, setTollPlaza] = useState('Mayor Hanif Flyover');
   const [tollAmount, setTollAmount] = useState('260');
-  const [tollSlipNo, setTollSlipNo] = useState(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [tollSlipNo, setTollSlipNo] = useState('');
 
   // Audio Voice Note Player State
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
@@ -185,21 +147,10 @@ export default function FleetChatCenter({
 
   // Phone Call Modal State
   const [showCallModal, setShowCallModal] = useState(false);
-  const [activeCallee, setActiveCallee] = useState({
-    name: 'Md. Shahidul Islam',
-    role: 'Assigned Driver • Toyota Prado GHA-13-8821',
-    phone: '+880 1711-229944'
-  });
+  const [activeCallee, setActiveCallee] = useState({ name: '', role: '', phone: '' });
 
   const streamScrollRef = useRef<HTMLDivElement>(null);
   const composerTextareaRef = useRef<HTMLTextAreaElement>(null);
-  const timeoutsRef = useRef<number[]>([]);
-
-  useEffect(() => () => { timeoutsRef.current.forEach(id => window.clearTimeout(id)); }, []);
-  const safeTimeout = (fn: () => void, ms: number) => {
-    timeoutsRef.current.push(window.setTimeout(fn, ms));
-  };
-
   // Timer for simulated voice recording
   useEffect(() => {
     let interval: any;
@@ -223,7 +174,7 @@ export default function FleetChatCenter({
     if (el) {
       el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
     }
-  }, [activeConversationMessages.length, selectedChannelId, isTypingUser]);
+  }, [activeConversationMessages.length, selectedChannelId]);
 
   // Auto-expand composer
   useEffect(() => {
@@ -259,9 +210,6 @@ export default function FleetChatCenter({
     if (!customText) {
       setMessageText('');
     }
-
-    // Trigger realistic counterpart responses for a real chat feel
-    simulateCounterpartResponses(text, selectedChannelId);
   };
 
   // Send Voice Note Simulation
@@ -279,55 +227,6 @@ export default function FleetChatCenter({
       }
     );
     showToast(t('Voice dispatch note sent', 'ভয়েস বার্তা পাঠানো হয়েছে', lang), 'success');
-    simulateCounterpartResponses('voice note', selectedChannelId);
-  };
-
-  const simulateCounterpartResponses = (userText: string, channelId: string) => {
-    const lower = userText.toLowerCase();
-
-    if (channelId.startsWith('REQ-')) {
-      const targetReq = requisitions.find(r => r.id === channelId);
-      const driverName = targetReq?.assignedDriverName || 'Md. Shahidul Islam';
-      const vehiclePlate = targetReq?.assignedVehiclePlate || 'DHAKA METRO GHA-13-8821';
-
-      if (activePersona === 'employee') {
-        safeTimeout(() => setIsTypingUser(`${driverName} (Driver)`), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          let reply = '';
-          if (lower.includes('where') || lower.includes('location') || lower.includes('porch') || lower.includes('gate')) {
-            reply = `Ji Tanvir Sir, I am parked at Gate-1 porch by the reception canopy with vehicle ${vehiclePlate}. AC is running at 21°C. Please come down whenever ready.`;
-          } else if (lower.includes('min') || lower.includes('down') || lower.includes('delay') || lower.includes('wait')) {
-            reply = `Noted Tanvir Sir, take your time. I have loaded chilled mineral water bottles in the vehicle. Waiting safely at the porch bay.`;
-          } else if (lower.includes('ac') || lower.includes('cool') || lower.includes('temp')) {
-            reply = `Ji Sir, cabin temperature is cooled to 20°C and fresh air circulation is running. Ready for highway transit.`;
-          } else if (lower.includes('toll') || lower.includes('flyover')) {
-            reply = `Ji Sir, I paid the Mayor Hanif Flyover toll (৳260) with my authorized e-pass and submitted the voucher for Central Transport clearance.`;
-          } else {
-            reply = `Assalamu Alaikum Tanvir Sir, message received. Vehicle ${vehiclePlate} is standing by at your service.`;
-          }
-          sendChatMessage(channelId, 'driver', `${driverName} (Driver)`, reply, { messageType: 'text' });
-        }, 2100);
-      } else if (activePersona === 'driver') {
-        safeTimeout(() => setIsTypingUser('Tanvir Ahmed (Passenger)'), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          sendChatMessage(channelId, 'employee', 'Tanvir Ahmed', `Thank you Shahidul Bhai, I have the batch test dossiers ready. We will depart in 5 minutes.`, { messageType: 'text' });
-        }, 2000);
-      } else {
-        safeTimeout(() => setIsTypingUser(`${driverName} (Driver)`), 800);
-        safeTimeout(() => {
-          setIsTypingUser(null);
-          sendChatMessage(channelId, 'driver', `${driverName} (Driver)`, `Ji Kamruzzaman Sir, received instruction. Following designated highway corridor and maintaining safe speed limits.`, { messageType: 'text' });
-        }, 2100);
-      }
-    } else if (channelId === 'desk_direct' && activePersona === 'employee') {
-      safeTimeout(() => setIsTypingUser('Md. Kamruzzaman (Transport Supervisor)'), 800);
-      safeTimeout(() => {
-        setIsTypingUser(null);
-        sendChatMessage('desk_direct', 'admin', 'Md. Kamruzzaman (Transport Supervisor)', `Assalamu Alaikum Tanvir. Central Transport Desk has logged your query. Vehicle allocation is prioritized. Feel free to contact hotline ${EMERGENCY_PHONE} if needed.`, { messageType: 'text' });
-      }, 2000);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -360,6 +259,10 @@ export default function FleetChatCenter({
       showToast(t('Please enter valid toll amount', 'সঠিক টোলের পরিমাণ লিখুন', lang), 'info');
       return;
     }
+    if (!tollSlipNo.trim()) {
+      showToast(t('Enter the receipt number printed on the toll slip', 'টোল স্লিপে ছাপা রসিদ নম্বর লিখুন', lang), 'info');
+      return;
+    }
 
     sendChatMessage(
       currentRequisition.id,
@@ -378,7 +281,7 @@ export default function FleetChatCenter({
     );
 
     setActiveDrawer('none');
-    setTollSlipNo(`TOL-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+    setTollSlipNo('');
     showToast(t(
       `✓ Toll voucher claimed: ${tollPlaza} (৳${amountNum}). Submitted for Transport Admin audit.`,
       `✓ টোল ভাউচার দাখিল সম্পন্ন: ৳${amountNum}`,
@@ -446,22 +349,22 @@ export default function FleetChatCenter({
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {personaName.replace(/\s*\(.*\)/, '')}
                 </span>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-success-solid)', display: 'inline-block' }} />
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500, #64748B)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
                 {activePersona === 'employee' ? 'Staff Passenger' : activePersona === 'driver' ? 'Duty Driver' : 'Central Dispatch'}
               </div>
             </div>
           </div>
 
-          <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '10px', fontWeight: 800, background: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1' }}>
+          <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '10px', fontWeight: 800, background: 'var(--surface-2)', color: 'var(--text-2)', border: '1px solid var(--border-2)' }}>
             {activePersona.toUpperCase()}
           </span>
         </div>
 
         {/* Filter Tabs (All, Trips, Direct Hotlines) */}
-        <div style={{ padding: '4px 10px', background: '#F1F5F9', borderBottom: '1px solid var(--brand-slate-200, #E2E8F0)' }}>
-          <div style={{ display: 'flex', background: '#E2E8F0', padding: '2px', borderRadius: '8px', gap: '2px' }}>
+        <div style={{ padding: '4px 10px', background: 'var(--surface-2)', borderBottom: '1px solid var(--brand-slate-200)' }}>
+          <div style={{ display: 'flex', background: 'var(--surface-3)', padding: '2px', borderRadius: '8px', gap: '2px' }}>
             <button
               onClick={() => setChannelFilterTab('all')}
               className={`fleet-chat-tab-pill ${channelFilterTab === 'all' ? 'active' : ''}`}
@@ -489,7 +392,7 @@ export default function FleetChatCenter({
         {/* Real-time Search Box */}
         <div className="fleet-chat-search-wrap">
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', pointerEvents: 'none', color: '#94A3B8' }} />
+            <Search size={14} style={{ position: 'absolute', left: '10px', pointerEvents: 'none', color: 'var(--text-muted)' }} />
             <input
               type="text"
               value={searchQuery}
@@ -500,7 +403,7 @@ export default function FleetChatCenter({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: '10px', border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}
+                style={{ position: 'absolute', right: '10px', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}
               >
                 <X size={14} />
               </button>
@@ -513,9 +416,9 @@ export default function FleetChatCenter({
           {/* Trip Rooms (Tri-Party: Driver ↔ Staff ↔ Admin) */}
           {(channelFilterTab === 'all' || channelFilterTab === 'trips') && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94A3B8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>
                 <span>{t('Active Duty Trips (3-Party)', 'সক্রিয় ডিউটি ট্রিপ চ্যানেল', lang)}</span>
-                <span style={{ background: '#EFF6FF', color: '#1D4ED8', padding: '1px 6px', borderRadius: '4px', fontSize: '9.5px', fontWeight: 800 }}>Tri-Party</span>
+                <span style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)', padding: '1px 6px', borderRadius: '4px', fontSize: '9.5px', fontWeight: 800 }}>Tri-Party</span>
               </div>
 
               {filteredRequisitions.map((r) => {
@@ -572,7 +475,7 @@ export default function FleetChatCenter({
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              color: isSelected ? 'var(--brand-crimson, #A51C30)' : undefined
+                              color: isSelected ? 'var(--brand-crimson)' : undefined
                             }}
                             title={r.to}
                           >
@@ -580,7 +483,7 @@ export default function FleetChatCenter({
                           </h4>
 
                           {isSelected ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: 'var(--brand-crimson, #A51C30)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: '#FFFFFF', flexShrink: 0 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: 'var(--brand-crimson)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-on-brand)', flexShrink: 0 }}>
                               Active
                             </span>
                           ) : (
@@ -591,8 +494,8 @@ export default function FleetChatCenter({
                         </div>
 
                         {/* Line 2: Requisition ID & Route */}
-                        <div style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#64748B' }}>
-                          <span style={{ fontFamily: 'monospace', fontWeight: 700, padding: '1px 4px', background: '#F1F5F9', borderRadius: '4px' }}>
+                        <div style={{ marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-3)' }}>
+                          <span style={{ fontFamily: 'monospace', fontWeight: 700, padding: '1px 4px', background: 'var(--surface-2)', borderRadius: '4px' }}>
                             #{r.id}
                           </span>
                           <span>•</span>
@@ -604,26 +507,26 @@ export default function FleetChatCenter({
                         {/* Line 3: Crew Badges (Driver & Passenger) */}
                         <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px' }}>
                           <span
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F1F5F9', padding: '2px 6px', borderRadius: '6px', fontWeight: 600, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--surface-2)', padding: '2px 6px', borderRadius: '6px', fontWeight: 600, maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                             title={`Staff Passenger: ${r.requesterName}`}
                           >
-                            <Users size={11} color="#3B82F6" style={{ flexShrink: 0 }} />
+                            <Users size={11} color="var(--status-info)" style={{ flexShrink: 0 }} />
                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.requesterName.split(' ')[0]}</span>
                           </span>
 
-                          <span style={{ color: '#CBD5E1' }}>➔</span>
+                          <span style={{ color: 'var(--text-inverse-2)' }}>➔</span>
 
                           {r.assignedDriverName ? (
                             <span
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#ECFDF5', color: '#047857', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                               title={`Assigned Driver: ${r.assignedDriverName}`}
                             >
-                              <Car size={11} color="#059669" style={{ flexShrink: 0 }} />
+                              <Car size={11} color="var(--status-success)" style={{ flexShrink: 0 }} />
                               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.assignedDriverName.replace(/\s*\(.*\)/, '').split(' ')[0]}</span>
                             </span>
                           ) : (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#FFFBEB', color: '#B45309', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>
-                              <Clock size={11} color="#D97706" style={{ flexShrink: 0 }} />
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)', padding: '2px 6px', borderRadius: '6px', fontWeight: 600 }}>
+                              <Clock size={11} color="var(--status-warning)" style={{ flexShrink: 0 }} />
                               <span>Awaiting</span>
                             </span>
                           )}
@@ -631,7 +534,7 @@ export default function FleetChatCenter({
 
                         {/* Line 4: Last Message Snippet */}
                         {lastMsg && (
-                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748B' }}>
+                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-3)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
                               <strong style={{ color: 'var(--brand-slate-700)', flexShrink: 0 }}>
                                 {lastMsg.senderName.split(' ')[0]}:
@@ -646,8 +549,8 @@ export default function FleetChatCenter({
                                   : lastMsg.text}
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: '#94A3B8', flexShrink: 0, paddingLeft: '4px' }}>
-                              <CheckCheck size={11} color="#3B82F6" />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: 'var(--text-muted)', flexShrink: 0, paddingLeft: '4px' }}>
+                              <CheckCheck size={11} color="var(--status-info)" />
                               <span>{lastMsg.timestamp}</span>
                             </div>
                           </div>
@@ -663,7 +566,7 @@ export default function FleetChatCenter({
           {/* Direct & Hotline Channels */}
           {(channelFilterTab === 'all' || channelFilterTab === 'direct') && (
             <div style={{ paddingTop: '8px' }}>
-              <div style={{ padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94A3B8' }}>
+              <div style={{ padding: '4px 8px 6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)' }}>
                 {t('Dedicated Hotlines & SOS', 'সরাসরি হটলাইন ও এসওএস', lang)}
               </div>
 
@@ -698,36 +601,36 @@ export default function FleetChatCenter({
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              color: isSelected ? 'var(--brand-crimson, #A51C30)' : undefined
+                              color: isSelected ? 'var(--brand-crimson)' : undefined
                             }}
                           >
                             {c.name}
                           </h4>
 
                           {isSelected ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: isSos ? '#DC2626' : 'var(--brand-crimson, #A51C30)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: '#FFFFFF', flexShrink: 0 }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', borderRadius: '9999px', background: isSos ? 'var(--status-danger-solid)' : 'var(--brand-crimson)', padding: '2px 8px', fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', color: 'var(--text-on-brand)', flexShrink: 0 }}>
                               Active
                             </span>
                           ) : (
-                            <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '9px', fontWeight: 800, background: isSos ? '#FEE2E2' : '#EFF6FF', color: isSos ? '#DC2626' : '#1D4ED8', flexShrink: 0 }}>
+                            <span style={{ padding: '2px 8px', borderRadius: '9999px', fontSize: '9px', fontWeight: 800, background: isSos ? 'var(--status-danger-bg)' : 'var(--status-info-bg)', color: isSos ? 'var(--status-danger)' : 'var(--status-info-text)', flexShrink: 0 }}>
                               {c.badge}
                             </span>
                           )}
                         </div>
 
-                        <div style={{ marginTop: '2px', fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ marginTop: '2px', fontSize: '11px', color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {c.sub}
                         </div>
 
                         {lastMsg && (
-                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#64748B' }}>
+                          <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-3)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
                               <strong style={{ color: 'var(--brand-slate-700)', flexShrink: 0 }}>
                                 {lastMsg.senderName.split(' ')[0]}:
                               </strong>
                               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lastMsg.text}</span>
                             </div>
-                            <span style={{ fontSize: '10px', color: '#94A3B8', flexShrink: 0, paddingLeft: '4px' }}>{lastMsg.timestamp}</span>
+                            <span style={{ fontSize: '10px', color: 'var(--text-muted)', flexShrink: 0, paddingLeft: '4px' }}>{lastMsg.timestamp}</span>
                           </div>
                         )}
                       </div>
@@ -756,7 +659,7 @@ export default function FleetChatCenter({
               onClick={() => setMobileActiveView('inbox')}
               style={{
                 borderRadius: '8px',
-                border: '1px solid var(--brand-slate-200, #E2E8F0)',
+                border: '1px solid var(--brand-slate-200)',
                 padding: '6px',
                 background: 'transparent',
                 cursor: 'pointer',
@@ -769,15 +672,15 @@ export default function FleetChatCenter({
 
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900, #0F172A)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <h3 style={{ margin: 0, fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {currentRequisition ? (
                     <>
-                      <Car size={16} style={{ color: '#A51C30', flexShrink: 0 }} />
+                      <Car size={16} style={{ color: 'var(--brand-crimson)', flexShrink: 0 }} />
                       <span>{currentRequisition.to.split(',')[0]} (Trip #{currentRequisition.id})</span>
                     </>
                   ) : currentDirectChannel ? (
                     <>
-                      <currentDirectChannel.icon size={16} style={{ color: '#2563EB', flexShrink: 0 }} />
+                      <currentDirectChannel.icon size={16} style={{ color: 'var(--status-info)', flexShrink: 0 }} />
                       <span>{currentDirectChannel.name}</span>
                     </>
                   ) : (
@@ -793,7 +696,7 @@ export default function FleetChatCenter({
               </div>
 
               {/* Subtitle Telemetry */}
-              <p style={{ margin: '1px 0 0', fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {currentRequisition ? (
                   <span>
                     Vehicle: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedVehiclePlate || 'Awaiting Allocation'}</strong> • Driver: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.assignedDriverName || 'Pending'}</strong> • Passenger: <strong style={{ color: 'var(--brand-slate-800)' }}>{currentRequisition.requesterName}</strong>
@@ -827,13 +730,13 @@ export default function FleetChatCenter({
                 onClick={() => setActiveDrawer(activeDrawer === 'radar' ? 'none' : 'radar')}
                 className="trip-chat-tool-btn"
                 style={{
-                  background: activeDrawer === 'radar' ? '#EFF6FF' : undefined,
-                  borderColor: activeDrawer === 'radar' ? '#3B82F6' : undefined,
-                  color: activeDrawer === 'radar' ? '#1D4ED8' : undefined,
+                  background: activeDrawer === 'radar' ? 'var(--status-info-bg)' : undefined,
+                  borderColor: activeDrawer === 'radar' ? 'var(--status-info)' : undefined,
+                  color: activeDrawer === 'radar' ? 'var(--status-info-text)' : undefined,
                 }}
                 title="Toggle Live Route & GPS Radar"
               >
-                <Compass size={15} style={{ color: '#2563EB' }} />
+                <Compass size={15} style={{ color: 'var(--status-info)' }} />
                 <span>{t('Live Radar', 'লাইভ রাডার', lang)}</span>
               </button>
             )}
@@ -843,8 +746,8 @@ export default function FleetChatCenter({
                 onClick={() => setActiveDrawer(activeDrawer === 'dossier' ? 'none' : 'dossier')}
                 className="trip-chat-tool-btn"
                 style={{
-                  background: activeDrawer === 'dossier' ? '#0F172A' : undefined,
-                  color: activeDrawer === 'dossier' ? '#FFFFFF' : undefined,
+                  background: activeDrawer === 'dossier' ? 'var(--surface-inverse)' : undefined,
+                  color: activeDrawer === 'dossier' ? 'var(--text-on-brand)' : undefined,
                 }}
                 title="Toggle Trip Details & Gate Pass"
               >
@@ -860,13 +763,13 @@ export default function FleetChatCenter({
           <div className="trip-chat-roster-bar">
             <div className="trip-chat-roster-pills">
               <span className="trip-chat-roster-tag">
-                <Users size={14} style={{ color: '#2563EB' }} />
+                <Users size={14} style={{ color: 'var(--status-info)' }} />
                 <span>{t('Tri-Party Mission Roster:', 'ত্রি-পক্ষীয় রুম:', lang)}</span>
               </span>
 
               {/* 1. Requesting Employee */}
               <div className="trip-chat-presence-chip">
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3B82F6', flexShrink: 0 }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-info-solid)', flexShrink: 0 }} />
                 <span className="trip-chat-presence-name">{currentRequisition.requesterName}</span>
                 <span className="trip-chat-presence-role staff">Staff Pax</span>
               </div>
@@ -877,7 +780,7 @@ export default function FleetChatCenter({
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: currentRequisition.assignedDriverName ? '#10B981' : '#F59E0B',
+                  background: currentRequisition.assignedDriverName ? 'var(--status-success-solid)' : 'var(--status-warning-solid)',
                   flexShrink: 0
                 }} />
                 <span className="trip-chat-presence-name">
@@ -888,14 +791,14 @@ export default function FleetChatCenter({
 
               {/* 3. Vehicle Admin */}
               <div className="trip-chat-presence-chip">
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366F1', flexShrink: 0 }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-purple-solid)', flexShrink: 0 }} />
                 <span className="trip-chat-presence-name">Md. Kamruzzaman</span>
                 <span className="trip-chat-presence-role admin">Dispatch Admin</span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#059669', flexShrink: 0 }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--status-success)', flexShrink: 0 }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--status-success-solid)', display: 'inline-block' }} />
               <span>{t('Active 3-Way Frequency', 'সক্রিয় ফ্রিকোয়েন্সি', lang)}</span>
             </div>
           </div>
@@ -914,12 +817,12 @@ export default function FleetChatCenter({
           </div>
 
           {activeConversationMessages.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--brand-slate-400, #94A3B8)' }}>
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--brand-slate-400)' }}>
               <MessageSquare size={44} style={{ margin: '0 auto 10px', opacity: 0.6 }} />
-              <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--brand-slate-700, #334155)' }}>
+              <div style={{ fontWeight: 800, fontSize: '14px', color: 'var(--brand-slate-700)' }}>
                 {t('No messages in this frequency yet', 'এই চ্যানেলে এখনও কোনো বার্তা নেই', lang)}
               </div>
-              <p style={{ fontSize: '12px', marginTop: '4px', color: 'var(--brand-slate-500, #64748B)' }}>
+              <p style={{ fontSize: '12px', marginTop: '4px', color: 'var(--brand-slate-500)' }}>
                 {isReadOnlyBroadcast
                   ? t('Central Transport announcements and fleet advisories will appear here.', 'কেন্দ্রীয় পরিবহন বিভাগের নির্দেশনা ও ঘোষণা এখানে দেখতে পাবেন।', lang)
                   : t('Send a coordination update or check-in to begin dispatch conversation.', 'কথোপকথন শুরু করতে একটি বার্তা পাঠান বা স্ট্যাটাস আপডেট দিন।', lang)}
@@ -937,7 +840,7 @@ export default function FleetChatCenter({
                 return (
                   <div key={m.id} style={{ display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
                     <div className="trip-chat-system-pill">
-                      <ShieldCheck size={14} style={{ color: '#2563EB' }} />
+                      <ShieldCheck size={14} style={{ color: 'var(--status-info)' }} />
                       <span>{m.actionLabel || m.text}</span>
                       <span style={{ opacity: 0.7 }}>• {m.timestamp}</span>
                     </div>
@@ -972,8 +875,8 @@ export default function FleetChatCenter({
                     {/* Rich Toll Voucher Card */}
                     {m.messageType === 'toll_claim' && m.tollData ? (
                       <div className="trip-chat-toll-card">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #FEF3C7', paddingBottom: '6px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 900, color: '#B45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--status-warning-border)', paddingBottom: '6px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 900, color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Receipt size={16} />
                             <span>HIGHWAY TOLL VOUCHER</span>
                           </span>
@@ -982,8 +885,8 @@ export default function FleetChatCenter({
                             borderRadius: '9999px',
                             fontSize: '10px',
                             fontWeight: 800,
-                            background: m.tollData.approved ? '#D1FAE5' : '#FEF3C7',
-                            color: m.tollData.approved ? '#047857' : '#B45309'
+                            background: m.tollData.approved ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                            color: m.tollData.approved ? 'var(--status-success-text)' : 'var(--status-warning-text)'
                           }}>
                             {m.tollData.approved ? '✓ Approved' : '⏳ Pending Audit'}
                           </span>
@@ -996,7 +899,7 @@ export default function FleetChatCenter({
                           </div>
                           <div>
                             <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Amount:</span>
-                            <span style={{ fontSize: '14px', fontWeight: 900, color: '#059669' }}>৳{m.tollData.amount}</span>
+                            <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--status-success)' }}>৳{m.tollData.amount}</span>
                           </div>
                           <div>
                             <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Slip Voucher:</span>
@@ -1004,7 +907,7 @@ export default function FleetChatCenter({
                           </div>
                           <div>
                             <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'block' }}>Cost Center:</span>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#2563EB' }}>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-info)' }}>
                               {currentRequisition?.costCenter || 'CC-SALES-DHAKA-102'}
                             </span>
                           </div>
@@ -1012,14 +915,14 @@ export default function FleetChatCenter({
 
                         {/* RBAC: ONLY ADMIN CAN APPROVE */}
                         {activePersona === 'admin' && !m.tollData.approved && (
-                          <div style={{ paddingTop: '6px', borderTop: '1px solid #FEF3C7', display: 'flex', justifyContent: 'flex-end' }}>
+                          <div style={{ paddingTop: '6px', borderTop: '1px solid var(--status-warning-border)', display: 'flex', justifyContent: 'flex-end' }}>
                             <button
                               onClick={() => approveTollExpense(m.id, m.requisitionId, personaName)}
                               style={{
                                 padding: '6px 14px',
                                 borderRadius: '10px',
-                                background: '#059669',
-                                color: '#FFFFFF',
+                                background: 'var(--status-success-solid)',
+                                color: 'var(--text-on-brand)',
                                 fontWeight: 800,
                                 fontSize: '12px',
                                 border: 'none',
@@ -1036,7 +939,7 @@ export default function FleetChatCenter({
                         )}
 
                         {activePersona !== 'admin' && !m.tollData.approved && (
-                          <div style={{ fontSize: '11px', fontStyle: 'italic', color: '#B45309' }}>
+                          <div style={{ fontSize: '11px', fontStyle: 'italic', color: 'var(--status-warning-text)' }}>
                             Awaiting Transport Supervisor authorization.
                           </div>
                         )}
@@ -1044,14 +947,14 @@ export default function FleetChatCenter({
                     ) : m.messageType === 'location_share' && m.locationData ? (
                       /* Rich Location Pin Card */
                       <div className="trip-chat-location-card">
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#2563EB', fontWeight: 800, fontSize: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--status-info)', fontWeight: 800, fontSize: '12px' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <MapPin size={16} />
                             <span>PASSENGER PICKUP PIN</span>
                           </span>
                           <button
                             onClick={() => setActiveDrawer('radar')}
-                            style={{ fontSize: '11px', fontWeight: 800, color: '#2563EB', border: 'none', background: 'transparent', cursor: 'pointer', textDecoration: 'underline' }}
+                            style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-info)', border: 'none', background: 'transparent', cursor: 'pointer', textDecoration: 'underline' }}
                           >
                             View Radar ➔
                           </button>
@@ -1086,7 +989,7 @@ export default function FleetChatCenter({
                                   width: '3px',
                                   borderRadius: '9999px',
                                   height: `${Math.max(4, (h / 100) * 16)}px`,
-                                  background: isMine ? 'rgba(255, 255, 255, 0.85)' : '#94A3B8',
+                                  background: isMine ? 'rgba(255, 255, 255, 0.85)' : 'var(--surface-4)',
                                   display: 'inline-block'
                                 }}
                               />
@@ -1105,8 +1008,8 @@ export default function FleetChatCenter({
                           width: '36px',
                           height: '36px',
                           borderRadius: '10px',
-                          background: isMine ? 'rgba(255, 255, 255, 0.2)' : '#EFF6FF',
-                          color: isMine ? '#FFFFFF' : '#2563EB',
+                          background: isMine ? 'rgba(255, 255, 255, 0.2)' : 'var(--status-info-bg)',
+                          color: isMine ? 'var(--text-on-brand)' : 'var(--status-info)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -1127,7 +1030,7 @@ export default function FleetChatCenter({
                         <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
                         <div className="trip-chat-bubble-footer">
                           <span>{m.timestamp}</span>
-                          {isMine && <CheckCheck size={13} color="#FFFFFF" />}
+                          {isMine && <CheckCheck size={13} color="var(--text-on-brand)" />}
                         </div>
                       </div>
                     )}
@@ -1136,65 +1039,18 @@ export default function FleetChatCenter({
               );
             })
           )}
-
-          {/* Typing Indicator */}
-          {isTypingUser && (
-            <div className="trip-chat-typing-pill">
-              <span style={{ display: 'inline-flex', gap: '4px' }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#A51C30', display: 'inline-block' }} />
-              </span>
-              <span>{isTypingUser} is typing...</span>
-            </div>
-          )}
         </div>
 
-        {/* ─── SENDER IDENTITY & PERSPECTIVE BAR ─── */}
         <div className="trip-chat-persona-bar">
           <div className="trip-chat-persona-controls">
-            {isActualAdmin ? (
-              <>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500, #64748B)' }}>
-                  {t('Dispatch Channel Perspective:', 'প্রেরক মোড:', lang)}
-                </span>
-                <div className="trip-chat-persona-group">
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('employee')}
-                    className={`trip-chat-persona-btn ${activePersona === 'employee' ? 'active-employee' : ''}`}
-                  >
-                    👤 Staff
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('driver')}
-                    className={`trip-chat-persona-btn ${activePersona === 'driver' ? 'active-driver' : ''}`}
-                  >
-                    🚗 Driver
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePersona('admin')}
-                    className={`trip-chat-persona-btn ${activePersona === 'admin' ? 'active-admin' : ''}`}
-                  >
-                    🛡️ Dispatch Desk
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
-                <span style={{ color: 'var(--brand-slate-500)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
-                <span style={{ fontWeight: 700, color: 'var(--brand-slate-900)' }}>{personaName}</span>
-                <span className="badge teal" style={{ fontSize: '10px', textTransform: 'capitalize' }}>
-                  ✓ {activePersona}
-                </span>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px' }}>
+              <span style={{ color: 'var(--text-3)', fontWeight: 600 }}>{t('Posting as:', 'প্রেরক:', lang)}</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{personaName}</span>
+            </div>
           </div>
 
-          <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400, #94A3B8)' }}>
-            Press <strong>Enter</strong> to send • <strong>Shift+Enter</strong> for newline
+          <span style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
+            {t('Enter to send · Shift+Enter for a new line', 'পাঠাতে Enter · নতুন লাইনের জন্য Shift+Enter', lang)}
           </span>
         </div>
 
@@ -1213,7 +1069,7 @@ export default function FleetChatCenter({
                   className="trip-chat-quick-pill"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <IconComp size={14} style={{ color: '#94A3B8' }} />
+                  <IconComp size={14} style={{ color: 'var(--text-muted)' }} />
                   <span>{chip.text}</span>
                 </button>
               );
@@ -1224,28 +1080,28 @@ export default function FleetChatCenter({
         {/* ─── REAL COMPOSER BAR ─── */}
         <div className="trip-chat-composer">
           {isReadOnlyBroadcast ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px', background: '#F1F5F9', padding: '12px', fontSize: '12px', color: '#64748B' }}>
-              <Lock size={16} style={{ color: '#94A3B8' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px', background: 'var(--surface-2)', padding: '12px', fontSize: '12px', color: 'var(--text-3)' }}>
+              <Lock size={16} style={{ color: 'var(--text-muted)' }} />
               <span>{t('Fleet Broadcast is read-only. Only Central Transport Admins can post announcements.', 'এই চ্যানেলটি শুধুমাত্র প্রশাসকদের ঘোষণার জন্য সংরক্ষিত।', lang)}</span>
             </div>
           ) : isRecordingVoice ? (
             <div className="trip-chat-recording-box">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#E11D48', display: 'inline-block' }} />
-                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 900, color: '#BE123C' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--brand-crimson-light)', display: 'inline-block' }} />
+                <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 900, color: 'var(--brand-crimson-light)' }}>
                   Recording audio dispatch... 0:{recordSeconds < 10 ? '0' : ''}{recordSeconds}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   onClick={() => setIsRecordingVoice(false)}
-                  style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'transparent', fontSize: '12px', fontWeight: 700, color: '#475569', cursor: 'pointer' }}
+                  style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'transparent', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSendVoiceNote}
-                  style={{ padding: '6px 14px', borderRadius: '8px', border: 'none', background: '#A51C30', color: '#FFFFFF', fontSize: '12px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  style={{ padding: '6px 14px', borderRadius: '8px', border: 'none', background: 'var(--brand-crimson)', color: 'var(--text-on-brand)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
                   <Send size={13} />
                   <span>Send Voice Note</span>
@@ -1262,7 +1118,7 @@ export default function FleetChatCenter({
                     className="trip-chat-tool-btn"
                     title={t('Share Current GPS Pickup Pin', 'জিপিএস লোকেশন পিন পাঠান', lang)}
                   >
-                    <MapPin size={15} style={{ color: '#2563EB' }} />
+                    <MapPin size={15} style={{ color: 'var(--status-info)' }} />
                     <span>{t('Pin', 'পিন', lang)}</span>
                   </button>
 
@@ -1271,7 +1127,7 @@ export default function FleetChatCenter({
                     className="trip-chat-tool-btn"
                     title={t('Upload Highway Toll Voucher', 'টোল স্লিপ দাবি করুন', lang)}
                   >
-                    <Receipt size={15} style={{ color: '#D97706' }} />
+                    <Receipt size={15} style={{ color: 'var(--status-warning)' }} />
                     <span>{t('Toll Slip', 'টোল', lang)}</span>
                   </button>
 
@@ -1280,7 +1136,7 @@ export default function FleetChatCenter({
                     className="trip-chat-tool-btn"
                     title="Record Voice Note"
                   >
-                    <Mic size={15} style={{ color: '#E11D48' }} />
+                    <Mic size={15} style={{ color: 'var(--brand-crimson-light)' }} />
                   </button>
                 </div>
               )}
@@ -1325,11 +1181,11 @@ export default function FleetChatCenter({
       {activeDrawer === 'radar' && currentRequisition && (
         <aside className="fleet-chat-drawer">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#2563EB' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-info)' }}>
               <Compass size={16} />
               <span>{t('Live Route Radar HUD', 'লাইভ রুট রাডার', lang)}</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
               <X size={16} />
             </button>
           </div>
@@ -1337,14 +1193,14 @@ export default function FleetChatCenter({
           {/* Telemetry KPIs */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px', marginBottom: '14px' }}>
             <div className="fleet-hud-card">
-              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>SPEED TELEMETRY</span>
-              <span style={{ fontSize: '18px', fontWeight: 900, color: '#2563EB', display: 'block', margin: '2px 0' }}>42 km/h</span>
-              <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 600 }}>Normal Corridor</span>
+              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)' }}>SPEED TELEMETRY</span>
+              <span style={{ fontSize: '18px', fontWeight: 900, color: 'var(--status-info)', display: 'block', margin: '2px 0' }}>42 km/h</span>
+              <span style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 600 }}>Normal Corridor</span>
             </div>
             <div className="fleet-hud-card">
-              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94A3B8' }}>FUEL STATUS</span>
-              <span style={{ fontSize: '18px', fontWeight: 900, color: '#059669', display: 'block', margin: '2px 0' }}>82%</span>
-              <span style={{ fontSize: '10.5px', color: '#64748B' }}>Octane 95</span>
+              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)' }}>FUEL STATUS</span>
+              <span style={{ fontSize: '18px', fontWeight: 900, color: 'var(--status-success)', display: 'block', margin: '2px 0' }}>82%</span>
+              <span style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>Octane 95</span>
             </div>
           </div>
 
@@ -1352,25 +1208,25 @@ export default function FleetChatCenter({
           <div className="fleet-hud-card" style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: 800, fontSize: '12px', marginBottom: '8px' }}>
               <span>Transit Corridor</span>
-              <span style={{ color: '#2563EB' }}>64% Completed</span>
+              <span style={{ color: 'var(--status-info)' }}>64% Completed</span>
             </div>
 
-            <div style={{ height: '8px', width: '100%', borderRadius: '9999px', background: '#F1F5F9', overflow: 'hidden', marginBottom: '12px' }}>
-              <div style={{ height: '100%', background: '#2563EB', borderRadius: '9999px', width: '64%' }} />
+            <div style={{ height: '8px', width: '100%', borderRadius: '9999px', background: 'var(--surface-2)', overflow: 'hidden', marginBottom: '12px' }}>
+              <div style={{ height: '100%', background: 'var(--status-info-solid)', borderRadius: '9999px', width: '64%' }} />
             </div>
 
-            <div style={{ borderLeft: '2px solid #2563EB', paddingLeft: '12px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ borderLeft: '2px solid var(--status-info)', paddingLeft: '12px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div>
                 <span style={{ fontWeight: 800, display: 'block' }}>Origin:</span>
-                <span style={{ color: '#64748B' }}>{currentRequisition.from}</span>
+                <span style={{ color: 'var(--text-3)' }}>{currentRequisition.from}</span>
               </div>
               <div>
-                <span style={{ fontWeight: 800, color: '#2563EB', display: 'block' }}>Current Position:</span>
+                <span style={{ fontWeight: 800, color: 'var(--status-info)', display: 'block' }}>Current Position:</span>
                 <span style={{ color: 'var(--brand-slate-700)' }}>Approaching Jatrabari Flyover Exit (45 km/h)</span>
               </div>
               <div>
                 <span style={{ fontWeight: 800, display: 'block' }}>Destination:</span>
-                <span style={{ color: '#64748B' }}>{currentRequisition.to}</span>
+                <span style={{ color: 'var(--text-3)' }}>{currentRequisition.to}</span>
               </div>
             </div>
           </div>
@@ -1396,10 +1252,10 @@ export default function FleetChatCenter({
         <aside className="fleet-chat-drawer">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              <FileText size={16} style={{ color: '#2563EB' }} />
+              <FileText size={16} style={{ color: 'var(--status-info)' }} />
               <span>{t('Mission Dossier', 'মিশন চালান তথ্য', lang)}</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
               <X size={16} />
             </button>
           </div>
@@ -1414,13 +1270,13 @@ export default function FleetChatCenter({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '12px', marginTop: '4px' }}>
-              <MapPin size={15} style={{ color: '#A51C30', flexShrink: 0 }} />
+              <MapPin size={15} style={{ color: 'var(--brand-crimson)', flexShrink: 0 }} />
               <span>{currentRequisition.to}</span>
             </div>
-            <div style={{ paddingLeft: '21px', fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+            <div style={{ paddingLeft: '21px', fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>
               From: {currentRequisition.from.split(',')[0]}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #F1F5F9', marginTop: '10px', paddingTop: '8px', fontSize: '11px', fontWeight: 600, color: '#64748B' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-subtle)', marginTop: '10px', paddingTop: '8px', fontSize: '11px', fontWeight: 600, color: 'var(--text-3)' }}>
               <span>Dept: {currentRequisition.departureTime}</span>
               <span>{currentRequisition.passengersCount} Pax</span>
             </div>
@@ -1428,16 +1284,16 @@ export default function FleetChatCenter({
 
           {/* Assigned Driver Profile */}
           {currentRequisition.assignedDriverName ? (
-            <div className="fleet-hud-card" style={{ background: '#ECFDF5', borderColor: '#A7F3D0', marginBottom: '14px' }}>
+            <div className="fleet-hud-card" style={{ background: 'var(--status-success-bg)', borderColor: 'var(--status-success-border)', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#059669', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '13px', flexShrink: 0 }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '13px', flexShrink: 0 }}>
                   {initials(currentRequisition.assignedDriverName)}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: '12.5px', color: '#064E3B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontWeight: 800, fontSize: '12.5px', color: 'var(--status-success-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentRequisition.assignedDriverName}
                   </div>
-                  <div style={{ fontWeight: 600, fontSize: '11px', color: '#047857' }}>
+                  <div style={{ fontWeight: 600, fontSize: '11px', color: 'var(--status-success-text)' }}>
                     {currentRequisition.assignedVehiclePlate || 'Duty Car Allocated'}
                   </div>
                 </div>
@@ -1457,8 +1313,8 @@ export default function FleetChatCenter({
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', border: '1px solid #FDE68A', background: '#FFFBEB', padding: '12px', fontSize: '12px', color: '#B45309', marginBottom: '14px' }}>
-              <Clock size={16} style={{ color: '#D97706', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', border: '1px solid var(--status-warning-bright)', background: 'var(--status-warning-bg)', padding: '12px', fontSize: '12px', color: 'var(--status-warning-text)', marginBottom: '14px' }}>
+              <Clock size={16} style={{ color: 'var(--status-warning)', flexShrink: 0 }} />
               <span>Awaiting driver assignment by transport supervisor</span>
             </div>
           )}
@@ -1473,12 +1329,12 @@ export default function FleetChatCenter({
               gap: '8px',
               width: '100%',
               borderRadius: '12px',
-              border: '1px solid #BFDBFE',
-              background: '#EFF6FF',
+              border: '1px solid var(--status-info-border)',
+              background: 'var(--status-info-bg)',
               padding: '10px',
               fontSize: '12px',
               fontWeight: 800,
-              color: '#1D4ED8',
+              color: 'var(--status-info-text)',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
             }}
@@ -1493,11 +1349,11 @@ export default function FleetChatCenter({
       {activeDrawer === 'toll' && currentRequisition && (
         <aside className="fleet-chat-drawer">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '8px', marginBottom: '14px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#D97706' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--status-warning)' }}>
               <Receipt size={16} />
               <span>Submit Highway Toll</span>
             </span>
-            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94A3B8' }}>
+            <button onClick={() => setActiveDrawer('none')} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--text-muted)' }}>
               <X size={16} />
             </button>
           </div>
@@ -1508,7 +1364,7 @@ export default function FleetChatCenter({
               <select
                 value={tollPlaza}
                 onChange={(e) => setTollPlaza(e.target.value)}
-                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', background: '#FFFFFF', boxSizing: 'border-box' }}
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid var(--border-2)', padding: '10px', fontSize: '12px', background: 'var(--surface-1)', boxSizing: 'border-box' }}
               >
                 <option value="Mayor Hanif Flyover">Mayor Hanif Flyover</option>
                 <option value="Second Buriganga Bridge">Second Buriganga Bridge (Babubazar)</option>
@@ -1523,7 +1379,7 @@ export default function FleetChatCenter({
                 type="number"
                 value={tollAmount}
                 onChange={(e) => setTollAmount(e.target.value)}
-                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', fontWeight: 800, background: '#FFFFFF', boxSizing: 'border-box' }}
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid var(--border-2)', padding: '10px', fontSize: '12px', fontWeight: 800, background: 'var(--surface-1)', boxSizing: 'border-box' }}
               />
             </div>
 
@@ -1533,7 +1389,7 @@ export default function FleetChatCenter({
                 type="text"
                 value={tollSlipNo}
                 onChange={(e) => setTollSlipNo(e.target.value)}
-                style={{ width: '100%', borderRadius: '10px', border: '1px solid #CBD5E1', padding: '10px', fontSize: '12px', fontFamily: 'monospace', background: '#FFFFFF', boxSizing: 'border-box' }}
+                style={{ width: '100%', borderRadius: '10px', border: '1px solid var(--border-2)', padding: '10px', fontSize: '12px', fontFamily: 'monospace', background: 'var(--surface-1)', boxSizing: 'border-box' }}
               />
             </div>
 
@@ -1542,8 +1398,8 @@ export default function FleetChatCenter({
               style={{
                 width: '100%',
                 borderRadius: '12px',
-                background: '#D97706',
-                color: '#FFFFFF',
+                background: 'var(--status-warning-solid)',
+                color: 'var(--text-on-brand)',
                 padding: '10px',
                 fontSize: '12px',
                 fontWeight: 800,

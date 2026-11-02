@@ -1,86 +1,84 @@
 import React, { useState } from 'react';
-import { AppRole, Lang, ROLE_META, t } from '../types';
-import { showToast } from '../App';
+import { Lang, ROLE_META, t } from '../types';
+import { showToast } from '../components/ToastManager';
+import { sessionStore } from '../auth/session';
 import {
   Lock, Mail, ArrowRight, ShieldCheck,
-  Globe, Eye, EyeOff, Sparkles
+  Globe, Eye, EyeOff, AlertCircle, Loader2
 } from 'lucide-react';
-import TelemetryLoader from '../components/TelemetryLoader';
 
 interface LoginPageProps {
-  onLogin: (role: AppRole) => void;
   lang: Lang;
   onLangToggle: () => void;
 }
 
-interface PersonaOption {
-  role: AppRole;
-  shortLabel: string;
-  shortLabelBn: string;
-}
+type FormError = 'invalid_credentials' | 'locked' | 'missing' | null;
 
-const PERSONAS: PersonaOption[] = [
-  { role: 'chairman',        shortLabel: 'Chairman & MD',        shortLabelBn: 'চেয়ারম্যান ও এমডি' },
-  { role: 'plant_gm',        shortLabel: 'Plant GM',             shortLabelBn: 'প্ল্যান্ট জিএম' },
-  { role: 'hr_admin',        shortLabel: 'GM, HR & Admin',       shortLabelBn: 'এইচআর ও প্রশাসন' },
-  { role: 'transport_admin', shortLabel: 'Transport Supervisor', shortLabelBn: 'পরিবহন সুপারভাইজার' },
-  { role: 'hod',             shortLabel: 'Head of Finance',      shortLabelBn: 'অর্থ বিভাগ প্রধান' },
-  { role: 'employee',        shortLabel: 'Sales Officer',        shortLabelBn: 'সিনিয়র সেলস অফিসার' },
-  { role: 'driver',          shortLabel: 'Company Driver',       shortLabelBn: 'কোম্পানি ড্রাইভার' },
-];
+const ERROR_TEXT: Record<Exclude<FormError, null>, { en: string; bn: string }> = {
+  missing: {
+    en: 'Enter your work email or employee ID and password.',
+    bn: 'আপনার অফিস ইমেইল বা কর্মী আইডি এবং পাসওয়ার্ড লিখুন।',
+  },
+invalid_credentials  : {
+    en: 'The email/ID or password you entered is incorrect.',
+    bn: 'ইমেইল/আইডি অথবা পাসওয়ার্ড সঠিক নয়।',
+  },
+  locked: {
+    en: 'Too many failed attempts. Contact IT Support Desk (Ext. 4401) to unlock your account.',
+    bn: 'অনেকবার ভুল চেষ্টা হয়েছে। অ্যাকাউন্ট আনলক করতে আইটি সাপোর্ট ডেস্কে (Ext. 4401) যোগাযোগ করুন।',
+  },
+};
 
-export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProps) {
-  const [selectedRole, setSelectedRole] = useState<AppRole>('chairman');
-  const [email, setEmail] = useState(ROLE_META.chairman.email);
-  const [password, setPassword] = useState('bogcl2026');
+export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<FormError>(null);
 
-  const handleSelectPersona = (p: PersonaOption) => {
-    const meta = ROLE_META[p.role];
-    setSelectedRole(p.role);
-    setEmail(meta.email);
-    setPassword('bogcl2026');
-  };
-
-  const handleEmailChange = (val: string) => {
-    setEmail(val);
-    const normalized = val.trim().toLowerCase();
-    const matchedRole = (Object.keys(ROLE_META) as AppRole[]).find(
-      (r) =>
-        ROLE_META[r].email.toLowerCase() === normalized ||
-        ROLE_META[r].empId.toLowerCase() === normalized
-    );
-    if (matchedRole) {
-      setSelectedRole(matchedRole);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    if (!identifier.trim() || !password) {
+      setError('missing');
+      return;
+    }
+    setError(null);
+    setIsSubmitting(true);
+    // Small delay so the state change reads as a real round-trip.
+    const [result] = await Promise.all([
+      sessionStore.login(identifier, password, rememberMe),
+      new Promise((r) => setTimeout(r, 650)),
+    ]);
+    setIsSubmitting(false);
+    if (!result.ok) {
+      setError(result.reason);
+      setPassword('');
+      return;
+    }
+    const user = sessionStore.getState().user;
+    if (user) {
+      showToast(
+        t(`Welcome back, ${user.shortName}.`, `স্বাগতম, ${user.nameBn}।`, lang),
+        'gold'
+      );
     }
   };
 
-  const handleTelemetryComplete = () => {
-    setIsSubmitting(false);
-    onLogin(selectedRole);
-    const meta = ROLE_META[selectedRole];
+  const handleSso = () => {
     showToast(
       t(
-        `Welcome, ${meta.name}! Signed into BOGCL OneOps.`,
-        `স্বাগতম, ${meta.nameBn}! সফলভাবে লগইন সম্পন্ন হয়েছে।`,
+        'Office Account sign-in is available on the company network only.',
+        'অফিস অ্যাকাউন্ট সাইন-ইন শুধুমাত্র কোম্পানি নেটওয়ার্কে ব্যবহারযোগ্য।',
         lang
       ),
-      'gold'
+      'info'
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-  };
-
-  const currentMeta = ROLE_META[selectedRole];
-
   return (
     <div className={`login-screen${lang === 'bn' ? ' lang-bn' : ''}`}>
-      {/* Top Header Bar */}
       <header className="login-topbar">
         <div className="login-brand-logo">
           <div className="brand-emblem">B</div>
@@ -91,108 +89,70 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
         </div>
 
         <button
-          className="btn-lang"
+          type="button"
+          className="btn-lang login-lang-btn"
           onClick={onLangToggle}
-          style={{
-            background: 'rgba(255,255,255,0.08)',
-            color: '#fff',
-            borderColor: 'rgba(255,255,255,0.18)',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            cursor: 'pointer',
-          }}
         >
           <Globe size={14} />
           <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
         </button>
       </header>
 
-      {/* Centered Main Form Container */}
       <main className="login-body">
         <div className="login-card-centered">
-          {/* Card Brand Header */}
           <div className="login-card-header">
             <div className="brand-badge-ring">
               <div className="brand-emblem-large">B</div>
             </div>
             <h2 className="login-main-title">
-              {t('Sign In to BOGCL OneOps', 'বসুন্ধরা ওয়ান-অপ্স পোর্টালে সাইন ইন করুন', lang)}
+              {t('Sign in to BOGCL OneOps', 'বসুন্ধরা ওয়ান-অপ্স পোর্টালে সাইন ইন করুন', lang)}
             </h2>
             <p className="login-main-subtitle">
               {t(
-                'Daily Operations, Approvals, Vehicles, Assets & Staff Services',
+                'Daily operations, approvals, vehicles, assets & staff services',
                 'দৈনন্দিন কার্যক্রম, অনুমোদন, পরিবহন, সম্পদ ও কর্মী সেবা পোর্টাল',
                 lang
               )}
             </p>
           </div>
 
-          {/* Quick Demo Role Switcher */}
-          <div className="demo-persona-section">
-            <div className="demo-persona-label">
-              <Sparkles size={12} color="var(--brand-gold)" />
-              <span>{t('Choose a Role to Preview the System', 'সিস্টেমটি দেখার জন্য যেকোনো একটি পদবি নির্বাচন করুন', lang)}</span>
-            </div>
+          <form onSubmit={handleSubmit} className="login-form-clean" noValidate>
+            {error && (
+              <div className="login-error-banner" role="alert">
+                <AlertCircle size={15} />
+                <span>{t(ERROR_TEXT[error].en, ERROR_TEXT[error].bn, lang)}</span>
+              </div>
+            )}
 
-            <div className="demo-pills-grid">
-              {PERSONAS.map((p) => {
-                const meta = ROLE_META[p.role];
-                const isSelected = selectedRole === p.role;
-                return (
-                  <button
-                    key={p.role}
-                    type="button"
-                    className={`demo-pill-btn ${isSelected ? 'active' : ''}`}
-                    onClick={() => handleSelectPersona(p)}
-                    title={`${meta.name} (${meta.empId}) — ${t(meta.label, meta.labelBn, lang)}`}
-                  >
-                    <span className="demo-pill-avatar" style={{ background: meta.avatarColor }}>
-                      {meta.initials}
-                    </span>
-                    <span className="demo-pill-text">
-                      <strong className="demo-pill-name">{meta.shortName}</strong>
-                      <span className="demo-pill-role">{t(p.shortLabel, p.shortLabelBn, lang)}</span>
-                    </span>
-                    {isSelected && <span className="demo-pill-check">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="login-form-clean">
-            {/* Work Email / Employee ID */}
             <div className="form-group-clean">
               <div className="label-with-link">
-                <label>{t('Work Email or Employee ID', 'অফিস ইমেইল অথবা কর্মী আইডি', lang)}</label>
-                <span style={{ fontSize: '11px', color: 'var(--brand-gold)', fontWeight: 700, fontFamily: 'monospace' }}>
-                  {currentMeta.empId}
-                </span>
+                <label htmlFor="login-identifier">{t('Work Email or Employee ID', 'অফিস ইমেইল অথবা কর্মী আইডি', lang)}</label>
               </div>
               <div className="login-input-clean">
                 <Mail size={15} className="input-icon-clean" />
                 <input
+                  id="login-identifier"
                   type="text"
-                  value={email}
-                  onChange={(e) => handleEmailChange(e.target.value)}
-                  placeholder="name@bashundhara.com or EMP-0001"
-                  required
+                  value={identifier}
+                  onChange={(e) => { setIdentifier(e.target.value); if (error) setError(null); }}
+                  placeholder={t('name@bashundhara.com or EMP-0001', 'name@bashundhara.com অথবা EMP-0001', lang)}
+                  autoComplete="username"
+                  autoFocus
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div className="form-group-clean">
               <div className="label-with-link">
-                <label>{t('Password', 'পাসওয়ার্ড', lang)}</label>
+                <label htmlFor="login-password">{t('Password', 'পাসওয়ার্ড', lang)}</label>
                 <a
                   href="#forgot"
                   onClick={(e) => {
                     e.preventDefault();
                     showToast(
                       t(
-                        'For password reset, please call IT Support Desk at Ext. 4401.',
+                        'For password reset, call IT Support Desk at Ext. 4401.',
                         'পাসওয়ার্ড রিসেটের জন্য আইটি সাপোর্ট ডেস্কে কল করুন: Ext. 4401',
                         lang
                       ),
@@ -207,16 +167,19 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
               <div className="login-input-clean">
                 <Lock size={15} className="input-icon-clean" />
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onChange={(e) => { setPassword(e.target.value); if (error) setError(null); }}
+                  autoComplete="current-password"
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
                   className="pw-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  title={showPassword ? t('Hide password', 'পাসওয়ার্ড লুকান', lang) : t('Show password', 'পাসওয়ার্ড দেখান', lang)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -224,80 +187,56 @@ export default function LoginPage({ onLogin, lang, onLangToggle }: LoginPageProp
               </div>
             </div>
 
-            {/* Remember Me */}
             <div className="login-options-clean">
               <label className="remember-checkbox-clean">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={isSubmitting}
                 />
                 <span>{t('Keep me signed in on this computer', 'এই ডিভাইসে সাইন-ইন মনে রাখুন', lang)}</span>
               </label>
             </div>
 
-            {/* Primary Submit Button */}
-            <button
-              type="submit"
-              className="btn-login-primary"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn-login-primary" disabled={isSubmitting}>
               {isSubmitting ? (
-                <span>{t('Signing In...', 'প্রবেশ করা হচ্ছে...', lang)}</span>
+                <>
+                  <Loader2 size={16} className="spin-anim" />
+                  <span>{t('Signing in…', 'প্রবেশ করা হচ্ছে…', lang)}</span>
+                </>
               ) : (
                 <>
-                  <span>
-                    {t(
-                      `Sign In as ${currentMeta.shortName} (${currentMeta.label})`,
-                      `${currentMeta.nameBn} হিসেবে প্রবেশ করুন`,
-                      lang
-                    )}
-                  </span>
+                  <span>{t('Sign in', 'সাইন ইন', lang)}</span>
                   <ArrowRight size={16} />
                 </>
               )}
             </button>
 
-            {/* Divider */}
             <div className="login-divider-clean">
-              <span>{t('or continue with', 'অথবা', lang)}</span>
+              <span>{t('or', 'অথবা', lang)}</span>
             </div>
 
-            {/* Company Single Sign-On */}
-            <button
-              type="button"
-              className="btn-sso-clean"
-              onClick={() => setIsSubmitting(true)}
-            >
+            <button type="button" className="btn-sso-clean" onClick={handleSso} disabled={isSubmitting}>
               <ShieldCheck size={16} color="var(--brand-gold)" />
-              <span>{t('Sign In with Bashundhara Group Office Account', 'বসুন্ধরা গ্রুপ অফিস অ্যাকাউন্ট দিয়ে প্রবেশ করুন', lang)}</span>
+              <span>{t('Sign in with Bashundhara Group Office Account', 'বসুন্ধরা গ্রুপ অফিস অ্যাকাউন্ট দিয়ে প্রবেশ করুন', lang)}</span>
             </button>
           </form>
         </div>
       </main>
 
-      {/* Clean Footer */}
       <footer className="login-footer-clean">
         <div>
-          © 2026 <strong>Bashundhara Oil & Gas Company Limited</strong>. All rights reserved.
+          © 2026 <strong>Bashundhara Oil & Gas Company Limited</strong>. {t('All rights reserved.', 'সর্বস্বত্ব সংরক্ষিত।', lang)}
         </div>
         <div className="login-footer-tags">
-          <span>🔒 {t('Secure Connection', 'নিরাপদ সংযোগ', lang)}</span>
+          <span>{t('Secure connection', 'নিরাপদ সংযোগ', lang)}</span>
           <span>•</span>
-          <span>{t('Baridhara Head Office', 'বারিধারা প্রধান কার্যালয়', lang)}</span>
+          <span>{ROLE_META.chairman.siteLabel.split(',')[0]}</span>
           <span>•</span>
           <span>{t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)}</span>
         </div>
       </footer>
-
-      {/* Sign-In Progress Overlay */}
-      {isSubmitting && (
-        <TelemetryLoader
-          role={selectedRole}
-          lang={lang}
-          onComplete={handleTelemetryComplete}
-        />
-      )}
     </div>
   );
 }

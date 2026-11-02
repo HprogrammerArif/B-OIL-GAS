@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import { useMemo, useState } from 'react';
+import { ViewProps, t } from '../types';
+import { showToast } from '../components/ToastManager';
 import {
-  Receipt, Plus, CheckCircle, Clock, AlertTriangle, Download,
-  DollarSign, MapPin, Calendar, FileText, Send, UserCheck,
-  ChevronRight, ArrowRight, ArrowLeft, ShieldAlert, Check, X, Filter
+  Receipt, Plus, CheckCircle, AlertTriangle, Download,
+  FileText, ArrowLeft, Check, X, Banknote, Inbox
 } from 'lucide-react';
 import SubmitClaimModal, { ClaimSubmissionData } from '../components/claims/SubmitClaimModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
 import { useApprovalStore, ClaimItem } from '../store/approvalStore';
+import { EmptyState, StatusPill } from '../components/ui';
+import {
+  CLAIM_STATUS, CLAIM_TYPE, type ClaimsFilter, actionFor, applyFilter, daysWaiting, isMine, isOverdue, isPending, useClaimsScope,
+} from './claims/config';
 
 const GRADE_POLICY = [
   { grade: 'Grade 1-2 (Chairman / MD / C-Suite)', daDhaka: 'Actuals / ৳5,000', daDistrict: 'Actuals / ৳6,000', hotelLimit: '5-Star / Direct Billing', travelMode: 'Executive Car / Domestic Air' },
@@ -19,44 +22,58 @@ const GRADE_POLICY = [
 ];
 
 export default function ClaimsView({ role, lang }: ViewProps) {
-  const { claims, addClaim, updateClaimStatus, rejectClaim, resubmitClaim } = useApprovalStore();
-  const [activeTab, setActiveTab] = useState<'all' | 'tada' | 'conveyance' | 'tour_event' | 'policy'>('all');
+  const { claims, addClaim, updateClaimStatus, rejectClaim, resubmitClaim, settleClaim } = useApprovalStore();
+  const { user, visible, canViewAll, isApprover } = useClaimsScope(claims);
+  const [activeTab, setActiveTab] = useState<'claims' | 'policy'>('claims');
+  const [filter, setFilter] = useState<ClaimsFilter>(isApprover ? 'awaiting_me' : 'all');
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<'list' | 'detail'>('list');
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
 
-  const selectedClaim = claims.find(c => c.id === selectedClaimId) || claims[0];
+  const filteredClaims = useMemo(
+    () => (user ? applyFilter(visible, filter, user) : []),
+    [visible, filter, user],
+  );
+  const selectedClaim = filteredClaims.find(c => c.id === selectedClaimId) ?? visible.find(c => c.id === selectedClaimId) ?? filteredClaims[0] ?? null;
   const setSelectedClaim = (claim: ClaimItem | null) => setSelectedClaimId(claim ? claim.id : null);
+  const action = selectedClaim && user ? actionFor(selectedClaim, user) : null;
+  const selectedIsMine = !!selectedClaim && !!user && isMine(selectedClaim, user);
+  const reviewer = user ? `${user.name} (${user.label})` : '';
 
-  const filteredClaims = claims.filter(c => {
-    if (activeTab === 'tada') return c.type === 'tada';
-    if (activeTab === 'conveyance') return c.type === 'conveyance';
-    if (activeTab === 'tour_event') return c.type === 'tour_event';
-    return true;
-  });
+  const counts = useMemo(() => {
+    const open = visible.filter(isPending);
+    return {
+      awaitingMe: user ? visible.filter((c) => { const a = actionFor(c, user); return a !== null && a !== 'resubmit'; }).length : 0,
+      openCount: open.length,
+      openAmount: open.reduce((s, c) => s + c.amount, 0),
+      overdue: visible.filter(isOverdue).length,
+      paymentDue: visible.filter((c) => c.status === 'approved'),
+      paid: visible.filter((c) => c.status === 'settled'),
+      returned: visible.filter((c) => c.status === 'rejected').length,
+    };
+  }, [visible, user]);
+
+  const handleVerify = (id: string) => {
+    updateClaimStatus(id, 'pending_finance', undefined, reviewer);
+    showToast(
+      t(`Claim ${id} verified and forwarded to Finance.`, `দাবি ${id} যাচাই করে অর্থ বিভাগে পাঠানো হয়েছে।`, lang),
+      'success'
+    );
+  };
 
   const handleApprove = (id: string) => {
-    const current = claims.find(c => c.id === id);
-    if (!current) return;
+    updateClaimStatus(id, 'approved', undefined, reviewer);
+    const voucher = claims.find((c) => c.id === id)?.sapVoucher;
+    showToast(
+      t(`Claim ${id} approved${voucher ? ` · voucher ${voucher}` : ''}.`, `দাবি ${id} অনুমোদিত${voucher ? ` · ভাউচার ${voucher}` : ''}।`, lang),
+      'success'
+    );
+  };
 
-    if (current.status === 'pending_hod') {
-      updateClaimStatus(id, 'pending_finance');
-      showToast(
-        lang === 'en'
-          ? `✓ Claim ${id} verified and forwarded to Corporate Finance for voucher release.`
-          : `✓ দাবি ${id} যাচাই করে পেমেন্টের জন্য অর্থ বিভাগে পাঠানো হয়েছে।`,
-        'success'
-      );
-    } else {
-      updateClaimStatus(id, 'approved');
-      showToast(
-        lang === 'en'
-          ? `✓ Claim ${id} authorized! Payment voucher generated.`
-          : `✓ দাবি ${id} অনুমোদিত! পেমেন্ট ভাউচার প্রস্তুত করা হয়েছে।`,
-        'success'
-      );
-    }
+  const handleSettle = (id: string) => {
+    settleClaim(id);
+    showToast(t(`Claim ${id} marked as paid.`, `দাবি ${id} পরিশোধিত হিসেবে চিহ্নিত।`, lang), 'success');
   };
 
   const handleReject = () => {
@@ -65,8 +82,6 @@ export default function ClaimsView({ role, lang }: ViewProps) {
 
   const handleConfirmReject = (data: RejectionData) => {
     if (!selectedClaim) return;
-    const actor = ROLE_META[role] || ROLE_META.hod;
-    const reviewer = `${actor.name} (${actor.label})`;
 
     rejectClaim(
       selectedClaim.id,
@@ -87,9 +102,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const handleResubmit = (claimId: string) => {
     resubmitClaim(claimId, 'Vouchers updated and per-diem recalculated.');
     showToast(
-      lang === 'en'
-        ? `Claim ${claimId} revised & resubmitted for approval.`
-        : `দাবি ${claimId} সংশোধনপূর্বক পুনরায় দাখিল করা হয়েছে।`,
+      t(`Claim ${claimId} revised and resubmitted for approval.`, `দাবি ${claimId} সংশোধন করে পুনরায় দাখিল করা হয়েছে।`, lang),
       'success'
     );
   };
@@ -97,18 +110,17 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const handleCreateClaim = (data: ClaimSubmissionData) => {
     const newClaim = addClaim(data);
     setSelectedClaimId(newClaim.id);
-    setActiveTab('all');
+    setActiveTab('claims');
+    setFilter(isApprover ? 'mine' : 'all');
     showToast(
-      lang === 'en'
-        ? `Claim ${data.id} submitted for approval.`
-        : `দাবি ${data.id} অনুমোদনের জন্য দাখিল করা হয়েছে।`,
+      t(`Claim ${data.id} submitted for approval.`, `দাবি ${data.id} অনুমোদনের জন্য দাখিল করা হয়েছে।`, lang),
       'success'
     );
   };
 
   const handleExportCSV = () => {
     const headers = ['Claim ID', 'Claimant', 'Department', 'Type', 'Amount (BDT)', 'Status', 'Date', 'Purpose'];
-    const rows = claims.map(c => [
+    const rows = visible.map(c => [
       c.id,
       `"${c.claimant.replace(/"/g, '""')}"`,
       `"${c.dept.replace(/"/g, '""')}"`,
@@ -126,31 +138,32 @@ export default function ClaimsView({ role, lang }: ViewProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(t('Expense ledger downloaded as CSV.', 'এক্সপেন্স লেজার সিএসভি ফাইল হিসেবে ডাউনলোড করা হয়েছে।', lang), 'success');
+    showToast(t('Claims exported as CSV.', 'দাবির তালিকা সিএসভি হিসেবে ডাউনলোড হয়েছে।', lang), 'success');
   };
 
-  const getStatusBadge = (status: ClaimItem['status']) => {
-    switch (status) {
-      case 'pending_hod':
-        return <span className="badge warn">Pending Review</span>;
-      case 'pending_finance':
-        return <span className="badge info">Pending Finance</span>;
-      case 'approved':
-        return <span className="badge success">Approved</span>;
-      case 'settled':
-        return <span className="badge success">Paid Out</span>;
-      case 'rejected':
-        return <span className="badge danger">Returned</span>;
-    }
+  const getStatusBadge = (claim: ClaimItem) => {
+    const meta = CLAIM_STATUS[claim.status];
+    return (
+      <span style={{ display: 'inline-flex', gap: 4, flexWrap: 'wrap' }}>
+        <StatusPill tone={meta.tone}>{t(...meta.label, lang)}</StatusPill>
+        {isOverdue(claim) && <StatusPill tone="danger">{t(`${daysWaiting(claim)} d overdue`, `${daysWaiting(claim)} দিন বিলম্বিত`, lang)}</StatusPill>}
+      </span>
+    );
   };
 
-  const pendingAmount = claims
-    .filter(c => c.status.includes('pending'))
-    .reduce((acc, c) => acc + c.amount, 0);
+  const typeBadge = (type: ClaimItem['type'], small = false) => (
+    <StatusPill tone={CLAIM_TYPE[type].tone} className={small ? 'ui-pill-sm' : ''}>{t(...CLAIM_TYPE[type].label, lang)}</StatusPill>
+  );
 
-  const approvedAmount = claims
-    .filter(c => c.status === 'approved' || c.status === 'settled')
-    .reduce((acc, c) => acc + c.amount, 0);
+  if (!user) return null;
+
+  const FILTERS: { id: ClaimsFilter; label: [string, string]; count: number; show: boolean }[] = [
+    { id: 'awaiting_me', label: ['Awaiting me', 'আমার অপেক্ষায়'], count: counts.awaitingMe, show: isApprover },
+    { id: 'all', label: canViewAll ? ['All claims', 'সকল দাবি'] : ['My claims', 'আমার দাবি'], count: visible.length, show: true },
+    { id: 'mine', label: ['Mine', 'আমার'], count: visible.filter((c) => isMine(c, user)).length, show: canViewAll },
+    { id: 'open', label: ['Open', 'চলমান'], count: counts.openCount + counts.returned, show: true },
+    { id: 'paid', label: ['Approved & paid', 'অনুমোদিত ও পরিশোধিত'], count: counts.paymentDue.length + counts.paid.length, show: true },
+  ];
 
   return (
     <div className="view-container">
@@ -158,74 +171,71 @@ export default function ClaimsView({ role, lang }: ViewProps) {
       <div className="section-header">
         <div>
           <h2 className="section-title">
-            💰 {t('Travel Expense & Conveyance Management', 'ভ্রমণ ও যাতায়াত ভাতা (টিএ/ডিএ) ব্যবস্থাপনা', lang)}
+            {t('Expense claims', 'ব্যয় দাবি', lang)}
           </h2>
           <p className="section-subtitle">
-            {t(
-              'Tour expense claims, daily allowance per-diem, monthly conveyance reimbursement, and payment vouchers.',
-              'দাপ্তরিক সফর ব্যয়, দৈনিক ভাতা, মাসিক যাতায়াত বিল এবং পেমেন্ট ভাউচার ব্যবস্থাপনা।',
-              lang
-            )}
+            {canViewAll
+              ? t('Travel (TA/DA), local conveyance and event settlements across the company, with the decisions you owe.', 'কোম্পানিজুড়ে ভ্রমণ (টিএ/ডিএ), স্থানীয় যাতায়াত ও ইভেন্ট নিষ্পত্তি এবং আপনার করণীয় সিদ্ধান্ত।', lang)
+              : t('Your travel, conveyance and event claims, from submission to payment.', 'আপনার ভ্রমণ, যাতায়াত ও ইভেন্ট দাবি — জমা থেকে পরিশোধ পর্যন্ত।', lang)}
           </p>
         </div>
         <div className="btn-group">
-          <button
-            className="btn-primary"
-            onClick={() => setShowSubmitModal(true)}
-          >
-            <Plus size={15} /> {t('Submit New Claim', 'নতুন দাবি দাখিল', lang)}
+          <button className="btn-primary" onClick={() => setShowSubmitModal(true)}>
+            <Plus size={15} /> {t('New claim', 'নতুন দাবি', lang)}
           </button>
-          <button
-            className="btn-outline"
-            onClick={handleExportCSV}
-          >
-            <Download size={15} /> {t('Export CSV Ledger', 'লেজার ডাউনলোড', lang)}
-          </button>
+          {canViewAll && (
+            <button className="btn-outline" onClick={handleExportCSV}>
+              <Download size={15} /> {t('Export CSV', 'সিএসভি ডাউনলোড', lang)}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* KPI Stat Cards */}
+      {/* KPI Stat Cards (computed from the claims in scope) */}
       <div className="kpi-grid mb-5">
-        <div className="kpi-card">
-          <div className="kpi-label">{t('Pending Verification', 'যাচাইয়ের অপেক্ষায়', lang)}</div>
-          <div className="kpi-value text-amber">
-            ৳{pendingAmount.toLocaleString()}
+        {isApprover ? (
+          <div className="kpi-card">
+            <div className="kpi-label">{t('Awaiting my decision', 'আমার সিদ্ধান্তের অপেক্ষায়', lang)}</div>
+            <div className={`kpi-value ${counts.awaitingMe ? 'text-amber' : ''}`}>{counts.awaitingMe}</div>
+            <div className="kpi-sub">{t(`${counts.overdue} overdue (> 5 days)`, `${counts.overdue}টি বিলম্বিত (৫ দিনের বেশি)`, lang)}</div>
           </div>
-          <div className="kpi-sub">{claims.filter(c => c.status.includes('pending')).length} active claims</div>
+        ) : (
+          <div className="kpi-card">
+            <div className="kpi-label">{t('In approval', 'অনুমোদনাধীন', lang)}</div>
+            <div className="kpi-value text-amber">৳{counts.openAmount.toLocaleString('en-IN')}</div>
+            <div className="kpi-sub">{t(`${counts.openCount} claim(s) pending`, `${counts.openCount}টি দাবি অপেক্ষমাণ`, lang)}</div>
+          </div>
+        )}
+        <div className="kpi-card">
+          <div className="kpi-label">{isApprover ? t('Open value', 'চলমান মূল্য', lang) : canViewAll ? t('Returned for correction', 'সংশোধনের জন্য ফেরত', lang) : t('Returned to me', 'আমার কাছে ফেরত', lang)}</div>
+          <div className={`kpi-value ${!isApprover && counts.returned ? 'text-amber' : ''}`}>{isApprover ? `৳${counts.openAmount.toLocaleString('en-IN')}` : counts.returned}</div>
+          <div className="kpi-sub">{isApprover ? t(`${counts.openCount} claim(s) in approval`, `${counts.openCount}টি দাবি অনুমোদনাধীন`, lang) : t('Needs correction and resubmission', 'সংশোধন ও পুনরায় দাখিল প্রয়োজন', lang)}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">{t('Approved Expenses', 'অনুমোদিত ব্যয়', lang)}</div>
-          <div className="kpi-value text-emerald">৳{approvedAmount.toLocaleString()}</div>
-          <div className="kpi-sub">Verified under company policy</div>
+          <div className="kpi-label">{t('Approved, payment due', 'অনুমোদিত, পরিশোধ বাকি', lang)}</div>
+          <div className="kpi-value text-blue">৳{counts.paymentDue.reduce((s, c) => s + c.amount, 0).toLocaleString('en-IN')}</div>
+          <div className="kpi-sub">{t(`${counts.paymentDue.length} voucher(s) issued`, `${counts.paymentDue.length}টি ভাউচার জারি`, lang)}</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">{t('Monthly Conveyance Limit', 'মাসিক যাতায়াত ভাতা সীমা', lang)}</div>
-          <div className="kpi-value">৳8,000 <span style={{ fontSize: '13px', color: 'var(--brand-slate-500)', fontWeight: 500 }}>/ Grade 8</span></div>
-          <div className="kpi-sub">Monthly ceiling for local visits</div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-label">{t('Settlement Time', 'গড় নিষ্পত্তি সময়', lang)}</div>
-          <div className="kpi-value text-blue">24-48 Hrs</div>
-          <div className="kpi-sub">Direct corporate bank transfer</div>
+          <div className="kpi-label">{t('Paid this month', 'এ মাসে পরিশোধিত', lang)}</div>
+          <div className="kpi-value text-emerald">৳{counts.paid.reduce((s, c) => s + c.amount, 0).toLocaleString('en-IN')}</div>
+          <div className="kpi-sub">{t(`${counts.paid.length} claim(s) settled`, `${counts.paid.length}টি দাবি নিষ্পন্ন`, lang)}</div>
         </div>
       </div>
 
       {/* Filter Tabs */}
       <div className="pill-tabs mb-4">
-        <button className={`pill-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>
-          {t('All Claims', 'সকল দাবি', lang)} ({claims.length})
-        </button>
-        <button className={`pill-tab ${activeTab === 'tada' ? 'active' : ''}`} onClick={() => setActiveTab('tada')}>
-          ✈️ {t('Outstation Travel (TA/DA)', 'দূরপাল্লার ভ্রমণ ভাতা (টিএ/ডিএ)', lang)}
-        </button>
-        <button className={`pill-tab ${activeTab === 'conveyance' ? 'active' : ''}`} onClick={() => setActiveTab('conveyance')}>
-          🚕 {t('Local Travel & Taxi', 'স্থানীয় যাতায়াত ও ট্যাক্সি', lang)}
-        </button>
-        <button className={`pill-tab ${activeTab === 'tour_event' ? 'active' : ''}`} onClick={() => setActiveTab('tour_event')}>
-          🏆 {t('Event & Dealer Meets', 'ইভেন্ট ও ডিলার সম্মেলন', lang)}
-        </button>
+        {FILTERS.filter((f) => f.show).map((f) => (
+          <button
+            key={f.id}
+            className={`pill-tab ${activeTab === 'claims' && filter === f.id ? 'active' : ''}`}
+            onClick={() => { setActiveTab('claims'); setFilter(f.id); }}
+          >
+            {t(...f.label, lang)} ({f.count})
+          </button>
+        ))}
         <button className={`pill-tab ${activeTab === 'policy' ? 'active' : ''}`} onClick={() => setActiveTab('policy')}>
-          📜 {t('Allowance Policy Rates', 'ভাতা নীতিমালা হার', lang)}
+          {t('Allowance policy', 'ভাতা নীতিমালা', lang)}
         </button>
       </div>
 
@@ -336,9 +346,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                             </td>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`}>
-                                  {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour' : '🚕 Conveyance'}
-                                </span>
+                                {typeBadge(item.type)}
                               </div>
                               <div style={{ fontSize: '12px', marginTop: '3px', maxWidth: '220px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {item.purpose}
@@ -350,12 +358,20 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>{item.destination}</div>
                               )}
                             </td>
-                            <td>{getStatusBadge(item.status)}</td>
+                            <td>{getStatusBadge(item)}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                  {filteredClaims.length === 0 && (
+                    <EmptyState
+                      compact
+                      icon={<Inbox size={22} />}
+                      title={filter === 'awaiting_me' ? t('Nothing awaiting your decision', 'আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই', lang) : t('No claims in this view', 'এই তালিকায় কোনো দাবি নেই', lang)}
+                      description={filter === 'awaiting_me' ? t('New claims routed to you will appear here.', 'আপনার কাছে পাঠানো নতুন দাবি এখানে দেখা যাবে।', lang) : t('Submit a claim or change the filter.', 'নতুন দাবি জমা দিন বা ফিল্টার পরিবর্তন করুন।', lang)}
+                    />
+                  )}
                 </div>
 
                 {/* Mobile Cards View */}
@@ -374,9 +390,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                           <span style={{ fontWeight: 800, fontFamily: 'monospace', fontSize: '11.5px', color: 'var(--brand-crimson)' }}>
                             {item.id}
                           </span>
-                          <span className={`badge ${item.type === 'tada' ? 'info' : item.type === 'tour_event' ? 'gold' : 'purple'}`} style={{ fontSize: '9.5px', padding: '1px 5px' }}>
-                            {item.type === 'tada' ? '✈️ TA/DA' : item.type === 'tour_event' ? '🏆 Tour' : '🚕 Conveyance'}
-                          </span>
+                          {typeBadge(item.type, true)}
                         </div>
                         <span style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)' }}>
                           ৳{item.amount.toLocaleString()}
@@ -391,10 +405,17 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                         <div>
                           <strong>{item.claimant}</strong> · {item.dept}
                         </div>
-                        {getStatusBadge(item.status)}
+                        {getStatusBadge(item)}
                       </div>
                     </div>
                   ))}
+                  {filteredClaims.length === 0 && (
+                    <EmptyState
+                      compact
+                      icon={<Inbox size={22} />}
+                      title={t('No claims in this view', 'এই তালিকায় কোনো দাবি নেই', lang)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -407,10 +428,10 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                     <div className="card-hd-icon">📄</div>
                     <div>
                       <div className="card-title">{selectedClaim.id}</div>
-                      <div className="card-subtitle">{selectedClaim.claimant} · {selectedClaim.designation}</div>
+                      <div className="card-subtitle">{selectedClaim.claimant}{selectedIsMine ? ` (${t('you', 'আপনি', lang)})` : ''} · {selectedClaim.designation} · {t('Submitted', 'জমা', lang)} {selectedClaim.dateSubmitted}</div>
                     </div>
                   </div>
-                  {getStatusBadge(selectedClaim.status)}
+                  {getStatusBadge(selectedClaim)}
                 </div>
                 <div className="card-body">
                   {/* Mobile Back Button */}
@@ -454,7 +475,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: '12px', color: 'var(--brand-slate-400)' }}>Direct voucher submission</div>
+                      <div style={{ fontSize: '12px', color: 'var(--brand-slate-400)' }}>{t('Single-line claim, no itemisation', 'একক দাবি, বিস্তারিত বিভাজন নেই', lang)}</div>
                     )}
                   </div>
 
@@ -470,7 +491,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--brand-border)', paddingTop: '6px', fontWeight: 700 }}>
                         <span>{t('Final Balance:', 'চূড়ান্ত সমন্বয় স্থিতি:', lang)}</span>
-                        <span style={{ color: (selectedClaim.netSettlement || 0) >= 0 ? '#15803D' : '#DC2626' }}>
+                        <span style={{ color: (selectedClaim.netSettlement || 0) >= 0 ? 'var(--status-success-text)' : 'var(--status-danger)' }}>
                           {(selectedClaim.netSettlement || 0) >= 0
                             ? `+ ৳${(selectedClaim.netSettlement || 0).toLocaleString()} (Payable to Staff)`
                             : `- ৳${Math.abs(selectedClaim.netSettlement || 0).toLocaleString()} (Refund to Company)`}
@@ -487,11 +508,27 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   </div>
 
                   {selectedClaim.sapVoucher && (
-                    <div style={{ background: 'rgba(5, 150, 105, 0.08)', border: '1px solid rgba(5, 150, 105, 0.2)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                      <CheckCircle size={16} color="#059669" />
+                    <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 14px', borderRadius: '6px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                      <CheckCircle size={16} color="var(--status-success)" />
                       <div>
-                        <strong>Payment Voucher Generated:</strong> <code>{selectedClaim.sapVoucher}</code>
+                        <strong>{t('Payment voucher', 'পেমেন্ট ভাউচার', lang)}:</strong> <code>{selectedClaim.sapVoucher}</code>
+                        {selectedClaim.status === 'settled' && selectedClaim.settledAt && (
+                          <span style={{ color: 'var(--status-success-text)' }}> · {t('paid', 'পরিশোধিত', lang)} {selectedClaim.settledAt}</span>
+                        )}
+                        {selectedClaim.status === 'approved' && (
+                          <span style={{ color: 'var(--text-3)' }}> · {t('bank transfer pending', 'ব্যাংক ট্রান্সফার বাকি', lang)}</span>
+                        )}
                       </div>
+                    </div>
+                  )}
+
+                  {isPending(selectedClaim) && (
+                    <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginBottom: 14, display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <Banknote size={13} />
+                      {selectedClaim.status === 'pending_hod'
+                        ? t('Step 1 of 2 · awaiting department head verification', 'ধাপ ১/২ · বিভাগীয় প্রধানের যাচাইয়ের অপেক্ষায়', lang)
+                        : t('Step 2 of 2 · awaiting finance approval and voucher', 'ধাপ ২/২ · অর্থ বিভাগের অনুমোদন ও ভাউচারের অপেক্ষায়', lang)}
+                      {daysWaiting(selectedClaim) > 0 && ` · ${t(`${daysWaiting(selectedClaim)} day(s) waiting`, `${daysWaiting(selectedClaim)} দিন অপেক্ষমাণ`, lang)}`}
                     </div>
                   )}
 
@@ -499,23 +536,23 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                   {selectedClaim.status === 'rejected' && (
                     <div
                       style={{
-                        background: '#FEF2F2',
-                        border: '1.5px solid #FCA5A5',
+                        background: 'var(--status-danger-bg)',
+                        border: '1.5px solid var(--status-danger-bright)',
                         borderRadius: '8px',
                         padding: '14px 16px',
                         marginBottom: '16px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#991B1B', fontWeight: 800, fontSize: '13px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--status-danger-text)', fontWeight: 800, fontSize: '13px' }}>
                         <AlertTriangle size={16} />
                         <span>{t('Returned for Correction', 'সংশোধনের জন্য ফেরত পাঠানো হয়েছে', lang)}</span>
-                        <span style={{ fontSize: '11px', color: '#B91C1C', marginLeft: 'auto', fontWeight: 500 }}>
-                          {selectedClaim.rejectedBy || 'Audit Approver'} • {selectedClaim.rejectedAt || 'Recent'}
+                        <span style={{ fontSize: '11px', color: 'var(--status-danger-text)', marginLeft: 'auto', fontWeight: 500 }}>
+                          {selectedClaim.rejectedBy ?? t('Approver', 'অনুমোদনকারী', lang)}{selectedClaim.rejectedAt ? ` • ${selectedClaim.rejectedAt}` : ''}
                         </span>
                       </div>
 
-                      <div style={{ marginTop: '8px', fontSize: '12px', color: '#7F1D1D' }}>
-                        <strong>{t('Reason:', 'কারণ:', lang)}</strong> {selectedClaim.rejectionReason || 'Voucher Incomplete'}
+                      <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--status-danger-text)' }}>
+                        <strong>{t('Reason:', 'কারণ:', lang)}</strong> {selectedClaim.rejectionReason ?? t('Not specified', 'উল্লেখ নেই', lang)}
                       </div>
 
                       {selectedClaim.rejectionObservation && (
@@ -523,11 +560,11 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                           style={{
                             marginTop: '6px',
                             fontSize: '11.5px',
-                            color: '#991B1B',
-                            background: 'rgba(255,255,255,0.7)',
+                            color: 'var(--status-danger-text)',
+                            background: 'var(--surface-1)',
                             padding: '6px 10px',
                             borderRadius: '4px',
-                            border: '1px solid #FECACA',
+                            border: '1px solid var(--status-danger-border)',
                           }}
                         >
                           <strong>{t('Observation:', 'পর্যবেক্ষণ:', lang)}</strong> {selectedClaim.rejectionObservation}
@@ -539,59 +576,64 @@ export default function ClaimsView({ role, lang }: ViewProps) {
                           style={{
                             marginTop: '6px',
                             fontSize: '11.5px',
-                            color: '#065F46',
-                            background: '#ECFDF5',
+                            color: 'var(--status-success-text)',
+                            background: 'var(--status-success-bg)',
                             padding: '6px 10px',
                             borderRadius: '4px',
-                            border: '1px solid #A7F3D0',
+                            border: '1px solid var(--status-success-border)',
                           }}
                         >
                           <strong>{t('Changes Requested:', 'করণীয় সংশোধন:', lang)}</strong> {selectedClaim.rejectionImprovementNotes}
                         </div>
                       )}
 
-                      <div style={{ marginTop: '12px', textAlign: 'right' }}>
-                        <button
-                          className="btn-primary"
-                          style={{ fontSize: '11.5px', padding: '6px 14px', background: '#059669', borderColor: '#059669', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                          onClick={() => handleResubmit(selectedClaim.id)}
-                        >
-                          <Check size={14} />
-                          {t('Resubmit Corrected Claim', 'সংশোধন করে পুনরায় দাখিল করুন', lang)}
-                        </button>
-                      </div>
+                      {action === 'resubmit' && (
+                        <div style={{ marginTop: '12px', textAlign: 'right' }}>
+                          <button
+                            className="btn-primary"
+                            style={{ fontSize: '11.5px', padding: '6px 14px', background: 'var(--status-success-solid)', borderColor: 'var(--status-success)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            onClick={() => handleResubmit(selectedClaim.id)}
+                          >
+                            <Check size={14} />
+                            {t('Resubmit corrected claim', 'সংশোধন করে পুনরায় দাখিল করুন', lang)}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* Approver Action Controls */}
-                  {selectedClaim.status.includes('pending') && (
+                  {/* Decision controls — only for the officer whose step it is, never on your own claim */}
+                  {(action === 'verify' || action === 'approve') && (
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      {selectedClaim.status === 'pending_hod' && (
-                        <button
-                          className="btn-primary"
-                          style={{ flex: 1 }}
-                          onClick={() => handleApprove(selectedClaim.id)}
-                        >
-                          <Check size={16} /> {t('Verify & Forward to Finance', 'অনুমোদন ও অর্থ বিভাগে প্রেরণ', lang)}
+                      {action === 'verify' && (
+                        <button className="btn-primary" style={{ flex: 1 }} onClick={() => handleVerify(selectedClaim.id)}>
+                          <Check size={16} /> {t('Verify & forward to Finance', 'যাচাই ও অর্থ বিভাগে প্রেরণ', lang)}
                         </button>
                       )}
-
-                      {selectedClaim.status === 'pending_finance' && (
+                      {action === 'approve' && (
                         <button
                           className="btn-primary"
-                          style={{ flex: 1, background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
+                          style={{ flex: 1, background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
                           onClick={() => handleApprove(selectedClaim.id)}
                         >
-                          <Check size={16} /> {t('Approve & Issue Voucher', 'পেমেন্ট অনুমোদন ও ভাউচার ইস্যু', lang)}
+                          <Check size={16} /> {t('Approve & issue voucher', 'অনুমোদন ও ভাউচার ইস্যু', lang)}
                         </button>
                       )}
-
-                      <button
-                        className="btn-outline-danger"
-                        onClick={handleReject}
-                      >
-                        <X size={16} /> {t('Return with Query', 'জিজ্ঞাসাসহ ফেরত', lang)}
+                      <button className="btn-outline-danger" onClick={handleReject}>
+                        <X size={16} /> {t('Return with query', 'জিজ্ঞাসাসহ ফেরত', lang)}
                       </button>
+                    </div>
+                  )}
+                  {action === 'settle' && (
+                    <button className="btn-primary" style={{ width: '100%' }} onClick={() => handleSettle(selectedClaim.id)}>
+                      <Banknote size={16} /> {t('Mark as paid', 'পরিশোধিত হিসেবে চিহ্নিত করুন', lang)}
+                    </button>
+                  )}
+                  {action === null && isPending(selectedClaim) && (
+                    <div style={{ fontSize: 12, color: 'var(--text-3)', padding: '10px 12px', background: 'var(--surface-2)', borderRadius: 8 }}>
+                      {selectedIsMine
+                        ? t('Your claim is with the approver. You will see the decision here.', 'আপনার দাবি অনুমোদনকারীর কাছে আছে। সিদ্ধান্ত এখানে দেখা যাবে।', lang)
+                        : t('Read-only: this claim is decided by another approver.', 'শুধু দেখার জন্য: এই দাবির সিদ্ধান্ত অন্য অনুমোদনকারী নেবেন।', lang)}
                     </div>
                   )}
                 </div>

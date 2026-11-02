@@ -1,3 +1,4 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, SYSTEM_TODAY } from '../types';
 
@@ -321,10 +322,16 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   },
 ];
 
-let globalEmployees = [...INITIAL_EMPLOYEES];
+const PERSIST_NAME = 'employees';
+const PERSIST_VERSION = 1;
+
+let globalEmployees: Employee[] = loadPersisted<Employee[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...INITIAL_EMPLOYEES];
 let listeners: Array<() => void> = [];
 
-const notify = () => listeners.forEach((l) => l());
+const notify = () => {
+  listeners.forEach((l) => l());
+  savePersisted(PERSIST_NAME, PERSIST_VERSION, () => globalEmployees);
+};
 
 export function getEmployeesSnapshot(): Employee[] {
   return globalEmployees;

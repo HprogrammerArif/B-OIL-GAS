@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Truck, Check, X, ShieldCheck } from 'lucide-react';
 import { Vehicle, useFleetStore } from '../../store/fleetStore';
 import { t } from '../../types';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 
 interface RegisterVehicleModalProps {
   isOpen: boolean;
@@ -85,7 +85,7 @@ export default function RegisterVehicleModal({
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: 'var(--surface-1)',
           borderRadius: '18px',
           overflow: 'hidden',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
@@ -97,7 +97,7 @@ export default function RegisterVehicleModal({
           className="fleet-modal-hd"
           style={{
             padding: '18px 28px',
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #871424 100%)',
+            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 55%, var(--brand-crimson-dark) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -111,8 +111,8 @@ export default function RegisterVehicleModal({
                 width: '42px',
                 height: '42px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid) 100%)',
+                color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -120,13 +120,13 @@ export default function RegisterVehicleModal({
                 flexShrink: 0,
               }}
             >
-              <Truck size={20} color="#FFFFFF" />
+              <Truck size={20} color="var(--text-on-brand)" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                 {t('Register New Fleet Commercial Vehicle', 'বহরে নতুন যানবাহন রেজিস্ট্রেশন', lang)}
               </h3>
-              <div style={{ fontSize: '12px', color: '#CBD5E1', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
                 BRTA Fitness Verification · HAZMAT Permit · Telematics Bound
               </div>
             </div>
@@ -140,7 +140,7 @@ export default function RegisterVehicleModal({
               borderRadius: '8px',
               border: '1px solid rgba(255, 255, 255, 0.2)',
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#CBD5E1',
+              color: 'var(--text-inverse-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -159,7 +159,7 @@ export default function RegisterVehicleModal({
               flex: '1 1 auto',
               overflowY: 'auto',
               padding: '26px 32px',
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'var(--surface-1)',
               boxSizing: 'border-box',
             }}
           >
@@ -175,7 +175,7 @@ export default function RegisterVehicleModal({
                   width: '100%',
                   padding: '11px 16px',
                   borderRadius: '10px',
-                  border: '1.5px solid #CBD5E1',
+                  border: '1.5px solid var(--border-2)',
                   fontSize: '13.5px',
                   fontFamily: 'monospace',
                   fontWeight: 800,
@@ -209,7 +209,7 @@ export default function RegisterVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -231,7 +231,7 @@ export default function RegisterVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -266,7 +266,7 @@ export default function RegisterVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -287,7 +287,7 @@ export default function RegisterVehicleModal({
                     width: '100%',
                     padding: '11px 16px',
                     borderRadius: '10px',
-                    border: '1.5px solid #CBD5E1',
+                    border: '1.5px solid var(--border-2)',
                     fontSize: '13px',
                     boxSizing: 'border-box',
                   }}
@@ -303,9 +303,9 @@ export default function RegisterVehicleModal({
             <div
               style={{
                 padding: '14px 18px',
-                background: '#F8FAFC',
+                background: 'var(--surface-0)',
                 borderRadius: '12px',
-                border: '1px solid #E2E8F0',
+                border: '1px solid var(--border-1)',
                 marginBottom: '18px',
                 display: 'flex',
                 alignItems: 'center',
@@ -314,10 +314,10 @@ export default function RegisterVehicleModal({
               }}
             >
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-1)' }}>
                   HAZMAT Petroleum & Bitumen Certificate
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '2px' }}>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
                   Certified by Department of Explosives for high-temperature asphalt transit
                 </div>
               </div>
@@ -325,19 +325,19 @@ export default function RegisterVehicleModal({
                 type="checkbox"
                 checked={hazmatCertified}
                 onChange={(e) => setHazmatCertified(e.target.checked)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#D97706' }}
+                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--status-warning-solid)' }}
               />
             </div>
 
             {/* Notice Alert */}
             <div
               style={{
-                background: '#EFF6FF',
-                border: '1px solid #BFDBFE',
+                background: 'var(--status-info-bg)',
+                border: '1px solid var(--status-info-border)',
                 padding: '12px 16px',
                 borderRadius: '10px',
                 fontSize: '12px',
-                color: '#1E40AF',
+                color: 'var(--status-info-text)',
                 lineHeight: 1.5,
               }}
             >
@@ -350,8 +350,8 @@ export default function RegisterVehicleModal({
             className="fleet-modal-ft"
             style={{
               padding: '16px 28px',
-              backgroundColor: '#F8FAFC',
-              borderTop: '1px solid #E2E8F0',
+              backgroundColor: 'var(--surface-0)',
+              borderTop: '1px solid var(--border-1)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '12px',
@@ -366,9 +366,9 @@ export default function RegisterVehicleModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 600,
-                color: '#475569',
-                backgroundColor: '#FFFFFF',
-                border: '1.5px solid #CBD5E1',
+                color: 'var(--text-2)',
+                backgroundColor: 'var(--surface-1)',
+                border: '1.5px solid var(--border-2)',
                 cursor: 'pointer',
               }}
             >
@@ -384,8 +384,8 @@ export default function RegisterVehicleModal({
                 borderRadius: '10px',
                 fontSize: '13px',
                 fontWeight: 700,
-                color: '#FFFFFF',
-                background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)',
+                color: 'var(--text-on-brand)',
+                background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)',
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(217, 119, 6, 0.35)',

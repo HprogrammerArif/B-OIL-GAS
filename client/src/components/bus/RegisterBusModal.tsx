@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BusVehicle, RouteInfo } from './busTypes';
 import { t } from '../../types';
+import { nextRef } from '../../lib/refs';
 import {
   Bus, X, CheckCircle, Shield, Truck, Calendar, Phone,
   User, Check, Sparkles, Navigation, Fuel, KeyRound
@@ -53,7 +54,7 @@ export default function RegisterBusModal({
       fuelLevel: '95%',
       fitnessExpiry,
       acType,
-      gpsTrackerId: `GPS-BOGCL-${Math.floor(10 + Math.random() * 90)}`
+      gpsTrackerId: nextRef('GPS', 3)
     };
 
     onRegister(newBus);
@@ -78,8 +79,8 @@ export default function RegisterBusModal({
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #091024 0%, #172554 100%)',
-          color: '#FFFFFF',
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
+          color: 'var(--text-on-brand)',
           padding: '18px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
@@ -93,7 +94,7 @@ export default function RegisterBusModal({
               borderRadius: '10px',
               background: 'rgba(212, 175, 55, 0.25)',
               border: '1px solid rgba(212, 175, 55, 0.5)',
-              color: '#FDE68A',
+              color: 'var(--status-warning-bright)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -102,14 +103,14 @@ export default function RegisterBusModal({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.2px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
                   {t('Enlist New Commuter Bus / Coach', 'নতুন কমিউটার বাস ও কোচ অন্তর্ভুক্তি', lang)}
                 </h3>
                 <span className="badge gold" style={{ fontSize: '10px', padding: '2px 8px' }}>
                   {t('Fleet Registration', 'বহর নিবন্ধন', lang)}
                 </span>
               </div>
-              <p style={{ fontSize: '12px', color: '#94A3B8', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
                 {t(
                   'Register a dedicated corporate coach, allocate seat capacity, and assign fixed highway road corridors.',
                   'প্রতিষ্ঠানিক বাস নিবন্ধন, আসন সংখ্যা নির্ধারণ এবং নির্দিষ্ট মহাসড়ক করিডোরে নিয়োগ করুন।',
@@ -123,7 +124,7 @@ export default function RegisterBusModal({
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#E2E8F0',
+              color: 'var(--text-inverse)',
               width: '32px',
               height: '32px',
               borderRadius: '8px',
@@ -142,22 +143,22 @@ export default function RegisterBusModal({
             padding: '20px 24px',
             maxHeight: '74vh',
             overflowY: 'auto',
-            background: 'var(--brand-card-bg, #FFFFFF)',
+            background: 'var(--brand-card-bg)',
             display: 'flex',
             flexDirection: 'column',
             gap: '18px'
           }}>
             {/* ─── SECTION 1: Vehicle Plate & Model Make ─── */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <div style={{
                 fontSize: '11.5px',
                 fontWeight: 800,
-                color: '#1E40AF',
+                color: 'var(--status-info-text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
                 marginBottom: '12px',
@@ -172,7 +173,7 @@ export default function RegisterBusModal({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Coach Registration No.', 'বাস রেজিস্ট্রেশন নম্বর', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Coach Registration No.', 'বাস রেজিস্ট্রেশন নম্বর', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -189,7 +190,7 @@ export default function RegisterBusModal({
 
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Bus Model & Make', 'বাসের মডেল ও বডি', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Bus Model & Make', 'বাসের মডেল ও বডি', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <select
                     className="form-input"
@@ -212,7 +213,7 @@ export default function RegisterBusModal({
               {/* Seating Capacity Tier Cards */}
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '8px', color: 'var(--brand-slate-800)' }}>
-                  {t('Seating Capacity & Fuselage Layout', 'আসন সংখ্যা ও লেআউট কাঠামো', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                  {t('Seating Capacity & Fuselage Layout', 'আসন সংখ্যা ও লেআউট কাঠামো', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                   {[
@@ -227,8 +228,8 @@ export default function RegisterBusModal({
                         type="button"
                         onClick={() => setCapacity(tier.cap)}
                         style={{
-                          background: isSel ? 'rgba(212, 175, 55, 0.12)' : '#FFFFFF',
-                          border: isSel ? '2px solid #D4AF37' : '1px solid var(--brand-border)',
+                          background: isSel ? 'rgba(212, 175, 55, 0.12)' : 'var(--surface-1)',
+                          border: isSel ? '2px solid var(--brand-gold)' : '1px solid var(--brand-border)',
                           borderRadius: '10px',
                           padding: '10px 12px',
                           textAlign: 'left',
@@ -239,9 +240,9 @@ export default function RegisterBusModal({
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '16px' }}>{tier.icon}</span>
-                          {isSel && <Check size={14} color="#B45309" />}
+                          {isSel && <Check size={14} color="var(--status-warning-text)" />}
                         </div>
-                        <div style={{ fontWeight: 800, fontSize: '13px', color: isSel ? '#B45309' : 'var(--brand-slate-900)', marginTop: '4px' }}>
+                        <div style={{ fontWeight: 800, fontSize: '13px', color: isSel ? 'var(--status-warning-text)' : 'var(--brand-slate-900)', marginTop: '4px' }}>
                           {tier.title}
                         </div>
                         <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
@@ -274,14 +275,14 @@ export default function RegisterBusModal({
             {/* ─── SECTION 2: Road Corridor Assignment ─── */}
             <div style={{
               background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.6) 0%, rgba(219, 234, 254, 0.3) 100%)',
-              border: '1.5px solid #93C5FD',
+              border: '1.5px solid var(--status-info-bright)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <div style={{
                 fontSize: '11.5px',
                 fontWeight: 800,
-                color: '#1E3A8A',
+                color: 'var(--status-info-text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
                 marginBottom: '10px',
@@ -308,13 +309,13 @@ export default function RegisterBusModal({
 
               {selectedRouteObj && (
                 <div style={{
-                  background: '#FFFFFF',
+                  background: 'var(--surface-1)',
                   borderRadius: '8px',
                   padding: '10px 12px',
                   marginTop: '10px',
                   border: '1px solid rgba(59, 130, 246, 0.3)',
                   fontSize: '11.5px',
-                  color: '#1E3A8A'
+                  color: 'var(--status-info-text)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span><strong>Path:</strong> {selectedRouteObj.corridorRoad}</span>
@@ -330,15 +331,15 @@ export default function RegisterBusModal({
 
             {/* ─── SECTION 3: Driver & Conductor Master Crew ─── */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <div style={{
                 fontSize: '11.5px',
                 fontWeight: 800,
-                color: '#B45309',
+                color: 'var(--status-warning-text)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.6px',
                 marginBottom: '12px',
@@ -351,9 +352,9 @@ export default function RegisterBusModal({
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '14px' }}>
-                <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
+                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '4px' }}>
-                    {t('Master Heavy Driver Name', 'চালকের নাম', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Master Heavy Driver Name', 'চালকের নাম', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -364,7 +365,7 @@ export default function RegisterBusModal({
                     required
                   />
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '4px' }}>
-                    {t('Driver Mobile Contact', 'চালকের মোবাইল', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Driver Mobile Contact', 'চালকের মোবাইল', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -376,9 +377,9 @@ export default function RegisterBusModal({
                   />
                 </div>
 
-                <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
+                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '4px' }}>
-                    {t('Conductor Name', 'কন্ডাক্টরের নাম', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Conductor Name', 'কন্ডাক্টরের নাম', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -389,7 +390,7 @@ export default function RegisterBusModal({
                     required
                   />
                   <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '4px' }}>
-                    {t('Conductor Mobile Contact', 'কন্ডাক্টরের মোবাইল', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                    {t('Conductor Mobile Contact', 'কন্ডাক্টরের মোবাইল', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
                   </label>
                   <input
                     className="form-input"
@@ -421,8 +422,8 @@ export default function RegisterBusModal({
           {/* Footer */}
           <div style={{
             padding: '16px 24px',
-            background: 'var(--brand-slate-50, #F8FAFC)',
-            borderTop: '1px solid var(--brand-border, #E2E8F0)',
+            background: 'var(--brand-slate-50)',
+            borderTop: '1px solid var(--brand-border)',
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',

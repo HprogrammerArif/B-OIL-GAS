@@ -54,8 +54,8 @@ export default function ReassignBusRouteModal({
       >
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #091024 0%, #172554 100%)',
-          color: '#FFFFFF',
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
+          color: 'var(--text-on-brand)',
           padding: '18px 24px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           display: 'flex',
@@ -69,7 +69,7 @@ export default function ReassignBusRouteModal({
               borderRadius: '10px',
               background: 'rgba(212, 175, 55, 0.25)',
               border: '1px solid rgba(212, 175, 55, 0.5)',
-              color: '#FDE68A',
+              color: 'var(--status-warning-bright)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -78,11 +78,11 @@ export default function ReassignBusRouteModal({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.2px' }}>
+                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
                   {t('Reassign Bus Coach to Road Corridor', 'রোড করিডোরে বাস পুনর্নির্ধারণ', lang)}
                 </h3>
               </div>
-              <p style={{ fontSize: '12px', color: '#94A3B8', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
                 {t('Dynamic Commuter Fleet Re-routing & Corridor Reallocation', 'যাত্রী চাহিদা অনুযায়ী বাস স্থানান্তর ও রুট পুনর্বণ্টন', lang)}
               </p>
             </div>
@@ -92,7 +92,7 @@ export default function ReassignBusRouteModal({
             style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#E2E8F0',
+              color: 'var(--text-inverse)',
               width: '32px',
               height: '32px',
               borderRadius: '8px',
@@ -111,20 +111,20 @@ export default function ReassignBusRouteModal({
             padding: '20px 24px',
             maxHeight: '74vh',
             overflowY: 'auto',
-            background: 'var(--brand-card-bg, #FFFFFF)',
+            background: 'var(--brand-card-bg)',
             display: 'flex',
             flexDirection: 'column',
             gap: '18px'
           }}>
             {/* Bus Coach Selector */}
             <div style={{
-              background: 'var(--brand-slate-50, #F8FAFC)',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--brand-slate-50)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {t('Select Bus Coach to Reallocate', 'স্থানান্তরের জন্য বাস নির্বাচন করুন', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                {t('Select Bus Coach to Reallocate', 'স্থানান্তরের জন্য বাস নির্বাচন করুন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
               </label>
               <select
                 className="form-input"
@@ -161,15 +161,15 @@ export default function ReassignBusRouteModal({
               gap: '14px',
               alignItems: 'center',
               background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.6) 0%, rgba(219, 234, 254, 0.3) 100%)',
-              border: '1.5px solid #93C5FD',
+              border: '1.5px solid var(--status-info-bright)',
               borderRadius: '12px',
               padding: '16px'
             }}>
-              <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
                 <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('Current Road Corridor', 'বর্তমান রুট', lang)}
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: '#1E3A8A' }}>
+                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: 'var(--status-info-text)' }}>
                   {currentRoute?.name.split(':')[0] || 'Unassigned'}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
@@ -184,8 +184,8 @@ export default function ReassignBusRouteModal({
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: '#D4AF37',
-                color: '#000000',
+                background: 'var(--brand-gold)',
+                color: 'var(--text-1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -194,17 +194,17 @@ export default function ReassignBusRouteModal({
                 <ArrowRight size={18} />
               </div>
 
-              <div style={{ background: '#FFFFFF', padding: '12px', borderRadius: '10px', border: '1.5px solid #10B981' }}>
-                <div style={{ fontSize: '10px', fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--status-success)' }}>
+                <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--status-success)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {t('Target New Road Corridor', 'নতুন নির্ধারিত রুট', lang)}
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: '#059669' }}>
+                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: 'var(--status-success)' }}>
                   {targetRoute?.name.split(':')[0]}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
                   {targetRoute?.name.split(':')[1]?.trim() || 'New Destination'}
                 </div>
-                <div style={{ fontSize: '10.5px', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
+                <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '4px', fontWeight: 700 }}>
                   🌅 {targetRoute?.inboundStartTime}
                 </div>
               </div>
@@ -212,13 +212,13 @@ export default function ReassignBusRouteModal({
 
             {/* Target Corridor Dropdown */}
             <div style={{
-              background: '#FFFFFF',
-              border: '1px solid var(--brand-border, #E2E8F0)',
+              background: 'var(--surface-1)',
+              border: '1px solid var(--brand-border)',
               borderRadius: '12px',
               padding: '16px'
             }}>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px' }}>
-                {t('Select Target Road Corridor from Master Network', 'মাস্টার নেটওয়ার্ক থেকে নতুন রোড নির্বাচন করুন', lang)} <span style={{ color: '#EF4444' }}>*</span>
+                {t('Select Target Road Corridor from Master Network', 'মাস্টার নেটওয়ার্ক থেকে নতুন রোড নির্বাচন করুন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
               </label>
               <select
                 className="form-input"
@@ -237,16 +237,16 @@ export default function ReassignBusRouteModal({
             {/* Dispatch Telemetry Warning Strip */}
             <div style={{
               fontSize: '11.5px',
-              color: '#1E3A8A',
+              color: 'var(--status-info-text)',
               background: 'rgba(59, 130, 246, 0.08)',
-              border: '1.5px solid #BFDBFE',
+              border: '1.5px solid var(--status-info-border)',
               padding: '12px 14px',
               borderRadius: '10px',
               display: 'flex',
               alignItems: 'flex-start',
               gap: '10px'
             }}>
-              <AlertCircle size={17} color="#2563EB" style={{ flexShrink: 0, marginTop: '1px' }} />
+              <AlertCircle size={17} color="var(--status-info)" style={{ flexShrink: 0, marginTop: '1px' }} />
               <div>
                 <strong>{t('Operational Telemetry Notice:', 'প্রশাসনিক বিজ্ঞপ্তি:', lang)}</strong>{' '}
                 {t(
@@ -261,8 +261,8 @@ export default function ReassignBusRouteModal({
           {/* Footer */}
           <div style={{
             padding: '16px 24px',
-            background: 'var(--brand-slate-50, #F8FAFC)',
-            borderTop: '1px solid var(--brand-border, #E2E8F0)',
+            background: 'var(--brand-slate-50)',
+            borderTop: '1px solid var(--brand-border)',
             display: 'flex',
             justifyContent: 'flex-end',
             alignItems: 'center',

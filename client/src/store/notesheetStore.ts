@@ -1,5 +1,7 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
-import { AppRole, SYSTEM_TODAY } from '../types';
+import { AppRole } from '../types';
+import { nowStamp } from '../lib/clock';
 import type { SignatoryStep } from '../components/notesheet/InitiateNotesheetModal';
 
 export interface NoteItem {
@@ -54,8 +56,37 @@ export interface NoteFile {
   budgetInfo: BudgetSummaryInfo;
 }
 
-const makeStampCode = (prefix = 'VERIFIED-SIGN') =>
-  `${prefix}-${Math.random().toString(16).slice(2, 10).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+/** Who may sign next on a file, derived from its signatory route. */
+export function pendingStepOf(file: NoteFile): SignatoryStep | null {
+  const route = file.signatoryRoute ?? [];
+  return route.find((s) => s.status === 'pending') ?? route.find((s) => s.status === 'upcoming') ?? null;
+}
+
+/** True when the given role is the signatory whose turn it is on this file. */
+export function isTurnOf(file: NoteFile, role: AppRole): boolean {
+  if (file.status === 'approved') return false;
+  const step = pendingStepOf(file);
+  if (step) return step.roleId === role;
+  // Legacy files without a route: the final approver (default Chairman) signs.
+  return (file.finalApproverRole ?? 'chairman') === role;
+}
+
+export interface SignStepParams {
+  fileIdOrNo: string;
+  actorRole: AppRole;
+  actorName: string;
+  actorRoleTitle: string;
+  actorDept: string;
+  remark: string;
+  /** Content hash for the signature (see lib/hash.ts). */
+  hash: string;
+}
+
+export interface SignStepResult {
+  signed: boolean;
+  final: boolean;
+  nextStep: SignatoryStep | null;
+}
 
 const INITIAL_NOTE_FILES: NoteFile[] = [
   {
@@ -439,8 +470,11 @@ const INITIAL_NOTE_FILES: NoteFile[] = [
   },
 ];
 
+const PERSIST_NAME = 'notesheets';
+const PERSIST_VERSION = 1;
+
 class NotesheetStore {
-  private files: NoteFile[] = [...INITIAL_NOTE_FILES];
+  private files: NoteFile[] = loadPersisted<NoteFile[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...INITIAL_NOTE_FILES];
   private listeners: Set<() => void> = new Set();
 
   subscribe(listener: () => void): () => void {
@@ -450,6 +484,7 @@ class NotesheetStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted(PERSIST_NAME, PERSIST_VERSION, () => this.files);
   }
 
   getFiles(): NoteFile[] {
@@ -486,49 +521,55 @@ class NotesheetStore {
     this.notify();
   }
 
-  approveFile(params: {
-    fileIdOrNo: string;
-    actorName: string;
-    actorRoleTitle: string;
-    actorDept: string;
-    actorRole: AppRole;
-    remark?: string;
-    stampCode?: string;
-  }) {
-    const code = params.stampCode || makeStampCode('APPROVED');
-    this.files = this.files.map((f) => {
-      if (f.id !== params.fileIdOrNo && f.fileNo !== params.fileIdOrNo) return f;
-      if (f.status === 'approved') return f;
+  /**
+   * The signed-in signatory signs their own step. Only the officer whose turn
+   * it is may sign; the next step then becomes pending, and the file is
+   * approved only when the final step is signed.
+   */
+  signStep(params: SignStepParams): SignStepResult {
+    const file = this.getFileByIdOrNo(params.fileIdOrNo);
+    if (!file || !isTurnOf(file, params.actorRole)) {
+      return { signed: false, final: false, nextStep: null };
+    }
 
-      const updatedRoute = f.signatoryRoute?.map((s) =>
-        s.roleId === params.actorRole || s.status === 'pending'
-          ? { ...s, status: 'signed' as const, signedAt: `${SYSTEM_TODAY}, Just Now`, hash: code }
-          : s
-      );
+    const route = file.signatoryRoute ?? [];
+    const idx = route.findIndex((s) => s.status === 'pending' || s.status === 'upcoming');
+    const nextStep = idx >= 0 && idx + 1 < route.length ? route[idx + 1] : null;
+    const final = nextStep === null;
+    const stamp = nowStamp();
 
-      const approvalNote: NoteItem = {
-        id: f.notes.length + 1,
-        para: f.notes.length + 1,
-        author: params.actorName,
-        role: params.actorRoleTitle,
-        dept: params.actorDept,
-        date: `${SYSTEM_TODAY}, Just Now`,
-        body:
-          params.remark ||
-          'Proposal reviewed and officially approved. Concerned department may proceed as per company rules.',
-        status: 'approved',
-        hash: code,
-        isChairman: params.actorRole === 'chairman',
-      };
-
-      return {
-        ...f,
-        status: 'approved',
-        signatoryRoute: updatedRoute,
-        notes: [...f.notes, approvalNote],
-      };
+    const updatedRoute = route.map((s, i) => {
+      if (i === idx) return { ...s, status: 'signed' as const, signedAt: stamp, hash: params.hash };
+      if (i === idx + 1) return { ...s, status: 'pending' as const };
+      return s;
     });
+
+    const note: NoteItem = {
+      id: file.notes.length + 1,
+      para: file.notes.length + 1,
+      author: params.actorName,
+      role: params.actorRoleTitle,
+      dept: params.actorDept,
+      date: stamp,
+      body: params.remark,
+      status: final ? 'approved' : 'forwarded',
+      hash: params.hash,
+      isChairman: params.actorRole === 'chairman',
+    };
+
+    const nextStatus: NoteFile['status'] = final
+      ? 'approved'
+      : nextStep?.roleId === 'chairman'
+        ? 'pending_chairman'
+        : 'pending_approval';
+
+    this.files = this.files.map((f) =>
+      f.id === file.id
+        ? { ...f, status: nextStatus, signatoryRoute: route.length ? updatedRoute : f.signatoryRoute, notes: [...f.notes, note] }
+        : f
+    );
     this.notify();
+    return { signed: true, final, nextStep };
   }
 
   returnFileForRevision(params: {
@@ -540,20 +581,21 @@ class NotesheetStore {
     reasonCategory: string;
     observation: string;
     improvementsRequired: string;
+    hash?: string;
   }) {
-    const code = makeStampCode('RETURNED');
     this.files = this.files.map((f) => {
       if (f.id !== params.fileIdOrNo && f.fileNo !== params.fileIdOrNo) return f;
+      if (f.status === 'approved') return f;
       const returnNote: NoteItem = {
         id: f.notes.length + 1,
         para: f.notes.length + 1,
         author: params.actorName,
         role: params.actorRoleTitle,
         dept: params.actorDept,
-        date: `${SYSTEM_TODAY}, Just Now`,
+        date: nowStamp(),
         body: `[Returned for Correction]: ${params.reasonCategory}\n• Observation: ${params.observation}\n• Requested Changes: ${params.improvementsRequired}`,
         status: 'pending',
-        hash: code,
+        hash: params.hash,
         isChairman: params.actorRole === 'chairman',
       };
       return {
@@ -581,7 +623,7 @@ export function useNotesheetStore() {
     files,
     addFile: notesheetStore.addFile.bind(notesheetStore),
     appendNote: notesheetStore.appendNote.bind(notesheetStore),
-    approveFile: notesheetStore.approveFile.bind(notesheetStore),
+    signStep: notesheetStore.signStep.bind(notesheetStore),
     returnFileForRevision: notesheetStore.returnFileForRevision.bind(notesheetStore),
   };
 }

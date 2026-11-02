@@ -1,75 +1,75 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { AppRole, ViewProps, t, ROLE_META } from '../types';
-import { showToast } from '../App';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { ViewProps, t } from '../types';
+import { showToast } from '../components/ToastManager';
+import { readToken } from '../lib/theme';
+import { today, nowStamp } from '../lib/clock';
+import { signatureCode } from '../lib/hash';
+import { useCurrentUser, useCan } from '../auth/session';
 import {
-  FileSignature, CheckCircle, Clock, ShieldCheck,
-  Send, PenTool, Hash, ArrowRight, Stamp,
-  FileText, QrCode, Lock, CheckCheck, Layers, X, Printer, RotateCcw, Crown, Plus
+  CheckCircle, Clock, ShieldCheck, PenTool, Stamp,
+  FileText, QrCode, Lock, CheckCheck, Layers, X, Printer, RotateCcw, Crown, Plus, Inbox
 } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 import InitiateNotesheetModal, {
-  SignatoryStep,
   NewNotesheetData,
   AVAILABLE_OFFICERS,
 } from '../components/notesheet/InitiateNotesheetModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
+import { EmptyState } from '../components/ui';
 import { approvalStore } from '../store/approvalStore';
-import { useNotesheetStore, NoteFile, NoteItem } from '../store/notesheetStore';
+import { useNotesheetStore, NoteFile, isTurnOf, pendingStepOf } from '../store/notesheetStore';
 
 export default function NotesheetView({ role, lang }: ViewProps) {
-  const { files, addFile, appendNote, approveFile, returnFileForRevision } = useNotesheetStore();
+  const { files, addFile, signStep, returnFileForRevision } = useNotesheetStore();
+  const user = useCurrentUser();
+  const canSign = useCan('notesheet:sign');
+  const canCreate = useCan('notesheet:create');
+  const canViewAll = useCan('notesheet:view_all');
 
-  const [activeFileId, setActiveFileId] = useState(files[0]?.id || 'f1');
+  // Scope: executives/approvers see every file; others only files they
+  // initiated, sit on the route of, or that belong to their department.
+  const visibleFiles = useMemo(() => {
+    if (canViewAll || !user) return files;
+    return files.filter(
+      (f) =>
+        f.initiatorName === user.name ||
+        f.signatoryRoute?.some((s) => s.roleId === user.role) ||
+        f.dept === user.dept
+    );
+  }, [files, canViewAll, user]);
+
+  const [activeFileId, setActiveFileId] = useState<string>(() => visibleFiles[0]?.id ?? '');
   const [newNoteText, setNewNoteText] = useState('');
   const [isSigned, setIsSigned] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'sheet' | 'audit' | 'compare'>('sheet');
   const [showCertModal, setShowCertModal] = useState(false);
   const [showOfficialDoc, setShowOfficialDoc] = useState(false);
   const [showInitiateModal, setShowInitiateModal] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signatureHash, setSignatureHash] = useState<string | null>(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
 
-  // Fallback to first file if active not found
-  const currentFile = files.find((f) => f.id === activeFileId) || files[0] || {
-    id: 'f1',
-    fileNo: 'BOGCL/PLANT/2026/0894',
-    title: 'Backup Power Generator Maintenance & Spare Parts Purchase',
-    dept: 'Plant Operations',
-    amount: '৳48,50,000',
-    urgency: 'urgent' as const,
-    status: 'pending_chairman' as const,
-    date: '27 Oct 2026',
-    sapRef: 'REF-PR-2026-90412',
-    initiatorName: 'Engr. Tariqul Islam',
-    initiatorRole: 'Senior Maintenance Engineer',
-    initiatorDept: 'Keraniganj Plant Operations',
-    finalApproverRole: 'chairman' as AppRole,
-    signatoryRoute: [],
-    notes: [],
-    quotations: [],
-    budgetInfo: {
-      budgetHead: 'Plant Maintenance & Reliability',
-      accountCode: 'GL-4102-KER',
-      annualAllocation: '৳2,50,00,000',
-      availableBalance: '৳1,18,40,000',
-      thisProposalAmount: '৳48,50,000',
-      purchaseOrderRef: 'PO-2026-KER-0894',
-    },
-  };
+  const currentFile: NoteFile | null =
+    visibleFiles.find((f) => f.id === activeFileId) ?? visibleFiles[0] ?? null;
 
-  const handleRejectOrReturn = (data: RejectionData) => {
-    const actorMeta = ROLE_META[role] || ROLE_META.hod;
+  const actorName = user?.name ?? '';
+  const actorRoleTitle = user?.label ?? '';
+  const actorDept = user?.dept ?? '';
+
+  const handleRejectOrReturn = async (data: RejectionData) => {
+    if (!currentFile || !user) return;
+    const hash = await signatureCode([currentFile.fileNo, 'RETURN', user.empId, data.reasonCategory, nowStamp()]);
     returnFileForRevision({
       fileIdOrNo: currentFile.id,
-      actorName: actorMeta.name,
-      actorRoleTitle: actorMeta.label,
-      actorDept: actorMeta.dept,
+      actorName,
+      actorRoleTitle,
+      actorDept,
       actorRole: role,
       reasonCategory: data.reasonCategory,
       observation: data.observation,
       improvementsRequired: data.improvementsRequired,
+      hash,
     });
 
     // Mirror to approval store
@@ -93,7 +93,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     if (!ctx) return;
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#1E293B';
+    ctx.strokeStyle = readToken('--text-1');
   }, [activeFileId, activeTab]);
 
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -136,12 +136,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   };
 
   const stopDrawing = () => {
+    if (!isDrawing) return;
     setIsDrawing(false);
-    // Auto-enable signature when user finishes drawing
+    // A drawn stroke counts as the signer's mark; the hash is computed on submit.
     setIsSigned(true);
-    if (!signatureHash) {
-      setSignatureHash(`VERIFIED-SIGN-${Math.random().toString(16).slice(2, 10).toUpperCase()}`);
-    }
   };
 
   const clearCanvas = () => {
@@ -150,41 +148,37 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setSignatureHash(null);
     setIsSigned(false);
   };
 
-  // Identify currently pending signatory in route
-  const currentPendingStepIndex = currentFile.signatoryRoute
-    ? currentFile.signatoryRoute.findIndex((s) => s.status === 'pending')
-    : -1;
-  const currentPendingStep = currentPendingStepIndex >= 0 && currentFile.signatoryRoute
-    ? currentFile.signatoryRoute[currentPendingStepIndex]
-    : null;
-  const isFinalStep = currentFile.signatoryRoute && currentPendingStepIndex >= 0
-    ? currentPendingStepIndex === currentFile.signatoryRoute.length - 1
-    : currentFile.status !== 'approved';
+  // Route position: whose turn it is, and whether that is the final step.
+  const route = currentFile?.signatoryRoute ?? [];
+  const currentPendingStep = currentFile ? pendingStepOf(currentFile) : null;
+  const currentPendingStepIndex = currentPendingStep ? route.indexOf(currentPendingStep) : -1;
+  const nextStep = currentPendingStepIndex >= 0 ? route[currentPendingStepIndex + 1] ?? null : null;
+  const isFinalStep = currentFile ? (currentPendingStep ? nextStep === null : currentFile.status !== 'approved') : false;
+  const isMyTurn = !!currentFile && !!user && canSign && isTurnOf(currentFile, user.role);
+  const isApproved = currentFile?.status === 'approved';
 
-  const activeSignatoryName = currentPendingStep
-    ? currentPendingStep.officerName
-    : (currentFile.finalApproverRole === 'chairman' ? 'Ahmed Akbar Sobhan' : (currentFile.notes[currentFile.notes.length - 1]?.author || 'Executive Authority'));
-  const activeSignatoryRole = currentPendingStep
-    ? currentPendingStep.roleName
-    : (currentFile.finalApproverRole === 'chairman' ? 'Chairman & Managing Director' : 'Executive Approver');
-  const activeSignatoryDept = currentPendingStep
-    ? currentPendingStep.dept
-    : (currentFile.dept || 'Corporate Management');
+  const awaitingName = currentPendingStep?.officerName
+    ?? AVAILABLE_OFFICERS.find((o) => o.roleId === (currentFile?.finalApproverRole ?? 'chairman'))?.officerName
+    ?? '';
+  const awaitingRole = currentPendingStep?.roleName
+    ?? AVAILABLE_OFFICERS.find((o) => o.roleId === (currentFile?.finalApproverRole ?? 'chairman'))?.roleName
+    ?? '';
 
-  const handleCreateNotesheet = (data: NewNotesheetData) => {
+  const handleCreateNotesheet = async (data: NewNotesheetData) => {
+    const stamp = nowStamp();
+    const initHash = await signatureCode([data.fileNo, '1', data.initiatorName, data.initialNote, stamp]);
     const newFile: NoteFile = {
-      id: `f-${Date.now()}`,
+      id: `f-${data.fileNo.replace(/\//g, '-')}`,
       fileNo: data.fileNo,
       title: data.title,
       dept: data.dept,
       amount: data.amount,
       urgency: data.urgency,
-      status: 'pending_approval',
-      date: '29 Oct 2026',
+      status: data.signatoryRoute[0]?.roleId === 'chairman' ? 'pending_chairman' : 'pending_approval',
+      date: today(),
       sapRef: data.sapRef,
       initiatorName: data.initiatorName,
       initiatorRole: data.initiatorRole,
@@ -198,10 +192,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           author: data.initiatorName,
           role: data.initiatorRole,
           dept: data.initiatorDept,
-          date: '29 Oct 2026, 09:30 AM',
+          date: stamp,
           body: data.initialNote,
-          status: 'approved',
-          hash: `VERIFIED-SIGN-INIT-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
+          status: 'forwarded',
+          hash: initHash,
         },
       ],
       quotations: [],
@@ -220,21 +214,20 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     setActiveTab('sheet');
     clearCanvas();
 
-    // Mirror to Omni-Approval Queue
-    approvalStore.addNotesheetApproval(data.fileNo, data.title, data.initiatorName, data.dept, data.amount);
+    // Mirror to the approvals queue
+    approvalStore.addNotesheetApproval(newFile.id, data.fileNo, data.title, data.initiatorName, data.dept, data.amount);
     showToast(
       t(
-        `✓ Note-Sheet ${data.fileNo} created! Sent to ${data.signatoryRoute[0]?.officerName || 'Reviewer'}.`,
-        `✓ নতুন নোট-শীট ${data.fileNo} তৈরি ও প্রথম অনুমোদনকারীর নিকট প্রেরিত।`,
+        `Note-sheet ${data.fileNo} created and sent to ${data.signatoryRoute[0]?.officerName ?? 'the first reviewer'}.`,
+        `নোট-শীট ${data.fileNo} তৈরি হয়েছে এবং ${data.signatoryRoute[0]?.officerName ?? 'প্রথম পর্যালোচক'}-এর কাছে পাঠানো হয়েছে।`,
         lang
       ),
       'gold'
     );
   };
 
-  const handleQuickSignActiveOfficer = () => {
-    const generatedHash = `VERIFIED-SIGN-${Math.random().toString(16).slice(2, 10).toUpperCase()}`;
-    setSignatureHash(generatedHash);
+  const handleQuickSign = () => {
+    if (!isMyTurn) return;
     setIsSigned(true);
     const canvas = canvasRef.current;
     if (canvas) {
@@ -242,105 +235,82 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#1E293B';
+        ctx.strokeStyle = readToken('--text-1');
+        ctx.fillStyle = readToken('--text-1');
         ctx.font = 'italic 700 20px "Outfit", Georgia, serif';
-        ctx.fillText(activeSignatoryName, 25, 65);
+        ctx.fillText(actorName, 25, 65);
         ctx.beginPath();
         ctx.moveTo(20, 75);
         ctx.bezierCurveTo(70, 95, 180, 55, 270, 70);
         ctx.stroke();
       }
     }
-    showToast(
-      t(
-        `Digital signature stamp applied for ${activeSignatoryName}.`,
-        `${activeSignatoryName}-এর ডিজিটাল স্বাক্ষর প্রয়োগ করা হয়েছে।`,
-        lang
-      ),
-      'gold'
-    );
   };
 
-  const handleSignAndAdvance = () => {
+  const handleSignAndAdvance = async () => {
+    if (!currentFile || !user || !isMyTurn || isSubmitting) return;
     if (!isSigned) {
       showToast(
-        t('Please sign or click quick stamp first.', 'অনুগ্রহ করে প্রথমে ডিজিটাল স্বাক্ষর করুন।', lang),
+        t('Sign in the pad or use the signature stamp first.', 'অনুগ্রহ করে প্রথমে স্বাক্ষর করুন।', lang),
         'info'
       );
       return;
     }
 
     const defaultRemark = isFinalStep
-      ? (currentPendingStep?.roleId === 'chairman'
-          ? 'Approved as recommended. Expedite procurement before scheduled plant operations. All standards verified compliant.'
-          : `Approved under delegated authority as ${activeSignatoryRole}. Financial and technical scope verified compliant. Work execution authorized.`)
-      : `Reviewed and found compliant. Recommended for approval to ${currentFile.signatoryRoute && currentFile.signatoryRoute[currentPendingStepIndex + 1] ? currentFile.signatoryRoute[currentPendingStepIndex + 1].officerName : 'the Next Approving Authority'}.`;
-
+      ? t('Approved as recommended. The concerned department may proceed as per company rules.', 'সুপারিশ অনুযায়ী অনুমোদিত। সংশ্লিষ্ট বিভাগ কোম্পানির নিয়ম অনুযায়ী অগ্রসর হতে পারে।', lang)
+      : t(`Reviewed and found in order. Forwarded to ${nextStep?.officerName ?? 'the next approving authority'}.`, `পর্যালোচিত ও যথাযথ পাওয়া গেছে। ${nextStep?.officerName ?? 'পরবর্তী অনুমোদনকারী'}-এর কাছে পাঠানো হলো।`, lang);
     const comment = newNoteText.trim() || defaultRemark;
 
-    if (isFinalStep) {
-      approveFile({
+    setIsSubmitting(true);
+    try {
+      const stamp = nowStamp();
+      const hash = await signatureCode([currentFile.fileNo, String(currentFile.notes.length + 1), user.empId, comment, stamp]);
+      const result = signStep({
         fileIdOrNo: currentFile.id,
-        actorName: activeSignatoryName,
-        actorRoleTitle: activeSignatoryRole,
-        actorDept: activeSignatoryDept,
-        actorRole: role,
+        actorRole: user.role,
+        actorName,
+        actorRoleTitle,
+        actorDept,
         remark: comment,
+        hash,
       });
 
-      // Cross-platform sync with approval store
-      approvalStore.syncSourceDecision(currentFile.id, 'approved', comment);
+      if (!result.signed) {
+        showToast(t('This file is not waiting on your signature.', 'এই ফাইলটি আপনার স্বাক্ষরের অপেক্ষায় নেই।', lang), 'warn');
+        return;
+      }
 
-      showToast(
-        t(
-          `✓ File ${currentFile.fileNo} received FINAL APPROVAL from ${activeSignatoryName}! Process Complete.`,
-          `✓ নথি ${currentFile.fileNo} ${activeSignatoryName} কর্তৃক চূড়ান্ত অনুমোদিত হয়েছে!`,
-          lang
-        ),
-        'success'
-      );
-      setShowCertModal(true);
-    } else {
-      // Intermediate step
-      appendNote(currentFile.id, {
-        author: activeSignatoryName,
-        role: activeSignatoryRole,
-        dept: activeSignatoryDept,
-        body: comment,
-        date: '29 Oct 2026, Just Now',
-        status: 'approved',
-        isChairman: currentPendingStep?.roleId === 'chairman',
-        hash: signatureHash || `VERIFIED-SIGN-${Math.random().toString(16).slice(2, 8).toUpperCase()}`,
-      });
+      if (result.final) {
+        approvalStore.syncSourceDecision(currentFile.id, 'approved', comment);
+        showToast(
+          t(`File ${currentFile.fileNo} is now approved. Signature ${hash}.`, `নথি ${currentFile.fileNo} অনুমোদিত হয়েছে। স্বাক্ষর ${hash}।`, lang),
+          'success'
+        );
+        setShowCertModal(true);
+      } else {
+        showToast(
+          t(`Signed and forwarded to ${result.nextStep?.officerName ?? 'the next authority'}.`, `স্বাক্ষরিত ও ${result.nextStep?.officerName ?? 'পরবর্তী কর্তৃপক্ষ'}-এর কাছে পাঠানো হয়েছে।`, lang),
+          'info'
+        );
+      }
 
-      const nextOfficer = currentFile.signatoryRoute ? currentFile.signatoryRoute[currentPendingStepIndex + 1] : null;
-      showToast(
-        t(
-          `✓ Endorsed by ${activeSignatoryName} and forwarded to ${nextOfficer ? nextOfficer.officerName : 'next authority'}.`,
-          `✓ ${activeSignatoryName} কর্তৃক স্বাক্ষরিত ও পরবর্তী কর্মকর্তার নিকট প্রেরিত।`,
-          lang
-        ),
-        'info'
-      );
+      setNewNoteText('');
+      clearCanvas();
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setNewNoteText('');
-    setIsSigned(false);
-    clearCanvas();
   };
 
-  const officialDocData: DocumentData = {
+  const finalApprover = AVAILABLE_OFFICERS.find((o) => o.roleId === (currentFile?.finalApproverRole ?? 'chairman'));
+  const officialDocData: DocumentData | null = currentFile ? {
     type: 'notesheet',
     docNumber: currentFile.fileNo,
     title: currentFile.title,
     date: currentFile.date,
     department: currentFile.dept,
-    authorizedBy: currentFile.finalApproverRole
-      ? (AVAILABLE_OFFICERS.find((o) => o.roleId === currentFile.finalApproverRole)?.officerName || 'Ahmed Akbar Sobhan')
-      : 'Ahmed Akbar Sobhan',
-    authorizerRole: currentFile.finalApproverRole
-      ? (AVAILABLE_OFFICERS.find((o) => o.roleId === currentFile.finalApproverRole)?.roleName || 'Chairman & Managing Director')
-      : 'Chairman & Managing Director, Bashundhara Oil & Gas Company',
+    authorizedBy: finalApprover?.officerName ?? '',
+    authorizerRole: finalApprover?.roleName ?? '',
     amountOrValue: currentFile.amount,
     sapReference: currentFile.sapRef,
     paragraphs: currentFile.notes.map((n) => ({
@@ -349,7 +319,33 @@ export default function NotesheetView({ role, lang }: ViewProps) {
       signedBy: `${n.author} — ${n.role}`,
       hash: n.hash,
     })),
-  };
+  } : null;
+
+  if (!currentFile || !officialDocData) {
+    return (
+      <div className="view-container">
+        <EmptyState
+          icon={<Inbox size={28} />}
+          title={t('No note-sheets in your scope', 'আপনার আওতায় কোনো নোট-শীট নেই', lang)}
+          description={t('Files you initiate or are asked to sign will appear here.', 'আপনি যে ফাইল শুরু করবেন বা স্বাক্ষরের জন্য পাবেন তা এখানে দেখা যাবে।', lang)}
+          action={canCreate ? (
+            <button className="btn-primary" onClick={() => setShowInitiateModal(true)}>
+              <Plus size={13} /> {t('New note-sheet', 'নতুন নোট-শীট', lang)}
+            </button>
+          ) : undefined}
+        />
+        {showInitiateModal && (
+          <InitiateNotesheetModal
+            isOpen={showInitiateModal}
+            onClose={() => setShowInitiateModal(false)}
+            onSubmit={handleCreateNotesheet}
+            lang={lang}
+            currentRole={role}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="view-container">
@@ -376,7 +372,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('sheet')}
               style={{
                 border: 'none',
-                background: activeTab === 'sheet' ? '#fff' : 'transparent',
+                background: activeTab === 'sheet' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'sheet' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -395,7 +391,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('compare')}
               style={{
                 border: 'none',
-                background: activeTab === 'compare' ? '#fff' : 'transparent',
+                background: activeTab === 'compare' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'compare' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -414,7 +410,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               onClick={() => setActiveTab('audit')}
               style={{
                 border: 'none',
-                background: activeTab === 'audit' ? '#fff' : 'transparent',
+                background: activeTab === 'audit' ? 'var(--surface-1)' : 'transparent',
                 boxShadow: activeTab === 'audit' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                 padding: '5px 12px',
                 borderRadius: '6px',
@@ -432,34 +428,30 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           </div>
 
           {/* Quick Actions */}
-          <button
-            className="btn-primary"
-            onClick={() => setShowInitiateModal(true)}
-            style={{
-              fontSize: '11.5px',
-              padding: '5px 12px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'linear-gradient(135deg, #A51C30 0%, #700B1A 100%)',
-              fontWeight: 700,
-            }}
-          >
-            <Plus size={13} /> {t('+ New Note-Sheet', '+ নতুন নোট-শীট', lang)}
-          </button>
+          {canCreate && (
+            <button
+              className="btn-primary"
+              onClick={() => setShowInitiateModal(true)}
+              style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
+            >
+              <Plus size={13} /> {t('New note-sheet', 'নতুন নোট-শীট', lang)}
+            </button>
+          )}
           <button
             className="btn-outline"
             onClick={() => setShowOfficialDoc(true)}
             style={{ fontSize: '11.5px', padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
           >
-            <Printer size={13} /> {t('Print Document', 'প্রিন্ট', lang)}
+            <Printer size={13} /> {t('Print', 'প্রিন্ট', lang)}
           </button>
           <button
             className="btn-outline"
             onClick={() => setShowCertModal(true)}
-            style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+            disabled={!isApproved}
+            title={isApproved ? undefined : t('Available once the file is approved', 'ফাইল অনুমোদিত হলে পাওয়া যাবে', lang)}
+            style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '5px', opacity: isApproved ? 1 : 0.55 }}
           >
-            <QrCode size={13} /> {t('Approval Certificate', 'অনুমোদন সনদ', lang)}
+            <QrCode size={13} /> {t('Approval certificate', 'অনুমোদন সনদ', lang)}
           </button>
         </div>
       </div>
@@ -469,29 +461,11 @@ export default function NotesheetView({ role, lang }: ViewProps) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', maxWidth: '100%' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-400)', textTransform: 'uppercase', letterSpacing: '0.5px', marginRight: '4px' }}>
-              Files:
+              {t('Files', 'ফাইল', lang)}:
             </span>
-            <button
-              onClick={() => setShowInitiateModal(true)}
-              style={{
-                border: '1px dashed var(--brand-crimson)',
-                background: 'rgba(165, 28, 48, 0.05)',
-                color: 'var(--brand-crimson)',
-                padding: '4px 10px',
-                borderRadius: '16px',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <Plus size={12} /> {t('New Note', 'নতুন নোট', lang)}
-            </button>
-            {files.map((file) => {
-              const isSelected = activeFileId === file.id;
+            {visibleFiles.map((file) => {
+              const isSelected = currentFile.id === file.id;
+              const myTurn = !!user && canSign && isTurnOf(file, user.role);
               return (
                 <button
                   key={file.id}
@@ -502,7 +476,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   style={{
                     border: isSelected ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                     background: isSelected ? 'var(--brand-crimson)' : 'var(--brand-card-bg)',
-                    color: isSelected ? '#fff' : 'var(--brand-slate-700)',
+                    color: isSelected ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
                     padding: '4px 11px',
                     borderRadius: '16px',
                     fontSize: '11.5px',
@@ -516,9 +490,11 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 >
                   <span>{file.fileNo.split('/').slice(-2).join('/')}</span>
                   {file.status === 'approved' ? (
-                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#059669' }}>✓</span>
+                    <CheckCircle size={11} style={{ color: isSelected ? 'var(--text-on-brand)' : 'var(--status-success)' }} />
+                  ) : myTurn ? (
+                    <PenTool size={11} style={{ color: isSelected ? 'var(--text-on-brand)' : 'var(--brand-crimson)' }} />
                   ) : (
-                    <span style={{ fontSize: '10px', color: isSelected ? '#fff' : '#D97706' }}>⏳</span>
+                    <Clock size={11} style={{ color: isSelected ? 'var(--text-on-brand)' : 'var(--status-warning)' }} />
                   )}
                 </button>
               );
@@ -527,10 +503,16 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className={`badge ${currentFile.urgency === 'urgent' ? 'danger' : currentFile.urgency === 'high' ? 'warn' : 'info'}`}>
-              {currentFile.urgency.toUpperCase()}
+              {currentFile.urgency === 'urgent' ? t('Urgent', 'জরুরি', lang) : currentFile.urgency === 'high' ? t('High', 'উচ্চ', lang) : t('Normal', 'সাধারণ', lang)}
             </span>
-            <span className={`badge ${currentFile.status === 'approved' ? 'success' : currentFile.status === 'in_review' ? 'warn' : 'gold'}`}>
-              {currentFile.status === 'approved' ? 'APPROVED' : currentFile.status === 'in_review' ? 'QUERY / IN REVIEW' : 'PENDING APPROVAL'}
+            <span className={`badge ${currentFile.status === 'approved' ? 'success' : currentFile.status === 'in_review' ? 'warn' : isMyTurn ? 'danger' : 'gold'}`}>
+              {currentFile.status === 'approved'
+                ? t('Approved', 'অনুমোদিত', lang)
+                : currentFile.status === 'in_review'
+                  ? t('Returned for correction', 'সংশোধনের জন্য ফেরত', lang)
+                  : isMyTurn
+                    ? t('Awaiting your signature', 'আপনার স্বাক্ষরের অপেক্ষায়', lang)
+                    : t(`Awaiting ${awaitingName}`, `${awaitingName}-এর অপেক্ষায়`, lang)}
             </span>
           </div>
         </div>
@@ -579,24 +561,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                           gap: '6px',
                           padding: '6px 10px',
                           borderRadius: '6px',
-                          background: step.status === 'signed' ? '#ECFDF5' : step.status === 'pending' ? '#FFFBEB' : '#F1F5F9',
-                          border: step.status === 'signed' ? '1px solid #10B981' : step.status === 'pending' ? '1px solid #F59E0B' : '1px solid #E2E8F0',
+                          background: step.status === 'signed' ? 'var(--status-success-bg)' : step.status === 'pending' ? 'var(--status-warning-bg)' : 'var(--surface-2)',
+                          border: step.status === 'signed' ? '1px solid var(--status-success)' : step.status === 'pending' ? '1px solid var(--status-warning)' : '1px solid var(--border-1)',
                           fontSize: '11px',
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        <span style={{ fontWeight: 800, color: step.status === 'signed' ? '#059669' : step.status === 'pending' ? '#D97706' : '#94A3B8' }}>
+                        <span style={{ fontWeight: 800, color: step.status === 'signed' ? 'var(--status-success)' : step.status === 'pending' ? 'var(--status-warning)' : 'var(--text-muted)' }}>
                           {idx + 1}. {step.officerName}
                         </span>
-                        <span style={{ fontSize: '10px', color: step.status === 'signed' ? '#059669' : '#64748B' }}>
+                        <span style={{ fontSize: '10px', color: step.status === 'signed' ? 'var(--status-success)' : 'var(--text-3)' }}>
                           ({step.roleName.split(' ')[0]})
                         </span>
                         {step.status === 'signed' ? (
-                          <span style={{ color: '#059669', fontWeight: 800 }}>✓</span>
+                          <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>✓</span>
                         ) : step.status === 'pending' ? (
-                          <span style={{ color: '#D97706', fontWeight: 800 }}>⏳</span>
+                          <span style={{ color: 'var(--status-warning)', fontWeight: 800 }}>⏳</span>
                         ) : (
-                          <span style={{ color: '#94A3B8' }}>•</span>
+                          <span style={{ color: 'var(--text-muted)' }}>•</span>
                         )}
                       </div>
                     ))}
@@ -612,13 +594,13 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     style={{
                       padding: '12px 14px',
                       borderRadius: '8px',
-                      border: n.isChairman ? '1px solid #D4AF37' : '1px solid var(--brand-slate-200)',
+                      border: n.isChairman ? '1px solid var(--brand-gold)' : '1px solid var(--brand-slate-200)',
                       background: n.isChairman ? 'rgba(212, 175, 55, 0.04)' : 'var(--brand-card-bg)',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? '#B45309' : 'var(--brand-slate-700)' }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: n.isChairman ? 'var(--status-warning-text)' : 'var(--brand-slate-700)' }}>
                           Para {n.para}.
                         </span>
                         <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{n.author}</strong>
@@ -634,7 +616,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     {n.hash && (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--brand-slate-100)', paddingTop: '6px', fontSize: '10px', color: 'var(--brand-slate-400)', flexWrap: 'wrap', gap: '4px' }}>
                         <span style={{ fontFamily: 'monospace' }}>🔒 Verification Code: {n.hash}</span>
-                        <span style={{ color: '#059669', fontWeight: 600 }}>✓ Verified Stamp</span>
+                        <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✓ Verified Stamp</span>
                       </div>
                     )}
                   </div>
@@ -659,21 +641,22 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                   <div>
                     <div style={{ color: 'var(--brand-slate-500)' }}>Available Balance:</div>
-                    <strong style={{ color: '#059669' }}>{currentFile.budgetInfo.availableBalance}</strong>
+                    <strong style={{ color: 'var(--status-success)' }}>{currentFile.budgetInfo.availableBalance}</strong>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Right Column: Signature Pad & Decision Controls */}
+          {/* Right Column: signing controls (only for the officer whose turn it is) or file status */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {isMyTurn ? (
             <div className="card" style={{ border: '1px solid var(--brand-slate-200)', padding: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                 <div className="card-hd-icon" style={{ width: '28px', height: '28px' }}><Stamp size={15} /></div>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                    {t('Sign & Endorse Document', 'স্বাক্ষর ও অনুমোদন নিয়ন্ত্রণ', lang)}
+                    {t('Sign & endorse', 'স্বাক্ষর ও অনুমোদন', lang)}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
                     {t('Add remarks and apply your digital signature', 'মন্তব্য যোগ করুন ও স্বাক্ষর সম্পন্ন করুন', lang)}
@@ -681,11 +664,11 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 </div>
               </div>
 
-              {/* Current Signer Capsule */}
+              {/* Signer capsule: always the signed-in user */}
               <div style={{
                 padding: '9px 12px',
                 background: isFinalStep ? 'rgba(212, 175, 55, 0.1)' : 'rgba(165, 28, 48, 0.05)',
-                border: isFinalStep ? '1px solid #D4AF37' : '1px solid rgba(165, 28, 48, 0.2)',
+                border: isFinalStep ? '1px solid var(--brand-gold)' : '1px solid rgba(165, 28, 48, 0.2)',
                 borderRadius: '6px',
                 marginBottom: '10px',
                 display: 'flex',
@@ -694,33 +677,33 @@ export default function NotesheetView({ role, lang }: ViewProps) {
               }}>
                 <div>
                   <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>
-                    {isFinalStep ? t('Final Sanction Authority', 'চূড়ান্ত অনুমোদনকারী', lang) : t('Current Reviewing Officer', 'বর্তমান অনুমোদনকারী', lang)}
+                    {isFinalStep ? t('Signing as final approver', 'চূড়ান্ত অনুমোদনকারী হিসেবে স্বাক্ষর', lang) : t('Signing as reviewing officer', 'পর্যালোচনাকারী কর্মকর্তা হিসেবে স্বাক্ষর', lang)}
                   </div>
                   <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                    {activeSignatoryName}
+                    {t(user?.name ?? '', user?.nameBn ?? '', lang)}
                   </div>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
-                    {activeSignatoryRole}
+                    {t(user?.label ?? '', user?.labelBn ?? '', lang)} · {user?.empId}
                   </div>
                 </div>
                 {isFinalStep && (
-                  <span style={{ fontSize: '9px', background: '#FEF3C7', color: '#92400E', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
-                    FINAL APPROVAL
+                  <span style={{ fontSize: '9px', background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                    {t('FINAL STEP', 'চূড়ান্ত ধাপ', lang)}
                   </span>
                 )}
               </div>
 
-              {/* 1-Click Quick Stamp */}
+              {/* Signature stamp */}
               <button
                 type="button"
-                onClick={handleQuickSignActiveOfficer}
+                onClick={handleQuickSign}
                 style={{
                   width: '100%',
                   padding: '8px 12px',
                   borderRadius: '6px',
-                  border: '1px dashed #D4AF37',
+                  border: '1px dashed var(--brand-gold)',
                   background: 'rgba(212, 175, 55, 0.08)',
-                  color: '#B45309',
+                  color: 'var(--status-warning-text)',
                   fontSize: '11.5px',
                   fontWeight: 700,
                   cursor: 'pointer',
@@ -731,18 +714,12 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   marginBottom: '10px',
                 }}
               >
-                {currentPendingStep?.roleId === 'chairman' ? <Crown size={14} color="#D4AF37" /> : <Stamp size={14} color="#B45309" />}
-                <span>
-                  {t(
-                    `⚡ 1-Click Digital Stamp: ${activeSignatoryName}`,
-                    `⚡ ডিজিটাল স্বাক্ষর প্রয়োগ: ${activeSignatoryName}`,
-                    lang
-                  )}
-                </span>
+                {user?.role === 'chairman' ? <Crown size={14} color="var(--brand-gold)" /> : <Stamp size={14} color="var(--status-warning-text)" />}
+                <span>{t('Apply my signature stamp', 'আমার স্বাক্ষর স্ট্যাম্প প্রয়োগ করুন', lang)}</span>
               </button>
 
               {/* Canvas Pad */}
-              <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: '#FAFAFC', position: 'relative', height: '100px', marginBottom: '10px' }}>
+              <div style={{ border: '1px solid var(--brand-slate-200)', borderRadius: '6px', background: 'var(--surface-0)', position: 'relative', height: '100px', marginBottom: '10px' }}>
                 <canvas
                   ref={canvasRef}
                   width={340}
@@ -758,7 +735,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 />
                 {!isDrawing && !isSigned && (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', color: 'var(--brand-slate-400)', fontSize: '11px' }}>
-                    <PenTool size={13} style={{ marginRight: '5px' }} /> Or draw signature with stylus / mouse
+                    <PenTool size={13} style={{ marginRight: '5px' }} /> {t('Or draw your signature here', 'অথবা এখানে স্বাক্ষর আঁকুন', lang)}
                   </div>
                 )}
               </div>
@@ -769,24 +746,24 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   onClick={clearCanvas}
                   style={{ border: 'none', background: 'transparent', color: 'var(--brand-slate-500)', fontSize: '11px', cursor: 'pointer', padding: 0 }}
                 >
-                  Clear Signature
+                  {t('Clear signature', 'স্বাক্ষর মুছুন', lang)}
                 </button>
                 {isSigned && (
-                  <span style={{ fontSize: '10.5px', color: '#059669', fontWeight: 700 }}>
-                    ✓ Signature Ready
+                  <span style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle size={11} /> {t('Signature ready', 'স্বাক্ষর প্রস্তুত', lang)}
                   </span>
                 )}
               </div>
 
               {/* Remarks Textarea */}
               <div className="form-group" style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '11px' }}>{t('Official Remarks / Approval Note', 'দাপ্তরিক মন্তব্য / অনুমোদন নোট', lang)}</label>
+                <label style={{ fontSize: '11px' }}>{t('Remarks', 'মন্তব্য', lang)}</label>
                 <textarea
                   rows={3}
                   placeholder={
                     isFinalStep
-                      ? 'Approved as recommended. Release purchase order and proceed with works.'
-                      : 'Reviewed and found technically compliant. Forwarded for final sanction.'
+                      ? t('Approved as recommended. Release purchase order and proceed with works.', 'সুপারিশ অনুযায়ী অনুমোদিত। ক্রয়াদেশ জারি করে কাজ শুরু করুন।', lang)
+                      : t('Reviewed and found in order. Forwarded for next signature.', 'পর্যালোচিত ও যথাযথ। পরবর্তী স্বাক্ষরের জন্য পাঠানো হলো।', lang)
                   }
                   value={newNoteText}
                   onChange={(e) => setNewNoteText(e.target.value)}
@@ -800,6 +777,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   type="button"
                   className="btn-primary"
                   onClick={handleSignAndAdvance}
+                  disabled={isSubmitting}
                   style={{
                     flex: 2,
                     fontWeight: 800,
@@ -812,7 +790,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   }}
                 >
                   <CheckCheck size={14} />
-                  <span>{isFinalStep ? t('Final Sanction & Approve', 'চূড়ান্ত অনুমোদন প্রদান', lang) : t('Sign & Forward', 'স্বাক্ষর ও ফরোয়ার্ড', lang)}</span>
+                  <span>{isFinalStep ? t('Approve & close file', 'অনুমোদন ও ফাইল বন্ধ', lang) : t('Sign & forward', 'স্বাক্ষর ও ফরোয়ার্ড', lang)}</span>
                 </button>
 
                 <button
@@ -823,8 +801,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                     flex: 1,
                     fontSize: '12px',
                     padding: '9px 10px',
-                    color: '#DC2626',
-                    borderColor: '#DC2626',
+                    color: 'var(--status-danger)',
+                    borderColor: 'var(--status-danger)',
                     background: 'rgba(220, 38, 38, 0.04)',
                     display: 'flex',
                     alignItems: 'center',
@@ -833,10 +811,69 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   }}
                 >
                   <RotateCcw size={13} />
-                  <span>{t('Return / Query', 'আপত্তি / ফেরত', lang)}</span>
+                  <span>{t('Return', 'ফেরত', lang)}</span>
                 </button>
               </div>
             </div>
+            ) : (
+            <div className="card" style={{ border: '1px solid var(--brand-slate-200)', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <div className="card-hd-icon" style={{ width: '28px', height: '28px' }}>
+                  {isApproved ? <ShieldCheck size={15} /> : <Clock size={15} />}
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                    {isApproved
+                      ? t('File approved', 'ফাইল অনুমোদিত', lang)
+                      : currentFile.status === 'in_review'
+                        ? t('Returned to initiator', 'সূচনাকারীর কাছে ফেরত', lang)
+                        : t('Awaiting signature', 'স্বাক্ষরের অপেক্ষায়', lang)}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
+                    {isApproved
+                      ? t('All signatories have signed. The certificate is available.', 'সব স্বাক্ষরকারী স্বাক্ষর করেছেন। সনদ পাওয়া যাচ্ছে।', lang)
+                      : currentFile.status === 'in_review'
+                        ? t('Corrections requested; the file will be re-routed once resubmitted.', 'সংশোধন চাওয়া হয়েছে; পুনরায় জমা দিলে ফাইলটি আবার পাঠানো হবে।', lang)
+                        : t('You have read access to this file.', 'এই ফাইলে আপনার কেবল পড়ার অনুমতি আছে।', lang)}
+                  </div>
+                </div>
+              </div>
+
+              {!isApproved && currentFile.status !== 'in_review' && (
+                <div style={{ padding: '9px 12px', background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-border)', borderRadius: '6px', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '9.5px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--brand-slate-500)', fontWeight: 700 }}>
+                    {isFinalStep ? t('Final approver', 'চূড়ান্ত অনুমোদনকারী', lang) : t('Next signatory', 'পরবর্তী স্বাক্ষরকারী', lang)}
+                  </div>
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>{awaitingName}</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>{awaitingRole}</div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', color: 'var(--brand-slate-700)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Initiated by', 'সূচনাকারী', lang)}</span>
+                  <strong>{currentFile.initiatorName ?? currentFile.notes[0]?.author ?? '—'}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Signatures', 'স্বাক্ষর', lang)}</span>
+                  <strong>{route.length ? `${route.filter((s) => s.status === 'signed').length}/${route.length}` : currentFile.notes.filter((n) => n.hash).length}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Purchase ref', 'ক্রয় রেফারেন্স', lang)}</span>
+                  <code style={{ fontSize: '11px' }}>{currentFile.sapRef}</code>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => setActiveTab('audit')}
+                style={{ width: '100%', marginTop: '12px', fontSize: '11.5px', padding: '7px 10px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                <Lock size={12} /> {t('View signature history', 'স্বাক্ষর ইতিহাস দেখুন', lang)}
+              </button>
+            </div>
+            )}
           </div>
         </div>
       )}
@@ -862,27 +899,27 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 <div
                   key={idx}
                   style={{
-                    border: quote.isRecommended ? '2px solid #059669' : '1px solid var(--brand-slate-200)',
+                    border: quote.isRecommended ? '2px solid var(--status-success)' : '1px solid var(--brand-slate-200)',
                     borderRadius: '8px',
                     padding: '16px',
-                    background: quote.isRecommended ? '#F0FDF4' : 'var(--brand-card-bg)',
+                    background: quote.isRecommended ? 'var(--status-success-bg)' : 'var(--brand-card-bg)',
                     position: 'relative',
                   }}
                 >
                   {quote.isRecommended && (
-                    <div style={{ position: 'absolute', top: '-10px', right: '14px', background: '#059669', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
+                    <div style={{ position: 'absolute', top: '-10px', right: '14px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)', fontSize: '10px', fontWeight: 800, padding: '2px 8px', borderRadius: '10px' }}>
                       RECOMMENDED & LOWEST BID
                     </div>
                   )}
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-900)' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-900)' }}>
                     {quote.vendor}
                   </div>
-                  <div style={{ fontSize: '11px', color: quote.isRecommended ? '#047857' : 'var(--brand-slate-500)' }}>
+                  <div style={{ fontSize: '11px', color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-500)' }}>
                     Origin: {quote.origin}
                   </div>
 
                   <div style={{ margin: '12px 0', borderTop: '1px solid var(--brand-slate-200)', borderBottom: '1px solid var(--brand-slate-200)', padding: '8px 0' }}>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: quote.isRecommended ? '#065F46' : 'var(--brand-slate-800)' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: quote.isRecommended ? 'var(--status-success-text)' : 'var(--brand-slate-800)' }}>
                       {quote.priceText}
                     </div>
                   </div>
@@ -916,16 +953,20 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                 {t('Document Approval History & Audit Trail', 'অনুমোদন প্রক্রিয়া ও দাপ্তরিক খতিয়ান', lang)}
               </h3>
               <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-                Document Reference: {currentFile.fileNo} · Recorded & Verified
+                {t('File', 'ফাইল', lang)}: {currentFile.fileNo}
               </p>
             </div>
-            <span className="badge success">Sequential Approvals Verified</span>
+            <span className={`badge ${isApproved ? 'success' : 'warn'}`}>
+              {isApproved
+                ? t('All signatures verified', 'সব স্বাক্ষর যাচাইকৃত', lang)
+                : t(`${currentFile.notes.filter((n) => n.hash).length} signed · awaiting ${awaitingName}`, `${currentFile.notes.filter((n) => n.hash).length}টি স্বাক্ষরিত · ${awaitingName}-এর অপেক্ষায়`, lang)}
+            </span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {currentFile.notes.map((n, idx) => (
               <div key={n.id} style={{ display: 'flex', gap: '12px', padding: '12px 14px', background: 'var(--brand-slate-50)', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: n.isChairman ? '#D4AF37' : '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '11px', flexShrink: 0 }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: n.isChairman ? 'var(--brand-gold)' : 'var(--status-success-solid)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '11px', flexShrink: 0 }}>
                   {idx + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -940,10 +981,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   </div>
                   {n.hash && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
-                      <span style={{ background: '#fff', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)', fontFamily: 'monospace' }}>
+                      <span style={{ background: 'var(--surface-1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--brand-slate-200)', fontFamily: 'monospace' }}>
                         {n.hash}
                       </span>
-                      <span style={{ color: '#059669', fontWeight: 700 }}>✓ Verified Digital Signature</span>
+                      <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified Digital Signature</span>
                     </div>
                   )}
                 </div>
@@ -959,7 +1000,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           <div className="app-modal-dialog" style={{ maxWidth: '600px', width: '95vw' }} onClick={(e) => e.stopPropagation()}>
             <div className="app-modal-header">
               <div className="app-modal-header-left">
-                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#059669' }}>
+                <div className="app-modal-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--status-success)' }}>
                   <ShieldCheck size={18} />
                 </div>
                 <div>
@@ -973,8 +1014,8 @@ export default function NotesheetView({ role, lang }: ViewProps) {
             </div>
 
             <div className="app-modal-body">
-              <div style={{ border: '2px solid #D4AF37', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: '#B45309', fontWeight: 800 }}>
+              <div style={{ border: '2px solid var(--brand-gold)', borderRadius: '12px', padding: '20px', background: 'rgba(212, 175, 55, 0.04)' }}>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--status-warning-text)', fontWeight: 800 }}>
                   BASHUNDHARA OIL & GAS COMPANY LIMITED
                 </div>
                 <h3 style={{ fontSize: '17px', fontWeight: 800, margin: '8px 0 4px 0', color: 'var(--brand-crimson)' }}>
@@ -989,7 +1030,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
                   <div><strong>Amount Authorized:</strong> {currentFile.amount}</div>
                   <div><strong>Department:</strong> {currentFile.dept}</div>
                   <div><strong>Approval Date:</strong> {currentFile.date}</div>
-                  <div style={{ color: '#059669', fontWeight: 700 }}>✓ Verified by all designated authorities</div>
+                  <div style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified by all designated authorities</div>
                 </div>
               </div>
             </div>

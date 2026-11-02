@@ -16,7 +16,7 @@ While BOGCL leadership originally asked for a prototype based on a high-level di
 
 | Path | Contents |
 | :--- | :--- |
-| `client/` | **Frozen interactive prototype** (React + Vite, 7 personas, 17 modules, no backend). Reference only — not modified. |
+| `client/` | **Interactive prototype / client demo** (React + Vite, 7 personas, 17 modules, no backend). Being polished per [`docs/PROTOTYPE_ENHANCEMENT_PLAN.md`](docs/PROTOTYPE_ENHANCEMENT_PLAN.md). |
 | `server/` | Production API — Express 5 · TypeScript · Prisma 6 · PostgreSQL 16 · Redis · BullMQ · Socket.IO (to be built from `docs/platform/01`) |
 | `frontend/` | Production web app — React 19 · React Router 7 · Redux Toolkit + RTK Query · Tailwind v4 (to be built from `docs/platform/04`) |
 | `app/` | Production mobile app — Expo SDK 56 · Expo Router · RTK Query (starter present; adapt per `docs/platform/05`) |

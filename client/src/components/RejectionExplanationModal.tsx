@@ -200,7 +200,7 @@ export default function RejectionExplanationModal({
           borderRadius: '16px',
           boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08)',
           overflow: 'hidden',
-          background: '#FFFFFF',
+          background: 'var(--surface-1)',
           margin: 'auto',
           animation: 'modal-pop 0.22s cubic-bezier(0.16,1,0.3,1) both',
         }}
@@ -218,16 +218,16 @@ export default function RejectionExplanationModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#FCA5A5',
+                color: 'var(--status-danger-bright)',
               }}
             >
               <RotateCcw size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
                 {title || t('Return for Correction', 'সংশোধনের জন্য ফেরত পাঠান', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#FCA5A5', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
                 {t('Explain clearly what needs to be fixed so the requester can update it easily', 'কী সংশোধন করতে হবে তা স্পষ্টভাবে উল্লেখ করুন', lang)}
               </div>
             </div>
@@ -248,8 +248,8 @@ export default function RejectionExplanationModal({
             {/* Item Summary */}
             <div
               style={{
-                background: '#F8FAFC',
-                border: '1px solid #E2E8F0',
+                background: 'var(--surface-0)',
+                border: '1px solid var(--border-1)',
                 borderRadius: '8px',
                 padding: '12px 14px',
                 marginBottom: '16px',
@@ -257,22 +257,22 @@ export default function RejectionExplanationModal({
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '6px' }}>
                 <div>
-                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#B91C1C', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--status-danger-text)', fontFamily: 'monospace' }}>
                     {itemId}
                   </span>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-1)', marginTop: '2px' }}>
                     {itemTitle}
                   </div>
                 </div>
                 {amount && (
-                  <span className="badge" style={{ background: '#FEE2E2', color: '#991B1B', fontWeight: 800, fontSize: '12px' }}>
+                  <span className="badge" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)', fontWeight: 800, fontSize: '12px' }}>
                     {typeof amount === 'number' ? `৳${amount.toLocaleString()}` : amount}
                   </span>
                 )}
               </div>
 
               {(requesterName || department) && (
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '6px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '6px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   {requesterName && <span>{t('Submitted By:', 'আবেদনকারী:', lang)} <strong>{requesterName}</strong></span>}
                   {department && <span>{t('Department:', 'বিভাগ:', lang)} <strong>{department}</strong></span>}
                 </div>
@@ -281,7 +281,7 @@ export default function RejectionExplanationModal({
 
             {/* Common Reasons */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '8px' }}>
                 {t('Choose Main Reason for Returning:', 'ফেরত পাঠানোর প্রধান কারণ নির্বাচন করুন:', lang)}
               </label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -296,9 +296,9 @@ export default function RejectionExplanationModal({
                         fontSize: '11px',
                         padding: '6px 11px',
                         borderRadius: '6px',
-                        border: isSelected ? '1.5px solid #DC2626' : '1px solid #CBD5E1',
-                        background: isSelected ? '#FEF2F2' : '#FFFFFF',
-                        color: isSelected ? '#991B1B' : '#475569',
+                        border: isSelected ? '1.5px solid var(--status-danger)' : '1px solid var(--border-2)',
+                        background: isSelected ? 'var(--status-danger-bg)' : 'var(--surface-1)',
+                        color: isSelected ? 'var(--status-danger-text)' : 'var(--text-2)',
                         fontWeight: isSelected ? 700 : 500,
                         cursor: 'pointer',
                         textAlign: 'left',
@@ -314,7 +314,7 @@ export default function RejectionExplanationModal({
 
             {/* Field 1: Why Returning */}
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-2)', marginBottom: '4px' }}>
                 {t('Details / What Was Found:', 'বিস্তারিত মন্তব্য (কেন ফেরত পাঠানো হচ্ছে?):', lang)}
               </label>
               <textarea
@@ -326,9 +326,9 @@ export default function RejectionExplanationModal({
                   fontSize: '12.5px',
                   padding: '9px 12px',
                   borderRadius: '6px',
-                  border: '1px solid #CBD5E1',
-                  background: '#FFFFFF',
-                  color: '#0F172A',
+                  border: '1px solid var(--border-2)',
+                  background: 'var(--surface-1)',
+                  color: 'var(--text-1)',
                   boxSizing: 'border-box',
                 }}
                 placeholder={t(
@@ -343,7 +343,7 @@ export default function RejectionExplanationModal({
 
             {/* Field 2: Next Steps for Requester */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#047857', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--status-success-text)', marginBottom: '4px' }}>
                 {t('How to Fix Before Resubmitting:', 'আবেদনকারীর করণীয় (কী ঠিক করে আবার জমা দেবেন?):', lang)}
               </label>
               <textarea
@@ -355,9 +355,9 @@ export default function RejectionExplanationModal({
                   fontSize: '12.5px',
                   padding: '9px 12px',
                   borderRadius: '6px',
-                  border: '1px solid #A7F3D0',
-                  background: '#F0FDF4',
-                  color: '#065F46',
+                  border: '1px solid var(--status-success-border)',
+                  background: 'var(--status-success-bg)',
+                  color: 'var(--status-success-text)',
                   boxSizing: 'border-box',
                 }}
                 value={improvementsRequired}
@@ -366,7 +366,7 @@ export default function RejectionExplanationModal({
             </div>
 
             {/* Notification Checkbox */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#475569' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-2)' }}>
               <input
                 type="checkbox"
                 id="notifySms"
@@ -385,8 +385,8 @@ export default function RejectionExplanationModal({
             className="modal-footer"
             style={{
               padding: '12px 20px',
-              background: '#F8FAFC',
-              borderTop: '1px solid #E2E8F0',
+              background: 'var(--surface-0)',
+              borderTop: '1px solid var(--border-1)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '10px',
@@ -407,13 +407,13 @@ export default function RejectionExplanationModal({
               style={{
                 fontSize: '12px',
                 padding: '8px 16px',
-                background: '#DC2626',
-                borderColor: '#DC2626',
+                background: 'var(--status-danger-solid)',
+                borderColor: 'var(--status-danger)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 fontWeight: 700,
-                color: '#FFFFFF',
+                color: 'var(--text-on-brand)',
               }}
             >
               <RotateCcw size={14} />

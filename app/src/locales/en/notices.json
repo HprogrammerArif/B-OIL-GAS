@@ -1,0 +1,112 @@
+{
+  "title": "Notice board",
+  "searchPlaceholder": "Search title, ref no. or text",
+  "filters": {
+    "ALL": "All", "UNREAD": "Unread", "ACK": "To acknowledge",
+    "EXECUTIVE": "Directives", "SAFETY": "Safety", "OPERATIONS": "Operations", "HR": "HR", "POLICY": "Policy", "ADMIN": "Admin", "FINANCE": "Finance"
+  },
+  "categories": {
+    "EXECUTIVE": "Chairman's directive", "SAFETY": "Safety circular", "OPERATIONS": "Operations", "HR": "HR circular",
+    "ADMIN": "Administration", "POLICY": "Policy", "FINANCE": "Finance"
+  },
+  "pinned": "Pinned",
+  "broadcast": "Announcement",
+  "needsAck": "Acknowledge",
+  "acked": "Acknowledged",
+  "ackProgress": "{{acked}} of {{total}} acknowledged",
+  "readProgress": "{{read}} of {{total}} read",
+  "empty": {
+    "title": "No notices",
+    "message": "Circulars addressed to you will appear here.",
+    "filtered": "No notices match these filters"
+  },
+  "detail": {
+    "reference": "Circular no.",
+    "publishedBy": "Published by",
+    "published": "Published {{time}}",
+    "audience": "Sent to",
+    "expires": "On the board until {{time}}",
+    "archived": "This notice was archived and is no longer on the board.",
+    "ackPrompt": "Please confirm you have read and understood this notice.",
+    "acknowledge": "I acknowledge",
+    "ackedOn": "You acknowledged this {{time}}",
+    "ackDone": "Acknowledgement recorded",
+    "receipts": "Read & acknowledgement",
+    "viewReceipts": "See who has read it",
+    "pin": "Pin to top",
+    "unpin": "Unpin",
+    "pinnedDone": "Pinned to the top of the board",
+    "unpinnedDone": "Unpinned",
+    "pinLimit": "Five notices are already pinned. Unpin one first.",
+    "archive": "Archive",
+    "archiveTitle": "Archive this notice?",
+    "archiveMessage": "It will be removed from everyone's board. This cannot be undone.",
+    "archivedDone": "Notice archived",
+    "noBangla": "Bangla text not provided — showing English.",
+    "offline": "Connect to the internet to acknowledge."
+  },
+  "receipts": {
+    "title": "Read & acknowledgement",
+    "notRead": "Not read yet",
+    "read": "Read {{time}}",
+    "acked": "Acknowledged {{time}}",
+    "others": "{{n}} more staff without the app are included in the totals.",
+    "empty": "No recipients with the app yet"
+  },
+  "compose": {
+    "title": "Publish notice",
+    "templates": "Start from a template",
+    "templateNames": { "directive": "Chairman's directive", "safety": "Safety & LOTO", "maintenance": "Maintenance window", "holiday": "Holiday notice" },
+    "write": "Write",
+    "preview": "Preview",
+    "titleEn": "Title (English)",
+    "titleBn": "Title (Bangla, optional)",
+    "bodyEn": "Message (English)",
+    "bodyBn": "Message (Bangla, optional)",
+    "category": "Category",
+    "priority": "Priority",
+    "audience": "Audience",
+    "people": "{{count}} people",
+    "referenceNo": "Circular / reference no. (optional)",
+    "options": "Delivery",
+    "pin": "Pin to top of the board",
+    "pinHint": "{{count}} of {{max}} pins in use",
+    "pinFull": "All {{max}} pins are in use",
+    "requiresAck": "Ask recipients to acknowledge",
+    "sendSms": "Also send SMS",
+    "criticalHint": "Critical notices that need acknowledgement interrupt recipients with a blocking alert until they confirm.",
+    "publish": "Publish to {{count}} people",
+    "published": "Notice published",
+    "publishedRef": "{{ref}} sent to {{count}} people",
+    "noRights": "You don't have permission to publish notices.",
+    "previewEmpty": "Fill in a title and message to see the preview.",
+    "offline": "Connect to the internet to publish."
+  },
+  "broadcastCompose": {
+    "title": "Company-wide announcement",
+    "intro": "Appears immediately as a banner on every employee's home screen and is saved at the top of the notice board.",
+    "titleLabel": "Announcement title",
+    "titleBn": "Title (Bangla, optional)",
+    "bodyLabel": "Message",
+    "bodyBn": "Message (Bangla, optional)",
+    "requiresAck": "Ask staff to acknowledge",
+    "sendSms": "Also send SMS to all staff",
+    "send": "Send to all staff",
+    "sent": "Announcement sent to {{count}} employees"
+  },
+  "banner": {
+    "label": "Chairman's announcement",
+    "acknowledge": "Acknowledge",
+    "dismiss": "Dismiss announcement",
+    "ackRequired": "Please acknowledge before dismissing."
+  },
+  "homeCard": {
+    "unread": "{{n}} unread",
+    "pendingAck": "{{n}} to acknowledge",
+    "empty": "No notices yet"
+  },
+  "actions": {
+    "compose": "Publish notice",
+    "broadcast": "Company announcement"
+  }
+}

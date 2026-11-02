@@ -517,11 +517,11 @@ export function generateSeatsForRoute(routeKey: string, capacity: number = 52): 
 
   // Some realistic employee rosters
   const employeePool = [
-    { name: 'Engr. Harunur Rashid', dept: 'Plant GM & Operations', phone: '+880 1711-002101', cat: 'executive' as const, blood: 'O+' },
+    { name: 'Engr. Abdul Hakim', dept: 'Plant Operations', phone: '+880 1711-002101', cat: 'executive' as const, blood: 'O+' },
     { name: 'Mizanur Rahman', dept: 'Quality Assurance', phone: '+880 1712-441122', cat: 'executive' as const, blood: 'A+' },
     { name: 'Farhana Kabir', dept: 'EHS Safety Lead', phone: '+880 1819-556677', cat: 'lady_priority' as const, blood: 'B+' },
     { name: 'Engr. Tariq Ahmed', dept: 'Maintenance Div.', phone: '+880 1711-002105', cat: 'executive' as const, blood: 'AB+' },
-    { name: 'Tanvir Ahmed', dept: 'Sales & Distribution', phone: '+880 1720-334455', cat: 'regular' as const, blood: 'B+' },
+    { name: 'Rashedul Hasan', dept: 'Sales & Distribution', phone: '+880 1720-334455', cat: 'regular' as const, blood: 'B+' },
     { name: 'Shariful Islam', dept: 'Refinery Tech', phone: '+880 1713-998877', cat: 'regular' as const, blood: 'O+' },
     { name: 'Rezaul Karim', dept: 'Instrument Specialist', phone: '+880 1814-223344', cat: 'regular' as const, blood: 'A+' },
     { name: 'Babul Akhter', dept: 'Logistics Custodian', phone: '+880 1911-887766', cat: 'regular' as const, blood: 'O-' },

@@ -1,83 +1,52 @@
-// src/app/redux/store.ts
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { combineReducers, configureStore, type Reducer } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import NetInfo from "@react-native-community/netinfo";
 import { AppState } from "react-native";
-import authReducer from "./features/auth/authSlice";
-import childReducer from "./features/child/childSlice";
-import tabIndicatorReducer from "./features/notificationService/tabIndicatorSlice";
-import {
-  persistReducer,
-  persistStore,
-  FLUSH,
-  REHYDRATE,
-  PAUSE,
-  PERSIST,
-  PURGE,
-  REGISTER,
-} from "redux-persist";
-import secureStorage from "./storage";
+import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, REHYDRATE } from "redux-persist";
+import { connectivity } from "@/lib/connectivity";
 import { baseApi } from "./api/baseApi";
+import { apiPersistConfig, authPersistConfig, uiPersistConfig } from "./persist/config";
+import authReducer from "./slices/auth.slice";
+import uiReducer from "./slices/ui.slice";
+import { listenerMiddleware } from "./listeners";
 
-// Combine all reducers
 const rootReducer = combineReducers({
-  auth: authReducer,
-  child: childReducer,
-  tabIndicator: tabIndicatorReducer,
-  [baseApi.reducerPath]: baseApi.reducer,
+  auth: persistReducer(authPersistConfig, authReducer),
+  ui: persistReducer(uiPersistConfig, uiReducer),
+  [baseApi.reducerPath]: persistReducer(
+    apiPersistConfig,
+    baseApi.reducer as unknown as Reducer<Record<string, unknown>>,
+  ) as unknown as typeof baseApi.reducer,
 });
 
-// Persist config
-const persistConfig = {
-  key: "root",
-  version: 1,
-  storage: secureStorage, // Use SecureStore
-  whitelist: ["auth", "child"], // Persist only auth and child states, not the API cache
-  keyPrefix: "persist_", // Use underscore instead of colon for SecureStore compatibility
-};
-
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
+      // Both dev-only checks walk the state on every action; RTK Query owns (and freezes) its cache,
+      // so walking it only adds seconds of JS-thread time per screen on device.
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredPaths: [baseApi.reducerPath],
       },
-    }).concat(baseApi.middleware),
+      immutableCheck: { ignoredPaths: [baseApi.reducerPath] },
+    })
+      .prepend(listenerMiddleware.middleware)
+      .concat(baseApi.middleware),
 });
 
 export const persistor = persistStore(store);
 
-// Wire RTK Query's internal event system to real React Native events.
-// This makes both `refetchOnReconnect` and `refetchOnFocus` work in RN,
-// since the browser events RTK Query uses (window.online, visibilitychange)
-// don't exist in React Native.
+/** RTK Query's focus/reconnect events, driven by React Native sources instead of the DOM. */
 setupListeners(store.dispatch, (dispatch, actions) => {
-  // ── Network connectivity ──────────────────────────────────────────────
-  const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-    if (state.isConnected) {
-      dispatch(actions.onOnline());
-    } else {
-      dispatch(actions.onOffline());
-    }
-  });
-
-  // ── App foreground / background ───────────────────────────────────────
-  // When the user reopens the app (Case 1, 2, 3 from race condition analysis)
-  // RTK Query's `refetchOnFocus: true` will re-fetch all active queries.
-  const appStateSubscription = AppState.addEventListener("change", (nextState) => {
-    if (nextState === "active") {
-      dispatch(actions.onFocus());
-    } else {
-      dispatch(actions.onFocusLost());
-    }
-  });
-
+  const stopConnectivity = connectivity.start();
+  const unsubscribeNet = connectivity.subscribe((online) => dispatch(online ? actions.onOnline() : actions.onOffline()));
+  const appState = AppState.addEventListener("change", (next) =>
+    dispatch(next === "active" ? actions.onFocus() : actions.onFocusLost()),
+  );
   return () => {
-    unsubscribeNetInfo();
-    appStateSubscription.remove();
+    unsubscribeNet();
+    stopConnectivity();
+    appState.remove();
   };
 });
 

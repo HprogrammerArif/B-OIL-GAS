@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { X, UserCheck, Clock } from 'lucide-react';
-import { showToast } from '../App';
+import { showToast } from './ToastManager';
 import { DepartmentApprovalStep, useApprovalStore } from '../store/approvalStore';
 
 export interface DetailDrawerData {
@@ -182,7 +182,7 @@ export default function DetailDrawer({
                           {step.officerName} ({step.roleName})
                         </div>
                         <div className="timeline-sub" style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                          <span style={{ color: '#059669', fontWeight: 600 }}>✓ {t('Checked:', 'সুপারিশ:', lang)}</span> "{step.note}"
+                          <span style={{ color: 'var(--status-success)', fontWeight: 600 }}>✓ {t('Checked:', 'সুপারিশ:', lang)}</span> "{step.note}"
                         </div>
                         <div style={{ fontSize: '9.5px', color: 'var(--brand-slate-400)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <Clock size={10} /> {step.timestamp}

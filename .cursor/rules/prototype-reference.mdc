@@ -1,18 +1,25 @@
 ---
-description: How to use the frozen prototype in client/ as a read-only functional and visual reference
+description: Conventions for the interactive prototype in client/ (active demo artifact)
 globs: client/**
 alwaysApply: false
 ---
 
-# Prototype Reference (`client/`) — READ ONLY
+# Prototype (`client/`) — Active Demo Artifact
 
-`client/` is the interactive prototype demonstrated to the client. **Do not edit, refactor, lint-fix, or upgrade anything in it.** Production work happens in `server/`, `frontend/`, `app/`.
+`client/` is the interactive prototype presented to the client. It is being enhanced to feel production-grade (plan: `docs/PROTOTYPE_ENHANCEMENT_PLAN.md`). It is **not** the production codebase — that is `server/`, `frontend/`, `app/`.
 
-## How to use it
-- Functional truth: `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md` (module deep-dives, constants, defects). Open prototype files only to confirm a detail (labels, constants, flow order, colours).
-- Business constants (grade DA rates, bus routes, regulators, risk matrix, PPE lists) have been promoted to rules/settings in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md` — cite the `BR-` id, not the prototype line.
-- Known prototype defects (fake SHA-256, OTP auto-accept, missing FIFO window, views not using their stores, mislabelled rejections) must **not** be reproduced; the spec defines the corrected behaviour.
-- Visual language (crimson `#A51C30`, navy `#0B132B`, gold `#D4AF37`, surface `#F8FAFC`, bilingual `t(en, bn)` labels) is reproduced via the design tokens in `frontend/` and `app/`, not by copying CSS files.
+## Boundaries
+- Self-contained: no backend calls, no auth servers; data lives in stores persisted to `localStorage`. Do not import from or into the production apps.
+- No new runtime dependencies without a stated reason (routing is hash-based; hashing uses Web Crypto).
+- Behaviour previews the production spec: permissions and scopes from `docs/platform/06` §h, states/enums from `docs/platform/02`, reference formats from `docs/platform/00` §5.2.
 
-## Running it
-`cd client && npm run dev` (Vite, http://localhost:5173). Persona switcher in the top bar. No backend needed.
+## Code conventions
+- Colours, spacing, radii, shadows only via tokens in `src/styles/tokens.css`; **no hex literals or ad-hoc inline colours in `.tsx`**. Use the primitives in `src/components/ui/` before writing custom markup.
+- Identity via `currentUser`/`useCan('module:action')`/`useScope()` from `src/auth/` — never `role === 'x'` or name-string matching in views.
+- Stores are the single source of truth; views never keep private copies of seed data. Dates relative to `today()` from `src/lib/clock.ts`; reference numbers via `nextRef(prefix)`.
+- Every view handles loading (skeleton), empty, and error states, in both themes.
+- Bilingual: every user-facing string through `t(en, bn, lang)`; keep EN and BN both filled.
+- Demo-only controls (persona switch, reset, scenarios) live only in the hidden demo panel, never in product UI.
+
+## Verify
+`cd client && npm run build` must pass; check the changed screens in light and dark; check with at least two personas (an approver and an employee/driver).

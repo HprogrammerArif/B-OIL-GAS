@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lang, t, AppRole } from '../../types';
 import { Employee, useEmployeeStore } from '../../store/employeeStore';
-import { showToast } from '../../App';
+import { showToast } from '../ToastManager';
 import { X, UserPlus, Check } from 'lucide-react';
 
 interface OnboardEmployeeModalProps {
@@ -17,12 +17,12 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
   const [nameBn, setNameBn] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+880 17');
-  const [sapPernr, setSapPernr] = useState(`EMP-${Math.floor(1000 + Math.random() * 8999)}`);
+  const [sapPernr, setSapPernr] = useState('');
   const [dept, setDept] = useState<Employee['dept']>('Plant Operations');
   const [designation, setDesignation] = useState('');
   const [role, setRole] = useState<AppRole>('employee');
   const [assignedSite, setAssignedSite] = useState<Employee['assignedSite']>('PLANT_KERANIGANJ');
-  const [nationalId, setNationalId] = useState('199' + Math.floor(1000000000000 + Math.random() * 900000000000));
+  const [nationalId, setNationalId] = useState('');
   const [bloodGroup, setBloodGroup] = useState('B+');
   const [emergencyContact, setEmergencyContact] = useState('+880 1819-000000');
 
@@ -30,13 +30,13 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
 
   const resolveManagerByDept = (d: Employee['dept']) => {
     switch (d) {
-      case 'Plant Operations': return 'Engr. Harunur Rashid (EMP-0012)';
-      case 'Finance & Accounts': return 'A.T.M. Mostafa (EMP-0004)';
-      case 'Human Resources': return 'Sayeed Ahmed (EMP-0003)';
-      case 'Transport & Logistics': return 'Kazi Masud (EMP-0007)';
+      case 'Plant Operations': return 'Engr. Md. Harunur Rashid (EMP-0012)';
+      case 'Finance & Accounts': return 'Farida Begum (EMP-0062)';
+      case 'Human Resources': return 'Sayeda Afroza Sultana (EMP-0028)';
+      case 'Transport & Logistics': return 'Md. Kamruzzaman (EMP-0045)';
       case 'Sales & Distribution': return 'Shahidul Alam (EMP-0006)';
       case 'HSE & Compliance': return 'Dr. Farhana Yasmin (EMP-0005)';
-      default: return 'Sayeed Ahmed (EMP-0003)';
+      default: return 'Sayeda Afroza Sultana (EMP-0028)';
     }
   };
 
@@ -52,6 +52,14 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
     }
     if (!designation.trim()) {
       showToast(t('Please enter official designation.', 'অনুগ্রহ করে পদবি লিখুন।', lang), 'info');
+      return;
+    }
+    if (!sapPernr.trim()) {
+      showToast(t('Please enter the payroll number.', 'অনুগ্রহ করে পেরোল নম্বর লিখুন।', lang), 'info');
+      return;
+    }
+    if (!/^(\d{10}|\d{13}|\d{17})$/.test(nationalId.trim())) {
+      showToast(t('National ID must be 10, 13 or 17 digits.', 'জাতীয় পরিচয়পত্র নম্বর ১০, ১৩ বা ১৭ সংখ্যার হতে হবে।', lang), 'info');
       return;
     }
 
@@ -71,7 +79,7 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
       nationalId,
       bloodGroup,
       emergencyContact,
-      avatarColor: role === 'chairman' ? '#A51C30' : role === 'plant_gm' ? '#0369A1' : role === 'hr_admin' ? '#BE185D' : role === 'transport_admin' ? '#059669' : role === 'hod' ? '#7C3AED' : role === 'driver' ? '#F59E0B' : '#0284C7',
+      avatarColor: role === 'chairman' ? 'var(--brand-crimson)' : role === 'plant_gm' ? 'var(--status-info-solid)' : role === 'hr_admin' ? 'var(--status-pink)' : role === 'transport_admin' ? 'var(--status-success-solid)' : role === 'hod' ? 'var(--status-purple-solid)' : role === 'driver' ? 'var(--status-warning-solid)' : 'var(--status-info-solid)',
     });
 
     showToast(t(
@@ -86,16 +94,16 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
   return (
     <div className="modal-bg" style={{ zIndex: 1000 }}>
       <div className="modal" style={{ maxWidth: '680px' }}>
-        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, #0A1227 0%, #111E3D 100%)', borderBottom: '2px solid var(--brand-crimson)' }}>
+        <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)', borderBottom: '2px solid var(--brand-crimson)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(225,29,72,0.2)', color: 'var(--brand-crimson)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <UserPlus size={18} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '15px', color: '#F8FAFC' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--text-inverse)' }}>
                 {t('Add New Employee to Directory', 'নতুন কর্মী অন্তর্ভুক্তিকরণ', lang)}
               </h3>
-              <div style={{ fontSize: '11px', color: '#94A3B8' }}>BOGCL Staff Directory & Payroll Profile</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>BOGCL Staff Directory & Payroll Profile</div>
             </div>
           </div>
           <button className="modal-close" onClick={onClose}><X size={18} /></button>
@@ -161,14 +169,28 @@ export default function OnboardEmployeeModal({ isOpen, onClose, lang }: OnboardE
               </div>
 
               <div className="form-group">
-                <label>{t('Payroll Staff Reference ID', 'পেরোল / কর্মী রেফারেন্স আইডি', lang)}</label>
+                <label>{t('Payroll Number *', 'পেরোল নম্বর *', lang)}</label>
                 <input
                   type="text"
                   style={{ fontFamily: 'monospace', fontWeight: 700 }}
+                  placeholder="PR-00000"
                   value={sapPernr}
                   onChange={(e) => setSapPernr(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label>{t('National ID (NID) *', 'জাতীয় পরিচয়পত্র নম্বর *', lang)}</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={17}
+                placeholder={t('10, 13 or 17 digits', '১০, ১৩ বা ১৭ সংখ্যা', lang)}
+                value={nationalId}
+                onChange={(e) => setNationalId(e.target.value.replace(/\D/g, ''))}
+              />
             </div>
 
             <div className="responsive-col-2-eq" style={{ gap: '14px', marginBottom: '14px' }}>

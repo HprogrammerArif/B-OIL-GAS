@@ -1,7 +1,9 @@
+import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
+import { nextRef } from '../lib/refs';
+import { nowStamp } from '../lib/clock';
 import type {
-  CustodyLogEntry,
   ReturnDetails,
   ParcelItem,
 } from '../views/ParcelView';
@@ -533,7 +535,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Truck Loading Bay #1, Keraniganj Plant',
     shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Md. Kamruzzaman (Transport Supervisor)',
-    reporterEmpId: 'EMP-0003',
+    reporterEmpId: 'EMP-0045',
     date: '25 Oct 2026, 03:45 PM',
     workflowStage: 'closed',
     immediateActionsTaken: 'Removed unattended ladder to maintenance storage cage immediately; cordoned area and summoned contractor supervisor.',
@@ -610,7 +612,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Heating Unit #2, Keraniganj Plant',
     shift: 'Evening Shift (15:00 - 23:00)',
     reportedBy: 'Engr. Md. Harunur Rashid (Plant GM)',
-    reporterEmpId: 'EMP-0002',
+    reporterEmpId: 'EMP-0012',
     date: '20 Oct 2026, 02:15 PM',
     workflowStage: 'closed',
     immediateActionsTaken: 'DCS automated bypass opened; thermal fluid burner heat reduced by 15%; pressure stabilized back to nominal 18 Bar within 4 minutes.',
@@ -702,7 +704,7 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     location: 'Circulation Bay Pump House, Unit-2, Keraniganj Complex',
     shift: 'Night Shift (23:00 - 07:00)',
     reportedBy: 'Tanvir Ahmed (Senior Operations Officer)',
-    reporterEmpId: 'EMP-0004',
+    reporterEmpId: 'EMP-1042',
     date: '30 Oct 2026, 03:15 AM',
     workflowStage: 'triaged',
     immediateActionsTaken: 'Marked pump casing with high-heat warning placard and cordoned side walkway with yellow tape.',
@@ -1458,9 +1460,15 @@ export interface ShiftWorker {
   shift: string;
   inTime: string;
   outTime: string;
-  locationStatus: 'inside_geofence' | 'remote_approved' | 'late' | 'absent';
+  /** `manual_review`: checked in without a usable GPS fix; flagged for the supervisor. */
+  locationStatus: 'inside_geofence' | 'remote_approved' | 'late' | 'absent' | 'manual_review';
   overtimeHours: number;
   distanceMeters: number;
+}
+
+export interface PunchDetail {
+  locationStatus?: ShiftWorker['locationStatus'];
+  distanceMeters?: number;
 }
 
 export interface LeaveRequestItem {
@@ -1980,6 +1988,21 @@ const INITIAL_PROFILE_PREFS: UserProfilePreferences = {
 /* ──────────────────────────────────────────────────────────────────────────
    OPERATIONS SINGLETON STORE
    ────────────────────────────────────────────────────────────────────────── */
+interface OperationsSnapshot {
+  licenses: LicenseCard[];
+  incidents: IncidentItem[];
+  parcels: ParcelItem[];
+  visitors: VisitorRecord[];
+  attendanceRoster: ShiftWorker[];
+  leaveRequests: LeaveRequestItem[];
+  chatChannels: ChatChannel[];
+  chatMembers: ChatMember[];
+  chatMessages: Record<string, ChatMessage[]>;
+  profilePrefs: UserProfilePreferences;
+}
+const PERSIST_NAME = 'operations';
+const PERSIST_VERSION = 1;
+
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
   private incidents: IncidentItem[] = [...INITIAL_INCIDENTS];
@@ -1993,6 +2016,11 @@ class OperationsStore {
   private profilePrefs: UserProfilePreferences = { ...INITIAL_PROFILE_PREFS };
   private listeners: Set<() => void> = new Set();
 
+  constructor() {
+    const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
+    if (saved) Object.assign(this, saved);
+  }
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -2000,6 +2028,18 @@ class OperationsStore {
 
   private notify() {
     this.listeners.forEach((l) => l());
+    savePersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION, () => ({
+      licenses: this.licenses,
+      incidents: this.incidents,
+      parcels: this.parcels,
+      visitors: this.visitors,
+      attendanceRoster: this.attendanceRoster,
+      leaveRequests: this.leaveRequests,
+      chatChannels: this.chatChannels,
+      chatMembers: this.chatMembers,
+      chatMessages: this.chatMessages,
+      profilePrefs: this.profilePrefs,
+    }));
   }
 
   // ── Getters ──
@@ -2064,7 +2104,7 @@ class OperationsStore {
   }
 
   addCapaItem(incidentId: string, item: Omit<CapaActionItem, 'id'>) {
-    const newId = `CAPA-${Math.floor(100 + Math.random() * 900)}`;
+    const newId = nextRef('CAPA', 3);
     const fullItem: CapaActionItem = { ...item, id: newId };
     this.incidents = this.incidents.map(inc => {
       if (inc.id !== incidentId) return inc;
@@ -2086,7 +2126,7 @@ class OperationsStore {
         return {
           ...c,
           status,
-          completedAt: status === 'completed' ? 'Just Now' : undefined,
+          completedAt: status === 'completed' ? nowStamp() : undefined,
           verificationEvidence: evidenceNote || c.verificationEvidence,
         };
       });
@@ -2125,45 +2165,6 @@ class OperationsStore {
     this.notify();
   }
 
-  advanceParcelStage(parcelId: string, actorName: string, actorRoleTitle: string) {
-    const STAGE_LABELS: Record<number, { en: string; bn: string; loc: string; eta: string; pct: number; status: ParcelItem['status'] }> = {
-      2: { en: 'Handed to Driver', bn: 'ড্রাইভারের নিকট হস্তান্তর', loc: 'Dispatch Loading Gate', eta: 'On the road (ETA 1 hr)', pct: 35, status: 'in_transit' },
-      3: { en: 'On the Way (Checkpoint Passed)', bn: 'পথে রয়েছে (চেকপয়েন্ট অতিক্রম)', loc: 'Babubazar Bridge Checkpoint', eta: 'Arriving within 30 mins', pct: 68, status: 'in_transit' },
-      4: { en: 'Arrived at Reception Desk', bn: 'রিসিপশন ডেস্কে পৌঁছেছে', loc: 'Destination Reception Desk', eta: 'Ready for PIN Handover', pct: 90, status: 'at_gate' },
-    };
-
-    this.parcels = this.parcels.map((p) => {
-      if (p.id !== parcelId || p.currentStage >= 4 || p.status === 'delivered' || p.status === 'returned') {
-        return p;
-      }
-      const nextStage = p.currentStage + 1;
-      const meta = STAGE_LABELS[nextStage];
-      if (!meta) return p;
-
-      const log: CustodyLogEntry = {
-        stage: nextStage,
-        stageName: meta.en,
-        stageNameBn: meta.bn,
-        location: meta.loc,
-        timestamp: 'Today, Just Now',
-        actor: actorName,
-        actorRole: actorRoleTitle,
-        notes: `Parcel moved to Stage ${nextStage} (${meta.en}). Seal checked intact.`,
-      };
-
-      return {
-        ...p,
-        currentStage: nextStage,
-        status: meta.status,
-        eta: meta.eta,
-        corridorProgressPercent: meta.pct,
-        lastUpdated: 'Today, Just Now',
-        chainOfCustody: [...p.chainOfCustody, log],
-      };
-    });
-    this.notify();
-  }
-
   // ── 4. Visitors Actions ──
   setVisitors(updater: VisitorRecord[] | ((prev: VisitorRecord[]) => VisitorRecord[])) {
     this.visitors = typeof updater === 'function' ? updater(this.visitors) : updater;
@@ -2171,9 +2172,16 @@ class OperationsStore {
   }
 
   // ── 5. Daily Attendance & Leave Actions ──
-  punchAttendance(role: AppRole, action: 'in' | 'out', site?: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ') {
+  punchAttendance(
+    role: AppRole,
+    action: 'in' | 'out',
+    site?: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ',
+    detail: PunchDetail = {},
+  ) {
     const meta = ROLE_META[role];
     const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const locationStatus = detail.locationStatus ?? 'inside_geofence';
+    const distanceMeters = detail.distanceMeters ?? 0;
 
     const exists = this.attendanceRoster.some((w) => w.id === meta.empId);
     if (exists) {
@@ -2185,8 +2193,8 @@ class OperationsStore {
             site: site || w.site,
             inTime: nowTime,
             outTime: 'On Duty',
-            locationStatus: 'inside_geofence',
-            distanceMeters: 28,
+            locationStatus,
+            distanceMeters,
           };
         }
         return {
@@ -2204,11 +2212,11 @@ class OperationsStore {
           dept: meta.dept,
           site: site || (meta.site === 'PLANT_KERANIGANJ' ? 'PLANT_KERANIGANJ' : 'HQ_BARIDHARA'),
           shift: 'General (09:00 AM – 06:00 PM)',
-          inTime: action === 'in' ? nowTime : '08:55 AM',
+          inTime: nowTime,
           outTime: action === 'out' ? nowTime : 'On Duty',
-          locationStatus: 'inside_geofence',
+          locationStatus,
           overtimeHours: 0,
-          distanceMeters: 25,
+          distanceMeters,
         },
         ...this.attendanceRoster,
       ];
@@ -2219,9 +2227,9 @@ class OperationsStore {
   addLeaveRequest(data: Omit<LeaveRequestItem, 'id' | 'status' | 'submittedAt'>): LeaveRequestItem {
     const newLeave: LeaveRequestItem = {
       ...data,
-      id: `LV-2026-${Math.floor(100 + Math.random() * 899)}`,
+      id: nextRef('LV'),
       status: 'pending',
-      submittedAt: `${SYSTEM_TODAY}, Just Now`,
+      submittedAt: nowStamp(),
     };
     this.leaveRequests = [newLeave, ...this.leaveRequests];
     this.notify();
@@ -2333,7 +2341,6 @@ export function useOperationsStore() {
     toggleCapaStatus: operationsStore.toggleCapaStatus.bind(operationsStore),
     closeIncidentWithSignOff: operationsStore.closeIncidentWithSignOff.bind(operationsStore),
     setParcels: operationsStore.setParcels.bind(operationsStore),
-    advanceParcelStage: operationsStore.advanceParcelStage.bind(operationsStore),
     setVisitors: operationsStore.setVisitors.bind(operationsStore),
     punchAttendance: operationsStore.punchAttendance.bind(operationsStore),
     addLeaveRequest: operationsStore.addLeaveRequest.bind(operationsStore),
