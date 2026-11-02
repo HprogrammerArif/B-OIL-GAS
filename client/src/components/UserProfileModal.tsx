@@ -156,9 +156,21 @@ export default function UserProfileModal({
                 fontSize: '19px',
                 fontWeight: 800,
                 boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              {meta.initials}
+              {meta.avatarUrl ? (
+                <img
+                  src={meta.avatarUrl}
+                  alt={meta.shortName}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <span>{meta.initials}</span>
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

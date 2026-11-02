@@ -1284,6 +1284,7 @@
     right: 10px !important;
     width: auto !important;
     max-width: none !important;
+    max-height: calc(100dvh - 72px) !important;
     border-radius: 14px !important;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
     z-index: 1200 !important;

@@ -125,9 +125,21 @@ export default function LockScreenModal({
             fontWeight: 900,
             margin: '0 auto 16px',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
-          {meta.initials}
+          {meta.avatarUrl ? (
+            <img
+              src={meta.avatarUrl}
+              alt={meta.shortName}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = 'none';
+              }}
+            />
+          ) : null}
+          <span>{meta.initials}</span>
         </div>
 
         <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 4px', color: 'var(--text-on-brand)' }}>
