@@ -3149,6 +3149,28 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   border-color: rgba(212, 175, 55, 0.35);
 }
 
+.role-mini-emoji-box {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  transition: transform var(--transition-fast);
+}
+
+.user-role-item:hover .role-mini-emoji-box {
+  transform: scale(1.08);
+}
+
+.role-mini-emoji {
+  font-size: 13px;
+  line-height: 1;
+  display: inline-block;
+}
+
 .role-mini-avatar {
   width: 24px;
   height: 24px;

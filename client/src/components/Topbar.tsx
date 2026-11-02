@@ -449,12 +449,14 @@ export default function Topbar({
                               );
                             }}
                           >
-                            <div className="role-mini-avatar" style={{ background: rMeta.avatarColor }}>
-                              {rMeta.avatarUrl ? (
-                                <img src={rMeta.avatarUrl} alt={rMeta.shortName} className="role-mini-avatar-img" />
-                              ) : (
-                                rMeta.initials
-                              )}
+                            <div
+                              className="role-mini-emoji-box"
+                              style={{
+                                background: `${rMeta.avatarColor}1A`,
+                                borderColor: `${rMeta.avatarColor}40`,
+                              }}
+                            >
+                              <span className="role-mini-emoji">{rMeta.roleEmoji || '👤'}</span>
                             </div>
                             <div className="role-item-meta">
                               <div className="role-item-name">{t(rMeta.name, rMeta.nameBn, lang)}</div>
