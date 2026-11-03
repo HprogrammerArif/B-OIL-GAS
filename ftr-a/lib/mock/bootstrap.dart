@@ -1,10 +1,12 @@
 import 'package:bogcl_oneops/core/network/dio_client.dart';
 import 'package:bogcl_oneops/core/storage/app_database.dart';
 import 'package:bogcl_oneops/core/storage/blob_store.dart';
+import 'package:bogcl_oneops/mock/engines/attendance_engine.dart';
 import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/leave_engine.dart';
 import 'package:bogcl_oneops/mock/mock_adapter.dart';
 import 'package:bogcl_oneops/mock/mock_config.dart';
+import 'package:bogcl_oneops/mock/seed/attendance.dart';
 import 'package:bogcl_oneops/mock/seed/audit.dart';
 import 'package:bogcl_oneops/mock/seed/leave.dart';
 import 'package:bogcl_oneops/mock/seed/notifications.dart';
@@ -23,6 +25,7 @@ final List<Seeder> mockSeeders = [
   seedAudit,
   seedWorkflowTemplates,
   seedLeave,
+  seedAttendance,
 ];
 
 /// The persisted mock store. Provided by [bootstrapMock] at startup.
@@ -48,6 +51,7 @@ Future<ProviderContainer> bootstrapMock({
   await FileEngine.sweepOrphans(store, blobs);
   // Profile photos are visible to every signed-in colleague.
   LeaveEngine.registerHooks();
+  AttendanceEngine.registerHooks();
   FileEngine.registerOwnerAccess('Employee', (_, _, _) => true);
 
   late final ProviderContainer container;

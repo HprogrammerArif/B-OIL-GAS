@@ -20,6 +20,10 @@ abstract final class Col {
   static const workflowActions = 'wf_actions';
   static const delegations = 'delegations';
   static const files = 'files';
+  static const shifts = 'shifts';
+  static const geofences = 'geofences';
+  static const punches = 'punches';
+  static const regularisations = 'regularisations';
   static const leaveTypes = 'leave_types';
   static const leaveBalances = 'leave_balances';
   static const leaveRequests = 'leave_requests';

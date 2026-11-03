@@ -3,12 +3,12 @@ import { ChevronRight, Plus, Eye, Pin, CheckCircle2, Megaphone, Search, X } from
 import { t } from '../../types';
 import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
-import { DetailDrawerData } from '../../components/DetailDrawer';
 import { DashboardSubViewProps, NoticeItem } from './types';
 import { INNER_CIRCLE } from './dashboardData';
 import { useNoticeStore } from '../../store/noticeStore';
 import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
 import { useMyApprovalQueue } from '../approvals/config';
+import { SLA_DAY_MINUTES, slaLabel, slaMinutesLeft, useNow } from '../../lib/sla';
 import { useCan } from '../../auth/session';
 import PublishNoticeModal from './PublishNoticeModal';
 import NoticeDetailModal from './NoticeDetailModal';
@@ -22,6 +22,7 @@ export default function ChairmanDashboard({
 }: DashboardSubViewProps) {
   const { notices, addNotice, acknowledgeNotice, togglePin } = useNoticeStore();
   const canDecide = useCan('approvals:decide');
+  const now = useNow();
   const { approveApprovalItem } = useApprovalStore();
   const { user, pending: approvalsList } = useMyApprovalQueue();
   const [approvalsPage, setApprovalsPage] = useState(1);
@@ -93,19 +94,7 @@ export default function ChairmanDashboard({
   }, [notices, noticeFilter, noticeSearch]);
 
   const handleRowClick = (item: ApprovalItem) => {
-    const drawerItem: DetailDrawerData = {
-      id: item.id,
-      title: item.title,
-      amount: item.amount,
-      dept: item.dept,
-      urgency: item.urgency,
-      time: item.date,
-      description: item.details,
-      initiator: item.requester,
-      sapRef: item.sapDocRef,
-      approvalTrail: item.approvalTrail,
-    };
-    if (onOpenDetailDrawer) onOpenDetailDrawer(drawerItem);
+    onOpenDetailDrawer?.(item.id);
   };
 
   return (
@@ -173,9 +162,9 @@ export default function ChairmanDashboard({
                                 {t('Ref', 'রেফ', lang)}: {item.sapDocRef}
                               </span>
                             )}
-                            {item.slaHoursLeft <= 24 && (
+                            {slaMinutesLeft(item, now) <= SLA_DAY_MINUTES && (
                               <span className="badge danger" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
-                                {item.slaHoursLeft <= 0 ? t('SLA breached', 'সময়সীমা অতিক্রান্ত', lang) : t(`${item.slaHoursLeft}h left`, `${item.slaHoursLeft.toLocaleString('bn-BD')} ঘণ্টা বাকি`, lang)}
+                                {slaMinutesLeft(item, now) <= 0 ? t('SLA breached', 'সময়সীমা অতিক্রান্ত', lang) : slaLabel(slaMinutesLeft(item, now), lang)}
                               </span>
                             )}
                           </div>

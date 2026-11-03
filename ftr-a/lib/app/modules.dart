@@ -13,6 +13,12 @@ typedef AppModule = ({
 
 final List<AppModule> builtModules = [
   (
+    key: 'attendance',
+    icon: Icons.fingerprint,
+    label: (l10n) => l10n.moduleAttendance,
+    route: AppRoutes.attendance,
+  ),
+  (
     key: 'leave',
     icon: Icons.beach_access_outlined,
     label: (l10n) => l10n.moduleLeave,

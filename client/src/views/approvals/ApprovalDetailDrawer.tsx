@@ -7,9 +7,8 @@ import {
 import { t, type Lang } from '../../types';
 import type { ApprovalItem } from '../../store/approvalStore';
 import { CATEGORY_LABELS } from './config';
-import {
-  SOURCE_LABEL, URGENCY_LABEL, avatarTone, initialsOf, slaLabel, slaTone,
-} from './format';
+import { SOURCE_LABEL, URGENCY_LABEL, avatarTone, initialsOf } from './format';
+import { slaLabel, slaMinutesLeft, slaTone, useNow } from '../../lib/sla';
 
 interface ApprovalDetailDrawerProps {
   item: ApprovalItem;
@@ -64,7 +63,8 @@ export default function ApprovalDetailDrawer({
   const trail = item.approvalTrail ?? [];
   const returned = item.decisionStatus === 'rejected';
   const decided = mode === 'history';
-  const tone = slaTone(item.slaHoursLeft);
+  const minutesLeft = slaMinutesLeft(item, useNow());
+  const tone = slaTone(minutesLeft);
   const sourceKey = item.sourceType ?? 'generic';
 
   return createPortal(
@@ -118,7 +118,7 @@ export default function ApprovalDetailDrawer({
                 {returned ? t('Returned with query', 'আপত্তিসহ ফেরত', lang) : t('Approved', 'অনুমোদিত', lang)}
               </span>
             ) : (
-              <span className={`apv-sla-pill ${tone}`}><Clock size={12} /> {slaLabel(item.slaHoursLeft, lang)}</span>
+              <span className={`apv-sla-pill ${tone}`}><Clock size={12} /> {slaLabel(minutesLeft, lang)}</span>
             )}
           </div>
 

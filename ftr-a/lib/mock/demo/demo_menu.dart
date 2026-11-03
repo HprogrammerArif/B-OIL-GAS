@@ -42,6 +42,14 @@ class _DemoMenu extends ConsumerWidget {
       MockFailureMode.conflict: l10n.demoFailureConflict,
     };
 
+    final locationLabels = {
+      DemoLocation.device: l10n.demoLocationDevice,
+      DemoLocation.headOffice: l10n.demoLocationHq,
+      DemoLocation.plant: l10n.demoLocationPlant,
+      DemoLocation.outside: l10n.demoLocationOutside,
+      DemoLocation.mockGps: l10n.demoLocationMock,
+    };
+
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.8,
@@ -118,6 +126,32 @@ class _DemoMenu extends ConsumerWidget {
                     label: Text(failureLabels[mode]!),
                     selected: config.failure == mode,
                     onSelected: (_) => controller.setFailure(mode),
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Space.lg,
+              Space.lg,
+              Space.lg,
+              Space.sm,
+            ),
+            child: Text(
+              l10n.demoLocation,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+            child: Wrap(
+              spacing: Space.sm,
+              children: [
+                for (final mode in DemoLocation.values)
+                  ChoiceChip(
+                    label: Text(locationLabels[mode]!),
+                    selected: config.location == mode,
+                    onSelected: (_) => controller.setLocation(mode),
                   ),
               ],
             ),

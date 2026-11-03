@@ -3,7 +3,7 @@ import { ViewProps, t, AppView } from '../types';
 import { Car, ArrowRight, MapPin, Bus, Receipt, QrCode, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { showToast } from '../components/ToastManager';
 import AnimatedCounter from '../components/AnimatedCounter';
-import DetailDrawer, { DetailDrawerData } from '../components/DetailDrawer';
+import ApprovalReviewHost from './approvals/ApprovalReviewHost';
 import { useCan } from '../auth/session';
 import { StatusPill, type StatusTone } from '../components/ui';
 
@@ -45,7 +45,7 @@ const TONE_PILL: Record<Tone, StatusTone> = {
 };
 
 export default function DashboardView({ role, lang, onNavigate }: DashboardViewProps) {
-  const [selectedDrawerItem, setSelectedDrawerItem] = useState<DetailDrawerData | null>(null);
+  const [selectedDrawerItem, setSelectedDrawerItem] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [showBatchReleaseModal, setShowBatchReleaseModal] = useState(false);
   const [showGatePassModal, setShowGatePassModal] = useState(false);
@@ -566,11 +566,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         />
       )}
 
-      <DetailDrawer
-        data={selectedDrawerItem}
-        onClose={() => setSelectedDrawerItem(null)}
-        lang={lang}
-      />
+      <ApprovalReviewHost openId={selectedDrawerItem} lang={lang} onOpen={setSelectedDrawerItem} />
 
       {canBroadcast && (
         <SendVoiceBriefingModal

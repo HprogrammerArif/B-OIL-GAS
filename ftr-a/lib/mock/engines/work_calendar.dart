@@ -78,4 +78,20 @@ abstract final class WorkCalendar {
       k = addDays(k, 1);
     }
   }
+
+  /// UTC instant of a Dhaka wall-clock time ("HH:mm") on [dateKey].
+  static DateTime atTime(String dateKey, String hhmm) {
+    final d = parse(dateKey);
+    final p = hhmm.split(':').map(int.parse).toList();
+    return DateTime.utc(
+      d.year,
+      d.month,
+      d.day,
+      p[0],
+      p[1],
+    ).subtract(Dhaka.offset);
+  }
+
+  /// Dhaka calendar date key of an instant.
+  static String dateOf(DateTime instant) => keyOf(Dhaka.wall(instant));
 }

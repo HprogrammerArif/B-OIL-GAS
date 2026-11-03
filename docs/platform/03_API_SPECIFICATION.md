@@ -1001,14 +1001,15 @@ Module dirs `attendance`, `leave`. Models `Shift`, `ShiftAssignment`, `Attendanc
 | Method | Path | Permission | Scope | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | POST | `/attendance/punch` | `attendance:punch` | self | Geo-fenced punch (mobile; web allowed only from whitelisted office IPs with `Setting attendance.webPunchCidrs`). Offline queue + `Idempotency-Key` (stored on `AttendancePunch.idempotencyKey`). |
-| GET | `/attendance/me/today` | `attendance:punch` | self | `{ shift, firstInAt, lastOutAt, status, punches[], nearestGeofence: { siteId, name, distanceM } }` (distance computed from `?lat&lng` if given). |
+| GET | `/attendance/me/today` | `attendance:punch` | self | `{ date, shift, day: AttendanceDay, nextPunchType, overtimeMinutesMtd, nearestGeofence: { id, site, name, nameBn, distanceM, inside } }` (nearest fence computed from `?lat&lng` if given). `AttendanceDay` = `{ date, status, firstInAt, lastOutAt, lateMinutes, workedMinutes, overtimeMinutes, site, holiday, flags { missingOut, earlyLeave, pendingReview }, leave, punches[] }`. |
+| GET | `/geofences` | any authenticated | — | Active geofences `{ id, site, name, centerLat, centerLng, radiusMeters }`. |
 | GET | `/attendance/me` | `attendance:punch` | self | My `AttendanceDay`s `?from=&to=` + monthly summary (`present, late, absent, leave, overtimeMinutes`). |
 | GET | `/attendance/live` | `attendance:read` | TEAM / DEPARTMENT / SITE / COMPANY | Today's roster from `v_attendance_live`: `?siteId=&departmentId=&status=&q=`; embeds `insideFence` (last accepted punch within fence and no OUT), `distanceM`. Socket `attendance:punch` keeps it live. |
 | GET | `/attendance/days` | `attendance:read` | scope | `?employeeId=&from=&to=&status=`; `?format=csv` muster export (`attendance:export`). |
 | GET | `/attendance/kpis` | `attendance:read` | scope | `{ present, late, absent, onLeave, fieldDuty, headcount, overtimeCost }`. |
 | GET/POST/PATCH | `/attendance/shifts[/{id}]` | `attendance:manage-shifts` | — | `Shift` master (`startTime/endTime HH:mm`, `graceMinutes 0–60`, `isNight`). |
 | GET/POST/DELETE | `/attendance/shift-assignments` | `attendance:manage-shifts` | dept/site | `{ employeeId, shiftId, startsOn, endsOn? }`; overlapping → `CONFLICT`. |
-| POST | `/attendance/regularisations` | `attendance:punch` | self | `{ date ≤ today, ≥ today−30, type: RegularisationType, requestedIn?, requestedOut?, reason ≥ 10, attachmentFileId? }` → PENDING + workflow. `FIELD_DUTY` for a future date acts as pre-approval (`fieldDutyApproved`). |
+| POST | `/attendance/regularisations` | `attendance:punch` | self | `{ date ≤ today, ≥ today−7 (the mock enforces 7 days; `FIELD_DUTY` may be up to 30 days ahead), type: RegularisationType, requestedIn?, requestedOut?, reason ≥ 10, attachmentFileId? }` → PENDING + workflow. `FIELD_DUTY` for a future date acts as pre-approval (`fieldDutyApproved`). |
 | GET | `/attendance/regularisations` | self / `attendance:approve-regularisation` | scope | `?status=&employeeId=&from=&to=`. |
 | POST | `/attendance/regularisations/{id}/approve` / `/reject` | `attendance:approve-regularisation` + approver | — | Approve → `AttendanceDay` recomputed (`PENDING_REGULARISATION` punches become effective; `FIELD_DUTY` day status). |
 | POST | `/attendance/recompute` | `attendance:manage-shifts` | — | `{ date, employeeIds? }` admin recompute job. |

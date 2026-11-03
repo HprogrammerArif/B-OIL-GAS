@@ -1,12 +1,12 @@
 import { Lang, AppRole } from '../../types';
-import { DetailDrawerData } from '../../components/DetailDrawer';
 
 export interface DashboardSubViewProps {
   role: AppRole;
   lang: Lang;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  onOpenDetailDrawer?: (item: DetailDrawerData) => void;
+  /** Opens the shared approval review drawer for an approval id. */
+  onOpenDetailDrawer?: (approvalId: string) => void;
 }
 
 export interface InnerCircleMember {

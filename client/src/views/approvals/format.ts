@@ -13,25 +13,6 @@ export function formatTakaCompact(amount: number, lang: Lang): string {
   return formatTaka(amount);
 }
 
-export type SlaTone = 'overdue' | 'danger' | 'warn' | 'ok';
-
-export const SLA_URGENT_HOURS = 12;
-
-export function slaTone(hoursLeft: number): SlaTone {
-  if (hoursLeft <= 0) return 'overdue';
-  if (hoursLeft < SLA_URGENT_HOURS) return 'danger';
-  if (hoursLeft < 24) return 'warn';
-  return 'ok';
-}
-
-export function slaLabel(hoursLeft: number, lang: Lang): string {
-  if (hoursLeft <= 0) return t('Overdue', 'সময় অতিক্রান্ত', lang);
-  if (hoursLeft < 24) return t(`${hoursLeft}h left`, `${hoursLeft} ঘণ্টা বাকি`, lang);
-  const days = Math.floor(hoursLeft / 24);
-  const hours = hoursLeft % 24;
-  return t(`${days}d ${hours}h left`, `${days} দিন ${hours} ঘণ্টা বাকি`, lang);
-}
-
 export const URGENCY_LABEL: Record<ApprovalItem['urgency'], [string, string]> = {
   critical: ['Critical', 'অত্যন্ত জরুরি'],
   high: ['High priority', 'উচ্চ অগ্রাধিকার'],

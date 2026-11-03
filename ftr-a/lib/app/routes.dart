@@ -5,6 +5,8 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const home = '/home';
   static const inbox = '/inbox';
+  static const attendance = '/home/attendance';
+  static const attendanceRegularise = '/home/attendance/regularise';
   static const leave = '/home/leave';
   static const leaveNew = '/home/leave/new';
   static String leaveDetail(String id) => '/home/leave/$id';

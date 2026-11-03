@@ -3,9 +3,8 @@ import { Check, ChevronRight, Clock, RotateCcw, ShieldCheck, Eye } from 'lucide-
 import { t, type Lang } from '../../types';
 import type { ApprovalItem } from '../../store/approvalStore';
 import { CATEGORY_LABELS } from './config';
-import {
-  URGENCY_LABEL, avatarTone, initialsOf, slaLabel, slaTone,
-} from './format';
+import { URGENCY_LABEL, avatarTone, initialsOf } from './format';
+import { slaLabel, slaMinutesLeft, slaTone, useNow } from '../../lib/sla';
 
 interface ApprovalCardProps {
   item: ApprovalItem;
@@ -25,7 +24,8 @@ export default function ApprovalCard({
   onToggleSelect, onOpen, onApprove, onReturn,
 }: ApprovalCardProps) {
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
-  const tone = mode === 'pending' ? slaTone(item.slaHoursLeft) : item.decisionStatus === 'rejected' ? 'warn' : 'done';
+  const minutesLeft = slaMinutesLeft(item, useNow());
+  const tone = mode === 'pending' ? slaTone(minutesLeft) : item.decisionStatus === 'rejected' ? 'warn' : 'done';
   const trail = item.approvalTrail ?? [];
   const lastEndorser = trail[trail.length - 1];
   const title = t(item.title, item.titleBn, lang);
@@ -88,7 +88,7 @@ export default function ApprovalCard({
         {mode === 'pending' ? (
           <div className="apv-sla">
             <span className={`apv-sla-pill ${tone}`}>
-              <Clock size={12} /> {slaLabel(item.slaHoursLeft, lang)}
+              <Clock size={12} /> {slaLabel(minutesLeft, lang)}
             </span>
             <span className="apv-submitted">{t('Submitted', 'দাখিল', lang)}: {item.date}</span>
           </div>

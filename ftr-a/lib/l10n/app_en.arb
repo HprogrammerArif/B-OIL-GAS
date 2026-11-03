@@ -398,5 +398,188 @@
       }
     }
   },
-  "workflowStepSkipped": "Not needed"
+  "workflowStepSkipped": "Not needed",
+  "moduleAttendance": "Attendance",
+  "attTitle": "Attendance",
+  "attShiftLine": "{name} · {start}–{end}",
+  "@attShiftLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "attIn": "In",
+  "attOut": "Out",
+  "attWorked": "Worked",
+  "attDuration": "{h}h {m}m",
+  "@attDuration": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "attPunchIn": "Punch in",
+  "attPunchOut": "Punch out",
+  "attLocating": "Getting your location…",
+  "attRecording": "Recording…",
+  "attPunchQueued": "Saved offline. Your punch time is kept and will sync when you are online.",
+  "attPunchFailed": "Could not record your punch. Please try again.",
+  "attOnLeaveToday": "You are on approved leave today.",
+  "attLateBy": "Late by {minutes} min",
+  "@attLateBy": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "attPendingReview": "Awaiting review",
+  "attMissingOut": "Out missing",
+  "attOvertimeMtd": "Overtime {duration}",
+  "@attOvertimeMtd": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "attStatusPresent": "Present",
+  "attStatusLate": "Late",
+  "attStatusEarlyLeave": "Early leave",
+  "attStatusHalfDay": "Half day",
+  "attStatusAbsent": "Absent",
+  "attStatusOnLeave": "On leave",
+  "attStatusHoliday": "Holiday",
+  "attStatusWeekend": "Weekend",
+  "attStatusFieldDuty": "Field duty",
+  "attStatusNone": "No record",
+  "attDaysTitle": "Daily record",
+  "attPrevMonth": "Previous month",
+  "attNextMonth": "Next month",
+  "attSumPresent": "Present",
+  "attSumLate": "Late",
+  "attSumAbsent": "Absent",
+  "attSumLeave": "Leave",
+  "attEmptyTitle": "No records yet",
+  "attEmptyMessage": "Your attendance for this month will appear here.",
+  "attDayPunches": "Punches",
+  "attNoPunches": "No punches on this day.",
+  "attPunchAccepted": "Accepted",
+  "attPunchPending": "Pending approval",
+  "attPunchRejected": "Rejected",
+  "attRegsTitle": "My requests",
+  "attRegularise": "Request regularisation",
+  "attClose": "Close",
+  "attTryAgain": "Try again",
+  "attOpenSettings": "Open settings",
+  "attLocTitle": "Location needed",
+  "attLocServiceOff": "Turn on location services to punch.",
+  "attLocDenied": "Location permission is needed to punch.",
+  "attLocDeniedForever": "Location is blocked for this app. Open settings to allow it.",
+  "attLocUnavailable": "Could not get your location. Try again.",
+  "attResultInTitle": "Punched in",
+  "attResultOutTitle": "Punched out",
+  "attResultDuplicate": "Already recorded",
+  "attResultOk": "Your punch was recorded.",
+  "attResultAtSite": "Recorded at {site}.",
+  "@attResultAtSite": {
+    "placeholders": {
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "attResultPendingTitle": "Sent for approval",
+  "attResultPendingMessage": "You punched away from the site. Your line manager will review it as field duty.",
+  "attResultOutsideTitle": "You are outside the site",
+  "attResultOutsideMessage": "You are {distance} m from {site}. Move closer, or request regularisation if you are on duty elsewhere.",
+  "@attResultOutsideMessage": {
+    "placeholders": {
+      "distance": {
+        "type": "int"
+      },
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "attResultAccuracyTitle": "Location not accurate enough",
+  "attResultAccuracyMessage": "Move to open sky and try again.",
+  "attResultMockTitle": "Mock location detected",
+  "attResultMockMessage": "Turn off mock locations and try again. This attempt was recorded for review.",
+  "attRegTitle": "Attendance request",
+  "attRegType": "Request type",
+  "attRegTypeMissed": "Missed punch",
+  "attRegTypeField": "Field duty",
+  "attRegTypeLate": "Late justification",
+  "attRegTypeRemote": "Remote work",
+  "attRegDate": "Date",
+  "attRegHintWindow": "You can file for the last {days} days.",
+  "@attRegHintWindow": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "attRegHintField": "Field duty can be filed up to {days} days ahead.",
+  "@attRegHintField": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "attRegIn": "In time",
+  "attRegOut": "Out time",
+  "attRegReason": "Reason",
+  "attRegReasonHint": "Explain what happened",
+  "attRegReasonMin": "Reason must be at least {min} characters",
+  "@attRegReasonMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "attRegSubmit": "Submit request",
+  "attRegSubmitted": "Request sent for approval",
+  "attRegQueued": "Saved offline. It will be sent when you are back online.",
+  "attRegQueueLabel": "Attendance request, {date}",
+  "@attRegQueueLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "attRegErrDuplicate": "A request for this day is already pending.",
+  "attRegErrWindow": "Choose a date within the last {days} days.",
+  "@attRegErrWindow": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "attRegErrTimes": "Out time must be after in time.",
+  "attRegErrMissedTime": "Enter the time you missed.",
+  "attRegErrFailed": "Could not submit the request. Please try again.",
+  "demoLocation": "Punch location",
+  "demoLocationDevice": "Phone GPS",
+  "demoLocationHq": "At Head Office",
+  "demoLocationPlant": "At Plant",
+  "demoLocationOutside": "Outside site",
+  "demoLocationMock": "Mock GPS"
 }

@@ -780,4 +780,315 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get workflowStepSkipped => 'Not needed';
+
+  @override
+  String get moduleAttendance => 'Attendance';
+
+  @override
+  String get attTitle => 'Attendance';
+
+  @override
+  String attShiftLine(String name, String start, String end) {
+    return '$name · $start–$end';
+  }
+
+  @override
+  String get attIn => 'In';
+
+  @override
+  String get attOut => 'Out';
+
+  @override
+  String get attWorked => 'Worked';
+
+  @override
+  String attDuration(int h, String m) {
+    return '${h}h ${m}m';
+  }
+
+  @override
+  String get attPunchIn => 'Punch in';
+
+  @override
+  String get attPunchOut => 'Punch out';
+
+  @override
+  String get attLocating => 'Getting your location…';
+
+  @override
+  String get attRecording => 'Recording…';
+
+  @override
+  String get attPunchQueued =>
+      'Saved offline. Your punch time is kept and will sync when you are online.';
+
+  @override
+  String get attPunchFailed => 'Could not record your punch. Please try again.';
+
+  @override
+  String get attOnLeaveToday => 'You are on approved leave today.';
+
+  @override
+  String attLateBy(int minutes) {
+    return 'Late by $minutes min';
+  }
+
+  @override
+  String get attPendingReview => 'Awaiting review';
+
+  @override
+  String get attMissingOut => 'Out missing';
+
+  @override
+  String attOvertimeMtd(String duration) {
+    return 'Overtime $duration';
+  }
+
+  @override
+  String get attStatusPresent => 'Present';
+
+  @override
+  String get attStatusLate => 'Late';
+
+  @override
+  String get attStatusEarlyLeave => 'Early leave';
+
+  @override
+  String get attStatusHalfDay => 'Half day';
+
+  @override
+  String get attStatusAbsent => 'Absent';
+
+  @override
+  String get attStatusOnLeave => 'On leave';
+
+  @override
+  String get attStatusHoliday => 'Holiday';
+
+  @override
+  String get attStatusWeekend => 'Weekend';
+
+  @override
+  String get attStatusFieldDuty => 'Field duty';
+
+  @override
+  String get attStatusNone => 'No record';
+
+  @override
+  String get attDaysTitle => 'Daily record';
+
+  @override
+  String get attPrevMonth => 'Previous month';
+
+  @override
+  String get attNextMonth => 'Next month';
+
+  @override
+  String get attSumPresent => 'Present';
+
+  @override
+  String get attSumLate => 'Late';
+
+  @override
+  String get attSumAbsent => 'Absent';
+
+  @override
+  String get attSumLeave => 'Leave';
+
+  @override
+  String get attEmptyTitle => 'No records yet';
+
+  @override
+  String get attEmptyMessage =>
+      'Your attendance for this month will appear here.';
+
+  @override
+  String get attDayPunches => 'Punches';
+
+  @override
+  String get attNoPunches => 'No punches on this day.';
+
+  @override
+  String get attPunchAccepted => 'Accepted';
+
+  @override
+  String get attPunchPending => 'Pending approval';
+
+  @override
+  String get attPunchRejected => 'Rejected';
+
+  @override
+  String get attRegsTitle => 'My requests';
+
+  @override
+  String get attRegularise => 'Request regularisation';
+
+  @override
+  String get attClose => 'Close';
+
+  @override
+  String get attTryAgain => 'Try again';
+
+  @override
+  String get attOpenSettings => 'Open settings';
+
+  @override
+  String get attLocTitle => 'Location needed';
+
+  @override
+  String get attLocServiceOff => 'Turn on location services to punch.';
+
+  @override
+  String get attLocDenied => 'Location permission is needed to punch.';
+
+  @override
+  String get attLocDeniedForever =>
+      'Location is blocked for this app. Open settings to allow it.';
+
+  @override
+  String get attLocUnavailable => 'Could not get your location. Try again.';
+
+  @override
+  String get attResultInTitle => 'Punched in';
+
+  @override
+  String get attResultOutTitle => 'Punched out';
+
+  @override
+  String get attResultDuplicate => 'Already recorded';
+
+  @override
+  String get attResultOk => 'Your punch was recorded.';
+
+  @override
+  String attResultAtSite(String site) {
+    return 'Recorded at $site.';
+  }
+
+  @override
+  String get attResultPendingTitle => 'Sent for approval';
+
+  @override
+  String get attResultPendingMessage =>
+      'You punched away from the site. Your line manager will review it as field duty.';
+
+  @override
+  String get attResultOutsideTitle => 'You are outside the site';
+
+  @override
+  String attResultOutsideMessage(int distance, String site) {
+    return 'You are $distance m from $site. Move closer, or request regularisation if you are on duty elsewhere.';
+  }
+
+  @override
+  String get attResultAccuracyTitle => 'Location not accurate enough';
+
+  @override
+  String get attResultAccuracyMessage => 'Move to open sky and try again.';
+
+  @override
+  String get attResultMockTitle => 'Mock location detected';
+
+  @override
+  String get attResultMockMessage =>
+      'Turn off mock locations and try again. This attempt was recorded for review.';
+
+  @override
+  String get attRegTitle => 'Attendance request';
+
+  @override
+  String get attRegType => 'Request type';
+
+  @override
+  String get attRegTypeMissed => 'Missed punch';
+
+  @override
+  String get attRegTypeField => 'Field duty';
+
+  @override
+  String get attRegTypeLate => 'Late justification';
+
+  @override
+  String get attRegTypeRemote => 'Remote work';
+
+  @override
+  String get attRegDate => 'Date';
+
+  @override
+  String attRegHintWindow(int days) {
+    return 'You can file for the last $days days.';
+  }
+
+  @override
+  String attRegHintField(int days) {
+    return 'Field duty can be filed up to $days days ahead.';
+  }
+
+  @override
+  String get attRegIn => 'In time';
+
+  @override
+  String get attRegOut => 'Out time';
+
+  @override
+  String get attRegReason => 'Reason';
+
+  @override
+  String get attRegReasonHint => 'Explain what happened';
+
+  @override
+  String attRegReasonMin(int min) {
+    return 'Reason must be at least $min characters';
+  }
+
+  @override
+  String get attRegSubmit => 'Submit request';
+
+  @override
+  String get attRegSubmitted => 'Request sent for approval';
+
+  @override
+  String get attRegQueued =>
+      'Saved offline. It will be sent when you are back online.';
+
+  @override
+  String attRegQueueLabel(String date) {
+    return 'Attendance request, $date';
+  }
+
+  @override
+  String get attRegErrDuplicate => 'A request for this day is already pending.';
+
+  @override
+  String attRegErrWindow(int days) {
+    return 'Choose a date within the last $days days.';
+  }
+
+  @override
+  String get attRegErrTimes => 'Out time must be after in time.';
+
+  @override
+  String get attRegErrMissedTime => 'Enter the time you missed.';
+
+  @override
+  String get attRegErrFailed =>
+      'Could not submit the request. Please try again.';
+
+  @override
+  String get demoLocation => 'Punch location';
+
+  @override
+  String get demoLocationDevice => 'Phone GPS';
+
+  @override
+  String get demoLocationHq => 'At Head Office';
+
+  @override
+  String get demoLocationPlant => 'At Plant';
+
+  @override
+  String get demoLocationOutside => 'Outside site';
+
+  @override
+  String get demoLocationMock => 'Mock GPS';
 }

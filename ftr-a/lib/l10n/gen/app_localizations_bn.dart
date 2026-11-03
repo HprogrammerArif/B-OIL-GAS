@@ -778,4 +778,315 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get workflowStepSkipped => 'প্রয়োজন নেই';
+
+  @override
+  String get moduleAttendance => 'উপস্থিতি';
+
+  @override
+  String get attTitle => 'উপস্থিতি';
+
+  @override
+  String attShiftLine(String name, String start, String end) {
+    return '$name · $start–$end';
+  }
+
+  @override
+  String get attIn => 'প্রবেশ';
+
+  @override
+  String get attOut => 'প্রস্থান';
+
+  @override
+  String get attWorked => 'কর্মঘণ্টা';
+
+  @override
+  String attDuration(int h, String m) {
+    return '$h ঘ $m মি';
+  }
+
+  @override
+  String get attPunchIn => 'পাঞ্চ ইন';
+
+  @override
+  String get attPunchOut => 'পাঞ্চ আউট';
+
+  @override
+  String get attLocating => 'আপনার অবস্থান নেওয়া হচ্ছে…';
+
+  @override
+  String get attRecording => 'রেকর্ড হচ্ছে…';
+
+  @override
+  String get attPunchQueued =>
+      'অফলাইনে সংরক্ষিত। আপনার পাঞ্চের সময় ঠিক থাকবে এবং অনলাইনে এলে সিঙ্ক হবে।';
+
+  @override
+  String get attPunchFailed => 'পাঞ্চ রেকর্ড করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get attOnLeaveToday => 'আজ আপনি অনুমোদিত ছুটিতে আছেন।';
+
+  @override
+  String attLateBy(int minutes) {
+    return '$minutes মিনিট দেরি';
+  }
+
+  @override
+  String get attPendingReview => 'পর্যালোচনার অপেক্ষায়';
+
+  @override
+  String get attMissingOut => 'প্রস্থান নেই';
+
+  @override
+  String attOvertimeMtd(String duration) {
+    return 'ওভারটাইম $duration';
+  }
+
+  @override
+  String get attStatusPresent => 'উপস্থিত';
+
+  @override
+  String get attStatusLate => 'দেরি';
+
+  @override
+  String get attStatusEarlyLeave => 'আগে প্রস্থান';
+
+  @override
+  String get attStatusHalfDay => 'অর্ধদিবস';
+
+  @override
+  String get attStatusAbsent => 'অনুপস্থিত';
+
+  @override
+  String get attStatusOnLeave => 'ছুটিতে';
+
+  @override
+  String get attStatusHoliday => 'সরকারি ছুটি';
+
+  @override
+  String get attStatusWeekend => 'সাপ্তাহিক ছুটি';
+
+  @override
+  String get attStatusFieldDuty => 'মাঠ দায়িত্ব';
+
+  @override
+  String get attStatusNone => 'রেকর্ড নেই';
+
+  @override
+  String get attDaysTitle => 'দৈনিক রেকর্ড';
+
+  @override
+  String get attPrevMonth => 'আগের মাস';
+
+  @override
+  String get attNextMonth => 'পরের মাস';
+
+  @override
+  String get attSumPresent => 'উপস্থিত';
+
+  @override
+  String get attSumLate => 'দেরি';
+
+  @override
+  String get attSumAbsent => 'অনুপস্থিত';
+
+  @override
+  String get attSumLeave => 'ছুটি';
+
+  @override
+  String get attEmptyTitle => 'এখনও কোনো রেকর্ড নেই';
+
+  @override
+  String get attEmptyMessage => 'এই মাসের উপস্থিতি এখানে দেখা যাবে।';
+
+  @override
+  String get attDayPunches => 'পাঞ্চ';
+
+  @override
+  String get attNoPunches => 'এই দিনে কোনো পাঞ্চ নেই।';
+
+  @override
+  String get attPunchAccepted => 'গৃহীত';
+
+  @override
+  String get attPunchPending => 'অনুমোদনের অপেক্ষায়';
+
+  @override
+  String get attPunchRejected => 'বাতিল';
+
+  @override
+  String get attRegsTitle => 'আমার আবেদন';
+
+  @override
+  String get attRegularise => 'নিয়মিতকরণের আবেদন';
+
+  @override
+  String get attClose => 'বন্ধ করুন';
+
+  @override
+  String get attTryAgain => 'আবার চেষ্টা করুন';
+
+  @override
+  String get attOpenSettings => 'সেটিংস খুলুন';
+
+  @override
+  String get attLocTitle => 'অবস্থান প্রয়োজন';
+
+  @override
+  String get attLocServiceOff => 'পাঞ্চ করতে লোকেশন সার্ভিস চালু করুন।';
+
+  @override
+  String get attLocDenied => 'পাঞ্চ করতে লোকেশনের অনুমতি প্রয়োজন।';
+
+  @override
+  String get attLocDeniedForever =>
+      'এই অ্যাপের জন্য লোকেশন বন্ধ আছে। অনুমতি দিতে সেটিংস খুলুন।';
+
+  @override
+  String get attLocUnavailable =>
+      'আপনার অবস্থান পাওয়া যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get attResultInTitle => 'পাঞ্চ ইন সম্পন্ন';
+
+  @override
+  String get attResultOutTitle => 'পাঞ্চ আউট সম্পন্ন';
+
+  @override
+  String get attResultDuplicate => 'ইতিমধ্যে রেকর্ড হয়েছে';
+
+  @override
+  String get attResultOk => 'আপনার পাঞ্চ রেকর্ড হয়েছে।';
+
+  @override
+  String attResultAtSite(String site) {
+    return '$site-এ রেকর্ড হয়েছে।';
+  }
+
+  @override
+  String get attResultPendingTitle => 'অনুমোদনের জন্য পাঠানো হয়েছে';
+
+  @override
+  String get attResultPendingMessage =>
+      'আপনি সাইটের বাইরে পাঞ্চ করেছেন। আপনার লাইন ম্যানেজার এটি মাঠ দায়িত্ব হিসেবে পর্যালোচনা করবেন।';
+
+  @override
+  String get attResultOutsideTitle => 'আপনি সাইটের বাইরে';
+
+  @override
+  String attResultOutsideMessage(int distance, String site) {
+    return 'আপনি $site থেকে $distance মিটার দূরে। কাছে আসুন, অথবা অন্যত্র দায়িত্বে থাকলে নিয়মিতকরণের আবেদন করুন।';
+  }
+
+  @override
+  String get attResultAccuracyTitle => 'অবস্থান যথেষ্ট নির্ভুল নয়';
+
+  @override
+  String get attResultAccuracyMessage =>
+      'খোলা জায়গায় গিয়ে আবার চেষ্টা করুন।';
+
+  @override
+  String get attResultMockTitle => 'নকল লোকেশন শনাক্ত হয়েছে';
+
+  @override
+  String get attResultMockMessage =>
+      'নকল লোকেশন বন্ধ করে আবার চেষ্টা করুন। এই চেষ্টাটি পর্যালোচনার জন্য রেকর্ড হয়েছে।';
+
+  @override
+  String get attRegTitle => 'উপস্থিতির আবেদন';
+
+  @override
+  String get attRegType => 'আবেদনের ধরন';
+
+  @override
+  String get attRegTypeMissed => 'পাঞ্চ বাদ পড়েছে';
+
+  @override
+  String get attRegTypeField => 'মাঠ দায়িত্ব';
+
+  @override
+  String get attRegTypeLate => 'দেরির ব্যাখ্যা';
+
+  @override
+  String get attRegTypeRemote => 'দূর থেকে কাজ';
+
+  @override
+  String get attRegDate => 'তারিখ';
+
+  @override
+  String attRegHintWindow(int days) {
+    return 'গত $days দিনের জন্য আবেদন করা যাবে।';
+  }
+
+  @override
+  String attRegHintField(int days) {
+    return 'মাঠ দায়িত্বের আবেদন $days দিন আগে পর্যন্ত করা যাবে।';
+  }
+
+  @override
+  String get attRegIn => 'প্রবেশের সময়';
+
+  @override
+  String get attRegOut => 'প্রস্থানের সময়';
+
+  @override
+  String get attRegReason => 'কারণ';
+
+  @override
+  String get attRegReasonHint => 'কী ঘটেছিল তা লিখুন';
+
+  @override
+  String attRegReasonMin(int min) {
+    return 'কারণ কমপক্ষে $min অক্ষরের হতে হবে';
+  }
+
+  @override
+  String get attRegSubmit => 'আবেদন জমা দিন';
+
+  @override
+  String get attRegSubmitted => 'আবেদন অনুমোদনের জন্য পাঠানো হয়েছে';
+
+  @override
+  String get attRegQueued => 'অফলাইনে সংরক্ষিত। অনলাইনে এলে পাঠানো হবে।';
+
+  @override
+  String attRegQueueLabel(String date) {
+    return 'উপস্থিতির আবেদন, $date';
+  }
+
+  @override
+  String get attRegErrDuplicate =>
+      'এই দিনের জন্য একটি আবেদন ইতিমধ্যে অপেক্ষমাণ।';
+
+  @override
+  String attRegErrWindow(int days) {
+    return 'গত $days দিনের মধ্যে একটি তারিখ বেছে নিন।';
+  }
+
+  @override
+  String get attRegErrTimes => 'প্রস্থানের সময় প্রবেশের পরে হতে হবে।';
+
+  @override
+  String get attRegErrMissedTime => 'যে সময়ের পাঞ্চ বাদ পড়েছে তা দিন।';
+
+  @override
+  String get attRegErrFailed => 'আবেদন জমা দেওয়া যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get demoLocation => 'পাঞ্চের অবস্থান';
+
+  @override
+  String get demoLocationDevice => 'ফোনের GPS';
+
+  @override
+  String get demoLocationHq => 'প্রধান কার্যালয়ে';
+
+  @override
+  String get demoLocationPlant => 'প্ল্যান্টে';
+
+  @override
+  String get demoLocationOutside => 'সাইটের বাইরে';
+
+  @override
+  String get demoLocationMock => 'নকল GPS';
 }

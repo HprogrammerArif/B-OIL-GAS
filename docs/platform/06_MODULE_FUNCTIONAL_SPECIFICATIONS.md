@@ -1787,12 +1787,14 @@ Step: `PENDING → ACTIVE → COMPLETED (decision APPROVED|REJECTED|RETURNED) | 
 | BR-17-10 | Module callbacks are idempotent and run in the same DB transaction as the decision; a failing callback rolls back the decision (no half-states). |
 | BR-17-11 | `summary` is refreshed by the module on resubmit; conditions re-evaluate only on (re)submit, never mid-route. |
 | BR-17-12 | Comments are visible to all participants (initiator, all step approvers); `internalOnly = true` comments (approvers) hidden from the initiator. |
-| BR-17-14 | Inbox ordering defaults to most urgent first (lowest `slaHoursLeft`); alternatives: highest amount, requester A–Z. "Due soon" = < 12 h left; overdue items are flagged distinctly. |
-| BR-17-15 | Batch approve acts only on selected items that are visible under the current filters, requires an explicit confirmation listing every file and the total amount, and is offered only to roles with `canBatch`. |
-| BR-17-16 | A request opens in a detail panel (details, endorsement trail, decision record) with next/previous navigation; after approving or returning from the panel the next request opens automatically. |
-| BR-17-17 | Amounts use lakh/crore grouping (৳48,50,000); KPI tiles may abbreviate (৳94.12 Lakh) and always show the exact total beside it. |
 | BR-17-13 | Delegation per CM-20..23; delegation UI lives in Approvals Center ("Out of office"); delegations affecting ACTIVE steps are applied by the next escalation tick (≤ 15 min). |
 | BR-17-14 | Every decision emits realtime `workflow.instance.updated` to initiator and participants, and `approvals.inbox.changed` to affected approvers (badge refresh). |
+| BR-17-15 | Inbox ordering defaults to most urgent first (least time remaining on the live SLA clock, BR-17-19); alternatives: highest amount, requester A–Z. "Due soon" = < 12 h left; overdue items are flagged distinctly. |
+| BR-17-16 | Batch approve acts only on selected items that are visible under the current filters, requires an explicit confirmation listing every file and the total amount, and is offered only to roles with `canBatch`. |
+| BR-17-17 | A request opens in a detail panel (details, endorsement trail, decision record) with next/previous navigation; after approving or returning from the panel the next request opens automatically. |
+| BR-17-18 | Amounts use lakh/crore grouping (৳48,50,000); KPI tiles may abbreviate (৳94.12 Lakh) and always show the exact total beside it. |
+| BR-17-19 | The SLA shown to approvers is a live countdown, not a stored number: remaining time = seeded SLA window − time elapsed since the item entered the queue (items created in-session start at creation; seeded items start with the demo session). It is displayed as `5h 12m left` / `Overdue by 40m`, refreshes about every 30 s, and drives the badge tone, "Due soon" count, sort order and dashboard urgency. Tone: overdue ≤ 0, danger < 12 h, warn < 24 h. |
+| BR-17-20 | Every surface that can decide an approval (Approvals page cards, review drawer, dashboard drawer) uses the same flow: Approve opens the executive directive modal and Return opens the structured return-with-query modal. No surface approves or returns with canned text; decision buttons appear only for holders of `approvals:decide`. |
 
 ### 16.5 Calculations
 `cycleHours = completedAt − submittedAt` (business or calendar per template clock). `stepHours = decidedAt − activatedAt`. `escalationRate = steps ESCALATED / steps COMPLETED`.

@@ -6,23 +6,24 @@ import {
   X, Flame, History, ArrowUpDown, SearchX, ListChecks,
 } from 'lucide-react';
 
-import { useApprovalStore, type ApprovalItem } from '../store/approvalStore';
+import { useApprovalStore } from '../store/approvalStore';
 import { useCan } from '../auth/session';
 import { nowTime } from '../lib/clock';
 import { CATEGORY_LABELS, useMyApprovalQueue } from './approvals/config';
-import { SLA_URGENT_HOURS, formatTaka, formatTakaCompact, slaLabel, type SortKey } from './approvals/format';
+import { formatTaka, formatTakaCompact, type SortKey } from './approvals/format';
+import { SLA_URGENT_MINUTES, slaLabel, slaMinutesLeft, useNow } from '../lib/sla';
+import { useApprovalDecisions } from './approvals/useApprovalDecisions';
 import ApprovalCard from './approvals/ApprovalCard';
 import ApprovalDetailDrawer from './approvals/ApprovalDetailDrawer';
 import { Button, EmptyState, Modal, PageHeader } from '../components/ui';
-import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
-import AuthorizeDirectiveModal, { AuthorizeData } from '../components/AuthorizeDirectiveModal';
 
 type Tab = 'pending' | 'history';
 type Outcome = 'all' | 'approved' | 'rejected';
 
 export default function ApprovalsView({ lang }: ViewProps) {
   const canDecide = useCan('approvals:decide');
-  const { approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
+  const { batchApproveItems } = useApprovalStore();
+  const now = useNow();
   const { user, config: cfg, pending: approvalItems, decided: decidedItems } = useMyApprovalQueue();
 
   const [activeTab, setActiveTab] = useState<Tab>('pending');
@@ -33,15 +34,12 @@ export default function ApprovalsView({ lang }: ViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('sla');
   const [openId, setOpenId] = useState<string | null>(null);
-  const [itemToReject, setItemToReject] = useState<ApprovalItem | null>(null);
-  const [itemToAuthorize, setItemToAuthorize] = useState<ApprovalItem | null>(null);
   const [batchOpen, setBatchOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(() => nowTime(lang));
 
   const categories = cfg?.categories ?? [];
   const canBatch = canDecide && (cfg?.canBatch ?? false);
-  const reviewer = user ? `${user.name} (${user.label})` : '';
   const isPending = activeTab === 'pending';
   const query = searchQuery.trim().toLowerCase();
 
@@ -51,7 +49,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
     const out = listToDisplay.filter((item) => {
       if (selectedCategory !== 'all' && item.category !== selectedCategory) return false;
       if (!isPending && outcome !== 'all' && item.decisionStatus !== outcome) return false;
-      if (isPending && dueSoonOnly && item.slaHoursLeft >= SLA_URGENT_HOURS) return false;
+      if (isPending && dueSoonOnly && slaMinutesLeft(item, now) >= SLA_URGENT_MINUTES) return false;
       if (!query) return true;
       return [item.title, item.requester, item.id, item.dept, item.details, item.sapDocRef, item.amount ?? '']
         .some((field) => field.toLowerCase().includes(query));
@@ -60,11 +58,11 @@ export default function ApprovalsView({ lang }: ViewProps) {
       out.sort((a, b) => {
         if (sortKey === 'amount') return (b.costTk ?? 0) - (a.costTk ?? 0);
         if (sortKey === 'requester') return a.requester.localeCompare(b.requester);
-        return a.slaHoursLeft - b.slaHoursLeft;
+        return slaMinutesLeft(a, now) - slaMinutesLeft(b, now);
       });
     }
     return out;
-  }, [listToDisplay, selectedCategory, outcome, dueSoonOnly, query, sortKey, isPending]);
+  }, [listToDisplay, selectedCategory, outcome, dueSoonOnly, query, sortKey, isPending, now]);
 
   // Only act on what is visible: a selection hidden by a filter is never approved by accident.
   const selectedVisible = useMemo(
@@ -75,8 +73,8 @@ export default function ApprovalsView({ lang }: ViewProps) {
   const allVisibleSelected = filteredItems.length > 0 && selectedVisible.length === filteredItems.length;
 
   const totalPendingCost = approvalItems.reduce((sum, i) => sum + (i.costTk ?? 0), 0);
-  const dueSoonItems = approvalItems.filter((i) => i.slaHoursLeft < SLA_URGENT_HOURS);
-  const nextDue = approvalItems.length > 0 ? Math.min(...approvalItems.map((i) => i.slaHoursLeft)) : null;
+  const dueSoonItems = approvalItems.filter((i) => slaMinutesLeft(i, now) < SLA_URGENT_MINUTES);
+  const nextDue = approvalItems.length > 0 ? Math.min(...approvalItems.map((i) => slaMinutesLeft(i, now))) : null;
   const approvedCount = decidedItems.filter((d) => d.decisionStatus !== 'rejected').length;
   const returnedCount = decidedItems.length - approvedCount;
 
@@ -128,49 +126,11 @@ export default function ApprovalsView({ lang }: ViewProps) {
     if (next) setOpenId(next.id);
   };
 
-  const handleConfirmAuthorize = (data: AuthorizeData) => {
-    if (!itemToAuthorize || !user) return;
-    const decidedItem = itemToAuthorize;
-    const next = nextIdAfter(decidedItem.id);
-    const res = approveApprovalItem(decidedItem.id, data.directive, reviewer, user.role);
-    setSelectedIds((prev) => prev.filter((x) => x !== decidedItem.id));
-    if (openId === decidedItem.id) setOpenId(next);
-
-    showToast(
-      t(
-        `✓ Approved ${decidedItem.id} (${decidedItem.amount || 'no amount'}). Voucher: ${res.sapVoucher}.`,
-        `✓ অনুমোদিত ${decidedItem.id}: ভাউচার প্রস্তুত (${res.sapVoucher})।`,
-        lang,
-      ),
-      'gold',
-    );
-    setItemToAuthorize(null);
-  };
-
-  const handleConfirmReject = (data: RejectionData) => {
-    if (!itemToReject || !user) return;
-    const decidedItem = itemToReject;
-    const next = nextIdAfter(decidedItem.id);
-    rejectApprovalItem(
-      decidedItem.id,
-      data.reasonCategory,
-      data.observation,
-      data.improvementsRequired,
-      reviewer,
-      user.role,
-    );
-    setSelectedIds((prev) => prev.filter((x) => x !== decidedItem.id));
-    if (openId === decidedItem.id) setOpenId(next);
-    showToast(
-      t(
-        `File ${decidedItem.id} returned to ${decidedItem.requester} with query: "${data.reasonCategory}".`,
-        `${decidedItem.id} আপত্তি ও নির্দেশনাসহ ${decidedItem.requester}-এর নিকট ফেরত পাঠানো হয়েছে।`,
-        lang,
-      ),
-      'warn',
-    );
-    setItemToReject(null);
-  };
+  const { requestApprove, requestReturn, modals, busy: decisionOpen } = useApprovalDecisions(lang, (id) => {
+    const next = nextIdAfter(id);
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+    if (openId === id) setOpenId(next);
+  });
 
   const handleConfirmBatch = () => {
     if (selectedVisible.length === 0 || !user) return;
@@ -244,7 +204,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
           aria-pressed={dueSoonOnly && isPending}
         >
           <div className="apv-kpi-top">
-            <span>{t(`Due within ${SLA_URGENT_HOURS} hours`, `${SLA_URGENT_HOURS} ঘণ্টার মধ্যে সময়সীমা`, lang)}</span>
+            <span>{t('Due within 12 hours', '১২ ঘণ্টার মধ্যে সময়সীমা', lang)}</span>
             <i><Flame size={16} /></i>
           </div>
           <strong>{dueSoonItems.length}</strong>
@@ -357,7 +317,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
       </div>
 
       {/* List */}
-      <div className={`apv-list-wrap ${refreshing ? 'is-refreshing' : ''}`}>
+      <div className="apv-list-wrap" aria-busy={refreshing}>
         <div className="apv-list-head">
           {isPending && canBatch && filteredItems.length > 0 ? (
             <label className="apv-selectall">
@@ -373,7 +333,24 @@ export default function ApprovalsView({ lang }: ViewProps) {
           </span>
         </div>
 
-        {filteredItems.length === 0 ? (
+        {refreshing ? (
+          <div className="apv-list" role="status" aria-label={t('Refreshing the queue', 'তালিকা হালনাগাদ হচ্ছে', lang)}>
+            {Array.from({ length: Math.min(Math.max(filteredItems.length, 2), 4) }, (_, i) => (
+              <div key={i} className="apv-skel" aria-hidden>
+                <div className="apv-skel-col">
+                  <span className="skeleton w-20" />
+                  <span className="skeleton title w-70" />
+                  <span className="skeleton w-90" />
+                  <span className="skeleton w-40" />
+                </div>
+                <div className="apv-skel-col end">
+                  <span className="skeleton amount" />
+                  <span className="skeleton pill" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="card">
             <EmptyState
               icon={hasActiveFilter ? <SearchX size={20} /> : <Inbox size={20} />}
@@ -403,8 +380,8 @@ export default function ApprovalsView({ lang }: ViewProps) {
                 selected={selectedIds.includes(item.id)}
                 onToggleSelect={toggleSelect}
                 onOpen={setOpenId}
-                onApprove={setItemToAuthorize}
-                onReturn={setItemToReject}
+                onApprove={requestApprove}
+                onReturn={requestReturn}
               />
             ))}
           </div>
@@ -439,13 +416,13 @@ export default function ApprovalsView({ lang }: ViewProps) {
           canDecide={canDecide}
           position={openIndex + 1}
           total={filteredItems.length}
-          suspendKeys={!!itemToAuthorize || !!itemToReject || batchOpen}
+          suspendKeys={decisionOpen || batchOpen}
           signerLabel={user ? `${user.name} (${user.label})` : ''}
           onClose={() => setOpenId(null)}
           onPrev={() => goRelative(-1)}
           onNext={() => goRelative(1)}
-          onApprove={setItemToAuthorize}
-          onReturn={setItemToReject}
+          onApprove={requestApprove}
+          onReturn={requestReturn}
         />
       )}
 
@@ -485,47 +462,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
         </ul>
       </Modal>
 
-      {itemToAuthorize && (
-        <AuthorizeDirectiveModal
-          isOpen={!!itemToAuthorize}
-          onClose={() => setItemToAuthorize(null)}
-          onConfirm={handleConfirmAuthorize}
-          lang={lang}
-          itemId={itemToAuthorize.id}
-          itemTitle={itemToAuthorize.title}
-          requesterName={itemToAuthorize.requester}
-          department={itemToAuthorize.dept}
-          amount={itemToAuthorize.amount}
-          sapDocRef={itemToAuthorize.sapDocRef}
-          approvalTrail={itemToAuthorize.approvalTrail}
-          roleTitle={user?.label ?? ''}
-          signerName={user?.name ?? ''}
-        />
-      )}
-
-      {itemToReject && (
-        <RejectionExplanationModal
-          isOpen={!!itemToReject}
-          onClose={() => setItemToReject(null)}
-          onConfirm={handleConfirmReject}
-          lang={lang}
-          title={t('Return Request with Query', 'আপত্তি ও নির্দেশনাসহ আবেদন ফেরত', lang)}
-          itemId={itemToReject.id}
-          itemTitle={itemToReject.title}
-          requesterName={itemToReject.requester}
-          department={itemToReject.dept}
-          amount={itemToReject.amount}
-          categoryType={
-            itemToReject.sourceType === 'claim'
-              ? 'claim'
-              : itemToReject.sourceType === 'requisition'
-                ? 'requisition'
-                : itemToReject.sourceType === 'notesheet'
-                  ? 'notesheet'
-                  : 'general'
-          }
-        />
-      )}
+      {modals}
     </div>
   );
 }

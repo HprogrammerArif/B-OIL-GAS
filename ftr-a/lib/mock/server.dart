@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/storage/blob_store.dart';
 import 'package:bogcl_oneops/core/utils/hash.dart';
 import 'package:bogcl_oneops/core/utils/logger.dart';
+import 'package:bogcl_oneops/mock/handlers/attendance_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/audit_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
@@ -60,6 +61,7 @@ class MockServer {
       ...workflowRoutes(),
       ...fileRoutes(),
       ...leaveRoutes(),
+      ...attendanceRoutes(),
     ]);
   }
 

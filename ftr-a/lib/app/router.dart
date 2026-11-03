@@ -1,6 +1,8 @@
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/features/activity/presentation/activity_screen.dart';
+import 'package:bogcl_oneops/features/attendance/presentation/attendance_screen.dart';
+import 'package:bogcl_oneops/features/attendance/presentation/regularise_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/loading_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/login_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
@@ -64,6 +66,19 @@ GoRouter router(Ref ref) {
                 path: AppRoutes.home,
                 builder: (context, state) => const HomeScreen(),
                 routes: [
+                  GoRoute(
+                    path: 'attendance',
+                    builder: (context, state) => const AttendanceScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'regularise',
+                        builder: (context, state) => RegulariseScreen(
+                          initialDate: state.uri.queryParameters['date'],
+                          initialType: state.uri.queryParameters['type'],
+                        ),
+                      ),
+                    ],
+                  ),
                   GoRoute(
                     path: 'leave',
                     builder: (context, state) => const LeaveScreen(),

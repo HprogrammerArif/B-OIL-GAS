@@ -1404,6 +1404,570 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Not needed'**
   String get workflowStepSkipped;
+
+  /// No description provided for @moduleAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get moduleAttendance;
+
+  /// No description provided for @attTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attTitle;
+
+  /// No description provided for @attShiftLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {start}–{end}'**
+  String attShiftLine(String name, String start, String end);
+
+  /// No description provided for @attIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get attIn;
+
+  /// No description provided for @attOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out'**
+  String get attOut;
+
+  /// No description provided for @attWorked.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked'**
+  String get attWorked;
+
+  /// No description provided for @attDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h {m}m'**
+  String attDuration(int h, String m);
+
+  /// No description provided for @attPunchIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Punch in'**
+  String get attPunchIn;
+
+  /// No description provided for @attPunchOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Punch out'**
+  String get attPunchOut;
+
+  /// No description provided for @attLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your location…'**
+  String get attLocating;
+
+  /// No description provided for @attRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get attRecording;
+
+  /// No description provided for @attPunchQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved offline. Your punch time is kept and will sync when you are online.'**
+  String get attPunchQueued;
+
+  /// No description provided for @attPunchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not record your punch. Please try again.'**
+  String get attPunchFailed;
+
+  /// No description provided for @attOnLeaveToday.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on approved leave today.'**
+  String get attOnLeaveToday;
+
+  /// No description provided for @attLateBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Late by {minutes} min'**
+  String attLateBy(int minutes);
+
+  /// No description provided for @attPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting review'**
+  String get attPendingReview;
+
+  /// No description provided for @attMissingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out missing'**
+  String get attMissingOut;
+
+  /// No description provided for @attOvertimeMtd.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtime {duration}'**
+  String attOvertimeMtd(String duration);
+
+  /// No description provided for @attStatusPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attStatusPresent;
+
+  /// No description provided for @attStatusLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attStatusLate;
+
+  /// No description provided for @attStatusEarlyLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Early leave'**
+  String get attStatusEarlyLeave;
+
+  /// No description provided for @attStatusHalfDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Half day'**
+  String get attStatusHalfDay;
+
+  /// No description provided for @attStatusAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attStatusAbsent;
+
+  /// No description provided for @attStatusOnLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get attStatusOnLeave;
+
+  /// No description provided for @attStatusHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get attStatusHoliday;
+
+  /// No description provided for @attStatusWeekend.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend'**
+  String get attStatusWeekend;
+
+  /// No description provided for @attStatusFieldDuty.
+  ///
+  /// In en, this message translates to:
+  /// **'Field duty'**
+  String get attStatusFieldDuty;
+
+  /// No description provided for @attStatusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No record'**
+  String get attStatusNone;
+
+  /// No description provided for @attDaysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily record'**
+  String get attDaysTitle;
+
+  /// No description provided for @attPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get attPrevMonth;
+
+  /// No description provided for @attNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get attNextMonth;
+
+  /// No description provided for @attSumPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attSumPresent;
+
+  /// No description provided for @attSumLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attSumLate;
+
+  /// No description provided for @attSumAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attSumAbsent;
+
+  /// No description provided for @attSumLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get attSumLeave;
+
+  /// No description provided for @attEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No records yet'**
+  String get attEmptyTitle;
+
+  /// No description provided for @attEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your attendance for this month will appear here.'**
+  String get attEmptyMessage;
+
+  /// No description provided for @attDayPunches.
+  ///
+  /// In en, this message translates to:
+  /// **'Punches'**
+  String get attDayPunches;
+
+  /// No description provided for @attNoPunches.
+  ///
+  /// In en, this message translates to:
+  /// **'No punches on this day.'**
+  String get attNoPunches;
+
+  /// No description provided for @attPunchAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get attPunchAccepted;
+
+  /// No description provided for @attPunchPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending approval'**
+  String get attPunchPending;
+
+  /// No description provided for @attPunchRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get attPunchRejected;
+
+  /// No description provided for @attRegsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My requests'**
+  String get attRegsTitle;
+
+  /// No description provided for @attRegularise.
+  ///
+  /// In en, this message translates to:
+  /// **'Request regularisation'**
+  String get attRegularise;
+
+  /// No description provided for @attClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get attClose;
+
+  /// No description provided for @attTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get attTryAgain;
+
+  /// No description provided for @attOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get attOpenSettings;
+
+  /// No description provided for @attLocTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location needed'**
+  String get attLocTitle;
+
+  /// No description provided for @attLocServiceOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location services to punch.'**
+  String get attLocServiceOff;
+
+  /// No description provided for @attLocDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is needed to punch.'**
+  String get attLocDenied;
+
+  /// No description provided for @attLocDeniedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is blocked for this app. Open settings to allow it.'**
+  String get attLocDeniedForever;
+
+  /// No description provided for @attLocUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not get your location. Try again.'**
+  String get attLocUnavailable;
+
+  /// No description provided for @attResultInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Punched in'**
+  String get attResultInTitle;
+
+  /// No description provided for @attResultOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Punched out'**
+  String get attResultOutTitle;
+
+  /// No description provided for @attResultDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Already recorded'**
+  String get attResultDuplicate;
+
+  /// No description provided for @attResultOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Your punch was recorded.'**
+  String get attResultOk;
+
+  /// No description provided for @attResultAtSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded at {site}.'**
+  String attResultAtSite(String site);
+
+  /// No description provided for @attResultPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent for approval'**
+  String get attResultPendingTitle;
+
+  /// No description provided for @attResultPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You punched away from the site. Your line manager will review it as field duty.'**
+  String get attResultPendingMessage;
+
+  /// No description provided for @attResultOutsideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You are outside the site'**
+  String get attResultOutsideTitle;
+
+  /// No description provided for @attResultOutsideMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are {distance} m from {site}. Move closer, or request regularisation if you are on duty elsewhere.'**
+  String attResultOutsideMessage(int distance, String site);
+
+  /// No description provided for @attResultAccuracyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not accurate enough'**
+  String get attResultAccuracyTitle;
+
+  /// No description provided for @attResultAccuracyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to open sky and try again.'**
+  String get attResultAccuracyMessage;
+
+  /// No description provided for @attResultMockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock location detected'**
+  String get attResultMockTitle;
+
+  /// No description provided for @attResultMockMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off mock locations and try again. This attempt was recorded for review.'**
+  String get attResultMockMessage;
+
+  /// No description provided for @attRegTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance request'**
+  String get attRegTitle;
+
+  /// No description provided for @attRegType.
+  ///
+  /// In en, this message translates to:
+  /// **'Request type'**
+  String get attRegType;
+
+  /// No description provided for @attRegTypeMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed punch'**
+  String get attRegTypeMissed;
+
+  /// No description provided for @attRegTypeField.
+  ///
+  /// In en, this message translates to:
+  /// **'Field duty'**
+  String get attRegTypeField;
+
+  /// No description provided for @attRegTypeLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late justification'**
+  String get attRegTypeLate;
+
+  /// No description provided for @attRegTypeRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote work'**
+  String get attRegTypeRemote;
+
+  /// No description provided for @attRegDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get attRegDate;
+
+  /// No description provided for @attRegHintWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'You can file for the last {days} days.'**
+  String attRegHintWindow(int days);
+
+  /// No description provided for @attRegHintField.
+  ///
+  /// In en, this message translates to:
+  /// **'Field duty can be filed up to {days} days ahead.'**
+  String attRegHintField(int days);
+
+  /// No description provided for @attRegIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In time'**
+  String get attRegIn;
+
+  /// No description provided for @attRegOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out time'**
+  String get attRegOut;
+
+  /// No description provided for @attRegReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get attRegReason;
+
+  /// No description provided for @attRegReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain what happened'**
+  String get attRegReasonHint;
+
+  /// No description provided for @attRegReasonMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason must be at least {min} characters'**
+  String attRegReasonMin(int min);
+
+  /// No description provided for @attRegSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get attRegSubmit;
+
+  /// No description provided for @attRegSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent for approval'**
+  String get attRegSubmitted;
+
+  /// No description provided for @attRegQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved offline. It will be sent when you are back online.'**
+  String get attRegQueued;
+
+  /// No description provided for @attRegQueueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance request, {date}'**
+  String attRegQueueLabel(String date);
+
+  /// No description provided for @attRegErrDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'A request for this day is already pending.'**
+  String get attRegErrDuplicate;
+
+  /// No description provided for @attRegErrWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date within the last {days} days.'**
+  String attRegErrWindow(int days);
+
+  /// No description provided for @attRegErrTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Out time must be after in time.'**
+  String get attRegErrTimes;
+
+  /// No description provided for @attRegErrMissedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the time you missed.'**
+  String get attRegErrMissedTime;
+
+  /// No description provided for @attRegErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit the request. Please try again.'**
+  String get attRegErrFailed;
+
+  /// No description provided for @demoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Punch location'**
+  String get demoLocation;
+
+  /// No description provided for @demoLocationDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone GPS'**
+  String get demoLocationDevice;
+
+  /// No description provided for @demoLocationHq.
+  ///
+  /// In en, this message translates to:
+  /// **'At Head Office'**
+  String get demoLocationHq;
+
+  /// No description provided for @demoLocationPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'At Plant'**
+  String get demoLocationPlant;
+
+  /// No description provided for @demoLocationOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside site'**
+  String get demoLocationOutside;
+
+  /// No description provided for @demoLocationMock.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock GPS'**
+  String get demoLocationMock;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

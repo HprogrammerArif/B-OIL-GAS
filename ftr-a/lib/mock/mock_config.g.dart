@@ -45,7 +45,7 @@ final class MockConfigControllerProvider
 }
 
 String _$mockConfigControllerHash() =>
-    r'8e3a78b1da6121579f323985e258cfeb92d19a26';
+    r'25b5765e590230997548f5f683ec5543d9529237';
 
 /// Live mock-server knobs, driven by the hidden demo menu.
 
