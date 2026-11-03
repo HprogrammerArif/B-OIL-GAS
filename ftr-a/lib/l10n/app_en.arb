@@ -1333,5 +1333,241 @@
   "approvalViewRequest": "See the full request",
   "approvalRoute": "Approval route",
   "approvalDiscussion": "Comments",
-  "approvalNeedsSignature": "This step needs your signature."
+  "approvalNeedsSignature": "This step needs your signature.",
+  "commonSave": "Save",
+  "moduleNoteSheets": "Note-sheets",
+  "nsIntro": "A note-sheet is a formal file note that asks for a decision or for money to be spent. It goes to each officer in turn and each one signs.",
+  "nsTabMine": "Mine",
+  "nsTabToSign": "To sign",
+  "nsTabAll": "All I can see",
+  "nsNew": "New note-sheet",
+  "nsEmptyMine": "You have not written any note-sheet yet.",
+  "nsEmptyToSign": "Nothing is waiting for your signature.",
+  "nsEmptyAll": "There are no note-sheets to show.",
+  "nsStatusDraft": "Draft",
+  "nsStatusInReview": "With approvers",
+  "nsStatusReturned": "Sent back",
+  "nsStatusApproved": "Approved",
+  "nsNextDraft": "Not sent yet. Add the details and send it for approval.",
+  "nsNextSign": "Your turn. Read it and sign, send it back, or reject it.",
+  "nsNextWaiting": "Waiting for {names}.",
+  "@nsNextWaiting": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "nsNextReturned": "Sent back to you. Read the reason, fix it and send it again.",
+  "nsNextReturnedOther": "Sent back to {name} for changes.",
+  "@nsNextReturnedOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nsNextApproved": "Approved and signed by everyone. Nothing more to do.",
+  "nsNextRejected": "Rejected. This file is closed.",
+  "nsNextWithdrawn": "Withdrawn by {name}. This file is closed.",
+  "@nsNextWithdrawn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nsFrom": "From {name}, {dept}, {date}",
+  "@nsFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "dept": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nsVerdictOne": "1 quote, from {name}.",
+  "@nsVerdictOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nsVerdictCheapest": "{count} quotes. {name} is cheapest, saving {saving} against the dearest.",
+  "@nsVerdictCheapest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "saving": {
+        "type": "String"
+      }
+    }
+  },
+  "nsVerdictNotLowest": "{count} quotes. {name} is recommended but costs {extra} more than {lowest}, the lowest.",
+  "@nsVerdictNotLowest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "extra": {
+        "type": "String"
+      },
+      "lowest": {
+        "type": "String"
+      }
+    }
+  },
+  "nsVerdictNoPick": "{count} quotes. {name} is the lowest. No supplier is recommended yet.",
+  "@nsVerdictNoPick": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nsOverLowest": "{amount} over the lowest",
+  "@nsOverLowest": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "nsRecommended": "Recommended",
+  "nsQuotesTitle": "Quotations",
+  "nsQuoteMeta": "{days} days delivery, {months} months warranty",
+  "@nsQuoteMeta": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "nsNotesTitle": "Notes",
+  "nsRouteTitle": "Approval route",
+  "nsSignedBy": "Signed by",
+  "nsSignedVerified": "Signed and verified",
+  "nsDetails": "Details",
+  "nsDetailsHelp": "Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.",
+  "nsVerifyCode": "Verification code {code}",
+  "@nsVerifyCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "nsKindNote": "Note",
+  "nsKindQuery": "Question",
+  "nsKindReturn": "Sent back",
+  "nsUrgNormal": "Normal",
+  "nsUrgHigh": "High",
+  "nsUrgCritical": "Critical",
+  "nsConfInternal": "Internal",
+  "nsConfConfidential": "Confidential",
+  "nsConfSecret": "Secret",
+  "nsEditTitle": "Edit note-sheet",
+  "nsFieldTitle": "Title",
+  "nsFieldSubject": "Subject",
+  "nsFieldAmount": "Amount in taka, if money is involved",
+  "nsFieldAmountHelp": "Leave empty if no spending is asked for.",
+  "nsFieldJustification": "What do you need, and why?",
+  "nsFieldUrgency": "How urgent is it?",
+  "nsFieldConfidentiality": "Who may read it?",
+  "nsQuoteAdd": "Add quotation",
+  "nsQuotesNeeded": "Spending of 2,00,000 taka or more needs at least 3 quotations and one recommended supplier.",
+  "nsQuotesOptional": "Quotations are optional below 2,00,000 taka.",
+  "nsQuotePickHint": "Tap the circle to recommend a supplier. Tap a row to change it.",
+  "nsQuoteVendor": "Supplier",
+  "nsQuotePrice": "Quoted price in taka",
+  "nsQuoteDelivery": "Delivery in days",
+  "nsQuoteWarranty": "Warranty in months",
+  "nsRecoNote": "Why not the lowest price?",
+  "nsWhyReturned": "Why {name} sent it back",
+  "@nsWhyReturned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nsSaveDraft": "Save draft",
+  "nsSaveChanges": "Save changes only",
+  "nsSend": "Send for approval",
+  "nsSendAgain": "Send again",
+  "nsSaved": "Saved",
+  "nsSent": "Sent for approval",
+  "nsDeleteDraft": "Delete draft",
+  "nsDeleteConfirm": "Delete this draft?",
+  "nsErrTitle": "Enter a title of at least 5 characters.",
+  "nsErrSubject": "Enter the subject.",
+  "nsErrJustification": "Explain the request in at least 10 characters.",
+  "nsErrVendor": "Enter the supplier name.",
+  "nsErrPrice": "Enter the quoted price.",
+  "nsErrQuotesMin": "Add at least 3 quotations.",
+  "nsErrQuotesPick": "Recommend exactly one supplier.",
+  "nsErrQuotesNote": "Explain in at least 30 characters why the recommended supplier is not the cheapest.",
+  "nsErrFailed": "That did not work. Please try again.",
+  "nsSignAction": "Review and sign",
+  "nsFixAndSend": "Fix and send again",
+  "nsEditAndSend": "Edit and send",
+  "nsAddNote": "Add a note or question",
+  "nsNoteAppendOnly": "Notes are never edited or deleted. Everyone on this file can read them.",
+  "nsNoteText": "Your note",
+  "nsNoteAdd": "Add to file",
+  "nsNoteAdded": "Added to the file",
+  "nsReturnTitle": "Send back for changes",
+  "nsRejectTitle": "Reject this note-sheet",
+  "nsReturnedToast": "Sent back to the author",
+  "nsRejectedToast": "Rejected",
+  "nsWithdrawConfirm": "Withdraw this note-sheet?",
+  "nsWithdrawMessage": "It will be closed and signatures so far will no longer count.",
+  "nsWithdrawnToast": "Withdrawn",
+  "nsPrint": "Print or save as PDF",
+  "nsPrintFailed": "Could not prepare the PDF.",
+  "nsSignTitle": "Sign this note-sheet",
+  "nsSignIntro": "You are signing {ref}. Your signature is tied to exactly what you see now.",
+  "@nsSignIntro": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "nsSignTyped": "Type name",
+  "nsSignDrawn": "Draw",
+  "nsSignStamp": "Stamp",
+  "nsSignTypedLabel": "Your full name",
+  "nsSignDrawHint": "Draw your signature here",
+  "nsSignClear": "Clear",
+  "nsSignComment": "Comment (optional)",
+  "nsSignOtp": "One-time code",
+  "nsSignOtpHelp": "Demo app: the code is 123456.",
+  "nsSignConfirm": "Sign and approve",
+  "nsSignErrName": "Type your full name.",
+  "nsSignErrDraw": "Draw your signature first.",
+  "nsSignErrOtp": "Enter the 6-digit code.",
+  "nsSignErrOtpWrong": "The code is not correct.",
+  "nsSignErrFailed": "Could not sign. Please try again.",
+  "nsSignedToast": "Signed. It moves to the next officer.",
+  "nsSignedFinal": "Signed. The note-sheet is fully approved."
 }

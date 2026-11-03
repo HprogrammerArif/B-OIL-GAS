@@ -2316,4 +2316,401 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get approvalNeedsSignature => 'This step needs your signature.';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get moduleNoteSheets => 'Note-sheets';
+
+  @override
+  String get nsIntro =>
+      'A note-sheet is a formal file note that asks for a decision or for money to be spent. It goes to each officer in turn and each one signs.';
+
+  @override
+  String get nsTabMine => 'Mine';
+
+  @override
+  String get nsTabToSign => 'To sign';
+
+  @override
+  String get nsTabAll => 'All I can see';
+
+  @override
+  String get nsNew => 'New note-sheet';
+
+  @override
+  String get nsEmptyMine => 'You have not written any note-sheet yet.';
+
+  @override
+  String get nsEmptyToSign => 'Nothing is waiting for your signature.';
+
+  @override
+  String get nsEmptyAll => 'There are no note-sheets to show.';
+
+  @override
+  String get nsStatusDraft => 'Draft';
+
+  @override
+  String get nsStatusInReview => 'With approvers';
+
+  @override
+  String get nsStatusReturned => 'Sent back';
+
+  @override
+  String get nsStatusApproved => 'Approved';
+
+  @override
+  String get nsNextDraft =>
+      'Not sent yet. Add the details and send it for approval.';
+
+  @override
+  String get nsNextSign =>
+      'Your turn. Read it and sign, send it back, or reject it.';
+
+  @override
+  String nsNextWaiting(String names) {
+    return 'Waiting for $names.';
+  }
+
+  @override
+  String get nsNextReturned =>
+      'Sent back to you. Read the reason, fix it and send it again.';
+
+  @override
+  String nsNextReturnedOther(String name) {
+    return 'Sent back to $name for changes.';
+  }
+
+  @override
+  String get nsNextApproved =>
+      'Approved and signed by everyone. Nothing more to do.';
+
+  @override
+  String get nsNextRejected => 'Rejected. This file is closed.';
+
+  @override
+  String nsNextWithdrawn(String name) {
+    return 'Withdrawn by $name. This file is closed.';
+  }
+
+  @override
+  String nsFrom(String name, String dept, String date) {
+    return 'From $name, $dept, $date';
+  }
+
+  @override
+  String nsVerdictOne(String name) {
+    return '1 quote, from $name.';
+  }
+
+  @override
+  String nsVerdictCheapest(int count, String name, String saving) {
+    return '$count quotes. $name is cheapest, saving $saving against the dearest.';
+  }
+
+  @override
+  String nsVerdictNotLowest(
+    int count,
+    String name,
+    String extra,
+    String lowest,
+  ) {
+    return '$count quotes. $name is recommended but costs $extra more than $lowest, the lowest.';
+  }
+
+  @override
+  String nsVerdictNoPick(int count, String name) {
+    return '$count quotes. $name is the lowest. No supplier is recommended yet.';
+  }
+
+  @override
+  String nsOverLowest(String amount) {
+    return '$amount over the lowest';
+  }
+
+  @override
+  String get nsRecommended => 'Recommended';
+
+  @override
+  String get nsQuotesTitle => 'Quotations';
+
+  @override
+  String nsQuoteMeta(int days, int months) {
+    return '$days days delivery, $months months warranty';
+  }
+
+  @override
+  String get nsNotesTitle => 'Notes';
+
+  @override
+  String get nsRouteTitle => 'Approval route';
+
+  @override
+  String get nsSignedBy => 'Signed by';
+
+  @override
+  String get nsSignedVerified => 'Signed and verified';
+
+  @override
+  String get nsDetails => 'Details';
+
+  @override
+  String get nsDetailsHelp =>
+      'Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.';
+
+  @override
+  String nsVerifyCode(String code) {
+    return 'Verification code $code';
+  }
+
+  @override
+  String get nsKindNote => 'Note';
+
+  @override
+  String get nsKindQuery => 'Question';
+
+  @override
+  String get nsKindReturn => 'Sent back';
+
+  @override
+  String get nsUrgNormal => 'Normal';
+
+  @override
+  String get nsUrgHigh => 'High';
+
+  @override
+  String get nsUrgCritical => 'Critical';
+
+  @override
+  String get nsConfInternal => 'Internal';
+
+  @override
+  String get nsConfConfidential => 'Confidential';
+
+  @override
+  String get nsConfSecret => 'Secret';
+
+  @override
+  String get nsEditTitle => 'Edit note-sheet';
+
+  @override
+  String get nsFieldTitle => 'Title';
+
+  @override
+  String get nsFieldSubject => 'Subject';
+
+  @override
+  String get nsFieldAmount => 'Amount in taka, if money is involved';
+
+  @override
+  String get nsFieldAmountHelp => 'Leave empty if no spending is asked for.';
+
+  @override
+  String get nsFieldJustification => 'What do you need, and why?';
+
+  @override
+  String get nsFieldUrgency => 'How urgent is it?';
+
+  @override
+  String get nsFieldConfidentiality => 'Who may read it?';
+
+  @override
+  String get nsQuoteAdd => 'Add quotation';
+
+  @override
+  String get nsQuotesNeeded =>
+      'Spending of 2,00,000 taka or more needs at least 3 quotations and one recommended supplier.';
+
+  @override
+  String get nsQuotesOptional => 'Quotations are optional below 2,00,000 taka.';
+
+  @override
+  String get nsQuotePickHint =>
+      'Tap the circle to recommend a supplier. Tap a row to change it.';
+
+  @override
+  String get nsQuoteVendor => 'Supplier';
+
+  @override
+  String get nsQuotePrice => 'Quoted price in taka';
+
+  @override
+  String get nsQuoteDelivery => 'Delivery in days';
+
+  @override
+  String get nsQuoteWarranty => 'Warranty in months';
+
+  @override
+  String get nsRecoNote => 'Why not the lowest price?';
+
+  @override
+  String nsWhyReturned(String name) {
+    return 'Why $name sent it back';
+  }
+
+  @override
+  String get nsSaveDraft => 'Save draft';
+
+  @override
+  String get nsSaveChanges => 'Save changes only';
+
+  @override
+  String get nsSend => 'Send for approval';
+
+  @override
+  String get nsSendAgain => 'Send again';
+
+  @override
+  String get nsSaved => 'Saved';
+
+  @override
+  String get nsSent => 'Sent for approval';
+
+  @override
+  String get nsDeleteDraft => 'Delete draft';
+
+  @override
+  String get nsDeleteConfirm => 'Delete this draft?';
+
+  @override
+  String get nsErrTitle => 'Enter a title of at least 5 characters.';
+
+  @override
+  String get nsErrSubject => 'Enter the subject.';
+
+  @override
+  String get nsErrJustification =>
+      'Explain the request in at least 10 characters.';
+
+  @override
+  String get nsErrVendor => 'Enter the supplier name.';
+
+  @override
+  String get nsErrPrice => 'Enter the quoted price.';
+
+  @override
+  String get nsErrQuotesMin => 'Add at least 3 quotations.';
+
+  @override
+  String get nsErrQuotesPick => 'Recommend exactly one supplier.';
+
+  @override
+  String get nsErrQuotesNote =>
+      'Explain in at least 30 characters why the recommended supplier is not the cheapest.';
+
+  @override
+  String get nsErrFailed => 'That did not work. Please try again.';
+
+  @override
+  String get nsSignAction => 'Review and sign';
+
+  @override
+  String get nsFixAndSend => 'Fix and send again';
+
+  @override
+  String get nsEditAndSend => 'Edit and send';
+
+  @override
+  String get nsAddNote => 'Add a note or question';
+
+  @override
+  String get nsNoteAppendOnly =>
+      'Notes are never edited or deleted. Everyone on this file can read them.';
+
+  @override
+  String get nsNoteText => 'Your note';
+
+  @override
+  String get nsNoteAdd => 'Add to file';
+
+  @override
+  String get nsNoteAdded => 'Added to the file';
+
+  @override
+  String get nsReturnTitle => 'Send back for changes';
+
+  @override
+  String get nsRejectTitle => 'Reject this note-sheet';
+
+  @override
+  String get nsReturnedToast => 'Sent back to the author';
+
+  @override
+  String get nsRejectedToast => 'Rejected';
+
+  @override
+  String get nsWithdrawConfirm => 'Withdraw this note-sheet?';
+
+  @override
+  String get nsWithdrawMessage =>
+      'It will be closed and signatures so far will no longer count.';
+
+  @override
+  String get nsWithdrawnToast => 'Withdrawn';
+
+  @override
+  String get nsPrint => 'Print or save as PDF';
+
+  @override
+  String get nsPrintFailed => 'Could not prepare the PDF.';
+
+  @override
+  String get nsSignTitle => 'Sign this note-sheet';
+
+  @override
+  String nsSignIntro(String ref) {
+    return 'You are signing $ref. Your signature is tied to exactly what you see now.';
+  }
+
+  @override
+  String get nsSignTyped => 'Type name';
+
+  @override
+  String get nsSignDrawn => 'Draw';
+
+  @override
+  String get nsSignStamp => 'Stamp';
+
+  @override
+  String get nsSignTypedLabel => 'Your full name';
+
+  @override
+  String get nsSignDrawHint => 'Draw your signature here';
+
+  @override
+  String get nsSignClear => 'Clear';
+
+  @override
+  String get nsSignComment => 'Comment (optional)';
+
+  @override
+  String get nsSignOtp => 'One-time code';
+
+  @override
+  String get nsSignOtpHelp => 'Demo app: the code is 123456.';
+
+  @override
+  String get nsSignConfirm => 'Sign and approve';
+
+  @override
+  String get nsSignErrName => 'Type your full name.';
+
+  @override
+  String get nsSignErrDraw => 'Draw your signature first.';
+
+  @override
+  String get nsSignErrOtp => 'Enter the 6-digit code.';
+
+  @override
+  String get nsSignErrOtpWrong => 'The code is not correct.';
+
+  @override
+  String get nsSignErrFailed => 'Could not sign. Please try again.';
+
+  @override
+  String get nsSignedToast => 'Signed. It moves to the next officer.';
+
+  @override
+  String get nsSignedFinal => 'Signed. The note-sheet is fully approved.';
 }

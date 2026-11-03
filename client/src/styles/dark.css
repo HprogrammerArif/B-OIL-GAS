@@ -262,9 +262,7 @@
 [data-theme="dark"] .stat-value,
 [data-theme="dark"] .doc-subject,
 [data-theme="dark"] .k-title,
-[data-theme="dark"] .notice-title,
 [data-theme="dark"] .inc-title,
-[data-theme="dark"] .prs-name,
 [data-theme="dark"] .day-name,
 [data-theme="dark"] .tank-id-tag {
   color: #F8FAFC !important;
@@ -275,7 +273,6 @@
   color: #CBD5E1;
 }
 
-[data-theme="dark"] .presence-row,
 [data-theme="dark"] .activity-item,
 [data-theme="dark"] .approval-queue-item,
 [data-theme="dark"] .shift-handover-row {
@@ -284,7 +281,6 @@
   color: #E2E8F0;
 }
 
-[data-theme="dark"] .presence-row:hover,
 [data-theme="dark"] .approval-queue-item:hover,
 [data-theme="dark"] .approval-interactive-card:hover {
   background: #16254C !important;

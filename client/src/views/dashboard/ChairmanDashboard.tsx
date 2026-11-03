@@ -1,669 +1,75 @@
-import { useState, useMemo } from 'react';
-import { ChevronRight, Plus, Eye, Pin, CheckCircle2, Megaphone, Search, X } from 'lucide-react';
+import { useMemo } from 'react';
 import { t } from '../../types';
-import { showToast } from '../../components/ToastManager';
-import Pagination from '../../components/Pagination';
-import { DashboardSubViewProps, NoticeItem } from './types';
-import { INNER_CIRCLE } from './dashboardData';
-import { useNoticeStore } from '../../store/noticeStore';
-import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
+import { DashboardSubViewProps } from './types';
 import { useMyApprovalQueue } from '../approvals/config';
-import { SLA_DAY_MINUTES, slaLabel, slaMinutesLeft, useNow } from '../../lib/sla';
+import { slaMinutesLeft, useNow } from '../../lib/sla';
 import { useCan } from '../../auth/session';
-import PublishNoticeModal from './PublishNoticeModal';
-import NoticeDetailModal from './NoticeDetailModal';
-import AuthorizeDirectiveModal, { AuthorizeData } from '../../components/AuthorizeDirectiveModal';
-import { ShieldCheck, Clock } from 'lucide-react';
+import ApprovalCard from '../approvals/ApprovalCard';
+import { useApprovalDecisions } from '../approvals/useApprovalDecisions';
+import { EmptyState, StatusPill } from '../../components/ui';
+import ChairmanNotices from './ChairmanNotices';
+import LeadershipPresence from './LeadershipPresence';
 
 export default function ChairmanDashboard({
   lang,
   activeTab,
-  onOpenDetailDrawer
+  onOpenDetailDrawer,
 }: DashboardSubViewProps) {
-  const { notices, addNotice, acknowledgeNotice, togglePin } = useNoticeStore();
   const canDecide = useCan('approvals:decide');
   const now = useNow();
-  const { approveApprovalItem } = useApprovalStore();
-  const { user, pending: approvalsList } = useMyApprovalQueue();
-  const [approvalsPage, setApprovalsPage] = useState(1);
-  const [innerCirclePage, setInnerCirclePage] = useState(1);
-  const [innerCircleFilter, setInnerCircleFilter] = useState<string>('all');
-  const [noticesPage, setNoticesPage] = useState(1);
-  const [noticeFilter, setNoticeFilter] = useState<string>('all');
-  const [noticeSearch, setNoticeSearch] = useState<string>('');
-  const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
-  const [selectedNoticeForDetail, setSelectedNoticeForDetail] = useState<NoticeItem | null>(null);
-  const [itemToAuthorize, setItemToAuthorize] = useState<ApprovalItem | null>(null);
-  const [expandedTrails, setExpandedTrails] = useState<Record<string, boolean>>({});
-
-  const toggleTrail = (id: string) => {
-    setExpandedTrails(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleAuthorize = (item: ApprovalItem) => {
-    setItemToAuthorize(item);
-  };
-
-  const handleConfirmAuthorize = (data: AuthorizeData) => {
-    if (!itemToAuthorize || !user) return;
-    const item = itemToAuthorize;
-    const res = approveApprovalItem(item.id, data.directive, `${user.name} (${user.label})`, user.role);
-
-    const directiveSnippet =
-      data.directive.length > 55 ? `${data.directive.slice(0, 55)}...` : data.directive;
-
-    showToast(
-      lang === 'en'
-        ? `Authorized ${item.id}${item.amount ? ` (${item.amount})` : ''}. Directive: "${directiveSnippet}". Voucher ${res.sapVoucher}.`
-        : `অনুমোদিত: ${item.id}${item.amount ? ` (${item.amount})` : ''}। নির্দেশনাসহ ভাউচার ${res.sapVoucher} তৈরি হয়েছে।`,
-      'gold'
-    );
-    setItemToAuthorize(null);
-  };
-
-  const innerCircleCounts = INNER_CIRCLE.reduce<Record<string, number>>((acc, p) => {
-    acc[p.status] = (acc[p.status] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const filteredInnerCircle = INNER_CIRCLE.filter(p => {
-    if (innerCircleFilter === 'all') return true;
-    return p.status === innerCircleFilter;
-  });
-
-  const filteredNotices = useMemo(() => {
-    return notices.filter(n => {
-      if (noticeFilter === 'pinned' && !n.pinned) return false;
-      if (noticeFilter === 'safety' && !n.tag?.toLowerCase().includes('safety') && n.category !== 'safety') return false;
-      if (noticeFilter === 'hr' && !n.tag?.toLowerCase().includes('hr') && n.category !== 'hr') return false;
-      if (noticeFilter === 'operational' && !n.tag?.toLowerCase().includes('operations') && !n.tag?.toLowerCase().includes('hse') && n.category !== 'operational') return false;
-
-      if (noticeSearch.trim()) {
-        const q = noticeSearch.toLowerCase().trim();
-        return (
-          n.title.toLowerCase().includes(q) ||
-          (n.title_bn && n.title_bn.toLowerCase().includes(q)) ||
-          (n.body && n.body.toLowerCase().includes(q)) ||
-          n.tag.toLowerCase().includes(q) ||
-          (n.author && n.author.toLowerCase().includes(q)) ||
-          (n.referenceNo && n.referenceNo.toLowerCase().includes(q))
-        );
-      }
-      return true;
-    });
-  }, [notices, noticeFilter, noticeSearch]);
-
-  const handleRowClick = (item: ApprovalItem) => {
-    onOpenDetailDrawer?.(item.id);
-  };
+  const { pending } = useMyApprovalQueue();
+  const { requestApprove, requestReturn, modals } = useApprovalDecisions(lang);
+  const queue = useMemo(
+    () => [...pending].sort((a, b) => slaMinutesLeft(a, now) - slaMinutesLeft(b, now)),
+    [pending, now],
+  );
 
   return (
     <>
-      {/* ═══════════════════════════════════════════
-          CHAIRMAN: TAB "approvals" (Paginated)
-          ═══════════════════════════════════════════ */}
+      {/* Files waiting for the Chairman's signature (same cards and decision flow as the Approvals page) */}
       {activeTab === 'approvals' && (
-        <div className="card mb-5 tab-pane-fade">
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon">⚡</div>
-              <div>
-                <div className="card-title">{t('Priority approvals awaiting your signature', 'আপনার স্বাক্ষরের অপেক্ষায় জরুরি অনুমোদন', lang)}</div>
-                <div className="card-subtitle">{t('High-value files endorsed by departments and escalated to the Chairman\'s office', 'বিভাগ কর্তৃক সুপারিশকৃত উচ্চমূল্যের ফাইল, চেয়ারম্যান দপ্তরে উন্নীত', lang)}</div>
-              </div>
+        <section className="tab-pane-fade dash-section" aria-labelledby="dash-apv-title">
+          <header className="dash-sec-head">
+            <div>
+              <h3 id="dash-apv-title">{t('Files waiting for your signature', 'আপনার স্বাক্ষরের অপেক্ষায় ফাইল', lang)}</h3>
+              <p>{t('Sent to you after each department has endorsed them. Most urgent first.', 'বিভাগীয় সুপারিশের পর আপনার কাছে পাঠানো। জরুরিগুলো আগে।', lang)}</p>
             </div>
-            <span className={`badge ${approvalsList.length > 0 ? 'danger' : 'success'}`}>{approvalsList.length} {t('files', 'টি ফাইল', lang)}</span>
-          </div>
-          <div className="card-body">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {approvalsList.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-3)', fontSize: '13px' }}>
-                  ✓ {t('No files are waiting on your signature.', 'আপনার স্বাক্ষরের অপেক্ষায় কোনো ফাইল নেই।', lang)}
-                </div>
-              ) : (
-                approvalsList.slice((approvalsPage - 1) * 2, approvalsPage * 2).map((item) => {
-                  const isExpanded = !!expandedTrails[item.id];
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="approval-interactive-card"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        borderLeft: `4px solid ${item.urgency === 'critical' ? 'var(--brand-crimson)' : item.urgency === 'high' ? 'var(--status-warning)' : 'var(--border-2)'}`,
-                        cursor: 'default',
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          flexWrap: 'wrap',
-                          gap: '10px',
-                        }}
-                      >
-                        <div style={{ flex: '1 1 300px' }}>
-                          <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-1)' }}>
-                            {t(item.title, item.titleBn || item.title, lang)}
-                          </div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>
-                            <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{item.id}</span> · {item.dept} · {item.requester}
-                            {item.amount && (
-                              <>
-                                {' · '}
-                                <strong style={{ color: 'var(--brand-gold-dark)', fontSize: '12px' }}>{item.amount}</strong>
-                              </>
-                            )}
-                            {item.sapDocRef && (
-                              <span className="badge info" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
-                                {t('Ref', 'রেফ', lang)}: {item.sapDocRef}
-                              </span>
-                            )}
-                            {slaMinutesLeft(item, now) <= SLA_DAY_MINUTES && (
-                              <span className="badge danger" style={{ fontSize: '9.5px', padding: '1px 5px', marginLeft: '6px' }}>
-                                {slaMinutesLeft(item, now) <= 0 ? t('SLA breached', 'সময়সীমা অতিক্রান্ত', lang) : slaLabel(slaMinutesLeft(item, now), lang)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex-gap" style={{ alignItems: 'center' }}>
-                          {canDecide && (
-                            <button
-                              type="button"
-                              className="btn-gold"
-                              style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
-                              onClick={() => handleAuthorize(item)}
-                              title={t('Authorize with an executive directive and digital seal', 'নির্দেশনা ও ডিজিটাল সিলসহ অনুমোদন', lang)}
-                            >
-                              👑 {t('Authorize', 'অনুমোদন', lang)}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="btn-outline"
-                            style={{ fontSize: '11px', padding: '6px 12px' }}
-                            onClick={() => handleRowClick(item)}
-                          >
-                            {t('Inspect File', 'নথি দেখুন', lang)}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Departmental Endorsement Path Preview & Accordion */}
-                      {item.approvalTrail && item.approvalTrail.length > 0 && (
-                        <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px', padding: '8px 12px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                            <button
-                              type="button"
-                              onClick={() => toggleTrail(item.id)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                padding: 0,
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                fontSize: '11.5px',
-                                fontWeight: 700,
-                                color: 'var(--status-purple-text)',
-                              }}
-                            >
-                              <ShieldCheck size={14} color="var(--status-success)" />
-                              <span>
-                                {t('Department Endorsement Path', 'বিভাগীয় সুপারিশ খতিয়ান', lang)} ({item.approvalTrail.length} {t('Notes', 'টি নোট', lang)})
-                              </span>
-                              <span style={{ fontSize: '9px' }}>{isExpanded ? '▲' : '▼'}</span>
-                            </button>
-
-                            {!isExpanded && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10.5px', color: 'var(--text-3)' }}>
-                                {item.approvalTrail.map((st, idx) => (
-                                  <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                    {idx > 0 && <span style={{ color: 'var(--text-inverse-2)', fontSize: '9px' }}>➔</span>}
-                                    <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800 }}>✓</span>
-                                    <span>{st.officerName.split(' ')[0]}</span>
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Expanded list of departmental justification notes */}
-                          {isExpanded && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-1)' }}>
-                              {item.approvalTrail.map((step, idx) => (
-                                <div key={idx} style={{ background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '6px', padding: '7px 10px', fontSize: '11px' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                      <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 800 }}>✓</span>
-                                      <strong style={{ color: 'var(--text-1)' }}>{step.officerName}</strong>
-                                      <span style={{ color: 'var(--text-3)', fontSize: '10px' }}>({step.roleName} · {step.department})</span>
-                                    </div>
-                                    <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                      <Clock size={10} /> {step.timestamp}
-                                    </span>
-                                  </div>
-                                  <div style={{ paddingLeft: '19px', color: 'var(--text-2)', fontStyle: 'italic', lineHeight: 1.4 }}>
-                                    "{step.note}"
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {approvalsList.length > 2 && (
-              <Pagination
-                currentPage={approvalsPage}
-                totalItems={approvalsList.length}
-                pageSize={2}
-                onPageChange={setApprovalsPage}
-                lang={lang}
-              />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          CHAIRMAN: TAB "inner_circle" (Paginated & Filterable)
-          ═══════════════════════════════════════════ */}
-      {activeTab === 'inner_circle' && (
-        <div className="card mb-5 tab-pane-fade">
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon">👥</div>
-              <div>
-                <div className="card-title">{t('Inner Circle — Executive Presence', 'ইনার সার্কেল — নেতৃত্ব উপস্থিতি', lang)}</div>
-                <div className="card-subtitle">{t('Live status of key leadership across Refinery, Finance & Operations', 'মূল নেতৃত্বের লাইভ স্ট্যাটাস', lang)}</div>
-              </div>
-            </div>
-            <span className="badge success">{filteredInnerCircle.length} {t('executives', 'জন কর্মকর্তা', lang)}</span>
-          </div>
-          <div className="card-body">
-            {/* Interactive Filter Pills */}
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px', fontSize: '11px' }}>
-              {[
-                { id: 'all', label: t(`All tracked (${INNER_CIRCLE.length})`, `সকল (${INNER_CIRCLE.length.toLocaleString('bn-BD')})`, lang), bg: 'var(--surface-2)', color: 'var(--text-2)' },
-                { id: 'present', label: t(`🟢 Present (${innerCircleCounts.present ?? 0})`, `🟢 উপস্থিত (${(innerCircleCounts.present ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-success-bg)', color: 'var(--status-success-text)' },
-                { id: 'meeting', label: t(`🔵 In meeting (${innerCircleCounts.meeting ?? 0})`, `🔵 মিটিংয়ে (${(innerCircleCounts.meeting ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-info-bg)', color: 'var(--status-info-text)' },
-                { id: 'travel', label: t(`🟣 Travelling (${innerCircleCounts.travel ?? 0})`, `🟣 সফরে (${(innerCircleCounts.travel ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' },
-                { id: 'leave', label: t(`🟡 On leave (${innerCircleCounts.leave ?? 0})`, `🟡 ছুটিতে (${(innerCircleCounts.leave ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
-                { id: 'sick', label: t(`🟠 Sick leave (${innerCircleCounts.sick ?? 0})`, `🟠 অসুস্থতাজনিত ছুটি (${(innerCircleCounts.sick ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' },
-                { id: 'uninformed', label: t(`🔴 Absent, uninformed (${innerCircleCounts.uninformed ?? 0})`, `🔴 অননুমোদিত অনুপস্থিত (${(innerCircleCounts.uninformed ?? 0).toLocaleString('bn-BD')})`, lang), bg: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' },
-              ].map(pill => (
-                <button
-                  key={pill.id}
-                  onClick={() => { setInnerCircleFilter(pill.id); setInnerCirclePage(1); }}
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    border: innerCircleFilter === pill.id ? '2px solid var(--brand-crimson)' : '1px solid transparent',
-                    background: pill.bg,
-                    color: pill.color,
-                    fontWeight: innerCircleFilter === pill.id ? 800 : 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {pill.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="presence-list">
-              {filteredInnerCircle.slice((innerCirclePage - 1) * 4, innerCirclePage * 4).map((person, i) => (
-                <div
-                  key={i}
-                  className="presence-row interactive-row"
-                  onClick={() => {
-                    if (person.status === 'uninformed') {
-                      showToast(t(`HR has been asked to follow up on ${person.name}'s unreported absence.`, `${person.name}-এর অনবহিত অনুপস্থিতির বিষয়ে এইচআরকে অনুসন্ধান করতে বলা হয়েছে।`, lang), 'danger');
-                    } else {
-                      showToast(`${person.name} · ${person.location} · ${person.phone}`, 'info');
-                    }
-                  }}
-                  title={t('Click for location and contact', 'অবস্থান ও যোগাযোগের জন্য ক্লিক করুন', lang)}
-                  style={{
-                    background: person.status === 'uninformed' ? 'var(--status-danger-bg)' : undefined,
-                    border: person.status === 'uninformed' ? '1px solid var(--status-danger-border)' : undefined
-                  }}
-                >
-                  <div className="presence-person">
-                    <div className="presence-avatar" style={{ background: person.color }}>{person.initials}</div>
-                    <div>
-                      <div className="prs-name">{person.name}</div>
-                      <div className="prs-role">{person.role} • <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{person.location}</span></div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className={`badge ${person.badge}`}>{t(person.statusLabel, person.statusLabelBn, lang)}</span>
-                    {person.status === 'uninformed' ? (
-                      <button
-                        className="btn-outline-danger"
-                        style={{ padding: '2px 8px', fontSize: '10px' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showToast(t(`Notice sent to ${person.name} and the HR department.`, `${person.name} ও এইচআর বিভাগকে নোটিশ পাঠানো হয়েছে।`, lang), 'danger');
-                        }}
-                      >
-                        {t('Alert HR', 'এইচআরকে জানান', lang)}
-                      </button>
-                    ) : (
-                      <ChevronRight size={14} color="var(--brand-slate-300)" />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Pagination
-              currentPage={innerCirclePage}
-              totalItems={filteredInnerCircle.length}
-              pageSize={4}
-              onPageChange={setInnerCirclePage}
-              lang={lang}
+            <StatusPill tone={queue.length > 0 ? 'danger' : 'success'}>
+              {queue.length} {t(queue.length === 1 ? 'file' : 'files', 'টি ফাইল', lang)}
+            </StatusPill>
+          </header>
+          {queue.length === 0 ? (
+            <EmptyState
+              compact
+              title={t('Nothing is waiting for you', 'আপনার জন্য কিছু অপেক্ষমান নেই', lang)}
+              description={t('New files sent to you will appear here.', 'আপনার কাছে পাঠানো নতুন ফাইল এখানে দেখা যাবে।', lang)}
             />
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════
-          CHAIRMAN: TAB "notices" (Paginated & Filterable)
-          ═══════════════════════════════════════════ */}
-      {activeTab === 'notices' && (
-        <div className="card mb-5 tab-pane-fade">
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon">📢</div>
-              <div>
-                <div className="card-title">{t('Enterprise Notice Board', 'এন্টারপ্রাইজ নোটিশ বোর্ড', lang)}</div>
-                <div className="card-subtitle">{t('Latest corporate announcements & group circulars', 'সর্বশেষ কর্পোরেট ঘোষণা', lang)}</div>
-              </div>
-            </div>
-            <button
-              className="btn-gold"
-              style={{ fontSize: '11.5px', padding: '6px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-              onClick={() => setShowPublishModal(true)}
-            >
-              <Plus size={13} />
-              <span>+ {t('Publish Notice', 'নোটিশ প্রকাশ', lang)}</span>
-            </button>
-          </div>
-          <div className="card-body">
-            {/* Filter Pills & Search */}
-            <div className="notice-filter-toolbar" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
-              <div className="notice-filter-pills" style={{ display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto', fontSize: '12px' }}>
-                {[
-                  { id: 'all', label: `All Circulars (${notices.length})` },
-                  { id: 'pinned', label: `📌 Pinned (${notices.filter(n => n.pinned).length})` },
-                  { id: 'safety', label: `⚠️ Safety Critical (${notices.filter(n => n.tag?.toLowerCase().includes('safety') || n.category === 'safety').length})` },
-                  { id: 'hr', label: `📋 HR & Admin (${notices.filter(n => n.tag?.toLowerCase().includes('hr') || n.category === 'hr').length})` },
-                  { id: 'operational', label: `🏭 Refinery Operations (${notices.filter(n => n.tag?.toLowerCase().includes('operations') || n.category === 'operational').length})` },
-                ].map(pill => (
-                  <button
-                    key={pill.id}
-                    onClick={() => { setNoticeFilter(pill.id); setNoticesPage(1); }}
-                    className={`notice-filter-btn ${noticeFilter === pill.id ? 'active' : ''}`}
-                  >
-                    {pill.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Search Box */}
-              <div className="notice-search-box">
-                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)', pointerEvents: 'none' }} />
-                <input
-                  type="text"
-                  value={noticeSearch}
-                  onChange={(e) => { setNoticeSearch(e.target.value); setNoticesPage(1); }}
-                  placeholder={t('Search notices, circulars...', 'নোটিশ খুঁজুন...', lang)}
+          ) : (
+            <div className="apv-list">
+              {queue.map((item) => (
+                <ApprovalCard
+                  key={item.id}
+                  item={item}
+                  mode="pending"
+                  lang={lang}
+                  canDecide={canDecide}
+                  selectable={false}
+                  selected={false}
+                  onToggleSelect={() => undefined}
+                  onOpen={(id) => onOpenDetailDrawer?.(id)}
+                  onApprove={requestApprove}
+                  onReturn={requestReturn}
                 />
-                {noticeSearch && (
-                  <button
-                    onClick={() => setNoticeSearch('')}
-                    style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-slate-400)' }}
-                  >
-                    <X size={13} />
-                  </button>
-                )}
-              </div>
+              ))}
             </div>
-
-            {/* Flagship Pinned Chairman Message */}
-            {noticeFilter === 'all' && !noticeSearch && (
-              <div
-                className="notice-card gold-pin"
-                style={{ marginBottom: '12px', cursor: 'pointer' }}
-                onClick={() => setSelectedNoticeForDetail({
-                  id: 'NOT-CHAIRMAN-EID',
-                  title: "Chairman's Message — Eid ul-Adha 2026",
-                  title_bn: "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬",
-                  tag: "👑 CHAIRMAN'S MESSAGE",
-                  category: "executive",
-                  priority: "high",
-                  date: "Jun 17, 2026",
-                  author: "Ahmed Akbar Sobhan",
-                  authorRole: "Chairman & Managing Director",
-                  targetAudience: "All Employees & Families of Bashundhara Group",
-                  body: "On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure, maintaining zero-incident safety standards, and powering the nation's energy future is the pride of our group. May this blessed occasion bring joy, health, and renewed determination to all.",
-                  read: true,
-                  pinned: true,
-                  referenceNo: "BOGCL/CHAIR/EID-2026"
-                })}
-              >
-                <div className="notice-hd">
-                  <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-gold-dark)' }}>
-                    👑 {t("Chairman's Message — Eid ul-Adha 2026", "চেয়ারম্যানের বার্তা — ঈদুল আযহা ২০২৬", lang)}
-                  </div>
-                  <span className="badge gold">👑 Pinned by Chairman</span>
-                </div>
-                <div className="notice-meta" style={{ fontSize: '11.5px', marginTop: '4px' }}>
-                  Jun 17, 2026 · Ahmed Akbar Sobhan, Chairman · <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--status-warning-text)' }}>BOGCL/CHAIR/EID-2026</span>
-                </div>
-                <div className="notice-body" style={{ fontStyle: 'italic', color: 'var(--brand-slate-700)', marginTop: '8px', lineHeight: 1.5 }}>
-                  {t('"On behalf of Bashundhara Group, I extend heartfelt Eid Mubarak to every employee and their families. Your relentless dedication to establishing world-class refining infrastructure..."', '"বাশুন্ধারা গ্রুপের পক্ষে সকল কর্মী ও তাদের পরিবারকে ঈদ মোবারক..."', lang)}
-                </div>
-              </div>
-            )}
-
-            {/* Paginated Notices List */}
-            {filteredNotices.length === 0 ? (
-              <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--brand-slate-400)' }}>
-                <Megaphone size={38} color="var(--brand-slate-300)" style={{ margin: '0 auto 8px' }} />
-                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-600)' }}>
-                  {t('No corporate notices found matching this filter', 'কোনো নোটিশ পাওয়া যায়নি', lang)}
-                </div>
-              </div>
-            ) : (
-              <div className="notice-list">
-                {filteredNotices.slice((noticesPage - 1) * 4, noticesPage * 4).map((notice, i) => {
-                  const isSafety = notice.tag.includes('SAFETY') || notice.category === 'safety';
-                  const isChairman = notice.tag.includes('CHAIRMAN') || notice.category === 'executive';
-
-                  return (
-                    <div
-                      key={notice.id || i}
-                      className={`notice-card${notice.pinned ? (isChairman ? ' gold-pin' : ' pinned') : ''}`}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setSelectedNoticeForDetail(notice)}
-                    >
-                      <div className="notice-hd">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '14px' }}>{isChairman ? '👑' : isSafety ? '⚠️' : '📢'}</span>
-                          <div className="notice-title" style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                            {t(notice.title, notice.title_bn, lang)}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                          {notice.pinned && (
-                            <span className={`badge ${isChairman ? 'gold' : 'danger'}`}>
-                              {isChairman ? '👑 Chairman Pinned' : '📌 Pinned'}
-                            </span>
-                          )}
-                          <span className={`badge ${isSafety ? 'danger' : notice.tag.includes('HR') ? 'info' : 'secondary'}`}>
-                            {notice.tag}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="notice-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                        <span>{notice.date}</span>
-                        {notice.author && (
-                          <>
-                            <span>•</span>
-                            <span style={{ fontWeight: 600, color: 'var(--brand-slate-700)' }}>By {notice.author}</span>
-                          </>
-                        )}
-                        {notice.targetAudience && (
-                          <>
-                            <span>•</span>
-                            <span>Audience: {notice.targetAudience}</span>
-                          </>
-                        )}
-                        {notice.referenceNo && (
-                          <>
-                            <span>•</span>
-                            <span style={{ fontFamily: 'monospace' }}>{notice.referenceNo}</span>
-                          </>
-                        )}
-                      </div>
-
-                      {notice.body && (
-                        <div className="notice-body" style={{ marginTop: '8px', fontSize: '12px', lineHeight: 1.5, color: 'var(--brand-slate-600)' }}>
-                          {t(notice.body, notice.body_bn || notice.body, lang)}
-                        </div>
-                      )}
-
-                      <div className="notice-card-footer" onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {notice.requiresAck && (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--brand-slate-500)' }}>
-                              <CheckCircle2 size={13} color="var(--status-success)" />
-                              <span>
-                                {notice.acknowledgedCount || 184}/{notice.totalRecipients || 218} Read ({Math.round(((notice.acknowledgedCount || 184) / (notice.totalRecipients || 218)) * 100)}%)
-                              </span>
-                            </span>
-                          )}
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <button
-                            type="button"
-                            className="btn-sm-ghost"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px' }}
-                            onClick={() => setSelectedNoticeForDetail(notice)}
-                          >
-                            <Eye size={12} />
-                            <span>{t('View Full Circular', 'বিস্তারিত দেখুন', lang)}</span>
-                          </button>
-
-                          {!notice.read ? (
-                            <button
-                              type="button"
-                              className="btn-sm-ghost"
-                              style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 800, color: 'var(--status-success-text)', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', borderRadius: '6px' }}
-                              onClick={() => {
-                                acknowledgeNotice(notice.id || notice.title);
-                                showToast(t('✓ Notice acknowledged.', '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।', lang), 'success');
-                              }}
-                            >
-                              ✅ {t('Acknowledge', 'পড়েছি', lang)}
-                            </button>
-                          ) : (
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--status-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <CheckCircle2 size={12} />
-                              <span>Acknowledged</span>
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: notice.pinned ? 'var(--status-warning)' : 'var(--brand-slate-400)' }}
-                            title={notice.pinned ? "Unpin notice" : "Pin notice"}
-                            onClick={() => {
-                              togglePin(notice.id || notice.title);
-                              showToast(notice.pinned ? '📌 Notice unpinned' : '📌 Notice pinned to top', 'info');
-                            }}
-                          >
-                            <Pin size={13} fill={notice.pinned ? 'var(--status-warning)' : 'none'} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <Pagination
-              currentPage={noticesPage}
-              totalItems={filteredNotices.length}
-              pageSize={4}
-              onPageChange={setNoticesPage}
-              lang={lang}
-            />
-          </div>
-        </div>
+          )}
+        </section>
       )}
 
-      {/* ─── MODAL 1: PUBLISH ENTERPRISE NOTICE ─── */}
-      <PublishNoticeModal
-        isOpen={showPublishModal}
-        onClose={() => setShowPublishModal(false)}
-        lang={lang}
-        onPublish={(newNotice) => {
-          addNotice(newNotice);
-          showToast(
-            t(
-              `👑 Executive Circular published! Pushed to 1,240 employees via App & SMS.`,
-              `👑 নতুন কর্পোরেট নোটিশ প্রকাশিত ও ১,২৪০ কর্মকর্তা-কর্মচারীদের নিকট প্রেরিত হয়েছে।`,
-              lang
-            ),
-            'gold'
-          );
-        }}
-      />
+      {activeTab === 'inner_circle' && <LeadershipPresence lang={lang} />}
+      {activeTab === 'notices' && <ChairmanNotices lang={lang} />}
 
-      {/* ─── MODAL 2: NOTICE DETAIL LETTERHEAD INSPECTION ─── */}
-      <NoticeDetailModal
-        notice={selectedNoticeForDetail}
-        onClose={() => setSelectedNoticeForDetail(null)}
-        lang={lang}
-        onAcknowledge={(noticeId) => {
-          if (noticeId) acknowledgeNotice(noticeId);
-        }}
-      />
-
-      {/* ─── MODAL 3: CHAIRMAN AUTHORIZATION DIRECTIVE MODAL ─── */}
-      {itemToAuthorize && (
-        <AuthorizeDirectiveModal
-          isOpen={!!itemToAuthorize}
-          onClose={() => setItemToAuthorize(null)}
-          onConfirm={handleConfirmAuthorize}
-          lang={lang}
-          itemId={itemToAuthorize.id}
-          itemTitle={itemToAuthorize.title}
-          requesterName={itemToAuthorize.requester}
-          department={itemToAuthorize.dept}
-          amount={itemToAuthorize.amount}
-          sapDocRef={itemToAuthorize.sapDocRef}
-          approvalTrail={itemToAuthorize.approvalTrail}
-          roleTitle={user?.label ?? ""}
-        />
-      )}
+      {modals}
     </>
   );
 }

@@ -20,6 +20,9 @@ import 'package:bogcl_oneops/features/leave/presentation/leave_apply_screen.dart
 import 'package:bogcl_oneops/features/leave/presentation/leave_detail_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
 import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_detail_screen.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_edit_screen.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheets_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_compose_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_detail_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notices_screen.dart';
@@ -100,6 +103,31 @@ GoRouter router(Ref ref) {
                         builder: (context, state) => ApprovalDetailScreen(
                           instanceId: state.pathParameters['id']!,
                         ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'note-sheets',
+                    builder: (context, state) => const NoteSheetsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) =>
+                            const NoteSheetEditScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => NoteSheetDetailScreen(
+                          id: state.pathParameters['id']!,
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: 'edit',
+                            builder: (context, state) => NoteSheetEditScreen(
+                              id: state.pathParameters['id'],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -255,6 +255,7 @@ class _Body extends ConsumerWidget {
     final link = switch (d.objectType) {
       'Claim' => AppRoutes.claimDetail(d.objectId),
       'LeaveRequest' => AppRoutes.leaveDetail(d.objectId),
+      'NoteSheet' => AppRoutes.noteSheetDetail(d.objectId),
       _ => null,
     };
     final comments = [
@@ -412,12 +413,25 @@ class _ActionBar extends ConsumerWidget {
                     style: TextStyle(color: context.bogcl.warning),
                   ),
                 ),
-              PrimaryButton(
-                label: l10n.approvalActApprove,
-                icon: Icons.check,
-                loading: busy,
-                onPressed: mine!.requiresSignature ? null : onApprove,
-              ),
+              if (mine!.requiresSignature)
+                PrimaryButton(
+                  label: l10n.nsSignAction,
+                  icon: Icons.draw_outlined,
+                  onPressed: detail.objectType == 'NoteSheet'
+                      ? () => unawaited(
+                          context.push(
+                            AppRoutes.noteSheetDetail(detail.objectId),
+                          ),
+                        )
+                      : null,
+                )
+              else
+                PrimaryButton(
+                  label: l10n.approvalActApprove,
+                  icon: Icons.check,
+                  loading: busy,
+                  onPressed: onApprove,
+                ),
               const SizedBox(height: Space.sm),
               Row(
                 children: [

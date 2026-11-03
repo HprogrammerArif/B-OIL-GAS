@@ -20,6 +20,10 @@ abstract final class AppRoutes {
   static String claimEdit(String id) => '/home/claims/$id/edit';
   static const bus = '/home/bus';
   static String busRoute(String id) => '/home/bus/routes/$id';
+  static const noteSheets = '/home/note-sheets';
+  static const noteSheetNew = '/home/note-sheets/new';
+  static String noteSheetDetail(String id) => '/home/note-sheets/$id';
+  static String noteSheetEdit(String id) => '/home/note-sheets/$id/edit';
   static const approvals = '/home/approvals';
   static String approvalDetail(String instanceId) =>
       '/home/approvals/$instanceId';

@@ -2309,4 +2309,401 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get approvalNeedsSignature => 'এই ধাপে আপনার স্বাক্ষর দরকার।';
+
+  @override
+  String get commonSave => 'সংরক্ষণ করুন';
+
+  @override
+  String get moduleNoteSheets => 'নোট-শিট';
+
+  @override
+  String get nsIntro =>
+      'নোট-শিট হলো সিদ্ধান্ত বা অর্থ ব্যয়ের অনুমোদন চেয়ে লেখা আনুষ্ঠানিক ফাইল নোট। এটি একে একে প্রতিটি কর্মকর্তার কাছে যায় এবং প্রত্যেকে স্বাক্ষর করেন।';
+
+  @override
+  String get nsTabMine => 'আমার';
+
+  @override
+  String get nsTabToSign => 'স্বাক্ষরের অপেক্ষায়';
+
+  @override
+  String get nsTabAll => 'আমি যা দেখতে পারি';
+
+  @override
+  String get nsNew => 'নতুন নোট-শিট';
+
+  @override
+  String get nsEmptyMine => 'আপনি এখনো কোনো নোট-শিট লেখেননি।';
+
+  @override
+  String get nsEmptyToSign => 'আপনার স্বাক্ষরের জন্য কিছু অপেক্ষায় নেই।';
+
+  @override
+  String get nsEmptyAll => 'দেখানোর মতো কোনো নোট-শিট নেই।';
+
+  @override
+  String get nsStatusDraft => 'খসড়া';
+
+  @override
+  String get nsStatusInReview => 'অনুমোদনকারীদের কাছে';
+
+  @override
+  String get nsStatusReturned => 'ফেরত এসেছে';
+
+  @override
+  String get nsStatusApproved => 'অনুমোদিত';
+
+  @override
+  String get nsNextDraft =>
+      'এখনো পাঠানো হয়নি। বিস্তারিত যোগ করে অনুমোদনের জন্য পাঠান।';
+
+  @override
+  String get nsNextSign =>
+      'এখন আপনার পালা। পড়ে স্বাক্ষর করুন, ফেরত পাঠান অথবা বাতিল করুন।';
+
+  @override
+  String nsNextWaiting(String names) {
+    return '$names-এর জন্য অপেক্ষা চলছে।';
+  }
+
+  @override
+  String get nsNextReturned =>
+      'আপনার কাছে ফেরত এসেছে। কারণ পড়ে ঠিক করে আবার পাঠান।';
+
+  @override
+  String nsNextReturnedOther(String name) {
+    return 'পরিবর্তনের জন্য $name-এর কাছে ফেরত গেছে।';
+  }
+
+  @override
+  String get nsNextApproved =>
+      'সবাই অনুমোদন ও স্বাক্ষর করেছেন। আর কিছু করার নেই।';
+
+  @override
+  String get nsNextRejected => 'বাতিল হয়েছে। এই ফাইলটি বন্ধ।';
+
+  @override
+  String nsNextWithdrawn(String name) {
+    return '$name প্রত্যাহার করেছেন। এই ফাইলটি বন্ধ।';
+  }
+
+  @override
+  String nsFrom(String name, String dept, String date) {
+    return '$name, $dept, $date থেকে';
+  }
+
+  @override
+  String nsVerdictOne(String name) {
+    return '১টি কোটেশন, $name থেকে।';
+  }
+
+  @override
+  String nsVerdictCheapest(int count, String name, String saving) {
+    return '$countটি কোটেশন। $name সবচেয়ে সস্তা, সবচেয়ে দামিটির চেয়ে $saving সাশ্রয়।';
+  }
+
+  @override
+  String nsVerdictNotLowest(
+    int count,
+    String name,
+    String extra,
+    String lowest,
+  ) {
+    return '$countটি কোটেশন। $name সুপারিশকৃত, কিন্তু সর্বনিম্ন $lowest-এর চেয়ে $extra বেশি।';
+  }
+
+  @override
+  String nsVerdictNoPick(int count, String name) {
+    return '$countটি কোটেশন। $name সর্বনিম্ন। এখনো কোনো সরবরাহকারী সুপারিশ করা হয়নি।';
+  }
+
+  @override
+  String nsOverLowest(String amount) {
+    return 'সর্বনিম্নের চেয়ে $amount বেশি';
+  }
+
+  @override
+  String get nsRecommended => 'সুপারিশকৃত';
+
+  @override
+  String get nsQuotesTitle => 'কোটেশন';
+
+  @override
+  String nsQuoteMeta(int days, int months) {
+    return '$days দিনে সরবরাহ, $months মাস ওয়ারেন্টি';
+  }
+
+  @override
+  String get nsNotesTitle => 'নোট';
+
+  @override
+  String get nsRouteTitle => 'অনুমোদনের ধাপ';
+
+  @override
+  String get nsSignedBy => 'স্বাক্ষর করেছেন';
+
+  @override
+  String get nsSignedVerified => 'স্বাক্ষরিত ও যাচাইকৃত';
+
+  @override
+  String get nsDetails => 'বিস্তারিত';
+
+  @override
+  String get nsDetailsHelp =>
+      'প্রতিটি নোট ও স্বাক্ষরের একটি ফিঙ্গারপ্রিন্ট (SHA-256) আছে। আগের কোনো নোট বদলালে ফিঙ্গারপ্রিন্ট আর মিলবে না।';
+
+  @override
+  String nsVerifyCode(String code) {
+    return 'যাচাই কোড $code';
+  }
+
+  @override
+  String get nsKindNote => 'নোট';
+
+  @override
+  String get nsKindQuery => 'প্রশ্ন';
+
+  @override
+  String get nsKindReturn => 'ফেরত';
+
+  @override
+  String get nsUrgNormal => 'সাধারণ';
+
+  @override
+  String get nsUrgHigh => 'জরুরি';
+
+  @override
+  String get nsUrgCritical => 'অতি জরুরি';
+
+  @override
+  String get nsConfInternal => 'অভ্যন্তরীণ';
+
+  @override
+  String get nsConfConfidential => 'গোপনীয়';
+
+  @override
+  String get nsConfSecret => 'অতি গোপন';
+
+  @override
+  String get nsEditTitle => 'নোট-শিট সম্পাদনা';
+
+  @override
+  String get nsFieldTitle => 'শিরোনাম';
+
+  @override
+  String get nsFieldSubject => 'বিষয়';
+
+  @override
+  String get nsFieldAmount => 'টাকার অঙ্ক, যদি অর্থ জড়িত থাকে';
+
+  @override
+  String get nsFieldAmountHelp => 'ব্যয়ের অনুমোদন না চাইলে ফাঁকা রাখুন।';
+
+  @override
+  String get nsFieldJustification => 'আপনার কী প্রয়োজন এবং কেন?';
+
+  @override
+  String get nsFieldUrgency => 'কতটা জরুরি?';
+
+  @override
+  String get nsFieldConfidentiality => 'কারা পড়তে পারবেন?';
+
+  @override
+  String get nsQuoteAdd => 'কোটেশন যোগ করুন';
+
+  @override
+  String get nsQuotesNeeded =>
+      '২,০০,০০০ টাকা বা তার বেশি ব্যয়ে কমপক্ষে ৩টি কোটেশন ও একজন সুপারিশকৃত সরবরাহকারী লাগবে।';
+
+  @override
+  String get nsQuotesOptional => '২,০০,০০০ টাকার নিচে কোটেশন ঐচ্ছিক।';
+
+  @override
+  String get nsQuotePickHint =>
+      'সরবরাহকারী সুপারিশ করতে বৃত্তে ট্যাপ করুন। বদলাতে সারিতে ট্যাপ করুন।';
+
+  @override
+  String get nsQuoteVendor => 'সরবরাহকারী';
+
+  @override
+  String get nsQuotePrice => 'উদ্ধৃত মূল্য (টাকা)';
+
+  @override
+  String get nsQuoteDelivery => 'সরবরাহ (দিন)';
+
+  @override
+  String get nsQuoteWarranty => 'ওয়ারেন্টি (মাস)';
+
+  @override
+  String get nsRecoNote => 'সর্বনিম্ন দাম কেন নয়?';
+
+  @override
+  String nsWhyReturned(String name) {
+    return '$name কেন ফেরত পাঠিয়েছেন';
+  }
+
+  @override
+  String get nsSaveDraft => 'খসড়া সংরক্ষণ';
+
+  @override
+  String get nsSaveChanges => 'শুধু পরিবর্তন সংরক্ষণ';
+
+  @override
+  String get nsSend => 'অনুমোদনের জন্য পাঠান';
+
+  @override
+  String get nsSendAgain => 'আবার পাঠান';
+
+  @override
+  String get nsSaved => 'সংরক্ষিত হয়েছে';
+
+  @override
+  String get nsSent => 'অনুমোদনের জন্য পাঠানো হয়েছে';
+
+  @override
+  String get nsDeleteDraft => 'খসড়া মুছুন';
+
+  @override
+  String get nsDeleteConfirm => 'এই খসড়া মুছবেন?';
+
+  @override
+  String get nsErrTitle => 'কমপক্ষে ৫ অক্ষরের শিরোনাম দিন।';
+
+  @override
+  String get nsErrSubject => 'বিষয় লিখুন।';
+
+  @override
+  String get nsErrJustification => 'কমপক্ষে ১০ অক্ষরে অনুরোধটি ব্যাখ্যা করুন।';
+
+  @override
+  String get nsErrVendor => 'সরবরাহকারীর নাম লিখুন।';
+
+  @override
+  String get nsErrPrice => 'উদ্ধৃত মূল্য লিখুন।';
+
+  @override
+  String get nsErrQuotesMin => 'কমপক্ষে ৩টি কোটেশন যোগ করুন।';
+
+  @override
+  String get nsErrQuotesPick => 'ঠিক একজন সরবরাহকারীকে সুপারিশ করুন।';
+
+  @override
+  String get nsErrQuotesNote =>
+      'সুপারিশকৃত সরবরাহকারী কেন সবচেয়ে সস্তা নয়, কমপক্ষে ৩০ অক্ষরে লিখুন।';
+
+  @override
+  String get nsErrFailed => 'কাজটি হয়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get nsSignAction => 'দেখে স্বাক্ষর করুন';
+
+  @override
+  String get nsFixAndSend => 'ঠিক করে আবার পাঠান';
+
+  @override
+  String get nsEditAndSend => 'সম্পাদনা করে পাঠান';
+
+  @override
+  String get nsAddNote => 'নোট বা প্রশ্ন যোগ করুন';
+
+  @override
+  String get nsNoteAppendOnly =>
+      'নোট কখনো সম্পাদনা বা মোছা যায় না। এই ফাইলের সবাই পড়তে পারবেন।';
+
+  @override
+  String get nsNoteText => 'আপনার নোট';
+
+  @override
+  String get nsNoteAdd => 'ফাইলে যোগ করুন';
+
+  @override
+  String get nsNoteAdded => 'ফাইলে যোগ হয়েছে';
+
+  @override
+  String get nsReturnTitle => 'পরিবর্তনের জন্য ফেরত পাঠান';
+
+  @override
+  String get nsRejectTitle => 'এই নোট-শিট বাতিল করুন';
+
+  @override
+  String get nsReturnedToast => 'লেখকের কাছে ফেরত পাঠানো হয়েছে';
+
+  @override
+  String get nsRejectedToast => 'বাতিল করা হয়েছে';
+
+  @override
+  String get nsWithdrawConfirm => 'এই নোট-শিট প্রত্যাহার করবেন?';
+
+  @override
+  String get nsWithdrawMessage =>
+      'ফাইলটি বন্ধ হবে এবং এ পর্যন্ত স্বাক্ষর বৈধ থাকবে না।';
+
+  @override
+  String get nsWithdrawnToast => 'প্রত্যাহার করা হয়েছে';
+
+  @override
+  String get nsPrint => 'প্রিন্ট বা পিডিএফ সংরক্ষণ';
+
+  @override
+  String get nsPrintFailed => 'পিডিএফ তৈরি করা যায়নি।';
+
+  @override
+  String get nsSignTitle => 'এই নোট-শিটে স্বাক্ষর করুন';
+
+  @override
+  String nsSignIntro(String ref) {
+    return 'আপনি $ref-এ স্বাক্ষর করছেন। আপনার স্বাক্ষর এখন যা দেখছেন ঠিক তার সঙ্গে যুক্ত থাকবে।';
+  }
+
+  @override
+  String get nsSignTyped => 'নাম লিখুন';
+
+  @override
+  String get nsSignDrawn => 'আঁকুন';
+
+  @override
+  String get nsSignStamp => 'সিল';
+
+  @override
+  String get nsSignTypedLabel => 'আপনার পূর্ণ নাম';
+
+  @override
+  String get nsSignDrawHint => 'এখানে আপনার স্বাক্ষর আঁকুন';
+
+  @override
+  String get nsSignClear => 'মুছুন';
+
+  @override
+  String get nsSignComment => 'মন্তব্য (ঐচ্ছিক)';
+
+  @override
+  String get nsSignOtp => 'ওয়ান-টাইম কোড';
+
+  @override
+  String get nsSignOtpHelp => 'ডেমো অ্যাপ: কোডটি 123456।';
+
+  @override
+  String get nsSignConfirm => 'স্বাক্ষর করে অনুমোদন দিন';
+
+  @override
+  String get nsSignErrName => 'আপনার পূর্ণ নাম লিখুন।';
+
+  @override
+  String get nsSignErrDraw => 'আগে স্বাক্ষর আঁকুন।';
+
+  @override
+  String get nsSignErrOtp => '৬ সংখ্যার কোডটি দিন।';
+
+  @override
+  String get nsSignErrOtpWrong => 'কোডটি সঠিক নয়।';
+
+  @override
+  String get nsSignErrFailed => 'স্বাক্ষর করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get nsSignedToast =>
+      'স্বাক্ষর হয়েছে। এটি পরবর্তী কর্মকর্তার কাছে যাচ্ছে।';
+
+  @override
+  String get nsSignedFinal => 'স্বাক্ষর হয়েছে। নোট-শিট সম্পূর্ণ অনুমোদিত।';
 }

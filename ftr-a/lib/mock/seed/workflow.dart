@@ -87,13 +87,14 @@ void seedWorkflowTemplates(MockStore store) {
     _step('FINANCE', 'Finance', 'ROLE', ref: 'FINANCE', isFinal: true),
   ]);
   add('NOTE_SHEET', 'NoteSheet', 'Note sheet', [
-    _step('HOD', 'Head of department', 'DEPARTMENT_HEAD'),
+    _step('HOD', 'Head of department', 'DEPARTMENT_HEAD', signature: true),
     _step(
       'FINANCE',
       'Finance',
       'ROLE',
       ref: 'FINANCE',
       condition: 'amount > 0',
+      signature: true,
     ),
     _step(
       'GM',
@@ -101,6 +102,7 @@ void seedWorkflowTemplates(MockStore store) {
       'ROLE',
       ref: 'PLANT_GM',
       condition: 'amount > 500000',
+      signature: true,
     ),
     _step(
       'CHAIRMAN',

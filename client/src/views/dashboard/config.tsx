@@ -11,12 +11,11 @@ import React from 'react';
 import {
   Users, FileCheck, Crown, Gauge, Truck, Car, Briefcase, BarChart3, Navigation,
   Bell, UserCheck, Activity, Lock, Receipt, AlertTriangle, ShieldAlert, Wrench,
-  CalendarCheck, Building2, Clock, Star, MapPin,
+  CalendarCheck, Building2, Clock, Star,
 } from 'lucide-react';
 import type { AppRole, AppView } from '../../types';
 import type { DashboardLiveData } from './useDashboardData';
 import { INITIAL_LOTO_PERMITS, INNER_CIRCLE } from './dashboardData';
-import { COMPLIANCE_HORIZON_DAYS } from './useDashboardData';
 
 export type Bilingual = readonly [en: string, bn: string];
 export type Tone = 'success' | 'info' | 'warning' | 'danger' | 'purple' | 'gold' | 'neutral';

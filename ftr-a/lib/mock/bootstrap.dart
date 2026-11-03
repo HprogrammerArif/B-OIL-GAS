@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/mock/engines/attendance_engine.dart';
 import 'package:bogcl_oneops/mock/engines/claim_engine.dart';
 import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/leave_engine.dart';
+import 'package:bogcl_oneops/mock/engines/note_sheet_engine.dart';
 import 'package:bogcl_oneops/mock/mock_adapter.dart';
 import 'package:bogcl_oneops/mock/mock_config.dart';
 import 'package:bogcl_oneops/mock/seed/attendance.dart';
@@ -12,6 +13,7 @@ import 'package:bogcl_oneops/mock/seed/audit.dart';
 import 'package:bogcl_oneops/mock/seed/bus.dart';
 import 'package:bogcl_oneops/mock/seed/claims.dart';
 import 'package:bogcl_oneops/mock/seed/leave.dart';
+import 'package:bogcl_oneops/mock/seed/note_sheets.dart';
 import 'package:bogcl_oneops/mock/seed/notices.dart';
 import 'package:bogcl_oneops/mock/seed/notifications.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
@@ -33,6 +35,7 @@ final List<Seeder> mockSeeders = [
   seedNotices,
   seedClaims,
   seedBus,
+  seedNoteSheets,
 ];
 
 /// The persisted mock store. Provided by [bootstrapMock] at startup.
@@ -60,6 +63,7 @@ Future<ProviderContainer> bootstrapMock({
   LeaveEngine.registerHooks();
   AttendanceEngine.registerHooks();
   ClaimEngine.registerHooks();
+  NoteSheetEngine.registerHooks();
   FileEngine.registerOwnerAccess('Employee', (_, _, _) => true);
 
   late final ProviderContainer container;

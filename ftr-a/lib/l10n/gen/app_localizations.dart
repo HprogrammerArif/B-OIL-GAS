@@ -4146,6 +4146,719 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'This step needs your signature.'**
   String get approvalNeedsSignature;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @moduleNoteSheets.
+  ///
+  /// In en, this message translates to:
+  /// **'Note-sheets'**
+  String get moduleNoteSheets;
+
+  /// No description provided for @nsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'A note-sheet is a formal file note that asks for a decision or for money to be spent. It goes to each officer in turn and each one signs.'**
+  String get nsIntro;
+
+  /// No description provided for @nsTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get nsTabMine;
+
+  /// No description provided for @nsTabToSign.
+  ///
+  /// In en, this message translates to:
+  /// **'To sign'**
+  String get nsTabToSign;
+
+  /// No description provided for @nsTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All I can see'**
+  String get nsTabAll;
+
+  /// No description provided for @nsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New note-sheet'**
+  String get nsNew;
+
+  /// No description provided for @nsEmptyMine.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not written any note-sheet yet.'**
+  String get nsEmptyMine;
+
+  /// No description provided for @nsEmptyToSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting for your signature.'**
+  String get nsEmptyToSign;
+
+  /// No description provided for @nsEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no note-sheets to show.'**
+  String get nsEmptyAll;
+
+  /// No description provided for @nsStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get nsStatusDraft;
+
+  /// No description provided for @nsStatusInReview.
+  ///
+  /// In en, this message translates to:
+  /// **'With approvers'**
+  String get nsStatusInReview;
+
+  /// No description provided for @nsStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back'**
+  String get nsStatusReturned;
+
+  /// No description provided for @nsStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get nsStatusApproved;
+
+  /// No description provided for @nsNextDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent yet. Add the details and send it for approval.'**
+  String get nsNextDraft;
+
+  /// No description provided for @nsNextSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn. Read it and sign, send it back, or reject it.'**
+  String get nsNextSign;
+
+  /// No description provided for @nsNextWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {names}.'**
+  String nsNextWaiting(String names);
+
+  /// No description provided for @nsNextReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back to you. Read the reason, fix it and send it again.'**
+  String get nsNextReturned;
+
+  /// No description provided for @nsNextReturnedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back to {name} for changes.'**
+  String nsNextReturnedOther(String name);
+
+  /// No description provided for @nsNextApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved and signed by everyone. Nothing more to do.'**
+  String get nsNextApproved;
+
+  /// No description provided for @nsNextRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected. This file is closed.'**
+  String get nsNextRejected;
+
+  /// No description provided for @nsNextWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn by {name}. This file is closed.'**
+  String nsNextWithdrawn(String name);
+
+  /// No description provided for @nsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}, {dept}, {date}'**
+  String nsFrom(String name, String dept, String date);
+
+  /// No description provided for @nsVerdictOne.
+  ///
+  /// In en, this message translates to:
+  /// **'1 quote, from {name}.'**
+  String nsVerdictOne(String name);
+
+  /// No description provided for @nsVerdictCheapest.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} quotes. {name} is cheapest, saving {saving} against the dearest.'**
+  String nsVerdictCheapest(int count, String name, String saving);
+
+  /// No description provided for @nsVerdictNotLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} quotes. {name} is recommended but costs {extra} more than {lowest}, the lowest.'**
+  String nsVerdictNotLowest(
+    int count,
+    String name,
+    String extra,
+    String lowest,
+  );
+
+  /// No description provided for @nsVerdictNoPick.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} quotes. {name} is the lowest. No supplier is recommended yet.'**
+  String nsVerdictNoPick(int count, String name);
+
+  /// No description provided for @nsOverLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} over the lowest'**
+  String nsOverLowest(String amount);
+
+  /// No description provided for @nsRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get nsRecommended;
+
+  /// No description provided for @nsQuotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotations'**
+  String get nsQuotesTitle;
+
+  /// No description provided for @nsQuoteMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days delivery, {months} months warranty'**
+  String nsQuoteMeta(int days, int months);
+
+  /// No description provided for @nsNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get nsNotesTitle;
+
+  /// No description provided for @nsRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval route'**
+  String get nsRouteTitle;
+
+  /// No description provided for @nsSignedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by'**
+  String get nsSignedBy;
+
+  /// No description provided for @nsSignedVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed and verified'**
+  String get nsSignedVerified;
+
+  /// No description provided for @nsDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get nsDetails;
+
+  /// No description provided for @nsDetailsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.'**
+  String get nsDetailsHelp;
+
+  /// No description provided for @nsVerifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code {code}'**
+  String nsVerifyCode(String code);
+
+  /// No description provided for @nsKindNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get nsKindNote;
+
+  /// No description provided for @nsKindQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get nsKindQuery;
+
+  /// No description provided for @nsKindReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back'**
+  String get nsKindReturn;
+
+  /// No description provided for @nsUrgNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get nsUrgNormal;
+
+  /// No description provided for @nsUrgHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get nsUrgHigh;
+
+  /// No description provided for @nsUrgCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get nsUrgCritical;
+
+  /// No description provided for @nsConfInternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal'**
+  String get nsConfInternal;
+
+  /// No description provided for @nsConfConfidential.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidential'**
+  String get nsConfConfidential;
+
+  /// No description provided for @nsConfSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret'**
+  String get nsConfSecret;
+
+  /// No description provided for @nsEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note-sheet'**
+  String get nsEditTitle;
+
+  /// No description provided for @nsFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get nsFieldTitle;
+
+  /// No description provided for @nsFieldSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get nsFieldSubject;
+
+  /// No description provided for @nsFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in taka, if money is involved'**
+  String get nsFieldAmount;
+
+  /// No description provided for @nsFieldAmountHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty if no spending is asked for.'**
+  String get nsFieldAmountHelp;
+
+  /// No description provided for @nsFieldJustification.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need, and why?'**
+  String get nsFieldJustification;
+
+  /// No description provided for @nsFieldUrgency.
+  ///
+  /// In en, this message translates to:
+  /// **'How urgent is it?'**
+  String get nsFieldUrgency;
+
+  /// No description provided for @nsFieldConfidentiality.
+  ///
+  /// In en, this message translates to:
+  /// **'Who may read it?'**
+  String get nsFieldConfidentiality;
+
+  /// No description provided for @nsQuoteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add quotation'**
+  String get nsQuoteAdd;
+
+  /// No description provided for @nsQuotesNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending of 2,00,000 taka or more needs at least 3 quotations and one recommended supplier.'**
+  String get nsQuotesNeeded;
+
+  /// No description provided for @nsQuotesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Quotations are optional below 2,00,000 taka.'**
+  String get nsQuotesOptional;
+
+  /// No description provided for @nsQuotePickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the circle to recommend a supplier. Tap a row to change it.'**
+  String get nsQuotePickHint;
+
+  /// No description provided for @nsQuoteVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplier'**
+  String get nsQuoteVendor;
+
+  /// No description provided for @nsQuotePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Quoted price in taka'**
+  String get nsQuotePrice;
+
+  /// No description provided for @nsQuoteDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery in days'**
+  String get nsQuoteDelivery;
+
+  /// No description provided for @nsQuoteWarranty.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty in months'**
+  String get nsQuoteWarranty;
+
+  /// No description provided for @nsRecoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Why not the lowest price?'**
+  String get nsRecoNote;
+
+  /// No description provided for @nsWhyReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Why {name} sent it back'**
+  String nsWhyReturned(String name);
+
+  /// No description provided for @nsSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get nsSaveDraft;
+
+  /// No description provided for @nsSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes only'**
+  String get nsSaveChanges;
+
+  /// No description provided for @nsSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send for approval'**
+  String get nsSend;
+
+  /// No description provided for @nsSendAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Send again'**
+  String get nsSendAgain;
+
+  /// No description provided for @nsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get nsSaved;
+
+  /// No description provided for @nsSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent for approval'**
+  String get nsSent;
+
+  /// No description provided for @nsDeleteDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete draft'**
+  String get nsDeleteDraft;
+
+  /// No description provided for @nsDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft?'**
+  String get nsDeleteConfirm;
+
+  /// No description provided for @nsErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title of at least 5 characters.'**
+  String get nsErrTitle;
+
+  /// No description provided for @nsErrSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the subject.'**
+  String get nsErrSubject;
+
+  /// No description provided for @nsErrJustification.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the request in at least 10 characters.'**
+  String get nsErrJustification;
+
+  /// No description provided for @nsErrVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the supplier name.'**
+  String get nsErrVendor;
+
+  /// No description provided for @nsErrPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the quoted price.'**
+  String get nsErrPrice;
+
+  /// No description provided for @nsErrQuotesMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 3 quotations.'**
+  String get nsErrQuotesMin;
+
+  /// No description provided for @nsErrQuotesPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommend exactly one supplier.'**
+  String get nsErrQuotesPick;
+
+  /// No description provided for @nsErrQuotesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain in at least 30 characters why the recommended supplier is not the cheapest.'**
+  String get nsErrQuotesNote;
+
+  /// No description provided for @nsErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Please try again.'**
+  String get nsErrFailed;
+
+  /// No description provided for @nsSignAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and sign'**
+  String get nsSignAction;
+
+  /// No description provided for @nsFixAndSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix and send again'**
+  String get nsFixAndSend;
+
+  /// No description provided for @nsEditAndSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit and send'**
+  String get nsEditAndSend;
+
+  /// No description provided for @nsAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note or question'**
+  String get nsAddNote;
+
+  /// No description provided for @nsNoteAppendOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes are never edited or deleted. Everyone on this file can read them.'**
+  String get nsNoteAppendOnly;
+
+  /// No description provided for @nsNoteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Your note'**
+  String get nsNoteText;
+
+  /// No description provided for @nsNoteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to file'**
+  String get nsNoteAdd;
+
+  /// No description provided for @nsNoteAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the file'**
+  String get nsNoteAdded;
+
+  /// No description provided for @nsReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back for changes'**
+  String get nsReturnTitle;
+
+  /// No description provided for @nsRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this note-sheet'**
+  String get nsRejectTitle;
+
+  /// No description provided for @nsReturnedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back to the author'**
+  String get nsReturnedToast;
+
+  /// No description provided for @nsRejectedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get nsRejectedToast;
+
+  /// No description provided for @nsWithdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw this note-sheet?'**
+  String get nsWithdrawConfirm;
+
+  /// No description provided for @nsWithdrawMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be closed and signatures so far will no longer count.'**
+  String get nsWithdrawMessage;
+
+  /// No description provided for @nsWithdrawnToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get nsWithdrawnToast;
+
+  /// No description provided for @nsPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print or save as PDF'**
+  String get nsPrint;
+
+  /// No description provided for @nsPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the PDF.'**
+  String get nsPrintFailed;
+
+  /// No description provided for @nsSignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign this note-sheet'**
+  String get nsSignTitle;
+
+  /// No description provided for @nsSignIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'You are signing {ref}. Your signature is tied to exactly what you see now.'**
+  String nsSignIntro(String ref);
+
+  /// No description provided for @nsSignTyped.
+  ///
+  /// In en, this message translates to:
+  /// **'Type name'**
+  String get nsSignTyped;
+
+  /// No description provided for @nsSignDrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get nsSignDrawn;
+
+  /// No description provided for @nsSignStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Stamp'**
+  String get nsSignStamp;
+
+  /// No description provided for @nsSignTypedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your full name'**
+  String get nsSignTypedLabel;
+
+  /// No description provided for @nsSignDrawHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw your signature here'**
+  String get nsSignDrawHint;
+
+  /// No description provided for @nsSignClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get nsSignClear;
+
+  /// No description provided for @nsSignComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment (optional)'**
+  String get nsSignComment;
+
+  /// No description provided for @nsSignOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time code'**
+  String get nsSignOtp;
+
+  /// No description provided for @nsSignOtpHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo app: the code is 123456.'**
+  String get nsSignOtpHelp;
+
+  /// No description provided for @nsSignConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign and approve'**
+  String get nsSignConfirm;
+
+  /// No description provided for @nsSignErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your full name.'**
+  String get nsSignErrName;
+
+  /// No description provided for @nsSignErrDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw your signature first.'**
+  String get nsSignErrDraw;
+
+  /// No description provided for @nsSignErrOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code.'**
+  String get nsSignErrOtp;
+
+  /// No description provided for @nsSignErrOtpWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'The code is not correct.'**
+  String get nsSignErrOtpWrong;
+
+  /// No description provided for @nsSignErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not sign. Please try again.'**
+  String get nsSignErrFailed;
+
+  /// No description provided for @nsSignedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed. It moves to the next officer.'**
+  String get nsSignedToast;
+
+  /// No description provided for @nsSignedFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed. The note-sheet is fully approved.'**
+  String get nsSignedFinal;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

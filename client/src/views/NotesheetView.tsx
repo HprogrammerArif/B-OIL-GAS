@@ -98,11 +98,9 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const isFinalStep = currentFile ? (currentPendingStep ? nextStep === null : currentFile.status !== 'approved') : false;
   const isMyTurn = !!currentFile && !!user && canSign && isTurnOf(currentFile, user.role);
   const state = currentFile ? stateOf(currentFile) : 'waiting';
-  const isApproved = state === 'approved';
 
   const fallbackApprover = AVAILABLE_OFFICERS.find((o) => o.roleId === (currentFile?.finalApproverRole ?? 'chairman'));
   const awaitingName = currentPendingStep?.officerName ?? fallbackApprover?.officerName ?? '';
-  const awaitingRole = currentPendingStep?.roleName ?? fallbackApprover?.roleName ?? '';
 
   const handleCreateNotesheet = async (data: NewNotesheetData) => {
     const stamp = nowStamp();

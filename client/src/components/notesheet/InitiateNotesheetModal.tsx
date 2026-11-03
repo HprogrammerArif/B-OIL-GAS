@@ -220,7 +220,6 @@ export default function InitiateNotesheetModal({
     note: initialNote.trim() ? '' : t('Write the justification for Para 1.', 'প্যারা-১-এর যৌক্তিকতা লিখুন।', lang),
   };
   const shown = (key: keyof typeof errors) => (submitted ? errors[key] : '');
-  const finalSignatory = route[route.length - 1];
 
   const applyPreset = (preset: RoutingPreset) => {
     setPresetId(preset.id);

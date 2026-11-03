@@ -43,6 +43,12 @@ final List<AppModule> builtModules = [
     route: AppRoutes.bus,
   ),
   (
+    key: 'note-sheets',
+    icon: Icons.description_outlined,
+    label: (l10n) => l10n.moduleNoteSheets,
+    route: AppRoutes.noteSheets,
+  ),
+  (
     key: 'approvals',
     icon: Icons.fact_check_outlined,
     label: (l10n) => l10n.moduleApprovals,
