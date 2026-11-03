@@ -12,7 +12,7 @@
   "status": { "IN_REVIEW": "পর্যালোচনাধীন", "APPROVED": "অনুমোদিত", "REJECTED": "প্রত্যাখ্যাত", "RETURNED": "ফেরত", "WITHDRAWN": "প্রত্যাহার" },
   "objectTypes": {
     "NoteSheet": "নোট-শিট", "Claim": "ব্যয় বিল", "Requisition": "গাড়ির আবেদন",
-    "LeaveRequest": "ছুটির আবেদন", "AssetRequisition": "সম্পদের আবেদন", "Visit": "ভিজিটর পাস"
+    "LeaveRequest": "ছুটির আবেদন", "Regularisation": "উপস্থিতি নিয়মিতকরণ", "AssetRequisition": "সম্পদের আবেদন", "Visit": "ভিজিটর পাস"
   },
   "searchPlaceholder": "শিরোনাম, রেফ নং বা আবেদনকারী খুঁজুন",
   "empty": { "title": "আপনার অপেক্ষায় কিছু নেই", "message": "আপনার সিদ্ধান্ত প্রয়োজন এমন নতুন আবেদন এখানে আসবে।", "filtered": "এই ফিল্টারে কিছু পাওয়া যায়নি" },

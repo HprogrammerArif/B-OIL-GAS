@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
-import { showToast } from '../ToastManager';
 import { deptCodeOf, nextNoteSheetRef, nextRef, peekNoteSheetRef, peekRef } from '../../lib/refs';
+import { Button, FormField, Modal } from '../ui';
 import {
-  FileSignature,
-  FileText,
-  X,
-  Sparkles,
-  Shield,
-  Layers,
-  ChevronRight,
+  ArrowDown, ArrowUp, Briefcase, Check, Crown, Factory, FileSignature, Layers, Plus, Send, Shield, Users, X,
 } from 'lucide-react';
 
 export interface SignatoryStep {
@@ -109,7 +103,6 @@ interface RoutingPreset {
   suggestedAmount: string;
   suggestedTitle: string;
   suggestedCategory: string;
-  icon: string;
 }
 
 const ROUTING_PRESETS: RoutingPreset[] = [
@@ -124,7 +117,6 @@ const ROUTING_PRESETS: RoutingPreset[] = [
     suggestedAmount: '৳3,50,000',
     suggestedTitle: 'Factory Cooling Water Pump Servicing & Pipe Valve Replacement',
     suggestedCategory: 'Plant Operations',
-    icon: '🏭',
   },
   {
     id: 'dept_finance',
@@ -137,7 +129,6 @@ const ROUTING_PRESETS: RoutingPreset[] = [
     suggestedAmount: '৳18,50,000',
     suggestedTitle: 'Annual Corporate Enterprise Software & Systems License Renewal',
     suggestedCategory: 'Finance & Accounts',
-    icon: '💼',
   },
   {
     id: 'hr_policy',
@@ -150,7 +141,6 @@ const ROUTING_PRESETS: RoutingPreset[] = [
     suggestedAmount: 'Company Policy / Approved Budget',
     suggestedTitle: 'Plant Operations Staff Shift Uniform & Personal Protective Equipment',
     suggestedCategory: 'Human Resources',
-    icon: '👥',
   },
   {
     id: 'capex_boardroom',
@@ -163,10 +153,41 @@ const ROUTING_PRESETS: RoutingPreset[] = [
     suggestedAmount: '৳48,50,000',
     suggestedTitle: 'Backup Power Generator Overhaul & Critical Spare Parts Purchase',
     suggestedCategory: 'Plant Operations & Engineering',
-    icon: '👑',
   },
 ];
 
+const PRESET_ICON: Record<string, ReactNode> = {
+  plant_internal: <Factory size={16} />,
+  dept_finance: <Briefcase size={16} />,
+  hr_policy: <Users size={16} />,
+  capex_boardroom: <Crown size={16} />,
+};
+
+const URGENCY_OPTIONS: { value: NewNotesheetData['urgency']; en: string; bn: string; descEn: string; descBn: string }[] = [
+  { value: 'normal', en: 'Normal', bn: 'সাধারণ', descEn: 'Standard turnaround', descBn: 'স্বাভাবিক সময়' },
+  { value: 'high', en: 'High priority', bn: 'উচ্চ অগ্রাধিকার', descEn: 'Review soon', descBn: 'দ্রুত পর্যালোচনা' },
+  { value: 'urgent', en: 'Urgent', bn: 'জরুরি', descEn: 'Immediate action', descBn: 'তাৎক্ষণিক পদক্ষেপ' },
+];
+
+const NOTE_LIMIT = 2000;
+const FIRST_PRESET = ROUTING_PRESETS[0];
+
+function routeFor(preset: RoutingPreset): SignatoryStep[] {
+  return preset.targetRoleIds.map((rId, idx) => {
+    const officer = AVAILABLE_OFFICERS.find((o) => o.roleId === rId) || AVAILABLE_OFFICERS[0];
+    return { ...officer, id: `step-${idx + 1}`, status: idx === 0 ? 'pending' : 'upcoming' };
+  });
+}
+
+/** Re-number a route so only the first signatory is "pending". */
+function renumber(route: SignatoryStep[]): SignatoryStep[] {
+  return route.map((s, idx) => ({ ...s, status: idx === 0 ? 'pending' : 'upcoming' }));
+}
+
+/**
+ * Start-a-note-sheet dialog. Mount it only while open (the parent renders it
+ * conditionally) so every new file starts from a clean form.
+ */
 export default function InitiateNotesheetModal({
   isOpen,
   onClose,
@@ -176,715 +197,283 @@ export default function InitiateNotesheetModal({
 }: InitiateNotesheetModalProps) {
   const currentMeta = ROLE_META[currentRole] || ROLE_META.plant_gm;
 
-  // Form State
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('plant_internal');
-  const [title, setTitle] = useState(
-    'Emergency Calibration of Unit-1 Bitumen Distillation Heat Exchanger Shell'
-  );
-  const [dept, setDept] = useState('Plant Maintenance & Reliability');
-  const [amount, setAmount] = useState('৳4,50,000');
-  const [urgency, setUrgency] = useState<'urgent' | 'high' | 'normal'>('high');
+  // A route template pre-fills a coherent starting point; every field stays editable.
+  const [presetId, setPresetId] = useState<string>(FIRST_PRESET.id);
+  const [title, setTitle] = useState(FIRST_PRESET.suggestedTitle);
+  const [dept, setDept] = useState(FIRST_PRESET.suggestedCategory);
+  const [amount, setAmount] = useState(FIRST_PRESET.suggestedAmount);
+  const [urgency, setUrgency] = useState<NewNotesheetData['urgency']>('normal');
+  const [initialNote, setInitialNote] = useState('');
+  const [route, setRoute] = useState<SignatoryStep[]>(() => routeFor(FIRST_PRESET));
+  const [submitted, setSubmitted] = useState(false);
+
   // Reference numbers are previewed from the sequential counters and only
   // allocated when the form is submitted.
   const initiatorDeptCode = deptCodeOf(currentMeta.dept);
   const [sapRef, setSapRef] = useState(() => peekRef('PR', 5));
   const fileNo = peekNoteSheetRef(initiatorDeptCode);
-  const [initialNote, setInitialNote] = useState(
-    'Submitted for administrative and technical approval. Mandatory ultrasonic thickness testing of Unit-1 heat exchanger shell completed; replacement of seal rings and calibration required prior to peak asphalt refining run.'
-  );
 
-  // Custom Signatory Route State
-  const [selectedRoute, setSelectedRoute] = useState<SignatoryStep[]>([
-    {
-      ...AVAILABLE_OFFICERS[0], // Plant GM
-      id: 'step-1',
-      status: 'pending',
-    },
-  ]);
+  const errors = {
+    title: title.trim() ? '' : t('Enter the subject of this file.', 'ফাইলের বিষয় লিখুন।', lang),
+    amount: amount.trim() ? '' : t('Enter the amount, or "Non-financial".', 'অর্থের পরিমাণ লিখুন, অথবা "অর্থবিহীন"।', lang),
+    dept: dept.trim() ? '' : t('Enter the department or GL head.', 'বিভাগ বা জিএল হেড লিখুন।', lang),
+    note: initialNote.trim() ? '' : t('Write the justification for Para 1.', 'প্যারা-১-এর যৌক্তিকতা লিখুন।', lang),
+  };
+  const shown = (key: keyof typeof errors) => (submitted ? errors[key] : '');
 
-  if (!isOpen) return null;
-
-  const handleApplyPreset = (preset: RoutingPreset) => {
-    setSelectedPresetId(preset.id);
+  const applyPreset = (preset: RoutingPreset) => {
+    setPresetId(preset.id);
     setTitle(preset.suggestedTitle);
     setDept(preset.suggestedCategory);
     setAmount(preset.suggestedAmount);
-
-    const newRoute: SignatoryStep[] = preset.targetRoleIds.map((rId, idx) => {
-      const officer = AVAILABLE_OFFICERS.find((o) => o.roleId === rId) || AVAILABLE_OFFICERS[0];
-      return {
-        ...officer,
-        id: `step-${idx + 1}`,
-        status: idx === 0 ? 'pending' : 'upcoming',
-      };
-    });
-
-    setSelectedRoute(newRoute);
-    showToast(
-      lang === 'bn'
-        ? `অনুমোদন রুট নির্বাচন: ${preset.titleBn}`
-        : `Approval route applied: ${preset.titleEn}`,
-      'info'
-    );
+    setRoute(routeFor(preset));
   };
 
-  const toggleSignatory = (officer: Omit<SignatoryStep, 'id' | 'status'>) => {
-    const exists = selectedRoute.some((s) => s.roleId === officer.roleId);
+  const toggleOfficer = (officer: Omit<SignatoryStep, 'id' | 'status'>) => {
+    const exists = route.some((s) => s.roleId === officer.roleId);
     if (exists) {
-      if (selectedRoute.length === 1) {
-        showToast(
-          t('At least one approving authority is required.', 'কমপক্ষে একজন অনুমোদনকারী আবশ্যক।', lang),
-          'warn'
-        );
-        return;
-      }
-      setSelectedRoute((prev) =>
-        prev
-          .filter((s) => s.roleId !== officer.roleId)
-          .map((s, idx) => ({ ...s, status: idx === 0 ? 'pending' : 'upcoming' }))
-      );
+      if (route.length === 1) return;
+      setRoute((prev) => renumber(prev.filter((s) => s.roleId !== officer.roleId)));
     } else {
-      setSelectedRoute((prev) => [
-        ...prev,
-        {
-          ...officer,
-          id: `step-${officer.roleId}`,
-          status: 'upcoming',
-        },
-      ]);
+      setRoute((prev) => renumber([...prev, { ...officer, id: `step-${officer.roleId}`, status: 'upcoming' }]));
     }
-    setSelectedPresetId('custom');
+    setPresetId('custom');
   };
 
-  const handleRemoveStep = (idx: number) => {
-    if (selectedRoute.length === 1) {
-      showToast(
-        t('At least one approving authority is required.', 'কমপক্ষে একজন অনুমোদনকারী আবশ্যক।', lang),
-        'warn'
-      );
-      return;
-    }
-    setSelectedRoute((prev) =>
-      prev
-        .filter((_, i) => i !== idx)
-        .map((s, i) => ({ ...s, status: i === 0 ? 'pending' : 'upcoming' }))
-    );
-    setSelectedPresetId('custom');
+  const moveStep = (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= route.length) return;
+    setRoute((prev) => {
+      const next = [...prev];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return renumber(next);
+    });
+    setPresetId('custom');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !initialNote.trim()) {
-      showToast(
-        t('Please enter document subject and initial note.', 'অনুগ্রহ করে বিষয় ও নোটের বিবরণ লিখুন।', lang),
-        'warn'
-      );
+    setSubmitted(true);
+    const firstBad = (['title', 'amount', 'dept', 'note'] as const).find((k) => errors[k]);
+    if (firstBad || route.length === 0) {
+      if (firstBad) document.querySelector<HTMLElement>(`#nsf-form [data-nsf="${firstBad}"]`)?.focus();
       return;
     }
 
-    if (selectedRoute.length === 0) {
-      showToast(
-        t('Please designate at least one approving signatory.', 'অনুগ্রহ করে কমপক্ষে একজন অনুমোদনকারী নির্বাচন করুন।', lang),
-        'warn'
-      );
-      return;
-    }
-
-    const finalApprover = selectedRoute[selectedRoute.length - 1];
     const allocatedFileNo = nextNoteSheetRef(initiatorDeptCode);
-    const allocatedSapRef = sapRef === peekRef('PR', 5) ? nextRef('PR', 5) : sapRef;
-    setSapRef(peekRef('PR', 5));
+    const typedRef = sapRef.trim();
+    const allocatedSapRef = !typedRef || typedRef === peekRef('PR', 5) ? nextRef('PR', 5) : typedRef;
 
     onSubmit({
       fileNo: allocatedFileNo,
-      title,
-      dept,
-      amount,
+      title: title.trim(),
+      dept: dept.trim(),
+      amount: amount.trim(),
       urgency,
       sapRef: allocatedSapRef,
       initiatorName: currentMeta.name,
       initiatorRole: currentMeta.label,
       initiatorDept: currentMeta.dept,
-      initialNote,
-      signatoryRoute: selectedRoute,
-      finalApproverRole: finalApprover.roleId,
+      initialNote: initialNote.trim(),
+      signatoryRoute: route,
+      finalApproverRole: route[route.length - 1].roleId,
     });
-
     onClose();
   };
 
-  const finalSignatory = selectedRoute[selectedRoute.length - 1];
-
   return (
-    <div
-      className="modal-bg"
-      onClick={onClose}
-      style={{
-        zIndex: 99999,
-        padding: '16px',
-        boxSizing: 'border-box',
-      }}
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="lg"
+      icon={<FileSignature size={17} />}
+      title={t('Start a new note-sheet', 'নতুন নোট-শীট শুরু করুন', lang)}
+      footer={(
+        <>
+          <span className="nsf-foot-note">
+            <Shield size={14} /> {t('Every signature is sealed with a SHA-256 code.', 'প্রতিটি স্বাক্ষর SHA-256 কোড দিয়ে সিলমোহরকৃত।', lang)}
+          </span>
+          <Button variant="secondary" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</Button>
+          <Button type="submit" form="nsf-form" variant="primary" icon={<Send size={14} />}>
+            {t('Send for approval', 'অনুমোদনের জন্য পাঠান', lang)}
+          </Button>
+        </>
+      )}
     >
-      <div
-        className="fleet-modal-dialog"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: '860px',
-          width: '96%',
-          maxHeight: '94vh',
-          display: 'flex',
-          flexDirection: 'column',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* ─── 1. MODAL HEADER ─── */}
-        <div className="fleet-modal-hd">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-light) 100%)',
-                color: 'var(--text-on-brand)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(225, 29, 72, 0.4)',
-                flexShrink: 0,
-              }}
-            >
-              <FileSignature size={22} color="var(--text-on-brand)" />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: '16px',
-                    fontWeight: 800,
-                    color: 'var(--text-on-brand)',
-                    letterSpacing: '-0.2px',
-                  }}
+      <form id="nsf-form" className="nsf" onSubmit={handleSubmit} noValidate>
+        {/* Initiator */}
+        <div className="nsf-initiator">
+          <span className="nsf-avatar" style={{ background: currentMeta.avatarColor }} aria-hidden>{currentMeta.initials}</span>
+          <span className="nsf-who">
+            <strong>{currentMeta.name}</strong>
+            <small>{t(currentMeta.label, currentMeta.labelBn, lang)} · {currentMeta.dept}</small>
+          </span>
+          <span className="nsf-ref">
+            <small>{t('File reference', 'ফাইল রেফারেন্স', lang)}</small>
+            <code>{fileNo}</code>
+          </span>
+        </div>
+
+        {/* 1. Template */}
+        <section className="nsf-section" aria-labelledby="nsf-s1">
+          <h4 id="nsf-s1"><b>1</b> {t('Choose an approval route', 'অনুমোদনের ধারা বেছে নিন', lang)}</h4>
+          <div className="nsf-presets" role="radiogroup" aria-labelledby="nsf-s1">
+            {ROUTING_PRESETS.map((preset) => {
+              const active = presetId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  className={`nsf-preset ${active ? 'active' : ''}`}
+                  onClick={() => applyPreset(preset)}
                 >
-                  {t('Start New Note-Sheet & E-Authorization File', 'নতুন ই-নোটশীট ও ফাইল অনুমোদন শুরু করুন', lang)}
-                </h3>
-                <span
-                  style={{
-                    backgroundColor: 'var(--status-warning-solid)',
-                    color: 'var(--text-on-brand)',
-                    fontSize: '10px',
-                    fontWeight: 800,
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}
+                  <span className="nsf-preset-icon">{PRESET_ICON[preset.id]}</span>
+                  <span className="nsf-preset-body">
+                    <strong>{t(preset.titleEn, preset.titleBn, lang)}</strong>
+                    <small>{t(preset.descEn, preset.descBn, lang)}</small>
+                  </span>
+                  {active && <Check size={15} className="nsf-preset-check" />}
+                </button>
+              );
+            })}
+          </div>
+          {presetId === 'custom' && (
+            <p className="nsf-custom"><Layers size={13} /> {t('Custom route: you changed the template.', 'কাস্টম ধারা: আপনি টেমপ্লেট পরিবর্তন করেছেন।', lang)}</p>
+          )}
+        </section>
+
+        {/* 2. Route */}
+        <section className="nsf-section" aria-labelledby="nsf-s2">
+          <h4 id="nsf-s2"><b>2</b> {t('Review the signing order', 'স্বাক্ষরের ক্রম দেখুন', lang)}</h4>
+          <ol className="nsf-route">
+            {route.map((step, idx) => {
+              const isFinal = idx === route.length - 1;
+              return (
+                <li key={step.id} className={isFinal ? 'final' : ''}>
+                  <span className="nsf-step-no">{idx + 1}</span>
+                  <span className="nsf-step-body">
+                    <strong>{step.officerName}</strong>
+                    <small>{t(step.roleName, step.roleNameBn, lang)}</small>
+                    {isFinal && <em><Crown size={11} /> {t('Final approver', 'চূড়ান্ত অনুমোদনকারী', lang)}</em>}
+                  </span>
+                  <span className="nsf-step-tools">
+                    <button type="button" onClick={() => moveStep(idx, -1)} disabled={idx === 0} aria-label={t('Move earlier', 'আগে নিন', lang)}><ArrowUp size={13} /></button>
+                    <button type="button" onClick={() => moveStep(idx, 1)} disabled={isFinal} aria-label={t('Move later', 'পরে নিন', lang)}><ArrowDown size={13} /></button>
+                    {route.length > 1 && (
+                      <button type="button" onClick={() => toggleOfficer(step)} aria-label={t(`Remove ${step.officerName}`, `${step.officerName}-কে সরান`, lang)}><X size={13} /></button>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="nsf-add">
+            <span>{t('Add or remove signatories:', 'স্বাক্ষরকারী যোগ বা বাদ দিন:', lang)}</span>
+            {AVAILABLE_OFFICERS.map((officer) => {
+              const included = route.some((s) => s.roleId === officer.roleId);
+              const locked = included && route.length === 1;
+              return (
+                <button
+                  key={officer.roleId}
+                  type="button"
+                  className={`nsf-chip ${included ? 'on' : ''}`}
+                  aria-pressed={included}
+                  disabled={locked}
+                  title={locked ? t('At least one approver is required.', 'কমপক্ষে একজন অনুমোদনকারী আবশ্যক।', lang) : undefined}
+                  onClick={() => toggleOfficer(officer)}
                 >
-                  Configurable Routing
-                </span>
-              </div>
-              <p
-                style={{
-                  margin: '3px 0 0 0',
-                  fontSize: '12px',
-                  color: 'var(--text-inverse-2)',
-                  lineHeight: 1.4,
-                }}
-              >
-                {t(
-                  'Initiator defines file scope, cost center, and designates required signing authorities',
-                  'আবেদনকারী ফাইলের উদ্দেশ্য, ব্যয় ও কার কার স্বাক্ষর প্রয়োজন তা নির্ধারণ করতে পারেন',
-                  lang
+                  {included ? <Check size={12} /> : <Plus size={12} />}
+                  {t(officer.roleName, officer.roleNameBn, lang)}
+                </button>
+              );
+            })}
+          </div>
+          <small className="nsf-hint">{t('Signatures are collected in this order. New signatories join at the end.', 'স্বাক্ষর এই ক্রমে নেওয়া হবে। নতুন স্বাক্ষরকারী শেষে যুক্ত হয়।', lang)}</small>
+        </section>
+
+        {/* 3. Details */}
+        <section className="nsf-section" aria-labelledby="nsf-s3">
+          <h4 id="nsf-s3"><b>3</b> {t('File details', 'ফাইলের বিবরণ', lang)}</h4>
+          <div className="nsf-grid">
+            <div className="nsf-span">
+              <FormField label={t('Subject / procurement matter', 'বিষয় / ক্রয়ের বিবরণ', lang)} required error={shown('title')}>
+                {(id) => (
+                  <input
+                    id={id}
+                    data-nsf="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="notice-input"
+                    maxLength={200}
+                    aria-invalid={!!shown('title')}
+                  />
                 )}
-              </p>
+              </FormField>
             </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: 'var(--text-inverse-2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            title="Close"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* ─── 2. INITIATOR PROFILE STRIP ─── */}
-        <div className="fleet-modal-profile-strip">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                background: currentMeta.avatarColor,
-                color: 'var(--text-on-brand)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: '12px',
-              }}
-            >
-              {currentMeta.initials}
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '12.5px' }}>
-                {t('Initiator: ', 'উত্থাপনকারী: ', lang)}
-                <strong>{currentMeta.name}</strong> •{' '}
-                <span style={{ opacity: 0.8 }}>{t(currentMeta.label, currentMeta.labelBn, lang)}</span>
-              </div>
-              <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '1px' }}>
-                {currentMeta.dept} • File Reference:{' '}
-                <code style={{ fontWeight: 700, color: 'var(--brand-crimson)' }}>{fileNo}</code>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                fontSize: '11px',
-                padding: '3px 10px',
-                borderRadius: '6px',
-                background: 'rgba(5, 150, 105, 0.12)',
-                color: 'var(--status-success)',
-                fontWeight: 700,
-                border: '1px solid rgba(5, 150, 105, 0.25)',
-              }}
-            >
-              ✓ SAP PR Synced
-            </div>
-          </div>
-        </div>
-
-        {/* ─── 3. FORM BODY ─── */}
-        <form
-          id="initiate-notesheet-form"
-          onSubmit={handleSubmit}
-          className="fleet-modal-body"
-          style={{
-            flex: '1 1 auto',
-            overflowY: 'auto',
-            padding: '22px 28px',
-            boxSizing: 'border-box',
-          }}
-        >
-          {/* 3A. APPROVAL ROUTING PRESETS BAR */}
-          <div className="fleet-preset-bar" style={{ marginBottom: '22px' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '10px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Sparkles size={14} color="var(--status-warning)" />
-                <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t('1-Click Signatory Routing Templates', 'স্বাক্ষরকারী রুট টেমপ্লেট নির্বাচন', lang)}
-                </span>
-              </div>
-              <span style={{ fontSize: '10.5px', opacity: 0.75 }}>
-                {t('Select workflow governance tier', 'অনুমোদন প্রক্রিয়া নির্বাচন করুন', lang)}
-              </span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '8px' }}>
-              {ROUTING_PRESETS.map((preset) => {
-                const isActive = selectedPresetId === preset.id;
-                return (
+            <FormField label={t('Estimated amount', 'আনুমানিক অর্থ', lang)} required error={shown('amount')} hint={t('For example ৳4,50,000', 'যেমন ৳4,50,000', lang)}>
+              {(id) => (
+                <input id={id} data-nsf="amount" type="text" value={amount} onChange={(e) => setAmount(e.target.value)} className="notice-input" aria-invalid={!!shown('amount')} />
+              )}
+            </FormField>
+            <FormField label={t('Department / GL head', 'বিভাগ / জিএল হেড', lang)} required error={shown('dept')}>
+              {(id) => (
+                <input id={id} data-nsf="dept" type="text" value={dept} onChange={(e) => setDept(e.target.value)} className="notice-input" aria-invalid={!!shown('dept')} />
+              )}
+            </FormField>
+            <FormField label={t('Purchase request reference', 'ক্রয় অনুরোধ রেফারেন্স', lang)} hint={t('Assigned automatically if left blank', 'ফাঁকা রাখলে স্বয়ংক্রিয়ভাবে নির্ধারিত হবে', lang)}>
+              {(id) => (
+                <input id={id} type="text" value={sapRef} onChange={(e) => setSapRef(e.target.value)} className="notice-input nsf-mono" />
+              )}
+            </FormField>
+            <div className="form-group ui-field">
+              <span className="ui-field-label" id="nsf-urgency-label">{t('Urgency', 'জরুরিতা', lang)}</span>
+              <div className="nsf-seg" role="radiogroup" aria-labelledby="nsf-urgency-label">
+                {URGENCY_OPTIONS.map((o) => (
                   <button
-                    key={preset.id}
+                    key={o.value}
                     type="button"
-                    onClick={() => handleApplyPreset(preset)}
-                    className="fleet-preset-chip"
-                    style={{
-                      borderColor: isActive ? 'var(--brand-crimson)' : undefined,
-                      backgroundColor: isActive ? 'rgba(165, 28, 48, 0.08)' : undefined,
-                      color: isActive ? 'var(--brand-crimson)' : undefined,
-                      padding: '8px 10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      whiteSpace: 'normal',
-                      textAlign: 'left',
-                      height: 'auto',
-                    }}
+                    role="radio"
+                    aria-checked={urgency === o.value}
+                    className={`${urgency === o.value ? 'active' : ''} u-${o.value}`}
+                    onClick={() => setUrgency(o.value)}
+                    title={t(o.descEn, o.descBn, lang)}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 800, fontSize: '11.5px' }}>
-                      <span>{preset.icon}</span>
-                      <span>{lang === 'bn' ? preset.titleBn : preset.titleEn}</span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: '9.5px',
-                        padding: '1px 5px',
-                        borderRadius: '4px',
-                        marginTop: '4px',
-                        backgroundColor: isActive ? 'var(--brand-crimson)' : 'rgba(0,0,0,0.08)',
-                        color: isActive ? 'var(--text-on-brand)' : 'inherit',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {preset.badge}
-                    </div>
+                    {t(o.en, o.bn, lang)}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* 3B. VISUAL ACTIVE SIGNATORY PIPELINE */}
-          <div
-            className="fleet-telemetry-hud"
-            style={{ marginBottom: '22px' }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '12px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800 }}>
-                <Layers size={14} color="var(--status-info)" />
-                <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t('Configured Approval Chain & Signatory Sequence', 'নির্বাচিত ধারাবাহিক অনুমোদনকারী চেইন', lang)}
-                </span>
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--status-success)', fontWeight: 700 }}>
-                Final Approver: {finalSignatory ? finalSignatory.officerName : 'None'}
-              </div>
-            </div>
-
-            {/* Step-by-Step Sequence Cards */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                overflowX: 'auto',
-                paddingBottom: '6px',
-              }}
-            >
-              {/* Originator Card */}
-              <div
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '10px',
-                  background: 'rgba(0,0,0,0.04)',
-                  border: '1px solid var(--brand-slate-200)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  flexShrink: 0,
-                  fontSize: '11.5px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '6px',
-                    background: currentMeta.avatarColor,
-                    color: 'var(--text-on-brand)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 800,
-                    fontSize: '10px',
-                  }}
-                >
-                  {currentMeta.initials}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '11px' }}>{currentMeta.name.split(' ')[0]}</div>
-                  <div style={{ fontSize: '9.5px', opacity: 0.7 }}>Initiator (Para 1)</div>
-                </div>
-              </div>
-
-              <ChevronRight size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-
-              {/* Dynamic Signatory Steps */}
-              {selectedRoute.map((step, idx) => {
-                const isFinal = idx === selectedRoute.length - 1;
-                return (
-                  <React.Fragment key={step.id}>
-                    <div
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '10px',
-                        background: isFinal ? 'rgba(217, 119, 6, 0.08)' : 'rgba(37, 99, 235, 0.08)',
-                        border: isFinal ? '1.5px solid var(--status-warning)' : '1.5px solid var(--status-info)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        flexShrink: 0,
-                        fontSize: '11.5px',
-                        position: 'relative',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '6px',
-                          background: step.avatarColor,
-                          color: 'var(--text-on-brand)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 800,
-                          fontSize: '10px',
-                        }}
-                      >
-                        {step.initials}
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '11.5px', color: isFinal ? 'var(--status-warning-text)' : 'var(--status-info-text)' }}>
-                          {step.officerName.split(' ')[0]}
-                        </div>
-                        <div style={{ fontSize: '9.5px', opacity: 0.8 }}>
-                          {isFinal ? '👑 Final Authority' : `Reviewer (Para ${idx + 2})`}
-                        </div>
-                      </div>
-                      {selectedRoute.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveStep(idx)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--text-muted)',
-                            cursor: 'pointer',
-                            padding: '2px',
-                            marginLeft: '4px',
-                          }}
-                          title="Remove Signatory"
-                        >
-                          <X size={12} />
-                        </button>
-                      )}
-                    </div>
-                    {!isFinal && <ChevronRight size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            {/* Quick Add Signatory Chips */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', opacity: 0.75, fontWeight: 600 }}>
-                {t('Toggle Authorities in Route:', 'স্বাক্ষরকারী যুক্ত/বাতিল করুন:', lang)}
-              </span>
-              {AVAILABLE_OFFICERS.map((officer) => {
-                const isIncluded = selectedRoute.some((s) => s.roleId === officer.roleId);
-                return (
-                  <button
-                    key={officer.roleId}
-                    type="button"
-                    onClick={() => toggleSignatory(officer)}
-                    style={{
-                      padding: '4px 8px',
-                      borderRadius: '6px',
-                      border: isIncluded ? '1px solid var(--status-success)' : '1px dashed var(--brand-slate-300)',
-                      background: isIncluded ? 'rgba(5, 150, 105, 0.08)' : 'transparent',
-                      color: isIncluded ? 'var(--status-success)' : 'inherit',
-                      fontSize: '11px',
-                      fontWeight: isIncluded ? 700 : 500,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
-                  >
-                    <span>{isIncluded ? '✓' : '+'}</span>
-                    <span>{officer.officerName.split(' ')[0]} ({officer.roleName.split(' ')[0]})</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3C. DOCUMENT SUBJECT & SAP REFERENCE */}
-          <div className="notice-field-group" style={{ marginBottom: '18px' }}>
-            <div className="notice-field-label">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileText size={14} color="var(--brand-crimson)" />
-                {t('Document Subject / Procurement Matter', 'নথির বিষয় / কার্যাদেশের বিবরণ', lang)}{' '}
-                <span style={{ color: 'var(--brand-crimson)' }}>*</span>
-              </span>
-            </div>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Emergency Procurement for Keraniganj Bitumen Reactor Safety Relief Valves"
-              className="notice-input"
-            />
-          </div>
-
-          {/* 3D. FINANCIAL ESTIMATE, CATEGORY & URGENCY */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '14px',
-              marginBottom: '18px',
-            }}
-          >
-            <div>
-              <div className="notice-field-label">
-                <span>{t('Estimated Amount / Financial Scope', 'আনুমানিক ব্যয় / আর্থিক পরিমাণ', lang)}</span>
-              </div>
-              <input
-                type="text"
-                required
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="e.g. ৳48,50,000 or Policy / Non-Financial"
-                className="notice-input"
+        {/* 4. Para 1 */}
+        <section className="nsf-section" aria-labelledby="nsf-s4">
+          <h4 id="nsf-s4"><b>4</b> {t('Para 1: your note and justification', 'প্যারা-১: আপনার নোট ও যৌক্তিকতা', lang)}</h4>
+          <FormField label={t('Why is this needed?', 'এটি কেন প্রয়োজন?', lang)} required error={shown('note')}>
+            {(id) => (
+              <textarea
+                id={id}
+                data-nsf="note"
+                rows={4}
+                maxLength={NOTE_LIMIT}
+                value={initialNote}
+                onChange={(e) => setInitialNote(e.target.value)}
+                placeholder={t(
+                  'State the technical, operational or administrative reason, and what you are asking the approvers to decide.',
+                  'প্রযুক্তিগত, পরিচালনাগত বা প্রশাসনিক কারণ এবং অনুমোদনকারীদের কী সিদ্ধান্ত নিতে হবে তা লিখুন।',
+                  lang,
+                )}
+                className="notice-textarea"
+                aria-invalid={!!shown('note')}
               />
-            </div>
-
-            <div>
-              <div className="notice-field-label">
-                <span>{t('Department / GL Head', 'বিভাগ / জিএল হেড', lang)}</span>
-              </div>
-              <input
-                type="text"
-                required
-                value={dept}
-                onChange={(e) => setDept(e.target.value)}
-                className="notice-input"
-              />
-            </div>
-
-            <div>
-              <div className="notice-field-label">
-                <span>{t('SAP PR / Material Reference', 'এসএপি পিআর রেফারেন্স', lang)}</span>
-              </div>
-              <input
-                type="text"
-                required
-                value={sapRef}
-                onChange={(e) => setSapRef(e.target.value)}
-                className="notice-input"
-                style={{ fontFamily: 'monospace', fontWeight: 700 }}
-              />
-            </div>
-
-            <div>
-              <div className="notice-field-label">
-                <span>{t('Urgency Level', 'জরুরিতা মাত্রা', lang)}</span>
-              </div>
-              <select
-                value={urgency}
-                onChange={(e) => setUrgency(e.target.value as any)}
-                className="notice-select"
-              >
-                <option value="urgent">🔴 Urgent (Immediate Action)</option>
-                <option value="high">🟠 High Priority</option>
-                <option value="normal">🟢 Normal Work Order</option>
-              </select>
-            </div>
-          </div>
-
-          {/* 3E. PARAGRAPH #1 (INITIATOR'S OFFICIAL NOTE) */}
-          <div className="notice-field-group" style={{ marginBottom: '18px' }}>
-            <div className="notice-field-label">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileSignature size={14} color="var(--status-info)" />
-                {t('Para-1: Initiating Officer Official Note & Justification', 'প্যারা-১: উত্থাপনকারীর অফিসিয়াল নোট ও যৌক্তিকতা', lang)}{' '}
-                <span style={{ color: 'var(--brand-crimson)' }}>*</span>
-              </span>
-              <span style={{ fontSize: '11px', opacity: 0.7, textTransform: 'none', fontWeight: 500 }}>
-                {initialNote.length} characters
-              </span>
-            </div>
-            <textarea
-              required
-              rows={4}
-              value={initialNote}
-              onChange={(e) => setInitialNote(e.target.value)}
-              placeholder="State the technical, operational, or administrative reason for this note-sheet..."
-              className="notice-textarea"
-              style={{ lineHeight: 1.6 }}
-            />
-          </div>
-        </form>
-
-        {/* ─── 4. MODAL FOOTER ─── */}
-        <div className="fleet-modal-ft">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', opacity: 0.8 }}>
-            <Shield size={16} color="var(--status-success)" />
-            <span>
-              Cryptographic SHA-256 seal assigned at each signatory tier. Final authority:{' '}
-              <strong>{finalSignatory ? finalSignatory.roleName : ''}</strong>
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: '9px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'inherit',
-                backgroundColor: 'transparent',
-                border: '1.5px solid var(--brand-slate-200)',
-                cursor: 'pointer',
-              }}
-            >
-              {t('Cancel', 'বাতিল', lang)}
-            </button>
-            <button
-              type="submit"
-              form="initiate-notesheet-form"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 22px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                color: 'var(--text-on-brand)',
-                background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(165, 28, 48, 0.35)',
-              }}
-            >
-              <FileSignature size={15} />
-              <span>{t('Launch Note-Sheet into Workflow', 'নোট-শীট ওয়ার্কফ্লোতে প্রেরণ করুন', lang)}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            )}
+          </FormField>
+          <span className="nsf-count">{initialNote.length}/{NOTE_LIMIT}</span>
+        </section>
+      </form>
+    </Modal>
   );
 }

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createTransform, type PersistConfig } from "redux-persist";
-import { securePersistStorage } from "@/lib/storage/secure";
+import { securePersistStorage, ssrSafeStorage } from "@/lib/storage/secure";
 import type { AuthState } from "@/redux/slices/auth.slice";
 import type { UiState } from "@/redux/slices/ui.slice";
 
@@ -54,12 +54,12 @@ export const authPersistConfig: PersistConfig<AuthState> = {
 
 export const uiPersistConfig: PersistConfig<UiState> = {
   key: "ui",
-  storage: AsyncStorage,
+  storage: ssrSafeStorage(AsyncStorage),
 };
 
 export const apiPersistConfig: PersistConfig<ApiSliceShape> = {
   key: "baseApi",
-  storage: AsyncStorage,
+  storage: ssrSafeStorage(AsyncStorage),
   whitelist: ["queries", "provided"],
   transforms: [apiWhitelistTransform],
   throttle: 1000,

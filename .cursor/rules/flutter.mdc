@@ -1,0 +1,42 @@
+---
+description: Flutter app (ftr-a/) architecture, state, routing, data, UI, i18n, offline and performance conventions
+globs: ftr-a/**
+alwaysApply: false
+---
+
+# Flutter Rules (`ftr-a/`)
+
+Spec: `docs/platform/05_MOBILE_APP_SPECIFICATION_FLUTTER.md` (adapted from doc 05). Business rules: doc 06 (`BR-xx-nn`). Status tracker: `ftr-a/docs/FEATURE_STATUS.md`. This is a backend-free pitch prototype that must feel like a production app: every screen real, no dead links, no "coming soon".
+
+## Structure (feature-first clean architecture)
+- `lib/app` (bootstrap, router, theme wiring), `lib/core` (network, storage, theme, utils), `lib/shared/widgets` (design kit), `lib/mock` (mock server, engines, seed), `lib/features/<module>/{data,domain,presentation}`.
+- Use `package:` imports only. Features never import other features' `presentation`; share through `domain` or `shared`.
+
+## State, routing, data
+- Riverpod with code generation (`@riverpod`). Widgets are `ConsumerWidget`; no business logic in widgets. UI-only state in `Notifier`s, server-like data in `AsyncNotifier`/`FutureProvider` via repositories.
+- go_router with typed routes; auth and role guards in redirects. Never `Navigator.push` for app routes.
+- Models: `freezed` + `json_serializable`, immutable. Money is a decimal string / `Decimal`-like value object, never `double`.
+- Repositories call a Dio client. The mock adapter answers like doc 03 (envelope, error codes, pagination, `Idempotency-Key`). No real HTTP, no backend code anywhere.
+- Generated files (`*.g.dart`, `*.freezed.dart`, `lib/l10n/gen`) are never edited by hand; run `dart run build_runner build --delete-conflicting-outputs` after changing annotated code.
+
+## UI and UX
+- Material 3 + brand tokens from `core/theme` (crimson `#A51C30`, slate `#0B132B`, gold `#D4AF37`, canvas `#F8FAFC`), light and dark. No hardcoded colors, sizes or text styles in screens.
+- Every screen handles loading (skeleton/shimmer), empty, error (with retry), offline and success states. Use shared widgets before creating new ones.
+- Never hardcode user-facing text: ARB keys in `lib/l10n/app_en.arb` AND `app_bn.arb`, then `flutter gen-l10n`.
+- Touch targets >= 48dp, `Semantics`/tooltips on icon buttons, respect text scale and reduce-motion. Haptics on success/failure. Motion is purposeful (150-300 ms), never blocks input.
+- Dates/numbers via `intl` in `Asia/Dhaka`; Bengali digits when locale is `bn`.
+
+## Performance
+- `const` constructors everywhere possible; `ListView.builder`/slivers for lists; `select` on providers to limit rebuilds; cache images; no work in `build()`; heavy work off the UI isolate (`compute`/`Isolate.run`).
+- No `print`; use `core/utils/logger` with PII redaction.
+
+## Offline and security
+- Mutations that must work offline go through the persisted queue with an idempotency key. Tokens only in `flutter_secure_storage`; never `shared_preferences`.
+- Permissions (location, camera, notifications): rationale screen first, handle denied/permanently-denied with a settings link.
+- Confidential screens (note-sheets, chat) enable screen-privacy per spec.
+
+## Dependencies
+- Reuse the dependencies already in `pubspec.yaml`. Any new package needs a one-line justification, a maintenance check, and no known critical issue.
+
+## Checks (not tests)
+- After edits run `dart format` on touched files and `flutter analyze`. Fix all warnings; no `// ignore` without a reason.

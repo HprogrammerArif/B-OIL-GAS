@@ -4,3 +4,6 @@ import "./demo";
 import "./workflow";
 import "./notifications";
 import "./notices";
+import "./attendance";
+import "./leave";
+import "./claims";

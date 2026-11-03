@@ -1179,14 +1179,6 @@
   transform: translateX(2px);
 }
 
-.presence-row.interactive-row {
-  cursor: pointer;
-}
-
-.presence-row.interactive-row:hover {
-  background: var(--brand-slate-200);
-}
-
 @keyframes spin-anim {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -1205,37 +1197,12 @@
    PHASE 1: INNER CIRCLE CHAT, DCS ALARMS, APPROVAL QUEUE, ACTIVITY TIMELINE
    ========================================================================== */
 
-
 /* ─── DCS ALARM BANNER (Plant GM) ─────────────────────────────────────────── */
-.dcs-alarm-banner {
-  background: linear-gradient(90deg, #1C0A0A 0%, #2D1212 50%, #1C0A0A 100%);
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  border-radius: var(--radius-lg);
-  padding: 14px 20px;
-  margin-bottom: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.dcs-alarm-banner::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: var(--status-danger-solid);
-  animation: alarmPulse 1.5s infinite;
-}
 
 @keyframes alarmPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
-
-.dcs-alarm-banner .ribbon-text h4 { color: var(--status-danger-bright); }
-.dcs-alarm-banner .ribbon-text p { color: rgba(255,255,255,0.6); font-size: 11.5px; }
 
 /* ─── DCS ALARM TABLE ROWS ────────────────────────────────────────────────── */
 .dcs-alarm-row {

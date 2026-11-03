@@ -65,7 +65,7 @@ describe("mock permissions", () => {
     "EMP-0001": ["dashboards", "approvals", "notices", "note-sheets", "attendance", "leave", "claims", "parcels", "visitors", "incidents", "assets", "compliance", "employees", "chat"],
     "EMP-0012": ["dashboards", "approvals", "notices", "note-sheets", "attendance", "leave", "claims", "parcels", "visitors", "incidents", "assets", "compliance", "chat"],
     "EMP-0028": ["dashboards", "approvals", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "bus", "parcels", "visitors", "incidents", "assets", "compliance", "employees", "chat"],
-    "EMP-0045": ["dashboards", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "bus", "parcels", "visitors", "incidents", "assets"],
+    "EMP-0045": ["dashboards", "approvals", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "bus", "parcels", "visitors", "incidents", "assets"],
     "EMP-0062": ["dashboards", "approvals", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "parcels", "visitors", "incidents", "assets", "compliance", "employees", "chat"],
     "EMP-1042": ["dashboards", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "bus", "parcels", "visitors", "incidents", "assets"],
     "EMP-0821": ["dashboards", "notices", "note-sheets", "attendance", "leave", "claims", "fleet", "parcels", "incidents", "assets"],

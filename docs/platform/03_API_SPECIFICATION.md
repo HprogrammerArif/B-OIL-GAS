@@ -258,7 +258,7 @@ All require authentication; no permission key (self scope).
 | GET | `/me/delegations` | `{ given: Delegation[], received: Delegation[] }` (active and future). |
 | POST | `/me/delegations` | Create a delegation from me (prototype *Leave Handover*). Body: `{ toUserId, modules: string[] (empty = all; values = module keys from §7 registry), startsAt, endsAt, maxAmount?, reason? }`. Rules: `toUserId ≠ me`, delegate must be ACTIVE and hold at least one role that can act in each listed module (else `POLICY_VIOLATION` rule `DELEGATE_LACKS_ROLE`); `endsAt − startsAt ≤ 90 days`; overlapping active delegation for same module set → `CONFLICT`. Emits notification `DELEGATION_CREATED` to delegate; `permissions:changed` to both. |
 | PATCH | `/me/delegations/{id}` | Shorten `endsAt` or set `isActive=false` (revoke). Pending steps already re-routed stay with the delegate until decided (the step records `delegatedToId`). |
-| GET | `/me/activity` | My recent `AuditLog` entries (cursor) — powers *My Recent Activity*. |
+| GET | `/me/activity` | My recent `AuditLog` entries (cursor) — powers *My Recent Activity*. Redacted: `{ id, action, entityType, entityId, createdAt }` only (no before/after). Mutations audit field names, never PII values. |
 | GET | `/me/dashboard` | Alias of `GET /dashboards/me` (§8). |
 
 ---
@@ -269,7 +269,7 @@ All require authentication; no permission key (self scope).
 
 | Method | Path | Permission | Description |
 | :--- | :--- | :--- | :--- |
-| POST | `/files/presign` | `files:upload` | Reserve a `FileObject` and get a presigned PUT URL. |
+| POST | `/files/presign` | `files:upload` | Reserve a `FileObject` and get a presigned PUT URL. (Pitch mock: `uploadUrl` is `mock-bucket://files/{id}`; the client writes bytes to the on-device private vault instead of an HTTP PUT. `GET /files/{id}/download` returns `{url, expiresAt, inline}` and `403` with `reason` `SCAN_PENDING`/`INFECTED` until the scan is CLEAN.) |
 | POST | `/files/{id}/complete` | `files:upload` (owner) | Finalise after the client PUT; server HEADs the object, verifies `sizeBytes` and (if provided) `sha256`, enqueues ClamAV scan job. |
 | GET | `/files/{id}` | `files:read` + owner-object access | Metadata (`fileName,mime,sizeBytes,sha256,scanStatus,createdAt`). |
 | GET | `/files/{id}/download` | same | `302` to a 5-minute presigned GET (or `{ "url": … }` with `?redirect=false`). Blocked (`FORBIDDEN`, reason `SCAN_PENDING`/`INFECTED`) unless `scanStatus = CLEAN`; images < 2 MB served with `Content-Disposition: inline`. |
@@ -293,9 +293,9 @@ Access rule: a file is readable if the caller may read **any** `Attachment` owne
 | Method | Path | Description |
 | :--- | :--- | :--- |
 | GET | `/notifications` | My notifications, cursor paginated. Filters `?unread=true`, `?priority=CRITICAL`, `?module=fleet`, `?category=APPROVALS\|SAFETY\|TRANSPORT\|ALL` (prototype `NotificationCenter` filter chips; category is derived from `type` prefix). |
-| GET | `/notifications/unread-count` | `{ "total": 7, "critical": 1, "byModule": { "workflow": 3, "parcels": 1 } }` (cached 10 s; also pushed via socket). |
+| GET | `/notifications/unread-count` | `{ "total": 7, "critical": 1, "pendingAck": 1, "byModule": { "workflow": 3, "parcels": 1 } }` (cached 10 s; also pushed via socket). |
 | POST | `/notifications/{id}/read` | Sets `readAt`. Idempotent. |
-| POST | `/notifications/read-all` | Body `{ "before": "<ISO>" }` optional. |
+| POST | `/notifications/read-all` | Body `{ "before": "<ISO>" }` optional. Returns `{ "updated": n }`. |
 | POST | `/notifications/{id}/ack` | Required when `ackRequired=true` (CRITICAL). Sets `ackedAt`; audit `NOTIFICATION_ACKED`. When `data.objectType = Notice`, also sets the caller's `NoticeReceipt.ackedAt` (and acknowledging the notice acks its notification), so the blocking modal and the notice never disagree. Reading the notice does not clear a pending `ackRequired` notification. |
 | GET/PATCH | `/notifications/preferences` | Same resource as `/me/preferences.notifications`. |
 
@@ -533,6 +533,23 @@ Validation: `title` 5–160; `body` 10–20 000 (markdown subset); `titleBn/body
 ```
 
 **Prototype note:** the prototype stored a single `acknowledgedCount` integer and claimed "788 employees"; production keeps per-user `NoticeReceipt` and computes counts from it.
+
+### 7.3 Pitch-app mock mapping (Flutter `ftr-a`)
+
+The in-app mock implements a reduced, role-aware subset (Phase 3c). Paths are relative to the mock base URL; envelope as §1.
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/notices/options` | `notices:create` | Replaces `compose-options`: `{ categories[], audiences[{type,refId,label,labelBn,recipientCount}], maxPinned, pinnedCount }`. POLICY category is not offered (its approval workflow `NOTICE_PUBLISH` arrives with Phase 4); EXECUTIVE only for Chairman/EA. |
+| GET | `/notices` | `notices:read` | `?filter=all|unread|ack|mine`; each item embeds `receipt`. |
+| GET | `/notices/unread-count` | `notices:read` | `{ unread, awaitingAck }` for list chips. |
+| GET | `/notices/{id}` | `notices:read` | Marks the receipt read. Authors also get `stats` (recipients/read/acked). |
+| POST | `/notices/{id}/ack` | `notices:read` | `CONFLICT` if already acknowledged. |
+| POST | `/notices` | `notices:create` | Create-and-publish in one step (no draft or scheduling). Pin over the limit of 5 → `CONFLICT` rule `MAX_PINNED`. Audience outside the caller's `notices:publish` scope → `FORBIDDEN`. |
+| GET | `/notices/{id}/receipts` | author or `notices:manage` | Per-recipient read/ack rows. |
+
+Deferred in the mock: drafts, scheduling, edit, archive, attachments, PDF, SMS channel, broadcasts banner.
+
 
 ---
 
@@ -1001,14 +1018,15 @@ Module dirs `attendance`, `leave`. Models `Shift`, `ShiftAssignment`, `Attendanc
 | Method | Path | Permission | Scope | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | POST | `/attendance/punch` | `attendance:punch` | self | Geo-fenced punch (mobile; web allowed only from whitelisted office IPs with `Setting attendance.webPunchCidrs`). Offline queue + `Idempotency-Key` (stored on `AttendancePunch.idempotencyKey`). |
-| GET | `/attendance/me/today` | `attendance:punch` | self | `{ shift, firstInAt, lastOutAt, status, punches[], nearestGeofence: { siteId, name, distanceM } }` (distance computed from `?lat&lng` if given). |
+| GET | `/attendance/me/today` | `attendance:punch` | self | `{ date, shift, day: AttendanceDay, nextPunchType, overtimeMinutesMtd, nearestGeofence: { id, site, name, nameBn, distanceM, inside } }` (nearest fence computed from `?lat&lng` if given). `AttendanceDay` = `{ date, status, firstInAt, lastOutAt, lateMinutes, workedMinutes, overtimeMinutes, site, holiday, flags { missingOut, earlyLeave, pendingReview }, leave, punches[] }`. |
+| GET | `/geofences` | any authenticated | — | Active geofences `{ id, site, name, centerLat, centerLng, radiusMeters }`. |
 | GET | `/attendance/me` | `attendance:punch` | self | My `AttendanceDay`s `?from=&to=` + monthly summary (`present, late, absent, leave, overtimeMinutes`). |
 | GET | `/attendance/live` | `attendance:read` | TEAM / DEPARTMENT / SITE / COMPANY | Today's roster from `v_attendance_live`: `?siteId=&departmentId=&status=&q=`; embeds `insideFence` (last accepted punch within fence and no OUT), `distanceM`. Socket `attendance:punch` keeps it live. |
 | GET | `/attendance/days` | `attendance:read` | scope | `?employeeId=&from=&to=&status=`; `?format=csv` muster export (`attendance:export`). |
 | GET | `/attendance/kpis` | `attendance:read` | scope | `{ present, late, absent, onLeave, fieldDuty, headcount, overtimeCost }`. |
 | GET/POST/PATCH | `/attendance/shifts[/{id}]` | `attendance:manage-shifts` | — | `Shift` master (`startTime/endTime HH:mm`, `graceMinutes 0–60`, `isNight`). |
 | GET/POST/DELETE | `/attendance/shift-assignments` | `attendance:manage-shifts` | dept/site | `{ employeeId, shiftId, startsOn, endsOn? }`; overlapping → `CONFLICT`. |
-| POST | `/attendance/regularisations` | `attendance:punch` | self | `{ date ≤ today, ≥ today−30, type: RegularisationType, requestedIn?, requestedOut?, reason ≥ 10, attachmentFileId? }` → PENDING + workflow. `FIELD_DUTY` for a future date acts as pre-approval (`fieldDutyApproved`). |
+| POST | `/attendance/regularisations` | `attendance:punch` | self | `{ date ≤ today, ≥ today−7 (the mock enforces 7 days; `FIELD_DUTY` may be up to 30 days ahead), type: RegularisationType, requestedIn?, requestedOut?, reason ≥ 10, attachmentFileId? }` → PENDING + workflow. `FIELD_DUTY` for a future date acts as pre-approval (`fieldDutyApproved`). |
 | GET | `/attendance/regularisations` | self / `attendance:approve-regularisation` | scope | `?status=&employeeId=&from=&to=`. |
 | POST | `/attendance/regularisations/{id}/approve` / `/reject` | `attendance:approve-regularisation` + approver | — | Approve → `AttendanceDay` recomputed (`PENDING_REGULARISATION` punches become effective; `FIELD_DUTY` day status). |
 | POST | `/attendance/recompute` | `attendance:manage-shifts` | — | `{ date, employeeIds? }` admin recompute job. |
@@ -1031,10 +1049,11 @@ Rules (doc 00 §6.7): `type ∈ PunchType`; `punchedAt` within ±10 min of serve
 
 | Method | Path | Permission | Scope | Description |
 | :--- | :--- | :--- | :--- | :--- |
+| GET | `/leave/policy` | any auth | — | `{ weekendDays (1=Mon…7=Sun), holidays[{date,name,nameBn}], maxConsecutiveCl, hrReviewAboveDays, backdateDays, backdateTypes, docRequiredAboveDays, reasonMin, reasonMax }` so clients show the day count and rule hints before submitting (pitch mock; server remains authoritative). |
 | GET | `/leave/types` | any auth | — | `LeaveType` list. |
 | GET | `/leave/balances` | `leave:request` (self) / `leave:read` | self/scope | `?employeeId=&year=` → `[{ leaveType, entitled, used, pending, available }]`. |
 | GET | `/leave/requests` | `leave:request` (self) / `leave:read` / `leave:approve` | scope | `?status=&employeeId=&leaveTypeId=&from=&to=&isInformed=`. |
-| POST | `/leave/requests` | `leave:request` | self (HR may file for others with `leave:manage`) | Create + submit. |
+| POST | `/leave/requests` | `leave:request` | self (HR may file for others with `leave:manage`) | Create + submit. Body `{ leaveTypeId, startDate, endDate, halfDay: null\|FIRST\|SECOND, reason (5–500), attachmentFileId? }` → `201` detail. Errors: `VALIDATION_ERROR` (dates, reason, half-day on a multi-day range, attachment unusable), `POLICY_VIOLATION` rules `INSUFFICIENT_BALANCE` (`available`), `MAX_CONSECUTIVE_CL`, `NOT_ELIGIBLE`; `CONFLICT` rule `OVERLAP`. A requester with no line manager (chairman) is auto-approved. |
 | GET | `/leave/requests/{id}` | participant | — | + workflow. |
 | POST | `/leave/requests/{id}/approve` / `/reject` / `/return` | `leave:approve` + approver | — | Approve → `APPROVED`, `LeaveBalance.used += days`, `AttendanceDay`s pre-marked `ON_LEAVE`, `reviewedById/At`; notification `LEAVE_DECIDED`; socket `leave:status`. |
 | POST | `/leave/requests/{id}/cancel` | employee | — | PENDING → CANCELLED; APPROVED and `startDate > today` → CANCELLED with balance restored. |
@@ -1120,6 +1139,25 @@ Policy engine (`server/src/modules/claims/policy.ts`), producing `policyFlags[{l
 
 `netSettlement = totalAmount − advance.amount` (negative = refund to treasury). **Prototype note:** the prototype used a flat ৳1,500/day; production uses the grade's `ExpensePolicy` and half-day rule.
 
+### 17.4 Pitch-app mock mapping (Flutter `ftr-a`)
+
+Implemented by `mock/engines/claim_engine.dart` (Phase 3d). Differences from §17.2:
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/claims/policy` | `claims:read` | Band A–E derived from grade, DA (Dhaka/district), hotel and conveyance caps, mileage rate, receipt threshold, declaration limit (৳1,000 for CNG/rickshaw/meals), allowed categories and modes, conveyance used this month. |
+| GET | `/claims` | `claims:read` | `?scope=mine|team|payable&status=&type=`. |
+| POST / PUT | `/claims`, `/claims/{id}` | `claims:create` | Header and the full line set in one body (replaces PATCH + PUT lines). The server re-computes DA lines (BR-11-03 full/half day), mileage amounts, totals, `policyAmount`, `netSettlement` and flags on every save. Receipts reference uploaded `receiptFileId`s. |
+| POST | `/claims/{id}/submit` | `claims:submit` | HARD flags (`NO_LINES`, `RECEIPT_REQUIRED`, `HOTEL_CAP_EXCEEDED`, `CONVEYANCE_CAP_EXCEEDED`, `DUPLICATE_RECEIPT`, `OVERLAPPING_PERIOD`, `LATE_SUBMISSION`) → `POLICY_VIOLATION` with `details[].rule`. SOFT flags (`MODE_ABOVE_ENTITLEMENT`, `MILEAGE_LONG`) go to approvers. Files workflow `CLAIM`; no line manager → auto-approved. |
+| POST | `/claims/{id}/cancel` | claimant | DRAFT/RETURNED cancel; pending claims are withdrawn through the workflow. |
+| POST | `/claims/{id}/pay` | `claims:settle` | Replaces `/settle`: APPROVED → SETTLED, mints `VCH-{YYYY}-{NNNNN}`, settles a linked advance, notifies the claimant. The claimant cannot pay their own claim. |
+| GET / POST | `/claims/advances` | `claims:advance` | Replaces `/advances`; `?scope=mine|payable`; body `{ amount, purpose, tourStart, tourEnd }`; max ৳5,00,000; `CONFLICT` rule `ADVANCE_OVERDUE` if an earlier disbursed advance is unlinked 30 days after its tour ended. Workflow `TOUR_ADVANCE` (manager → Finance). |
+| POST | `/claims/advances/{id}/cancel` | self | Before disbursement. |
+| POST | `/claims/advances/{id}/disburse` | `claims:settle` | APPROVED → DISBURSED. |
+
+Deferred in the mock: BEFTN CSV export, Finance line adjustments, executive step above ৳5,00,000, `ADVANCE_SETTLEMENT_OVERDUE` notifications, PDF, KPIs, policy CRUD. Approver actions use the Approvals Center (Phase 4).
+
+
 ---
 
 ## 18. MOD-14 — Commuter Bus & FIFO Waitlist
@@ -1176,6 +1214,27 @@ When a seat becomes `VACATED` (release, offboarding, admin vacate) or a new seat
 ```
 
 Errors: `INVALID_STATE_TRANSITION` (offer not PENDING), `POLICY_VIOLATION` `OFFER_EXPIRED` (`expiresAt < now`, job may not have run yet — accept fails and the expiry is applied), `CONFLICT` (employee got a seat elsewhere meanwhile). Side-effects: notification `BUS_SEAT_CONFIRMED` (or `APPROVAL_PENDING` to supervisor when `bus.adminConfirm`), socket `bus:occupancy` to route room, due item DONE, audit `BUS_SEAT_ALLOCATED`.
+
+### 18.4 Pitch-app mock mapping (Flutter `ftr-a`)
+
+Implemented by `mock/engines/bus_engine.dart` (Phase 3e). Offer expiry is processed lazily by `BusEngine.tick` on every `/bus/*` request (stands in for the server job). Offer window 48 h; queue order `priority DESC, appliedAt ASC`.
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/bus/routes` | `bus:read` | Occupancy (`capacity, occupied, vacated, free, occupancyPct, waitlistLength`), stops with morning/evening times, `myStatus` = `SEAT|WAITING|OFFERED|null`. |
+| GET | `/bus/routes/{id}` | `bus:read` | Adds `admin: { seats[], queue[] }` when the caller has `bus:manage`. |
+| GET | `/bus/my-seat` | `bus:read` | Replaces `/bus/me`: `{ allocation, waitlist }` with position and estimated wait (14 days per place). |
+| POST | `/bus/routes/{id}/waitlist` | `bus:seat-self` | Join. `CONFLICT` rules `ALREADY_HAS_SEAT`, `ALREADY_WAITING`. A free seat is offered to the head of the queue immediately. |
+| POST | `/bus/waitlist/{id}/accept` | `bus:seat-self` | `{ stopId }`; `POLICY_VIOLATION` `OFFER_EXPIRED` after the window. Replaces `/offer/accept`. |
+| POST | `/bus/waitlist/{id}/decline`, `/cancel` | `bus:seat-self` | Decline an offer / leave the queue; the seat moves on. |
+| POST | `/bus/waitlist/{id}/priority` | `bus:manage` | `{ priority 0–9, reason ≥ 10 when > 0 }`, audited. |
+| POST | `/bus/allocations/{id}/release` | `bus:seat-self` | `{ from, to, reason }`, at most 60 days; seat shows as VACATED and may be offered to the queue. |
+| POST | `/bus/allocations/{id}/reclaim` | `bus:seat-self` | Only while the seat is still free. |
+| POST | `/bus/allocations/{id}/end` | `bus:allocate` | Admin ends an allocation; the seat is re-offered. |
+| POST | `/bus/broadcasts` | `bus:broadcast` | `{ routeId?, message }` → `{ recipients }`. |
+
+Deferred in the mock: lady/executive seat categories, SHIFT_PASS/GUEST bookings, swaps, boarding scans, manifests, route and bus CRUD, admin-confirm workflow.
+
 
 ---
 
@@ -1270,6 +1329,11 @@ Module dir `workflow`; web feature `approvals`. This module has **no endpoints o
 | Chairman "Priority Approvals" | `GET /dashboards/widgets/approvals.priority` (= inbox sorted by `-summary.amount,dueAt` limit 5) |
 
 **Prototype note:** approver attribution now comes from the authenticated actor (`WorkflowAction.actorId`), history shows the real `decision`, and `signatureHash`/`notifySms` from the modal are honoured (`Signature` row; SMS to initiator). Category mapping `objectType → category`: `NoteSheet, AssetRequisition → PROCUREMENT`; `Claim, Advance → CLAIMS`; `VehicleRequisition → FLEET`; `LeaveRequest, Regularisation → LEAVE`; `ExitClearance → HR`; `AssetDisposal → ASSETS`; `Visit → VISITORS`; `SeatWaitlist → BUS`; `LicenceRenewal → COMPLIANCE`; `Incident → HSE`; `Notice → NOTICES`.
+
+
+### 21.x Pitch-app mock additions
+
+`GET /workflow/delegates` (`workflow:act`): active colleagues the caller may delegate a decision to (users holding `workflow:act`, excluding the caller) as `[{ userId, name, nameBn, title }]`. Workflow notifications carry `data.route = /home/approvals/{instanceId}` so the Inbox can open the request.
 
 ---
 

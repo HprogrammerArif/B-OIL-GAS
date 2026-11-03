@@ -17,6 +17,7 @@ import {
   type IncidentItem,
   type ShiftWorker,
 } from '../../store/operationsStore';
+import { SLA_DAY_MINUTES, slaMinutesLeft, useNow } from '../../lib/sla';
 import { useFleetStore, type Driver, type VehicleRequisition } from '../../store/fleetStore';
 import { useNoticeStore } from '../../store/noticeStore';
 import { useEmployeeStore } from '../../store/employeeStore';
@@ -25,7 +26,7 @@ import { useBusStore } from '../../store/busStore';
 import type { Seat } from '../../components/bus/busTypes';
 
 export const COMPLIANCE_HORIZON_DAYS = 90;
-export const URGENT_SLA_HOURS = 24;
+export const URGENT_SLA_MINUTES = SLA_DAY_MINUTES;
 
 /** Annual casual-leave entitlement used for the employee balance tile. */
 export const CASUAL_LEAVE_ENTITLEMENT_DAYS = 10;
@@ -98,6 +99,7 @@ function sumCost(items: ApprovalItem[]): number {
 export function useDashboardData(): DashboardLiveData {
   const user = useCurrentUser();
   const { pending, decided } = useMyApprovalQueue();
+  const now = useNow();
   const { claims } = useApprovalStore();
   const { files } = useNotesheetStore();
   const { licenses, incidents, attendanceRoster, leaveRequests } = useOperationsStore();
@@ -114,7 +116,7 @@ export function useDashboardData(): DashboardLiveData {
     const role = user?.role;
 
     /* Approvals */
-    const urgent = pending.filter((p) => p.slaHoursLeft <= URGENT_SLA_HOURS || p.urgency === 'critical').length;
+    const urgent = pending.filter((p) => slaMinutesLeft(p, now) <= URGENT_SLA_MINUTES || p.urgency === 'critical').length;
     const highestValue = pending.reduce<ApprovalItem | null>(
       (best, it) => ((it.costTk ?? 0) > (best?.costTk ?? -1) ? it : best),
       null,
@@ -232,6 +234,6 @@ export function useDashboardData(): DashboardLiveData {
     };
   }, [
     user, pending, decided, claims, files, licenses, incidents, attendanceRoster, leaveRequests,
-    drivers, vehicles, requisitions, notices, employees, workOrders, routeSeats,
+    drivers, vehicles, requisitions, notices, employees, workOrders, routeSeats, now,
   ]);
 }

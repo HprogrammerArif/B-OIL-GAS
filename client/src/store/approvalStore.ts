@@ -58,7 +58,10 @@ export interface ApprovalItem {
   amount?: string;
   costTk?: number;
   date: string;
+  /** Hours that were left when the item entered the queue (see `lib/sla.ts`). */
   slaHoursLeft: number;
+  /** Epoch ms when the SLA clock started; seeded items start with the demo session. */
+  slaStartedAt?: number;
   urgency: 'critical' | 'high' | 'normal';
   sapDocRef: string;
   details: string;
@@ -931,6 +934,7 @@ class ApprovalStore {
           costTk: updatedClaim.amount,
           date: nowStamp(),
           slaHoursLeft: 24,
+          slaStartedAt: Date.now(),
           urgency: 'high',
           sapDocRef: updatedClaim.id,
           details: `Resubmitted with updates: ${revisionNotes || 'Supporting receipts attached'}.`,

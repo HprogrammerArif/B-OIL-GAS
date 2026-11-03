@@ -1708,6 +1708,8 @@ export interface ChatMessage {
   fileSize?: string;
   voiceDuration?: string;
   reactions?: Record<string, number>;
+  /** emoji → ids of members who added it in this session, so a second tap removes it. */
+  reactedBy?: Record<string, string[]>;
   repliesCount?: number;
 }
 

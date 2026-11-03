@@ -13,7 +13,7 @@ export default function NotFound() {
   };
   return (
     <Screen title={t("appName")}>
-      <EmptyState icon="compass-outline" title={t("errors:notFound")} actionLabel={t("actions.back")} onAction={leave} />
+      <EmptyState icon="compass-outline" title={t("errors:routeUnavailable")} actionLabel={t("actions.back")} onAction={leave} />
     </Screen>
   );
 }

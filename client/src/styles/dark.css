@@ -92,12 +92,26 @@
   border: 1px solid #1E293B !important;
 }
 
+[data-theme="dark"] .role-badge.chairman {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.16) 0%, rgba(186, 28, 55, 0.12) 100%) !important;
+  border: 1px solid rgba(212, 175, 55, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 0 14px rgba(212, 175, 55, 0.08) !important;
+}
+
 [data-theme="dark"] .role-badge-text .label {
   color: #64748B !important;
 }
 
+[data-theme="dark"] .role-badge.chairman .role-badge-text .label {
+  color: var(--brand-gold) !important;
+}
+
 [data-theme="dark"] .role-badge-text .value {
   color: #F8FAFC !important;
+}
+
+[data-theme="dark"] .role-badge.chairman .role-badge-text .value {
+  color: #FFFFFF !important;
 }
 
 [data-theme="dark"] .nav-section {
@@ -248,9 +262,7 @@
 [data-theme="dark"] .stat-value,
 [data-theme="dark"] .doc-subject,
 [data-theme="dark"] .k-title,
-[data-theme="dark"] .notice-title,
 [data-theme="dark"] .inc-title,
-[data-theme="dark"] .prs-name,
 [data-theme="dark"] .day-name,
 [data-theme="dark"] .tank-id-tag {
   color: #F8FAFC !important;
@@ -261,7 +273,6 @@
   color: #CBD5E1;
 }
 
-[data-theme="dark"] .presence-row,
 [data-theme="dark"] .activity-item,
 [data-theme="dark"] .approval-queue-item,
 [data-theme="dark"] .shift-handover-row {
@@ -270,7 +281,6 @@
   color: #E2E8F0;
 }
 
-[data-theme="dark"] .presence-row:hover,
 [data-theme="dark"] .approval-queue-item:hover,
 [data-theme="dark"] .approval-interactive-card:hover {
   background: #16254C !important;

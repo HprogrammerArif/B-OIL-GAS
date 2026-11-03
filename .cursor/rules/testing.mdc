@@ -24,5 +24,10 @@ alwaysApply: false
 - Mock native modules (`expo-location`, `expo-camera`, `expo-secure-store`) in `jest.setup.ts`; never call real device APIs in tests.
 - Offline-queue tests cover enqueue, replay order, and 409 handling.
 
+## Flutter (`ftr-a/test`, `ftr-a/integration_test`)
+- Tests are written alongside features but only RUN at the end (see `no-tests-during-development`).
+- Unit tests for engines/repositories with `mocktail`; widget tests with provider overrides; golden tests for the design kit; integration tests for persona flows (login, punch, approve, claim).
+- Never touch real device APIs: fake geolocator, secure storage and notifications.
+
 ## Coverage gates
 - server ≥ 80 % (auth/engines ≥ 90 %), frontend ≥ 70 %, app ≥ 70 %; do not lower thresholds to pass CI.

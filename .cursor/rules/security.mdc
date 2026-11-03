@@ -9,7 +9,7 @@ Reference: `docs/platform/07_SECURITY_COMPLIANCE_AND_NFR.md`.
 
 - Secrets never enter the repo: no keys, DSNs with tokens, or passwords in code, docs, tests, or `.env.example` (names only). If you find one, report it and do not copy it anywhere.
 - Passwords: argon2id only. Tokens/OTPs/reset codes stored hashed; compared with constant-time functions.
-- Web auth uses httpOnly `SameSite=Strict` cookies + CSRF header; mobile uses bearer tokens from SecureStore. Never store tokens in `localStorage`/AsyncStorage.
+- Web auth uses httpOnly `SameSite=Strict` cookies + CSRF header; mobile (Flutter) keeps tokens/PII keys only in `flutter_secure_storage` (Keystore/Keychain). Never store tokens in `localStorage`/AsyncStorage/`shared_preferences`. The pitch app has no backend, so mock credentials are demo-only seed data and never real.
 - Every mutating endpoint has `authorize(permission)`; scope filters are applied in repositories — never rely on client-side checks.
 - PII (NID, ID proofs, phone, location, signatures) is classified Restricted/Confidential: encrypt where doc 02 §5 says so, redact from logs, exclude from analytics, respect retention jobs.
 - Files: presigned uploads only, MIME sniffed server-side, AV-scanned before download, private buckets. Never serve user files from the API process.

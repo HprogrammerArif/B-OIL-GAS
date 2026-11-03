@@ -1,5 +1,7 @@
 # 10 — Coding Standards & Engineering Conventions
 
+> **Tech-stack change (3 Nov 2026):** Dart/Flutter standards are in `.cursor/rules/flutter.mdc` and `05_MOBILE_APP_SPECIFICATION_FLUTTER.md` (§2–§4, §10–§12). The TypeScript sections below apply to legacy code only.
+
 **Document:** 10 of the Production Platform Specification Suite
 **Status:** Baseline v1.0 — 1 November 2026
 **Audience:** All engineers (server, web, mobile), QA automation, DevOps, AI agents

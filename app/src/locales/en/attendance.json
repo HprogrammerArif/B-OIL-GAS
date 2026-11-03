@@ -1,0 +1,145 @@
+{
+  "title": "Attendance",
+  "shift": "{{name}} · {{start}} – {{end}}",
+  "today": {
+    "none": "Not punched in yet",
+    "in": "In",
+    "out": "Out",
+    "worked": "Worked",
+    "overtime": "Overtime this month",
+    "lateBy": "Late by {{time}}",
+    "missingOut": "Punch-out missing",
+    "review": "Awaiting review"
+  },
+  "status": {
+    "PRESENT": "Present",
+    "LATE": "Late",
+    "EARLY_LEAVE": "Left early",
+    "ABSENT": "Absent",
+    "ON_LEAVE": "On leave",
+    "HOLIDAY": "Holiday",
+    "WEEKEND": "Weekend",
+    "FIELD_DUTY": "Field duty",
+    "HALF_DAY": "Half day",
+    "NONE": "No record"
+  },
+  "punch": {
+    "in": "Punch in",
+    "out": "Punch out",
+    "complete": "Day complete",
+    "offline": "Connect to the internet to punch.",
+    "locating": "Getting your location…",
+    "accuracy": "GPS accuracy ±{{m}} m",
+    "submitting": "Recording your punch…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "openSettings": "Open settings",
+    "failed": "The punch could not be recorded. Please try again.",
+    "weak": {
+      "title": "GPS signal is weak",
+      "body": "Accuracy is ±{{m}} m but 50 m or better is needed. Move outdoors or near a window and try again."
+    },
+    "error": {
+      "PERMISSION_DENIED": { "title": "Location permission needed", "body": "Allow location access so we can confirm you are at the site." },
+      "LOCATION_OFF": { "title": "Location is turned off", "body": "Turn on location services, then try again." },
+      "TIMEOUT": { "title": "Could not get a location", "body": "Move to an open area and try again." }
+    },
+    "outside": {
+      "title": "You are outside the site",
+      "body": "{{distance}} from {{site}}. If you are on field duty you can still punch; your manager will review it.",
+      "confirm": "Punch anyway (field duty)"
+    },
+    "result": {
+      "ACCEPTED": "Punch recorded",
+      "PENDING_REGULARISATION": "Sent to your manager for review",
+      "REJECTED_OUTSIDE_FENCE": "Outside the site boundary",
+      "REJECTED_ACCURACY": "GPS accuracy too low",
+      "REJECTED_MOCK": "Mock location detected"
+    },
+    "duplicate": "Already recorded a moment ago.",
+    "regularise": "Request regularisation",
+    "away": "{{distance}} from {{site}}",
+    "inside": "At {{site}}"
+  },
+  "demo": {
+    "title": "Demo location",
+    "real": "Real GPS"
+  },
+  "units": { "m": "m", "km": "km" },
+  "week": { "title": "Last 7 days" },
+  "links": {
+    "history": "Attendance history",
+    "regularise": "Regularisation requests",
+    "leave": "Leave"
+  },
+  "history": {
+    "title": "Attendance history",
+    "empty": "No records for this month",
+    "summary": {
+      "present": "Present",
+      "late": "Late",
+      "absent": "Absent",
+      "leave": "Leave",
+      "fieldDuty": "Field duty",
+      "worked": "Hours worked",
+      "overtime": "Overtime"
+    },
+    "punches": "Punches",
+    "fix": "Fix this day"
+  },
+  "team": {
+    "title": "Team today",
+    "searchPlaceholder": "Search team",
+    "empty": "No one matches this filter",
+    "kpi": {
+      "present": "In",
+      "late": "Late",
+      "notIn": "Not in",
+      "onLeave": "On leave",
+      "absent": "Absent",
+      "fieldDuty": "Field duty"
+    },
+    "filters": {
+      "ALL": "All",
+      "IN": "In",
+      "LATE": "Late",
+      "NOT_IN": "Not in",
+      "ON_LEAVE": "On leave",
+      "REVIEW": "Review"
+    },
+    "self": "You",
+    "inAt": "In {{time}}",
+    "awaiting": "{{count}} waiting for your decision",
+    "openInbox": "Open approvals"
+  },
+  "regularise": {
+    "title": "Regularisation",
+    "new": "New request",
+    "type": "Request type",
+    "types": {
+      "MISSED_PUNCH": "Missed punch",
+      "FIELD_DUTY": "Field duty",
+      "LATE_JUSTIFICATION": "Late justification",
+      "REMOTE_WORK": "Remote work"
+    },
+    "date": "Date",
+    "requestedIn": "In time (HH:mm)",
+    "requestedOut": "Out time (HH:mm)",
+    "reason": "Reason",
+    "reasonHelp": "Explain what happened.",
+    "submit": "Send for approval",
+    "sent": "Request sent to your manager",
+    "mine": "My requests",
+    "team": "Team requests",
+    "empty": "No requests yet",
+    "window": "You can request a correction for the last 7 days.",
+    "fieldDutyWindow": "Field duty can be requested up to 30 days ahead.",
+    "decidedBy": "Decided by {{name}}",
+    "timeFormat": "Use 24-hour time, e.g. 09:15",
+    "timeOrder": "Out time must be after in time",
+    "timeNeeded": "Enter the missed time"
+  },
+  "errors": {
+    "PUNCH_DUPLICATE": "Already recorded."
+  }
+}

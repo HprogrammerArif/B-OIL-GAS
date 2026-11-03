@@ -19,7 +19,13 @@ const EVENT_TAGS: Record<string, (payload: Record<string, unknown>) => Tag[]> = 
   "approval:updated": (p) => [{ type: "Inbox", id: LIST }, { type: "Approval", id: String(p.instanceId) }],
   "notice:published": () => [{ type: "Notice", id: LIST }, { type: "Broadcast", id: "ACTIVE" }],
   "notice:updated": (p) => [{ type: "Notice", id: LIST }, { type: "Notice", id: String(p.noticeId) }, { type: "Broadcast", id: "ACTIVE" }],
-  "broadcast:new": () => [{ type: "Broadcast", id: "ACTIVE" }, { type: "Notice", id: LIST }],
+    "attendance:punch": () => [
+      { type: "AttendanceToday", id: "ME" }, { type: "AttendanceDay", id: LIST }, { type: "AttendanceDay", id: "ROSTER" }, { type: "Regularisation", id: LIST },
+    ],
+    "leave:status": () => [
+      { type: "LeaveRequest", id: LIST }, { type: "LeaveBalance", id: LIST }, { type: "AttendanceDay", id: LIST }, { type: "AttendanceDay", id: "ROSTER" },
+    ],
+    "broadcast:new": () => [{ type: "Broadcast", id: "ACTIVE" }, { type: "Notice", id: LIST }],
 };
 
 /** Subscribes the signed-in user to realtime events while the app shell is mounted. */

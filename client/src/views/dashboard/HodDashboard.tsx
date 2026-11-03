@@ -5,6 +5,7 @@ import { showToast } from '../../components/ToastManager';
 import Pagination from '../../components/Pagination';
 import { EmptyState } from '../../components/ui';
 import { useCan } from '../../auth/session';
+import { slaMinutesLeft, useNow } from '../../lib/sla';
 import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
 import { CATEGORY_LABELS, useMyApprovalQueue } from '../approvals/config';
 import { DEPT_BUDGET, deptBudgetUsed, fmtBdt } from './config';
@@ -26,6 +27,7 @@ export default function HodDashboard({ lang, activeTab }: DashboardSubViewProps)
   const { approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
   const { user, pending: queue } = useMyApprovalQueue();
   const data = useDashboardData();
+  const now = useNow();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [page, setPage] = useState(1);
@@ -138,7 +140,7 @@ export default function HodDashboard({ lang, activeTab }: DashboardSubViewProps)
             ) : (
               <div className="approval-queue-list">
                 {pageItems.map((item) => {
-                  const overdue = item.slaHoursLeft <= 0;
+                  const overdue = slaMinutesLeft(item, now) <= 0;
                   const cat = CATEGORY_LABELS[item.category];
                   return (
                     <div key={item.id} className={`approval-queue-item${overdue ? ' overdue' : ''}`}>

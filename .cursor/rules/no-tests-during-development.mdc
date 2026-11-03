@@ -1,0 +1,12 @@
+---
+description: Do not run any tests during development; tests run once at the end
+alwaysApply: true
+---
+
+# No test runs during development
+
+- Do not run any tests while developing, in any app (`ftr-a/`, `client/`, `app/`, `server/`, `frontend/`, `infra/`). This covers `flutter test`, `dart test`, `flutter drive`, `patrol`, `integration_test`, `jest`, `vitest`, `npm test`, `playwright`/`e2e`, and any other test runner.
+- Writing or updating test files is still fine. Only running them is paused.
+- Do not mention test results as verification in the meantime. Say tests were not run.
+- Tests run once, at the end (Phase 8), when the user asks for it (for example "run the tests now" or "final verification").
+- `dart format`, `dart analyze` and `flutter analyze` are not tests. Run them only when needed to confirm an edit, and keep them minimal.

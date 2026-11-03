@@ -41,6 +41,8 @@ export interface RoleMetaItem {
   bloodGroup: string;
   initials: string;
   avatarColor: string;
+  avatarUrl?: string;
+  roleEmoji: string;
 }
 
 export const SYSTEM_TODAY = '29 Oct 2026';
@@ -63,6 +65,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'B+',
     initials: 'AAS',
     avatarColor: '#A51C30',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '👑',
   },
   plant_gm: {
     empId: 'EMP-0012',
@@ -81,6 +85,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'O+',
     initials: 'HR',
     avatarColor: '#0369A1',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '🏭',
   },
   hr_admin: {
     empId: 'EMP-0028',
@@ -99,6 +105,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'A+',
     initials: 'SAS',
     avatarColor: '#BE185D',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '👥',
   },
   transport_admin: {
     empId: 'EMP-0045',
@@ -117,6 +125,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'B+',
     initials: 'KZ',
     avatarColor: '#059669',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '🚚',
   },
   hod: {
     empId: 'EMP-0062',
@@ -135,6 +145,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'AB+',
     initials: 'FB',
     avatarColor: '#7C3AED',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '💰',
   },
   employee: {
     empId: 'EMP-1042',
@@ -153,6 +165,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'O+',
     initials: 'TA',
     avatarColor: '#D97706',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '💼',
   },
   driver: {
     empId: 'EMP-0821',
@@ -171,6 +185,8 @@ export const ROLE_META: Record<AppRole, RoleMetaItem> = {
     bloodGroup: 'B+',
     initials: 'RI',
     avatarColor: '#059669',
+    avatarUrl: '/avatars/avatar-common.svg',
+    roleEmoji: '🚗',
   },
 };
 

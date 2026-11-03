@@ -1,0 +1,33 @@
+---
+description: Product clarity principle for every screen - minimum data, maximum understanding
+alwaysApply: true
+---
+
+# Clarity: minimum data, maximum understanding
+
+Applies to every screen, in every app (`ftr-a/`, `client/`, `app/`). A first-time user, including a senior executive with 10 seconds, must understand a screen without training.
+
+## Every screen and record answers four questions, in plain words, near the top
+1. **What is this?** One plain sentence or title. No internal jargon or codes as the headline.
+2. **Where did it come from?** Who asked/raised it, from which department, when.
+3. **Why does it exist?** The reason or business rule, in one line.
+4. **What happens next / what do I do?** One sentence that depends on the viewer's role and the record's state (for example "Waiting for Farida Begum. Nothing for you to do.").
+
+## Show less
+- One primary number or status per record; everything else is secondary text.
+- Prefer a **derived verdict** over raw data ("3 quotes. Energypac is cheapest, saving ৳3,30,000") with the raw data underneath, not instead of it.
+- Hide technical detail (hash codes, internal IDs, account codes, audit metadata) behind a disclosure ("Details"). Never as default body text.
+- Do not show the same data twice on one screen (no summary tab that repeats the main tab). Remove the duplicate instead of adding a toggle.
+- No decorative fields, badges or banners that do not change a decision. If a label never varies, delete it.
+- Group by the user's task and order top to bottom as a story (what, who, why, evidence, decision), not by database table.
+
+## Say it simply
+- Use everyday words; if a company term is unavoidable (note-sheet, e-Nothi), explain it once in the page description.
+- Status labels say what is happening ("Waiting for Farida Begum"), not what the state is called ("pending_chairman").
+- Money is formatted with lakh/crore grouping; differences are shown as amounts ("+৳1,70,000"), not as bare percentages.
+- Every user-facing string is bilingual (EN + BN), as in `project.mdc`.
+
+## Checklist before finishing a screen
+- Can someone say what it is, who it is from and why, in 10 seconds?
+- Is the next action obvious for each role that can open it?
+- Could any field, tab or card be removed without losing a decision? Remove it.

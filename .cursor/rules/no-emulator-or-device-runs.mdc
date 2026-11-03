@@ -1,0 +1,13 @@
+---
+description: Never start emulators, builds or app launches from the agent
+alwaysApply: true
+---
+
+# No emulators or app launches from the agent
+
+- Never start an Android emulator or iOS simulator in any form: `emulator`, `avdmanager`, `flutter emulators --launch`, Android Studio AVDs, `xcrun simctl`, or `flutter run` / `npx expo run:*` / `expo start`.
+- Never build or install the app from the agent terminal: `flutter build apk|appbundle|ios`, `flutter install`, `gradlew assemble*`, `adb install`, `eas build`, `expo prebuild`.
+- Do not start any dev server or Metro. The user runs the app on their physical device from their own terminal.
+- Read-only diagnosis is allowed: `flutter doctor`, `flutter devices`, `adb devices` (only when useful or asked). `flutter pub get`, `build_runner`, `gen-l10n`, `analyze` and `format` are allowed because they do not launch the app.
+- When a change needs the app to be run, say so and give the user the exact command (for example `flutter run -d <device-id>` from `ftr-a`).
+- Keep editing code and docs as normal; this rule only covers running the app and emulators.

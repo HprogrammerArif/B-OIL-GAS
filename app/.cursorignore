@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+dist/
+build/
+out/
+.expo/
+web-build/
+
+# Test and coverage outputs
+coverage/
+playwright-report/
+test-results/
+
+# Generated files
+*.map
+*.log
+
+# Native build outputs
+android/.gradle/
+android/app/build/
+ios/Pods/
+
+# Large generated assets
+*.lock

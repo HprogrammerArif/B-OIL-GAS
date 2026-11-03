@@ -1,5 +1,6 @@
 import type { PunchResult, PunchType, RegularisationType, RequestStatus } from "@/types/domain/attendance";
 import type { Priority, Urgency } from "@/types/domain/common";
+import type { ClaimCategory, ClaimStatus, ClaimType, PolicyFlag, TravelMode } from "@/types/domain/claims";
 import type { HalfDay, LeaveCode } from "@/types/domain/leave";
 import type { DepartmentRef, Lang, MeEmployee, RoleKey, SiteRef } from "@/types/domain/identity";
 import type { NoticeAudienceRef, NoticeCategory, NoticeStatus } from "@/types/domain/notice";
@@ -281,6 +282,43 @@ export interface MockLeaveRequest {
   workflowInstanceId: string | null;
 }
 
+/* ─── Claims (doc 02 Claim / ClaimLine) ─── */
+
+export interface MockClaimLine {
+  id: string;
+  date: string;
+  category: ClaimCategory;
+  description: string;
+  fromPlace: string | null;
+  toPlace: string | null;
+  distanceKm: number | null;
+  amount: number;
+  isDeclaration: boolean;
+  receiptFileId: string | null;
+}
+
+export interface MockClaim {
+  id: string;
+  claimNo: string;
+  claimantId: string;
+  type: ClaimType;
+  purpose: string;
+  destination: string | null;
+  periodStart: string;
+  periodEnd: string;
+  travelMode: TravelMode | null;
+  costCenter: string | null;
+  status: ClaimStatus;
+  lines: MockClaimLine[];
+  policyFlags: PolicyFlag[];
+  totalAmount: number;
+  policyAmount: number;
+  voucherNo: string | null;
+  createdAt: string;
+  updatedAt: string;
+  workflowInstanceId: string | null;
+}
+
 /**
  * Whole in-app database. Module tables are added alongside their handlers;
  * bump `MOCK_DB_VERSION` whenever a table shape changes so devices reseed.
@@ -309,6 +347,7 @@ export interface MockDb {
   leaveTypes: MockLeaveType[];
   leaveBalances: MockLeaveBalance[];
   leaveRequests: MockLeaveRequest[];
+  claims: MockClaim[];
 }
 
-export const MOCK_DB_VERSION = 5;
+export const MOCK_DB_VERSION = 6;
