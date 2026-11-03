@@ -5,6 +5,9 @@ import 'package:bogcl_oneops/features/auth/presentation/loading_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/login_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_screen.dart';
+import 'package:bogcl_oneops/features/leave/presentation/leave_apply_screen.dart';
+import 'package:bogcl_oneops/features/leave/presentation/leave_detail_screen.dart';
+import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
 import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
 import 'package:bogcl_oneops/features/notifications/presentation/inbox_screen.dart';
 import 'package:bogcl_oneops/features/outbox/presentation/outbox_screen.dart';
@@ -60,6 +63,23 @@ GoRouter router(Ref ref) {
               GoRoute(
                 path: AppRoutes.home,
                 builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'leave',
+                    builder: (context, state) => const LeaveScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const LeaveApplyScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            LeaveDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 extension AppL10nContext on BuildContext {
   AppL10n get l10n => AppL10n.of(this);
@@ -17,6 +18,15 @@ String relativeTime(AppL10n l, DateTime instant, String languageCode) {
   if (diff.inDays < 1) return l.timeHoursAgo(diff.inHours);
   if (diff.inDays < 7) return l.timeDaysAgo(diff.inDays);
   return DateFmt.date(instant, languageCode);
+}
+
+/// "2 days", "Half day", "1.5 days"; numbers use Bengali digits for `bn`.
+String daysText(AppL10n l, double days, String languageCode) {
+  if (days == 0.5) return l.leaveHalfDay;
+  if (days == days.roundToDouble()) return l.leaveDaysCount(days.toInt());
+  return l.leaveDaysFraction(
+    NumberFormat.decimalPattern(languageCode).format(days),
+  );
 }
 
 /// Localised role label; falls back to the server-provided name.

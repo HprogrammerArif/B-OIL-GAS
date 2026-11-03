@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/core/network/api_error.dart';
+import 'package:bogcl_oneops/core/storage/blob_store.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/seed/rbac.dart';
 import 'package:bogcl_oneops/mock/store.dart';
@@ -26,12 +27,16 @@ class HandlerContext {
     required this.params,
     required this.store,
     required this.auth,
+    required this.blobs,
   });
 
   final MockRequest req;
   final Map<String, String> params;
   final MockStore store;
   final AuthContext? auth;
+
+  /// Private object storage (presigned-upload stand-in).
+  final BlobStore blobs;
 
   Map<String, String> get query => req.query;
   Object? get body => req.body;

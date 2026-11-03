@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:flutter/material.dart';
 
@@ -115,10 +117,13 @@ class ListRow extends StatelessWidget {
 
 /// Circle avatar with initials fallback.
 class Avatar extends StatelessWidget {
-  const Avatar({required this.name, this.size = 40, super.key});
+  const Avatar({required this.name, this.size = 40, this.image, super.key});
 
   final String name;
   final double size;
+
+  /// Photo bytes; initials show when null.
+  final Uint8List? image;
 
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+'))
@@ -137,11 +142,14 @@ class Avatar extends StatelessWidget {
       child: CircleAvatar(
         radius: size / 2,
         backgroundColor: scheme.primary.withValues(alpha: 0.12),
-        child: Text(
-          _initials.toUpperCase(),
-          style: Theme.of(context).textTheme.labelLarge
-              ?.copyWith(color: scheme.primary, fontSize: size * 0.36),
-        ),
+        backgroundImage: image == null ? null : MemoryImage(image!),
+        child: image != null
+            ? null
+            : Text(
+                _initials.toUpperCase(),
+                style: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(color: scheme.primary, fontSize: size * 0.36),
+              ),
       ),
     );
   }

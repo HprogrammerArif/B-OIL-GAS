@@ -46,7 +46,7 @@ void seedWorkflowTemplates(MockStore store) {
       'HR review',
       'ROLE',
       ref: 'HR_ADMIN',
-      condition: 'days > 5',
+      condition: "hrReview == 'true'",
     ),
   ]);
   add(

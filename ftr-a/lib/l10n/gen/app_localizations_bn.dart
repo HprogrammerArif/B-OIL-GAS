@@ -498,4 +498,284 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get activityOther => 'অন্যান্য কার্যকলাপ';
+
+  @override
+  String get pickerTitle => 'ফাইল যোগ করুন';
+
+  @override
+  String get pickerCamera => 'ছবি তুলুন';
+
+  @override
+  String get pickerGallery => 'গ্যালারি থেকে বেছে নিন';
+
+  @override
+  String get pickerFiles => 'ফাইল ব্রাউজ করুন';
+
+  @override
+  String get moreChangePhoto => 'প্রোফাইল ছবি পরিবর্তন করুন';
+
+  @override
+  String get photoUpdated => 'প্রোফাইল ছবি হালনাগাদ হয়েছে';
+
+  @override
+  String get uploadNeedsConnection =>
+      'এই ফাইল আপলোড করতে ইন্টারনেটে সংযুক্ত হন।';
+
+  @override
+  String get uploadRejected =>
+      'এই ফাইলটি ব্যবহার করা যাবে না। ধরন ও আকার দেখে নিন।';
+
+  @override
+  String get uploadBlocked => 'ভাইরাস স্ক্যানে এই ফাইলটি আটকানো হয়েছে।';
+
+  @override
+  String get homeQuickActions => 'দ্রুত কাজ';
+
+  @override
+  String get moduleLeave => 'ছুটি';
+
+  @override
+  String get leaveTitle => 'ছুটি';
+
+  @override
+  String get leaveApply => 'ছুটির আবেদন';
+
+  @override
+  String get leaveBalancesTitle => 'আমার ছুটির হিসাব';
+
+  @override
+  String leaveAvailable(String days) {
+    return '$days বাকি';
+  }
+
+  @override
+  String leaveBalanceDetail(String used, String total) {
+    return '$total-এর মধ্যে $used ব্যবহৃত';
+  }
+
+  @override
+  String leaveBalancePending(String days) {
+    return '$days পর্যালোচনাধীন';
+  }
+
+  @override
+  String get leaveRequestsTitle => 'আমার আবেদন';
+
+  @override
+  String get leaveFilterAll => 'সব';
+
+  @override
+  String get leaveStatusPending => 'অপেক্ষমাণ';
+
+  @override
+  String get leaveStatusApproved => 'অনুমোদিত';
+
+  @override
+  String get leaveStatusRejected => 'প্রত্যাখ্যাত';
+
+  @override
+  String get leaveStatusCancelled => 'বাতিল';
+
+  @override
+  String get leaveEmptyTitle => 'কোনো ছুটির আবেদন নেই';
+
+  @override
+  String get leaveEmptyMessage =>
+      'ছুটির আবেদন করুন এবং অনুমোদনের অবস্থা এখানে দেখুন।';
+
+  @override
+  String leaveDaysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count দিন',
+      one: '১ দিন',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String leaveDaysFraction(String value) {
+    return '$value দিন';
+  }
+
+  @override
+  String get leaveHalfDay => 'অর্ধ দিন';
+
+  @override
+  String get leaveHalfFirst => 'প্রথম ভাগ';
+
+  @override
+  String get leaveHalfSecond => 'দ্বিতীয় ভাগ';
+
+  @override
+  String get leaveFormType => 'ছুটির ধরন';
+
+  @override
+  String get leaveFormFrom => 'শুরু';
+
+  @override
+  String get leaveFormTo => 'শেষ';
+
+  @override
+  String get leaveFormHalfDay => 'অর্ধ দিন';
+
+  @override
+  String get leaveFormReason => 'কারণ';
+
+  @override
+  String get leaveFormReasonHint => 'কেন ছুটি প্রয়োজন?';
+
+  @override
+  String leaveFormCounts(String days) {
+    return 'গণনা হবে $days';
+  }
+
+  @override
+  String get leaveFormAttachment => 'সহায়ক নথি';
+
+  @override
+  String get leaveFormAttachRequired => 'এই ছুটির জন্য আবশ্যক';
+
+  @override
+  String get leaveFormAttach => 'নথি সংযুক্ত করুন';
+
+  @override
+  String get leaveFormRemove => 'সরান';
+
+  @override
+  String get leaveFormSubmit => 'আবেদন জমা দিন';
+
+  @override
+  String get leaveFormNoWorkingDays =>
+      'নির্বাচিত তারিখগুলো সবই সাপ্তাহিক ছুটি বা সরকারি ছুটি।';
+
+  @override
+  String leaveFormReasonMin(int min) {
+    return 'কমপক্ষে $minটি অক্ষর লিখুন';
+  }
+
+  @override
+  String leaveFormBalanceShort(String days) {
+    return 'এই ধরনের ছুটিতে মাত্র $days বাকি আছে।';
+  }
+
+  @override
+  String leaveFormClLimit(int max) {
+    return 'নৈমিত্তিক ছুটি টানা সর্বোচ্চ $max দিন নেওয়া যায়।';
+  }
+
+  @override
+  String leaveFormBackdate(int days) {
+    return 'শুধু অসুস্থতাজনিত বা বিনা বেতনের ছুটি সর্বোচ্চ $days দিন আগের তারিখ থেকে নেওয়া যায়।';
+  }
+
+  @override
+  String get leaveFormHrReview => 'এই আবেদনে এইচআর পর্যালোচনাও লাগবে।';
+
+  @override
+  String get leaveFormUninformed =>
+      'শুরুর তারিখের পরে আবেদন; এটি অজানা অনুপস্থিতি হিসেবে চিহ্নিত হবে।';
+
+  @override
+  String get leaveSubmitted => 'আবেদন আপনার ম্যানেজারের কাছে জমা হয়েছে।';
+
+  @override
+  String get leaveQueued => 'অফলাইনে সংরক্ষিত। অনলাইনে ফিরলে জমা হবে।';
+
+  @override
+  String get leaveErrInsufficient =>
+      'এই ছুটির জন্য আপনার পর্যাপ্ত ব্যালেন্স নেই।';
+
+  @override
+  String get leaveErrOverlap => 'এই তারিখগুলোতে আপনার আগে থেকেই ছুটি আছে।';
+
+  @override
+  String get leaveErrFailed => 'আবেদন জমা দেওয়া যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String leaveQueueLabel(String type, String range) {
+    return 'ছুটি: $type, $range';
+  }
+
+  @override
+  String get leaveDetailTitle => 'ছুটির আবেদন';
+
+  @override
+  String get leaveDetailPeriod => 'সময়কাল';
+
+  @override
+  String get leaveDetailDuration => 'মেয়াদ';
+
+  @override
+  String get leaveDetailReason => 'কারণ';
+
+  @override
+  String leaveDetailReviewedBy(String name) {
+    return 'পর্যালোচনা করেছেন $name';
+  }
+
+  @override
+  String get leaveDetailComment => 'পর্যালোচকের মন্তব্য';
+
+  @override
+  String get leaveDetailRoute => 'অনুমোদনের ধাপ';
+
+  @override
+  String get leaveDetailAttachment => 'সংযুক্তি';
+
+  @override
+  String get leaveCancel => 'আবেদন বাতিল করুন';
+
+  @override
+  String get leaveCancelTitle => 'এই ছুটির আবেদন বাতিল করবেন?';
+
+  @override
+  String get leaveCancelPending =>
+      'আপনি প্রত্যাহার করেছেন তা ম্যানেজারকে জানানো হবে।';
+
+  @override
+  String get leaveCancelApproved => 'দিনগুলো আপনার ব্যালেন্সে ফিরে যাবে।';
+
+  @override
+  String get leaveCancelKeep => 'আবেদন রাখুন';
+
+  @override
+  String get leaveCancelled => 'আবেদন বাতিল হয়েছে।';
+
+  @override
+  String get leaveCancelQueued => 'অফলাইনে সংরক্ষিত। অনলাইনে ফিরলে বাতিল হবে।';
+
+  @override
+  String get leaveCancelFailed => 'আবেদন বাতিল করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get workflowStepSubmitted => 'জমা দেওয়া হয়েছে';
+
+  @override
+  String get workflowStepManager => 'লাইন ম্যানেজার';
+
+  @override
+  String get workflowStepHr => 'এইচআর পর্যালোচনা';
+
+  @override
+  String workflowStepWaiting(String names) {
+    return '$names-এর অপেক্ষায়';
+  }
+
+  @override
+  String get workflowStepUpNext => 'পরবর্তী ধাপ';
+
+  @override
+  String workflowStepApprovedBy(String name) {
+    return '$name অনুমোদন করেছেন';
+  }
+
+  @override
+  String workflowStepRejectedBy(String name) {
+    return '$name প্রত্যাখ্যান করেছেন';
+  }
+
+  @override
+  String get workflowStepSkipped => 'প্রয়োজন নেই';
 }

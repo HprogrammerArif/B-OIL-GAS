@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
+import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
@@ -72,6 +73,8 @@ List<RouteDef> meRoutes() => [
     final emp = body['employee'];
     String? emergency;
     String? blood;
+    var photoSet = false;
+    String? photo;
     if (emp != null) {
       if (emp is! Map) throw validationError('employee', 'Invalid profile');
       final e = Map<String, Object?>.from(emp);
@@ -92,10 +95,43 @@ List<RouteDef> meRoutes() => [
         }
         blood = bg;
       }
+      if (e.containsKey('photoFileId')) {
+        photoSet = true;
+        final raw = e['photoFileId'];
+        if (raw != null) {
+          final file = raw is String ? ctx.store.get(Col.files, raw) : null;
+          if (file == null ||
+              file['uploaderUserId'] != a.user['id'] ||
+              file['purpose'] != 'AVATAR' ||
+              file['status'] != 'UPLOADED' ||
+              FileEngine.scanStatus(ctx.store, file) == 'INFECTED') {
+            throw validationError(
+              'employee.photoFileId',
+              'Choose a valid photo',
+            );
+          }
+          photo = raw as String;
+        }
+      }
     }
     if (lang != null) a.user['preferredLang'] = lang;
     if (emergency != null) a.employee['emergencyContact'] = emergency;
     if (blood != null) a.employee['bloodGroup'] = blood;
+    if (photoSet) {
+      final old = a.employee.strOrNull('photoFileId');
+      a.employee['photoFileId'] = photo;
+      if (photo != null) {
+        FileEngine.attach(
+          ctx.store,
+          photo,
+          ownerType: 'Employee',
+          ownerId: a.employee.str('id'),
+        );
+      }
+      if (old != null && old != photo) {
+        await FileEngine.destroy(ctx.store, ctx.blobs, old);
+      }
+    }
     ctx.store
       ..touch(Col.users, a.user)
       ..touch(Col.employees, a.employee);
@@ -111,6 +147,7 @@ List<RouteDef> meRoutes() => [
           if (lang != null) 'preferredLang',
           if (emergency != null) 'emergencyContact',
           if (blood != null) 'bloodGroup',
+          if (photoSet) 'photoFileId',
         ],
       },
     );

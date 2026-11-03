@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:bogcl_oneops/core/network/api_error.dart';
+import 'package:bogcl_oneops/core/storage/blob_store.dart';
 import 'package:bogcl_oneops/core/utils/hash.dart';
 import 'package:bogcl_oneops/core/utils/logger.dart';
 import 'package:bogcl_oneops/mock/handlers/audit_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/file_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/leave_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/me_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/notification_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/workflow_handlers.dart';
@@ -43,6 +46,7 @@ class MockServer {
   MockServer({
     required this.store,
     required this.config,
+    required this.blobs,
     MockRouter? router,
     Random? random,
   }) : router = router ?? MockRouter(),
@@ -54,10 +58,13 @@ class MockServer {
       ...notificationRoutes(),
       ...auditRoutes(),
       ...workflowRoutes(),
+      ...fileRoutes(),
+      ...leaveRoutes(),
     ]);
   }
 
   final MockStore store;
+  final BlobStore blobs;
   final MockRouter router;
   final MockConfig Function() config;
   final Random _random;
@@ -175,6 +182,7 @@ class MockServer {
           params: found.params,
           store: store,
           auth: auth,
+          blobs: blobs,
         ),
       );
       if (idemKey != null && response.status < 500) {

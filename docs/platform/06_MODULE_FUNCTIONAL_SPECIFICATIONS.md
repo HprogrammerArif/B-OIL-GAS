@@ -1589,6 +1589,13 @@ Messages: `sent → edited (editedAt) | deleted (deletedAt, tombstone)`. Directi
 | BR-15-08 | Quick directive presets are client-side templates (Setting `chat.directivePresets` list) — no server logic. |
 | BR-15-09 | Voice messages are stored files; transcription is optional via adapter; TTS playback of text is client-side only. |
 | BR-15-10 | Rate limit: `chat.maxMessagesPerMinute (30)` per user; attachments ≤ 10 per message. |
+| BR-15-11 | Pinning: only `chat:directive` holders can pin/unpin a message; pinned messages are listed in the conversation details panel and are visible to every member; directives are pinned on issue. |
+| BR-15-12 | Reactions are one per emoji per user and toggle on a second tap (count decrements). |
+| BR-15-13 | Search covers the viewer's own conversations only (channel names/descriptions, people, message text, file names, directive refs); results deep-link to the message. |
+| BR-15-14 | Conversation list shows the last-message preview, time and unread count per channel/DM; opening a conversation marks it read and shows a "N new messages" divider for what was unread. Drafts are kept per conversation on the client. |
+| BR-15-15 | Read-receipt label: channels show "Sent" (no readers) or "Read by N"; DMs show "Delivered" or "Read". |
+| BR-15-16 | The conversation details panel shows members with presence, pinned messages and files shared in that conversation (derived from messages, not a separate vault). |
+| BR-15-17 | UI copy states "encrypted in transit / at rest" only; never "end-to-end" or "AES-256" (see BR-15-05). |
 
 ### 14.5 Calculations
 `ackRate(directive) = |acknowledgements| / |members at issue time|`. `responseTimeP50 = median(ackAt − issuedAt)`.
@@ -1758,7 +1765,7 @@ Step: `PENDING → ACTIVE → COMPLETED (decision APPROVED|REJECTED|RETURNED) | 
 | DRAFT → SUBMITTED → IN_REVIEW | `submit` (called by module service) | initiator | template active; conditions evaluated against `summary` | steps materialised (conditions false → SKIPPED); step 1 (or parallel group) ACTIVE with `activatedAt`, `dueAt = addSla(activatedAt, slaHours, clock)`; approvers resolved + delegation (CM-21); `APPROVAL_PENDING`; realtime `workflow.step.activated` to approver rooms; module callback `onSubmitted` |
 | ACTIVE → COMPLETED(APPROVED) | `approve` | step approver / delegate / escalatee | step ACTIVE; actor eligible; optional `comment`; `signatureId` if template step `requiresSignature` | `WorkflowAction APPROVE`; next step(s) activated or instance APPROVED (`completedAt`); module callback `onStepApproved`/`onApproved`; `APPROVAL_DECIDED` to initiator; realtime |
 | ACTIVE → COMPLETED(REJECTED) | `reject` | same | `comment ≥ 10 chars` | instance REJECTED; remaining steps SKIPPED; callback `onRejected`; notify |
-| ACTIVE → COMPLETED(RETURNED) | `return` | same | `comment ≥ 20` | instance RETURNED; callback `onReturned`; notify initiator |
+| ACTIVE → COMPLETED(RETURNED) | `return` | same | `comment ≥ 10` (aligned with doc 03) | instance RETURNED; callback `onReturned`; notify initiator |
 | RETURNED → IN_REVIEW | `resubmit` | initiator | module validates changes | steps from the returning step re-materialised (module may request from step 1) |
 | IN_REVIEW → WITHDRAWN | `withdraw` | initiator | no step COMPLETED(APPROVED) unless Setting `workflow.allowWithdrawAfterApproval` (`false`) | notify active approver |
 | any ACTIVE | `reassign` | SUPER_ADMIN | reason; target eligible | `WorkflowAction REASSIGN`; approver replaced; audit |
@@ -1780,6 +1787,10 @@ Step: `PENDING → ACTIVE → COMPLETED (decision APPROVED|REJECTED|RETURNED) | 
 | BR-17-10 | Module callbacks are idempotent and run in the same DB transaction as the decision; a failing callback rolls back the decision (no half-states). |
 | BR-17-11 | `summary` is refreshed by the module on resubmit; conditions re-evaluate only on (re)submit, never mid-route. |
 | BR-17-12 | Comments are visible to all participants (initiator, all step approvers); `internalOnly = true` comments (approvers) hidden from the initiator. |
+| BR-17-14 | Inbox ordering defaults to most urgent first (lowest `slaHoursLeft`); alternatives: highest amount, requester A–Z. "Due soon" = < 12 h left; overdue items are flagged distinctly. |
+| BR-17-15 | Batch approve acts only on selected items that are visible under the current filters, requires an explicit confirmation listing every file and the total amount, and is offered only to roles with `canBatch`. |
+| BR-17-16 | A request opens in a detail panel (details, endorsement trail, decision record) with next/previous navigation; after approving or returning from the panel the next request opens automatically. |
+| BR-17-17 | Amounts use lakh/crore grouping (৳48,50,000); KPI tiles may abbreviate (৳94.12 Lakh) and always show the exact total beside it. |
 | BR-17-13 | Delegation per CM-20..23; delegation UI lives in Approvals Center ("Out of office"); delegations affecting ACTIVE steps are applied by the next escalation tick (≤ 15 min). |
 | BR-17-14 | Every decision emits realtime `workflow.instance.updated` to initiator and participants, and `approvals.inbox.changed` to affected approvers (badge refresh). |
 

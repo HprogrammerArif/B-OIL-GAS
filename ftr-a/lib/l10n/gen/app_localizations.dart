@@ -930,6 +930,480 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Other activity'**
   String get activityOther;
+
+  /// No description provided for @pickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a file'**
+  String get pickerTitle;
+
+  /// No description provided for @pickerCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get pickerCamera;
+
+  /// No description provided for @pickerGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get pickerGallery;
+
+  /// No description provided for @pickerFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse files'**
+  String get pickerFiles;
+
+  /// No description provided for @moreChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get moreChangePhoto;
+
+  /// No description provided for @photoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated'**
+  String get photoUpdated;
+
+  /// No description provided for @uploadNeedsConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to upload this file.'**
+  String get uploadNeedsConnection;
+
+  /// No description provided for @uploadRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This file can\'t be used. Check its type and size.'**
+  String get uploadRejected;
+
+  /// No description provided for @uploadBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This file was blocked by the virus scan.'**
+  String get uploadBlocked;
+
+  /// No description provided for @homeQuickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get homeQuickActions;
+
+  /// No description provided for @moduleLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get moduleLeave;
+
+  /// No description provided for @leaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leaveTitle;
+
+  /// No description provided for @leaveApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply for leave'**
+  String get leaveApply;
+
+  /// No description provided for @leaveBalancesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My balances'**
+  String get leaveBalancesTitle;
+
+  /// No description provided for @leaveAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} left'**
+  String leaveAvailable(String days);
+
+  /// No description provided for @leaveBalanceDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {used} of {total}'**
+  String leaveBalanceDetail(String used, String total);
+
+  /// No description provided for @leaveBalancePending.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} in review'**
+  String leaveBalancePending(String days);
+
+  /// No description provided for @leaveRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My requests'**
+  String get leaveRequestsTitle;
+
+  /// No description provided for @leaveFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get leaveFilterAll;
+
+  /// No description provided for @leaveStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get leaveStatusPending;
+
+  /// No description provided for @leaveStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get leaveStatusApproved;
+
+  /// No description provided for @leaveStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get leaveStatusRejected;
+
+  /// No description provided for @leaveStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get leaveStatusCancelled;
+
+  /// No description provided for @leaveEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No leave requests'**
+  String get leaveEmptyTitle;
+
+  /// No description provided for @leaveEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply for leave and follow its approval here.'**
+  String get leaveEmptyMessage;
+
+  /// No description provided for @leaveDaysCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String leaveDaysCount(int count);
+
+  /// No description provided for @leaveDaysFraction.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} days'**
+  String leaveDaysFraction(String value);
+
+  /// No description provided for @leaveHalfDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Half day'**
+  String get leaveHalfDay;
+
+  /// No description provided for @leaveHalfFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First half'**
+  String get leaveHalfFirst;
+
+  /// No description provided for @leaveHalfSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Second half'**
+  String get leaveHalfSecond;
+
+  /// No description provided for @leaveFormType.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave type'**
+  String get leaveFormType;
+
+  /// No description provided for @leaveFormFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get leaveFormFrom;
+
+  /// No description provided for @leaveFormTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get leaveFormTo;
+
+  /// No description provided for @leaveFormHalfDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Half day'**
+  String get leaveFormHalfDay;
+
+  /// No description provided for @leaveFormReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get leaveFormReason;
+
+  /// No description provided for @leaveFormReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do you need leave?'**
+  String get leaveFormReasonHint;
+
+  /// No description provided for @leaveFormCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Counts as {days}'**
+  String leaveFormCounts(String days);
+
+  /// No description provided for @leaveFormAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporting document'**
+  String get leaveFormAttachment;
+
+  /// No description provided for @leaveFormAttachRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for this leave'**
+  String get leaveFormAttachRequired;
+
+  /// No description provided for @leaveFormAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach document'**
+  String get leaveFormAttach;
+
+  /// No description provided for @leaveFormRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get leaveFormRemove;
+
+  /// No description provided for @leaveFormSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get leaveFormSubmit;
+
+  /// No description provided for @leaveFormNoWorkingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected dates are all weekends or holidays.'**
+  String get leaveFormNoWorkingDays;
+
+  /// No description provided for @leaveFormReasonMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least {min} characters'**
+  String leaveFormReasonMin(int min);
+
+  /// No description provided for @leaveFormBalanceShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {days} available for this leave type.'**
+  String leaveFormBalanceShort(String days);
+
+  /// No description provided for @leaveFormClLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual leave is limited to {max} consecutive days.'**
+  String leaveFormClLimit(int max);
+
+  /// No description provided for @leaveFormBackdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only sick or unpaid leave can start up to {days} days in the past.'**
+  String leaveFormBackdate(int days);
+
+  /// No description provided for @leaveFormHrReview.
+  ///
+  /// In en, this message translates to:
+  /// **'This request also needs HR review.'**
+  String get leaveFormHrReview;
+
+  /// No description provided for @leaveFormUninformed.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed after the start date; it will be marked uninformed.'**
+  String get leaveFormUninformed;
+
+  /// No description provided for @leaveSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Request submitted to your manager.'**
+  String get leaveSubmitted;
+
+  /// No description provided for @leaveQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved offline. It will be submitted when you are back online.'**
+  String get leaveQueued;
+
+  /// No description provided for @leaveErrInsufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have enough balance for this leave.'**
+  String get leaveErrInsufficient;
+
+  /// No description provided for @leaveErrOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have leave on these dates.'**
+  String get leaveErrOverlap;
+
+  /// No description provided for @leaveErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not submit the request. Please try again.'**
+  String get leaveErrFailed;
+
+  /// No description provided for @leaveQueueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave: {type}, {range}'**
+  String leaveQueueLabel(String type, String range);
+
+  /// No description provided for @leaveDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request'**
+  String get leaveDetailTitle;
+
+  /// No description provided for @leaveDetailPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get leaveDetailPeriod;
+
+  /// No description provided for @leaveDetailDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get leaveDetailDuration;
+
+  /// No description provided for @leaveDetailReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get leaveDetailReason;
+
+  /// No description provided for @leaveDetailReviewedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed by {name}'**
+  String leaveDetailReviewedBy(String name);
+
+  /// No description provided for @leaveDetailComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewer comment'**
+  String get leaveDetailComment;
+
+  /// No description provided for @leaveDetailRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval route'**
+  String get leaveDetailRoute;
+
+  /// No description provided for @leaveDetailAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment'**
+  String get leaveDetailAttachment;
+
+  /// No description provided for @leaveCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get leaveCancel;
+
+  /// No description provided for @leaveCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this leave request?'**
+  String get leaveCancelTitle;
+
+  /// No description provided for @leaveCancelPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your manager will be told you withdrew it.'**
+  String get leaveCancelPending;
+
+  /// No description provided for @leaveCancelApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'The days go back to your balance.'**
+  String get leaveCancelApproved;
+
+  /// No description provided for @leaveCancelKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep request'**
+  String get leaveCancelKeep;
+
+  /// No description provided for @leaveCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled.'**
+  String get leaveCancelled;
+
+  /// No description provided for @leaveCancelQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved offline. It will be cancelled when you are back online.'**
+  String get leaveCancelQueued;
+
+  /// No description provided for @leaveCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not cancel the request. Please try again.'**
+  String get leaveCancelFailed;
+
+  /// No description provided for @workflowStepSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get workflowStepSubmitted;
+
+  /// No description provided for @workflowStepManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Line manager'**
+  String get workflowStepManager;
+
+  /// No description provided for @workflowStepHr.
+  ///
+  /// In en, this message translates to:
+  /// **'HR review'**
+  String get workflowStepHr;
+
+  /// No description provided for @workflowStepWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {names}'**
+  String workflowStepWaiting(String names);
+
+  /// No description provided for @workflowStepUpNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Up next'**
+  String get workflowStepUpNext;
+
+  /// No description provided for @workflowStepApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by {name}'**
+  String workflowStepApprovedBy(String name);
+
+  /// No description provided for @workflowStepRejectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by {name}'**
+  String workflowStepRejectedBy(String name);
+
+  /// No description provided for @workflowStepSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Not needed'**
+  String get workflowStepSkipped;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

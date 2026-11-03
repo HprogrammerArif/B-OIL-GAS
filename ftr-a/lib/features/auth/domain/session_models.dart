@@ -72,6 +72,7 @@ abstract class EmployeeProfile with _$EmployeeProfile {
     String? initials,
     String? avatarColor,
     String? bloodGroup,
+    String? photoFileId,
     String? joinDate,
   }) = _EmployeeProfile;
 

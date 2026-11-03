@@ -108,6 +108,20 @@ class AuthRepository {
     }
   }
 
+  /// Sets (or clears with null) the profile photo from an uploaded AVATAR file.
+  Future<void> setPhoto(String? fileId) async {
+    try {
+      await _dio.patch<Object?>(
+        '/me',
+        data: {
+          'employee': {'photoFileId': fileId},
+        },
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> setPreferredLanguage(String lang) async {
     try {
       await _dio.patch<Object?>('/me', data: {'preferredLang': lang});

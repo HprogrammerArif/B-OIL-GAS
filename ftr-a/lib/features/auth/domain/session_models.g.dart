@@ -75,6 +75,7 @@ _EmployeeProfile _$EmployeeProfileFromJson(Map<String, dynamic> json) =>
       initials: json['initials'] as String?,
       avatarColor: json['avatarColor'] as String?,
       bloodGroup: json['bloodGroup'] as String?,
+      photoFileId: json['photoFileId'] as String?,
       joinDate: json['joinDate'] as String?,
     );
 
@@ -93,6 +94,7 @@ Map<String, dynamic> _$EmployeeProfileToJson(_EmployeeProfile instance) =>
       'initials': instance.initials,
       'avatarColor': instance.avatarColor,
       'bloodGroup': instance.bloodGroup,
+      'photoFileId': instance.photoFileId,
       'joinDate': instance.joinDate,
     };
 

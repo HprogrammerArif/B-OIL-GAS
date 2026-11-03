@@ -49,6 +49,32 @@ abstract final class DateFmt {
   static String dateTime(DateTime instant, String languageCode) =>
       '${date(instant, languageCode)}, ${time(instant, languageCode)}';
 
+  /// A `YYYY-MM-DD` calendar date (no time zone), e.g. a leave start date.
+  static String key(
+    String dateKey,
+    String languageCode, {
+    String pattern = 'dd MMM yyyy',
+  }) {
+    final p = dateKey.split('-').map(int.parse).toList();
+    final out = DateFormat(
+      pattern,
+      languageCode,
+    ).format(DateTime(p[0], p[1], p[2]));
+    return languageCode == 'bn' ? toBengaliDigits(out) : out;
+  }
+
+  /// `12 Nov – 14 Nov 2026`; a single date when [start] equals [end].
+  static String range(String start, String end, String languageCode) {
+    if (start == end) return key(start, languageCode);
+    final sameYear = start.substring(0, 4) == end.substring(0, 4);
+    final from = key(
+      start,
+      languageCode,
+      pattern: sameYear ? 'dd MMM' : 'dd MMM yyyy',
+    );
+    return '$from – ${key(end, languageCode)}';
+  }
+
   static String _fmt(String pattern, DateTime instant, String languageCode) {
     final out = DateFormat(pattern, languageCode).format(Dhaka.wall(instant));
     return languageCode == 'bn' ? toBengaliDigits(out) : out;

@@ -19,6 +19,10 @@ abstract final class Col {
   static const workflowSteps = 'wf_steps';
   static const workflowActions = 'wf_actions';
   static const delegations = 'delegations';
+  static const files = 'files';
+  static const leaveTypes = 'leave_types';
+  static const leaveBalances = 'leave_balances';
+  static const leaveRequests = 'leave_requests';
 }
 
 const sites = <Json>[

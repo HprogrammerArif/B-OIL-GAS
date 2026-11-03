@@ -1393,7 +1393,7 @@ as String?,
 /// @nodoc
 mixin _$EmployeeProfile {
 
- String get id; String get empCode; String get fullName; Designation get designation; Grade get grade; OrgRef get department; OrgRef get site; String? get fullNameBn; String? get shortName; String? get shortNameBn; String? get initials; String? get avatarColor; String? get bloodGroup; String? get joinDate;
+ String get id; String get empCode; String get fullName; Designation get designation; Grade get grade; OrgRef get department; OrgRef get site; String? get fullNameBn; String? get shortName; String? get shortNameBn; String? get initials; String? get avatarColor; String? get bloodGroup; String? get photoFileId; String? get joinDate;
 /// Create a copy of EmployeeProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1407,20 +1407,20 @@ $EmployeeProfileCopyWith<EmployeeProfile> get copyWith => _$EmployeeProfileCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as EmployeeProfile;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EmployeeProfile&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.empCode, _this.empCode) || other.empCode == _this.empCode)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.designation, _this.designation) || other.designation == _this.designation)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.department, _this.department) || other.department == _this.department)&&(identical(other.site, _this.site) || other.site == _this.site)&&(identical(other.fullNameBn, _this.fullNameBn) || other.fullNameBn == _this.fullNameBn)&&(identical(other.shortName, _this.shortName) || other.shortName == _this.shortName)&&(identical(other.shortNameBn, _this.shortNameBn) || other.shortNameBn == _this.shortNameBn)&&(identical(other.initials, _this.initials) || other.initials == _this.initials)&&(identical(other.avatarColor, _this.avatarColor) || other.avatarColor == _this.avatarColor)&&(identical(other.bloodGroup, _this.bloodGroup) || other.bloodGroup == _this.bloodGroup)&&(identical(other.joinDate, _this.joinDate) || other.joinDate == _this.joinDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EmployeeProfile&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.empCode, _this.empCode) || other.empCode == _this.empCode)&&(identical(other.fullName, _this.fullName) || other.fullName == _this.fullName)&&(identical(other.designation, _this.designation) || other.designation == _this.designation)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.department, _this.department) || other.department == _this.department)&&(identical(other.site, _this.site) || other.site == _this.site)&&(identical(other.fullNameBn, _this.fullNameBn) || other.fullNameBn == _this.fullNameBn)&&(identical(other.shortName, _this.shortName) || other.shortName == _this.shortName)&&(identical(other.shortNameBn, _this.shortNameBn) || other.shortNameBn == _this.shortNameBn)&&(identical(other.initials, _this.initials) || other.initials == _this.initials)&&(identical(other.avatarColor, _this.avatarColor) || other.avatarColor == _this.avatarColor)&&(identical(other.bloodGroup, _this.bloodGroup) || other.bloodGroup == _this.bloodGroup)&&(identical(other.photoFileId, _this.photoFileId) || other.photoFileId == _this.photoFileId)&&(identical(other.joinDate, _this.joinDate) || other.joinDate == _this.joinDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as EmployeeProfile;
-  return Object.hash(runtimeType,_this.id,_this.empCode,_this.fullName,_this.designation,_this.grade,_this.department,_this.site,_this.fullNameBn,_this.shortName,_this.shortNameBn,_this.initials,_this.avatarColor,_this.bloodGroup,_this.joinDate);
+  return Object.hash(runtimeType,_this.id,_this.empCode,_this.fullName,_this.designation,_this.grade,_this.department,_this.site,_this.fullNameBn,_this.shortName,_this.shortNameBn,_this.initials,_this.avatarColor,_this.bloodGroup,_this.photoFileId,_this.joinDate);
 }
 
 @override
 String toString() {
   final _this = this as EmployeeProfile;
-  return 'EmployeeProfile(id: ${_this.id}, empCode: ${_this.empCode}, fullName: ${_this.fullName}, designation: ${_this.designation}, grade: ${_this.grade}, department: ${_this.department}, site: ${_this.site}, fullNameBn: ${_this.fullNameBn}, shortName: ${_this.shortName}, shortNameBn: ${_this.shortNameBn}, initials: ${_this.initials}, avatarColor: ${_this.avatarColor}, bloodGroup: ${_this.bloodGroup}, joinDate: ${_this.joinDate})';
+  return 'EmployeeProfile(id: ${_this.id}, empCode: ${_this.empCode}, fullName: ${_this.fullName}, designation: ${_this.designation}, grade: ${_this.grade}, department: ${_this.department}, site: ${_this.site}, fullNameBn: ${_this.fullNameBn}, shortName: ${_this.shortName}, shortNameBn: ${_this.shortNameBn}, initials: ${_this.initials}, avatarColor: ${_this.avatarColor}, bloodGroup: ${_this.bloodGroup}, photoFileId: ${_this.photoFileId}, joinDate: ${_this.joinDate})';
 }
 
 
@@ -1431,7 +1431,7 @@ abstract mixin class $EmployeeProfileCopyWith<$Res>  {
   factory $EmployeeProfileCopyWith(EmployeeProfile value, $Res Function(EmployeeProfile) _then) = _$EmployeeProfileCopyWithImpl;
 @useResult
 $Res call({
- String id, String empCode, String fullName, Designation designation, Grade grade, OrgRef department, OrgRef site, String? fullNameBn, String? shortName, String? shortNameBn, String? initials, String? avatarColor, String? bloodGroup, String? joinDate
+ String id, String empCode, String fullName, Designation designation, Grade grade, OrgRef department, OrgRef site, String? fullNameBn, String? shortName, String? shortNameBn, String? initials, String? avatarColor, String? bloodGroup, String? photoFileId, String? joinDate
 });
 
 
@@ -1448,7 +1448,7 @@ class _$EmployeeProfileCopyWithImpl<$Res>
 
 /// Create a copy of EmployeeProfile
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? empCode = null,Object? fullName = null,Object? designation = null,Object? grade = null,Object? department = null,Object? site = null,Object? fullNameBn = freezed,Object? shortName = freezed,Object? shortNameBn = freezed,Object? initials = freezed,Object? avatarColor = freezed,Object? bloodGroup = freezed,Object? joinDate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? empCode = null,Object? fullName = null,Object? designation = null,Object? grade = null,Object? department = null,Object? site = null,Object? fullNameBn = freezed,Object? shortName = freezed,Object? shortNameBn = freezed,Object? initials = freezed,Object? avatarColor = freezed,Object? bloodGroup = freezed,Object? photoFileId = freezed,Object? joinDate = freezed,}) {
   return _then(EmployeeProfile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,empCode: null == empCode ? _self.empCode : empCode // ignore: cast_nullable_to_non_nullable
@@ -1463,6 +1463,7 @@ as String?,shortNameBn: freezed == shortNameBn ? _self.shortNameBn : shortNameBn
 as String?,initials: freezed == initials ? _self.initials : initials // ignore: cast_nullable_to_non_nullable
 as String?,avatarColor: freezed == avatarColor ? _self.avatarColor : avatarColor // ignore: cast_nullable_to_non_nullable
 as String?,bloodGroup: freezed == bloodGroup ? _self.bloodGroup : bloodGroup // ignore: cast_nullable_to_non_nullable
+as String?,photoFileId: freezed == photoFileId ? _self.photoFileId : photoFileId // ignore: cast_nullable_to_non_nullable
 as String?,joinDate: freezed == joinDate ? _self.joinDate : joinDate // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -1585,10 +1586,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? joinDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? photoFileId,  String? joinDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EmployeeProfile() when $default != null:
-return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.joinDate);case _:
+return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.photoFileId,_that.joinDate);case _:
   return orElse();
 
 }
@@ -1606,10 +1607,10 @@ return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.gr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? joinDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? photoFileId,  String? joinDate)  $default,) {final _that = this;
 switch (_that) {
 case _EmployeeProfile():
-return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.joinDate);case _:
+return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.photoFileId,_that.joinDate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1626,10 +1627,10 @@ return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.gr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? joinDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String empCode,  String fullName,  Designation designation,  Grade grade,  OrgRef department,  OrgRef site,  String? fullNameBn,  String? shortName,  String? shortNameBn,  String? initials,  String? avatarColor,  String? bloodGroup,  String? photoFileId,  String? joinDate)?  $default,) {final _that = this;
 switch (_that) {
 case _EmployeeProfile() when $default != null:
-return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.joinDate);case _:
+return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.grade,_that.department,_that.site,_that.fullNameBn,_that.shortName,_that.shortNameBn,_that.initials,_that.avatarColor,_that.bloodGroup,_that.photoFileId,_that.joinDate);case _:
   return null;
 
 }
@@ -1641,7 +1642,7 @@ return $default(_that.id,_that.empCode,_that.fullName,_that.designation,_that.gr
 @JsonSerializable()
 
 class _EmployeeProfile implements EmployeeProfile {
-  const _EmployeeProfile({required this.id, required this.empCode, required this.fullName, required this.designation, required this.grade, required this.department, required this.site, this.fullNameBn, this.shortName, this.shortNameBn, this.initials, this.avatarColor, this.bloodGroup, this.joinDate});
+  const _EmployeeProfile({required this.id, required this.empCode, required this.fullName, required this.designation, required this.grade, required this.department, required this.site, this.fullNameBn, this.shortName, this.shortNameBn, this.initials, this.avatarColor, this.bloodGroup, this.photoFileId, this.joinDate});
   factory _EmployeeProfile.fromJson(Map<String, dynamic> json) => _$EmployeeProfileFromJson(json);
 
 @override final  String id;
@@ -1657,6 +1658,7 @@ class _EmployeeProfile implements EmployeeProfile {
 @override final  String? initials;
 @override final  String? avatarColor;
 @override final  String? bloodGroup;
+@override final  String? photoFileId;
 @override final  String? joinDate;
 
 /// Create a copy of EmployeeProfile
@@ -1672,18 +1674,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmployeeProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.empCode, empCode) || other.empCode == empCode)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.designation, designation) || other.designation == designation)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.department, department) || other.department == department)&&(identical(other.site, site) || other.site == site)&&(identical(other.fullNameBn, fullNameBn) || other.fullNameBn == fullNameBn)&&(identical(other.shortName, shortName) || other.shortName == shortName)&&(identical(other.shortNameBn, shortNameBn) || other.shortNameBn == shortNameBn)&&(identical(other.initials, initials) || other.initials == initials)&&(identical(other.avatarColor, avatarColor) || other.avatarColor == avatarColor)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.joinDate, joinDate) || other.joinDate == joinDate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmployeeProfile&&(identical(other.id, id) || other.id == id)&&(identical(other.empCode, empCode) || other.empCode == empCode)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.designation, designation) || other.designation == designation)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.department, department) || other.department == department)&&(identical(other.site, site) || other.site == site)&&(identical(other.fullNameBn, fullNameBn) || other.fullNameBn == fullNameBn)&&(identical(other.shortName, shortName) || other.shortName == shortName)&&(identical(other.shortNameBn, shortNameBn) || other.shortNameBn == shortNameBn)&&(identical(other.initials, initials) || other.initials == initials)&&(identical(other.avatarColor, avatarColor) || other.avatarColor == avatarColor)&&(identical(other.bloodGroup, bloodGroup) || other.bloodGroup == bloodGroup)&&(identical(other.photoFileId, photoFileId) || other.photoFileId == photoFileId)&&(identical(other.joinDate, joinDate) || other.joinDate == joinDate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,empCode,fullName,designation,grade,department,site,fullNameBn,shortName,shortNameBn,initials,avatarColor,bloodGroup,joinDate);
+    return Object.hash(runtimeType,id,empCode,fullName,designation,grade,department,site,fullNameBn,shortName,shortNameBn,initials,avatarColor,bloodGroup,photoFileId,joinDate);
 }
 
 @override
 String toString() {
-    return 'EmployeeProfile(id: $id, empCode: $empCode, fullName: $fullName, designation: $designation, grade: $grade, department: $department, site: $site, fullNameBn: $fullNameBn, shortName: $shortName, shortNameBn: $shortNameBn, initials: $initials, avatarColor: $avatarColor, bloodGroup: $bloodGroup, joinDate: $joinDate)';
+    return 'EmployeeProfile(id: $id, empCode: $empCode, fullName: $fullName, designation: $designation, grade: $grade, department: $department, site: $site, fullNameBn: $fullNameBn, shortName: $shortName, shortNameBn: $shortNameBn, initials: $initials, avatarColor: $avatarColor, bloodGroup: $bloodGroup, photoFileId: $photoFileId, joinDate: $joinDate)';
 }
 
 
@@ -1694,7 +1696,7 @@ abstract mixin class _$EmployeeProfileCopyWith<$Res> implements $EmployeeProfile
   factory _$EmployeeProfileCopyWith(_EmployeeProfile value, $Res Function(_EmployeeProfile) _then) = __$EmployeeProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String empCode, String fullName, Designation designation, Grade grade, OrgRef department, OrgRef site, String? fullNameBn, String? shortName, String? shortNameBn, String? initials, String? avatarColor, String? bloodGroup, String? joinDate
+ String id, String empCode, String fullName, Designation designation, Grade grade, OrgRef department, OrgRef site, String? fullNameBn, String? shortName, String? shortNameBn, String? initials, String? avatarColor, String? bloodGroup, String? photoFileId, String? joinDate
 });
 
 
@@ -1711,7 +1713,7 @@ class __$EmployeeProfileCopyWithImpl<$Res>
 
 /// Create a copy of EmployeeProfile
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? empCode = null,Object? fullName = null,Object? designation = null,Object? grade = null,Object? department = null,Object? site = null,Object? fullNameBn = freezed,Object? shortName = freezed,Object? shortNameBn = freezed,Object? initials = freezed,Object? avatarColor = freezed,Object? bloodGroup = freezed,Object? joinDate = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? empCode = null,Object? fullName = null,Object? designation = null,Object? grade = null,Object? department = null,Object? site = null,Object? fullNameBn = freezed,Object? shortName = freezed,Object? shortNameBn = freezed,Object? initials = freezed,Object? avatarColor = freezed,Object? bloodGroup = freezed,Object? photoFileId = freezed,Object? joinDate = freezed,}) {
   return _then(_EmployeeProfile(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,empCode: null == empCode ? _self.empCode : empCode // ignore: cast_nullable_to_non_nullable
@@ -1726,6 +1728,7 @@ as String?,shortNameBn: freezed == shortNameBn ? _self.shortNameBn : shortNameBn
 as String?,initials: freezed == initials ? _self.initials : initials // ignore: cast_nullable_to_non_nullable
 as String?,avatarColor: freezed == avatarColor ? _self.avatarColor : avatarColor // ignore: cast_nullable_to_non_nullable
 as String?,bloodGroup: freezed == bloodGroup ? _self.bloodGroup : bloodGroup // ignore: cast_nullable_to_non_nullable
+as String?,photoFileId: freezed == photoFileId ? _self.photoFileId : photoFileId // ignore: cast_nullable_to_non_nullable
 as String?,joinDate: freezed == joinDate ? _self.joinDate : joinDate // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

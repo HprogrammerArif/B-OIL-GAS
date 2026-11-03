@@ -4,15 +4,20 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/language_switch.dart';
 import 'package:bogcl_oneops/app/preferences_controller.dart';
 import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/offline/outbox_service.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/data/auth_repository.dart';
 import 'package:bogcl_oneops/features/auth/presentation/app_lock.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/profile_avatar.dart';
 import 'package:bogcl_oneops/mock/demo/demo_menu.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
+import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,6 +43,7 @@ class MoreScreen extends ConsumerStatefulWidget {
 class _MoreScreenState extends ConsumerState<MoreScreen> {
   static const _demoTaps = 7;
   int _taps = 0;
+  bool _uploadingPhoto = false;
 
   void _onVersionTap() {
     _taps++;
@@ -46,6 +52,37 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       Haptics.heavy();
       unawaited(showDemoMenu(context));
     }
+  }
+
+  Future<void> _changePhoto() async {
+    final l10n = context.l10n;
+    final picked = await pickAttachment(context, allowFiles: false);
+    if (picked == null || !mounted) return;
+    setState(() => _uploadingPhoto = true);
+    var failure = l10n.uploadRejected;
+    var done = false;
+    try {
+      final uploads = ref.read(uploadServiceProvider);
+      final meta = await uploads.upload(picked, purpose: 'AVATAR');
+      await uploads.awaitClean(meta.id);
+      await ref.read(authRepositoryProvider).setPhoto(meta.id);
+      await ref.read(sessionControllerProvider.notifier).reload();
+      done = true;
+    } on ApiException catch (e) {
+      failure = switch (e.code) {
+        ApiErrorCode.offline ||
+        ApiErrorCode.timeout => l10n.uploadNeedsConnection,
+        ApiErrorCode.forbidden => l10n.uploadBlocked,
+        _ => l10n.uploadRejected,
+      };
+    }
+    if (!mounted) return;
+    setState(() => _uploadingPhoto = false);
+    AppToast.show(
+      context,
+      done ? l10n.photoUpdated : failure,
+      tone: done ? StatusTone.success : StatusTone.danger,
+    );
   }
 
   Future<void> _signOut() async {
@@ -96,7 +133,12 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
                 children: [
                   Row(
                     children: [
-                      Avatar(name: emp.fullName, size: 52),
+                      _EditableAvatar(
+                        name: emp.fullName,
+                        photoFileId: emp.photoFileId,
+                        busy: _uploadingPhoto,
+                        onTap: _changePhoto,
+                      ),
                       const SizedBox(width: Space.lg),
                       Expanded(
                         child: Column(
@@ -273,6 +315,64 @@ class _Detail extends StatelessWidget {
             child: Text(value, style: theme.textTheme.bodyMedium),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Profile photo with a camera badge; tap to change it.
+class _EditableAvatar extends StatelessWidget {
+  const _EditableAvatar({
+    required this.name,
+    required this.photoFileId,
+    required this.busy,
+    required this.onTap,
+  });
+
+  final String name;
+  final String? photoFileId;
+  final bool busy;
+  final Future<void> Function() onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: context.l10n.moreChangePhoto,
+      child: InkResponse(
+        onTap: busy ? null : () => unawaited(onTap()),
+        radius: 34,
+        child: SizedBox(
+          width: 56,
+          height: 56,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              ProfileAvatar(name: name, photoFileId: photoFileId, size: 52),
+              if (busy)
+                const SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              Positioned(
+                right: -2,
+                bottom: -2,
+                child: CircleAvatar(
+                  radius: 11,
+                  backgroundColor: scheme.primary,
+                  child: Icon(
+                    Icons.photo_camera,
+                    size: 13,
+                    color: scheme.onPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

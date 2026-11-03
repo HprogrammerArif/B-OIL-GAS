@@ -269,7 +269,7 @@ All require authentication; no permission key (self scope).
 
 | Method | Path | Permission | Description |
 | :--- | :--- | :--- | :--- |
-| POST | `/files/presign` | `files:upload` | Reserve a `FileObject` and get a presigned PUT URL. |
+| POST | `/files/presign` | `files:upload` | Reserve a `FileObject` and get a presigned PUT URL. (Pitch mock: `uploadUrl` is `mock-bucket://files/{id}`; the client writes bytes to the on-device private vault instead of an HTTP PUT. `GET /files/{id}/download` returns `{url, expiresAt, inline}` and `403` with `reason` `SCAN_PENDING`/`INFECTED` until the scan is CLEAN.) |
 | POST | `/files/{id}/complete` | `files:upload` (owner) | Finalise after the client PUT; server HEADs the object, verifies `sizeBytes` and (if provided) `sha256`, enqueues ClamAV scan job. |
 | GET | `/files/{id}` | `files:read` + owner-object access | Metadata (`fileName,mime,sizeBytes,sha256,scanStatus,createdAt`). |
 | GET | `/files/{id}/download` | same | `302` to a 5-minute presigned GET (or `{ "url": … }` with `?redirect=false`). Blocked (`FORBIDDEN`, reason `SCAN_PENDING`/`INFECTED`) unless `scanStatus = CLEAN`; images < 2 MB served with `Content-Disposition: inline`. |
@@ -1031,10 +1031,11 @@ Rules (doc 00 §6.7): `type ∈ PunchType`; `punchedAt` within ±10 min of serve
 
 | Method | Path | Permission | Scope | Description |
 | :--- | :--- | :--- | :--- | :--- |
+| GET | `/leave/policy` | any auth | — | `{ weekendDays (1=Mon…7=Sun), holidays[{date,name,nameBn}], maxConsecutiveCl, hrReviewAboveDays, backdateDays, backdateTypes, docRequiredAboveDays, reasonMin, reasonMax }` so clients show the day count and rule hints before submitting (pitch mock; server remains authoritative). |
 | GET | `/leave/types` | any auth | — | `LeaveType` list. |
 | GET | `/leave/balances` | `leave:request` (self) / `leave:read` | self/scope | `?employeeId=&year=` → `[{ leaveType, entitled, used, pending, available }]`. |
 | GET | `/leave/requests` | `leave:request` (self) / `leave:read` / `leave:approve` | scope | `?status=&employeeId=&leaveTypeId=&from=&to=&isInformed=`. |
-| POST | `/leave/requests` | `leave:request` | self (HR may file for others with `leave:manage`) | Create + submit. |
+| POST | `/leave/requests` | `leave:request` | self (HR may file for others with `leave:manage`) | Create + submit. Body `{ leaveTypeId, startDate, endDate, halfDay: null\|FIRST\|SECOND, reason (5–500), attachmentFileId? }` → `201` detail. Errors: `VALIDATION_ERROR` (dates, reason, half-day on a multi-day range, attachment unusable), `POLICY_VIOLATION` rules `INSUFFICIENT_BALANCE` (`available`), `MAX_CONSECUTIVE_CL`, `NOT_ELIGIBLE`; `CONFLICT` rule `OVERLAP`. A requester with no line manager (chairman) is auto-approved. |
 | GET | `/leave/requests/{id}` | participant | — | + workflow. |
 | POST | `/leave/requests/{id}/approve` / `/reject` / `/return` | `leave:approve` + approver | — | Approve → `APPROVED`, `LeaveBalance.used += days`, `AttendanceDay`s pre-marked `ON_LEAVE`, `reviewedById/At`; notification `LEAVE_DECIDED`; socket `leave:status`. |
 | POST | `/leave/requests/{id}/cancel` | employee | — | PENDING → CANCELLED; APPROVED and `startDate > today` → CANCELLED with balance restored. |

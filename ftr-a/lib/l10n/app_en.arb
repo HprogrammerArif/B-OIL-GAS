@@ -208,5 +208,195 @@
   "activityProfileUpdated": "Updated profile",
   "activityPreferencesUpdated": "Updated preferences",
   "activityNotificationAcked": "Acknowledged a notification",
-  "activityOther": "Other activity"
+  "activityOther": "Other activity",
+  "pickerTitle": "Add a file",
+  "pickerCamera": "Take a photo",
+  "pickerGallery": "Choose from gallery",
+  "pickerFiles": "Browse files",
+  "moreChangePhoto": "Change profile photo",
+  "photoUpdated": "Profile photo updated",
+  "uploadNeedsConnection": "Connect to the internet to upload this file.",
+  "uploadRejected": "This file can't be used. Check its type and size.",
+  "uploadBlocked": "This file was blocked by the virus scan.",
+  "homeQuickActions": "Quick actions",
+  "moduleLeave": "Leave",
+  "leaveTitle": "Leave",
+  "leaveApply": "Apply for leave",
+  "leaveBalancesTitle": "My balances",
+  "leaveAvailable": "{days} left",
+  "@leaveAvailable": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveBalanceDetail": "Used {used} of {total}",
+  "@leaveBalanceDetail": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveBalancePending": "{days} in review",
+  "@leaveBalancePending": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveRequestsTitle": "My requests",
+  "leaveFilterAll": "All",
+  "leaveStatusPending": "Pending",
+  "leaveStatusApproved": "Approved",
+  "leaveStatusRejected": "Rejected",
+  "leaveStatusCancelled": "Cancelled",
+  "leaveEmptyTitle": "No leave requests",
+  "leaveEmptyMessage": "Apply for leave and follow its approval here.",
+  "leaveDaysCount": "{count, plural, =1{1 day} other{{count} days}}",
+  "@leaveDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveDaysFraction": "{value} days",
+  "@leaveDaysFraction": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveHalfDay": "Half day",
+  "leaveHalfFirst": "First half",
+  "leaveHalfSecond": "Second half",
+  "leaveFormType": "Leave type",
+  "leaveFormFrom": "From",
+  "leaveFormTo": "To",
+  "leaveFormHalfDay": "Half day",
+  "leaveFormReason": "Reason",
+  "leaveFormReasonHint": "Why do you need leave?",
+  "leaveFormCounts": "Counts as {days}",
+  "@leaveFormCounts": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveFormAttachment": "Supporting document",
+  "leaveFormAttachRequired": "Required for this leave",
+  "leaveFormAttach": "Attach document",
+  "leaveFormRemove": "Remove",
+  "leaveFormSubmit": "Submit request",
+  "leaveFormNoWorkingDays": "The selected dates are all weekends or holidays.",
+  "leaveFormReasonMin": "Enter at least {min} characters",
+  "@leaveFormReasonMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormBalanceShort": "Only {days} available for this leave type.",
+  "@leaveFormBalanceShort": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveFormClLimit": "Casual leave is limited to {max} consecutive days.",
+  "@leaveFormClLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormBackdate": "Only sick or unpaid leave can start up to {days} days in the past.",
+  "@leaveFormBackdate": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormHrReview": "This request also needs HR review.",
+  "leaveFormUninformed": "Filed after the start date; it will be marked uninformed.",
+  "leaveSubmitted": "Request submitted to your manager.",
+  "leaveQueued": "Saved offline. It will be submitted when you are back online.",
+  "leaveErrInsufficient": "You do not have enough balance for this leave.",
+  "leaveErrOverlap": "You already have leave on these dates.",
+  "leaveErrFailed": "Could not submit the request. Please try again.",
+  "leaveQueueLabel": "Leave: {type}, {range}",
+  "@leaveQueueLabel": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveDetailTitle": "Leave request",
+  "leaveDetailPeriod": "Period",
+  "leaveDetailDuration": "Duration",
+  "leaveDetailReason": "Reason",
+  "leaveDetailReviewedBy": "Reviewed by {name}",
+  "@leaveDetailReviewedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveDetailComment": "Reviewer comment",
+  "leaveDetailRoute": "Approval route",
+  "leaveDetailAttachment": "Attachment",
+  "leaveCancel": "Cancel request",
+  "leaveCancelTitle": "Cancel this leave request?",
+  "leaveCancelPending": "Your manager will be told you withdrew it.",
+  "leaveCancelApproved": "The days go back to your balance.",
+  "leaveCancelKeep": "Keep request",
+  "leaveCancelled": "Request cancelled.",
+  "leaveCancelQueued": "Saved offline. It will be cancelled when you are back online.",
+  "leaveCancelFailed": "Could not cancel the request. Please try again.",
+  "workflowStepSubmitted": "Submitted",
+  "workflowStepManager": "Line manager",
+  "workflowStepHr": "HR review",
+  "workflowStepWaiting": "Waiting for {names}",
+  "@workflowStepWaiting": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepUpNext": "Up next",
+  "workflowStepApprovedBy": "Approved by {name}",
+  "@workflowStepApprovedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepRejectedBy": "Rejected by {name}",
+  "@workflowStepRejectedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepSkipped": "Not needed"
 }

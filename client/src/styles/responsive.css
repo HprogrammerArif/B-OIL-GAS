@@ -1291,46 +1291,6 @@
   }
 }
 
-/* ─── APPROVALS MOBILE CARD & QUEUE STYLING ─── */
-.approvals-mobile-cards {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-}
-.approvals-desktop-table {
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .approvals-desktop-table {
-    display: none !important;
-  }
-  .approvals-mobile-cards {
-    display: flex !important;
-  }
-}
-
-.approval-mobile-card {
-  background: var(--brand-card-bg, var(--surface-1));
-  border: 1px solid var(--brand-slate-200);
-  border-radius: 10px;
-  padding: 14px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: all 0.15s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.approval-mobile-card.selected {
-  border-color: var(--brand-crimson);
-  background: rgba(165, 28, 48, 0.03);
-}
-[data-theme="dark"] .approval-mobile-card {
-  background: #0E1834;
-  border-color: var(--border-inverse);
-}
-
 /* ─── CLAIMS MOBILE CARD STYLING ─── */
 .claims-mobile-cards {
   display: none;

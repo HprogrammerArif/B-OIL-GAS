@@ -497,4 +497,287 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get activityOther => 'Other activity';
+
+  @override
+  String get pickerTitle => 'Add a file';
+
+  @override
+  String get pickerCamera => 'Take a photo';
+
+  @override
+  String get pickerGallery => 'Choose from gallery';
+
+  @override
+  String get pickerFiles => 'Browse files';
+
+  @override
+  String get moreChangePhoto => 'Change profile photo';
+
+  @override
+  String get photoUpdated => 'Profile photo updated';
+
+  @override
+  String get uploadNeedsConnection =>
+      'Connect to the internet to upload this file.';
+
+  @override
+  String get uploadRejected =>
+      'This file can\'t be used. Check its type and size.';
+
+  @override
+  String get uploadBlocked => 'This file was blocked by the virus scan.';
+
+  @override
+  String get homeQuickActions => 'Quick actions';
+
+  @override
+  String get moduleLeave => 'Leave';
+
+  @override
+  String get leaveTitle => 'Leave';
+
+  @override
+  String get leaveApply => 'Apply for leave';
+
+  @override
+  String get leaveBalancesTitle => 'My balances';
+
+  @override
+  String leaveAvailable(String days) {
+    return '$days left';
+  }
+
+  @override
+  String leaveBalanceDetail(String used, String total) {
+    return 'Used $used of $total';
+  }
+
+  @override
+  String leaveBalancePending(String days) {
+    return '$days in review';
+  }
+
+  @override
+  String get leaveRequestsTitle => 'My requests';
+
+  @override
+  String get leaveFilterAll => 'All';
+
+  @override
+  String get leaveStatusPending => 'Pending';
+
+  @override
+  String get leaveStatusApproved => 'Approved';
+
+  @override
+  String get leaveStatusRejected => 'Rejected';
+
+  @override
+  String get leaveStatusCancelled => 'Cancelled';
+
+  @override
+  String get leaveEmptyTitle => 'No leave requests';
+
+  @override
+  String get leaveEmptyMessage =>
+      'Apply for leave and follow its approval here.';
+
+  @override
+  String leaveDaysCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String leaveDaysFraction(String value) {
+    return '$value days';
+  }
+
+  @override
+  String get leaveHalfDay => 'Half day';
+
+  @override
+  String get leaveHalfFirst => 'First half';
+
+  @override
+  String get leaveHalfSecond => 'Second half';
+
+  @override
+  String get leaveFormType => 'Leave type';
+
+  @override
+  String get leaveFormFrom => 'From';
+
+  @override
+  String get leaveFormTo => 'To';
+
+  @override
+  String get leaveFormHalfDay => 'Half day';
+
+  @override
+  String get leaveFormReason => 'Reason';
+
+  @override
+  String get leaveFormReasonHint => 'Why do you need leave?';
+
+  @override
+  String leaveFormCounts(String days) {
+    return 'Counts as $days';
+  }
+
+  @override
+  String get leaveFormAttachment => 'Supporting document';
+
+  @override
+  String get leaveFormAttachRequired => 'Required for this leave';
+
+  @override
+  String get leaveFormAttach => 'Attach document';
+
+  @override
+  String get leaveFormRemove => 'Remove';
+
+  @override
+  String get leaveFormSubmit => 'Submit request';
+
+  @override
+  String get leaveFormNoWorkingDays =>
+      'The selected dates are all weekends or holidays.';
+
+  @override
+  String leaveFormReasonMin(int min) {
+    return 'Enter at least $min characters';
+  }
+
+  @override
+  String leaveFormBalanceShort(String days) {
+    return 'Only $days available for this leave type.';
+  }
+
+  @override
+  String leaveFormClLimit(int max) {
+    return 'Casual leave is limited to $max consecutive days.';
+  }
+
+  @override
+  String leaveFormBackdate(int days) {
+    return 'Only sick or unpaid leave can start up to $days days in the past.';
+  }
+
+  @override
+  String get leaveFormHrReview => 'This request also needs HR review.';
+
+  @override
+  String get leaveFormUninformed =>
+      'Filed after the start date; it will be marked uninformed.';
+
+  @override
+  String get leaveSubmitted => 'Request submitted to your manager.';
+
+  @override
+  String get leaveQueued =>
+      'Saved offline. It will be submitted when you are back online.';
+
+  @override
+  String get leaveErrInsufficient =>
+      'You do not have enough balance for this leave.';
+
+  @override
+  String get leaveErrOverlap => 'You already have leave on these dates.';
+
+  @override
+  String get leaveErrFailed =>
+      'Could not submit the request. Please try again.';
+
+  @override
+  String leaveQueueLabel(String type, String range) {
+    return 'Leave: $type, $range';
+  }
+
+  @override
+  String get leaveDetailTitle => 'Leave request';
+
+  @override
+  String get leaveDetailPeriod => 'Period';
+
+  @override
+  String get leaveDetailDuration => 'Duration';
+
+  @override
+  String get leaveDetailReason => 'Reason';
+
+  @override
+  String leaveDetailReviewedBy(String name) {
+    return 'Reviewed by $name';
+  }
+
+  @override
+  String get leaveDetailComment => 'Reviewer comment';
+
+  @override
+  String get leaveDetailRoute => 'Approval route';
+
+  @override
+  String get leaveDetailAttachment => 'Attachment';
+
+  @override
+  String get leaveCancel => 'Cancel request';
+
+  @override
+  String get leaveCancelTitle => 'Cancel this leave request?';
+
+  @override
+  String get leaveCancelPending => 'Your manager will be told you withdrew it.';
+
+  @override
+  String get leaveCancelApproved => 'The days go back to your balance.';
+
+  @override
+  String get leaveCancelKeep => 'Keep request';
+
+  @override
+  String get leaveCancelled => 'Request cancelled.';
+
+  @override
+  String get leaveCancelQueued =>
+      'Saved offline. It will be cancelled when you are back online.';
+
+  @override
+  String get leaveCancelFailed =>
+      'Could not cancel the request. Please try again.';
+
+  @override
+  String get workflowStepSubmitted => 'Submitted';
+
+  @override
+  String get workflowStepManager => 'Line manager';
+
+  @override
+  String get workflowStepHr => 'HR review';
+
+  @override
+  String workflowStepWaiting(String names) {
+    return 'Waiting for $names';
+  }
+
+  @override
+  String get workflowStepUpNext => 'Up next';
+
+  @override
+  String workflowStepApprovedBy(String name) {
+    return 'Approved by $name';
+  }
+
+  @override
+  String workflowStepRejectedBy(String name) {
+    return 'Rejected by $name';
+  }
+
+  @override
+  String get workflowStepSkipped => 'Not needed';
 }

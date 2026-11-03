@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:bogcl_oneops/app/l10n_ext.dart';
+import 'package:bogcl_oneops/app/modules.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/files/presentation/profile_avatar.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Role-based home. The header accent follows the home variant (Chairman and
 /// executives get the gold accent); quick actions list only built modules the
@@ -46,6 +51,10 @@ class _HomeBody extends StatelessWidget {
     final bangla = context.isBangla;
     final theme = Theme.of(context);
     final emp = session.profile.employee;
+    final modules = [
+      for (final m in builtModules)
+        if (session.navigation.contains(m.key)) m,
+    ];
     final executive = session.homeVariant == HomeVariant.executive;
     final accent = executive
         ? context.bogcl.executiveGold
@@ -66,7 +75,11 @@ class _HomeBody extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Avatar(name: emp.fullName, size: 56),
+              ProfileAvatar(
+                name: emp.fullName,
+                photoFileId: emp.photoFileId,
+                size: 56,
+              ),
               const SizedBox(width: Space.lg),
               Expanded(
                 child: Column(
@@ -91,6 +104,17 @@ class _HomeBody extends StatelessWidget {
             ],
           ),
         ),
+        if (modules.isNotEmpty) ...[
+          SectionHeader(title: l10n.homeQuickActions),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+            child: Wrap(
+              spacing: Space.md,
+              runSpacing: Space.md,
+              children: [for (final m in modules) _ModuleTile(module: m)],
+            ),
+          ),
+        ],
         SectionHeader(title: l10n.homeWorkspaceTitle),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: Space.lg),
@@ -132,6 +156,48 @@ class _HomeBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ModuleTile extends StatelessWidget {
+  const _ModuleTile({required this.module});
+
+  final AppModule module;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final label = module.label(context.l10n);
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(Corner.lg),
+        onTap: () => unawaited(context.push(module.route)),
+        child: Container(
+          width: 96,
+          padding: const EdgeInsets.symmetric(vertical: Space.md),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(Corner.lg),
+          ),
+          child: Column(
+            children: [
+              Icon(module.icon, color: theme.colorScheme.primary, size: 28),
+              const SizedBox(height: Space.xs),
+              Text(
+                label,
+                style: theme.textTheme.labelMedium,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -138,5 +138,195 @@
   "activityProfileUpdated": "প্রোফাইল হালনাগাদ করেছেন",
   "activityPreferencesUpdated": "পছন্দ হালনাগাদ করেছেন",
   "activityNotificationAcked": "একটি বিজ্ঞপ্তি স্বীকার করেছেন",
-  "activityOther": "অন্যান্য কার্যকলাপ"
+  "activityOther": "অন্যান্য কার্যকলাপ",
+  "pickerTitle": "ফাইল যোগ করুন",
+  "pickerCamera": "ছবি তুলুন",
+  "pickerGallery": "গ্যালারি থেকে বেছে নিন",
+  "pickerFiles": "ফাইল ব্রাউজ করুন",
+  "moreChangePhoto": "প্রোফাইল ছবি পরিবর্তন করুন",
+  "photoUpdated": "প্রোফাইল ছবি হালনাগাদ হয়েছে",
+  "uploadNeedsConnection": "এই ফাইল আপলোড করতে ইন্টারনেটে সংযুক্ত হন।",
+  "uploadRejected": "এই ফাইলটি ব্যবহার করা যাবে না। ধরন ও আকার দেখে নিন।",
+  "uploadBlocked": "ভাইরাস স্ক্যানে এই ফাইলটি আটকানো হয়েছে।",
+  "homeQuickActions": "দ্রুত কাজ",
+  "moduleLeave": "ছুটি",
+  "leaveTitle": "ছুটি",
+  "leaveApply": "ছুটির আবেদন",
+  "leaveBalancesTitle": "আমার ছুটির হিসাব",
+  "leaveAvailable": "{days} বাকি",
+  "@leaveAvailable": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveBalanceDetail": "{total}-এর মধ্যে {used} ব্যবহৃত",
+  "@leaveBalanceDetail": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveBalancePending": "{days} পর্যালোচনাধীন",
+  "@leaveBalancePending": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveRequestsTitle": "আমার আবেদন",
+  "leaveFilterAll": "সব",
+  "leaveStatusPending": "অপেক্ষমাণ",
+  "leaveStatusApproved": "অনুমোদিত",
+  "leaveStatusRejected": "প্রত্যাখ্যাত",
+  "leaveStatusCancelled": "বাতিল",
+  "leaveEmptyTitle": "কোনো ছুটির আবেদন নেই",
+  "leaveEmptyMessage": "ছুটির আবেদন করুন এবং অনুমোদনের অবস্থা এখানে দেখুন।",
+  "leaveDaysCount": "{count, plural, =1{১ দিন} other{{count} দিন}}",
+  "@leaveDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveDaysFraction": "{value} দিন",
+  "@leaveDaysFraction": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveHalfDay": "অর্ধ দিন",
+  "leaveHalfFirst": "প্রথম ভাগ",
+  "leaveHalfSecond": "দ্বিতীয় ভাগ",
+  "leaveFormType": "ছুটির ধরন",
+  "leaveFormFrom": "শুরু",
+  "leaveFormTo": "শেষ",
+  "leaveFormHalfDay": "অর্ধ দিন",
+  "leaveFormReason": "কারণ",
+  "leaveFormReasonHint": "কেন ছুটি প্রয়োজন?",
+  "leaveFormCounts": "গণনা হবে {days}",
+  "@leaveFormCounts": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveFormAttachment": "সহায়ক নথি",
+  "leaveFormAttachRequired": "এই ছুটির জন্য আবশ্যক",
+  "leaveFormAttach": "নথি সংযুক্ত করুন",
+  "leaveFormRemove": "সরান",
+  "leaveFormSubmit": "আবেদন জমা দিন",
+  "leaveFormNoWorkingDays": "নির্বাচিত তারিখগুলো সবই সাপ্তাহিক ছুটি বা সরকারি ছুটি।",
+  "leaveFormReasonMin": "কমপক্ষে {min}টি অক্ষর লিখুন",
+  "@leaveFormReasonMin": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormBalanceShort": "এই ধরনের ছুটিতে মাত্র {days} বাকি আছে।",
+  "@leaveFormBalanceShort": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveFormClLimit": "নৈমিত্তিক ছুটি টানা সর্বোচ্চ {max} দিন নেওয়া যায়।",
+  "@leaveFormClLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormBackdate": "শুধু অসুস্থতাজনিত বা বিনা বেতনের ছুটি সর্বোচ্চ {days} দিন আগের তারিখ থেকে নেওয়া যায়।",
+  "@leaveFormBackdate": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveFormHrReview": "এই আবেদনে এইচআর পর্যালোচনাও লাগবে।",
+  "leaveFormUninformed": "শুরুর তারিখের পরে আবেদন; এটি অজানা অনুপস্থিতি হিসেবে চিহ্নিত হবে।",
+  "leaveSubmitted": "আবেদন আপনার ম্যানেজারের কাছে জমা হয়েছে।",
+  "leaveQueued": "অফলাইনে সংরক্ষিত। অনলাইনে ফিরলে জমা হবে।",
+  "leaveErrInsufficient": "এই ছুটির জন্য আপনার পর্যাপ্ত ব্যালেন্স নেই।",
+  "leaveErrOverlap": "এই তারিখগুলোতে আপনার আগে থেকেই ছুটি আছে।",
+  "leaveErrFailed": "আবেদন জমা দেওয়া যায়নি। আবার চেষ্টা করুন।",
+  "leaveQueueLabel": "ছুটি: {type}, {range}",
+  "@leaveQueueLabel": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveDetailTitle": "ছুটির আবেদন",
+  "leaveDetailPeriod": "সময়কাল",
+  "leaveDetailDuration": "মেয়াদ",
+  "leaveDetailReason": "কারণ",
+  "leaveDetailReviewedBy": "পর্যালোচনা করেছেন {name}",
+  "@leaveDetailReviewedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "leaveDetailComment": "পর্যালোচকের মন্তব্য",
+  "leaveDetailRoute": "অনুমোদনের ধাপ",
+  "leaveDetailAttachment": "সংযুক্তি",
+  "leaveCancel": "আবেদন বাতিল করুন",
+  "leaveCancelTitle": "এই ছুটির আবেদন বাতিল করবেন?",
+  "leaveCancelPending": "আপনি প্রত্যাহার করেছেন তা ম্যানেজারকে জানানো হবে।",
+  "leaveCancelApproved": "দিনগুলো আপনার ব্যালেন্সে ফিরে যাবে।",
+  "leaveCancelKeep": "আবেদন রাখুন",
+  "leaveCancelled": "আবেদন বাতিল হয়েছে।",
+  "leaveCancelQueued": "অফলাইনে সংরক্ষিত। অনলাইনে ফিরলে বাতিল হবে।",
+  "leaveCancelFailed": "আবেদন বাতিল করা যায়নি। আবার চেষ্টা করুন।",
+  "workflowStepSubmitted": "জমা দেওয়া হয়েছে",
+  "workflowStepManager": "লাইন ম্যানেজার",
+  "workflowStepHr": "এইচআর পর্যালোচনা",
+  "workflowStepWaiting": "{names}-এর অপেক্ষায়",
+  "@workflowStepWaiting": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepUpNext": "পরবর্তী ধাপ",
+  "workflowStepApprovedBy": "{name} অনুমোদন করেছেন",
+  "@workflowStepApprovedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepRejectedBy": "{name} প্রত্যাখ্যান করেছেন",
+  "@workflowStepRejectedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "workflowStepSkipped": "প্রয়োজন নেই"
 }
