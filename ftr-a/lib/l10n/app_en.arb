@@ -1,5 +1,212 @@
 {
   "@@locale": "en",
   "appName": "BOGCL OneOps",
-  "@appName": {"description": "Application name"}
+  "@appName": {
+    "description": "Application name"
+  },
+  "commonRetry": "Retry",
+  "commonErrorTitle": "Something went wrong",
+  "commonErrorMessage": "We could not load this. Check your connection and try again.",
+  "commonEmptyTitle": "Nothing here yet",
+  "commonEmptyMessage": "New items will appear here.",
+  "commonOfflineBanner": "You are offline. Changes will sync when you reconnect.",
+  "commonPendingSync": "Pending sync",
+  "commonLoading": "Loading",
+  "commonShowPassword": "Show password",
+  "commonHidePassword": "Hide password",
+  "commonFieldRequired": "This field is required",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
+  "languageEnglish": "English",
+  "languageBangla": "বাংলা",
+  "loginTitle": "Sign in",
+  "loginSubtitle": "Use your company email, phone number or employee ID.",
+  "loginIdentifierLabel": "Email, phone or employee ID",
+  "loginPasswordLabel": "Password",
+  "loginSubmit": "Sign in",
+  "loginErrorInvalid": "The ID or password is incorrect.",
+  "loginErrorLocked": "Too many attempts. Please try again in 15 minutes.",
+  "loginErrorOffline": "You are offline. Connect to the internet and try again.",
+  "loginErrorGeneric": "We could not sign you in. Please try again.",
+  "loginErrorValidation": "Enter your ID and password.",
+  "sessionRestoreError": "We could not restore your session.",
+  "navHome": "Home",
+  "navMore": "More",
+  "homeGoodMorning": "Good morning, {name}",
+  "@homeGoodMorning": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGoodAfternoon": "Good afternoon, {name}",
+  "@homeGoodAfternoon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGoodEvening": "Good evening, {name}",
+  "@homeGoodEvening": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWorkspaceTitle": "Your workspace",
+  "profileEmployeeId": "Employee ID",
+  "profileDepartment": "Department",
+  "profileSite": "Site",
+  "profileGrade": "Grade",
+  "profileRoles": "Roles",
+  "profileEmail": "Email",
+  "profilePhone": "Phone",
+  "moreProfile": "Profile",
+  "moreSettings": "Settings",
+  "settingsLanguage": "Language",
+  "settingsTheme": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "signOut": "Sign out",
+  "signOutConfirmTitle": "Sign out?",
+  "signOutConfirmMessage": "You will need to sign in again to use the app.",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "enumRoleCHAIRMAN": "Chairman",
+  "enumRolePLANT_GM": "Plant General Manager",
+  "enumRoleHOD": "Head of Department",
+  "enumRoleLINE_MANAGER": "Line Manager",
+  "enumRoleHR_ADMIN": "HR Administrator",
+  "enumRoleFINANCE": "Finance",
+  "enumRoleTRANSPORT_ADMIN": "Transport Administrator",
+  "enumRoleHSE_OFFICER": "HSE Officer",
+  "enumRoleSECURITY_GATE": "Security Gate",
+  "enumRoleMAILROOM": "Mailroom",
+  "enumRoleDRIVER": "Driver",
+  "enumRoleEMPLOYEE": "Employee",
+  "demoTitle": "Demo menu",
+  "demoSwitchPersona": "Switch persona",
+  "demoSimulate": "Simulation",
+  "demoOffline": "Simulate offline",
+  "demoSlowNetwork": "Slow network",
+  "demoFailureMode": "Inject failures",
+  "demoFailureNone": "None",
+  "demoFailureTimeout": "Timeouts",
+  "demoFailureServer": "Server errors (500)",
+  "demoFailureConflict": "Conflicts (409)",
+  "demoData": "Data",
+  "demoResetData": "Reset demo data",
+  "demoResetConfirmTitle": "Reset demo data?",
+  "demoResetConfirmMessage": "All changes are erased and you are signed out.",
+  "demoPersonaSwitched": "Switched to {name}",
+  "@demoPersonaSwitched": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "demoResetDone": "Demo data was reset",
+  "lockTitle": "App locked",
+  "lockMessage": "Unlock with your fingerprint, face or screen lock to continue.",
+  "lockReason": "Confirm it is you to open BOGCL OneOps",
+  "lockUnlock": "Unlock",
+  "lockFailed": "We could not verify you. Try again.",
+  "settingsBiometric": "Biometric unlock",
+  "settingsBiometricHint": "Ask for fingerprint, face or screen lock after 2 minutes in the background.",
+  "moreOutbox": "Sync queue",
+  "outboxTitle": "Sync queue",
+  "outboxEmptyTitle": "Everything is synced",
+  "outboxEmptyMessage": "Actions you take offline wait here until they are sent.",
+  "outboxStatusPending": "Waiting to sync",
+  "outboxStatusSyncing": "Syncing",
+  "outboxStatusFailed": "Failed",
+  "outboxRetry": "Retry",
+  "outboxDiscard": "Discard",
+  "outboxDiscardTitle": "Discard this action?",
+  "outboxDiscardMessage": "It will not be sent and cannot be recovered.",
+  "outboxSyncNow": "Sync now",
+  "outboxFailedReason": "The server could not accept this action. You can retry it or discard it.",
+  "outboxWillRetry": "It will be sent automatically when you are back online.",
+  "outboxAttempts": "{count, plural, =1{1 attempt} other{{count} attempts}}",
+  "@outboxAttempts": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "navInbox": "Inbox",
+  "inboxTitle": "Inbox",
+  "inboxMarkAllRead": "Mark all as read",
+  "inboxMarkedAllRead": "All notifications marked as read",
+  "inboxFilterAll": "All",
+  "inboxFilterApprovals": "Approvals",
+  "inboxFilterSafety": "Safety",
+  "inboxFilterTransport": "Transport",
+  "inboxFilterUnread": "Unread",
+  "inboxEmptyTitle": "You're all caught up",
+  "inboxEmptyUnreadTitle": "No unread notifications",
+  "inboxEmptyMessage": "New notifications will appear here.",
+  "inboxAcknowledge": "Acknowledge",
+  "inboxAckRequired": "Acknowledgement required",
+  "inboxAcknowledged": "Acknowledged",
+  "inboxAckLabel": "Acknowledge notification",
+  "inboxReadLabel": "Mark notification as read",
+  "inboxReadAllLabel": "Mark all notifications as read",
+  "inboxLoadMoreFailed": "Couldn't load more. Scroll to try again.",
+  "inboxPriorityCritical": "Critical",
+  "inboxPriorityHigh": "High priority",
+  "inboxUnreadSemantics": "Unread",
+  "commonClose": "Close",
+  "timeJustNow": "Just now",
+  "timeMinutesAgo": "{count, plural, =1{1 min ago} other{{count} min ago}}",
+  "@timeMinutesAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "@timeHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "timeDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+  "@timeDaysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "moreActivity": "My activity",
+  "activityTitle": "My activity",
+  "activityEmptyTitle": "No activity yet",
+  "activityEmptyMessage": "Your sign-ins and changes will be listed here.",
+  "activityLoginSuccess": "Signed in",
+  "activityLoginFailed": "Failed sign-in attempt",
+  "activityLogout": "Signed out",
+  "activityProfileUpdated": "Updated profile",
+  "activityPreferencesUpdated": "Updated preferences",
+  "activityNotificationAcked": "Acknowledged a notification",
+  "activityOther": "Other activity"
 }

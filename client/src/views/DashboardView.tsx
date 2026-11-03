@@ -112,7 +112,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
       {/* ═══════════════════════════════════════════
           HERO STRIP — three live numbers for this role
           ═══════════════════════════════════════════ */}
-      <div className="roi-banner">
+      <div className="roi-banner" style={role === 'chairman' ? { borderTop: '3px solid var(--brand-gold)' } : undefined}>
         <div className="roi-stats-row">
           {heroStats.map((s, i) => (
             <div key={i} className="roi-stat-item">
@@ -409,20 +409,67 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
             </>
           )}
 
+          {/* CHAIRMAN: Quick-Action Command Bar */}
+          {role === 'chairman' && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+              <button
+                className="btn-gold"
+                style={{ fontSize: '12px', padding: '8px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', flex: '1 1 auto', justifyContent: 'center' }}
+                onClick={() => setActiveTab('approvals')}
+              >
+                ⚡ {t(`Sign Pending Files (${data.approvals.pending.length})`, `ফাইলে স্বাক্ষর করুন (${data.approvals.pending.length})`, lang)}
+              </button>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '12px', padding: '8px 16px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', flex: '1 1 auto', justifyContent: 'center' }}
+                onClick={() => setActiveTab('notices')}
+              >
+                📢 {t('Publish Notice', 'নোটিশ প্রকাশ করুন', lang)}
+              </button>
+              <button
+                className="btn-outline"
+                style={{ fontSize: '12px', padding: '8px 16px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', flex: '1 1 auto', justifyContent: 'center' }}
+                onClick={() => setActiveTab('inner_circle')}
+              >
+                👥 {t('Inner Circle', 'ইনার সার্কেল', lang)}
+              </button>
+            </div>
+          )}
+
           {/* KPI GRID */}
           <div className="stats-grid mb-5">
-            {stats.map((s, i) => (
-              <div key={i} className={`stat-card ${s.type}`}>
-                <div className="stat-top">
-                  <div className="stat-label">{t(s.label[0], s.label[1], lang)}</div>
-                  <div className="stat-icon-wrap">{s.icon}</div>
+            {stats.map((s, i) => {
+              // Chairman stat cards navigate to relevant tabs/views on click
+              const chairmanNavTargets: Array<{ tab?: string; view?: AppView }> = [
+                { view: 'workforce' },
+                { tab: 'approvals' },
+                { view: 'compliance' },
+                { view: 'incident' },
+              ];
+              const navTarget = role === 'chairman' ? chairmanNavTargets[i] : null;
+              const isClickable = !!navTarget;
+              return (
+                <div
+                  key={i}
+                  className={`stat-card ${s.type}${isClickable ? ' interactive-row' : ''}`}
+                  style={isClickable ? { cursor: 'pointer' } : undefined}
+                  onClick={isClickable ? () => {
+                    if (navTarget?.tab) setActiveTab(navTarget.tab);
+                    else if (navTarget?.view) onNavigate?.(navTarget.view);
+                  } : undefined}
+                  title={isClickable ? t('Click to view details', 'বিস্তারিত দেখুন', lang) : undefined}
+                >
+                  <div className="stat-top">
+                    <div className="stat-label">{t(s.label[0], s.label[1], lang)}</div>
+                    <div className="stat-icon-wrap">{s.icon}</div>
+                  </div>
+                  <div className="stat-main-row">
+                    <div className="stat-value"><AnimatedCounter value={s.value} /></div>
+                  </div>
+                  <div className="stat-sub">{t(s.sub[0], s.sub[1], lang)}</div>
                 </div>
-                <div className="stat-main-row">
-                  <div className="stat-value"><AnimatedCounter value={s.value} /></div>
-                </div>
-                <div className="stat-sub">{t(s.sub[0], s.sub[1], lang)}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* JUMP CARDS */}

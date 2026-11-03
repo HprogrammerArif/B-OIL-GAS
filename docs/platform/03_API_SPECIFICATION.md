@@ -258,7 +258,7 @@ All require authentication; no permission key (self scope).
 | GET | `/me/delegations` | `{ given: Delegation[], received: Delegation[] }` (active and future). |
 | POST | `/me/delegations` | Create a delegation from me (prototype *Leave Handover*). Body: `{ toUserId, modules: string[] (empty = all; values = module keys from §7 registry), startsAt, endsAt, maxAmount?, reason? }`. Rules: `toUserId ≠ me`, delegate must be ACTIVE and hold at least one role that can act in each listed module (else `POLICY_VIOLATION` rule `DELEGATE_LACKS_ROLE`); `endsAt − startsAt ≤ 90 days`; overlapping active delegation for same module set → `CONFLICT`. Emits notification `DELEGATION_CREATED` to delegate; `permissions:changed` to both. |
 | PATCH | `/me/delegations/{id}` | Shorten `endsAt` or set `isActive=false` (revoke). Pending steps already re-routed stay with the delegate until decided (the step records `delegatedToId`). |
-| GET | `/me/activity` | My recent `AuditLog` entries (cursor) — powers *My Recent Activity*. |
+| GET | `/me/activity` | My recent `AuditLog` entries (cursor) — powers *My Recent Activity*. Redacted: `{ id, action, entityType, entityId, createdAt }` only (no before/after). Mutations audit field names, never PII values. |
 | GET | `/me/dashboard` | Alias of `GET /dashboards/me` (§8). |
 
 ---
@@ -293,9 +293,9 @@ Access rule: a file is readable if the caller may read **any** `Attachment` owne
 | Method | Path | Description |
 | :--- | :--- | :--- |
 | GET | `/notifications` | My notifications, cursor paginated. Filters `?unread=true`, `?priority=CRITICAL`, `?module=fleet`, `?category=APPROVALS\|SAFETY\|TRANSPORT\|ALL` (prototype `NotificationCenter` filter chips; category is derived from `type` prefix). |
-| GET | `/notifications/unread-count` | `{ "total": 7, "critical": 1, "byModule": { "workflow": 3, "parcels": 1 } }` (cached 10 s; also pushed via socket). |
+| GET | `/notifications/unread-count` | `{ "total": 7, "critical": 1, "pendingAck": 1, "byModule": { "workflow": 3, "parcels": 1 } }` (cached 10 s; also pushed via socket). |
 | POST | `/notifications/{id}/read` | Sets `readAt`. Idempotent. |
-| POST | `/notifications/read-all` | Body `{ "before": "<ISO>" }` optional. |
+| POST | `/notifications/read-all` | Body `{ "before": "<ISO>" }` optional. Returns `{ "updated": n }`. |
 | POST | `/notifications/{id}/ack` | Required when `ackRequired=true` (CRITICAL). Sets `ackedAt`; audit `NOTIFICATION_ACKED`. When `data.objectType = Notice`, also sets the caller's `NoticeReceipt.ackedAt` (and acknowledging the notice acks its notification), so the blocking modal and the notice never disagree. Reading the notice does not clear a pending `ackRequired` notification. |
 | GET/PATCH | `/notifications/preferences` | Same resource as `/me/preferences.notifications`. |
 

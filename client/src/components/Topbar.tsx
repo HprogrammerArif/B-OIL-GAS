@@ -246,7 +246,13 @@ export default function Topbar({
             aria-expanded={showDropdown}
             aria-haspopup="true"
           >
-            <div className="user-avatar" style={{ background: meta.avatarColor }}>
+            <div
+              className="user-avatar"
+              style={{
+                background: meta.avatarColor,
+                ...(role === 'chairman' ? { boxShadow: '0 0 0 2px var(--brand-gold), 0 0 0 4px rgba(212,175,55,0.25)' } : {}),
+              }}
+            >
               {meta.avatarUrl ? (
                 <img
                   src={meta.avatarUrl}
@@ -259,6 +265,21 @@ export default function Topbar({
               ) : null}
               <span className="user-avatar-initials">{meta.initials}</span>
               <span className="avatar-status-dot" title={t('Active Session', 'সক্রিয় সেশন', lang)} />
+              {role === 'chairman' && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-5px',
+                    fontSize: '10px',
+                    lineHeight: 1,
+                    pointerEvents: 'none',
+                  }}
+                  title="Chairman & Managing Director"
+                >
+                  👑
+                </span>
+              )}
             </div>
             <ChevronDown size={11} className={`chevron-indicator ${showDropdown ? 'open' : ''}`} />
           </button>
