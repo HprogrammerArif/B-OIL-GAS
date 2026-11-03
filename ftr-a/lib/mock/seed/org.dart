@@ -27,6 +27,14 @@ abstract final class Col {
   static const leaveTypes = 'leave_types';
   static const leaveBalances = 'leave_balances';
   static const leaveRequests = 'leave_requests';
+  static const notices = 'notices';
+  static const noticeReceipts = 'notice_receipts';
+  static const claims = 'claims';
+  static const advances = 'advances';
+  static const busRoutes = 'bus_routes';
+  static const busAllocations = 'bus_allocations';
+  static const busWaitlist = 'bus_waitlist';
+  static const busBroadcasts = 'bus_broadcasts';
 }
 
 const sites = <Json>[

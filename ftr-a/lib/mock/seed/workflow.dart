@@ -82,6 +82,10 @@ void seedWorkflowTemplates(MockStore store) {
       isFinal: true,
     ),
   ]);
+  add('TOUR_ADVANCE', 'Advance', 'Tour advance', [
+    _step('MANAGER', 'Line manager', 'LINE_MANAGER'),
+    _step('FINANCE', 'Finance', 'ROLE', ref: 'FINANCE', isFinal: true),
+  ]);
   add('NOTE_SHEET', 'NoteSheet', 'Note sheet', [
     _step('HOD', 'Head of department', 'DEPARTMENT_HEAD'),
     _step(

@@ -336,6 +336,9 @@ stateDiagram-v2
 | BR-03-10 | Delegation applies (CM-21) except for steps with `isFinal = true` when Setting `noteSheets.allowDelegatedFinalSign` = `false` (default); in that case the step escalates (CM-24) instead. |
 | BR-03-11 | SAP PR/PO references (`sapPrRef`, `poNumber`) are optional free text until the SAP adapter exists; format validated `^SAP-PR-\d{4}-\d{5}$` when provided. |
 | BR-03-12 | Approvals Center summary for a note-sheet = `{ fileNo, title, amount, department, urgency, currentStep }`; mirrored automatically by the workflow engine (no separate "add approval" call). |
+| BR-03-13 | Note-sheet workspace (web): a searchable, filterable file list (All / My turn / In progress / Returned / Approved, with counts) sits beside the selected file; the user lands on the first file awaiting their signature. Urgency is shown only while a file is open. Status wording is derived from the file state and signatory route, never a constant. |
+| BR-03-14 | The signing card is shown only to the signatory whose turn it is; others see a status card (next signatory, certificate, history). Signing requires a captured signature (drawn or stamp); remarks are optional and default to the standard wording. Final approval asks for explicit confirmation before closing the file. |
+| BR-03-15 | Every paragraph shows its verification code with a copy action; the route is rendered as a stepper (signed / awaiting / not yet reached) using full role names. The "Vendor quotations" tab shows comparison cards only when quotations exist, and labels the recommended quote as "Recommended" (not "lowest bid"). |
 
 ### 4.5 Calculations
 `daysInReview = businessDaysBetween(submittedAt, approvedAt ?? now)`. `stepElapsedPct = (now − activatedAt) / (dueAt − activatedAt) × 100`.
