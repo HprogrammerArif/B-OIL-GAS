@@ -1,20 +1,8 @@
 import 'package:bogcl_oneops/mock/engines/note_sheet_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
-import 'package:bogcl_oneops/mock/router.dart';
-import 'package:bogcl_oneops/mock/seed/org.dart';
-import 'package:bogcl_oneops/mock/seed/rbac.dart';
+import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
 import 'package:bogcl_oneops/mock/store.dart';
-
-AuthContext _auth(MockStore store, String code) {
-  final user = store.get(Col.users, userIdFor(code))!;
-  return AuthContext(
-    user: user,
-    employee: store.get(Col.employees, empId(code))!,
-    session: const {},
-    grants: grantsForRoles(user.strList('roles')),
-  );
-}
 
 Json _quote(
   String vendor,
@@ -34,8 +22,8 @@ Json _quote(
 /// department, one signed by everyone, and one sent back for changes.
 void seedNoteSheets(MockStore store) {
   NoteSheetEngine.registerHooks();
-  final emp = _auth(store, 'EMP-1042');
-  final hod = _auth(store, 'EMP-0062');
+  final emp = seedAuthFor(store, 'EMP-1042');
+  final hod = seedAuthFor(store, 'EMP-0062');
 
   NoteSheetEngine.create(store, emp, {
     'title': 'Replace two shop-floor laptops',

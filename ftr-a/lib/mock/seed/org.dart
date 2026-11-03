@@ -36,6 +36,7 @@ abstract final class Col {
   static const busWaitlist = 'bus_waitlist';
   static const busBroadcasts = 'bus_broadcasts';
   static const noteSheets = 'note_sheets';
+  static const parcels = 'parcels';
 }
 
 const sites = <Json>[

@@ -1,5 +1,6 @@
 import 'package:bogcl_oneops/core/utils/hash.dart';
 import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
+import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -351,7 +352,7 @@ abstract final class NoteSheetEngine {
       authorUserId: me,
     );
     sheet
-      ..objList('paragraphs').add(p)
+      ..['paragraphs'] = [...sheet.objList('paragraphs'), p]
       ..['updatedAt'] = store.nowIso();
     store.put(Col.noteSheets, sheet);
     return p;
@@ -382,7 +383,9 @@ abstract final class NoteSheetEngine {
     if (method is! String || !NoteSheetPolicy.signMethods.contains(method)) {
       throw validationError('method', 'Choose how to sign');
     }
-    if (method == 'DRAWN' && body['imageFileId'] is! String) {
+    final image = body['imageFileId'];
+    if (method == 'DRAWN' &&
+        (image is! String || store.get(Col.files, image) == null)) {
       throw validationError('imageFileId', 'Draw your signature');
     }
     if (!skipOtp) {
@@ -396,15 +399,10 @@ abstract final class NoteSheetEngine {
     final paragraphsBefore = [...sheet.objList('paragraphs')];
     if (comment != null && comment.isNotEmpty) {
       // The signed content includes the signer's own remark.
-      sheet.objList('paragraphs').add(
-        _paragraph(
-          store,
-          sheet,
-          kind: 'NOTE',
-          body: comment,
-          authorUserId: me,
-        ),
-      );
+      sheet['paragraphs'] = [
+        ...sheet.objList('paragraphs'),
+        _paragraph(store, sheet, kind: 'NOTE', body: comment, authorUserId: me),
+      ];
     }
     final signedAt = store.nowIso();
     final docHash = documentHash(sheet);
@@ -424,6 +422,14 @@ abstract final class NoteSheetEngine {
           'BG-${Hash.sha256Hex('$docHash|$me|$signedAt').substring(0, 8).toUpperCase()}',
       'signedAt': signedAt,
     };
+    if (image is String) {
+      FileEngine.attach(
+        store,
+        image,
+        ownerType: 'NoteSheet',
+        ownerId: sheet.str('id'),
+      );
+    }
     final before = [...sheet.objList('signatures')];
     sheet['signatures'] = [...before, signature];
     store.put(Col.noteSheets, sheet);
@@ -488,17 +494,16 @@ abstract final class NoteSheetEngine {
           instance.str('id'),
         ).where((a) => a['type'] == 'RETURN').lastOrNull;
         if (last != null) {
-          s
-              .objList('paragraphs')
-              .add(
-                _paragraph(
-                  store,
-                  s,
-                  kind: 'RETURN',
-                  body: last.strOrNull('comment') ?? '',
-                  authorUserId: last.str('actorId'),
-                ),
-              );
+          s['paragraphs'] = [
+            ...s.objList('paragraphs'),
+            _paragraph(
+              store,
+              s,
+              kind: 'RETURN',
+              body: last.strOrNull('comment') ?? '',
+              authorUserId: last.str('actorId'),
+            ),
+          ];
         }
         s['signatures'] = <Json>[];
       case WorkflowEvent.withdrawn:

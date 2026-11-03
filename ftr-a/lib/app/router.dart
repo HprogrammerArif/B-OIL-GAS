@@ -23,6 +23,9 @@ import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_detail_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_edit_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheets_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcel_detail_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcel_edit_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcels_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_compose_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_detail_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notices_screen.dart';
@@ -124,6 +127,30 @@ GoRouter router(Ref ref) {
                           GoRoute(
                             path: 'edit',
                             builder: (context, state) => NoteSheetEditScreen(
+                              id: state.pathParameters['id'],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'parcels',
+                    builder: (context, state) => const ParcelsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const ParcelEditScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => ParcelDetailScreen(
+                          id: state.pathParameters['id']!,
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: 'edit',
+                            builder: (context, state) => ParcelEditScreen(
                               id: state.pathParameters['id'],
                             ),
                           ),

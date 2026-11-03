@@ -644,6 +644,17 @@ Rules: caller must be `NoteSignatory.userId` of the PENDING step (or its workflo
 
 **Prototype note:** "SHA-256 seal" was `Math.random()`; production hashes are real and verifiable at `/verify/note-sheets/{code}` (ADR-25).
 
+### 9.4 Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/note_sheet_engine.dart`) implements a subset with these differences:
+
+- Paragraphs, quotes and signatures are embedded in the note-sheet record (no separate resources). `GET /note-sheets?view=mine|to-sign|all` replaces the `mine` query; drafts are visible only to their author.
+- `POST /note-sheets/{id}/sign` takes `{ method: DRAWN|TYPED|STAMP, otp, typedName?, imageFileId?, comment? }`. There is no SMS gateway: the OTP is the fixed demo code `123456` and no `/sign/otp` call exists. Every step of the NOTE_SHEET template requires a signature. A signer's comment becomes a NOTE paragraph that is part of the signed content.
+- Return, reject, withdraw and delegate use the shared `/workflow/instances/{id}/actions`. A return adds a RETURN paragraph with the reason and clears signatures; the author edits (`PUT`) and submits again.
+- `documentHash`, `stampCode` (`BG-XXXXXXXX`), the paragraph hash chain and `finalHash` are real SHA-256 values. The `verificationCode` is `NS-` plus 10 hex characters of the final hash.
+- PDF is built on the device (`pdf`/`printing`); only an approved sheet carries the stamp and QR. Bengali conjuncts may render without full shaping in the PDF.
+- Deferred: budget check (BR-03-05), public verify endpoint, confidentiality hiding rules, SAP references, OTP rate limits, delegated final-signature rules.
+
 ---
 
 ## 10. MOD-04 — Parcel Chain-of-Custody

@@ -49,6 +49,12 @@ final List<AppModule> builtModules = [
     route: AppRoutes.noteSheets,
   ),
   (
+    key: 'parcels',
+    icon: Icons.inventory_2_outlined,
+    label: (l10n) => l10n.moduleParcels,
+    route: AppRoutes.parcels,
+  ),
+  (
     key: 'approvals',
     icon: Icons.fact_check_outlined,
     label: (l10n) => l10n.moduleApprovals,

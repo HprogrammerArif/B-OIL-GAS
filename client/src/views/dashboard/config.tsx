@@ -210,7 +210,7 @@ const transport_admin: DashboardRoleConfig = {
   tabs: (d) => [
     { id: 'overview', label: ['Fleet Operations', 'ফ্লিট পরিচালনা'], icon: <Truck size={15} /> },
     { id: 'requisitions', label: ['Vehicle Requests', 'যানবাহন আবেদন'], icon: <Car size={15} />, badge: d.fleet.pendingRequisitions || undefined, badgeType: 'warn' },
-    { id: 'corridor', label: ['Trips in Transit', 'চলমান ট্রিপ'], icon: <Navigation size={15} />, badge: d.fleet.inTransit || undefined, badgeType: 'info' },
+    { id: 'corridor', label: ['Trips on the Road', 'পথে থাকা ট্রিপ'], icon: <Navigation size={15} />, badge: d.fleet.inTransit || undefined, badgeType: 'info' },
   ],
   stats: (d) => [
     { label: ['Fleet available', 'গাড়ি উপলব্ধ'], value: `${d.fleet.available}/${d.fleet.total}`, sub: [`${d.fleet.inTransit} out on trips`, `${bn(d.fleet.inTransit)}টি ট্রিপে`], type: 'green', icon: <Truck size={16} /> },
