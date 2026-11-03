@@ -26,7 +26,6 @@ class PersonPick {
   final String site;
   final String siteBn;
 
-  String where({required bool bangla}) => bangla
-      ? '$departmentBn, $siteBn'
-      : '$department, $site';
+  String where({required bool bangla}) =>
+      bangla ? '$departmentBn, $siteBn' : '$department, $site';
 }

@@ -1569,5 +1569,346 @@
   "nsSignErrOtpWrong": "The code is not correct.",
   "nsSignErrFailed": "Could not sign. Please try again.",
   "nsSignedToast": "Signed. It moves to the next officer.",
-  "nsSignedFinal": "Signed. The note-sheet is fully approved."
+  "nsSignedFinal": "Signed. The note-sheet is fully approved.",
+  "moduleParcels": "Parcels",
+  "pcSend": "Send a parcel",
+  "pcIntro": "Track parcels you send, receive or look after. Type the number on the label to find one.",
+  "pcSearchHint": "Search, or enter PKG-2026-0001",
+  "pcNotFound": "No parcel with that number, or you cannot see it.",
+  "pcTabMine": "Mine",
+  "pcTabIncoming": "Coming to me",
+  "pcTabSent": "Sent by me",
+  "pcTabCarrying": "Carrying",
+  "pcTabSite": "Everything at my site",
+  "pcStuckOnly": "Stuck only",
+  "pcEmpty": "No parcels yet.",
+  "pcEmptyFiltered": "No parcels match.",
+  "pcVerdictNone": "Nothing needs you right now.",
+  "pcVerdictNeed": "Waiting for you: {count}",
+  "@pcVerdictNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pcConfidentialTitle": "Confidential parcel",
+  "pcStuckPill": "Stuck {hours} h",
+  "@pcStuckPill": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "pcStatusCreated": "Not handed over yet",
+  "pcStatusDispatched": "With the courier",
+  "pcStatusInTransit": "On the way",
+  "pcStatusAtGate": "At the gate",
+  "pcStatusOut": "Out for delivery",
+  "pcStatusDelivered": "Delivered",
+  "pcStatusHeld": "Held for checking",
+  "pcStatusReturning": "Going back",
+  "pcStatusReturned": "Returned",
+  "pcStatusLost": "Lost",
+  "pcStatusDamaged": "Damaged",
+  "pcStatusCancelled": "Cancelled",
+  "pcCatLegal": "Legal documents",
+  "pcCatSample": "QC sample",
+  "pcCatSpares": "Spare parts",
+  "pcCatTender": "Tender bid",
+  "pcCatIt": "IT equipment",
+  "pcCatConfidential": "Confidential",
+  "pcCatGeneral": "General",
+  "pcHandFragile": "Fragile",
+  "pcHandCold": "Keep cold",
+  "pcHandHazmat": "Hazardous",
+  "pcHandUpright": "Keep upright",
+  "pcRetTamper": "Seal was broken",
+  "pcRetDamaged": "Contents damaged",
+  "pcRetWrong": "Wrong documents",
+  "pcRetRefused": "Recipient refused it",
+  "pcRetUnavailable": "Recipient not available",
+  "pcEvCreated": "Created",
+  "pcEvHandover": "Handed to the courier",
+  "pcEvCheckpoint": "Stop recorded",
+  "pcEvGateIn": "Received at the gate",
+  "pcEvOut": "Out for delivery",
+  "pcEvCode": "Code confirmed",
+  "pcEvDelivered": "Delivered",
+  "pcEvProblem": "Problem reported",
+  "pcEvReturn": "Sending back started",
+  "pcEvReturnCheckpoint": "Stop on the way back",
+  "pcEvReturned": "Returned to sender",
+  "pcEvException": "Marked lost or damaged",
+  "pcEvCancelled": "Cancelled",
+  "pcEvNote": "Note",
+  "pcNextDispatch": "Hand it to a courier and record the seal.",
+  "pcNextCreatedSender": "Waiting for the mailroom to hand it to a courier. Nothing for you to do.",
+  "pcNextCreated": "Not handed to a courier yet.",
+  "pcNextGateIn": "It has arrived. Check the seal and receive it at the gate.",
+  "pcNextAtGateYou": "It is at the gate. You will get a code when it is sent out to you.",
+  "pcNextAtGate": "At the gate, waiting to go to the recipient.",
+  "pcNextReceive": "It is on its way to you. Tap I have received it, or read the code to the person delivering it.",
+  "pcNextHeldAct": "The seal or contents have a problem. Send it back to the sender.",
+  "pcNextHeld": "Held for checking because of a problem.",
+  "pcNextDamagedAct": "Damaged. Send it back to the sender.",
+  "pcNextBackYou": "It is coming back to you. Tap I have received it when you have it.",
+  "pcNextLost": "Marked lost. Nothing more to do.",
+  "pcNextCancelled": "Cancelled. Nothing more to do.",
+  "pcNextCarryLocal": "Take it to {to}. Record each stop on the way.",
+  "@pcNextCarryLocal": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextCarry": "Take it to {dest}. Record each stop on the way.",
+  "@pcNextCarry": {
+    "placeholders": {
+      "dest": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextComing": "{courier} is bringing it. Nothing for you to do yet.",
+  "@pcNextComing": {
+    "placeholders": {
+      "courier": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextRoad": "On the way to {dest}.",
+  "@pcNextRoad": {
+    "placeholders": {
+      "dest": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextBring": "Send it out for delivery to {to}. They get a one-time code.",
+  "@pcNextBring": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextAskCode": "Ask {name} for the 6-digit code and enter it.",
+  "@pcNextAskCode": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextOut": "Being delivered to {to}.",
+  "@pcNextOut": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextDelivered": "Delivered to {to} on {date}.",
+  "@pcNextDelivered": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextCarryBack": "Take it back to {from}. Record each stop.",
+  "@pcNextCarryBack": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextBackSoon": "Going back to {from}.",
+  "@pcNextBackSoon": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "pcNextReturned": "Returned to {from}.",
+  "@pcNextReturned": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "pcActDispatch": "Hand to courier",
+  "pcActCheckpoint": "Record a stop",
+  "pcActGateIn": "Receive at gate",
+  "pcActReportProblem": "Report a problem",
+  "pcActOut": "Send out for delivery",
+  "pcActReceive": "I have received it",
+  "pcActEnterCode": "Enter delivery code",
+  "pcActConfirmCode": "Confirm code",
+  "pcActReturn": "Send back to sender",
+  "pcActException": "Mark lost or damaged",
+  "pcActAddNote": "Add a note",
+  "pcActResend": "Send the code again",
+  "pcActEdit": "Edit",
+  "pcActCancel": "Cancel parcel",
+  "pcActLabel": "Print label",
+  "pcMore": "More actions",
+  "pcDoneProblem": "Problem reported. The parcel is on hold.",
+  "pcDoneReturn": "It is going back to the sender.",
+  "pcDoneException": "Recorded.",
+  "pcDoneNote": "Note added.",
+  "pcDoneResend": "A new code was sent.",
+  "pcDoneCancel": "Parcel cancelled.",
+  "pcDoneDispatch": "Handed to the courier.",
+  "pcDoneGateIn": "Received at the gate.",
+  "pcDoneOut": "Out for delivery. The recipient has a code.",
+  "pcDoneReceive": "Received. Thank you.",
+  "pcDoneVerify": "Delivery confirmed.",
+  "pcDoneCheckpoint": "Stop recorded.",
+  "pcDoneCreate": "Parcel created.",
+  "pcDoneEdit": "Changes saved.",
+  "pcCancelMessage": "The parcel will not be sent. This cannot be undone.",
+  "pcOutMessage": "{name} will get a 6-digit code to confirm delivery.",
+  "@pcOutMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pcReceiveMessage": "Confirm only if the parcel is in your hands.",
+  "pcErrOtpInvalid": "That code is not correct.",
+  "pcErrOtpExpired": "The code has expired. Ask for a new one.",
+  "pcErrOtpLocked": "Too many wrong codes. Ask the mailroom for help.",
+  "pcErrOtpRate": "Too many new codes. Try again in an hour.",
+  "pcErrSeal": "Enter the seal number.",
+  "pcErrPhotoNeeded": "A photo is needed.",
+  "pcErrLostEarly": "A parcel can be marked lost only after 72 hours without movement.",
+  "pcErrFlagged": "This parcel is on hold because of a seal problem.",
+  "pcErrFailed": "Something went wrong. Please try again.",
+  "pcErrLabel": "Could not prepare the label.",
+  "pcErrPhotoOpen": "Could not open the photo.",
+  "pcErrPhoto": "Could not upload the photo. Try again.",
+  "pcErrCourier": "Choose a courier.",
+  "pcErrLocation": "Enter where it is.",
+  "pcErrProblemNote": "Describe the problem in at least 10 characters.",
+  "pcErrCode": "Enter the 6-digit code.",
+  "pcErrExceptionNote": "Explain in at least 20 characters.",
+  "pcErrNote": "Write a note.",
+  "pcErrDescription": "Describe what is inside (at least 5 characters).",
+  "pcErrRecipient": "Choose who receives it.",
+  "pcErrNumber": "Enter a valid number.",
+  "pcErrWaybill": "At least 3 characters.",
+  "pcSheetDispatch": "Hand to courier",
+  "pcSheetDispatchHelp": "Choose who carries it. Their name goes on the trail.",
+  "pcSheetCheckpoint": "Record a stop",
+  "pcSheetCheckpointHelp": "Where is the parcel now?",
+  "pcSheetReturnCheckpointHelp": "Where is the parcel now, on its way back?",
+  "pcSheetGateIn": "Receive at gate",
+  "pcSheetGateInHelp": "Check the seal. If it is broken or the parcel is damaged, switch it off and report.",
+  "pcSheetVerify": "Delivery code",
+  "pcSheetVerifyHelp": "Ask the recipient for the 6-digit code they received.",
+  "pcSheetVerifyReturnHelp": "Ask the sender for the 6-digit code they received.",
+  "pcSheetFlag": "Report a problem",
+  "pcSheetFlagHelp": "The parcel is held until someone decides what to do.",
+  "pcSheetReturn": "Send back",
+  "pcSheetReturnHelp": "The parcel goes back to {name} with a new code.",
+  "@pcSheetReturnHelp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pcSheetException": "Lost or damaged",
+  "pcSheetExceptionHelp": "Use this only when the parcel cannot be delivered.",
+  "pcSheetNote": "Add a note",
+  "pcSheetNoteHelp": "Everyone who can see this parcel can read it.",
+  "pcFieldCourier": "Courier",
+  "pcFieldSeal": "Seal number (optional)",
+  "pcFieldSealRequired": "Seal number",
+  "pcSealWhy": "This parcel must be sealed because of its value or type.",
+  "pcFieldLocation": "Where is it?",
+  "pcFieldSealIntact": "Seal is intact",
+  "pcSealNo": "Seal {no}",
+  "@pcSealNo": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "pcReasonSeal": "Seal broken",
+  "pcReasonDamaged": "Contents damaged",
+  "pcFieldCode": "6-digit code",
+  "pcFieldReceivedBy": "Received by (name, optional)",
+  "pcFieldWhatHappened": "What happened",
+  "pcFieldNoteOptional": "Note (optional)",
+  "pcFieldNote": "Note",
+  "pcPhotoRequired": "Take a photo (required)",
+  "pcPhotoOptional": "Add a photo (optional)",
+  "pcPhotoAdded": "Photo added: {name}",
+  "@pcPhotoAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pcFrom": "From",
+  "pcTo": "To",
+  "pcCarriedBy": "Courier",
+  "pcTrail": "Where it has been",
+  "pcReturnLine": "Return {no}: {reason}",
+  "@pcReturnLine": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "pcViewPhoto": "View photo",
+  "pcDetCategory": "Type",
+  "pcDetWaybill": "Waybill",
+  "pcDetSeal": "Seal",
+  "pcDetValue": "Declared value",
+  "pcDetWeight": "Weight",
+  "pcDetHandling": "Handling",
+  "pcDetTrail": "Trail check",
+  "pcSealBroken": "Reported broken",
+  "pcChainOk": "Fingerprints match. Nobody changed the trail.",
+  "pcChainBroken": "Fingerprints do not match. The trail was changed.",
+  "pcEditTitle": "Edit parcel",
+  "pcFormIntro": "Say who gets it and what it is. The mailroom hands it to a courier, and the recipient gets a code to confirm delivery.",
+  "pcFieldRecipient": "Who receives it",
+  "pcPickRecipient": "Choose a colleague",
+  "pcFieldCategory": "What kind of parcel",
+  "pcFieldDescription": "What is inside",
+  "pcFieldUrgency": "How urgent",
+  "pcUrgNormal": "Normal",
+  "pcFieldValue": "Value in taka (optional)",
+  "pcValueHelp": "Above ৳50,000 a photo is needed on delivery. Above ৳1,00,000 it must be sealed.",
+  "pcFieldWeight": "Weight in kg (optional)",
+  "pcFieldWaybill": "Courier waybill (optional)",
+  "pcFieldHandling": "Special handling",
+  "pcFieldConfidential": "Confidential",
+  "pcConfidentialAuto": "This kind of parcel is always confidential.",
+  "pcConfidentialHelp": "Hides what is inside from people who only handle it.",
+  "pcSaveChanges": "Save changes",
+  "pcCreate": "Create parcel",
+  "peopleSearchHint": "Search by name, title or department",
+  "peopleNone": "No one found."
 }

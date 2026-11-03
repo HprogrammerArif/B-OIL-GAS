@@ -2713,4 +2713,693 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsSignedFinal => 'Signed. The note-sheet is fully approved.';
+
+  @override
+  String get moduleParcels => 'Parcels';
+
+  @override
+  String get pcSend => 'Send a parcel';
+
+  @override
+  String get pcIntro =>
+      'Track parcels you send, receive or look after. Type the number on the label to find one.';
+
+  @override
+  String get pcSearchHint => 'Search, or enter PKG-2026-0001';
+
+  @override
+  String get pcNotFound => 'No parcel with that number, or you cannot see it.';
+
+  @override
+  String get pcTabMine => 'Mine';
+
+  @override
+  String get pcTabIncoming => 'Coming to me';
+
+  @override
+  String get pcTabSent => 'Sent by me';
+
+  @override
+  String get pcTabCarrying => 'Carrying';
+
+  @override
+  String get pcTabSite => 'Everything at my site';
+
+  @override
+  String get pcStuckOnly => 'Stuck only';
+
+  @override
+  String get pcEmpty => 'No parcels yet.';
+
+  @override
+  String get pcEmptyFiltered => 'No parcels match.';
+
+  @override
+  String get pcVerdictNone => 'Nothing needs you right now.';
+
+  @override
+  String pcVerdictNeed(int count) {
+    return 'Waiting for you: $count';
+  }
+
+  @override
+  String get pcConfidentialTitle => 'Confidential parcel';
+
+  @override
+  String pcStuckPill(int hours) {
+    return 'Stuck $hours h';
+  }
+
+  @override
+  String get pcStatusCreated => 'Not handed over yet';
+
+  @override
+  String get pcStatusDispatched => 'With the courier';
+
+  @override
+  String get pcStatusInTransit => 'On the way';
+
+  @override
+  String get pcStatusAtGate => 'At the gate';
+
+  @override
+  String get pcStatusOut => 'Out for delivery';
+
+  @override
+  String get pcStatusDelivered => 'Delivered';
+
+  @override
+  String get pcStatusHeld => 'Held for checking';
+
+  @override
+  String get pcStatusReturning => 'Going back';
+
+  @override
+  String get pcStatusReturned => 'Returned';
+
+  @override
+  String get pcStatusLost => 'Lost';
+
+  @override
+  String get pcStatusDamaged => 'Damaged';
+
+  @override
+  String get pcStatusCancelled => 'Cancelled';
+
+  @override
+  String get pcCatLegal => 'Legal documents';
+
+  @override
+  String get pcCatSample => 'QC sample';
+
+  @override
+  String get pcCatSpares => 'Spare parts';
+
+  @override
+  String get pcCatTender => 'Tender bid';
+
+  @override
+  String get pcCatIt => 'IT equipment';
+
+  @override
+  String get pcCatConfidential => 'Confidential';
+
+  @override
+  String get pcCatGeneral => 'General';
+
+  @override
+  String get pcHandFragile => 'Fragile';
+
+  @override
+  String get pcHandCold => 'Keep cold';
+
+  @override
+  String get pcHandHazmat => 'Hazardous';
+
+  @override
+  String get pcHandUpright => 'Keep upright';
+
+  @override
+  String get pcRetTamper => 'Seal was broken';
+
+  @override
+  String get pcRetDamaged => 'Contents damaged';
+
+  @override
+  String get pcRetWrong => 'Wrong documents';
+
+  @override
+  String get pcRetRefused => 'Recipient refused it';
+
+  @override
+  String get pcRetUnavailable => 'Recipient not available';
+
+  @override
+  String get pcEvCreated => 'Created';
+
+  @override
+  String get pcEvHandover => 'Handed to the courier';
+
+  @override
+  String get pcEvCheckpoint => 'Stop recorded';
+
+  @override
+  String get pcEvGateIn => 'Received at the gate';
+
+  @override
+  String get pcEvOut => 'Out for delivery';
+
+  @override
+  String get pcEvCode => 'Code confirmed';
+
+  @override
+  String get pcEvDelivered => 'Delivered';
+
+  @override
+  String get pcEvProblem => 'Problem reported';
+
+  @override
+  String get pcEvReturn => 'Sending back started';
+
+  @override
+  String get pcEvReturnCheckpoint => 'Stop on the way back';
+
+  @override
+  String get pcEvReturned => 'Returned to sender';
+
+  @override
+  String get pcEvException => 'Marked lost or damaged';
+
+  @override
+  String get pcEvCancelled => 'Cancelled';
+
+  @override
+  String get pcEvNote => 'Note';
+
+  @override
+  String get pcNextDispatch => 'Hand it to a courier and record the seal.';
+
+  @override
+  String get pcNextCreatedSender =>
+      'Waiting for the mailroom to hand it to a courier. Nothing for you to do.';
+
+  @override
+  String get pcNextCreated => 'Not handed to a courier yet.';
+
+  @override
+  String get pcNextGateIn =>
+      'It has arrived. Check the seal and receive it at the gate.';
+
+  @override
+  String get pcNextAtGateYou =>
+      'It is at the gate. You will get a code when it is sent out to you.';
+
+  @override
+  String get pcNextAtGate => 'At the gate, waiting to go to the recipient.';
+
+  @override
+  String get pcNextReceive =>
+      'It is on its way to you. Tap I have received it, or read the code to the person delivering it.';
+
+  @override
+  String get pcNextHeldAct =>
+      'The seal or contents have a problem. Send it back to the sender.';
+
+  @override
+  String get pcNextHeld => 'Held for checking because of a problem.';
+
+  @override
+  String get pcNextDamagedAct => 'Damaged. Send it back to the sender.';
+
+  @override
+  String get pcNextBackYou =>
+      'It is coming back to you. Tap I have received it when you have it.';
+
+  @override
+  String get pcNextLost => 'Marked lost. Nothing more to do.';
+
+  @override
+  String get pcNextCancelled => 'Cancelled. Nothing more to do.';
+
+  @override
+  String pcNextCarryLocal(String to) {
+    return 'Take it to $to. Record each stop on the way.';
+  }
+
+  @override
+  String pcNextCarry(String dest) {
+    return 'Take it to $dest. Record each stop on the way.';
+  }
+
+  @override
+  String pcNextComing(String courier) {
+    return '$courier is bringing it. Nothing for you to do yet.';
+  }
+
+  @override
+  String pcNextRoad(String dest) {
+    return 'On the way to $dest.';
+  }
+
+  @override
+  String pcNextBring(String to) {
+    return 'Send it out for delivery to $to. They get a one-time code.';
+  }
+
+  @override
+  String pcNextAskCode(String name) {
+    return 'Ask $name for the 6-digit code and enter it.';
+  }
+
+  @override
+  String pcNextOut(String to) {
+    return 'Being delivered to $to.';
+  }
+
+  @override
+  String pcNextDelivered(String to, String date) {
+    return 'Delivered to $to on $date.';
+  }
+
+  @override
+  String pcNextCarryBack(String from) {
+    return 'Take it back to $from. Record each stop.';
+  }
+
+  @override
+  String pcNextBackSoon(String from) {
+    return 'Going back to $from.';
+  }
+
+  @override
+  String pcNextReturned(String from) {
+    return 'Returned to $from.';
+  }
+
+  @override
+  String get pcActDispatch => 'Hand to courier';
+
+  @override
+  String get pcActCheckpoint => 'Record a stop';
+
+  @override
+  String get pcActGateIn => 'Receive at gate';
+
+  @override
+  String get pcActReportProblem => 'Report a problem';
+
+  @override
+  String get pcActOut => 'Send out for delivery';
+
+  @override
+  String get pcActReceive => 'I have received it';
+
+  @override
+  String get pcActEnterCode => 'Enter delivery code';
+
+  @override
+  String get pcActConfirmCode => 'Confirm code';
+
+  @override
+  String get pcActReturn => 'Send back to sender';
+
+  @override
+  String get pcActException => 'Mark lost or damaged';
+
+  @override
+  String get pcActAddNote => 'Add a note';
+
+  @override
+  String get pcActResend => 'Send the code again';
+
+  @override
+  String get pcActEdit => 'Edit';
+
+  @override
+  String get pcActCancel => 'Cancel parcel';
+
+  @override
+  String get pcActLabel => 'Print label';
+
+  @override
+  String get pcMore => 'More actions';
+
+  @override
+  String get pcDoneProblem => 'Problem reported. The parcel is on hold.';
+
+  @override
+  String get pcDoneReturn => 'It is going back to the sender.';
+
+  @override
+  String get pcDoneException => 'Recorded.';
+
+  @override
+  String get pcDoneNote => 'Note added.';
+
+  @override
+  String get pcDoneResend => 'A new code was sent.';
+
+  @override
+  String get pcDoneCancel => 'Parcel cancelled.';
+
+  @override
+  String get pcDoneDispatch => 'Handed to the courier.';
+
+  @override
+  String get pcDoneGateIn => 'Received at the gate.';
+
+  @override
+  String get pcDoneOut => 'Out for delivery. The recipient has a code.';
+
+  @override
+  String get pcDoneReceive => 'Received. Thank you.';
+
+  @override
+  String get pcDoneVerify => 'Delivery confirmed.';
+
+  @override
+  String get pcDoneCheckpoint => 'Stop recorded.';
+
+  @override
+  String get pcDoneCreate => 'Parcel created.';
+
+  @override
+  String get pcDoneEdit => 'Changes saved.';
+
+  @override
+  String get pcCancelMessage =>
+      'The parcel will not be sent. This cannot be undone.';
+
+  @override
+  String pcOutMessage(String name) {
+    return '$name will get a 6-digit code to confirm delivery.';
+  }
+
+  @override
+  String get pcReceiveMessage => 'Confirm only if the parcel is in your hands.';
+
+  @override
+  String get pcErrOtpInvalid => 'That code is not correct.';
+
+  @override
+  String get pcErrOtpExpired => 'The code has expired. Ask for a new one.';
+
+  @override
+  String get pcErrOtpLocked =>
+      'Too many wrong codes. Ask the mailroom for help.';
+
+  @override
+  String get pcErrOtpRate => 'Too many new codes. Try again in an hour.';
+
+  @override
+  String get pcErrSeal => 'Enter the seal number.';
+
+  @override
+  String get pcErrPhotoNeeded => 'A photo is needed.';
+
+  @override
+  String get pcErrLostEarly =>
+      'A parcel can be marked lost only after 72 hours without movement.';
+
+  @override
+  String get pcErrFlagged =>
+      'This parcel is on hold because of a seal problem.';
+
+  @override
+  String get pcErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get pcErrLabel => 'Could not prepare the label.';
+
+  @override
+  String get pcErrPhotoOpen => 'Could not open the photo.';
+
+  @override
+  String get pcErrPhoto => 'Could not upload the photo. Try again.';
+
+  @override
+  String get pcErrCourier => 'Choose a courier.';
+
+  @override
+  String get pcErrLocation => 'Enter where it is.';
+
+  @override
+  String get pcErrProblemNote =>
+      'Describe the problem in at least 10 characters.';
+
+  @override
+  String get pcErrCode => 'Enter the 6-digit code.';
+
+  @override
+  String get pcErrExceptionNote => 'Explain in at least 20 characters.';
+
+  @override
+  String get pcErrNote => 'Write a note.';
+
+  @override
+  String get pcErrDescription =>
+      'Describe what is inside (at least 5 characters).';
+
+  @override
+  String get pcErrRecipient => 'Choose who receives it.';
+
+  @override
+  String get pcErrNumber => 'Enter a valid number.';
+
+  @override
+  String get pcErrWaybill => 'At least 3 characters.';
+
+  @override
+  String get pcSheetDispatch => 'Hand to courier';
+
+  @override
+  String get pcSheetDispatchHelp =>
+      'Choose who carries it. Their name goes on the trail.';
+
+  @override
+  String get pcSheetCheckpoint => 'Record a stop';
+
+  @override
+  String get pcSheetCheckpointHelp => 'Where is the parcel now?';
+
+  @override
+  String get pcSheetReturnCheckpointHelp =>
+      'Where is the parcel now, on its way back?';
+
+  @override
+  String get pcSheetGateIn => 'Receive at gate';
+
+  @override
+  String get pcSheetGateInHelp =>
+      'Check the seal. If it is broken or the parcel is damaged, switch it off and report.';
+
+  @override
+  String get pcSheetVerify => 'Delivery code';
+
+  @override
+  String get pcSheetVerifyHelp =>
+      'Ask the recipient for the 6-digit code they received.';
+
+  @override
+  String get pcSheetVerifyReturnHelp =>
+      'Ask the sender for the 6-digit code they received.';
+
+  @override
+  String get pcSheetFlag => 'Report a problem';
+
+  @override
+  String get pcSheetFlagHelp =>
+      'The parcel is held until someone decides what to do.';
+
+  @override
+  String get pcSheetReturn => 'Send back';
+
+  @override
+  String pcSheetReturnHelp(String name) {
+    return 'The parcel goes back to $name with a new code.';
+  }
+
+  @override
+  String get pcSheetException => 'Lost or damaged';
+
+  @override
+  String get pcSheetExceptionHelp =>
+      'Use this only when the parcel cannot be delivered.';
+
+  @override
+  String get pcSheetNote => 'Add a note';
+
+  @override
+  String get pcSheetNoteHelp => 'Everyone who can see this parcel can read it.';
+
+  @override
+  String get pcFieldCourier => 'Courier';
+
+  @override
+  String get pcFieldSeal => 'Seal number (optional)';
+
+  @override
+  String get pcFieldSealRequired => 'Seal number';
+
+  @override
+  String get pcSealWhy =>
+      'This parcel must be sealed because of its value or type.';
+
+  @override
+  String get pcFieldLocation => 'Where is it?';
+
+  @override
+  String get pcFieldSealIntact => 'Seal is intact';
+
+  @override
+  String pcSealNo(String no) {
+    return 'Seal $no';
+  }
+
+  @override
+  String get pcReasonSeal => 'Seal broken';
+
+  @override
+  String get pcReasonDamaged => 'Contents damaged';
+
+  @override
+  String get pcFieldCode => '6-digit code';
+
+  @override
+  String get pcFieldReceivedBy => 'Received by (name, optional)';
+
+  @override
+  String get pcFieldWhatHappened => 'What happened';
+
+  @override
+  String get pcFieldNoteOptional => 'Note (optional)';
+
+  @override
+  String get pcFieldNote => 'Note';
+
+  @override
+  String get pcPhotoRequired => 'Take a photo (required)';
+
+  @override
+  String get pcPhotoOptional => 'Add a photo (optional)';
+
+  @override
+  String pcPhotoAdded(String name) {
+    return 'Photo added: $name';
+  }
+
+  @override
+  String get pcFrom => 'From';
+
+  @override
+  String get pcTo => 'To';
+
+  @override
+  String get pcCarriedBy => 'Courier';
+
+  @override
+  String get pcTrail => 'Where it has been';
+
+  @override
+  String pcReturnLine(String no, String reason) {
+    return 'Return $no: $reason';
+  }
+
+  @override
+  String get pcViewPhoto => 'View photo';
+
+  @override
+  String get pcDetCategory => 'Type';
+
+  @override
+  String get pcDetWaybill => 'Waybill';
+
+  @override
+  String get pcDetSeal => 'Seal';
+
+  @override
+  String get pcDetValue => 'Declared value';
+
+  @override
+  String get pcDetWeight => 'Weight';
+
+  @override
+  String get pcDetHandling => 'Handling';
+
+  @override
+  String get pcDetTrail => 'Trail check';
+
+  @override
+  String get pcSealBroken => 'Reported broken';
+
+  @override
+  String get pcChainOk => 'Fingerprints match. Nobody changed the trail.';
+
+  @override
+  String get pcChainBroken =>
+      'Fingerprints do not match. The trail was changed.';
+
+  @override
+  String get pcEditTitle => 'Edit parcel';
+
+  @override
+  String get pcFormIntro =>
+      'Say who gets it and what it is. The mailroom hands it to a courier, and the recipient gets a code to confirm delivery.';
+
+  @override
+  String get pcFieldRecipient => 'Who receives it';
+
+  @override
+  String get pcPickRecipient => 'Choose a colleague';
+
+  @override
+  String get pcFieldCategory => 'What kind of parcel';
+
+  @override
+  String get pcFieldDescription => 'What is inside';
+
+  @override
+  String get pcFieldUrgency => 'How urgent';
+
+  @override
+  String get pcUrgNormal => 'Normal';
+
+  @override
+  String get pcFieldValue => 'Value in taka (optional)';
+
+  @override
+  String get pcValueHelp =>
+      'Above ৳50,000 a photo is needed on delivery. Above ৳1,00,000 it must be sealed.';
+
+  @override
+  String get pcFieldWeight => 'Weight in kg (optional)';
+
+  @override
+  String get pcFieldWaybill => 'Courier waybill (optional)';
+
+  @override
+  String get pcFieldHandling => 'Special handling';
+
+  @override
+  String get pcFieldConfidential => 'Confidential';
+
+  @override
+  String get pcConfidentialAuto =>
+      'This kind of parcel is always confidential.';
+
+  @override
+  String get pcConfidentialHelp =>
+      'Hides what is inside from people who only handle it.';
+
+  @override
+  String get pcSaveChanges => 'Save changes';
+
+  @override
+  String get pcCreate => 'Create parcel';
+
+  @override
+  String get peopleSearchHint => 'Search by name, title or department';
+
+  @override
+  String get peopleNone => 'No one found.';
 }

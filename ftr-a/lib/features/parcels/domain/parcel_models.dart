@@ -242,10 +242,6 @@ class Parcel {
   final List<ParcelEvent> events;
   final bool chainValid;
 
-  bool get isOpen => !const {
-    'DELIVERED',
-    'RETURNED',
-    'LOST',
-    'CANCELLED',
-  }.contains(status);
+  bool get isOpen =>
+      !const {'DELIVERED', 'RETURNED', 'LOST', 'CANCELLED'}.contains(status);
 }

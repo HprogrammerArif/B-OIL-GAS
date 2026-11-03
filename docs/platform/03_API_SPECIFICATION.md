@@ -716,6 +716,18 @@ Validation: `category ∈ ParcelCategory`; `description` 5–500; `declaredValue
 
 Rules: status must be `OUT_FOR_DELIVERY` or `AT_GATE` (`INVALID_STATE_TRANSITION`); bcrypt compare against `otpHash`; wrong → `POLICY_VIOLATION` `OTP_INVALID` with `details[0].attemptsLeft`; after 5 failures OTP invalidated (`OTP_LOCKED`, resend required); expired → `OTP_EXPIRED`. Events `OTP_VERIFIED` then `DELIVERED` appended with hash chain `eventHash = sha256(prevHash + type + actorUserId + createdAt + note)`. Notifications `PARCEL_DELIVERED` to sender & recipient; socket `parcel:status`; due item DONE. **Prototype note:** the prototype accepted a master PIN `1234` and displayed the OTP in the error toast; production has no master code and never returns the OTP. Gate/security role can override delivery only via `/exception` with audit.
 
+### 10.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/parcel_engine.dart`, `handlers/parcel_handlers.dart`) implements this module with these differences:
+
+- The recipient must be a system user chosen from `GET /people?q=` (name, title, department and site only, no PII; the caller is excluded). Destination site is the recipient's site; same-site parcels are `intraSite` and may go out for delivery straight from DISPATCHED/IN_TRANSIT without the gate step.
+- `GET /parcels?view=mine|sent|incoming|carrying|site|all&status&q&stuck=true`; `GET /parcels/couriers` (needs `parcels:dispatch`; users holding DRIVER or MAILROOM); `GET /parcels/by-tracking/{no}`. Each parcel carries a `me` block of booleans (`canDispatch`, `canGateIn`, `canAccept`, ...) computed from role, state and scope; the app only shows buttons that will work. Confidential parcels hide the description (`hidden: true`) from people who only handle them.
+- There is no SMS: the 6-digit code is delivered as an in-app notification to the recipient (return code: to the sender) and stored hashed. `POST /parcels/{id}/accept` lets the recipient confirm in the app instead of reading the code out (sender, for a returned parcel). Resending is limited to 3 per hour.
+- Marking LOST is allowed only after 72 hours without movement (`LOST_TOO_EARLY`); DAMAGED needs a photo and stays returnable. Seal is required above ৳1,00,000; delivery photo above ৳50,000. A broken seal is reported through `/flag` (photo plus note, parcel goes to QUARANTINED), never through `/checkpoint`.
+- The custody trail is a SHA-256 chain (`prev|type|actor|location|note|photo|at`) and `chainValid` is recomputed on read. Photos are uploaded as `PHOTO` files and attached to the parcel; file access follows parcel participants or a wider-than-self `parcels:read` grant.
+- Label PDF with QR is printed on the device (`pdf`/`printing`).
+- Deferred: manifest PDF, trip linking (BR-04-10), `parcels:reassign`, escalation above ৳5,00,000, COMPLIANCE notification.
+
 ---
 
 ## 11. MOD-05 — Asset Lifecycle & EAM

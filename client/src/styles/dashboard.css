@@ -358,3 +358,23 @@
 .tr-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .tr-modal-note { margin: 0 0 4px; font-size: 13px; color: var(--text-2); }
 @media (max-width: 560px) { .tr-item { flex-direction: column; } .tr-actions { width: 100%; } }
+
+/* ─── Employee: leave + recent activity; HOD budget strip ──────────────────── */
+.my-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 20px; align-items: start; }
+.my-leave, .my-act { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.my-leave li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 14px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
+.my-leave span { font-size: 13px; color: var(--text-2); }
+.my-leave strong { font-size: 14px; color: var(--text-1); text-align: right; }
+.my-leave small { font-size: 12px; color: var(--text-3); grid-column: 1 / -1; }
+.my-leave .hs-bar { grid-column: 1 / -1; margin-top: 4px; }
+.my-act li { display: flex; align-items: flex-start; gap: 12px; padding: 11px 14px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
+.my-act-icon { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--surface-2); color: var(--text-2); }
+.my-act li > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.my-act strong { font-size: 13.5px; color: var(--text-1); }
+.my-act small { font-size: 12px; color: var(--text-3); }
+.my-act time { font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+
+.hod-budget { padding: 12px 14px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 8px; }
+.hod-budget p { margin: 0; font-size: 13px; color: var(--text-2); }
+.hod-budget strong { font-size: 15px; color: var(--text-1); }
+.hod-budget strong.is-tight { color: var(--status-danger); }

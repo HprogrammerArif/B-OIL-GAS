@@ -69,8 +69,7 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     final session = ref.watch(sessionControllerProvider).value;
     final canCreate = session?.can('parcels:create') ?? false;
     final canCarry = session?.can('parcels:deliver') ?? false;
-    final canSite =
-        session?.can('parcels:read', GrantScope.site) ?? false;
+    final canSite = session?.can('parcels:read', GrantScope.site) ?? false;
     final rows = ref.watch(
       parcelsProvider(_view, query: _query, stuckOnly: _stuckOnly),
     );
@@ -216,8 +215,11 @@ class _Row extends StatelessWidget {
       ),
       title: title,
       subtitle: [
-        '${p.trackingNo} · ${p.origin.label(bangla: bangla)} → '
-            '${p.dest.label(bangla: bangla)}',
+        [
+          p.trackingNo,
+          p.origin.label(bangla: bangla),
+          p.dest.label(bangla: bangla),
+        ].join(' · '),
         parcelNextLine(l10n, p, bangla: bangla),
       ].join('\n'),
       trailing: Column(

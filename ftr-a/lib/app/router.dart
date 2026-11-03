@@ -23,14 +23,14 @@ import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_detail_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_edit_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheets_screen.dart';
-import 'package:bogcl_oneops/features/parcels/presentation/parcel_detail_screen.dart';
-import 'package:bogcl_oneops/features/parcels/presentation/parcel_edit_screen.dart';
-import 'package:bogcl_oneops/features/parcels/presentation/parcels_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_compose_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_detail_screen.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notices_screen.dart';
 import 'package:bogcl_oneops/features/notifications/presentation/inbox_screen.dart';
 import 'package:bogcl_oneops/features/outbox/presentation/outbox_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcel_detail_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcel_edit_screen.dart';
+import 'package:bogcl_oneops/features/parcels/presentation/parcels_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -144,9 +144,8 @@ GoRouter router(Ref ref) {
                       ),
                       GoRoute(
                         path: ':id',
-                        builder: (context, state) => ParcelDetailScreen(
-                          id: state.pathParameters['id']!,
-                        ),
+                        builder: (context, state) =>
+                            ParcelDetailScreen(id: state.pathParameters['id']!),
                         routes: [
                           GoRoute(
                             path: 'edit',

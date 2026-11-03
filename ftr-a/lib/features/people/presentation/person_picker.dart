@@ -58,7 +58,9 @@ class _PickerState extends ConsumerState<_Picker> {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.75,
       child: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
         child: Column(
           children: [
             Padding(
@@ -66,7 +68,10 @@ class _PickerState extends ConsumerState<_Picker> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: Space.md),
                   TextField(
                     controller: _c,

@@ -117,8 +117,7 @@ class _SheetState extends ConsumerState<_Sheet> {
     _ => false,
   };
 
-  bool get _photoOffered =>
-      _photoNeeded || widget.kind == ParcelSheet.verify;
+  bool get _photoOffered => _photoNeeded || widget.kind == ParcelSheet.verify;
 
   void _confirm() {
     final l10n = context.l10n;
@@ -326,9 +325,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                 label: widget.parcel.me.sealRequired
                     ? l10n.pcFieldSealRequired
                     : l10n.pcFieldSeal,
-                helper: widget.parcel.me.sealRequired
-                    ? l10n.pcSealWhy
-                    : null,
+                helper: widget.parcel.me.sealRequired ? l10n.pcSealWhy : null,
                 controller: _seal,
                 maxLength: 40,
               ),
@@ -415,10 +412,12 @@ class _SheetState extends ConsumerState<_Sheet> {
               const SizedBox(height: Space.md),
               AppTextField(
                 label: switch (k) {
-                  ParcelSheet.flag || ParcelSheet.exception =>
-                    l10n.pcFieldWhatHappened,
+                  ParcelSheet.flag ||
+                  ParcelSheet.exception => l10n.pcFieldWhatHappened,
                   ParcelSheet.gateIn =>
-                    _sealIntact ? l10n.pcFieldNoteOptional : l10n.pcFieldWhatHappened,
+                    _sealIntact
+                        ? l10n.pcFieldNoteOptional
+                        : l10n.pcFieldWhatHappened,
                   ParcelSheet.note => l10n.pcFieldNote,
                   _ => l10n.pcFieldNoteOptional,
                 },
@@ -443,7 +442,9 @@ class _SheetState extends ConsumerState<_Sheet> {
                       ),
                 label: Text(
                   _photoId == null
-                      ? (_photoNeeded ? l10n.pcPhotoRequired : l10n.pcPhotoOptional)
+                      ? (_photoNeeded
+                            ? l10n.pcPhotoRequired
+                            : l10n.pcPhotoOptional)
                       : l10n.pcPhotoAdded(_photoName ?? ''),
                 ),
               ),
@@ -457,9 +458,10 @@ class _SheetState extends ConsumerState<_Sheet> {
                 ),
               ),
             const SizedBox(height: Space.lg),
-            destructive
-                ? PrimaryButton.danger(label: confirm, onPressed: _confirm)
-                : PrimaryButton(label: confirm, onPressed: _confirm),
+            if (destructive)
+              PrimaryButton.danger(label: confirm, onPressed: _confirm)
+            else
+              PrimaryButton(label: confirm, onPressed: _confirm),
           ],
         ),
       ),

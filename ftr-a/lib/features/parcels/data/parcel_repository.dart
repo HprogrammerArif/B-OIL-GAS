@@ -72,10 +72,7 @@ class ParcelRepository {
     }
   }
 
-  Future<Parcel> save({
-    required Map<String, Object?> body,
-    String? id,
-  }) async {
+  Future<Parcel> save({required Map<String, Object?> body, String? id}) async {
     try {
       final res = id == null
           ? await _dio.post<Object?>('/parcels', data: body)

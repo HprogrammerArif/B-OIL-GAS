@@ -2706,4 +2706,687 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsSignedFinal => 'স্বাক্ষর হয়েছে। নোট-শিট সম্পূর্ণ অনুমোদিত।';
+
+  @override
+  String get moduleParcels => 'পার্সেল';
+
+  @override
+  String get pcSend => 'পার্সেল পাঠান';
+
+  @override
+  String get pcIntro =>
+      'আপনার পাঠানো, প্রাপ্ত বা দায়িত্বে থাকা পার্সেল ট্র্যাক করুন। লেবেলের নম্বর লিখে খুঁজুন।';
+
+  @override
+  String get pcSearchHint => 'খুঁজুন, অথবা PKG-2026-0001 লিখুন';
+
+  @override
+  String get pcNotFound =>
+      'এই নম্বরে কোনো পার্সেল নেই, অথবা আপনি দেখতে পারেন না।';
+
+  @override
+  String get pcTabMine => 'আমার';
+
+  @override
+  String get pcTabIncoming => 'আমার জন্য';
+
+  @override
+  String get pcTabSent => 'আমার পাঠানো';
+
+  @override
+  String get pcTabCarrying => 'বহনে';
+
+  @override
+  String get pcTabSite => 'আমার সাইটের সব';
+
+  @override
+  String get pcStuckOnly => 'শুধু আটকে থাকা';
+
+  @override
+  String get pcEmpty => 'এখনো কোনো পার্সেল নেই।';
+
+  @override
+  String get pcEmptyFiltered => 'কোনো পার্সেল মেলেনি।';
+
+  @override
+  String get pcVerdictNone => 'এখন আপনার কিছু করার নেই।';
+
+  @override
+  String pcVerdictNeed(int count) {
+    return 'আপনার অপেক্ষায়: $count';
+  }
+
+  @override
+  String get pcConfidentialTitle => 'গোপনীয় পার্সেল';
+
+  @override
+  String pcStuckPill(int hours) {
+    return '$hours ঘণ্টা আটকে';
+  }
+
+  @override
+  String get pcStatusCreated => 'এখনো হস্তান্তর হয়নি';
+
+  @override
+  String get pcStatusDispatched => 'কুরিয়ারের কাছে';
+
+  @override
+  String get pcStatusInTransit => 'পথে';
+
+  @override
+  String get pcStatusAtGate => 'গেটে পৌঁছেছে';
+
+  @override
+  String get pcStatusOut => 'বিতরণে';
+
+  @override
+  String get pcStatusDelivered => 'পৌঁছে দেওয়া হয়েছে';
+
+  @override
+  String get pcStatusHeld => 'যাচাইয়ের জন্য আটকানো';
+
+  @override
+  String get pcStatusReturning => 'ফেরত যাচ্ছে';
+
+  @override
+  String get pcStatusReturned => 'ফেরত দেওয়া হয়েছে';
+
+  @override
+  String get pcStatusLost => 'হারিয়ে গেছে';
+
+  @override
+  String get pcStatusDamaged => 'ক্ষতিগ্রস্ত';
+
+  @override
+  String get pcStatusCancelled => 'বাতিল';
+
+  @override
+  String get pcCatLegal => 'আইনি নথি';
+
+  @override
+  String get pcCatSample => 'কিউসি নমুনা';
+
+  @override
+  String get pcCatSpares => 'খুচরা যন্ত্রাংশ';
+
+  @override
+  String get pcCatTender => 'দরপত্র';
+
+  @override
+  String get pcCatIt => 'আইটি সরঞ্জাম';
+
+  @override
+  String get pcCatConfidential => 'গোপনীয়';
+
+  @override
+  String get pcCatGeneral => 'সাধারণ';
+
+  @override
+  String get pcHandFragile => 'ভঙ্গুর';
+
+  @override
+  String get pcHandCold => 'ঠান্ডায় রাখুন';
+
+  @override
+  String get pcHandHazmat => 'বিপজ্জনক';
+
+  @override
+  String get pcHandUpright => 'সোজা রাখুন';
+
+  @override
+  String get pcRetTamper => 'সিল ভাঙা ছিল';
+
+  @override
+  String get pcRetDamaged => 'ভেতরের জিনিস ক্ষতিগ্রস্ত';
+
+  @override
+  String get pcRetWrong => 'ভুল নথি';
+
+  @override
+  String get pcRetRefused => 'প্রাপক নিতে চাননি';
+
+  @override
+  String get pcRetUnavailable => 'প্রাপককে পাওয়া যায়নি';
+
+  @override
+  String get pcEvCreated => 'তৈরি করা হয়েছে';
+
+  @override
+  String get pcEvHandover => 'কুরিয়ারকে দেওয়া হয়েছে';
+
+  @override
+  String get pcEvCheckpoint => 'থামার স্থান নথিভুক্ত';
+
+  @override
+  String get pcEvGateIn => 'গেটে গ্রহণ করা হয়েছে';
+
+  @override
+  String get pcEvOut => 'বিতরণে বের হয়েছে';
+
+  @override
+  String get pcEvCode => 'কোড নিশ্চিত হয়েছে';
+
+  @override
+  String get pcEvDelivered => 'পৌঁছে দেওয়া হয়েছে';
+
+  @override
+  String get pcEvProblem => 'সমস্যা জানানো হয়েছে';
+
+  @override
+  String get pcEvReturn => 'ফেরত পাঠানো শুরু';
+
+  @override
+  String get pcEvReturnCheckpoint => 'ফেরার পথে থামা';
+
+  @override
+  String get pcEvReturned => 'প্রেরকের কাছে ফেরত';
+
+  @override
+  String get pcEvException => 'হারানো বা ক্ষতিগ্রস্ত চিহ্নিত';
+
+  @override
+  String get pcEvCancelled => 'বাতিল করা হয়েছে';
+
+  @override
+  String get pcEvNote => 'মন্তব্য';
+
+  @override
+  String get pcNextDispatch => 'কুরিয়ারের হাতে দিন এবং সিল নম্বর লিখুন।';
+
+  @override
+  String get pcNextCreatedSender =>
+      'মেইলরুম কুরিয়ারকে দেওয়ার অপেক্ষায়। আপনার করণীয় নেই।';
+
+  @override
+  String get pcNextCreated => 'এখনো কুরিয়ারকে দেওয়া হয়নি।';
+
+  @override
+  String get pcNextGateIn => 'পৌঁছেছে। সিল দেখে গেটে গ্রহণ করুন।';
+
+  @override
+  String get pcNextAtGateYou => 'গেটে আছে। আপনার কাছে পাঠানো হলে কোড পাবেন।';
+
+  @override
+  String get pcNextAtGate => 'গেটে আছে, প্রাপকের কাছে যাওয়ার অপেক্ষায়।';
+
+  @override
+  String get pcNextReceive =>
+      'এটি আপনার কাছে আসছে। হাতে পেলে আমি পেয়েছি চাপুন, অথবা বিতরণকারীকে কোডটি বলুন।';
+
+  @override
+  String get pcNextHeldAct =>
+      'সিল বা ভেতরের জিনিসে সমস্যা আছে। প্রেরকের কাছে ফেরত পাঠান।';
+
+  @override
+  String get pcNextHeld => 'সমস্যার কারণে যাচাইয়ের জন্য আটকানো।';
+
+  @override
+  String get pcNextDamagedAct => 'ক্ষতিগ্রস্ত। প্রেরকের কাছে ফেরত পাঠান।';
+
+  @override
+  String get pcNextBackYou =>
+      'এটি আপনার কাছে ফেরত আসছে। হাতে পেলে আমি পেয়েছি চাপুন।';
+
+  @override
+  String get pcNextLost => 'হারিয়ে গেছে বলে চিহ্নিত। আর কিছু করার নেই।';
+
+  @override
+  String get pcNextCancelled => 'বাতিল। আর কিছু করার নেই।';
+
+  @override
+  String pcNextCarryLocal(String to) {
+    return '$to-এর কাছে নিয়ে যান। পথে প্রতিটি থামার স্থান লিখুন।';
+  }
+
+  @override
+  String pcNextCarry(String dest) {
+    return '$dest-এ নিয়ে যান। পথে প্রতিটি থামার স্থান লিখুন।';
+  }
+
+  @override
+  String pcNextComing(String courier) {
+    return '$courier নিয়ে আসছেন। এখন আপনার করণীয় নেই।';
+  }
+
+  @override
+  String pcNextRoad(String dest) {
+    return '$dest-এর পথে।';
+  }
+
+  @override
+  String pcNextBring(String to) {
+    return '$to-এর কাছে বিতরণে পাঠান। তিনি একটি এককালীন কোড পাবেন।';
+  }
+
+  @override
+  String pcNextAskCode(String name) {
+    return '$name-এর কাছ থেকে ৬ সংখ্যার কোড নিয়ে লিখুন।';
+  }
+
+  @override
+  String pcNextOut(String to) {
+    return '$to-এর কাছে পৌঁছে দেওয়া হচ্ছে।';
+  }
+
+  @override
+  String pcNextDelivered(String to, String date) {
+    return '$date তারিখে $to-কে পৌঁছে দেওয়া হয়েছে।';
+  }
+
+  @override
+  String pcNextCarryBack(String from) {
+    return '$from-এর কাছে ফেরত নিয়ে যান। প্রতিটি থামার স্থান লিখুন।';
+  }
+
+  @override
+  String pcNextBackSoon(String from) {
+    return '$from-এর কাছে ফেরত যাচ্ছে।';
+  }
+
+  @override
+  String pcNextReturned(String from) {
+    return '$from-এর কাছে ফেরত দেওয়া হয়েছে।';
+  }
+
+  @override
+  String get pcActDispatch => 'কুরিয়ারকে দিন';
+
+  @override
+  String get pcActCheckpoint => 'থামার স্থান লিখুন';
+
+  @override
+  String get pcActGateIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get pcActReportProblem => 'সমস্যা জানান';
+
+  @override
+  String get pcActOut => 'বিতরণে পাঠান';
+
+  @override
+  String get pcActReceive => 'আমি পেয়েছি';
+
+  @override
+  String get pcActEnterCode => 'ডেলিভারি কোড দিন';
+
+  @override
+  String get pcActConfirmCode => 'কোড নিশ্চিত করুন';
+
+  @override
+  String get pcActReturn => 'প্রেরকের কাছে ফেরত পাঠান';
+
+  @override
+  String get pcActException => 'হারানো বা ক্ষতিগ্রস্ত চিহ্নিত করুন';
+
+  @override
+  String get pcActAddNote => 'মন্তব্য যোগ করুন';
+
+  @override
+  String get pcActResend => 'কোড আবার পাঠান';
+
+  @override
+  String get pcActEdit => 'সম্পাদনা করুন';
+
+  @override
+  String get pcActCancel => 'পার্সেল বাতিল করুন';
+
+  @override
+  String get pcActLabel => 'লেবেল প্রিন্ট করুন';
+
+  @override
+  String get pcMore => 'আরও কাজ';
+
+  @override
+  String get pcDoneProblem =>
+      'সমস্যা জানানো হয়েছে। পার্সেলটি আটকে রাখা হয়েছে।';
+
+  @override
+  String get pcDoneReturn => 'এটি প্রেরকের কাছে ফেরত যাচ্ছে।';
+
+  @override
+  String get pcDoneException => 'নথিভুক্ত হয়েছে।';
+
+  @override
+  String get pcDoneNote => 'মন্তব্য যোগ হয়েছে।';
+
+  @override
+  String get pcDoneResend => 'নতুন কোড পাঠানো হয়েছে।';
+
+  @override
+  String get pcDoneCancel => 'পার্সেল বাতিল হয়েছে।';
+
+  @override
+  String get pcDoneDispatch => 'কুরিয়ারকে দেওয়া হয়েছে।';
+
+  @override
+  String get pcDoneGateIn => 'গেটে গ্রহণ করা হয়েছে।';
+
+  @override
+  String get pcDoneOut => 'বিতরণে পাঠানো হয়েছে। প্রাপক একটি কোড পেয়েছেন।';
+
+  @override
+  String get pcDoneReceive => 'গ্রহণ করা হয়েছে। ধন্যবাদ।';
+
+  @override
+  String get pcDoneVerify => 'ডেলিভারি নিশ্চিত হয়েছে।';
+
+  @override
+  String get pcDoneCheckpoint => 'থামার স্থান নথিভুক্ত হয়েছে।';
+
+  @override
+  String get pcDoneCreate => 'পার্সেল তৈরি হয়েছে।';
+
+  @override
+  String get pcDoneEdit => 'পরিবর্তন সংরক্ষিত হয়েছে।';
+
+  @override
+  String get pcCancelMessage =>
+      'পার্সেলটি আর পাঠানো হবে না। এটি ফেরানো যাবে না।';
+
+  @override
+  String pcOutMessage(String name) {
+    return 'ডেলিভারি নিশ্চিত করতে $name একটি ৬ সংখ্যার কোড পাবেন।';
+  }
+
+  @override
+  String get pcReceiveMessage => 'পার্সেল হাতে পেলেই নিশ্চিত করুন।';
+
+  @override
+  String get pcErrOtpInvalid => 'কোডটি সঠিক নয়।';
+
+  @override
+  String get pcErrOtpExpired => 'কোডের মেয়াদ শেষ। নতুন কোড চান।';
+
+  @override
+  String get pcErrOtpLocked =>
+      'অনেকবার ভুল কোড দেওয়া হয়েছে। মেইলরুমের সাহায্য নিন।';
+
+  @override
+  String get pcErrOtpRate =>
+      'অনেকবার নতুন কোড চাওয়া হয়েছে। এক ঘণ্টা পরে চেষ্টা করুন।';
+
+  @override
+  String get pcErrSeal => 'সিল নম্বর লিখুন।';
+
+  @override
+  String get pcErrPhotoNeeded => 'একটি ছবি দরকার।';
+
+  @override
+  String get pcErrLostEarly =>
+      '৭২ ঘণ্টা নড়াচড়া না হলে তবেই হারিয়ে গেছে চিহ্নিত করা যায়।';
+
+  @override
+  String get pcErrFlagged => 'সিলের সমস্যার কারণে এই পার্সেল আটকে আছে।';
+
+  @override
+  String get pcErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get pcErrLabel => 'লেবেল তৈরি করা যায়নি।';
+
+  @override
+  String get pcErrPhotoOpen => 'ছবি খোলা যায়নি।';
+
+  @override
+  String get pcErrPhoto => 'ছবি আপলোড করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get pcErrCourier => 'একজন কুরিয়ার বেছে নিন।';
+
+  @override
+  String get pcErrLocation => 'কোথায় আছে লিখুন।';
+
+  @override
+  String get pcErrProblemNote => 'সমস্যাটি কমপক্ষে ১০ অক্ষরে লিখুন।';
+
+  @override
+  String get pcErrCode => '৬ সংখ্যার কোড লিখুন।';
+
+  @override
+  String get pcErrExceptionNote => 'কমপক্ষে ২০ অক্ষরে ব্যাখ্যা করুন।';
+
+  @override
+  String get pcErrNote => 'একটি মন্তব্য লিখুন।';
+
+  @override
+  String get pcErrDescription => 'ভেতরে কী আছে লিখুন (কমপক্ষে ৫ অক্ষর)।';
+
+  @override
+  String get pcErrRecipient => 'কে পাবেন তা বেছে নিন।';
+
+  @override
+  String get pcErrNumber => 'সঠিক সংখ্যা লিখুন।';
+
+  @override
+  String get pcErrWaybill => 'কমপক্ষে ৩ অক্ষর।';
+
+  @override
+  String get pcSheetDispatch => 'কুরিয়ারকে দিন';
+
+  @override
+  String get pcSheetDispatchHelp =>
+      'কে বহন করবেন তা বেছে নিন। তাঁর নাম ট্রেইলে থাকবে।';
+
+  @override
+  String get pcSheetCheckpoint => 'থামার স্থান লিখুন';
+
+  @override
+  String get pcSheetCheckpointHelp => 'পার্সেল এখন কোথায়?';
+
+  @override
+  String get pcSheetReturnCheckpointHelp => 'ফেরার পথে পার্সেল এখন কোথায়?';
+
+  @override
+  String get pcSheetGateIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get pcSheetGateInHelp =>
+      'সিল দেখুন। সিল ভাঙা বা পার্সেল ক্ষতিগ্রস্ত হলে সুইচ বন্ধ করে জানান।';
+
+  @override
+  String get pcSheetVerify => 'ডেলিভারি কোড';
+
+  @override
+  String get pcSheetVerifyHelp => 'প্রাপকের পাওয়া ৬ সংখ্যার কোডটি চান।';
+
+  @override
+  String get pcSheetVerifyReturnHelp => 'প্রেরকের পাওয়া ৬ সংখ্যার কোডটি চান।';
+
+  @override
+  String get pcSheetFlag => 'সমস্যা জানান';
+
+  @override
+  String get pcSheetFlagHelp =>
+      'কী করা হবে তা ঠিক না হওয়া পর্যন্ত পার্সেল আটকে থাকবে।';
+
+  @override
+  String get pcSheetReturn => 'ফেরত পাঠান';
+
+  @override
+  String pcSheetReturnHelp(String name) {
+    return 'পার্সেলটি নতুন কোডসহ $name-এর কাছে ফেরত যাবে।';
+  }
+
+  @override
+  String get pcSheetException => 'হারানো বা ক্ষতিগ্রস্ত';
+
+  @override
+  String get pcSheetExceptionHelp =>
+      'পার্সেল পৌঁছে দেওয়া সম্ভব না হলেই শুধু এটি ব্যবহার করুন।';
+
+  @override
+  String get pcSheetNote => 'মন্তব্য যোগ করুন';
+
+  @override
+  String get pcSheetNoteHelp =>
+      'যাঁরা এই পার্সেল দেখতে পারেন সবাই এটি পড়তে পারবেন।';
+
+  @override
+  String get pcFieldCourier => 'কুরিয়ার';
+
+  @override
+  String get pcFieldSeal => 'সিল নম্বর (ঐচ্ছিক)';
+
+  @override
+  String get pcFieldSealRequired => 'সিল নম্বর';
+
+  @override
+  String get pcSealWhy =>
+      'মূল্য বা ধরনের কারণে এই পার্সেল সিল করা বাধ্যতামূলক।';
+
+  @override
+  String get pcFieldLocation => 'কোথায় আছে?';
+
+  @override
+  String get pcFieldSealIntact => 'সিল অক্ষত আছে';
+
+  @override
+  String pcSealNo(String no) {
+    return 'সিল $no';
+  }
+
+  @override
+  String get pcReasonSeal => 'সিল ভাঙা';
+
+  @override
+  String get pcReasonDamaged => 'ভেতরের জিনিস ক্ষতিগ্রস্ত';
+
+  @override
+  String get pcFieldCode => '৬ সংখ্যার কোড';
+
+  @override
+  String get pcFieldReceivedBy => 'যিনি গ্রহণ করেছেন (নাম, ঐচ্ছিক)';
+
+  @override
+  String get pcFieldWhatHappened => 'কী ঘটেছে';
+
+  @override
+  String get pcFieldNoteOptional => 'মন্তব্য (ঐচ্ছিক)';
+
+  @override
+  String get pcFieldNote => 'মন্তব্য';
+
+  @override
+  String get pcPhotoRequired => 'ছবি তুলুন (বাধ্যতামূলক)';
+
+  @override
+  String get pcPhotoOptional => 'ছবি যোগ করুন (ঐচ্ছিক)';
+
+  @override
+  String pcPhotoAdded(String name) {
+    return 'ছবি যোগ হয়েছে: $name';
+  }
+
+  @override
+  String get pcFrom => 'প্রেরক';
+
+  @override
+  String get pcTo => 'প্রাপক';
+
+  @override
+  String get pcCarriedBy => 'কুরিয়ার';
+
+  @override
+  String get pcTrail => 'কোথায় কোথায় ছিল';
+
+  @override
+  String pcReturnLine(String no, String reason) {
+    return 'ফেরত $no: $reason';
+  }
+
+  @override
+  String get pcViewPhoto => 'ছবি দেখুন';
+
+  @override
+  String get pcDetCategory => 'ধরন';
+
+  @override
+  String get pcDetWaybill => 'ওয়েবিল';
+
+  @override
+  String get pcDetSeal => 'সিল';
+
+  @override
+  String get pcDetValue => 'ঘোষিত মূল্য';
+
+  @override
+  String get pcDetWeight => 'ওজন';
+
+  @override
+  String get pcDetHandling => 'হ্যান্ডলিং';
+
+  @override
+  String get pcDetTrail => 'ট্রেইল যাচাই';
+
+  @override
+  String get pcSealBroken => 'ভাঙা বলে জানানো হয়েছে';
+
+  @override
+  String get pcChainOk => 'ফিঙ্গারপ্রিন্ট মিলেছে। ট্রেইল কেউ বদলায়নি।';
+
+  @override
+  String get pcChainBroken => 'ফিঙ্গারপ্রিন্ট মেলেনি। ট্রেইল বদলানো হয়েছে।';
+
+  @override
+  String get pcEditTitle => 'পার্সেল সম্পাদনা';
+
+  @override
+  String get pcFormIntro =>
+      'কে পাবেন এবং এটি কী তা লিখুন। মেইলরুম কুরিয়ারকে দেবে, আর প্রাপক ডেলিভারি নিশ্চিত করতে একটি কোড পাবেন।';
+
+  @override
+  String get pcFieldRecipient => 'কে গ্রহণ করবেন';
+
+  @override
+  String get pcPickRecipient => 'একজন সহকর্মী বেছে নিন';
+
+  @override
+  String get pcFieldCategory => 'পার্সেলের ধরন';
+
+  @override
+  String get pcFieldDescription => 'ভেতরে কী আছে';
+
+  @override
+  String get pcFieldUrgency => 'কত জরুরি';
+
+  @override
+  String get pcUrgNormal => 'সাধারণ';
+
+  @override
+  String get pcFieldValue => 'টাকায় মূল্য (ঐচ্ছিক)';
+
+  @override
+  String get pcValueHelp =>
+      '৳৫০,০০০-এর বেশি হলে ডেলিভারিতে ছবি লাগবে। ৳১,০০,০০০-এর বেশি হলে সিল করতে হবে।';
+
+  @override
+  String get pcFieldWeight => 'কেজিতে ওজন (ঐচ্ছিক)';
+
+  @override
+  String get pcFieldWaybill => 'কুরিয়ার ওয়েবিল (ঐচ্ছিক)';
+
+  @override
+  String get pcFieldHandling => 'বিশেষ হ্যান্ডলিং';
+
+  @override
+  String get pcFieldConfidential => 'গোপনীয়';
+
+  @override
+  String get pcConfidentialAuto => 'এই ধরনের পার্সেল সবসময় গোপনীয়।';
+
+  @override
+  String get pcConfidentialHelp =>
+      'যাঁরা শুধু বহন করেন তাঁদের কাছ থেকে ভেতরের বিবরণ লুকিয়ে রাখে।';
+
+  @override
+  String get pcSaveChanges => 'পরিবর্তন সংরক্ষণ করুন';
+
+  @override
+  String get pcCreate => 'পার্সেল তৈরি করুন';
+
+  @override
+  String get peopleSearchHint => 'নাম, পদবি বা বিভাগ দিয়ে খুঁজুন';
+
+  @override
+  String get peopleNone => 'কাউকে পাওয়া যায়নি।';
 }

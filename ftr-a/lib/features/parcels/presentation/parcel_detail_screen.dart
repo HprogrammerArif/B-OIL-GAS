@@ -23,7 +23,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-enum _Menu { problem, sendBack, lostOrDamaged, note, resend, edit, cancel, label }
+enum _Menu {
+  problem,
+  sendBack,
+  lostOrDamaged,
+  note,
+  resend,
+  edit,
+  cancel,
+  label,
+}
 
 /// One parcel: where it is, who has it, what I do next, and the trail.
 class ParcelDetailScreen extends ConsumerStatefulWidget {
@@ -116,7 +125,12 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
       case _Menu.problem:
         await _withSheet(p, ParcelSheet.flag, 'flag', l10n.pcDoneProblem);
       case _Menu.sendBack:
-        await _withSheet(p, ParcelSheet.returnBack, 'return', l10n.pcDoneReturn);
+        await _withSheet(
+          p,
+          ParcelSheet.returnBack,
+          'return',
+          l10n.pcDoneReturn,
+        );
       case _Menu.lostOrDamaged:
         await _withSheet(
           p,
@@ -127,7 +141,10 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
       case _Menu.note:
         await _withSheet(p, ParcelSheet.note, 'note', l10n.pcDoneNote);
       case _Menu.resend:
-        await _run(() => _repo.act(p.id, 'resend-otp'), done: l10n.pcDoneResend);
+        await _run(
+          () => _repo.act(p.id, 'resend-otp'),
+          done: l10n.pcDoneResend,
+        );
       case _Menu.edit:
         await context.push(AppRoutes.parcelEdit(p.id));
       case _Menu.cancel:
@@ -158,7 +175,10 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
     final items = <PopupMenuEntry<_Menu>>[
       if (p != null && m != null) ...[
         if (m.canFlag)
-          PopupMenuItem(value: _Menu.problem, child: Text(l10n.pcActReportProblem)),
+          PopupMenuItem(
+            value: _Menu.problem,
+            child: Text(l10n.pcActReportProblem),
+          ),
         if (m.canReturn)
           PopupMenuItem(value: _Menu.sendBack, child: Text(l10n.pcActReturn)),
         if (m.canException)
@@ -211,14 +231,18 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
   Widget? _bar(Parcel p) {
     final l10n = context.l10n;
     final m = p.me;
-    final onRoad = p.status == 'DISPATCHED' || p.status == 'IN_TRANSIT';
     final actions = <(String, IconData, VoidCallback)>[
       if (m.canDispatch)
         (
           l10n.pcActDispatch,
           Icons.handshake_outlined,
           () => unawaited(
-            _withSheet(p, ParcelSheet.dispatch, 'dispatch', l10n.pcDoneDispatch),
+            _withSheet(
+              p,
+              ParcelSheet.dispatch,
+              'dispatch',
+              l10n.pcDoneDispatch,
+            ),
           ),
         ),
       if (m.canGateIn)
@@ -257,7 +281,9 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
             ),
           ),
         ),
-      if (m.canVerifyOtp && !m.isRecipient && !(m.isSender && p.status == 'RETURN_IN_TRANSIT'))
+      if (m.canVerifyOtp &&
+          !m.isRecipient &&
+          !(m.isSender && p.status == 'RETURN_IN_TRANSIT'))
         (
           l10n.pcActEnterCode,
           Icons.pin_outlined,
@@ -272,7 +298,9 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
           () => unawaited(
             _withSheet(
               p,
-              onRoad ? ParcelSheet.checkpoint : ParcelSheet.returnCheckpoint,
+              p.status.startsWith('RETURN')
+                  ? ParcelSheet.returnCheckpoint
+                  : ParcelSheet.checkpoint,
               'checkpoint',
               l10n.pcDoneCheckpoint,
             ),
@@ -452,9 +480,7 @@ class _Who extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: Text(title == null ? name : '$name, $title'),
-          ),
+          Expanded(child: Text(title == null ? name : '$name, $title')),
         ],
       ),
     );
@@ -478,11 +504,7 @@ class _EventTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final e = event;
     final who = e.actor?.display(bangla: bangla);
-    final parts = [
-      ?who,
-      ?e.location,
-      DateFmt.dateTime(e.createdAt, lang),
-    ];
+    final parts = [?who, ?e.location, DateFmt.dateTime(e.createdAt, lang)];
     return ListRow(
       leading: Icon(parcelEventIcon(e.type)),
       title: parcelEventLabel(l10n, e.type),
@@ -493,21 +515,30 @@ class _EventTile extends ConsumerWidget {
       trailing: e.photoFileId == null
           ? null
           : IconButton(
-              icon: Icon(Icons.photo_outlined, color: theme.colorScheme.primary),
+              icon: Icon(
+                Icons.photo_outlined,
+                color: theme.colorScheme.primary,
+              ),
               tooltip: l10n.pcViewPhoto,
-              onPressed: () => unawaited(_showPhoto(context, ref, e.photoFileId!)),
+              onPressed: () =>
+                  unawaited(_showPhoto(context, ref, e.photoFileId!)),
             ),
     );
   }
 
-  Future<void> _showPhoto(BuildContext context, WidgetRef ref, String id) async {
+  Future<void> _showPhoto(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
     final l10n = context.l10n;
     try {
       final bytes = await ref.read(filesRepositoryProvider).download(id);
       if (!context.mounted || bytes == null) return;
       await showDialog<void>(
         context: context,
-        builder: (_) => Dialog(child: InteractiveViewer(child: Image.memory(bytes))),
+        builder: (_) =>
+            Dialog(child: InteractiveViewer(child: Image.memory(bytes))),
       );
     } on ApiException {
       if (!context.mounted) return;

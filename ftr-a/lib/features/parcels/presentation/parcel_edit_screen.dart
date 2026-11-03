@@ -35,10 +35,7 @@ class ParcelEditScreen extends ConsumerWidget {
     return ref
         .watch(parcelDetailProvider(id))
         .when(
-          loading: () => Scaffold(
-            appBar: AppBar(),
-            body: const SkeletonList(),
-          ),
+          loading: () => Scaffold(appBar: AppBar(), body: const SkeletonList()),
           error: (_, _) => Scaffold(
             appBar: AppBar(),
             body: ErrorState(
@@ -90,11 +87,8 @@ class _FormState extends ConsumerState<_Form> {
     super.dispose();
   }
 
-  bool get _forcedConfidential => const {
-    'CONFIDENTIAL',
-    'LEGAL_DOCS',
-    'TENDER_BID',
-  }.contains(_category);
+  bool get _forcedConfidential =>
+      const {'CONFIDENTIAL', 'LEGAL_DOCS', 'TENDER_BID'}.contains(_category);
 
   Future<void> _pickRecipient() async {
     final pick = await showPersonPicker(
@@ -226,12 +220,7 @@ class _FormState extends ConsumerState<_Form> {
                             _errors['recipient']!,
                             style: TextStyle(color: context.bogcl.danger),
                           ))
-                  : Text(
-                      [
-                        ?recipient.title,
-                        ?_recipientWhere,
-                      ].join(' · '),
-                    ),
+                  : Text([?recipient.title, ?_recipientWhere].join(' · ')),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => unawaited(_pickRecipient()),
             ),
