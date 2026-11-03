@@ -130,11 +130,21 @@ export default function ApprovalDetailDrawer({
             </div>
           </div>
 
+          {!decided && (
+            <p className="apv-why">
+              {trail.length > 0
+                ? t(
+                  `Endorsed by ${trail.map((s) => s.officerName).join(', ')}. It is now with you for the final decision.`,
+                  `সুপারিশ করেছেন ${trail.map((s) => s.officerName).join(', ')}। এখন চূড়ান্ত সিদ্ধান্তের জন্য আপনার কাছে।`,
+                  lang,
+                )
+                : t(`Sent to you by ${item.requester} for your decision.`, `${item.requester} সিদ্ধান্তের জন্য আপনার কাছে পাঠিয়েছেন।`, lang)}
+            </p>
+          )}
+
           <dl className="apv-facts">
             <div><dt><Building2 size={13} /> {t('Department', 'বিভাগ', lang)}</dt><dd>{item.dept}</dd></div>
             <div><dt><CalendarClock size={13} /> {t('Submitted', 'দাখিল', lang)}</dt><dd>{item.date}</dd></div>
-            <div><dt><Hash size={13} /> {t('Reference', 'রেফারেন্স', lang)}</dt><dd className="mono">{item.sapDocRef}</dd></div>
-            <div><dt><Layers size={13} /> {t('Source', 'উৎস', lang)}</dt><dd>{t(SOURCE_LABEL[sourceKey][0], SOURCE_LABEL[sourceKey][1], lang)}</dd></div>
           </dl>
 
           <section className="apv-section">
@@ -204,6 +214,14 @@ export default function ApprovalDetailDrawer({
               )}
             </section>
           )}
+
+          <details className="apv-ref-details">
+            <summary>{t('Reference details', 'রেফারেন্স তথ্য', lang)}</summary>
+            <dl className="apv-facts">
+              <div><dt><Hash size={13} /> {t('Reference', 'রেফারেন্স', lang)}</dt><dd className="mono">{item.sapDocRef}</dd></div>
+              <div><dt><Layers size={13} /> {t('Came from', 'উৎস', lang)}</dt><dd>{t(SOURCE_LABEL[sourceKey][0], SOURCE_LABEL[sourceKey][1], lang)}</dd></div>
+            </dl>
+          </details>
         </div>
 
         <footer className="apv-drawer-foot">

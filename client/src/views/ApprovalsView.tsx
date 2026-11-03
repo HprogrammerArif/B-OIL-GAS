@@ -2,13 +2,11 @@ import { useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  ClipboardCheck, Check, Search, Clock, Wallet, ShieldCheck, RefreshCw, Inbox,
-  X, Flame, History, ArrowUpDown, SearchX, ListChecks,
+  ClipboardCheck, Check, Search, Inbox, X, Flame, History, ArrowUpDown, SearchX, ListChecks,
 } from 'lucide-react';
 
 import { useApprovalStore } from '../store/approvalStore';
 import { useCan } from '../auth/session';
-import { nowTime } from '../lib/clock';
 import { CATEGORY_LABELS, useMyApprovalQueue } from './approvals/config';
 import { formatTaka, formatTakaCompact, type SortKey } from './approvals/format';
 import { SLA_URGENT_MINUTES, slaLabel, slaMinutesLeft, useNow } from '../lib/sla';
@@ -35,8 +33,6 @@ export default function ApprovalsView({ lang }: ViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>('sla');
   const [openId, setOpenId] = useState<string | null>(null);
   const [batchOpen, setBatchOpen] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(() => nowTime(lang));
 
   const categories = cfg?.categories ?? [];
   const canBatch = canDecide && (cfg?.canBatch ?? false);
@@ -78,6 +74,19 @@ export default function ApprovalsView({ lang }: ViewProps) {
   const approvedCount = decidedItems.filter((d) => d.decisionStatus !== 'rejected').length;
   const returnedCount = decidedItems.length - approvedCount;
 
+  const bn = (n: number) => n.toLocaleString('bn-BD');
+  const verdict = isPending
+    ? approvalItems.length === 0
+      ? t('You are all caught up. Nothing is waiting for your signature.', 'সব নিষ্পন্ন। আপনার স্বাক্ষরের অপেক্ষায় কিছু নেই।', lang)
+      : t(
+        `${approvalItems.length} ${approvalItems.length === 1 ? 'file needs' : 'files need'} your decision${totalPendingCost > 0 ? `, worth ${formatTakaCompact(totalPendingCost, lang)}` : ''}.${dueSoonItems.length > 0 && nextDue !== null ? ` ${dueSoonItems.length} due within 12 hours (next: ${slaLabel(nextDue, lang).toLowerCase()}).` : ''}`,
+        `${bn(approvalItems.length)}টি নথিতে আপনার সিদ্ধান্ত প্রয়োজন${totalPendingCost > 0 ? `, মোট ${formatTakaCompact(totalPendingCost, lang)}` : ''}।${dueSoonItems.length > 0 && nextDue !== null ? ` ${bn(dueSoonItems.length)}টির সময়সীমা ১২ ঘণ্টার মধ্যে; সবচেয়ে কাছেরটি: ${slaLabel(nextDue, lang)}।` : ''}`,
+        lang,
+      )
+    : decidedItems.length === 0
+      ? t('You have not decided on any file yet.', 'আপনি এখনো কোনো নথির সিদ্ধান্ত দেননি।', lang)
+      : t(`You decided on ${decidedItems.length}: ${approvedCount} approved, ${returnedCount} sent back.`, `আপনি ${bn(decidedItems.length)}টির সিদ্ধান্ত দিয়েছেন: ${bn(approvedCount)}টি অনুমোদিত, ${bn(returnedCount)}টি ফেরত।`, lang);
+
   const openItem = openId ? [...approvalItems, ...decidedItems].find((i) => i.id === openId) ?? null : null;
   const openIndex = openItem ? filteredItems.findIndex((i) => i.id === openItem.id) : -1;
   const hasActiveFilter = selectedCategory !== 'all' || dueSoonOnly || outcome !== 'all' || !!query;
@@ -103,16 +112,6 @@ export default function ApprovalsView({ lang }: ViewProps) {
 
   const toggleSelectAll = () =>
     setSelectedIds(allVisibleSelected ? [] : filteredItems.map((i) => i.id));
-
-  const handleRefresh = () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    window.setTimeout(() => {
-      setRefreshing(false);
-      setLastUpdated(nowTime(lang));
-      showToast(t('Queue is up to date.', 'তালিকা হালনাগাদ আছে।', lang), 'info');
-    }, 700);
-  };
 
   /** After deciding from the drawer, move on to the next request in the list (or close at the end). */
   const nextIdAfter = (id: string): string | null => {
@@ -167,80 +166,17 @@ export default function ApprovalsView({ lang }: ViewProps) {
       <PageHeader
         title={t(cfg.title[0], cfg.title[1], lang)}
         description={t(cfg.description[0], cfg.description[1], lang)}
-        actions={
-          <>
-            <span className="apv-updated"><Clock size={12} /> {t(`Updated ${lastUpdated}`, `হালনাগাদ ${lastUpdated}`, lang)}</span>
-            <Button variant="secondary" size="sm" icon={<RefreshCw size={13} className={refreshing ? 'apv-spin' : ''} />} onClick={handleRefresh} disabled={refreshing}>
-              {t('Refresh', 'রিফ্রেশ', lang)}
-            </Button>
-          </>
-        }
       />
 
-      {/* KPI ribbon */}
-      <div className="apv-kpis">
-        <div className="apv-kpi red">
-          <div className="apv-kpi-top">
-            <span>{t('Pending in queue', 'অনুমোদনের অপেক্ষায়', lang)}</span>
-            <i><ClipboardCheck size={16} /></i>
-          </div>
-          <strong>{approvalItems.length}</strong>
-          <small>
-            {approvalItems.length === 0
-              ? t('You are all caught up', 'সব নিষ্পন্ন হয়েছে', lang)
-              : t(
-                `${approvalItems.length === 1 ? '1 file needs' : `${approvalItems.length} files need`} your signature`,
-                `${approvalItems.length}টি নথি আপনার স্বাক্ষরের অপেক্ষায়`,
-                lang,
-              )}
-          </small>
-        </div>
-
-        <button
-          type="button"
-          className={`apv-kpi warn clickable ${dueSoonOnly && isPending ? 'active' : ''}`}
-          disabled={dueSoonItems.length === 0}
-          onClick={() => { switchTab('pending'); setDueSoonOnly(true); }}
-          aria-pressed={dueSoonOnly && isPending}
-        >
-          <div className="apv-kpi-top">
-            <span>{t('Due within 12 hours', '১২ ঘণ্টার মধ্যে সময়সীমা', lang)}</span>
-            <i><Flame size={16} /></i>
-          </div>
-          <strong>{dueSoonItems.length}</strong>
-          <small>
-            {nextDue !== null && dueSoonItems.length > 0
-              ? `${t('Next due', 'সবচেয়ে কাছে', lang)}: ${slaLabel(nextDue, lang)}`
-              : t('Nothing urgent right now', 'এখন কোনো জরুরি নথি নেই', lang)}
-          </small>
-        </button>
-
-        <div className="apv-kpi gold">
-          <div className="apv-kpi-top">
-            <span>{t('Value awaiting decision', 'সিদ্ধান্তের অপেক্ষায় থাকা অর্থ', lang)}</span>
-            <i><Wallet size={16} /></i>
-          </div>
-          <strong title={formatTaka(totalPendingCost)}>{formatTakaCompact(totalPendingCost, lang)}</strong>
-          <small>{formatTaka(totalPendingCost)} · {t('across pending files', 'অপেক্ষমাণ নথিতে', lang)}</small>
-        </div>
-
-        <button
-          type="button"
-          className={`apv-kpi green clickable ${!isPending ? 'active' : ''}`}
-          onClick={() => switchTab('history')}
-          aria-pressed={!isPending}
-        >
-          <div className="apv-kpi-top">
-            <span>{t('Decided by you', 'আপনার নিষ্পন্ন সিদ্ধান্ত', lang)}</span>
-            <i><ShieldCheck size={16} /></i>
-          </div>
-          <strong>{decidedItems.length}</strong>
-          <small>
-            {decidedItems.length === 0
-              ? t('No decisions yet', 'এখনও কোনো সিদ্ধান্ত নেই', lang)
-              : t(`${approvedCount} approved · ${returnedCount} returned`, `${approvedCount}টি অনুমোদিত · ${returnedCount}টি ফেরত`, lang)}
-          </small>
-        </button>
+      {/* One-sentence verdict: what is waiting and how urgent */}
+      <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : ''}`} role="status">
+        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Flame size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
+        <p>{verdict}</p>
+        {isPending && dueSoonItems.length > 0 && (
+          <Button variant="secondary" size="sm" onClick={() => setDueSoonOnly((v) => !v)}>
+            {dueSoonOnly ? t('Show all', 'সব দেখান', lang) : t('Show urgent only', 'শুধু জরুরি দেখান', lang)}
+          </Button>
+        )}
       </div>
 
       {/* Tabs + search */}
@@ -286,14 +222,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
               </button>
             );
           })}
-          {isPending ? (
-            <button
-              type="button" className={`apv-filter urgent ${dueSoonOnly ? 'active' : ''}`}
-              onClick={() => setDueSoonOnly((v) => !v)} aria-pressed={dueSoonOnly}
-            >
-              <Flame size={12} /> {t('Due soon', 'শীঘ্রই সময়সীমা', lang)} <b>{dueSoonItems.length}</b>
-            </button>
-          ) : (
+          {!isPending && (
             (['approved', 'rejected'] as const).map((o) => (
               <button key={o} type="button" className={`apv-filter ${outcome === o ? 'active' : ''}`} onClick={() => setOutcome(outcome === o ? 'all' : o)} aria-pressed={outcome === o}>
                 {o === 'approved' ? t('Approved', 'অনুমোদিত', lang) : t('Returned', 'ফেরত', lang)}{' '}
@@ -317,7 +246,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
       </div>
 
       {/* List */}
-      <div className="apv-list-wrap" aria-busy={refreshing}>
+      <div className="apv-list-wrap">
         <div className="apv-list-head">
           {isPending && canBatch && filteredItems.length > 0 ? (
             <label className="apv-selectall">
@@ -333,24 +262,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
           </span>
         </div>
 
-        {refreshing ? (
-          <div className="apv-list" role="status" aria-label={t('Refreshing the queue', 'তালিকা হালনাগাদ হচ্ছে', lang)}>
-            {Array.from({ length: Math.min(Math.max(filteredItems.length, 2), 4) }, (_, i) => (
-              <div key={i} className="apv-skel" aria-hidden>
-                <div className="apv-skel-col">
-                  <span className="skeleton w-20" />
-                  <span className="skeleton title w-70" />
-                  <span className="skeleton w-90" />
-                  <span className="skeleton w-40" />
-                </div>
-                <div className="apv-skel-col end">
-                  <span className="skeleton amount" />
-                  <span className="skeleton pill" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredItems.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="card">
             <EmptyState
               icon={hasActiveFilter ? <SearchX size={20} /> : <Inbox size={20} />}
