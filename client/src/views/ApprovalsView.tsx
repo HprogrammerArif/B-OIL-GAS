@@ -366,7 +366,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
             <li key={i.id}>
               <span>
                 <strong>{t(i.title, i.titleBn, lang)}</strong>
-                <small>{i.id} · {i.requester}</small>
+                <small>{i.requester} · {i.dept}</small>
               </span>
               <b>{i.amount ?? '—'}</b>
             </li>

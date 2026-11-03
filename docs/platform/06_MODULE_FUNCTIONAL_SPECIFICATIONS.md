@@ -888,6 +888,7 @@ stateDiagram-v2
 | BR-07-11 | Closure requires `IncidentClosure.safetySignedAt` before `managerSignedAt`; the HSE signatory cannot be the investigator (`safetyOfficerId ≠ investigatorId`) unless the site has one HSE officer (Setting `hse.allowSameInvestigatorClosure = false`). |
 | BR-07-12 | Severity 5 or `FATALITY` incidents auto-notify CHAIRMAN and DIRECTOR by SMS and require acknowledgement (CM-27). |
 | BR-07-13 | Zones are site master data (MOD-18 `hse.zones[siteId]`) seeded from the prototype's 10 Keraniganj zones. |
+| BR-07-UX | *Safety & Incidents* opens with one sentence (reporter: how many reports they filed and how many are still with the safety team; others: open, serious and government-reportable counts and days without a lost-time injury). Filters are status chips (all, still open, serious and open, needs government report, closed) with search; kind, plant area, severity and stage sit under *More filters*; the 5x5 risk grid is a collapsible tool hidden from reporters. Each card shows severity in words, kind, title, place and reporter, any injured person, the cause once found, a five-step progress bar, one next-step sentence per role and stage, and fix progress with the itemised fixes on demand. Incident number, shift, risk score and on-the-spot actions are under *Details*. |
 
 ### 8.5 Calculations
 `TRIR` and `safeDays` per §3.8. `LTIFR = LTI × 1,000,000 / manHours`. `capaCompletionPct = (COMPLETED + VERIFIED) / total`. `avgDaysToClose = mean(closedAt − reportedAt)`.
@@ -1130,6 +1131,7 @@ Vehicle status machine: `AVAILABLE → IN_TRANSIT → AVAILABLE`; `AVAILABLE →
 | BR-09-16 | Rating 1–5 by requester within 72 h of completion; `Driver.rating = mean(last 50 ratings)`. |
 | BR-09-17 | Vehicle registration auto-creates the MOD-05 asset (BR-05-15); `RETIRED` requires MOD-05 write-off approval. |
 | BR-09-18 | Driver enrolment requires `Employee` with role `DRIVER`, licence no. (`^[A-Z]{2}-BRTA-\d{4}-\d{4,6}$` or free with flag), class, expiry ≥ today + 30 days. |
+| BR-09-UX | The dispatch dialog (Fleet and the Transport dashboard) lists only free vehicles and drivers and checks fit before assigning: seats against passengers (too few seats blocks), requested vehicle type (a different type only warns), tanker hazmat certification and low fuel; for the driver, the licence class against the chosen vehicle (mismatch blocks), licence expiry (expired blocks, within 30 days warns), today's alcohol test (failed blocks, pending warns) and duty hours (10 h or more warns). Unsuitable options stay visible with the reason and cannot be chosen; Assign is disabled until a valid pair is chosen. The driver note is optional and not pre-filled. |
 
 ### 10.5 Calculations
 Examples: 2 stops, round trip → `estimatedCost = 1400 + 700 + 950 = 3050`; `estimatedKm = 38.4 × 1.3 × 2 = 99.84`. Duty: gate-out 08:00, gate-in 13:30 → +5.5 h; driver at 5.2 h before → 10.7 h ≥ 10 → `REST_REQUIRED`.
@@ -1244,6 +1246,7 @@ Punch has no state machine; `result` is final at acceptance.
 | BR-10-12 | Approver cannot approve own leave; HOD's leave goes to PLANT_GM/DIRECTOR (line manager chain); CHAIRMAN leave is informational (auto-approved, `isInformed`). |
 | BR-10-13 | Face biometric is **not** part of v1 (device adapter later); punch identity = authenticated session + device + geofence. **(prototype gap: fake face match.)** |
 | BR-10-14 | Monthly muster export (CSV/XLSX) per site/department with statuses and minutes; HR only; audited `EXPORT`. |
+| BR-10-UX | *Attendance & Leave* page opens with one plain sentence on the person's day (on duty since when and where / not punched in / on leave) plus how many of their leave requests are waiting for the manager. *My leave* shows per type "N days left", "x of y used" and a usage bar; each request shows dates and a plain status (waiting for your manager / approved / declined) without internal IDs. The leave form shows the days requested and the balance that would remain. The team view shows three counts (present, late, check-ins to review); pending team leave is listed once, in *Team leave requests*. |
 
 ### 11.5 Calculations
 Haversine: `a = sin²(Δφ/2) + cosφ₁·cosφ₂·sin²(Δλ/2)`, `d = 2R·atan2(√a, √(1−a))`, `R = 6,371,000 m`. Example: fence centre 23.7000, 90.3500 r 500; punch 23.7030, 90.3520 → Δφ 0.003° (333.6 m), Δλ 0.002° (≈ 203.5 m at that latitude) → d ≈ 390.8 m → inside. Late: shift 09:00, grace 15, IN 09:22 → LATE, `lateMinutes = 22`.
@@ -1379,6 +1382,7 @@ Advance: `PENDING_MANAGER → PENDING_FINANCE → APPROVED → (disbursedAt set)
 | BR-11-14 | Approver ≠ claimant; a HOD's claim goes to PLANT_GM/DIRECTOR; FINANCE staff claims go to Finance HOD then DIRECTOR. |
 | BR-11-15 | Payment: `voucherNo` from sequence `VCH`; BEFTN batch export (CSV) per day for the bank; `SETTLED` is terminal. **(prototype gap: `settled` unreachable.)** |
 | BR-11-16 | CSV export of claims (own / department / company by scope) with lines, flags, voucher; audited. |
+| BR-11-UX | *Expense claims* opens with one sentence: for an approver, how many claims need their decision, their total, and how many have waited over 5 days; for a claimant, claims sent back to fix, or what is being checked and what is approved for bank payment. The open claim leads with a plain next-step sentence per status and viewer (e.g. "Waiting for your department head to check the bills"; "Nothing for you to do"). Lists show submission date, claimant, purpose, amount and status without claim numbers; the claim number sits under *Reference details*. Amounts use lakh/crore grouping. |
 
 ### 12.5 Calculations (examples)
 - TADA G7–G8, Chattogram: depart Mon 06:00, return Wed 14:00 → Mon 18 h (100 %), Tue 24 h (100 %), Wed 14 h (100 %) → DA = 3 × 2,000 = 6,000. If return Wed 09:00 → Wed 9 h → still 100 %; return Wed 03:00 → 3 h → 0; return Wed 07:00 → 7 h → 50 % = 1,000.

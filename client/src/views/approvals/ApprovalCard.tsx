@@ -53,7 +53,6 @@ export default function ApprovalCard({
           {mode === 'pending' && item.urgency !== 'normal' && (
             <span className={`apv-chip urgency-${item.urgency}`}>{t(URGENCY_LABEL[item.urgency][0], URGENCY_LABEL[item.urgency][1], lang)}</span>
           )}
-          <span className="apv-ref">{item.id}</span>
         </div>
 
         <h3 className="apv-title">

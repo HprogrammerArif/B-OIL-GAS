@@ -203,6 +203,22 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
   if (!user) return null;
 
   const siteLabel = (id: ShiftWorker['site']) => t(...SITES[id].label, lang);
+  const bn = (n: number) => n.toLocaleString('bn-BD');
+  const requestedDays = fromDate && toDate ? parseDays(fromDate, toDate) : 0;
+  const pendingMine = myLeaves.filter((l) => l.status === 'pending').length;
+  const punchedOutToday = !!myRecord && myRecord.outTime !== 'On Duty' && myRecord.outTime !== '-' && !onLeaveToday;
+
+  /** One plain sentence: where the person stands right now and what to do next. */
+  const dayStatus = onLeaveToday
+    ? t('You are on approved leave today. No punch is needed.', 'আজ আপনি অনুমোদিত ছুটিতে আছেন। পাঞ্চ করতে হবে না।', lang)
+    : onDuty && myRecord
+      ? t(`You punched in at ${myRecord.inTime} at ${siteLabel(myRecord.site)}. Punch out when your shift ends.`, `আপনি ${myRecord.inTime}-এ ${siteLabel(myRecord.site)}-এ পাঞ্চ-ইন করেছেন। শিফট শেষে পাঞ্চ-আউট করুন।`, lang)
+      : punchedOutToday && myRecord
+        ? t(`You worked ${myRecord.inTime} to ${myRecord.outTime} today. Nothing more to do.`, `আজ আপনি ${myRecord.inTime} থেকে ${myRecord.outTime} পর্যন্ত কাজ করেছেন। আর কিছু করার নেই।`, lang)
+        : t(`You have not punched in yet. Be at ${siteLabel(defaultSite)} and tap Punch in.`, `আপনি এখনও পাঞ্চ-ইন করেননি। ${siteLabel(defaultSite)}-এ পৌঁছে পাঞ্চ-ইন চাপুন।`, lang);
+  const leaveStatus = pendingMine > 0
+    ? t(` ${pendingMine} leave ${pendingMine === 1 ? 'request is' : 'requests are'} waiting for your manager.`, ` ${bn(pendingMine)}টি ছুটির আবেদন ম্যানেজারের অপেক্ষায়।`, lang)
+    : '';
 
   return (
     <div className="view-container">
@@ -216,10 +232,15 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         meta={<span style={{ fontSize: 12, color: 'var(--text-3)' }}>{today()}</span>}
         actions={
           <Button variant="secondary" icon={<Plus size={14} />} onClick={() => setShowLeaveModal(true)} disabled={onLeaveToday}>
-            {t('Apply for leave', 'ছুটির আবেদন', lang)}
+            {t('Request leave', 'ছুটির আবেদন', lang)}
           </Button>
         }
       />
+
+      <p className={`lv-status ${onDuty ? 'ok' : ''}`} role="status">
+        {onLeaveToday ? <CalendarDays size={16} /> : onDuty ? <LogIn size={16} /> : <Clock size={16} />}
+        <span>{dayStatus}{leaveStatus}</span>
+      </p>
 
       <div className="responsive-col-2-eq" style={{ marginBottom: 20 }}>
         {/* Punch console */}
@@ -285,15 +306,15 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         {/* My leave */}
         <Card
           title={t('My leave', 'আমার ছুটি', lang)}
-          subtitle={t('Balances for the current year and your requests', 'চলতি বছরের ব্যালেন্স ও আপনার আবেদন', lang)}
+          subtitle={t(`Days you can still take in ${new Date().getFullYear()}, and where your requests stand`, `${new Date().getFullYear()} সালে আর কত দিন ছুটি নিতে পারবেন, এবং আবেদনের অবস্থা`, lang)}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+          <div className="lv-balances">
             {balances.map((b) => (
-              <div key={b.type} style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 10.5, color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>{t(...LEAVE_LABEL[b.type], lang)}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, marginTop: 2 }}>
-                  {b.left}<span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}> / {LEAVE_ENTITLEMENT[b.type]}</span>
-                </div>
+              <div key={b.type} className={`lv-balance ${b.left === 0 ? 'empty' : ''}`}>
+                <span className="lv-balance-name">{t(...LEAVE_LABEL[b.type], lang)}</span>
+                <strong>{t(`${b.left} ${b.left === 1 ? 'day' : 'days'} left`, `${bn(b.left)} দিন বাকি`, lang)}</strong>
+                <small>{t(`${b.used} of ${LEAVE_ENTITLEMENT[b.type]} used`, `${bn(LEAVE_ENTITLEMENT[b.type])}-এর মধ্যে ${bn(b.used)} ব্যবহৃত`, lang)}</small>
+                <div className="hs-bar" aria-hidden><span style={{ width: `${Math.min(100, (b.used / LEAVE_ENTITLEMENT[b.type]) * 100)}%` }} /></div>
               </div>
             ))}
           </div>
@@ -308,13 +329,13 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myLeaves.map((l) => (
-                <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border-1)', borderRadius: 8 }}>
+                <div key={l.id} className="lv-request">
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700 }}>{t(...LEAVE_LABEL[l.leaveType], lang)} · {l.days} {t(l.days === 1 ? 'day' : 'days', 'দিন', lang)}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{l.fromDate} → {l.toDate} · {l.id}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{l.fromDate} → {l.toDate}</div>
                   </div>
                   <StatusPill tone={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warn'}>
-                    {l.status === 'approved' ? t('Approved', 'অনুমোদিত', lang) : l.status === 'rejected' ? t('Declined', 'প্রত্যাখ্যাত', lang) : t('Pending', 'অপেক্ষমাণ', lang)}
+                    {l.status === 'approved' ? t('Approved', 'অনুমোদিত', lang) : l.status === 'rejected' ? t('Declined', 'প্রত্যাখ্যাত', lang) : t('Waiting for your manager', 'ম্যানেজারের অপেক্ষায়', lang)}
                   </StatusPill>
                 </div>
               ))}
@@ -341,11 +362,6 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
               <div className={`kpi-value ${teamStats.review ? 'text-amber' : ''}`}>{teamStats.review}</div>
               <div className="kpi-sub">{t('Punched in without a location fix', 'অবস্থান যাচাই ছাড়া পাঞ্চ-ইন', lang)}</div>
             </div>
-            <div className="kpi-card">
-              <div className="kpi-label">{t('Leave awaiting decision', 'সিদ্ধান্তের অপেক্ষায় ছুটি', lang)}</div>
-              <div className="kpi-value text-blue">{teamLeaves.filter((l) => l.status === 'pending').length}</div>
-              <div className="kpi-sub">{canApproveLeave ? t('Decide in Approvals', 'অনুমোদন কেন্দ্রে সিদ্ধান্ত নিন', lang) : t('Routed to the approving manager', 'অনুমোদনকারী ব্যবস্থাপকের কাছে পাঠানো', lang)}</div>
-            </div>
           </div>
 
           <Card
@@ -371,7 +387,6 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                     <tr key={r.id}>
                       <td>
                         <div style={{ fontWeight: 600 }}>{r.name}{r.id === user.empId ? ` (${t('you', 'আপনি', lang)})` : ''}</div>
-                        <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-3)' }}>{r.id}</div>
                       </td>
                       <td>
                         <div style={{ fontSize: 12 }}>{r.roleTitle}</div>
@@ -495,7 +510,7 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       <Modal
         open={showLeaveModal}
         onClose={() => { setShowLeaveModal(false); setLeaveError(null); }}
-        title={t('Apply for leave', 'ছুটির আবেদন', lang)}
+        title={t('Request leave', 'ছুটির আবেদন', lang)}
         icon={<CalendarDays size={16} />}
         size="sm"
         footer={
@@ -526,7 +541,13 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
           label={t('Reason', 'কারণ', lang)}
           required
           error={leaveError}
-          hint={fromDate && toDate ? t(`${parseDays(fromDate, toDate)} day(s) requested`, `${parseDays(fromDate, toDate)} দিন আবেদন`, lang) : undefined}
+          hint={requestedDays > 0
+            ? t(
+              `${requestedDays} ${requestedDays === 1 ? 'day' : 'days'} requested. You would have ${Math.max(0, (balances.find((b) => b.type === leaveType)?.left ?? 0) - requestedDays)} left.`,
+              `${bn(requestedDays)} দিন আবেদন। অনুমোদিত হলে বাকি থাকবে ${bn(Math.max(0, (balances.find((b) => b.type === leaveType)?.left ?? 0) - requestedDays))} দিন।`,
+              lang,
+            )
+            : undefined}
         >
           {(id) => <textarea id={id} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('e.g. Family event in Chattogram', 'যেমন: চট্টগ্রামে পারিবারিক অনুষ্ঠান', lang)} />}
         </FormField>

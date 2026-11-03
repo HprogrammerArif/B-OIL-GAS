@@ -1,22 +1,9 @@
-import React, { useState } from 'react';
-import { VehicleRequisition, Vehicle, Driver } from '../../store/fleetStore';
-import { t } from '../../types';
-import {
-  Car,
-  User,
-  ShieldCheck,
-  CheckCircle2,
-  X,
-  AlertTriangle,
-  Clock,
-  MapPin,
-  FileText,
-  Fuel,
-  Users,
-  Check,
-  Shield,
-  Gauge,
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import type { VehicleRequisition, Vehicle, Driver } from '../../store/fleetStore';
+import { t, type Lang } from '../../types';
+import { AlertTriangle, Car, Check, CheckCircle2, MapPin, UserRound, XCircle } from 'lucide-react';
+import { daysUntil } from '../../lib/clock';
+import { Button, FormField, Modal } from '../ui';
 
 interface AssignVehicleModalProps {
   isOpen: boolean;
@@ -25,9 +12,47 @@ interface AssignVehicleModalProps {
   vehicles: Vehicle[];
   drivers: Driver[];
   onConfirm: (reqId: string, vehiclePlate: string, driverId: string, dispatchNotes?: string) => void;
-  lang: 'en' | 'bn';
+  lang: Lang;
 }
 
+type Tone = 'ok' | 'warn' | 'bad';
+interface Check {
+  tone: Tone;
+  text: string;
+}
+
+const TYPE_LABEL: Record<Vehicle['type'], [string, string]> = {
+  executive: ['car', 'গাড়ি'],
+  microbus: ['microbus', 'মাইক্রোবাস'],
+  tanker: ['tanker', 'ট্যাংকার'],
+  pickup: ['pickup', 'পিকআপ'],
+};
+
+/** Vehicle type the requester asked for. */
+const REQUESTED_TYPE: Record<VehicleRequisition['requiredCapacity'], Vehicle['type']> = {
+  sedan_4: 'executive',
+  microbus_7: 'microbus',
+  pickup_4x4: 'pickup',
+  tanker_heavy: 'tanker',
+};
+
+/** Licence classes that may drive each vehicle type. */
+const LICENCE_FOR: Record<Vehicle['type'], Driver['licenseType'][]> = {
+  executive: ['Light Commercial', 'Heavy Commercial (HAZMAT)'],
+  pickup: ['Light Commercial', 'Heavy Commercial (HAZMAT)'],
+  microbus: ['PSV Microbus'],
+  tanker: ['Heavy Commercial (HAZMAT)'],
+};
+
+const LICENCE_LABEL: Record<Driver['licenseType'], [string, string]> = {
+  'Light Commercial': ['Light Commercial', 'লাইট কমার্শিয়াল'],
+  'PSV Microbus': ['PSV Microbus', 'পিএসভি মাইক্রোবাস'],
+  'Heavy Commercial (HAZMAT)': ['Heavy Commercial (HAZMAT)', 'হেভি কমার্শিয়াল (হ্যাজম্যাট)'],
+};
+
+const worst = (checks: Check[]): Tone => (checks.some((c) => c.tone === 'bad') ? 'bad' : checks.some((c) => c.tone === 'warn') ? 'warn' : 'ok');
+
+/** Dispatch dialog: pick a vehicle and driver that really fit the trip. Unsuitable ones are shown with the reason and cannot be chosen. */
 export default function AssignVehicleModal({
   isOpen,
   onClose,
@@ -37,617 +62,211 @@ export default function AssignVehicleModal({
   onConfirm,
   lang,
 }: AssignVehicleModalProps) {
-  // Filter for available roadworthy assets only
-  const availableVehicles = vehicles.filter((v) => v.status === 'available');
-  const availableDrivers = drivers.filter((d) => d.status === 'available');
+  const [plate, setPlate] = useState('');
+  const [driverId, setDriverId] = useState('');
+  const [notes, setNotes] = useState('');
 
-  const [selectedVehiclePlate, setSelectedVehiclePlate] = useState<string>(
-    availableVehicles[0]?.plate || ''
-  );
-  const [selectedDriverId, setSelectedDriverId] = useState<string>(
-    availableDrivers[0]?.id || ''
-  );
-  const [dispatchNotes, setDispatchNotes] = useState(
-    'Standard refinery corridor clearance. Adhere to 60 km/h expressway speed limit. Ensure vehicle return by designated roster.'
-  );
-  const [error, setError] = useState('');
+  const bn = (n: number) => (lang === 'bn' ? n.toLocaleString('bn-BD') : String(n));
+  const typeName = (type: Vehicle['type']) => t(...TYPE_LABEL[type], lang);
+  const people = (n: number) => t(`${n} ${n === 1 ? 'person' : 'people'}`, `${bn(n)} জন`, lang);
 
-  if (!isOpen || !requisition) return null;
+  const readyVehicles = useMemo(() => vehicles.filter((v) => v.status === 'available'), [vehicles]);
+  const readyDrivers = useMemo(() => drivers.filter((d) => d.status === 'available'), [drivers]);
 
-  const selectedVehicle = vehicles.find((v) => v.plate === selectedVehiclePlate);
-  const selectedDriver = drivers.find((d) => d.id === selectedDriverId);
-
-  const handleAssign = () => {
-    if (!selectedVehiclePlate || !selectedDriverId) {
-      setError(
-        t('Please select both a vehicle and an available driver.', 'দয়া করে গাড়ি ও চালক উভয়ই নির্বাচন করুন।', lang)
-      );
-      return;
+  const vehicleChecks = (v: Vehicle): Check[] => {
+    if (!requisition) return [];
+    const out: Check[] = [];
+    const need = requisition.passengersCount;
+    out.push(
+      v.capacitySeats >= need
+        ? { tone: 'ok', text: t(`${v.capacitySeats} seats for ${people(need)}`, `${bn(need)} জনের জন্য ${bn(v.capacitySeats)}টি আসন`, lang) }
+        : { tone: 'bad', text: t(`Only ${v.capacitySeats} seats, but ${people(need)} are travelling`, `মাত্র ${bn(v.capacitySeats)}টি আসন, কিন্তু যাচ্ছেন ${bn(need)} জন`, lang) },
+    );
+    const asked = REQUESTED_TYPE[requisition.requiredCapacity];
+    if (v.type !== asked) {
+      out.push({ tone: 'warn', text: t(`A ${typeName(asked)} was requested; this is a ${typeName(v.type)}`, `${typeName(asked)} চাওয়া হয়েছিল; এটি ${typeName(v.type)}`, lang) });
     }
+    if (v.type === 'tanker' && !v.hazmatCertified) {
+      out.push({ tone: 'bad', text: t('This tanker is not certified for hazardous cargo', 'এই ট্যাংকার বিপজ্জনক মালের জন্য সনদপ্রাপ্ত নয়', lang) });
+    }
+    if (v.fuelPct < 25) {
+      out.push({ tone: 'warn', text: t(`Fuel is low (${v.fuelPct}%)`, `জ্বালানি কম (${bn(v.fuelPct)}%)`, lang) });
+    }
+    return out;
+  };
 
-    onConfirm(requisition.id, selectedVehiclePlate, selectedDriverId, dispatchNotes);
+  const driverChecks = (d: Driver, v: Vehicle | undefined): Check[] => {
+    const out: Check[] = [];
+    if (v) {
+      const ok = LICENCE_FOR[v.type].includes(d.licenseType);
+      out.push(
+        ok
+          ? { tone: 'ok', text: t(`Licence (${t(...LICENCE_LABEL[d.licenseType], 'en')}) covers a ${typeName(v.type)}`, `লাইসেন্স (${t(...LICENCE_LABEL[d.licenseType], 'bn')}) দিয়ে ${typeName(v.type)} চালানো যায়`, lang) }
+          : {
+            tone: 'bad',
+            text: t(
+              `Licence is ${t(...LICENCE_LABEL[d.licenseType], 'en')}; a ${typeName(v.type)} needs ${LICENCE_FOR[v.type].map((l) => t(...LICENCE_LABEL[l], 'en')).join(' or ')}`,
+              `লাইসেন্স ${t(...LICENCE_LABEL[d.licenseType], 'bn')}; ${typeName(v.type)} চালাতে লাগে ${LICENCE_FOR[v.type].map((l) => t(...LICENCE_LABEL[l], 'bn')).join(' বা ')}`,
+              lang,
+            ),
+          },
+      );
+    }
+    const left = daysUntil(d.licenseExpiry);
+    if (Number.isFinite(left)) {
+      if (left < 0) out.push({ tone: 'bad', text: t(`Licence expired on ${d.licenseExpiry}`, `লাইসেন্সের মেয়াদ শেষ হয়েছে ${d.licenseExpiry}`, lang) });
+      else if (left <= 30) out.push({ tone: 'warn', text: t(`Licence expires in ${left} days (${d.licenseExpiry})`, `লাইসেন্সের মেয়াদ ${bn(left)} দিনে শেষ (${d.licenseExpiry})`, lang) });
+    }
+    if (d.breathalyzerToday === 'FAILED') out.push({ tone: 'bad', text: t('Failed today\'s alcohol test', 'আজকের অ্যালকোহল পরীক্ষায় অকৃতকার্য', lang) });
+    else if (d.breathalyzerToday === 'PENDING') out.push({ tone: 'warn', text: t('Today\'s alcohol test is not done yet', 'আজকের অ্যালকোহল পরীক্ষা এখনও হয়নি', lang) });
+    else out.push({ tone: 'ok', text: t('Passed today\'s alcohol test', 'আজকের অ্যালকোহল পরীক্ষায় উত্তীর্ণ', lang) });
+    if (d.dutyHoursToday >= 10) out.push({ tone: 'warn', text: t(`Already on duty ${d.dutyHoursToday} hours today`, `আজ ইতিমধ্যে ${bn(d.dutyHoursToday)} ঘণ্টা ডিউটি করেছেন`, lang) });
+    return out;
+  };
+
+  const vehicleRows = useMemo(
+    () => readyVehicles.map((v) => ({ v, checks: vehicleChecks(v) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [readyVehicles, requisition, lang],
+  );
+  const selectedVehicle = readyVehicles.find((v) => v.plate === plate);
+  const driverRows = useMemo(
+    () => readyDrivers.map((d) => ({ d, checks: driverChecks(d, selectedVehicle) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [readyDrivers, selectedVehicle, lang],
+  );
+
+  const firstGoodVehicle = vehicleRows.find((r) => worst(r.checks) !== 'bad')?.v.plate ?? '';
+  const firstGoodDriver = driverRows.find((r) => worst(r.checks) !== 'bad')?.d.id ?? '';
+
+  // Start each request on the best fit; move off a choice that stops fitting.
+  useEffect(() => {
+    if (!isOpen) return;
+    setNotes('');
+    setPlate(firstGoodVehicle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, requisition?.id]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const current = vehicleRows.find((r) => r.v.plate === plate);
+    if (!current || worst(current.checks) === 'bad') setPlate(firstGoodVehicle);
+  }, [isOpen, vehicleRows, plate, firstGoodVehicle]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const current = driverRows.find((r) => r.d.id === driverId);
+    if (!current || worst(current.checks) === 'bad') setDriverId(firstGoodDriver);
+  }, [isOpen, driverRows, driverId, firstGoodDriver]);
+
+  if (!requisition) return null;
+
+  const vehicleRow = vehicleRows.find((r) => r.v.plate === plate);
+  const driverRow = driverRows.find((r) => r.d.id === driverId);
+  const canConfirm = !!vehicleRow && !!driverRow && worst(vehicleRow.checks) !== 'bad' && worst(driverRow.checks) !== 'bad';
+  const nothingFits = vehicleRows.length > 0 && !firstGoodVehicle;
+
+  const confirm = () => {
+    if (!canConfirm) return;
+    onConfirm(requisition.id, plate, driverId, notes.trim() || undefined);
     onClose();
   };
 
+  const reasonOf = (checks: Check[]) => checks.find((c) => c.tone === 'bad')?.text;
+  const icon = (tone: Tone) => (tone === 'ok' ? <CheckCircle2 size={13} /> : tone === 'warn' ? <AlertTriangle size={13} /> : <XCircle size={13} />);
+  const renderChecks = (checks: Check[]) => (
+    <ul className="asg-checks">
+      {checks.map((c, i) => (
+        <li key={i} className={c.tone}>{icon(c.tone)} <span>{c.text}</span></li>
+      ))}
+    </ul>
+  );
+
   return (
-    <div
-      className="modal-bg"
-      onClick={onClose}
-      style={{
-        zIndex: 99999,
-        padding: '20px',
-        boxSizing: 'border-box',
-      }}
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={t('Assign a vehicle and driver', 'গাড়ি ও চালক বরাদ্দ করুন', lang)}
+      icon={<Car size={16} />}
+      size="md"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</Button>
+          <Button icon={<Check size={15} />} disabled={!canConfirm} onClick={confirm}>
+            {t('Assign and create trip pass', 'বরাদ্দ করুন ও ট্রিপ পাস তৈরি করুন', lang)}
+          </Button>
+        </>
+      }
     >
-      <div
-        className="fleet-modal-dialog"
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: '760px',
-          width: '95%',
-          maxHeight: '92vh',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: 'var(--surface-1)',
-          borderRadius: '18px',
-          overflow: 'hidden',
-          boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.1)',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* ─── 1. MODAL HEADER ─── */}
-        <div
-          className="fleet-modal-hd"
-          style={{
-            padding: '18px 28px',
-            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 55%, var(--brand-crimson-dark) 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid) 100%)',
-                color: 'var(--text-on-brand)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)',
-                flexShrink: 0,
-              }}
-            >
-              <ShieldCheck size={22} color="var(--text-on-brand)" />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: '16px',
-                    fontWeight: 800,
-                    color: 'var(--text-on-brand)',
-                    letterSpacing: '-0.2px',
-                  }}
-                >
-                  {t('Dispatch Desk: Assign Vehicle & Driver', 'ডেসপ্যাচ ডেস্ক: গাড়ি ও চালক বরাদ্দ', lang)}
-                </h3>
-                <span
-                  style={{
-                    backgroundColor: 'var(--status-warning-solid)',
-                    color: 'var(--text-1)',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    padding: '2px 9px',
-                    borderRadius: '6px',
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  #{requisition.id}
-                </span>
-              </div>
-              <p
-                style={{
-                  margin: '3px 0 0 0',
-                  fontSize: '12px',
-                  color: 'var(--text-inverse-2)',
-                  lineHeight: 1.4,
-                }}
-              >
-                {t('Requester:', 'আবেদনকারী:')} <strong>{requisition.requesterName}</strong> • {requisition.dept}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '10px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: 'var(--text-inverse-2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.color = 'var(--text-on-brand)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.color = 'var(--text-inverse-2)';
-            }}
-            title="Close"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* ─── 2. SCROLLABLE FORM BODY ─── */}
-        <div
-          className="fleet-modal-body"
-          style={{
-            flex: '1 1 auto',
-            overflowY: 'auto',
-            padding: '26px 32px',
-            backgroundColor: 'var(--surface-1)',
-            boxSizing: 'border-box',
-          }}
-        >
-          {error && (
-            <div
-              style={{
-                padding: '12px 16px',
-                borderRadius: '10px',
-                backgroundColor: 'var(--status-danger-bg)',
-                border: '1px solid var(--status-danger-border)',
-                color: 'var(--status-danger)',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '18px',
-              }}
-            >
-              <AlertTriangle size={16} />
-              <span>{error}</span>
-            </div>
+      <div className="asg-trip">
+        <strong><MapPin size={14} /> {requisition.from.split(',')[0]} → {requisition.to.split(',')[0]}</strong>
+        <span>
+          {t(
+            `${requisition.requesterName} (${requisition.dept}) needs a ${typeName(REQUESTED_TYPE[requisition.requiredCapacity])} for ${people(requisition.passengersCount)}, leaving ${requisition.departureTime}${requisition.tripType === 'round_trip' ? ', round trip' : ', one way'}.`,
+            `${requisition.requesterName} (${requisition.dept})-এর ${typeName(REQUESTED_TYPE[requisition.requiredCapacity])} দরকার, ${bn(requisition.passengersCount)} জনের জন্য, ছাড়বে ${requisition.departureTime}, ${requisition.tripType === 'round_trip' ? 'যাওয়া-আসা' : 'একমুখী'}।`,
+            lang,
           )}
-
-          {/* Trip Dossier Summary Box */}
-          <div
-            style={{
-              padding: '16px 20px',
-              borderRadius: '12px',
-              backgroundColor: 'var(--surface-0)',
-              border: '1px solid var(--border-1)',
-              marginBottom: '22px',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontWeight: 800,
-                  fontSize: '13.5px',
-                  color: 'var(--text-1)',
-                }}
-              >
-                <MapPin size={16} color="var(--status-info)" />
-                <span>
-                  {requisition.from.split(',')[0]} ➔ {requisition.to.split(',')[0]}
-                </span>
-              </div>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  padding: '3px 10px',
-                  borderRadius: '999px',
-                  backgroundColor: 'var(--status-info-bg)',
-                  color: 'var(--status-info-text)',
-                  border: '1px solid var(--status-info-border)',
-                }}
-              >
-                {requisition.tripType === 'round_trip' ? '🔄 Round Trip' : '➡️ One Way'}
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '12px',
-                fontSize: '12px',
-                color: 'var(--text-2)',
-                paddingTop: '6px',
-              }}
-            >
-              <div>
-                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Departure Time
-                </span>
-                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>{requisition.departureTime}</span>
-              </div>
-              <div>
-                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '10.5px', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Authorized Passengers
-                </span>
-                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>
-                  {requisition.passengersCount} Officials ({requisition.passengerNames.split(',')[0]}...)
-                </span>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: '10px',
-                paddingTop: '8px',
-                borderTop: '1px solid var(--border-1)',
-                fontSize: '11.5px',
-                color: 'var(--text-3)',
-                fontStyle: 'italic',
-              }}
-            >
-              &ldquo;{requisition.purpose}&rdquo;
-            </div>
-          </div>
-
-          {/* 1. Select Available Roadworthy Vehicle */}
-          <div className="notice-field-group" style={{ marginBottom: '22px' }}>
-            <div className="notice-field-label">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Car size={15} color="var(--status-info)" />
-                <span>{t('1. Select Available Roadworthy Vehicle from Fleet', '১. বহর থেকে প্রস্তুত যানবাহন নির্বাচন করুন', lang)}</span>
-              </span>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: 'var(--status-success-text)',
-                  backgroundColor: 'var(--status-success-bg)',
-                  padding: '2px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--status-success-border)',
-                }}
-              >
-                {availableVehicles.length} {t('Vehicles Ready', 'গাড়ি প্রস্তুত', lang)}
-              </span>
-            </div>
-
-            {availableVehicles.length === 0 ? (
-              <div
-                style={{
-                  padding: '14px',
-                  borderRadius: '10px',
-                  backgroundColor: 'var(--status-warning-bg)',
-                  border: '1px solid var(--status-warning-bright)',
-                  fontSize: '12px',
-                  color: 'var(--status-warning-text)',
-                }}
-              >
-                ⚠️ {t('All pool vehicles are currently in transit or undergoing maintenance.', 'সকল গাড়ি বর্তমানে সড়কে অথবা ওয়ার্কশপে রক্ষণাবেক্ষণাধীন।', lang)}
-              </div>
-            ) : (
-              <div>
-                <select
-                  value={selectedVehiclePlate}
-                  onChange={(e) => setSelectedVehiclePlate(e.target.value)}
-                  className="notice-select"
-                  style={{
-                    width: '100%',
-                    padding: '11px 16px',
-                    borderRadius: '10px',
-                    border: '1.5px solid var(--border-2)',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: 'var(--text-1)',
-                    backgroundColor: 'var(--surface-1)',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    marginBottom: '10px',
-                  }}
-                >
-                  {availableVehicles.map((v) => (
-                    <option key={v.id} value={v.plate}>
-                      {v.plate} — {v.model} ({v.capacitySeats} Seats | Fuel: {v.fuelPct}% Octane)
-                    </option>
-                  ))}
-                </select>
-
-                {/* Selected Vehicle Quick Details Card */}
-                {selectedVehicle && (
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      backgroundColor: 'var(--status-info-bg)',
-                      border: '1px solid var(--status-info-border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info-text)' }}>
-                        {selectedVehicle.model} ({selectedVehicle.plate})
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
-                        {selectedVehicle.location} • Odometer: {((selectedVehicle as any).odometerKm || selectedVehicle.nextServiceKm || 42350).toLocaleString()} km • Fuel: {selectedVehicle.fuelPct}%
-                      </div>
-                    </div>
-                    <span
-                      style={{
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        backgroundColor: 'var(--status-success-bg)',
-                        color: 'var(--status-success-text)',
-                        border: '1px solid var(--status-success-border)',
-                      }}
-                    >
-                      ROADWORTHY
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 2. Select Certified Driver On Duty */}
-          <div className="notice-field-group" style={{ marginBottom: '22px' }}>
-            <div className="notice-field-label">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <User size={15} color="var(--status-success)" />
-                <span>{t('2. Select Certified On-Duty Driver', '২. উপস্থিত সার্টিফাইড চালক বরাদ্দ করুন', lang)}</span>
-              </span>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 800,
-                  color: 'var(--status-success-text)',
-                  backgroundColor: 'var(--status-success-bg)',
-                  padding: '2px 8px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--status-success-border)',
-                }}
-              >
-                {availableDrivers.length} {t('Drivers Ready', 'চালক প্রস্তুত', lang)}
-              </span>
-            </div>
-
-            {availableDrivers.length === 0 ? (
-              <div
-                style={{
-                  padding: '14px',
-                  borderRadius: '10px',
-                  backgroundColor: 'var(--status-warning-bg)',
-                  border: '1px solid var(--status-warning-bright)',
-                  fontSize: '12px',
-                  color: 'var(--status-warning-text)',
-                }}
-              >
-                ⚠️ {t('No drivers are currently available (on trip, sick leave, or rest required).', 'কোনো চালক উপস্থিত নেই (সবাই ট্রিপে অথবা ছুটিতে আছেন)।', lang)}
-              </div>
-            ) : (
-              <div>
-                <select
-                  value={selectedDriverId}
-                  onChange={(e) => setSelectedDriverId(e.target.value)}
-                  className="notice-select"
-                  style={{
-                    width: '100%',
-                    padding: '11px 16px',
-                    borderRadius: '10px',
-                    border: '1.5px solid var(--border-2)',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: 'var(--text-1)',
-                    backgroundColor: 'var(--surface-1)',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    marginBottom: '10px',
-                  }}
-                >
-                  {availableDrivers.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name} ({d.phone}) — {d.licenseType} | Rating: ★{d.rating} | BAC: 0.00%
-                    </option>
-                  ))}
-                </select>
-
-                {/* Selected Driver Quick Details Card */}
-                {selectedDriver && (
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      backgroundColor: 'var(--status-success-bg)',
-                      border: '1px solid var(--status-success-border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-success-text)' }}>
-                        {selectedDriver.name} ({selectedDriver.phone})
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
-                        License: {selectedDriver.licenseNo} • Breathalyzer: <strong>{selectedDriver.breathalyzerToday || '0.00% BAC'}</strong>
-                      </div>
-                    </div>
-                    <span
-                      style={{
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        backgroundColor: 'var(--status-success-bg)',
-                        color: 'var(--status-success-text)',
-                        border: '1px solid var(--status-success-bright)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <CheckCircle2 size={11} />
-                      100% BAC PASSED
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 3. Dispatch Instructions */}
-          <div className="notice-field-group" style={{ marginBottom: '10px' }}>
-            <div className="notice-field-label">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <FileText size={14} color="var(--text-3)" />
-                <span>{t('Dispatch Instructions / Route Waypoints', 'ডেসপ্যাচ নির্দেশনা ও রুট নোট', lang)}</span>
-              </span>
-            </div>
-            <textarea
-              rows={3}
-              value={dispatchNotes}
-              onChange={(e) => setDispatchNotes(e.target.value)}
-              className="notice-textarea"
-              style={{
-                width: '100%',
-                padding: '11px 16px',
-                borderRadius: '10px',
-                border: '1.5px solid var(--border-2)',
-                fontSize: '13px',
-                lineHeight: 1.6,
-                color: 'var(--text-1)',
-                backgroundColor: 'var(--surface-1)',
-                outline: 'none',
-                boxSizing: 'border-box',
-                resize: 'vertical',
-                minHeight: '70px',
-              }}
-            />
-          </div>
-        </div>
-
-        {/* ─── 3. MODAL FOOTER ─── */}
-        <div
-          className="fleet-modal-ft"
-          style={{
-            padding: '16px 28px',
-            backgroundColor: 'var(--surface-0)',
-            borderTop: '1px solid var(--border-1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-3)' }}>
-            <ShieldCheck size={16} color="var(--status-success)" />
-            <span>Digital Trip Challan Pass will be generated instantly upon confirmation</span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                padding: '9px 18px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 600,
-                color: 'var(--text-2)',
-                backgroundColor: 'var(--surface-1)',
-                border: '1.5px solid var(--border-2)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--surface-2)';
-                e.currentTarget.style.borderColor = 'var(--border-3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--surface-1)';
-                e.currentTarget.style.borderColor = 'var(--border-2)';
-              }}
-            >
-              {t('Cancel', 'বাতিল', lang)}
-            </button>
-            <button
-              type="button"
-              disabled={availableVehicles.length === 0 || availableDrivers.length === 0}
-              onClick={handleAssign}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 22px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 700,
-                color: 'var(--text-on-brand)',
-                background:
-                  availableVehicles.length === 0 || availableDrivers.length === 0
-                    ? 'var(--text-inverse-2)'
-                    : 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid-dark) 100%)',
-                border: 'none',
-                cursor:
-                  availableVehicles.length === 0 || availableDrivers.length === 0
-                    ? 'not-allowed'
-                    : 'pointer',
-                boxShadow:
-                  availableVehicles.length === 0 || availableDrivers.length === 0
-                    ? 'none'
-                    : '0 4px 14px rgba(217, 119, 6, 0.35)',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                if (availableVehicles.length > 0 && availableDrivers.length > 0) {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 6px 18px rgba(217, 119, 6, 0.45)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (availableVehicles.length > 0 && availableDrivers.length > 0) {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(217, 119, 6, 0.35)';
-                }
-              }}
-            >
-              <CheckCircle2 size={15} />
-              <span>{t('Confirm Assignment & Dispatch Challan', 'বরাদ্দ নিশ্চিত করুন ও ডিজিটাল চালান তৈরি করুন', lang)}</span>
-            </button>
-          </div>
-        </div>
+        </span>
+        {requisition.purpose && <em>“{requisition.purpose}”</em>}
       </div>
-    </div>
+
+      <FormField label={t('Vehicle', 'গাড়ি', lang)} required hint={t('Only vehicles that are free now are listed.', 'শুধু এখন খালি গাড়ি দেখানো হচ্ছে।', lang)}>
+        {(id) =>
+          vehicleRows.length === 0 ? (
+            <p className="asg-empty"><AlertTriangle size={14} /> {t('No vehicle is free right now. All are on the road or in the workshop.', 'এখন কোনো গাড়ি খালি নেই। সবগুলো সড়কে অথবা ওয়ার্কশপে।', lang)}</p>
+          ) : (
+            <>
+              <select id={id} value={plate} onChange={(e) => setPlate(e.target.value)}>
+                {vehicleRows.map(({ v, checks }) => (
+                  <option key={v.id} value={v.plate} disabled={worst(checks) === 'bad'}>
+                    {v.plate} · {v.model} · {t(`${v.capacitySeats} seats`, `${bn(v.capacitySeats)}টি আসন`, lang)}
+                    {worst(checks) === 'bad' ? ` — ${reasonOf(checks)}` : ''}
+                  </option>
+                ))}
+              </select>
+              {nothingFits && (
+                <p className="asg-empty"><XCircle size={14} /> {t('None of the free vehicles fit this trip. Open the list to see why, or wait for one to return.', 'খালি কোনো গাড়িই এই ট্রিপের উপযোগী নয়। কারণ দেখতে তালিকা খুলুন, অথবা কোনোটি ফেরার অপেক্ষা করুন।', lang)}</p>
+              )}
+              {vehicleRow && renderChecks(vehicleRow.checks)}
+            </>
+          )
+        }
+      </FormField>
+
+      <FormField label={t('Driver', 'চালক', lang)} required hint={t('Only drivers who are free now are listed. The licence is checked against the chosen vehicle.', 'শুধু এখন খালি চালক দেখানো হচ্ছে। নির্বাচিত গাড়ির সঙ্গে লাইসেন্স মিলিয়ে দেখা হয়।', lang)}>
+        {(id) =>
+          driverRows.length === 0 ? (
+            <p className="asg-empty"><UserRound size={14} /> {t('No driver is free right now (on a trip, on leave or needs rest).', 'এখন কোনো চালক খালি নেই (ট্রিপে, ছুটিতে বা বিশ্রামে)।', lang)}</p>
+          ) : (
+            <>
+              <select id={id} value={driverId} onChange={(e) => setDriverId(e.target.value)}>
+                {driverRows.map(({ d, checks }) => (
+                  <option key={d.id} value={d.id} disabled={worst(checks) === 'bad'}>
+                    {d.name}
+                    {worst(checks) === 'bad' ? ` — ${reasonOf(checks)}` : ''}
+                  </option>
+                ))}
+              </select>
+              {vehicleRows.length > 0 && !firstGoodDriver && (
+                <p className="asg-empty"><XCircle size={14} /> {t('No free driver can take this vehicle. Open the list to see why, or pick another vehicle.', 'কোনো খালি চালক এই গাড়ি চালাতে পারবেন না। কারণ দেখতে তালিকা খুলুন, অথবা অন্য গাড়ি বেছে নিন।', lang)}</p>
+              )}
+              {driverRow && renderChecks(driverRow.checks)}
+            </>
+          )
+        }
+      </FormField>
+
+      <FormField label={t('Note for the driver (optional)', 'চালকের জন্য নোট (ঐচ্ছিক)', lang)}>
+        {(id) => (
+          <textarea
+            id={id}
+            rows={2}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t('e.g. Pick up the guest from gate 2 first', 'যেমন: আগে ২ নম্বর গেট থেকে অতিথিকে তুলুন', lang)}
+          />
+        )}
+      </FormField>
+    </Modal>
   );
 }

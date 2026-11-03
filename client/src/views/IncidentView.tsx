@@ -14,13 +14,10 @@ import {
   CapaActionItem,
 } from '../store/operationsStore';
 import { useEmployeeStore } from '../store/employeeStore';
+import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, Clock, Flame,
-  FileText, Plus, Eye, Zap, ShieldCheck, Activity, Camera,
-  HelpCircle, ChevronRight, Siren, Download, Share2, Filter,
-  Check, ArrowRight, UserCheck, AlertOctagon, Send, Wrench,
-  Search, X, CheckSquare, Calendar, Building, MapPin, HeartPulse,
-  HardHat, Award, User, RefreshCw, ChevronDown, ChevronUp, Layers, CheckCircle2
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, Zap, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, Award, ChevronDown, ChevronUp, SearchX,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const PLANT_ZONES = [
@@ -75,6 +72,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   // ── Filters & Search State ──
   const [activeTab, setActiveTab] = useState<'all' | 'spill_leak' | 'near_miss' | 'first_aid' | 'pressure_piping' | 'electrical_arc' | 'statutory'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [wizardError, setWizardError] = useState<string | null>(null);
+  const [quick, setQuick] = useState<'all' | 'open' | 'serious' | 'statutory' | 'closed'>('all');
   const [selectedZone, setSelectedZone] = useState<string>('All Plant Zones');
   const [selectedSeverity, setSelectedSeverity] = useState<number>(0); // 0 = all
   const [selectedStage, setSelectedStage] = useState<'all' | IncidentWorkflowStage>('all');
@@ -497,707 +496,379 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     );
   };
 
+  const bn = (n: number) => n.toLocaleString('bn-BD');
+  const isOpenInc = (i: IncidentItem) => i.capaStatus !== 'closed';
+  const quickCounts = {
+    all: visibleIncidents.length,
+    open: visibleIncidents.filter(isOpenInc).length,
+    serious: visibleIncidents.filter((i) => isOpenInc(i) && i.level >= 3).length,
+    statutory: visibleIncidents.filter((i) => i.statutoryReportable && isOpenInc(i)).length,
+    closed: visibleIncidents.filter((i) => !isOpenInc(i)).length,
+  };
+  const QUICK: { id: typeof quick; label: [string, string]; count: number }[] = [
+    { id: 'all', label: ['All', 'সব'], count: quickCounts.all },
+    { id: 'open', label: ['Still open', 'চলমান'], count: quickCounts.open },
+    { id: 'serious', label: ['Serious and open', 'গুরুতর ও চলমান'], count: quickCounts.serious },
+    { id: 'statutory', label: ['Needs government report', 'সরকারি রিপোর্ট দরকার'], count: quickCounts.statutory },
+    { id: 'closed', label: ['Closed', 'সমাপ্ত'], count: quickCounts.closed },
+  ];
+  const quickFiltered = filteredIncidents.filter((i) =>
+    quick === 'open' ? isOpenInc(i)
+      : quick === 'serious' ? isOpenInc(i) && i.level >= 3
+        : quick === 'statutory' ? i.statutoryReportable && isOpenInc(i)
+          : quick === 'closed' ? !isOpenInc(i)
+            : true,
+  );
+  const hasFilter = quick !== 'all' || activeTab !== 'all' || !!matrixFilter || selectedZone !== 'All Plant Zones' || selectedSeverity > 0 || selectedStage !== 'all' || !!searchQuery.trim();
+  const clearFilters = () => {
+    setQuick('all'); setActiveTab('all'); setMatrixFilter(null); setSelectedZone('All Plant Zones');
+    setSelectedSeverity(0); setSelectedStage('all'); setSearchQuery('');
+  };
+
+  const LEVEL_LABEL: Record<number, [string, string]> = {
+    1: ['Minor', 'সামান্য'], 2: ['Low', 'নিম্ন'], 3: ['Moderate', 'মাঝারি'], 4: ['Major', 'গুরুতর'], 5: ['Critical', 'চরম'],
+  };
+  const STAGES: IncidentWorkflowStage[] = ['reported', 'triaged', 'under_investigation', 'capa_execution', 'closed'];
+  const STAGE_LABEL: Record<string, [string, string]> = {
+    reported: ['Reported', 'দাখিল হয়েছে'],
+    triaged: ['Risk checked', 'ঝুঁকি যাচাই হয়েছে'],
+    under_investigation: ['Finding the cause', 'কারণ খোঁজা হচ্ছে'],
+    capa_execution: ['Fixing the problem', 'সমাধান চলছে'],
+    closed: ['Closed', 'সমাপ্ত'],
+  };
+
+  const verdictWarn = mode !== 'reporter' && (quickCounts.serious > 0 || quickCounts.statutory > 0);
+  const verdict = mode === 'reporter'
+    ? quickCounts.all === 0
+      ? t('You have not reported anything yet. If you see a hazard or something goes wrong, report it right away.', 'আপনি এখনও কিছু রিপোর্ট করেননি। কোনো বিপদ বা সমস্যা দেখলে সঙ্গে সঙ্গে রিপোর্ট করুন।', lang)
+      : t(`You reported ${quickCounts.all} ${quickCounts.all === 1 ? 'issue' : 'issues'}. ${quickCounts.open} ${quickCounts.open === 1 ? 'is' : 'are'} still being handled by the safety team.`, `আপনি ${bn(quickCounts.all)}টি বিষয় রিপোর্ট করেছেন। ${bn(quickCounts.open)}টি এখনও নিরাপত্তা দলের হাতে।`, lang)
+    : t(
+      `${quickCounts.open} ${quickCounts.open === 1 ? 'incident is' : 'incidents are'} open${quickCounts.serious > 0 ? `, ${quickCounts.serious} serious` : ''}${quickCounts.statutory > 0 ? `, ${quickCounts.statutory} to report to the government` : ''}. ${stats.safeDays} days without a lost-time injury.`,
+      `${bn(quickCounts.open)}টি ঘটনা চলমান${quickCounts.serious > 0 ? `, ${bn(quickCounts.serious)}টি গুরুতর` : ''}${quickCounts.statutory > 0 ? `, ${bn(quickCounts.statutory)}টি সরকারকে জানাতে হবে` : ''}। কর্মবিরতিজনিত আঘাত ছাড়া ${bn(stats.safeDays)} দিন।`,
+      lang,
+    );
+
+  /** Plain sentence per card: where the incident is and what the viewer should do. */
+  const nextStep = (inc: IncidentItem): string => {
+    const stage = inc.workflowStage || (inc.capaStatus === 'closed' ? 'closed' : 'under_investigation');
+    const items = inc.capaItems || [];
+    const done = items.filter((c) => c.status === 'completed').length;
+    const lead = mode === 'investigate';
+    switch (stage) {
+      case 'reported':
+      case 'triaged':
+        return lead
+          ? t('New report. Check the risk and start finding the cause.', 'নতুন রিপোর্ট। ঝুঁকি যাচাই করে কারণ খোঁজা শুরু করুন।', lang)
+          : t('Waiting for the safety team to check it. Nothing for you to do.', 'নিরাপত্তা দলের যাচাইয়ের অপেক্ষায়। আপনার কিছু করার নেই।', lang);
+      case 'under_investigation':
+        return lead
+          ? t('Find the root cause, then set the fixes.', 'মূল কারণ খুঁজে বের করে সমাধান ঠিক করুন।', lang)
+          : t('The safety team is finding the cause.', 'নিরাপত্তা দল কারণ খুঁজছে।', lang);
+      case 'capa_execution':
+        return lead
+          ? done === items.length && items.length > 0
+            ? t('All fixes are done. Verify on site and close the incident.', 'সব সমাধান শেষ। সাইটে যাচাই করে ঘটনাটি বন্ধ করুন।', lang)
+            : t(`${done} of ${items.length} fixes done. Follow up on the rest.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ। বাকিগুলো অনুসরণ করুন।`, lang)
+          : t(`${done} of ${items.length} fixes are done.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ।`, lang);
+      default:
+        return t('Closed and verified. Nothing more to do.', 'সমাপ্ত ও যাচাইকৃত। আর কিছু করার নেই।', lang);
+    }
+  };
+
   return (
     <div>
-      {/* ─── 1. TOP HEADER & INSTANT SAFETY CONTROLS ─── */}
-      <div className="flex-between mb-4" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--brand-slate-900)', margin: 0 }}>
-              {mode === 'reporter'
-                ? t('My Safety Reports', 'আমার নিরাপত্তা রিপোর্ট', lang)
-                : t('Safety & Incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
-            </h2>
-          </div>
-          <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
-            {mode === 'investigate'
-              ? t('Triage reports, run root-cause analysis and close corrective actions.', 'রিপোর্ট যাচাই, মূল কারণ বিশ্লেষণ ও সংশোধনমূলক ব্যবস্থা সম্পন্ন করুন।', lang)
-              : mode === 'oversight'
-                ? t('All reported incidents and their investigation status.', 'সব রিপোর্টকৃত ঘটনা ও তদন্তের অবস্থা।', lang)
-                : t('Report hazards and incidents, and follow up on what you reported.', 'বিপদ ও দুর্ঘটনা রিপোর্ট করুন এবং অগ্রগতি দেখুন।', lang)}
-          </p>
-        </div>
+      <PageHeader
+        title={mode === 'reporter' ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang) : t('Safety and incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
+        description={mode === 'investigate'
+          ? t('Check new reports, find the root cause and make sure each fix is done before closing.', 'নতুন রিপোর্ট যাচাই করুন, মূল কারণ খুঁজুন এবং বন্ধ করার আগে প্রতিটি সমাধান নিশ্চিত করুন।', lang)
+          : mode === 'oversight'
+            ? t('Every reported incident and where its investigation stands.', 'সব রিপোর্টকৃত ঘটনা ও তদন্তের অবস্থা।', lang)
+            : t('Report a hazard or incident and follow what happens to it.', 'বিপদ বা দুর্ঘটনা রিপোর্ট করুন এবং তার অগ্রগতি দেখুন।', lang)}
+        actions={
+          <>
+            {canInvestigate && (
+              <Button variant="outline-danger" icon={<Siren size={14} />} onClick={() => setShowEmergencyModal(true)}>
+                {t('Emergency alert', 'জরুরি সতর্কবার্তা', lang)}
+              </Button>
+            )}
+            <Button variant="secondary" icon={<Zap size={14} />} onClick={() => setShowQuickHazardModal(true)}>
+              {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
+            </Button>
+            <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setShowLogWizard(true); }}>
+              {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
+            </Button>
+          </>
+        }
+      />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {canInvestigate && (
-            <button
-              type="button"
-              className="btn-outline-danger"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
-              onClick={() => setShowEmergencyModal(true)}
-            >
-              <Siren size={15} color="var(--status-danger)" />
-              {t('Emergency Alert', 'জরুরি সতর্কবার্তা', lang)}
+      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
+        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+        <span>{verdict}</span>
+      </p>
+
+      {/* Find what you need: status chips, search, and the less-used filters */}
+      <div className="card mb-4 inc-filters">
+        <div className="inc-chips">
+          {QUICK.map((q) => (
+            <button key={q.id} type="button" className={`parcel-pill-tab ${quick === q.id ? 'active' : ''}`} onClick={() => setQuick(q.id)}>
+              {t(...q.label, lang)} ({q.count})
             </button>
+          ))}
+        </div>
+        <div className="inc-search">
+          <Search size={15} />
+          <input
+            type="text"
+            className="form-input"
+            placeholder={t('Search by title, place or who reported it', 'শিরোনাম, স্থান বা রিপোর্টকারী দিয়ে খুঁজুন', lang)}
+            aria-label={t('Search incidents', 'ঘটনা খুঁজুন', lang)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button type="button" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={15} /></button>
           )}
-
-          <button
-            type="button"
-            className="btn-sm-ghost"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, background: 'var(--status-purple-bg)', color: 'var(--status-purple)', border: '1px solid var(--status-purple-border)' }}
-            onClick={() => setShowQuickHazardModal(true)}
-          >
-            <Zap size={14} color="var(--status-purple)" />
-            {t('Quick Hazard Report', 'দ্রুত বিপদ রিপোর্ট', lang)}
-          </button>
-
-          <button
-            type="button"
-            className="btn-primary"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}
-            onClick={() => {
-              setWizardStep(1);
-              setShowLogWizard(true);
-            }}
-          >
-            <Plus size={15} />
-            {t('Report Incident / Near-Miss', 'নতুন ইনসিডেন্ট রিপোর্ট', lang)}
-          </button>
         </div>
-      </div>
-
-      {/* ─── 2. REFINERY SAFETY LEADERSHIP KPI DECK ─── */}
-      <div className="parcel-kpi-grid mb-4">
-        {/* Card 1: Safe Days */}
-        <div className="parcel-kpi-card" style={{ borderColor: 'var(--status-success-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-success-bg) 100%)' }}>
-          <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'var(--status-success-bg)', color: 'var(--status-success-text)' }}>
-              <ShieldCheck size={18} />
-            </div>
-            <span className="badge success" style={{ fontSize: '9.5px' }}>{t('Site-wide', 'সমগ্র সাইট', lang)}</span>
-          </div>
-          <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-success-text)' }}>{stats.safeDays}</div>
-            <div className="parcel-kpi-title">{t('Days Without Lost-Time Injury', 'কর্মদিবস হারানো দুর্ঘটনাবিহীন দিন', lang)}</div>
-            <div className="parcel-kpi-sub">
-              {t('Counted from the last lost-time injury', 'সর্বশেষ কর্মদিবস হারানো দুর্ঘটনা থেকে গণনা', lang)}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Open Investigations */}
-        <div
-          className={`parcel-kpi-card ${selectedStage === 'under_investigation' ? 'active' : ''}`}
-          onClick={() => setSelectedStage(selectedStage === 'under_investigation' ? 'all' : 'under_investigation')}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning)' }}>
-              <Clock size={18} />
-            </div>
-            <span className="badge warn" style={{ fontSize: '9.5px' }}>{t('Active', 'চলমান', lang)}</span>
-          </div>
-          <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-warning)' }}>{stats.open}</div>
-            <div className="parcel-kpi-title">{t('Open Issues & Investigations', 'চলমান তদন্ত ও সমাধান', lang)}</div>
-            <div className="parcel-kpi-sub">
-              {stats.closed} {t('Resolved Safely This Year', 'টি ঘটনা সফলভাবে সমাধান হয়েছে', lang)}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: CAPA Closure Rate */}
-        <div className="parcel-kpi-card" style={{ borderColor: 'var(--status-info-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-info-bg) 100%)' }}>
-          <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)' }}>
-              <CheckSquare size={18} />
-            </div>
-            <span className="badge info" style={{ fontSize: '9.5px' }}>{t('Target: >85%', 'লক্ষ্য: >৮৫%', lang)}</span>
-          </div>
-          <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-info-text)' }}>{stats.capaRate}%</div>
-            <div className="parcel-kpi-title">{t('Safety Fix Rate (CAPA)', 'নিরাপত্তা প্রতিকারের হার (CAPA)', lang)}</div>
-            <div className="parcel-kpi-sub">
-              {t('Fixing problems & preventing recurrence', 'সমস্যা সমাধান ও পুনরাবৃত্তি রোধ', lang)}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 4: Statutory Reportable SLA */}
-        <div
-          className={`parcel-kpi-card ${activeTab === 'statutory' ? 'active' : ''}`}
-          onClick={() => setActiveTab(activeTab === 'statutory' ? 'all' : 'statutory')}
-          style={{ cursor: 'pointer', borderColor: 'var(--status-danger-border)', background: 'linear-gradient(180deg, var(--surface-1) 0%, var(--status-danger-bg) 100%)' }}
-        >
-          <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)' }}>
-              <FileText size={18} />
-            </div>
-            <span className="badge danger" style={{ fontSize: '9.5px' }}>{t('Govt deadline', 'সরকারি সময়সীমা', lang)}</span>
-          </div>
-          <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-danger-text)' }}>{stats.statutory}</div>
-            <div className="parcel-kpi-title">{t('Govt-Reportable Issues (DoE)', 'সরকারিভাবে রিপোর্টযোগ্য বিষয়', lang)}</div>
-            <div className="parcel-kpi-sub">
-              {t('Explosives Dept Form B-12 Ready', 'বিস্ফোরক পরিদপ্তর ফর্ম বি-১২ প্রস্তুত', lang)}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 5: TRIR Safety Frequency */}
-        <div className="parcel-kpi-card">
-          <div className="parcel-kpi-top">
-            <div className="parcel-kpi-icon" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' }}>
-              <Activity size={18} />
-            </div>
-            <span className="badge meeting" style={{ fontSize: '9.5px' }}>{t('Level 3+', 'স্তর ৩+', lang)}</span>
-          </div>
-          <div>
-            <div className="parcel-kpi-val" style={{ color: 'var(--status-purple-text)' }}>{stats.critical}</div>
-            <div className="parcel-kpi-title">{t('Serious Incidents', 'গুরুতর ঘটনা', lang)}</div>
-            <div className="parcel-kpi-sub">
-              {t('Moderate, major or critical severity', 'মাঝারি, বড় বা সংকটপূর্ণ মাত্রা', lang)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 3. INTERACTIVE 5x5 RISK MATRIX ─── */}
-      <div className="card mb-4" style={{ overflow: 'hidden' }}>
-        <div className="card-hd">
-          <div className="card-hd-left">
-            <div className="card-hd-icon" style={{ background: 'var(--status-warning-bg)', color: 'var(--status-warning-text)' }}>
-              <Activity size={18} />
-            </div>
-            <div>
-              <div className="card-title">
-                {t('Risk Priority Grid: How Likely? × How Severe?', 'ঝুঁকি মূল্যায়ন গ্রিড: সম্ভাবনা × প্রভাব', lang)}
-              </div>
-              <div className="card-subtitle">
-                {t('Click any colored square to see factory issues with that risk rating', 'যেকোনো রঙের ঘরে ক্লিক করে নির্দিষ্ট ঝুঁকির ঘটনাগুলো ফিল্টার করুন', lang)}
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {matrixFilter && (
-              <button
-                type="button"
-                className="btn-sm-ghost"
-                style={{ fontSize: '11px', background: 'var(--surface-2)', color: 'var(--text-1)', fontWeight: 700 }}
-                onClick={() => setMatrixFilter(null)}
-              >
-                ✕ {t('Clear Matrix Filter', 'ম্যাট্রিক্স ফিল্টার মুছুন', lang)} (Severity {matrixFilter.level} × Chance {matrixFilter.likelihood})
-              </button>
-            )}
-            <span className="badge gold">{t('5×5 risk grid', '৫×৫ ঝুঁকি গ্রিড', lang)}</span>
-          </div>
-        </div>
-
-        <div className="card-body" style={{ overflowX: 'auto' }}>
-          <div style={{ minWidth: '600px' }}>
-            <div className="hse-risk-matrix-grid">
-              {/* Top Row: Headers */}
-              <div className="hse-matrix-header-cell" style={{ visibility: 'hidden' }}>-</div>
-              <div className="hse-matrix-header-cell">1. Very Rare</div>
-              <div className="hse-matrix-header-cell">2. Unlikely</div>
-              <div className="hse-matrix-header-cell">3. Possible</div>
-              <div className="hse-matrix-header-cell">4. Likely</div>
-              <div className="hse-matrix-header-cell">5. Almost Certain</div>
-
-              {/* Rows 5 down to 1 */}
-              {[5, 4, 3, 2, 1].map((lvl) => {
-                const rowLabel =
-                  lvl === 5 ? '5. Severe Disaster' :
-                  lvl === 4 ? '4. Serious Damage' :
-                  lvl === 3 ? '3. Moderate Issue' :
-                  lvl === 2 ? '2. Minor Problem' : '1. Negligible';
-
-                return (
-                  <React.Fragment key={lvl}>
-                    <div className="hse-matrix-row-label">{rowLabel}</div>
-                    {[1, 2, 3, 4, 5].map((prob) => {
-                      const score = lvl * prob;
-                      const riskClass =
-                        score >= 20 ? 'risk-crimson' :
-                        score >= 15 ? 'risk-red' :
-                        score >= 10 ? 'risk-orange' :
-                        score >= 5 ? 'risk-yellow' : 'risk-green';
-
-                      const matching = incidents.filter(i => i.level === lvl && (i.likelihood || 2) === prob);
-                      const isSelected = matrixFilter?.level === lvl && matrixFilter?.likelihood === prob;
-
-                      return (
-                        <div
-                          key={prob}
-                          className={`hse-matrix-cell ${riskClass} ${isSelected ? 'active-filter' : ''}`}
-                          onClick={() => setMatrixFilter(isSelected ? null : { level: lvl, likelihood: prob })}
-                          title={`Severity ${lvl} × Likelihood ${prob} = Score ${score}. Click to filter (${matching.length} incidents)`}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '9.5px', fontWeight: 800 }}>
-                            <span>{score}</span>
-                            <span>{score >= 15 ? 'EXTREME' : score >= 10 ? 'HIGH' : score >= 5 ? 'MED' : 'LOW'}</span>
-                          </div>
-
-                          <div style={{ marginTop: '2px' }}>
-                            {matching.map((m) => (
-                              <div
-                                key={m.id}
-                                style={{
-                                  fontSize: '9px',
-                                  fontWeight: 800,
-                                  background: 'rgba(0,0,0,0.6)',
-                                  color: 'var(--text-on-brand)',
-                                  padding: '1px 4px',
-                                  borderRadius: '3px',
-                                  whiteSpace: 'nowrap',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  marginTop: '2px'
-                                }}
-                              >
-                                ★ {m.incNo.split('-').slice(-2).join('-')}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-              <span>← Likelihood: Very Rare (1) to Almost Certain (5)</span>
-              <span>★ Factory issues placed in grid by calculated risk</span>
-              <span>Severity: Negligible (1) to Severe Disaster (5) ↑</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 4. EXPLORER TABS & ADVANCED SEARCH FILTER DOCK ─── */}
-      <div className="card mb-4" style={{ padding: '14px', borderRadius: 'var(--radius-md)' }}>
-        {/* Category Pills */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('all'); setMatrixFilter(null); }}
-          >
-            📋 {t('All Safety Records', 'সকল ইনসিডেন্ট', lang)} ({incidents.length})
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'spill_leak' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('spill_leak'); setMatrixFilter(null); }}
-          >
-            🛢️ {t('Oil & Fuel Spills', 'তেল / বিটুমিন নিঃসরণ', lang)}
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'near_miss' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('near_miss'); setMatrixFilter(null); }}
-          >
-            ⚡ {t('Near-Misses (Almost Happened)', 'নিয়ার-মিস ও বিপদ পর্যবেক্ষণ', lang)}
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'first_aid' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('first_aid'); setMatrixFilter(null); }}
-          >
-            🩹 {t('First-Aid & Health', 'প্রাথমিক চিকিৎসা ও আঘাত', lang)}
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'pressure_piping' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('pressure_piping'); setMatrixFilter(null); }}
-          >
-            ⚠️ {t('Pipes & Pressure Valves', 'চাপ ও পাইপলাইন', lang)}
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'electrical_arc' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('electrical_arc'); setMatrixFilter(null); }}
-          >
-            ⚙️ {t('Electrical & Machinery', 'বৈদ্যুতিক ও মেকানিক্যাল', lang)}
-          </button>
-          <button
-            type="button"
-            className={`parcel-pill-tab ${activeTab === 'statutory' ? 'active' : ''}`}
-            style={{ color: stats.statutory > 0 ? 'var(--status-danger)' : undefined }}
-            onClick={() => { setActiveTab('statutory'); setMatrixFilter(null); }}
-          >
-            🚨 {t('Govt-Reportable (Explosives Dept)', 'সরকারি নোটিশ রিপোর্টযোগ্য', lang)} ({stats.statutory})
-          </button>
-        </div>
-
-        {/* Search, Zone & Status Filter Controls */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', alignItems: 'center' }}>
-          {/* Live Search */}
-          <div style={{ position: 'relative' }}>
-            <Search size={15} style={{ position: 'absolute', left: '10px', top: '11px', color: 'var(--brand-slate-400)' }} />
-            <input
-              type="text"
-              className="form-input"
-              style={{ width: '100%', paddingLeft: '32px', height: '36px', fontSize: '12px' }}
-              placeholder={t('Search by issue #, keyword, location, or reporter...', 'আইডি, স্থান বা বিবরণ লিখে খুঁজুন...', lang)}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                style={{ position: 'absolute', right: '8px', top: '9px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--brand-slate-400)' }}
-              >
-                <X size={15} />
-              </button>
-            )}
-          </div>
-
-          {/* Zone Selector */}
-          <div>
-            <select
-              className="form-input"
-              style={{ width: '100%', height: '36px', fontSize: '12px' }}
-              value={selectedZone}
-              onChange={(e) => setSelectedZone(e.target.value)}
-            >
+        <details className="inc-more">
+          <summary><Filter size={13} /> {t('More filters', 'আরও ফিল্টার', lang)}</summary>
+          <div className="inc-more-grid">
+            <select className="form-input" value={activeTab} onChange={(e) => { setActiveTab(e.target.value as typeof activeTab); setMatrixFilter(null); }} aria-label={t('Kind of incident', 'ঘটনার ধরন', lang)}>
+              <option value="all">{t('Every kind of incident', 'সব ধরনের ঘটনা', lang)}</option>
+              <option value="spill_leak">{t('Oil and fuel spills', 'তেল / বিটুমিন নিঃসরণ', lang)}</option>
+              <option value="near_miss">{t('Near-misses and hazards', 'নিয়ার-মিস ও বিপদ', lang)}</option>
+              <option value="first_aid">{t('Injuries and first aid', 'আঘাত ও প্রাথমিক চিকিৎসা', lang)}</option>
+              <option value="pressure_piping">{t('Pipes and pressure', 'চাপ ও পাইপলাইন', lang)}</option>
+              <option value="electrical_arc">{t('Electrical and machinery', 'বৈদ্যুতিক ও যান্ত্রিক', lang)}</option>
+            </select>
+            <select className="form-input" value={selectedZone} onChange={(e) => setSelectedZone(e.target.value)} aria-label={t('Plant area', 'প্ল্যান্ট এলাকা', lang)}>
               {PLANT_ZONES.map((zone) => (
-                <option key={zone} value={zone}>{zone}</option>
+                <option key={zone} value={zone}>{zone === 'All Plant Zones' ? t('Every plant area', 'সব প্ল্যান্ট এলাকা', lang) : zone}</option>
+              ))}
+            </select>
+            <select className="form-input" value={selectedSeverity} onChange={(e) => setSelectedSeverity(Number(e.target.value))} aria-label={t('Severity', 'তীব্রতা', lang)}>
+              <option value={0}>{t('Any severity', 'যেকোনো তীব্রতা', lang)}</option>
+              {[1, 2, 3, 4, 5].map((l) => (
+                <option key={l} value={l}>{t(`${l} · ${LEVEL_LABEL[l][0]}`, `${bn(l)} · ${LEVEL_LABEL[l][1]}`, lang)}</option>
+              ))}
+            </select>
+            <select className="form-input" value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as 'all' | IncidentWorkflowStage)} aria-label={t('Stage', 'ধাপ', lang)}>
+              <option value="all">{t('Any stage', 'যেকোনো ধাপ', lang)}</option>
+              {STAGES.map((s) => (
+                <option key={s} value={s}>{t(...STAGE_LABEL[s], lang)}</option>
               ))}
             </select>
           </div>
-
-          {/* Severity Selector */}
-          <div>
-            <select
-              className="form-input"
-              style={{ width: '100%', height: '36px', fontSize: '12px' }}
-              value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(Number(e.target.value))}
-            >
-              <option value={0}>{t('All Severity Levels (1 to 5)', 'সকল তীব্রতা স্তর', lang)}</option>
-              <option value={1}>{t('Level 1: Minor (Routine Housekeeping)', 'লেভেল ১: সামান্য', lang)}</option>
-              <option value={2}>{t('Level 2: Low (Near-Miss / First-Aid)', 'লেভেল ২: নিম্ন', lang)}</option>
-              <option value={3}>{t('Level 3: Moderate (Hydrocarbon Leak)', 'লেভেল ৩: মাঝারি', lang)}</option>
-              <option value={4}>{t('Level 4: Major (High Heat / Pressure Trip)', 'লেভেল ৪: গুরুতর', lang)}</option>
-              <option value={5}>{t('Level 5: Critical (Refinery Emergency)', 'লেভেল ৫: চরম জরুরি', lang)}</option>
-            </select>
-          </div>
-
-          {/* Workflow Stage */}
-          <div>
-            <select
-              className="form-input"
-              style={{ width: '100%', height: '36px', fontSize: '12px' }}
-              value={selectedStage}
-              onChange={(e) => setSelectedStage(e.target.value as any)}
-            >
-              <option value="all">{t('All Workflow Stages', 'সকল পর্যায়', lang)}</option>
-              <option value="reported">{t('1. Reported', '১. দাখিলকৃত', lang)}</option>
-              <option value="triaged">{t('2. Risk Evaluated', '২. ঝুঁকি যাচাই', lang)}</option>
-              <option value="under_investigation">{t('3. Root Cause Investigation', '৩. তদন্তাধীন', lang)}</option>
-              <option value="capa_execution">{t('4. Fixing Problem (CAPA)', '৪. প্রতিকার চলমান', lang)}</option>
-              <option value="closed">{t('5. Closed & Verified', '৫. সমাপ্ত ও অনুমোদিত', lang)}</option>
-            </select>
-          </div>
-        </div>
+        </details>
       </div>
 
-      {/* ─── 5. INCIDENT REGISTRY CARDS ─── */}
-      <div className="incident-list">
-        {filteredIncidents.length === 0 ? (
-          <div className="card text-center" style={{ padding: '40px 20px', color: 'var(--brand-slate-500)' }}>
-            <ShieldCheck size={36} style={{ margin: '0 auto 10px', color: 'var(--status-success)', opacity: 0.8 }} />
-            <h4 style={{ margin: '0 0 4px', fontSize: '15px', color: 'var(--brand-slate-800)' }}>
-              {t('No safety incidents match current filter criteria', 'কোনো ইনসিডেন্ট পাওয়া যায়নি', lang)}
-            </h4>
-            <p style={{ margin: 0, fontSize: '12px' }}>
-              {t('All factory plant zones operating under normal safety parameters.', 'সকল প্ল্যান্ট এলাকা স্বাভাবিক ও নিরাপদ অবস্থায় পরিচালিত হচ্ছে।', lang)}
-            </p>
-          </div>
-        ) : (
-          filteredIncidents.map((inc) => {
-            const isExpanded = expandedIncidentId === inc.id;
-            const completedCount = (inc.capaItems || []).filter(c => c.status === 'completed').length;
-            const totalCapaCount = (inc.capaItems || []).length;
-            const capaPct = totalCapaCount > 0 ? Math.round((completedCount / totalCapaCount) * 100) : (inc.capaStatus === 'closed' ? 100 : 0);
-            const currentStage = inc.workflowStage || (inc.capaStatus === 'closed' ? 'closed' : 'capa_execution');
-            const typeMeta = INCIDENT_TYPE_META[inc.incidentType] || INCIDENT_TYPE_META.near_miss;
-
-            return (
-              <div key={inc.id} className={`incident-card l${inc.level}`}>
-                {/* Header Strip */}
-                <div className="inc-hd">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span className={`badge ${inc.level >= 4 ? 'danger' : inc.level === 3 ? 'warn' : 'info'}`} style={{ fontSize: '10px', fontWeight: 800 }}>
-                      Level {inc.level} · {inc.riskCategory ? inc.riskCategory.toUpperCase() : 'RISK'} (Score {inc.riskScore || (inc.level * 2)})
-                    </span>
-
-                    <span className="badge" style={{ background: 'var(--brand-slate-100)', color: typeMeta.color, border: `1px solid color-mix(in srgb, ${typeMeta.color} 25%, transparent)`, fontSize: '10px', fontWeight: 700 }}>
-                      {typeMeta.icon} {typeMeta.label}
-                    </span>
-
-                    <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                      {inc.incNo}
-                    </span>
-
-                    {inc.statutoryReportable && (
-                      <span className="badge danger" style={{ animation: 'pulse 1.5s infinite', fontSize: '9.5px' }}>
-                        🚨 {t('Govt Report (Explosives Dept)', 'সরকারিভাবে রিপোর্টযোগ্য', lang)}
-                      </span>
-                    )}
-
-                    {inc.fiveWhys && (
-                      <span className="badge gold" style={{ fontSize: '9.5px' }}>
-                        ✓ Root Cause Solved (5-Whys: {inc.fiveWhys.fishboneCategory})
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--brand-slate-400)' }}>
-                    <span>{inc.shift}</span>
-                    <span>•</span>
-                    <span>{inc.date}</span>
-                  </div>
-                </div>
-
-                {/* Workflow Progression Pipeline */}
-                <div className="hse-workflow-pipeline mb-2">
-                  <div className={`hse-pipeline-step ${currentStage === 'reported' ? 'active' : 'completed'}`}>
-                    1. {t('Reported', 'দাখিল', lang)}
-                  </div>
-                  <ChevronRight size={10} color="var(--text-muted)" />
-                  <div className={`hse-pipeline-step ${currentStage === 'triaged' ? 'active' : currentStage === 'reported' ? '' : 'completed'}`}>
-                    2. {t('Risk Evaluated', 'ঝুঁকি যাচাই', lang)}
-                  </div>
-                  <ChevronRight size={10} color="var(--text-muted)" />
-                  <div className={`hse-pipeline-step ${currentStage === 'under_investigation' ? 'active' : (currentStage === 'capa_execution' || currentStage === 'closed') ? 'completed' : ''}`}>
-                    3. {t('Root Cause Found', 'তদন্ত ও আরসিএ', lang)}
-                  </div>
-                  <ChevronRight size={10} color="var(--text-muted)" />
-                  <div className={`hse-pipeline-step ${currentStage === 'capa_execution' ? 'active' : currentStage === 'closed' ? 'completed' : ''}`}>
-                    4. {t('Fixing Problem (CAPA)', 'সিএপিএ প্রয়োগ', lang)}
-                  </div>
-                  <ChevronRight size={10} color="var(--text-muted)" />
-                  <div className={`hse-pipeline-step ${currentStage === 'closed' ? 'active' : ''}`}>
-                    5. {t('Approved & Closed', 'সমাপ্ত ও অনুমোদিত', lang)}
-                  </div>
-                </div>
-
-                {/* Title & Location */}
-                <h3 className="inc-title" style={{ fontSize: '15px', margin: '4px 0 2px' }}>
-                  {t(inc.title, inc.titleBn, lang)}
-                </h3>
-
-                <div className="inc-meta">
-                  <span>📍 <strong>{inc.plantZone || 'Keraniganj Complex'}</strong> • {inc.location}</span>
-                  <span style={{ marginLeft: '12px' }}>
-                    Reported by: <strong>{inc.reportedBy}</strong>
-                  </span>
-                </div>
-
-                {/* Immediate Containment Banner */}
-                {inc.immediateActionsTaken && (
-                  <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: 'var(--status-success-text)' }}>
-                    <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                      <ShieldCheck size={14} color="var(--status-success-text)" />
-                      {t('Immediate Safety Containment Actions Executed:', 'তাৎক্ষণিক গৃহীত নিরাপত্তা পদক্ষেপ:', lang)}
-                    </div>
-                    <div>{inc.immediateActionsTaken}</div>
-                  </div>
-                )}
-
-                {/* Injured Person Info (if any) */}
-                {inc.personsInvolved && inc.personsInvolved.some(p => p.involvementType === 'injured') && (
-                  <div style={{ background: 'var(--status-danger-bg)', border: '1px solid var(--status-danger-border)', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '11.5px', color: 'var(--status-danger-text)' }}>
-                    <div style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                      <HeartPulse size={14} color="var(--status-danger)" />
-                      {t('First-Aid / Occupational Health Record:', 'পেশাগত স্বাস্থ্য ও প্রাথমিক চিকিৎসা বিবরণ:', lang)}
-                    </div>
-                    {inc.personsInvolved.filter(p => p.involvementType === 'injured').map((p, idx) => (
-                      <div key={idx}>
-                        <strong>{p.name}</strong> ({p.role}) — {p.injuryNature}. <em>{p.treatmentGiven}</em>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Root Cause Analysis Summary */}
-                <div style={{ background: 'var(--brand-slate-100)', padding: '10px 12px', borderRadius: '6px', margin: '8px 0', fontSize: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '6px' }}>
-                    <div>
-                      <strong>{t('Root Cause:', 'মূল কারণ:', lang)}</strong> {inc.rootCause}
-                    </div>
-                    {inc.fiveWhys?.fishboneCategory && (
-                      <span className="badge" style={{ background: 'var(--status-info-bg)', color: 'var(--status-info-text)', fontSize: '9.5px', fontWeight: 800 }}>
-                        {inc.fiveWhys.fishboneCategory.toUpperCase()} CAUSE
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* CAPA Progress Bar & Summary */}
-                <div style={{ margin: '10px 0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', marginBottom: '4px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700 }}>
-                      <CheckSquare size={13} color="var(--brand-crimson)" />
-                      <span>{t('Corrective & Preventive Actions (CAPA):', 'সংশোধনমূলক ও প্রতিরোধমূলক ব্যবস্থা:', lang)}</span>
-                      <span style={{ color: 'var(--brand-slate-500)', fontWeight: 500 }}>
-                        ({completedCount}/{totalCapaCount || 1} {t('Completed', 'সম্পন্ন', lang)})
-                      </span>
-                    </div>
-                    <span style={{ fontWeight: 800, color: capaPct === 100 ? 'var(--status-success-text)' : 'var(--status-warning)' }}>
-                      {capaPct}%
-                    </span>
-                  </div>
-
-                  <div style={{ height: '6px', background: 'var(--brand-slate-200)', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        height: '100%',
-                        width: `${capaPct}%`,
-                        background: capaPct === 100 ? 'var(--status-success-solid)' : 'linear-gradient(90deg, var(--status-warning-solid) 0%, var(--status-success-solid) 100%)',
-                        transition: 'width 0.3s ease',
-                      }}
-                    />
-                  </div>
-
-                  {/* Expandable CAPA Items */}
-                  {isExpanded && inc.capaItems && inc.capaItems.length > 0 && (
-                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {inc.capaItems.map((c) => (
-                        <div
-                          key={c.id}
-                          style={{
-                            background: c.status === 'completed' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
-                            border: c.status === 'completed' ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            flexWrap: 'wrap',
-                            gap: '8px',
-                            fontSize: '11.5px',
-                          }}
-                        >
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <span
-                                className="badge"
-                                style={{
-                                  fontSize: '8.5px',
-                                  padding: '1px 5px',
-                                  background: c.actionType === 'immediate_containment' ? 'var(--status-info-bg)' : c.actionType === 'preventive' ? 'var(--status-purple-bg)' : 'var(--status-warning-bg)',
-                                  color: c.actionType === 'immediate_containment' ? 'var(--status-info-text)' : c.actionType === 'preventive' ? 'var(--status-purple)' : 'var(--status-warning-text)',
-                                }}
-                              >
-                                {c.actionType.replace('_', ' ').toUpperCase()}
-                              </span>
-                              <strong style={{ color: 'var(--brand-slate-900)' }}>{c.description}</strong>
-                            </div>
-                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                              Owner: <strong>{c.owner}</strong> • Target: {c.dueDate}
-                              {c.verificationEvidence && <span style={{ color: 'var(--status-success)', marginLeft: '8px' }}>✓ {c.verificationEvidence}</span>}
-                            </div>
-                          </div>
-
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {c.status === 'completed' ? (
-                              <span className="badge success" style={{ fontSize: '9px' }}>✓ {t('COMPLETED', 'সম্পন্ন', lang)}</span>
-                            ) : !canInvestigate ? (
-                              <span className="badge" style={{ fontSize: '9px' }}>{t('OPEN', 'চলমান', lang)}</span>
-                            ) : (
-                              <button
-                                type="button"
-                                className="btn-sm-ghost"
-                                style={{ fontSize: '10.5px', padding: '3px 8px', background: 'var(--status-success-solid)', color: 'var(--text-on-brand)' }}
-                                onClick={() => toggleCapaStatus(inc.id, c.id, 'completed', 'Verified compliant on site')}
-                              >
-                                <Check size={11} /> {t('Mark Done', 'সম্পন্ন করুন', lang)}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Closure Stamp (if closed) */}
-                {inc.closureSignOff && (
-                  <div style={{ background: 'var(--status-warning-bg)', border: '1.5px dashed var(--brand-gold)', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Award size={16} color="var(--brand-gold)" />
-                      <div>
-                        <strong>{t('Closure verified:', 'সমাপ্তি যাচাইকৃত:', lang)}</strong> {inc.closureSignOff.remarks}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--status-warning-text)' }}>
-                      Safety: {inc.closureSignOff.safetyOfficerName} • GM: {inc.closureSignOff.gmName}
-                    </div>
-                  </div>
-                )}
-
-                {/* Footer Controls */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--brand-slate-200)' }}>
-                  <button
-                    type="button"
-                    className="btn-sm-ghost"
-                    style={{ fontSize: '11px', padding: '4px 8px', color: 'var(--brand-slate-600)' }}
-                    onClick={() => setExpandedIncidentId(isExpanded ? null : inc.id)}
-                  >
-                    {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                    {isExpanded ? t('Hide CAPA Items', 'সিএপিএ সংক্ষেপ করুন', lang) : t('View Itemized Actions', 'বিস্তারিত পদক্ষেপ দেখুন', lang)} ({totalCapaCount})
-                  </button>
-
-                  <div className="flex-gap" style={{ flexWrap: 'wrap' }}>
-                    {canInvestigate && (
-                      <button
-                        type="button"
-                        className="btn-sm-ghost"
-                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                        onClick={() => openRcaModal(inc)}
-                      >
-                        <HelpCircle size={12} color="var(--status-warning)" />
-                        {inc.fiveWhys ? t('5-Whys & Fishbone', '৫-হোয়াইজ ও ফিশবোন', lang) : t('Run RCA', 'কারণ অনুসন্ধান', lang)}
-                      </button>
-                    )}
-
-                    {canInvestigate && (
-                      <button
-                        type="button"
-                        className="btn-sm-ghost"
-                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                        onClick={() => setSelectedCapaIncident(inc)}
-                      >
-                        <CheckSquare size={12} color="var(--status-info)" />
-                        {t('Manage CAPA', 'সিএপিএ পরিচালনা', lang)}
-                      </button>
-                    )}
-
-                    {mode !== 'reporter' && inc.statutoryReportable && (
-                      <button
-                        type="button"
-                        className="btn-sm-ghost"
-                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                        onClick={() => setSelectedDossierIncident(inc)}
-                      >
-                        <FileText size={12} color="var(--brand-crimson)" />
-                        {t('Statutory report', 'সংবিধিবদ্ধ প্রতিবেদন', lang)}
-                      </button>
-                    )}
-
-                    {inc.capaStatus !== 'closed' && canInvestigate && (() => {
-                      const capaDone = (inc.capaItems?.length ?? 0) > 0 && (inc.capaItems ?? []).every(c => c.status === 'completed');
+      {/* Risk grid: a tool for people who assess risk, hidden for reporters */}
+      {mode !== 'reporter' && (
+        <details className="card mb-4 inc-grid">
+          <summary>
+            <Activity size={15} />
+            <span>
+              <strong>{t('Risk grid: how likely and how severe', 'ঝুঁকির গ্রিড: কত সম্ভাব্য ও কত গুরুতর', lang)}</strong>
+              <small>{t('Tap a square to list only the incidents with that risk.', 'কোনো ঘরে চাপ দিলে শুধু সেই ঝুঁকির ঘটনা দেখাবে।', lang)}</small>
+            </span>
+            {matrixFilter && <em>{t(`Showing severity ${matrixFilter.level} × likelihood ${matrixFilter.likelihood}`, `দেখানো হচ্ছে: তীব্রতা ${bn(matrixFilter.level)} × সম্ভাবনা ${bn(matrixFilter.likelihood)}`, lang)}</em>}
+          </summary>
+          <div className="card-body" style={{ overflowX: 'auto' }}>
+            <div style={{ minWidth: '600px' }}>
+              <div className="hse-risk-matrix-grid">
+                <div className="hse-matrix-header-cell" style={{ visibility: 'hidden' }}>-</div>
+                {([['1. Very rare', '১. অতি বিরল'], ['2. Unlikely', '২. অসম্ভাব্য'], ['3. Possible', '৩. সম্ভাব্য'], ['4. Likely', '৪. সম্ভবত'], ['5. Almost certain', '৫. প্রায় নিশ্চিত']] as [string, string][]).map((h) => (
+                  <div key={h[0]} className="hse-matrix-header-cell">{t(h[0], h[1], lang)}</div>
+                ))}
+                {[5, 4, 3, 2, 1].map((lvl) => (
+                  <React.Fragment key={lvl}>
+                    <div className="hse-matrix-row-label">{lvl}. {t(...LEVEL_LABEL[lvl], lang)}</div>
+                    {[1, 2, 3, 4, 5].map((prob) => {
+                      const score = lvl * prob;
+                      const riskClass = score >= 20 ? 'risk-crimson' : score >= 15 ? 'risk-red' : score >= 10 ? 'risk-orange' : score >= 5 ? 'risk-yellow' : 'risk-green';
+                      const matching = visibleIncidents.filter((i) => i.level === lvl && (i.likelihood || 2) === prob);
+                      const isSelected = matrixFilter?.level === lvl && matrixFilter?.likelihood === prob;
                       return (
                         <button
                           type="button"
-                          className="btn-primary"
-                          disabled={!capaDone}
-                          title={capaDone ? undefined : t('Complete all CAPA actions first', 'আগে সব সিএপিএ ব্যবস্থা সম্পন্ন করুন', lang)}
-                          style={{ fontSize: '11px', padding: '4px 10px', opacity: capaDone ? 1 : 0.55, cursor: capaDone ? 'pointer' : 'not-allowed', background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid-dark) 100%)' }}
-                          onClick={() => capaDone && setSelectedSignoffIncident(inc)}
+                          key={prob}
+                          className={`hse-matrix-cell ${riskClass} ${isSelected ? 'active-filter' : ''}`}
+                          onClick={() => setMatrixFilter(isSelected ? null : { level: lvl, likelihood: prob })}
+                          aria-pressed={isSelected}
+                          title={t(`${matching.length} incident(s) with severity ${lvl} and likelihood ${prob}`, `তীব্রতা ${bn(lvl)} ও সম্ভাবনা ${bn(prob)} — ${bn(matching.length)}টি ঘটনা`, lang)}
                         >
-                          <CheckCircle size={12} />
-                          {t('Verify & Close Incident', 'যাচাই ও সমাপ্তি ঘোষণা', lang)}
+                          <span style={{ fontSize: '10px', fontWeight: 800 }}>{score >= 15 ? t('Extreme', 'অত্যধিক', lang) : score >= 10 ? t('High', 'উচ্চ', lang) : score >= 5 ? t('Medium', 'মাঝারি', lang) : t('Low', 'নিম্ন', lang)}</span>
+                          {matching.length > 0 && <strong className="inc-cell-count">{matching.length}</strong>}
                         </button>
                       );
-                    })()}
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+              <div className="inc-grid-axes">
+                <span>← {t('Less likely', 'কম সম্ভাব্য', lang)} · {t('More likely', 'বেশি সম্ভাব্য', lang)} →</span>
+                <span>↑ {t('More severe', 'বেশি গুরুতর', lang)}</span>
+              </div>
+            </div>
+          </div>
+        </details>
+      )}
+
+      {/* Incident cards */}
+      <div className="incident-list">
+        {quickFiltered.length === 0 ? (
+          <div className="card">
+            <EmptyState
+              icon={hasFilter ? <SearchX size={20} /> : <ShieldCheck size={20} />}
+              title={hasFilter ? t('No incident matches these filters', 'এই ফিল্টারে কোনো ঘটনা নেই', lang) : mode === 'reporter' ? t('You have no reports yet', 'আপনার কোনো রিপোর্ট নেই', lang) : t('No incidents recorded', 'কোনো ঘটনা নথিভুক্ত নেই', lang)}
+              description={hasFilter ? t('Clear the filters to see everything again.', 'সব দেখতে ফিল্টার মুছুন।', lang) : t('Use "Report an incident" or "Quick hazard report" above.', 'উপরের "ঘটনা রিপোর্ট করুন" বা "দ্রুত বিপদ রিপোর্ট" ব্যবহার করুন।', lang)}
+              action={hasFilter ? <Button variant="secondary" size="sm" onClick={clearFilters}>{t('Clear filters', 'ফিল্টার মুছুন', lang)}</Button> : undefined}
+            />
+          </div>
+        ) : (
+          quickFiltered.map((inc) => {
+            const isExpanded = expandedIncidentId === inc.id;
+            const items = inc.capaItems || [];
+            const completedCount = items.filter((c) => c.status === 'completed').length;
+            const capaPct = items.length > 0 ? Math.round((completedCount / items.length) * 100) : inc.capaStatus === 'closed' ? 100 : 0;
+            const stage = inc.workflowStage || (inc.capaStatus === 'closed' ? 'closed' : 'under_investigation');
+            const stageIdx = Math.max(0, STAGES.indexOf(stage));
+            const typeMeta = INCIDENT_TYPE_META[inc.incidentType] || INCIDENT_TYPE_META.near_miss;
+            const injured = (inc.personsInvolved || []).filter((p) => p.involvementType === 'injured');
+            const capaDone = items.length > 0 && items.every((c) => c.status === 'completed');
+
+            return (
+              <div key={inc.id} className={`incident-card l${inc.level}`}>
+                <div className="inc-hd">
+                  <div className="inc-tags">
+                    <StatusPill tone={inc.level >= 4 ? 'danger' : inc.level === 3 ? 'warn' : 'info'}>
+                      {t(`${LEVEL_LABEL[inc.level][0]} severity`, `${LEVEL_LABEL[inc.level][1]} তীব্রতা`, lang)}
+                    </StatusPill>
+                    <span className="inc-kind">{t(typeMeta.label, typeMeta.labelBn, lang)}</span>
+                    {inc.statutoryReportable && (
+                      <StatusPill tone="danger">{t('Must be reported to the government', 'সরকারকে জানাতে হবে', lang)}</StatusPill>
+                    )}
+                  </div>
+                  <span className="inc-when">{inc.date}</span>
+                </div>
+
+                <h3 className="inc-title" style={{ fontSize: '15px', margin: '6px 0 2px' }}>{t(inc.title, inc.titleBn, lang)}</h3>
+                <div className="inc-meta">
+                  <MapPin size={12} /> <strong>{inc.plantZone || 'Keraniganj Complex'}</strong> · {inc.location}
+                  {' · '}{t('reported by', 'রিপোর্ট করেছেন', lang)} <strong>{inc.reportedBy}</strong>
+                </div>
+
+                {injured.length > 0 && (
+                  <div className="inc-injury">
+                    <HeartPulse size={14} />
+                    <span>
+                      {injured.map((p, idx) => (
+                        <span key={idx}><strong>{p.name}</strong> ({p.role}): {p.injuryNature}{p.treatmentGiven ? `. ${p.treatmentGiven}` : ''}{idx < injured.length - 1 ? ' · ' : ''}</span>
+                      ))}
+                    </span>
+                  </div>
+                )}
+
+                {inc.rootCause && (inc.fiveWhys || stage === 'capa_execution' || stage === 'closed') && (
+                  <p className="inc-cause"><strong>{t('Cause', 'কারণ', lang)}:</strong> {inc.rootCause}</p>
+                )}
+
+                <div className="inc-steps" role="img" aria-label={t(`Step ${stageIdx + 1} of 5: ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫: ${STAGE_LABEL[stage][1]}`, lang)}>
+                  <div className="inc-step-bars">
+                    {STAGES.map((s, i) => <span key={s} className={i <= stageIdx ? 'on' : ''} />)}
+                  </div>
+                  <small>{t(`Step ${stageIdx + 1} of 5 · ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫ · ${STAGE_LABEL[stage][1]}`, lang)}</small>
+                </div>
+
+                <p className="inc-next"><ArrowRight size={13} /> {nextStep(inc)}</p>
+
+                {items.length > 0 && (
+                  <div className="inc-fixes">
+                    <div className="inc-fixes-head">
+                      <span>{t(`Fixes: ${completedCount} of ${items.length} done`, `সমাধান: ${bn(items.length)}টির মধ্যে ${bn(completedCount)}টি শেষ`, lang)}</span>
+                      <b className={capaPct === 100 ? 'done' : ''}>{capaPct}%</b>
+                    </div>
+                    <div className="hs-bar" aria-hidden><span style={{ width: `${capaPct}%`, background: capaPct === 100 ? 'var(--status-success-solid)' : undefined }} /></div>
+                    {isExpanded && (
+                      <ul className="inc-fix-list">
+                        {items.map((c) => (
+                          <li key={c.id} className={c.status === 'completed' ? 'done' : ''}>
+                            <span>
+                              <strong>{c.description}</strong>
+                              <small>
+                                {t(c.actionType === 'immediate_containment' ? 'Immediate' : c.actionType === 'preventive' ? 'Prevent repeat' : 'Correct', c.actionType === 'immediate_containment' ? 'তাৎক্ষণিক' : c.actionType === 'preventive' ? 'পুনরাবৃত্তি রোধ' : 'সংশোধন', lang)}
+                                {' · '}{c.owner}{' · '}{t('due', 'সময়সীমা', lang)} {c.dueDate}
+                                {c.verificationEvidence ? ` · ${c.verificationEvidence}` : ''}
+                              </small>
+                            </span>
+                            {c.status === 'completed' ? (
+                              <StatusPill tone="success">{t('Done', 'শেষ', lang)}</StatusPill>
+                            ) : canInvestigate ? (
+                              <Button size="sm" variant="secondary" icon={<Check size={12} />} onClick={() => toggleCapaStatus(inc.id, c.id, 'completed', 'Verified compliant on site')}>
+                                {t('Mark done', 'শেষ করুন', lang)}
+                              </Button>
+                            ) : (
+                              <StatusPill tone="warn">{t('Open', 'চলমান', lang)}</StatusPill>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {inc.closureSignOff && (
+                  <p className="inc-closed">
+                    <Award size={14} />
+                    <span>
+                      {t('Closed and verified by', 'সমাপ্ত ও যাচাই করেছেন', lang)} {inc.closureSignOff.safetyOfficerName} {t('and', 'ও', lang)} {inc.closureSignOff.gmName}
+                      {inc.closureSignOff.remarks ? `: ${inc.closureSignOff.remarks}` : ''}
+                    </span>
+                  </p>
+                )}
+
+                <div className="inc-foot">
+                  <div className="inc-foot-left">
+                    {items.length > 0 && (
+                      <Button variant="ghost" size="sm" icon={isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />} onClick={() => setExpandedIncidentId(isExpanded ? null : inc.id)}>
+                        {isExpanded ? t('Hide fixes', 'সমাধান লুকান', lang) : t(`Show fixes (${items.length})`, `সমাধান দেখুন (${bn(items.length)})`, lang)}
+                      </Button>
+                    )}
+                    <details className="inc-ref">
+                      <summary>{t('Details', 'বিবরণ', lang)}</summary>
+                      <p>{t('Incident no.', 'ঘটনা নং', lang)}: <code>{inc.incNo}</code></p>
+                      <p>{inc.shift}</p>
+                      <p>{t(`Risk score ${inc.riskScore || inc.level * 2} of 25`, `ঝুঁকির স্কোর ২৫-এর মধ্যে ${bn(inc.riskScore || inc.level * 2)}`, lang)}</p>
+                      {inc.immediateActionsTaken && <p><strong>{t('Done on the spot', 'তাৎক্ষণিক পদক্ষেপ', lang)}:</strong> {inc.immediateActionsTaken}</p>}
+                    </details>
+                  </div>
+
+                  <div className="inc-foot-actions">
+                    {canInvestigate && (
+                      <Button variant="secondary" size="sm" icon={<HelpCircle size={13} />} onClick={() => openRcaModal(inc)}>
+                        {inc.fiveWhys ? t('Cause analysis', 'কারণ বিশ্লেষণ', lang) : t('Find the cause', 'কারণ খুঁজুন', lang)}
+                      </Button>
+                    )}
+                    {canInvestigate && (
+                      <Button variant="secondary" size="sm" icon={<CheckSquare size={13} />} onClick={() => setSelectedCapaIncident(inc)}>
+                        {t('Manage fixes', 'সমাধান পরিচালনা', lang)}
+                      </Button>
+                    )}
+                    {mode !== 'reporter' && inc.statutoryReportable && (
+                      <Button variant="secondary" size="sm" icon={<FileText size={13} />} onClick={() => setSelectedDossierIncident(inc)}>
+                        {t('Government report', 'সরকারি প্রতিবেদন', lang)}
+                      </Button>
+                    )}
+                    {inc.capaStatus !== 'closed' && canInvestigate && (
+                      <Button
+                        size="sm"
+                        icon={<CheckCircle size={13} />}
+                        disabled={!capaDone}
+                        title={capaDone ? undefined : t('Finish all fixes first', 'আগে সব সমাধান শেষ করুন', lang)}
+                        onClick={() => capaDone && setSelectedSignoffIncident(inc)}
+                      >
+                        {t('Verify and close', 'যাচাই করে বন্ধ করুন', lang)}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1206,363 +877,219 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         )}
       </div>
 
-      {/* ─── MODAL 1: COMPREHENSIVE INDUSTRIAL REPORTING WIZARD ─── */}
-      {showLogWizard && (
-        <div className="modal-bg" onClick={() => setShowLogWizard(false)}>
-          <div className="modal" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldAlert size={18} color="var(--status-warning-bright)" />
-                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
-                    {t('Industrial Incident & Near-Miss Reporting Wizard', 'কারখানা ইনসিডেন্ট ও নিয়ার-মিস রিপোর্টিং উইজার্ড', lang)}
-                  </h3>
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-inverse-2)', marginTop: '2px' }}>
-                  Step {wizardStep} of 3: {wizardStep === 1 ? 'Event Category & Plant Zone' : wizardStep === 2 ? 'Severity & Immediate Containment' : 'Personnel & Evidence'}
-                </div>
-              </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowLogWizard(false)}>×</button>
-            </div>
-
-            <div className="modal-body" style={{ maxHeight: '76vh', overflowY: 'auto' }}>
-              {/* Wizard Steps Tracker */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px', borderBottom: '1px solid var(--brand-slate-200)', paddingBottom: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 1 ? 800 : 500, color: wizardStep === 1 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 1 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>1</span>
-                  <span>1. Event Details</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 2 ? 800 : 500, color: wizardStep === 2 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 2 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>2</span>
-                  <span>2. Risk & Containment</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: wizardStep === 3 ? 800 : 500, color: wizardStep === 3 ? 'var(--brand-crimson)' : 'var(--brand-slate-500)' }}>
-                  <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: wizardStep === 3 ? 'var(--brand-crimson)' : 'var(--surface-4)', color: 'var(--text-on-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 800 }}>3</span>
-                  <span>3. People & Evidence</span>
-                </div>
-              </div>
-
-              {/* STEP 1: EVENT DETAILS */}
-              {wizardStep === 1 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div className="form-group">
-                    <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Incident / Event Classification', 'ঘটনার শ্রেণীবিভাগ', lang)}</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '6px', marginTop: '4px' }}>
-                      {(Object.keys(INCIDENT_TYPE_META) as IncidentType[]).map((type) => {
-                        const m = INCIDENT_TYPE_META[type];
-                        const isSelected = wizardType === type;
-                        return (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => setWizardType(type)}
-                            style={{
-                              padding: '8px 10px',
-                              borderRadius: '6px',
-                              border: isSelected ? `2px solid ${m.color}` : '1px solid var(--brand-slate-200)',
-                              background: isSelected ? `color-mix(in srgb, ${m.color} 8%, transparent)` : 'var(--surface-1)',
-                              color: isSelected ? m.color : 'var(--brand-slate-700)',
-                              fontWeight: isSelected ? 800 : 600,
-                              fontSize: '11px',
-                              textAlign: 'left',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}
-                          >
-                            <span>{m.icon}</span>
-                            <span>{m.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Incident Headline / Summary', 'ঘটনার শিরোনাম', lang)}</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Minor thermal fluid drip discovered on flange V-204"
-                      value={wizardTitle}
-                      onChange={(e) => setWizardTitle(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Factory Plant Zone', 'প্ল্যান্টের এলাকা', lang)}</label>
-                      <select
-                        className="form-input"
-                        value={wizardZone}
-                        onChange={(e) => {
-                          setWizardZone(e.target.value);
-                          setWizardLocation(`${e.target.value}, Specific Bay`);
-                        }}
-                      >
-                        {PLANT_ZONES.filter(z => z !== 'All Plant Zones').map((z) => (
-                          <option key={z} value={z}>{z}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Specific Equipment / Bay Location', 'সুনির্দিষ্ট সরঞ্জাম বা বে', lang)}</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="e.g. Tank TK-102 lower discharge valve"
-                        value={wizardLocation}
-                        onChange={(e) => setWizardLocation(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Operating Shift', 'অপারেটিং শিফট', lang)}</label>
-                      <select
-                        className="form-input"
-                        value={wizardShift}
-                        onChange={(e) => setWizardShift(e.target.value as any)}
-                      >
-                        <option value="Morning Shift (07:00 - 15:00)">Morning Shift (07:00 - 15:00)</option>
-                        <option value="Evening Shift (15:00 - 23:00)">Evening Shift (15:00 - 23:00)</option>
-                        <option value="Night Shift (23:00 - 07:00)">Night Shift (23:00 - 07:00)</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Reporter Persona', 'প্রতিবেদনকারী', lang)}</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        disabled
-                        value={`${currentPersona.name} (${currentPersona.label} · ${currentPersona.empId})`}
-                        style={{ background: 'var(--brand-slate-100)', color: 'var(--brand-slate-600)' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 2: RISK & IMMEDIATE CONTAINMENT */}
-              {wizardStep === 2 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Consequence Severity (Level 1 to 5)', 'তীব্রতা স্তর', lang)}</label>
-                      <select
-                        className="form-input"
-                        value={wizardSeverity}
-                        onChange={(e) => setWizardSeverity(Number(e.target.value) as any)}
-                      >
-                        <option value={1}>Level 1: Minor (Routine Housekeeping / Negligible)</option>
-                        <option value={2}>Level 2: Low (Near-Miss / First-Aid Case)</option>
-                        <option value={3}>Level 3: Moderate (Hydrocarbon Leak / Equipment Interruption)</option>
-                        <option value={4}>Level 4: Major (High Heat / Pressure Line Emergency Alert)</option>
-                        <option value={5}>Level 5: Critical (Refinery Shutdown / Disaster Protocol)</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Occurrence Likelihood / Probability', 'পুনরাবৃত্তির সম্ভাবনা', lang)}</label>
-                      <select
-                        className="form-input"
-                        value={wizardLikelihood}
-                        onChange={(e) => setWizardLikelihood(Number(e.target.value) as any)}
-                      >
-                        <option value={1}>1: Rare (Happens once in 5+ years)</option>
-                        <option value={2}>2: Unlikely (Has happened once in plant history)</option>
-                        <option value={3}>3: Possible (Could happen under upset conditions)</option>
-                        <option value={4}>4: Likely (Frequent recurrence without barrier)</option>
-                        <option value={5}>5: Almost Certain (Impending recurrence)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Dynamic Risk Score Preview */}
-                  <div
-                    style={{
-                      background: wizardSeverity * wizardLikelihood >= 15 ? 'var(--status-danger-bg)' : wizardSeverity * wizardLikelihood >= 10 ? 'var(--status-warning-bg)' : 'var(--status-success-bg)',
-                      border: wizardSeverity * wizardLikelihood >= 15 ? '1px solid var(--status-danger-bright)' : wizardSeverity * wizardLikelihood >= 10 ? '1px solid var(--status-warning-border)' : '1px solid var(--status-success-bright)',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', textTransform: 'uppercase' }}>
-                        Calculated Petroleum Risk Rating:
-                      </div>
-                      <div style={{ fontSize: '15px', fontWeight: 900, color: wizardSeverity * wizardLikelihood >= 15 ? 'var(--status-danger-text)' : wizardSeverity * wizardLikelihood >= 10 ? 'var(--status-warning-text)' : 'var(--status-success-text)' }}>
-                        Score: {wizardSeverity * wizardLikelihood} / 25 ({wizardSeverity * wizardLikelihood >= 15 ? 'EXTREME RISK' : wizardSeverity * wizardLikelihood >= 10 ? 'HIGH RISK' : wizardSeverity * wizardLikelihood >= 5 ? 'MEDIUM RISK' : 'LOW RISK'})
-                      </div>
-                    </div>
-                    {wizardSeverity >= 3 && (
-                      <span className="badge danger" style={{ fontSize: '10px' }}>
-                        ⚠️ Triggers 24-hr Statutory DoE Notice
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Immediate Actions & Safety Containment Taken', 'তাৎক্ষণিক গৃহীত পদক্ষেপ ও নিরাপত্তা ব্যবস্থা', lang)}</label>
-                    <textarea
-                      rows={3}
-                      className="form-input"
-                      placeholder="e.g. Manually closed isolation valve V-204, deployed oil-absorbent boom, cordoned 10-meter perimeter with yellow danger barrier tape..."
-                      value={wizardImmediateActions}
-                      onChange={(e) => setWizardImmediateActions(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: PERSONNEL & EVIDENCE */}
-              {wizardStep === 3 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      id="hasInjury"
-                      checked={wizardHasInjury}
-                      onChange={(e) => setWizardHasInjury(e.target.checked)}
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    <label htmlFor="hasInjury" style={{ fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' }}>
-                      {t('Did this event involve an injury or first-aid treatment to any worker?', 'এই ঘটনায় কোনো কর্মী আহত হয়েছেন বা প্রাথমিক চিকিৎসা প্রয়োজন হয়েছে?', lang)}
-                    </label>
-                  </div>
-
-                  {wizardHasInjury && (
-                    <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      <div className="form-group">
-                        <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Select Injured Personnel', 'আহত কর্মী নির্বাচন', lang)}</label>
-                        <select
-                          className="form-input"
-                          value={wizardInjuredEmpId}
-                          onChange={(e) => setWizardInjuredEmpId(e.target.value)}
-                        >
-                          <option value="">-- Choose Worker from Staff Directory --</option>
-                          {activeEmployees.map((emp) => (
-                            <option key={emp.id} value={emp.id}>{emp.name} ({emp.designation} · {emp.id})</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Nature of Injury', 'আঘাতের ধরন', lang)}</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="e.g. Minor thermal burn on right forearm / thumb contusion"
-                            value={wizardInjuryNature}
-                            onChange={(e) => setWizardInjuryNature(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('First-Aid / Clinic Treatment Given', 'প্রদত্ত চিকিৎসা', lang)}</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="e.g. Burnol applied; cold pack administered at plant clinic"
-                            value={wizardTreatmentGiven}
-                            onChange={(e) => setWizardTreatmentGiven(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '12px', fontWeight: 700 }}>{t('Witnesses Present on Duty', 'প্রত্যক্ষদর্শী', lang)}</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="e.g. Mizanur Rahman (Security), Kalam Miah (Driver)"
-                      value={wizardWitnessName}
-                      onChange={(e) => setWizardWitnessName(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Photo Simulation */}
-                  <div
-                    style={{
-                      border: '1.5px dashed var(--brand-slate-300)',
-                      borderRadius: '8px',
-                      padding: '14px',
-                      textAlign: 'center',
-                      background: wizardSimulatePhoto ? 'var(--status-success-bg)' : 'var(--surface-0)',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => setWizardSimulatePhoto(!wizardSimulatePhoto)}
-                  >
-                    <Camera size={24} style={{ color: wizardSimulatePhoto ? 'var(--status-success-text)' : 'var(--brand-slate-400)', margin: '0 auto 6px' }} />
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: wizardSimulatePhoto ? 'var(--status-success-text)' : 'var(--brand-slate-700)' }}>
-                      {wizardSimulatePhoto ? '✓ 2 Photographs Attached (Site Perimeter & Valve Flange)' : '+ Click to Simulate On-Site Camera Photo Evidence'}
-                    </div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                      JPG, PNG, PDF up to 15MB • Time-stamped geo-coordinates will be embedded
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="modal-ft">
-              {wizardStep > 1 && (
-                <button
-                  type="button"
-                  className="btn-outline"
-                  onClick={() => setWizardStep((prev) => (prev - 1) as any)}
-                >
-                  ← {t('Back', 'পূর্ববর্তী', lang)}
-                </button>
-              )}
-
-              <button
-                type="button"
-                className="btn-sm-ghost"
-                onClick={() => setShowLogWizard(false)}
+      {/* Report an incident: three short steps */}
+      <Modal
+        open={showLogWizard}
+        onClose={() => { setShowLogWizard(false); setWizardError(null); }}
+        title={t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
+        icon={<ShieldAlert size={16} />}
+        size="md"
+        footer={
+          <>
+            {wizardStep > 1 && (
+              <Button variant="ghost" onClick={() => { setWizardError(null); setWizardStep((prev) => (prev - 1) as 1 | 2 | 3); }}>
+                {t('Back', 'পূর্ববর্তী', lang)}
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => { setShowLogWizard(false); setWizardError(null); }}>{t('Cancel', 'বাতিল', lang)}</Button>
+            {wizardStep < 3 ? (
+              <Button
+                icon={<ArrowRight size={14} />}
+                onClick={() => {
+                  if (wizardStep === 1 && !wizardTitle.trim()) {
+                    setWizardError(t('Say in one line what happened.', 'এক লাইনে লিখুন কী ঘটেছে।', lang));
+                    return;
+                  }
+                  if (wizardStep === 2 && !wizardImmediateActions.trim()) {
+                    setWizardError(t('Write what was done on the spot, even if it was only to keep people away.', 'ঘটনাস্থলে কী করা হয়েছে লিখুন, এমনকি শুধু মানুষকে সরিয়ে রাখা হলেও।', lang));
+                    return;
+                  }
+                  setWizardError(null);
+                  setWizardStep((prev) => (prev + 1) as 1 | 2 | 3);
+                }}
               >
-                {t('Cancel', 'বাতিল', lang)}
-              </button>
-
-              {wizardStep < 3 ? (
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => {
-                    if (wizardStep === 1 && !wizardTitle.trim()) {
-                      showToast(t('Please provide incident headline.', 'শিরোনাম পূরণ করুন।', lang), 'info');
-                      return;
-                    }
-                    setWizardStep((prev) => (prev + 1) as any);
-                  }}
-                >
-                  {t('Continue', 'পরবর্তী ধাপ', lang)} →
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn-primary"
-                  style={{ background: 'linear-gradient(135deg, var(--brand-crimson) 0%, var(--brand-crimson-dark) 100%)' }}
-                  onClick={handleWizardSubmit}
-                >
-                  <ShieldAlert size={15} />
-                  {t('Log Incident & Trigger Response', 'ইনসিডেন্ট নথিভুক্ত ও অ্যালার্ট জারি করুন', lang)}
-                </button>
-              )}
-            </div>
+                {t('Continue', 'পরবর্তী ধাপ', lang)}
+              </Button>
+            ) : (
+              <Button icon={<Send size={14} />} onClick={() => { setWizardError(null); handleWizardSubmit(); }}>
+                {t('Submit report', 'রিপোর্ট জমা দিন', lang)}
+              </Button>
+            )}
+          </>
+        }
+      >
+        <div className="inc-steps" style={{ marginTop: 0, marginBottom: 14 }}>
+          <div className="inc-step-bars" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+            {[1, 2, 3].map((n) => <span key={n} className={n <= wizardStep ? 'on' : ''} />)}
           </div>
+          <small>
+            {t(`Step ${wizardStep} of 3`, `ধাপ ${bn(wizardStep)}/৩`, lang)}
+            {' · '}
+            {wizardStep === 1 ? t('What happened and where', 'কী ঘটেছে ও কোথায়', lang) : wizardStep === 2 ? t('How serious, and what you did', 'কতটা গুরুতর, আর কী করেছেন', lang)
+              : t('Who was involved', 'কারা জড়িত', lang)}
+          </small>
         </div>
-      )}
+
+        {wizardStep === 1 && (
+          <>
+            <FormField label={t('What happened? (one line)', 'কী ঘটেছে? (এক লাইনে)', lang)} required error={wizardError}>
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  value={wizardTitle}
+                  onChange={(e) => { setWizardTitle(e.target.value); setWizardError(null); }}
+                  placeholder={t('e.g. Small oil drip on valve V-204', 'যেমন: ভালভ V-204 থেকে অল্প তেল চুঁইয়ে পড়ছে', lang)}
+                />
+              )}
+            </FormField>
+            <FormField label={t('Kind of incident', 'ঘটনার ধরন', lang)} required>
+              {(id) => (
+                <select id={id} value={wizardType} onChange={(e) => setWizardType(e.target.value as IncidentType)}>
+                  {(Object.keys(INCIDENT_TYPE_META) as IncidentType[]).map((type) => (
+                    <option key={type} value={type}>{t(INCIDENT_TYPE_META[type].label, INCIDENT_TYPE_META[type].labelBn, lang)}</option>
+                  ))}
+                </select>
+              )}
+            </FormField>
+            <FormField label={t('Plant area', 'প্ল্যান্টের এলাকা', lang)} required>
+              {(id) => (
+                <select
+                  id={id}
+                  value={wizardZone}
+                  onChange={(e) => { setWizardZone(e.target.value); setWizardLocation(e.target.value); }}
+                >
+                  {PLANT_ZONES.filter((z) => z !== 'All Plant Zones').map((z) => (
+                    <option key={z} value={z}>{z}</option>
+                  ))}
+                </select>
+              )}
+            </FormField>
+            <FormField label={t('Exact spot or equipment', 'সুনির্দিষ্ট জায়গা বা যন্ত্র', lang)} hint={t('For example the tank, valve or bay number.', 'যেমন ট্যাংক, ভালভ বা বে নম্বর।', lang)}>
+              {(id) => (
+                <input id={id} type="text" value={wizardLocation} onChange={(e) => setWizardLocation(e.target.value)} placeholder={t('e.g. Tank TK-102 lower valve', 'যেমন: ট্যাংক TK-102 এর নিচের ভালভ', lang)} />
+              )}
+            </FormField>
+            <FormField label={t('Shift when it happened', 'যে শিফটে ঘটেছে', lang)}>
+              {(id) => (
+                <select id={id} value={wizardShift} onChange={(e) => setWizardShift(e.target.value as typeof wizardShift)}>
+                  <option value="Morning Shift (07:00 - 15:00)">{t('Morning (07:00 – 15:00)', 'সকাল (০৭:০০ – ১৫:০০)', lang)}</option>
+                  <option value="Evening Shift (15:00 - 23:00)">{t('Evening (15:00 – 23:00)', 'সন্ধ্যা (১৫:০০ – ২৩:০০)', lang)}</option>
+                  <option value="Night Shift (23:00 - 07:00)">{t('Night (23:00 – 07:00)', 'রাত (২৩:০০ – ০৭:০০)', lang)}</option>
+                </select>
+              )}
+            </FormField>
+            <p className="hs-meta">{t('Reported by', 'রিপোর্টকারী', lang)}: <strong>{currentPersona.name}</strong> ({currentPersona.label})</p>
+          </>
+        )}
+
+        {wizardStep === 2 && (
+          <>
+            <FormField label={t('How serious was the result?', 'ফলাফল কতটা গুরুতর?', lang)} required>
+              {(id) => (
+                <select id={id} value={wizardSeverity} onChange={(e) => setWizardSeverity(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)}>
+                  <option value={1}>{t('1 Minor: nothing damaged, nobody hurt', '১ সামান্য: কিছু নষ্ট হয়নি, কেউ আহত হয়নি', lang)}</option>
+                  <option value={2}>{t('2 Low: a near-miss or minor first aid', '২ নিম্ন: অল্পের জন্য রক্ষা বা সামান্য প্রাথমিক চিকিৎসা', lang)}</option>
+                  <option value={3}>{t('3 Moderate: a leak or equipment stopped', '৩ মাঝারি: লিক বা যন্ত্র বন্ধ', lang)}</option>
+                  <option value={4}>{t('4 Major: high heat or pressure emergency', '৪ গুরুতর: অতিরিক্ত তাপ বা চাপের জরুরি অবস্থা', lang)}</option>
+                  <option value={5}>{t('5 Critical: plant shutdown or disaster', '৫ চরম: প্ল্যান্ট বন্ধ বা বিপর্যয়', lang)}</option>
+                </select>
+              )}
+            </FormField>
+            <FormField label={t('How likely is it to happen again?', 'আবার ঘটার সম্ভাবনা কতটা?', lang)} required>
+              {(id) => (
+                <select id={id} value={wizardLikelihood} onChange={(e) => setWizardLikelihood(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)}>
+                  <option value={1}>{t('1 Rare: about once in 5+ years', '১ বিরল: ৫+ বছরে একবার', lang)}</option>
+                  <option value={2}>{t('2 Unlikely: has happened once here', '২ অসম্ভাব্য: এখানে একবার ঘটেছে', lang)}</option>
+                  <option value={3}>{t('3 Possible: could happen in abnormal conditions', '৩ সম্ভাব্য: অস্বাভাবিক অবস্থায় ঘটতে পারে', lang)}</option>
+                  <option value={4}>{t('4 Likely: will recur without a safeguard', '৪ সম্ভবত: প্রতিরোধ ছাড়া আবার ঘটবে', lang)}</option>
+                  <option value={5}>{t('5 Almost certain: about to recur', '৫ প্রায় নিশ্চিত: শিগগির আবার ঘটবে', lang)}</option>
+                </select>
+              )}
+            </FormField>
+
+            {(() => {
+              const score = wizardSeverity * wizardLikelihood;
+              const tone = score >= 15 ? 'bad' : score >= 10 ? 'warn' : 'ok';
+              const word = score >= 15 ? t('extreme', 'অত্যধিক', lang) : score >= 10 ? t('high', 'উচ্চ', lang) : score >= 5 ? t('medium', 'মাঝারি', lang) : t('low', 'নিম্ন', lang);
+              return (
+                <ul className="asg-checks" style={{ marginBottom: 14 }}>
+                  <li className={tone}>
+                    {tone === 'ok' ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />}
+                    <span>{t(`Risk is ${word} (${score} out of 25).`, `ঝুঁকি ${word} (২৫-এর মধ্যে ${bn(score)})।`, lang)}</span>
+                  </li>
+                  {wizardSeverity >= 3 && (
+                    <li className="bad">
+                      <AlertTriangle size={13} />
+                      <span>{t('This must be reported to the Department of Explosives within 24 hours. We prepare the report for you.', 'এটি ২৪ ঘণ্টার মধ্যে বিস্ফোরক অধিদপ্তরকে জানাতে হবে। রিপোর্ট আমরা তৈরি করে দেব।', lang)}</span>
+                    </li>
+                  )}
+                </ul>
+              );
+            })()}
+
+            <FormField label={t('What was done on the spot?', 'ঘটনাস্থলে কী করা হয়েছে?', lang)} required error={wizardError}>
+              {(id) => (
+                <textarea
+                  id={id}
+                  rows={3}
+                  value={wizardImmediateActions}
+                  onChange={(e) => { setWizardImmediateActions(e.target.value); setWizardError(null); }}
+                  placeholder={t('e.g. Closed valve V-204, put absorbent boom around it, kept people 10 m away', 'যেমন: ভালভ V-204 বন্ধ করা হয়েছে, চারপাশে শোষক বুম দেওয়া হয়েছে, ১০ মিটারের মধ্যে কাউকে যেতে দেওয়া হয়নি', lang)}
+                />
+              )}
+            </FormField>
+          </>
+        )}
+
+        {wizardStep === 3 && (
+          <>
+            <label className="inc-check">
+              <input type="checkbox" checked={wizardHasInjury} onChange={(e) => setWizardHasInjury(e.target.checked)} />
+              <span>{t('Was anyone hurt or given first aid?', 'কেউ কি আহত হয়েছেন বা প্রাথমিক চিকিৎসা পেয়েছেন?', lang)}</span>
+            </label>
+
+            {wizardHasInjury && (
+              <div className="inc-injury-box">
+                <FormField label={t('Who was hurt?', 'কে আহত হয়েছেন?', lang)} required>
+                  {(id) => (
+                    <select id={id} value={wizardInjuredEmpId} onChange={(e) => setWizardInjuredEmpId(e.target.value)}>
+                      <option value="">{t('Choose from the staff list', 'কর্মী তালিকা থেকে বেছে নিন', lang)}</option>
+                      {activeEmployees.map((emp) => (
+                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.designation})</option>
+                      ))}
+                    </select>
+                  )}
+                </FormField>
+                <FormField label={t('What was the injury?', 'আঘাত কী ধরনের?', lang)}>
+                  {(id) => (
+                    <input id={id} type="text" value={wizardInjuryNature} onChange={(e) => setWizardInjuryNature(e.target.value)} placeholder={t('e.g. Small burn on the right forearm', 'যেমন: ডান হাতের কবজির কাছে সামান্য পোড়া', lang)} />
+                  )}
+                </FormField>
+                <FormField label={t('What treatment was given?', 'কী চিকিৎসা দেওয়া হয়েছে?', lang)}>
+                  {(id) => (
+                    <input id={id} type="text" value={wizardTreatmentGiven} onChange={(e) => setWizardTreatmentGiven(e.target.value)} placeholder={t('e.g. Cold pack at the plant clinic', 'যেমন: প্ল্যান্ট ক্লিনিকে ঠান্ডা প্যাক', lang)} />
+                  )}
+                </FormField>
+              </div>
+            )}
+
+            <FormField label={t('Who saw it? (optional)', 'কে দেখেছেন? (ঐচ্ছিক)', lang)}>
+              {(id) => (
+                <input id={id} type="text" value={wizardWitnessName} onChange={(e) => setWizardWitnessName(e.target.value)} placeholder={t('e.g. Mizanur Rahman (Security)', 'যেমন: মিজানুর রহমান (নিরাপত্তা)', lang)} />
+              )}
+            </FormField>
+
+            <Button
+              variant={wizardSimulatePhoto ? 'secondary' : 'ghost'}
+              icon={wizardSimulatePhoto ? <CheckCircle2 size={14} /> : <Camera size={14} />}
+              onClick={() => setWizardSimulatePhoto(!wizardSimulatePhoto)}
+            >
+              {wizardSimulatePhoto ? t('2 photos attached. Tap to remove.', '২টি ছবি যুক্ত। সরাতে চাপুন।', lang) : t('Add photos of the spot', 'জায়গার ছবি যুক্ত করুন', lang)}
+            </Button>
+          </>
+        )}
+      </Modal>
 
       {/* ─── MODAL 2: 1-MINUTE GOOD CATCH / HAZARD REPORTER ─── */}
       {showQuickHazardModal && (

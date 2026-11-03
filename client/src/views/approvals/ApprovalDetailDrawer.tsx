@@ -103,7 +103,6 @@ export default function ApprovalDetailDrawer({
             {!decided && item.urgency !== 'normal' && (
               <span className={`apv-chip urgency-${item.urgency}`}>{t(URGENCY_LABEL[item.urgency][0], URGENCY_LABEL[item.urgency][1], lang)}</span>
             )}
-            <span className="apv-ref">{item.id}</span>
           </div>
           <h2 className="apv-drawer-title">{t(item.title, item.titleBn, lang)}</h2>
 
@@ -126,7 +125,7 @@ export default function ApprovalDetailDrawer({
             <span className={`apv-avatar lg tone-${avatarTone(item.requester)}`} aria-hidden>{initialsOf(item.requester)}</span>
             <div>
               <strong>{item.requester}</strong>
-              <span>{item.designation}</span>
+              <span>{item.designation} � {item.dept}</span>
             </div>
           </div>
 
@@ -143,7 +142,6 @@ export default function ApprovalDetailDrawer({
           )}
 
           <dl className="apv-facts">
-            <div><dt><Building2 size={13} /> {t('Department', 'বিভাগ', lang)}</dt><dd>{item.dept}</dd></div>
             <div><dt><CalendarClock size={13} /> {t('Submitted', 'দাখিল', lang)}</dt><dd>{item.date}</dd></div>
           </dl>
 
@@ -218,6 +216,7 @@ export default function ApprovalDetailDrawer({
           <details className="apv-ref-details">
             <summary>{t('Reference details', 'রেফারেন্স তথ্য', lang)}</summary>
             <dl className="apv-facts">
+              <div><dt><Hash size={13} /> {t('Request no.', 'আবেদন নং', lang)}</dt><dd className="mono">{item.id}</dd></div>
               <div><dt><Hash size={13} /> {t('Reference', 'রেফারেন্স', lang)}</dt><dd className="mono">{item.sapDocRef}</dd></div>
               <div><dt><Layers size={13} /> {t('Came from', 'উৎস', lang)}</dt><dd>{t(SOURCE_LABEL[sourceKey][0], SOURCE_LABEL[sourceKey][1], lang)}</dd></div>
             </dl>
