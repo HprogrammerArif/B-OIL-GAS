@@ -6,3 +6,4 @@ import "./notifications";
 import "./notices";
 import "./attendance";
 import "./leave";
+import "./claims";

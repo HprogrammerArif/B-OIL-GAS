@@ -19,6 +19,10 @@ export const routes = {
   leave: "/leave" as Href,
   newLeave: "/leave/new" as Href,
   leaveRequest: (id: string) => `/leave/${id}` as Href,
+  claims: "/claims" as Href,
+  newClaim: "/claims/new" as Href,
+  claim: (id: string) => `/claims/${id}` as Href,
+  resubmitClaim: (id: string) => ({ pathname: "/claims/new", params: { from: id } }) as unknown as Href,
   profile: "/profile" as Href,
   settings: "/settings" as Href,
 };
@@ -39,12 +43,14 @@ const BUILT_EXACT = [
   "/attendance/regularise",
   "/leave",
   "/leave/new",
+  "/claims",
+  "/claims/new",
   "/notices",
   "/notices/compose",
   "/notices/broadcast",
   "/approvals/history",
 ];
-const BUILT_PREFIXES = ["/approvals/", "/notices/", "/leave/", "/attendance/"];
+const BUILT_PREFIXES = ["/approvals/", "/notices/", "/leave/", "/attendance/", "/claims/"];
 
 export function isRouteBuilt(path: string): boolean {
   const clean = path.split("?")[0] ?? path;

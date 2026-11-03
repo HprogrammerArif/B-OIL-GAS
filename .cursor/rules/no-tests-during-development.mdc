@@ -1,0 +1,12 @@
+---
+description: Do not run tests during development; tests are run once at the end by the user's request
+alwaysApply: true
+---
+
+# No test runs during development
+
+- Do not run any tests while developing, in any app (`client/`, `server/`, `frontend/`, `app/`, `infra/`). This covers `jest`, `vitest`, `npm test`, `npx jest`, `playwright`/`e2e`, and any other test runner.
+- Writing or updating test files is still fine. Only running them is paused.
+- Do not mention test results as verification in the meantime. Say tests were not run.
+- Tests run once, at the end, when the user asks for it (for example "run the tests now" or "final verification").
+- Typecheck and lint are not tests. Run them only when they are needed to confirm an edit, and keep them minimal.
