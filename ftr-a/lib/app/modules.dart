@@ -42,4 +42,10 @@ final List<AppModule> builtModules = [
     label: (l10n) => l10n.moduleBus,
     route: AppRoutes.bus,
   ),
+  (
+    key: 'approvals',
+    icon: Icons.fact_check_outlined,
+    label: (l10n) => l10n.moduleApprovals,
+    route: AppRoutes.approvals,
+  ),
 ];

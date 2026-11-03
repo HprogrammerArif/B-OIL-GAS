@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
+import 'package:bogcl_oneops/mock/seed/rbac.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 const _batchMax = 25;
@@ -169,6 +170,21 @@ List<RouteDef> workflowRoutes() => [
       });
     },
   ),
+  // Colleagues the caller may delegate a decision to.
+  RouteDef('GET', '/workflow/delegates', permission: const ['workflow:act'], (
+    ctx,
+  ) async {
+    final me = _me(ctx);
+    final rows = <Json>[];
+    for (final u in ctx.store.all(Col.users)) {
+      if (u['id'] == me || u['isActive'] != true) continue;
+      final grants = grantsForRoles(u.strList('roles'));
+      if (!grants.any((g) => g['key'] == 'workflow:act')) continue;
+      final ref = WorkflowEngine.personRef(ctx.store, u.str('id'));
+      if (ref != null) rows.add(ref);
+    }
+    return ok(sortBy(rows, 'name', 'name'));
+  }),
   RouteDef('GET', '/workflow/history', permission: const ['workflow:inbox'], (
     ctx,
   ) async {

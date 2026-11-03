@@ -1157,5 +1157,181 @@
   "busBroadcast": "Broadcast to this route",
   "busBroadcastMessage": "Message",
   "busBroadcastSend": "Send",
-  "busBroadcastSent": "Message sent"
+  "busBroadcastSent": "Message sent",
+  "moduleApprovals": "Approvals",
+  "inboxOpen": "Open",
+  "approvalsTitle": "Approvals",
+  "approvalTabPending": "Waiting for me",
+  "approvalTabHistory": "History",
+  "approvalSelected": "{count} selected",
+  "@approvalSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalVerdict": "{count} waiting for your decision",
+  "@approvalVerdict": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalVerdictOverdue": "{pending} waiting, {overdue} overdue",
+  "@approvalVerdictOverdue": {
+    "placeholders": {
+      "pending": {
+        "type": "int"
+      },
+      "overdue": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalCatAll": "All",
+  "approvalCatLeave": "Leave",
+  "approvalCatClaims": "Claims",
+  "approvalCatProcurement": "Procurement",
+  "approvalCatFleet": "Fleet",
+  "approvalCatOther": "Other",
+  "approvalEmptyTitle": "All clear",
+  "approvalEmptyMessage": "Nothing is waiting for your decision. New requests appear here.",
+  "approvalBatchHint": "Press and hold a request to approve several at once. Requests that need a signature or are above 5,00,000 must be decided one by one.",
+  "approvalBatchConfirm": "Approve {count} requests?",
+  "@approvalBatchConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalBatchMessage": "Each one is approved as it stands. This cannot be undone.",
+  "approvalBatchDone": "{count} approved",
+  "@approvalBatchDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalBatchPartial": "{ok} approved, {failed} could not be approved",
+  "@approvalBatchPartial": {
+    "placeholders": {
+      "ok": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalApproveSelected": "Approve {count}",
+  "@approvalApproveSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalErrFailed": "That did not work. Try again.",
+  "approvalErrSelf": "You cannot decide your own request.",
+  "approvalErrLimit": "This amount is above your delegated approval limit.",
+  "approvalErrClosed": "This request is no longer waiting for a decision.",
+  "approvalErrMinChars": "Write at least {count} characters",
+  "@approvalErrMinChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "approvalFrom": "From {name}, {when}",
+  "@approvalFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalUrgent": "Urgent",
+  "approvalDelegatedToYou": "Delegated to you",
+  "approvalSlaOk": "On time",
+  "approvalSlaWarn": "Half the time used",
+  "approvalSlaDanger": "Due soon",
+  "approvalSlaOverdue": "Overdue",
+  "approvalDecApproved": "Approved",
+  "approvalDecRejected": "Rejected",
+  "approvalDecReturned": "Returned",
+  "approvalDecStarted": "Sent by me",
+  "approvalWithdrawn": "Withdrawn",
+  "approvalInReview": "In review",
+  "approvalHistoryEmptyTitle": "No history yet",
+  "approvalHistoryEmptyMessage": "Decisions you make and requests you send appear here.",
+  "approvalActApprove": "Approve",
+  "approvalActReject": "Reject",
+  "approvalActReturn": "Return",
+  "approvalActDelegate": "Delegate",
+  "approvalActWithdraw": "Withdraw",
+  "approvalActComment": "Comment",
+  "approvalDetailTitle": "Request",
+  "approvalApproveTitle": "Approve this request?",
+  "approvalNoteOptional": "Note (optional)",
+  "approvalRejectTitle": "Reject this request?",
+  "approvalRejectMessage": "The requester is told why. This closes the request.",
+  "approvalReturnTitle": "Return for changes?",
+  "approvalReturnMessage": "The requester can fix it and send it again.",
+  "approvalReasonHint": "Reason (at least 10 characters)",
+  "approvalDoneApproved": "Approved",
+  "approvalDoneRejected": "Rejected",
+  "approvalDoneReturned": "Returned to the requester",
+  "approvalDoneDelegated": "Delegated to {name}",
+  "@approvalDoneDelegated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalDoneComment": "Comment added",
+  "approvalDoneWithdrawn": "Request withdrawn",
+  "approvalDelegateTitle": "Delegate to a colleague",
+  "approvalDelegateMessage": "They decide in your place and the record shows it was on your behalf.",
+  "approvalCommentHint": "Write a comment",
+  "approvalSend": "Send",
+  "approvalWithdrawConfirm": "Withdraw this request?",
+  "approvalWithdrawMessage": "Approvers will no longer see it.",
+  "approvalNextYou": "Waiting for you at: {step}",
+  "@approvalNextYou": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalNextInReview": "Still in review. Nothing for you to do.",
+  "approvalNextWaiting": "Waiting for {names}. Nothing for you to do.",
+  "@approvalNextWaiting": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalNextClosed": "Closed: {status}",
+  "@approvalNextClosed": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "approvalViewRequest": "See the full request",
+  "approvalRoute": "Approval route",
+  "approvalDiscussion": "Comments",
+  "approvalNeedsSignature": "This step needs your signature."
 }

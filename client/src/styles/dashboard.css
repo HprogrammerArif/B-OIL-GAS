@@ -1,0 +1,171 @@
+/* ─── DASHBOARD OVERVIEW ──────────────────────────────────────────────────────
+   Tokens only; tinted surfaces use color-mix so light and dark share one rule. */
+
+.dash-overview { display: flex; flex-direction: column; gap: 16px; }
+.dash-overview > .stats-grid { margin-bottom: 0; }
+
+/* "Needs you today" */
+.dash-needs {
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  padding: 16px 18px;
+}
+.dash-needs header { margin-bottom: 10px; }
+.dash-needs h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--text-1); }
+.dash-needs header p { margin: 2px 0 0; font-size: 12.5px; color: var(--text-3); }
+.dash-needs ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dash-needs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-1);
+  background: var(--surface-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-1);
+}
+.dash-needs li > svg { flex-shrink: 0; }
+.dash-needs li > span { flex: 1; min-width: 0; }
+.dash-needs li.tone-danger {
+  background: color-mix(in srgb, var(--status-danger) 9%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--status-danger) 38%, var(--border-1));
+}
+.dash-needs li.tone-danger > svg { color: var(--status-danger); }
+.dash-needs li.tone-warning {
+  background: color-mix(in srgb, var(--brand-gold) 13%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--brand-gold) 50%, var(--border-1));
+}
+.dash-needs li.tone-warning > svg { color: var(--status-warning-text); }
+.dash-needs li.tone-info > svg { color: var(--status-info); }
+.dash-needs li .ui-btn { flex-shrink: 0; }
+
+.dash-needs.is-clear {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--status-success) 10%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--status-success) 38%, var(--border-1));
+}
+.dash-needs.is-clear > svg { color: var(--status-success); flex-shrink: 0; }
+.dash-needs.is-clear p { margin: 2px 0 0; font-size: 13px; color: var(--text-2); }
+
+@media (max-width: 520px) {
+  .dash-needs li { flex-wrap: wrap; }
+  .dash-needs li > span { flex-basis: calc(100% - 30px); }
+}
+
+/* Voice briefing */
+.dash-voice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-left: 4px solid var(--brand-gold);
+  border-radius: var(--radius-lg);
+}
+.dash-voice-btn {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-gold);
+  color: var(--brand-slate-900);
+  cursor: pointer;
+}
+.dash-voice.is-playing .dash-voice-btn {
+  background: var(--status-success);
+  color: var(--text-on-brand);
+  animation: dashVoicePulse 1.4s ease-in-out infinite;
+}
+@keyframes dashVoicePulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success) 45%, transparent); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+.dash-voice-text { flex: 1; min-width: 0; }
+.dash-voice-text strong { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-1); }
+.dash-voice-text p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dash-voice small { flex-shrink: 0; font-size: 11.5px; color: var(--text-3); }
+@media (prefers-reduced-motion: reduce) {
+  .dash-voice.is-playing .dash-voice-btn { animation: none; }
+}
+
+/* Employee shortcuts */
+.dash-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.dash-tile {
+  --tile: var(--status-info);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px;
+  text-align: center;
+  font-family: inherit;
+  color: var(--text-1);
+  cursor: pointer;
+  background: color-mix(in srgb, var(--tile) 9%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--tile) 35%, var(--border-1));
+  border-radius: var(--radius-lg);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.dash-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.dash-tile:focus-visible { outline: 2px solid var(--tile); outline-offset: 2px; }
+.dash-tile.tone-warning { --tile: var(--status-warning); }
+.dash-tile.tone-success { --tile: var(--status-success); }
+.dash-tile.tone-purple { --tile: var(--status-purple); }
+.dash-tile-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tile);
+  color: var(--text-on-brand);
+}
+.dash-tile strong { font-size: 13.5px; font-weight: 800; }
+.dash-tile small { font-size: 12px; color: var(--text-3); }
+@media (prefers-reduced-motion: reduce) {
+  .dash-tile { transition: none; }
+  .dash-tile:hover { transform: none; }
+}
+
+/* Employee's current vehicle request */
+.dash-trip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--status-success) 10%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--status-success) 38%, var(--border-1));
+}
+.dash-trip.is-pending {
+  background: color-mix(in srgb, var(--brand-gold) 13%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--brand-gold) 50%, var(--border-1));
+}
+.dash-trip > svg { flex-shrink: 0; margin-top: 1px; color: var(--status-success); }
+.dash-trip.is-pending > svg { color: var(--status-warning-text); }
+.dash-trip > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dash-trip strong { font-size: 13.5px; color: var(--text-1); }
+.dash-trip span { font-size: 12.5px; color: var(--text-2); }
+.dash-trip .dash-trip-who { font-weight: 700; }

@@ -2053,4 +2053,267 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get busBroadcastSent => 'Message sent';
+
+  @override
+  String get moduleApprovals => 'Approvals';
+
+  @override
+  String get inboxOpen => 'Open';
+
+  @override
+  String get approvalsTitle => 'Approvals';
+
+  @override
+  String get approvalTabPending => 'Waiting for me';
+
+  @override
+  String get approvalTabHistory => 'History';
+
+  @override
+  String approvalSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String approvalVerdict(int count) {
+    return '$count waiting for your decision';
+  }
+
+  @override
+  String approvalVerdictOverdue(int pending, int overdue) {
+    return '$pending waiting, $overdue overdue';
+  }
+
+  @override
+  String get approvalCatAll => 'All';
+
+  @override
+  String get approvalCatLeave => 'Leave';
+
+  @override
+  String get approvalCatClaims => 'Claims';
+
+  @override
+  String get approvalCatProcurement => 'Procurement';
+
+  @override
+  String get approvalCatFleet => 'Fleet';
+
+  @override
+  String get approvalCatOther => 'Other';
+
+  @override
+  String get approvalEmptyTitle => 'All clear';
+
+  @override
+  String get approvalEmptyMessage =>
+      'Nothing is waiting for your decision. New requests appear here.';
+
+  @override
+  String get approvalBatchHint =>
+      'Press and hold a request to approve several at once. Requests that need a signature or are above 5,00,000 must be decided one by one.';
+
+  @override
+  String approvalBatchConfirm(int count) {
+    return 'Approve $count requests?';
+  }
+
+  @override
+  String get approvalBatchMessage =>
+      'Each one is approved as it stands. This cannot be undone.';
+
+  @override
+  String approvalBatchDone(int count) {
+    return '$count approved';
+  }
+
+  @override
+  String approvalBatchPartial(int ok, int failed) {
+    return '$ok approved, $failed could not be approved';
+  }
+
+  @override
+  String approvalApproveSelected(int count) {
+    return 'Approve $count';
+  }
+
+  @override
+  String get approvalErrFailed => 'That did not work. Try again.';
+
+  @override
+  String get approvalErrSelf => 'You cannot decide your own request.';
+
+  @override
+  String get approvalErrLimit =>
+      'This amount is above your delegated approval limit.';
+
+  @override
+  String get approvalErrClosed =>
+      'This request is no longer waiting for a decision.';
+
+  @override
+  String approvalErrMinChars(int count) {
+    return 'Write at least $count characters';
+  }
+
+  @override
+  String approvalFrom(String name, String when) {
+    return 'From $name, $when';
+  }
+
+  @override
+  String get approvalUrgent => 'Urgent';
+
+  @override
+  String get approvalDelegatedToYou => 'Delegated to you';
+
+  @override
+  String get approvalSlaOk => 'On time';
+
+  @override
+  String get approvalSlaWarn => 'Half the time used';
+
+  @override
+  String get approvalSlaDanger => 'Due soon';
+
+  @override
+  String get approvalSlaOverdue => 'Overdue';
+
+  @override
+  String get approvalDecApproved => 'Approved';
+
+  @override
+  String get approvalDecRejected => 'Rejected';
+
+  @override
+  String get approvalDecReturned => 'Returned';
+
+  @override
+  String get approvalDecStarted => 'Sent by me';
+
+  @override
+  String get approvalWithdrawn => 'Withdrawn';
+
+  @override
+  String get approvalInReview => 'In review';
+
+  @override
+  String get approvalHistoryEmptyTitle => 'No history yet';
+
+  @override
+  String get approvalHistoryEmptyMessage =>
+      'Decisions you make and requests you send appear here.';
+
+  @override
+  String get approvalActApprove => 'Approve';
+
+  @override
+  String get approvalActReject => 'Reject';
+
+  @override
+  String get approvalActReturn => 'Return';
+
+  @override
+  String get approvalActDelegate => 'Delegate';
+
+  @override
+  String get approvalActWithdraw => 'Withdraw';
+
+  @override
+  String get approvalActComment => 'Comment';
+
+  @override
+  String get approvalDetailTitle => 'Request';
+
+  @override
+  String get approvalApproveTitle => 'Approve this request?';
+
+  @override
+  String get approvalNoteOptional => 'Note (optional)';
+
+  @override
+  String get approvalRejectTitle => 'Reject this request?';
+
+  @override
+  String get approvalRejectMessage =>
+      'The requester is told why. This closes the request.';
+
+  @override
+  String get approvalReturnTitle => 'Return for changes?';
+
+  @override
+  String get approvalReturnMessage =>
+      'The requester can fix it and send it again.';
+
+  @override
+  String get approvalReasonHint => 'Reason (at least 10 characters)';
+
+  @override
+  String get approvalDoneApproved => 'Approved';
+
+  @override
+  String get approvalDoneRejected => 'Rejected';
+
+  @override
+  String get approvalDoneReturned => 'Returned to the requester';
+
+  @override
+  String approvalDoneDelegated(String name) {
+    return 'Delegated to $name';
+  }
+
+  @override
+  String get approvalDoneComment => 'Comment added';
+
+  @override
+  String get approvalDoneWithdrawn => 'Request withdrawn';
+
+  @override
+  String get approvalDelegateTitle => 'Delegate to a colleague';
+
+  @override
+  String get approvalDelegateMessage =>
+      'They decide in your place and the record shows it was on your behalf.';
+
+  @override
+  String get approvalCommentHint => 'Write a comment';
+
+  @override
+  String get approvalSend => 'Send';
+
+  @override
+  String get approvalWithdrawConfirm => 'Withdraw this request?';
+
+  @override
+  String get approvalWithdrawMessage => 'Approvers will no longer see it.';
+
+  @override
+  String approvalNextYou(String step) {
+    return 'Waiting for you at: $step';
+  }
+
+  @override
+  String get approvalNextInReview => 'Still in review. Nothing for you to do.';
+
+  @override
+  String approvalNextWaiting(String names) {
+    return 'Waiting for $names. Nothing for you to do.';
+  }
+
+  @override
+  String approvalNextClosed(String status) {
+    return 'Closed: $status';
+  }
+
+  @override
+  String get approvalViewRequest => 'See the full request';
+
+  @override
+  String get approvalRoute => 'Approval route';
+
+  @override
+  String get approvalDiscussion => 'Comments';
+
+  @override
+  String get approvalNeedsSignature => 'This step needs your signature.';
 }

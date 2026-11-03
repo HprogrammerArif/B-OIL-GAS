@@ -620,25 +620,6 @@ body:has(.fleet-chat-active) {
   overflow: hidden !important;
 }
 
-/* ─── EXECUTIVE ALERT RIBBON ─────────────────────────────────────────────── */
-.exec-ribbon {
-  background:linear-gradient(90deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%);
-  border-left:5px solid var(--brand-gold);
-  border-radius:var(--radius-md); padding:14px 20px;
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:24px; box-shadow:var(--shadow-md);
-}
-.ribbon-left { display:flex; align-items:center; gap:14px; }
-.ribbon-icon { font-size:22px; }
-.ribbon-text h4 { font-size:13.5px; font-weight:700; color:var(--text-on-brand); }
-.ribbon-text p { font-size:11.5px; color:rgba(255,255,255,0.65); }
-.btn-ribbon {
-  padding:6px 14px; background:rgba(212,175,55,0.15);
-  border:1px solid var(--brand-gold); color:var(--brand-gold-light);
-  border-radius:var(--radius-sm); font-size:11.5px; font-weight:600;
-  cursor:pointer; transition:all var(--transition-fast); white-space:nowrap;
-}
-.btn-ribbon:hover { background:var(--brand-gold); color:var(--brand-slate-900); }
 
 /* ─── STATS GRID ─────────────────────────────────────────────────────────── */
 .stats-grid {

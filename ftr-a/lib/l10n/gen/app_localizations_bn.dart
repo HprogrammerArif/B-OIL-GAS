@@ -2049,4 +2049,264 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get busBroadcastSent => 'বার্তা পাঠানো হয়েছে';
+
+  @override
+  String get moduleApprovals => 'অনুমোদন';
+
+  @override
+  String get inboxOpen => 'খুলুন';
+
+  @override
+  String get approvalsTitle => 'অনুমোদন';
+
+  @override
+  String get approvalTabPending => 'আমার অপেক্ষায়';
+
+  @override
+  String get approvalTabHistory => 'ইতিহাস';
+
+  @override
+  String approvalSelected(int count) {
+    return '$countটি বাছাই';
+  }
+
+  @override
+  String approvalVerdict(int count) {
+    return '$countটি আপনার সিদ্ধান্তের অপেক্ষায়';
+  }
+
+  @override
+  String approvalVerdictOverdue(int pending, int overdue) {
+    return '$pendingটি অপেক্ষায়, $overdueটি সময় পেরিয়েছে';
+  }
+
+  @override
+  String get approvalCatAll => 'সব';
+
+  @override
+  String get approvalCatLeave => 'ছুটি';
+
+  @override
+  String get approvalCatClaims => 'বিল ও দাবি';
+
+  @override
+  String get approvalCatProcurement => 'ক্রয়';
+
+  @override
+  String get approvalCatFleet => 'যানবাহন';
+
+  @override
+  String get approvalCatOther => 'অন্যান্য';
+
+  @override
+  String get approvalEmptyTitle => 'কিছু বাকি নেই';
+
+  @override
+  String get approvalEmptyMessage =>
+      'আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই। নতুন অনুরোধ এখানে আসবে।';
+
+  @override
+  String get approvalBatchHint =>
+      'একসঙ্গে একাধিক অনুমোদনে অনুরোধ চেপে ধরুন। স্বাক্ষর লাগে বা ৫,০০,০০০-এর বেশি হলে আলাদাভাবে সিদ্ধান্ত নিতে হবে।';
+
+  @override
+  String approvalBatchConfirm(int count) {
+    return '$countটি অনুরোধ অনুমোদন করবেন?';
+  }
+
+  @override
+  String get approvalBatchMessage =>
+      'প্রতিটি যেমন আছে তেমনই অনুমোদিত হবে। এটি ফেরানো যায় না।';
+
+  @override
+  String approvalBatchDone(int count) {
+    return '$countটি অনুমোদিত';
+  }
+
+  @override
+  String approvalBatchPartial(int ok, int failed) {
+    return '$okটি অনুমোদিত, $failedটি করা যায়নি';
+  }
+
+  @override
+  String approvalApproveSelected(int count) {
+    return '$countটি অনুমোদন';
+  }
+
+  @override
+  String get approvalErrFailed => 'কাজটি হয়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get approvalErrSelf => 'নিজের অনুরোধে সিদ্ধান্ত নেওয়া যায় না।';
+
+  @override
+  String get approvalErrLimit => 'এই অঙ্ক আপনার অর্পিত অনুমোদনের সীমার বেশি।';
+
+  @override
+  String get approvalErrClosed => 'এই অনুরোধ আর সিদ্ধান্তের অপেক্ষায় নেই।';
+
+  @override
+  String approvalErrMinChars(int count) {
+    return 'কমপক্ষে $countটি অক্ষর লিখুন';
+  }
+
+  @override
+  String approvalFrom(String name, String when) {
+    return '$name-এর কাছ থেকে, $when';
+  }
+
+  @override
+  String get approvalUrgent => 'জরুরি';
+
+  @override
+  String get approvalDelegatedToYou => 'আপনাকে অর্পিত';
+
+  @override
+  String get approvalSlaOk => 'সময়মতো';
+
+  @override
+  String get approvalSlaWarn => 'অর্ধেক সময় গেছে';
+
+  @override
+  String get approvalSlaDanger => 'শিগগির সময় শেষ';
+
+  @override
+  String get approvalSlaOverdue => 'সময় পেরিয়েছে';
+
+  @override
+  String get approvalDecApproved => 'অনুমোদিত';
+
+  @override
+  String get approvalDecRejected => 'প্রত্যাখ্যাত';
+
+  @override
+  String get approvalDecReturned => 'ফেরত';
+
+  @override
+  String get approvalDecStarted => 'আমার পাঠানো';
+
+  @override
+  String get approvalWithdrawn => 'প্রত্যাহৃত';
+
+  @override
+  String get approvalInReview => 'পর্যালোচনায়';
+
+  @override
+  String get approvalHistoryEmptyTitle => 'এখনও কোনো ইতিহাস নেই';
+
+  @override
+  String get approvalHistoryEmptyMessage =>
+      'আপনার সিদ্ধান্ত ও পাঠানো অনুরোধ এখানে দেখা যাবে।';
+
+  @override
+  String get approvalActApprove => 'অনুমোদন';
+
+  @override
+  String get approvalActReject => 'প্রত্যাখ্যান';
+
+  @override
+  String get approvalActReturn => 'ফেরত দিন';
+
+  @override
+  String get approvalActDelegate => 'অর্পণ';
+
+  @override
+  String get approvalActWithdraw => 'প্রত্যাহার';
+
+  @override
+  String get approvalActComment => 'মন্তব্য';
+
+  @override
+  String get approvalDetailTitle => 'অনুরোধ';
+
+  @override
+  String get approvalApproveTitle => 'অনুরোধটি অনুমোদন করবেন?';
+
+  @override
+  String get approvalNoteOptional => 'মন্তব্য (ঐচ্ছিক)';
+
+  @override
+  String get approvalRejectTitle => 'অনুরোধটি প্রত্যাখ্যান করবেন?';
+
+  @override
+  String get approvalRejectMessage =>
+      'আবেদনকারীকে কারণ জানানো হবে। অনুরোধটি বন্ধ হয়ে যাবে।';
+
+  @override
+  String get approvalReturnTitle => 'পরিবর্তনের জন্য ফেরত দেবেন?';
+
+  @override
+  String get approvalReturnMessage => 'আবেদনকারী ঠিক করে আবার পাঠাতে পারবেন।';
+
+  @override
+  String get approvalReasonHint => 'কারণ (কমপক্ষে ১০ অক্ষর)';
+
+  @override
+  String get approvalDoneApproved => 'অনুমোদিত হয়েছে';
+
+  @override
+  String get approvalDoneRejected => 'প্রত্যাখ্যান করা হয়েছে';
+
+  @override
+  String get approvalDoneReturned => 'আবেদনকারীর কাছে ফেরত গেছে';
+
+  @override
+  String approvalDoneDelegated(String name) {
+    return '$name-কে অর্পণ করা হয়েছে';
+  }
+
+  @override
+  String get approvalDoneComment => 'মন্তব্য যোগ হয়েছে';
+
+  @override
+  String get approvalDoneWithdrawn => 'অনুরোধ প্রত্যাহার হয়েছে';
+
+  @override
+  String get approvalDelegateTitle => 'সহকর্মীকে অর্পণ করুন';
+
+  @override
+  String get approvalDelegateMessage =>
+      'তিনি আপনার হয়ে সিদ্ধান্ত নেবেন এবং রেকর্ডে আপনার পক্ষে বলে থাকবে।';
+
+  @override
+  String get approvalCommentHint => 'মন্তব্য লিখুন';
+
+  @override
+  String get approvalSend => 'পাঠান';
+
+  @override
+  String get approvalWithdrawConfirm => 'অনুরোধটি প্রত্যাহার করবেন?';
+
+  @override
+  String get approvalWithdrawMessage => 'অনুমোদনকারীরা আর এটি দেখবেন না।';
+
+  @override
+  String approvalNextYou(String step) {
+    return 'আপনার অপেক্ষায়: $step';
+  }
+
+  @override
+  String get approvalNextInReview => 'পর্যালোচনা চলছে। আপনার কিছু করার নেই।';
+
+  @override
+  String approvalNextWaiting(String names) {
+    return '$names-এর অপেক্ষায়। আপনার কিছু করার নেই।';
+  }
+
+  @override
+  String approvalNextClosed(String status) {
+    return 'শেষ: $status';
+  }
+
+  @override
+  String get approvalViewRequest => 'পুরো অনুরোধ দেখুন';
+
+  @override
+  String get approvalRoute => 'অনুমোদনের ধাপ';
+
+  @override
+  String get approvalDiscussion => 'মন্তব্য';
+
+  @override
+  String get approvalNeedsSignature => 'এই ধাপে আপনার স্বাক্ষর দরকার।';
 }

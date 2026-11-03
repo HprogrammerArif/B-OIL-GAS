@@ -785,6 +785,7 @@ abstract final class WorkflowEngine {
     'objectType': instance['objectType'],
     'objectId': instance['objectId'],
     'workflowInstanceId': instance['id'],
+    'route': '/home/approvals/${instance['id']}',
   };
 
   static void _notifyInitiator(

@@ -3690,6 +3690,462 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Message sent'**
   String get busBroadcastSent;
+
+  /// No description provided for @moduleApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get moduleApprovals;
+
+  /// No description provided for @inboxOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get inboxOpen;
+
+  /// No description provided for @approvalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get approvalsTitle;
+
+  /// No description provided for @approvalTabPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for me'**
+  String get approvalTabPending;
+
+  /// No description provided for @approvalTabHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get approvalTabHistory;
+
+  /// No description provided for @approvalSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String approvalSelected(int count);
+
+  /// No description provided for @approvalVerdict.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting for your decision'**
+  String approvalVerdict(int count);
+
+  /// No description provided for @approvalVerdictOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'{pending} waiting, {overdue} overdue'**
+  String approvalVerdictOverdue(int pending, int overdue);
+
+  /// No description provided for @approvalCatAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get approvalCatAll;
+
+  /// No description provided for @approvalCatLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get approvalCatLeave;
+
+  /// No description provided for @approvalCatClaims.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims'**
+  String get approvalCatClaims;
+
+  /// No description provided for @approvalCatProcurement.
+  ///
+  /// In en, this message translates to:
+  /// **'Procurement'**
+  String get approvalCatProcurement;
+
+  /// No description provided for @approvalCatFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Fleet'**
+  String get approvalCatFleet;
+
+  /// No description provided for @approvalCatOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get approvalCatOther;
+
+  /// No description provided for @approvalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear'**
+  String get approvalEmptyTitle;
+
+  /// No description provided for @approvalEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting for your decision. New requests appear here.'**
+  String get approvalEmptyMessage;
+
+  /// No description provided for @approvalBatchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold a request to approve several at once. Requests that need a signature or are above 5,00,000 must be decided one by one.'**
+  String get approvalBatchHint;
+
+  /// No description provided for @approvalBatchConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {count} requests?'**
+  String approvalBatchConfirm(int count);
+
+  /// No description provided for @approvalBatchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one is approved as it stands. This cannot be undone.'**
+  String get approvalBatchMessage;
+
+  /// No description provided for @approvalBatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} approved'**
+  String approvalBatchDone(int count);
+
+  /// No description provided for @approvalBatchPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{ok} approved, {failed} could not be approved'**
+  String approvalBatchPartial(int ok, int failed);
+
+  /// No description provided for @approvalApproveSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {count}'**
+  String approvalApproveSelected(int count);
+
+  /// No description provided for @approvalErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Try again.'**
+  String get approvalErrFailed;
+
+  /// No description provided for @approvalErrSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot decide your own request.'**
+  String get approvalErrSelf;
+
+  /// No description provided for @approvalErrLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is above your delegated approval limit.'**
+  String get approvalErrLimit;
+
+  /// No description provided for @approvalErrClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This request is no longer waiting for a decision.'**
+  String get approvalErrClosed;
+
+  /// No description provided for @approvalErrMinChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Write at least {count} characters'**
+  String approvalErrMinChars(int count);
+
+  /// No description provided for @approvalFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}, {when}'**
+  String approvalFrom(String name, String when);
+
+  /// No description provided for @approvalUrgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Urgent'**
+  String get approvalUrgent;
+
+  /// No description provided for @approvalDelegatedToYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Delegated to you'**
+  String get approvalDelegatedToYou;
+
+  /// No description provided for @approvalSlaOk.
+  ///
+  /// In en, this message translates to:
+  /// **'On time'**
+  String get approvalSlaOk;
+
+  /// No description provided for @approvalSlaWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Half the time used'**
+  String get approvalSlaWarn;
+
+  /// No description provided for @approvalSlaDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get approvalSlaDanger;
+
+  /// No description provided for @approvalSlaOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get approvalSlaOverdue;
+
+  /// No description provided for @approvalDecApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approvalDecApproved;
+
+  /// No description provided for @approvalDecRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get approvalDecRejected;
+
+  /// No description provided for @approvalDecReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get approvalDecReturned;
+
+  /// No description provided for @approvalDecStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent by me'**
+  String get approvalDecStarted;
+
+  /// No description provided for @approvalWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get approvalWithdrawn;
+
+  /// No description provided for @approvalInReview.
+  ///
+  /// In en, this message translates to:
+  /// **'In review'**
+  String get approvalInReview;
+
+  /// No description provided for @approvalHistoryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get approvalHistoryEmptyTitle;
+
+  /// No description provided for @approvalHistoryEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Decisions you make and requests you send appear here.'**
+  String get approvalHistoryEmptyMessage;
+
+  /// No description provided for @approvalActApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get approvalActApprove;
+
+  /// No description provided for @approvalActReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get approvalActReject;
+
+  /// No description provided for @approvalActReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get approvalActReturn;
+
+  /// No description provided for @approvalActDelegate.
+  ///
+  /// In en, this message translates to:
+  /// **'Delegate'**
+  String get approvalActDelegate;
+
+  /// No description provided for @approvalActWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get approvalActWithdraw;
+
+  /// No description provided for @approvalActComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get approvalActComment;
+
+  /// No description provided for @approvalDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get approvalDetailTitle;
+
+  /// No description provided for @approvalApproveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this request?'**
+  String get approvalApproveTitle;
+
+  /// No description provided for @approvalNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get approvalNoteOptional;
+
+  /// No description provided for @approvalRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject this request?'**
+  String get approvalRejectTitle;
+
+  /// No description provided for @approvalRejectMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The requester is told why. This closes the request.'**
+  String get approvalRejectMessage;
+
+  /// No description provided for @approvalReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return for changes?'**
+  String get approvalReturnTitle;
+
+  /// No description provided for @approvalReturnMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The requester can fix it and send it again.'**
+  String get approvalReturnMessage;
+
+  /// No description provided for @approvalReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (at least 10 characters)'**
+  String get approvalReasonHint;
+
+  /// No description provided for @approvalDoneApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get approvalDoneApproved;
+
+  /// No description provided for @approvalDoneRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get approvalDoneRejected;
+
+  /// No description provided for @approvalDoneReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned to the requester'**
+  String get approvalDoneReturned;
+
+  /// No description provided for @approvalDoneDelegated.
+  ///
+  /// In en, this message translates to:
+  /// **'Delegated to {name}'**
+  String approvalDoneDelegated(String name);
+
+  /// No description provided for @approvalDoneComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment added'**
+  String get approvalDoneComment;
+
+  /// No description provided for @approvalDoneWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Request withdrawn'**
+  String get approvalDoneWithdrawn;
+
+  /// No description provided for @approvalDelegateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delegate to a colleague'**
+  String get approvalDelegateTitle;
+
+  /// No description provided for @approvalDelegateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'They decide in your place and the record shows it was on your behalf.'**
+  String get approvalDelegateMessage;
+
+  /// No description provided for @approvalCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a comment'**
+  String get approvalCommentHint;
+
+  /// No description provided for @approvalSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get approvalSend;
+
+  /// No description provided for @approvalWithdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw this request?'**
+  String get approvalWithdrawConfirm;
+
+  /// No description provided for @approvalWithdrawMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvers will no longer see it.'**
+  String get approvalWithdrawMessage;
+
+  /// No description provided for @approvalNextYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you at: {step}'**
+  String approvalNextYou(String step);
+
+  /// No description provided for @approvalNextInReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Still in review. Nothing for you to do.'**
+  String get approvalNextInReview;
+
+  /// No description provided for @approvalNextWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {names}. Nothing for you to do.'**
+  String approvalNextWaiting(String names);
+
+  /// No description provided for @approvalNextClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed: {status}'**
+  String approvalNextClosed(String status);
+
+  /// No description provided for @approvalViewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'See the full request'**
+  String get approvalViewRequest;
+
+  /// No description provided for @approvalRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval route'**
+  String get approvalRoute;
+
+  /// No description provided for @approvalDiscussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get approvalDiscussion;
+
+  /// No description provided for @approvalNeedsSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'This step needs your signature.'**
+  String get approvalNeedsSignature;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

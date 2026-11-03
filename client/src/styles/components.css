@@ -2081,8 +2081,6 @@
   box-sizing: border-box !important;
 }
 
-
-
 input[type="text"], input[type="email"], input[type="date"], input[type="number"], textarea, select {
   width:100%; padding:9px 12px; border:1px solid var(--brand-slate-200);
   border-radius:var(--radius-sm); font-size:13px; font-family:var(--font-main);
@@ -3468,93 +3466,6 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   color: var(--text-1);
 }
 
-.tab-jump-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.tab-jump-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 10px;
-  padding: 16px;
-  background: var(--brand-card-bg, var(--surface-1));
-  border: 1px solid var(--brand-slate-200);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-xs);
-}
-
-.tab-jump-card:hover {
-  background: var(--surface-1);
-  border-color: var(--brand-crimson);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-[data-theme="dark"] .tab-jump-card {
-  background: var(--surface-inverse);
-  border-color: var(--border-inverse);
-}
-
-[data-theme="dark"] .tab-jump-card:hover {
-  background: #16254C;
-  border-color: var(--brand-gold);
-}
-
-.tab-jump-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-}
-
-.tab-jump-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--brand-slate-900);
-}
-
-[data-theme="dark"] .tab-jump-title {
-  color: var(--text-inverse);
-}
-
-.tab-jump-desc {
-  font-size: 12.5px;
-  color: var(--brand-slate-600);
-  line-height: 1.5;
-  flex: 1;
-}
-
-[data-theme="dark"] .tab-jump-desc {
-  color: var(--text-muted);
-}
-
-.tab-jump-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--brand-crimson);
-  padding-top: 8px;
-  border-top: 1px solid var(--brand-slate-100);
-}
-
-[data-theme="dark"] .tab-jump-footer {
-  color: var(--brand-gold);
-  border-top-color: rgba(255, 255, 255, 0.08);
-}
-
 /* ─── UNIVERSAL RESPONSIVE GRID HELPERS ─────────────────────────────────────── */
 .responsive-col-2 {
   display: grid;
@@ -3590,60 +3501,7 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   -webkit-overflow-scrolling: touch;
 }
 
-/* ─── PITCH ENHANCEMENTS: ROI TICKER, SAP GATEWAY & PKI ──────────────────────── */
-.roi-banner {
-  background: linear-gradient(90deg, var(--surface-inverse-deep) 0%, var(--surface-inverse) 50%, var(--surface-inverse-deep) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: var(--radius-lg);
-  padding: 16px 22px;
-  margin-bottom: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-.roi-banner::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; width: 4px; height: 100%;
-  background: linear-gradient(180deg, var(--brand-gold) 0%, var(--brand-crimson) 100%);
-}
-
-.roi-stats-row {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  flex-wrap: wrap;
-}
-
-.roi-stat-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.roi-stat-item + .roi-stat-item {
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
-  padding-left: 28px;
-}
-
-.roi-stat-item .val {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--brand-gold);
-  line-height: 1.1;
-}
-
-.roi-stat-item .lbl {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 2px;
-}
+/* ─── PITCH ENHANCEMENTS: SAP GATEWAY & PKI ──────────────────────── */
 
 .sap-sync-pill {
   display: inline-flex;
@@ -4790,7 +4648,4 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 [data-theme="dark"] .claims-table-control:focus {
   border-color: var(--brand-crimson-light);
 }
-
-
-
 

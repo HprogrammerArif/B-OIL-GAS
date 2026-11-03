@@ -12,6 +12,7 @@ import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 String _categoryLabel(AppL10n l10n, NotificationCategory c) => switch (c) {
   NotificationCategory.all => l10n.inboxFilterAll,
@@ -429,7 +430,22 @@ class _DetailSheet extends ConsumerWidget {
                   }
                 },
               )
-            else
+            else if (item.route != null) ...[
+              PrimaryButton(
+                label: l10n.inboxOpen,
+                icon: Icons.open_in_new,
+                onPressed: () {
+                  final router = GoRouter.of(context);
+                  Navigator.of(context).pop();
+                  unawaited(router.push(item.route!));
+                },
+              ),
+              const SizedBox(height: Space.sm),
+              PrimaryButton.secondary(
+                label: l10n.commonClose,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ] else
               PrimaryButton.secondary(
                 label: l10n.commonClose,
                 onPressed: () => Navigator.of(context).pop(),

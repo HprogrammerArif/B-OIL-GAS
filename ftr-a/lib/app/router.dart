@@ -1,6 +1,8 @@
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/features/activity/presentation/activity_screen.dart';
+import 'package:bogcl_oneops/features/approvals/presentation/approval_detail_screen.dart';
+import 'package:bogcl_oneops/features/approvals/presentation/approvals_screen.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_screen.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/regularise_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/loading_screen.dart';
@@ -85,6 +87,18 @@ GoRouter router(Ref ref) {
                         builder: (context, state) => RegulariseScreen(
                           initialDate: state.uri.queryParameters['date'],
                           initialType: state.uri.queryParameters['type'],
+                        ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'approvals',
+                    builder: (context, state) => const ApprovalsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => ApprovalDetailScreen(
+                          instanceId: state.pathParameters['id']!,
                         ),
                       ),
                     ],

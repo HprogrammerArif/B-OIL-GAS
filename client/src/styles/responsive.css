@@ -3,7 +3,6 @@
    Supports Desktop, Laptop, iPad/Tablet, and Mobile (360px - 1024px)
    ========================================================================== */
 
-
 /* ─── BASE RESPONSIVE CONTROLS & UTILITIES ─────────────────────────────────── */
 .sidebar-mobile-backdrop {
   position: fixed;
@@ -327,19 +326,6 @@
     gap: 18px !important;
   }
 
-  /* Strategic ROI Ribbon Wrap */
-  .roi-banner {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 14px !important;
-  }
-
-  .roi-stats-row {
-    width: 100% !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
-    gap: 10px !important;
-  }
 }
 
 /* ─── INNER CIRCLE CHAT MOBILE / TABLET ADAPTATION (<= 900px) ──────────────── */
@@ -552,44 +538,7 @@
     white-space: nowrap !important;
   }
 
-  /* Strategic ROI Banner & Stats Mobile Optimization */
-  .roi-banner {
-    padding: 14px 16px !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-  }
 
-  .roi-stats-row {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  .roi-stat-item + .roi-stat-item {
-    border-left: none !important;
-    padding-left: 0 !important;
-  }
-
-  .roi-stat-item .val {
-    font-size: 18px !important;
-  }
-
-  .roi-stat-item .lbl {
-    font-size: 10px !important;
-  }
-
-  .roi-banner button {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  /* Progressive Disclosure Jump Grid Mobile */
-  .tab-jump-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
 
   /* Priority Approvals Mobile Card */
   .approval-interactive-card {

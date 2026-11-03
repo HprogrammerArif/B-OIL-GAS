@@ -1330,6 +1330,11 @@ Module dir `workflow`; web feature `approvals`. This module has **no endpoints o
 
 **Prototype note:** approver attribution now comes from the authenticated actor (`WorkflowAction.actorId`), history shows the real `decision`, and `signatureHash`/`notifySms` from the modal are honoured (`Signature` row; SMS to initiator). Category mapping `objectType → category`: `NoteSheet, AssetRequisition → PROCUREMENT`; `Claim, Advance → CLAIMS`; `VehicleRequisition → FLEET`; `LeaveRequest, Regularisation → LEAVE`; `ExitClearance → HR`; `AssetDisposal → ASSETS`; `Visit → VISITORS`; `SeatWaitlist → BUS`; `LicenceRenewal → COMPLIANCE`; `Incident → HSE`; `Notice → NOTICES`.
 
+
+### 21.x Pitch-app mock additions
+
+`GET /workflow/delegates` (`workflow:act`): active colleagues the caller may delegate a decision to (users holding `workflow:act`, excluding the caller) as `[{ userId, name, nameBn, title }]`. Workflow notifications carry `data.route = /home/approvals/{instanceId}` so the Inbox can open the request.
+
 ---
 
 ## 22. MOD-18 — Administration
