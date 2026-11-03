@@ -1,5 +1,7 @@
 # 09 — Delivery Roadmap & Work Plan
 
+> **Tech-stack change (3 Nov 2026):** the active plan is the 9-phase Flutter pitch roadmap in `05_MOBILE_APP_SPECIFICATION_FLUTTER.md` §14 and `ftr-a/docs/FEATURE_STATUS.md`. The sprint plan below is reference only.
+
 **Document:** 09 of the Production Platform Specification Suite
 **Status:** Baseline v1.0 — 1 November 2026
 **Audience:** Product owner, tech lead, engineering, QA, DevOps, client steering committee

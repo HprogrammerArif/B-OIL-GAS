@@ -1,5 +1,7 @@
 # BOGCL OneOps — Production Platform: Overview & Architecture
 
+> **Tech-stack change (3 Nov 2026):** the active build is a backend-free Flutter pitch app in `ftr-a/` (mock data, production look and feel). See `05_MOBILE_APP_SPECIFICATION_FLUTTER.md` and `AGENTS.md`. ADRs about Express/Prisma/React/Expo (ADR-02..04, 12..17, 19, 21) are reference only; module registry, roles, scopes and conventions remain binding.
+
 **Document:** 00 of the Production Platform Specification Suite
 **Status:** Baseline v1.0 — 1 November 2026
 **Audience:** Engineering (backend, web, mobile), DevOps, QA, Product

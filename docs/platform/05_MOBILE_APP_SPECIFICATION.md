@@ -1,5 +1,7 @@
 # 05 — Mobile App Specification (Expo)
 
+> **Superseded for the active build (3 Nov 2026):** see `05_MOBILE_APP_SPECIFICATION_FLUTTER.md`. Sections 9 (per-module screens), 10 (role home), 5/8 (offline, geolocation) and 11 (tokens) remain the functional source of truth; Expo/RN specifics are reference only.
+
 **Document:** 05 of the Production Platform Specification Suite
 **Status:** Baseline v1.0 — 1 November 2026
 **Audience:** Mobile engineers, backend engineers (contract owners), QA, DevOps

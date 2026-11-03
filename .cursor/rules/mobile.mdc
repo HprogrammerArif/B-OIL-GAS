@@ -1,10 +1,12 @@
 ---
-description: Mobile app (app/) conventions for Expo + Expo Router + Redux Toolkit + RTK Query
+description: LEGACY React Native app (app/) conventions - reference only, superseded by flutter.mdc
 globs: app/**
 alwaysApply: false
 ---
 
-# Mobile Rules (`app/`)
+# Mobile Rules (`app/`) - LEGACY
+
+The production mobile app is now Flutter in `ftr-a/` (see `flutter.mdc`). `app/` is a read-only reference for business logic and mock seed data; do not extend it.
 
 Spec: `docs/platform/05_MOBILE_APP_SPECIFICATION.md`. Also follow `app/.agents/AGENTS.md` and `app/.agents/skills/*` (starter conventions) where they do not conflict with the spec.
 

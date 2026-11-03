@@ -4,51 +4,51 @@ Entry point for AI agents and new engineers. Read this, then the documents it po
 
 ## What this repository is
 
+The active deliverable is a **Flutter pitch app** (`ftr-a/`). It has **no backend**: all data is a seeded, persisted mock layer. It must still look, feel and behave like a real production application (visuals, flows, validation, offline, notifications, realtime), because it is used to pitch the product.
+
 | Path | What | Status |
 | :-- | :-- | :-- |
-| `client/` | Interactive React prototype shown to the client (7 personas, 17 modules, no backend) | **Active demo artifact** — being enhanced per `docs/PROTOTYPE_ENHANCEMENT_PLAN.md`; stays self-contained |
-| `server/` | Production API — Node 22, Express 5, TypeScript, Prisma 6, PostgreSQL 16, Redis 7, BullMQ, Socket.IO | To be built (spec: `docs/platform/01`) |
-| `frontend/` | Production web app — React 19, Vite, React Router 7, Redux Toolkit + RTK Query, Tailwind v4 + shadcn/ui | To be built (spec: `docs/platform/04`) |
-| `app/` | Production mobile app — Expo SDK 56, Expo Router, Redux Toolkit + RTK Query (adapted from the committed starter) | Starter present; adaptation per `docs/platform/05` |
-| `infra/` | docker-compose, Dockerfiles, CI workflows, deployment manifests | To be built (spec: `docs/platform/08`) |
-| `docs/` | Pitch/planning docs (01–06), prototype report (`00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md`), and the production specification suite in `docs/platform/` | Living |
-
-No npm workspaces: each of `client/`, `server/`, `frontend/`, `app/` has its own `package.json`. Shared API types are generated from the server's OpenAPI document.
+| `ftr-a/` | **Flutter app** (Android first, iOS-ready): Riverpod, go_router, Dio + in-app mock server, drift, EN/BN l10n | **Active — build here** |
+| `app/` | Legacy React Native (Expo) app with mock server and several finished modules | Read-only reference for business logic, seed data, copy |
+| `client/` | Interactive React web prototype (7 personas, 17 modules) | Read-only reference |
+| `server/`, `frontend/`, `infra/` | Production backend / web / infra placeholders | **Not being built** |
+| `docs/` | Pitch/planning docs, prototype report, `docs/platform/00–10` specification suite | Living; mobile spec adapted in `05_MOBILE_APP_SPECIFICATION_FLUTTER.md` |
 
 ## Read in this order
 
-1. `docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md` — decisions (ADRs), conventions, engines, module registry.
-2. The spec for the app you are touching: `01` server · `04` web · `05` mobile.
-3. `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md` — business rules (`BR-xx-nn`) for the module.
-4. `docs/platform/03_API_SPECIFICATION.md` and `02_DATABASE_SCHEMA.md` — contract and data model.
-5. `docs/platform/10_CODING_STANDARDS_AND_CONVENTIONS.md`.
+1. `ftr-a/docs/FEATURE_STATUS.md` — what is built, what is next, per module and persona.
+2. `docs/platform/05_MOBILE_APP_SPECIFICATION_FLUTTER.md` — architecture, screens per module, design system.
+3. `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md` — business rules (`BR-xx-nn`).
+4. `docs/platform/03_API_SPECIFICATION.md` and `02_DATABASE_SCHEMA.md` — shapes the mock mirrors.
+5. `docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md` (module registry, roles, scopes, conventions) and `10_CODING_STANDARDS_AND_CONVENTIONS.md`.
 
-For what the prototype does (and its known defects), start with `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md`; for prototype enhancement work, follow `docs/PROTOTYPE_ENHANCEMENT_PLAN.md`.
+Prototype behaviour and known defects: `docs/00_PROJECT_CURRENT_STATE_COMPREHENSIVE_REPORT.md`.
 
 ## Rules and skills
 
-- Rules in `.cursor/rules/`: `project` and `security` always apply; `backend`, `frontend`, `mobile`, `database-prisma`, `api-conventions`, `testing`, `prototype-reference` attach by path; `handoff-summary` on request.
-- Skills in `.cursor/skills/`: `port-prototype-module` (end-to-end), `add-backend-module`, `add-web-feature`, `add-mobile-screen`, `prisma-migration`, `update-platform-docs`. Invoke them by name for the corresponding task.
-- The Expo starter ships its own `app/.agents/AGENTS.md` and skills; they apply inside `app/` where they do not conflict with `docs/platform/05`.
+- Rules in `.cursor/rules/`: always on — `project`, `security`, `no-tests-during-development`, `no-emulator-or-device-runs`; by path — `flutter` (`ftr-a/**`), `testing`; legacy — `mobile`, `backend`, `frontend`, `database-prisma`, `api-conventions`, `prototype-reference`; on request — `handoff-summary`.
+- Skills in `.cursor/skills/`: `flutter-add-feature`, `flutter-add-screen`, `flutter-mock-endpoint`, `flutter-port-rn-module`, `flutter-i18n-keys`, `flutter-release-android`, `update-platform-docs`. Legacy: `port-prototype-module`, `add-mobile-screen`, `add-web-feature`, `add-backend-module`, `prisma-migration`.
 
 ## Non-negotiables
 
-- `client/` never calls a backend or imports production code; follow `.cursor/rules/prototype-reference.mdc` when editing it.
-- No secrets in the repo; `.env.example` files list names only. Never overwrite `.env*` files.
-- No destructive database commands or production config changes without explicit approval.
+- No emulators, builds or app launches from the agent; the user runs `flutter run -d <device>` on their phone. No tests during development; tests run once at the end when asked.
+- No secrets in the repo; never overwrite `.env*`/`key.properties`/keystores. No real network backends.
+- No dead links, stubs or "coming soon" in `ftr-a`: if an entry point exists, the screen works for the personas that can see it.
 - New dependencies need a stated reason; never swap an existing library without approval.
 - Behaviour changes update the matching spec in `docs/platform/` in the same change.
-- All user-facing text is bilingual (EN/BN) via i18n keys.
+- All user-facing text is bilingual (EN/BN) via ARB keys.
 
-## Commands (per app, once scaffolded)
+## Commands (run from `ftr-a/`)
 
 ```
-client/    npm run dev                      # prototype on http://localhost:5173
-server/    npm run dev | test | lint | typecheck | prisma:migrate | openapi:gen
-frontend/  npm run dev | test | lint | typecheck | api:types | e2e
-app/       npx expo start | npm test | npm run lint | npm run api:types
-infra/     docker compose -f docker-compose.dev.yml up -d   # postgres, redis, minio, mailpit
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # freezed/riverpod/drift codegen
+flutter gen-l10n                                           # after editing .arb files
+dart format lib && flutter analyze                         # agent-allowed checks
+flutter run -d <device-id>                                 # USER runs this on the phone
 ```
+
+Flutter SDK: `C:\src\flutter` (on user PATH). See `ftr-a/docs/RUN_ON_DEVICE.md`.
 
 ## Handoff
 

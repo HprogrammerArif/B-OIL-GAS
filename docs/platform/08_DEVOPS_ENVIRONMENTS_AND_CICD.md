@@ -1,5 +1,7 @@
 # 08 — DevOps, Environments & CI/CD
 
+> **Tech-stack change (3 Nov 2026):** no server or infra is being built. For the Flutter pitch app only flavors, signing and the Android release steps apply (`05_MOBILE_APP_SPECIFICATION_FLUTTER.md` §13). This document is reference only.
+
 **Document:** 08 of the Production Platform Specification Suite
 **Status:** Baseline v1.0 — 1 November 2026
 **Audience:** DevOps, backend, web, mobile engineers; BOGCL IT infrastructure team

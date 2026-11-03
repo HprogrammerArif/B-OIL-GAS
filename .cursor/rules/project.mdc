@@ -6,23 +6,22 @@ alwaysApply: true
 # Project Development Rules
 
 ## Context first
-- This repo is **BOGCL OneOps**: a frozen prototype in `client/` and three production codebases — `server/` (Express + Prisma), `frontend/` (React + RTK Query), `app/` (Expo). Read `AGENTS.md` and `docs/platform/00_PLATFORM_OVERVIEW_AND_ARCHITECTURE.md` before non-trivial work.
-- Business rules live in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md`; API contract in `03`; schema in `02`. Implement from the docs; when behaviour must change, update the doc in the same change.
-- `client/` is the interactive prototype being polished for presentation (`docs/PROTOTYPE_ENHANCEMENT_PLAN.md`, rule `prototype-reference`). Keep it self-contained; production code goes only in `server/`, `frontend/`, `app/`.
+- This repo is **BOGCL OneOps**. The active deliverable is the **Flutter pitch app in `ftr-a/`**: no backend, seeded mock data, but it must look and behave like a real production app. `client/` (web prototype) and `app/` (React Native) are read-only references; `server/` and `frontend/` are not being built. Read `AGENTS.md` and `ftr-a/docs/FEATURE_STATUS.md` before non-trivial work.
+- Business rules live in `docs/platform/06_MODULE_FUNCTIONAL_SPECIFICATIONS.md`; mobile spec in `docs/platform/05_MOBILE_APP_SPECIFICATION_FLUTTER.md`; API shapes in `03` (the mock mirrors them). Implement from the docs; when behaviour must change, update the doc in the same change.
 
 ## General
 - Act as a senior software engineer. Understand the existing architecture before making changes.
 - Follow existing project conventions. Prefer simple, maintainable solutions; avoid overengineering.
 - Do not duplicate existing functionality (check engines in `server/src/engines` and shared UI first).
 
-## TypeScript
-- TypeScript strict for all application code. Avoid `any`; use `unknown` + narrowing.
-- Define interfaces/types; handle nullable values safely.
+## Dart / TypeScript
+- Dart: sound null safety, strict analyzer (`strict-casts/inference/raw-types`), no `dynamic` unless unavoidable, immutable models.
+- TypeScript (legacy apps only): strict; avoid `any`.
 
 ## Code Quality
 - Keep functions focused and readable; handle loading, error, empty, and success states.
 - Consider edge cases; remove unused imports and code.
-- Never hardcode user-facing text — use i18n keys (EN + BN).
+- Never hardcode user-facing text — use i18n keys (EN + BN; ARB files in `ftr-a/lib/l10n`).
 
 ## Dependencies
 - Reuse existing dependencies. Do not install new packages without explaining why.

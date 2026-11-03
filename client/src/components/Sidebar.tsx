@@ -407,7 +407,7 @@ export default function Sidebar({
       </div>
 
       {/* Role Badge */}
-      {!isCollapsed ? (
+      {/* {!isCollapsed ? (
         <div className="role-badge">
           <div className="role-badge-dot" />
           <div className="role-badge-text">
@@ -421,7 +421,7 @@ export default function Sidebar({
         <div className="role-badge-mini" title={`${meta.name} (${meta.empId}) — ${t(meta.label, meta.labelBn, lang)}`}>
           <div className="role-badge-dot" />
         </div>
-      )}
+      )} */}
 
       {/* Role-Specific Navigation */}
       <nav className="sidebar-nav">

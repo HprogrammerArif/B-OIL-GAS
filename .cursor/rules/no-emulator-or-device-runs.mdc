@@ -1,13 +1,13 @@
 ---
-description: Never launch emulators, simulators, or app builds/runs from the agent terminal; the user runs the app on their own device
+description: Never start emulators, builds or app launches from the agent
 alwaysApply: true
 ---
 
 # No emulators or app launches from the agent
 
-- Never start an Android emulator or iOS simulator, in any form: `emulator`, `avdmanager`, Android Studio AVDs, `xcrun simctl`, or `npx expo run:android` / `run:ios` / `expo start --android` / `--ios` / `--web`.
-- Never build or install the app on a device or emulator from the agent terminal (`gradlew assemble*`, `adb install`, `eas build`, `expo prebuild`).
-- Do not start Metro or any dev server for the mobile app (`npx expo start`). The user starts it and runs the app on their physical device from their own terminal.
-- `adb` may be used only for read-only diagnosis when the user asks (for example `adb devices`). Never use it to install, launch, or control the app.
-- When a change needs the app to be run, say so and give the user the exact command to run themselves.
+- Never start an Android emulator or iOS simulator in any form: `emulator`, `avdmanager`, `flutter emulators --launch`, Android Studio AVDs, `xcrun simctl`, or `flutter run` / `npx expo run:*` / `expo start`.
+- Never build or install the app from the agent terminal: `flutter build apk|appbundle|ios`, `flutter install`, `gradlew assemble*`, `adb install`, `eas build`, `expo prebuild`.
+- Do not start any dev server or Metro. The user runs the app on their physical device from their own terminal.
+- Read-only diagnosis is allowed: `flutter doctor`, `flutter devices`, `adb devices` (only when useful or asked). `flutter pub get`, `build_runner`, `gen-l10n`, `analyze` and `format` are allowed because they do not launch the app.
+- When a change needs the app to be run, say so and give the user the exact command (for example `flutter run -d <device-id>` from `ftr-a`).
 - Keep editing code and docs as normal; this rule only covers running the app and emulators.

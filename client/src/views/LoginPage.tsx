@@ -127,31 +127,6 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
           LEFT HERO: FULL-BLEED AERIAL REFINERY NIGHT PHOTOGRAPHY
           ────────────────────────────────────────────────────────────────── */}
       <section className="sc-hero-backdrop">
-        <header className="sc-brand-badge-box">
-          <div className="sc-brand-badge-emblem">
-            <div
-              style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '6px',
-                background: 'linear-gradient(135deg, #BA1C37 0%, #7A0C1E 100%)',
-                color: '#FFFFFF',
-                fontWeight: 900,
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              B
-            </div>
-            <div className="sc-brand-logo-text">
-              <strong>BOGCL</strong>
-              <span>OneOps</span>
-            </div>
-          </div>
-        </header>
-
         <div className="sc-hero-center">
           <span className="sc-command-tag">
             {t('COMMAND CENTRE', 'অপারেশনস কমান্ড সেন্টার', lang)}
@@ -200,7 +175,7 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
               title={t('Toggle Language', 'ভাষা পরিবর্তন', lang)}
             >
               <Globe size={12} />
-              <span>{lang === 'en' ? 'বাংলা' : 'English'}</span>
+              <span className="sc-lang-badge">{lang === 'en' ? 'বাং' : 'EN'}</span>
             </button>
           </div>
 

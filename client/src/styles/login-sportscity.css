@@ -40,52 +40,11 @@
   pointer-events: none;
 }
 
-/* Hero Top Branding Badge */
-.sc-brand-badge-box {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.sc-brand-badge-emblem {
-  background: #FFFFFF;
-  border-radius: 8px;
-  padding: 8px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.sc-brand-logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-
-.sc-brand-logo-text strong {
-  font-family: var(--font-display, inherit);
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #1A365D;
-}
-
-.sc-brand-logo-text span {
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: #C53030;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
 /* Center Hero Typography */
 .sc-hero-center {
   position: relative;
   z-index: 2;
+  margin-top: 14%;
   margin-bottom: 24px;
   max-width: 640px;
 }
@@ -195,6 +154,16 @@
 .sc-lang-toggle-btn:hover {
   border-color: #E5B358;
   color: #E5B358;
+}
+
+/* Language badge — compact ISO chip shown inside the toggle button */
+.sc-lang-badge {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .sc-staff-sub {
