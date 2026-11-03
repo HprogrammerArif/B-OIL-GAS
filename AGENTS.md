@@ -26,7 +26,7 @@ Prototype behaviour and known defects: `docs/00_PROJECT_CURRENT_STATE_COMPREHENS
 
 ## Rules and skills
 
-- Rules in `.cursor/rules/`: always on — `project`, `security`, `no-tests-during-development`, `no-emulator-or-device-runs`; by path — `flutter` (`ftr-a/**`), `testing`; legacy — `mobile`, `backend`, `frontend`, `database-prisma`, `api-conventions`, `prototype-reference`; on request — `handoff-summary`.
+- Rules in `.cursor/rules/`: always on — `project`, `clarity-minimum-data`, `security`, `no-tests-during-development`, `no-emulator-or-device-runs`; by path — `flutter` (`ftr-a/**`), `testing`; legacy — `mobile`, `backend`, `frontend`, `database-prisma`, `api-conventions`, `prototype-reference`; on request — `handoff-summary`.
 - Skills in `.cursor/skills/`: `flutter-add-feature`, `flutter-add-screen`, `flutter-mock-endpoint`, `flutter-port-rn-module`, `flutter-i18n-keys`, `flutter-release-android`, `update-platform-docs`. Legacy: `port-prototype-module`, `add-mobile-screen`, `add-web-feature`, `add-backend-module`, `prisma-migration`.
 
 ## Non-negotiables
@@ -37,6 +37,7 @@ Prototype behaviour and known defects: `docs/00_PROJECT_CURRENT_STATE_COMPREHENS
 - New dependencies need a stated reason; never swap an existing library without approval.
 - Behaviour changes update the matching spec in `docs/platform/` in the same change.
 - All user-facing text is bilingual (EN/BN) via ARB keys.
+- Minimum data, maximum understanding: every screen says what it is, where it came from, why, and what happens next, in plain words (`.cursor/rules/clarity-minimum-data.mdc`).
 
 ## Commands (run from `ftr-a/`)
 

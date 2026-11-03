@@ -11,7 +11,7 @@ enum NoticeCategory {
   hr('HR'),
   executive('EXECUTIVE');
 
-  const NoticeCategory(this.wire);
+  NoticeCategory(this.wire);
 
   final String wire;
 
@@ -24,7 +24,7 @@ enum NoticePriority {
   high('HIGH'),
   critical('CRITICAL');
 
-  const NoticePriority(this.wire);
+  NoticePriority(this.wire);
 
   final String wire;
 

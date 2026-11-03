@@ -24,4 +24,22 @@ final List<AppModule> builtModules = [
     label: (l10n) => l10n.moduleLeave,
     route: AppRoutes.leave,
   ),
+  (
+    key: 'notices',
+    icon: Icons.campaign_outlined,
+    label: (l10n) => l10n.moduleNotices,
+    route: AppRoutes.notices,
+  ),
+  (
+    key: 'claims',
+    icon: Icons.receipt_long_outlined,
+    label: (l10n) => l10n.moduleClaims,
+    route: AppRoutes.claims,
+  ),
+  (
+    key: 'bus',
+    icon: Icons.directions_bus_outlined,
+    label: (l10n) => l10n.moduleBus,
+    route: AppRoutes.bus,
+  ),
 ];

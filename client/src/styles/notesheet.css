@@ -82,15 +82,6 @@
 }
 .ns-card-head.compact .ns-card-icon { width: 30px; height: 30px; border-radius: 9px; }
 
-.ns-label {
-  margin: 0 0 10px;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--text-3);
-}
-
 /* ─── File rail ──────────────────────────────────────────────────────────── */
 .ns-rail {
   display: flex;
@@ -195,12 +186,7 @@
   border-left-color: var(--ns-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-crimson) 9%, transparent);
 }
-.ns-file-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .ns-file-no { font-size: 11.5px; font-weight: 700; color: var(--text-3); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.ns-file-icon { display: inline-flex; color: var(--text-3); }
-.ns-file-icon.state-mine { color: var(--status-warning-text); }
-.ns-file-icon.state-approved { color: var(--status-success); }
-.ns-file-icon.state-returned { color: var(--status-warning); }
 .ns-file-title {
   font-size: 13.5px;
   font-weight: 700;
@@ -214,13 +200,6 @@
 .ns-file-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ns-file-meta strong { color: var(--text-1); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ns-file-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.ns-file-progress {
-  margin-left: auto;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text-3);
-  font-variant-numeric: tabular-nums;
-}
 .ns-rail-empty {
   display: flex;
   align-items: center;
@@ -260,30 +239,24 @@
   .ns-file-list { overflow-y: auto; padding: 2px 4px 4px 2px; margin: -2px -4px -4px -2px; }
 }
 
-/* ─── File header ────────────────────────────────────────────────────────── */
-.ns-filehead { display: flex; flex-direction: column; gap: 14px; }
-.ns-fh-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.ns-fh-title { min-width: 0; flex: 1 1 320px; }
-.ns-org {
-  display: block;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.9px;
-  text-transform: uppercase;
-  color: var(--ns-accent-ink);
-}
-.ns-fh-title h3 {
-  margin: 6px 0 8px;
+/* ─── Summary card ("in short") ─────────────────────────────────────────── */
+.ns-summary { display: flex; flex-direction: column; gap: 16px; }
+.ns-sum-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ns-pills, .ns-fh-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ns-sum-main { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ns-sum-title { min-width: 0; flex: 1 1 300px; }
+.ns-sum-title h3 {
+  margin: 0 0 6px;
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1.3;
   letter-spacing: -0.2px;
   color: var(--text-1);
 }
-.ns-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--text-3); }
-.ns-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.ns-meta code { font-size: 12px; color: var(--text-2); }
+.ns-fileno { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--text-3); }
+.ns-fileno span { display: inline-flex; align-items: center; gap: 5px; }
+.ns-fileno code { color: var(--text-3); }
 
 .ns-amount {
   text-align: right;
@@ -302,33 +275,34 @@
   white-space: nowrap;
 }
 
-.ns-fh-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-1);
-}
-.ns-pills, .ns-fh-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ns-sum-facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 24px; }
+.ns-sum-facts dt { font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-3); margin-bottom: 3px; }
+.ns-sum-facts dd { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; color: var(--text-1); }
+.ns-sum-facts dd small { font-size: 12px; color: var(--text-3); }
+.ns-why { line-height: 1.55; color: var(--text-2); }
 
-.ns-callout {
+.ns-next-step {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border-radius: var(--radius-md);
-  background: var(--ns-gold-soft);
-  border: 1px solid var(--ns-gold-line);
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  font-size: 13.5px;
+  line-height: 1.5;
   color: var(--text-1);
-  font-size: 13px;
-  line-height: 1.45;
 }
-.ns-callout > svg { color: var(--status-warning-text); flex-shrink: 0; }
-.ns-callout > span { flex: 1 1 240px; }
-.ns-callout button {
+.ns-next-step > svg { flex-shrink: 0; color: var(--text-3); }
+.ns-next-step > span { flex: 1 1 240px; }
+.ns-next-step.state-mine { background: var(--ns-gold-soft); border-color: var(--ns-gold-line); }
+.ns-next-step.state-mine > svg { color: var(--status-warning-text); }
+.ns-next-step.state-returned { background: var(--ns-warn-soft); border-color: var(--ns-warn-line); }
+.ns-next-step.state-returned > svg { color: var(--status-warning-text); }
+.ns-next-step.state-approved { background: var(--ns-ok-soft); border-color: var(--ns-ok-line); }
+.ns-next-step.state-approved > svg { color: var(--status-success); }
+.ns-jump {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -342,63 +316,19 @@
   font-family: inherit;
   cursor: pointer;
 }
-.ns-callout button:hover { background: var(--ns-hover); }
+.ns-jump:hover { background: var(--ns-hover); }
 /* The jump link is only useful when the signing card sits below the document. */
 @container nsmain (min-width: 860px) {
-  .ns-callout button { display: none; }
+  .ns-jump { display: none; }
 }
-
-/* ─── Tabs ───────────────────────────────────────────────────────────────── */
-.ns-tabs {
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  width: fit-content;
-  max-width: 100%;
-  overflow-x: auto;
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  border-radius: 12px;
-}
-.ns-tabs button {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--text-3);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.ns-tabs button:hover { color: var(--text-1); }
-.ns-tabs button.active { background: var(--surface-1); color: var(--ns-accent-ink); font-weight: 700; box-shadow: var(--shadow-xs); }
-.ns-count-pill {
-  min-width: 20px;
-  padding: 0 6px;
-  border-radius: var(--radius-full);
-  background: var(--surface-3);
-  color: var(--text-2);
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-}
-.ns-tabs button.active .ns-count-pill { background: color-mix(in srgb, var(--brand-crimson) 14%, var(--surface-1)); color: var(--ns-accent-ink); }
 
 /* ─── Sheet layout ───────────────────────────────────────────────────────── */
 .ns-sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
 .ns-doc, .ns-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 @container nsmain (min-width: 860px) {
-  .ns-sheet { grid-template-columns: minmax(0, 1fr) 330px; }
+  .ns-sheet.with-side { grid-template-columns: minmax(0, 1fr) 330px; }
   .ns-side { position: sticky; top: 12px; }
 }
-
-.ns-paper { display: flex; flex-direction: column; gap: 18px; }
 
 /* Route stepper */
 .ns-steps {
@@ -540,35 +470,93 @@
   cursor: pointer;
 }
 .ns-code button:hover { background: var(--ns-hover); color: var(--text-1); }
-.ns-verified {
+.ns-verify { margin-top: 2px; border-top: 1px solid var(--border-1); padding-top: 10px; }
+.ns-verify summary {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
   font-size: 12px;
   font-weight: 700;
   color: var(--status-success-text);
 }
-[data-theme='dark'] .ns-verified { color: var(--status-success-bright); }
+.ns-verify summary::-webkit-details-marker { display: none; }
+.ns-verify[open] summary { margin-bottom: 8px; }
+[data-theme='dark'] .ns-verify summary { color: var(--status-success-bright); }
+.ns-verify-body { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; max-width: 100%; }
+.ns-verify-body small { font-size: 12px; color: var(--text-3); }
 
-/* Budget + facts */
-.ns-facts { margin: 0; display: grid; gap: 12px 16px; }
-.ns-facts.four { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-.ns-facts.stack { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-.ns-facts dt { font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--text-3); margin-bottom: 3px; }
-.ns-facts dd { margin: 0; font-size: 13.5px; font-weight: 700; color: var(--text-1); display: flex; flex-direction: column; gap: 3px; }
-.ns-facts dd small { font-size: 12px; font-weight: 500; color: var(--text-3); }
-.ns-facts dd.mono { font-size: 12.5px; font-weight: 600; }
-.ns-facts dd.ok { color: var(--status-success-text); }
-[data-theme='dark'] .ns-facts dd.ok { color: var(--status-success-bright); }
+/* Section headers for the evidence cards */
+.ns-sec-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.ns-sec-head > div { flex: 1; min-width: 0; }
+.ns-sec-head h3 { margin: 0; font-size: 15px; font-weight: 800; color: var(--text-1); }
+.ns-sec-head p { margin: 3px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--text-3); }
+.ns-muted { margin: 0; font-size: 13px; color: var(--text-3); }
 
-.ns-meter { display: block; height: 7px; border-radius: var(--radius-full); background: var(--surface-3); overflow: hidden; }
-.ns-meter i { display: block; height: 100%; background: var(--status-success); border-radius: inherit; transition: width 0.4s ease; }
+/* Price comparison */
+.ns-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--ns-ok-soft);
+  border: 1px solid var(--ns-ok-line);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-1);
+}
+.ns-verdict > svg { flex-shrink: 0; margin-top: 2px; color: var(--status-success); }
 
-/* ─── Side: sign + status cards ──────────────────────────────────────────── */
+table.ns-quotes { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ns-quotes th, .ns-quotes td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border-1); }
+.ns-quotes thead th { font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-3); }
+.ns-quotes tbody tr:last-child > * { border-bottom: none; }
+.ns-quotes tbody th { font-weight: 400; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.ns-quotes tbody th strong { font-size: 13.5px; color: var(--text-1); }
+.ns-quotes small { display: block; font-size: 12px; color: var(--text-3); line-height: 1.4; }
+.ns-quotes td b { font-size: 14px; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.ns-quotes td small.ok { color: var(--status-success-text); font-weight: 700; }
+[data-theme='dark'] .ns-quotes td small.ok { color: var(--status-success-bright); }
+.ns-quotes tr.recommended > * { background: var(--ns-ok-soft); }
+.ns-rec {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--status-success);
+  color: var(--text-on-brand);
+  font-size: 11px;
+  font-weight: 800;
+}
+@container nsmain (max-width: 640px) {
+  .ns-quotes thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ns-quotes, .ns-quotes tbody, .ns-quotes tr, .ns-quotes th, .ns-quotes td { display: block; }
+  .ns-quotes tbody tr { padding: 10px 0; border-bottom: 1px solid var(--border-1); }
+  .ns-quotes tbody tr:last-child { border-bottom: none; }
+  .ns-quotes th, .ns-quotes td { border: none; padding: 3px 12px; }
+  .ns-quotes td { display: flex; justify-content: space-between; gap: 12px; }
+  .ns-quotes td::before { content: attr(data-label); color: var(--text-3); font-weight: 600; flex-shrink: 0; }
+  .ns-quotes td small { text-align: right; }
+}
+
+/* Budget check */
+.ns-budget { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.ns-budget > div { padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border-1); }
+.ns-budget dt { font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+.ns-budget dd { margin: 0; font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.ns-budget > div.ok { background: var(--ns-ok-soft); border-color: var(--ns-ok-line); }
+.ns-budget > div.ok dd { color: var(--status-success-text); }
+.ns-budget > div.bad { background: color-mix(in srgb, var(--status-danger) 10%, var(--surface-1)); border-color: color-mix(in srgb, var(--status-danger) 40%, var(--border-1)); }
+.ns-budget > div.bad dd { color: var(--status-danger); }
+[data-theme='dark'] .ns-budget > div.ok dd { color: var(--status-success-bright); }
+
+/* ─── Side: sign card ──────────────────────────────────────────── */
 .ns-sign.final { border-color: var(--ns-gold-line); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-gold) 14%, transparent); }
 .ns-sign.final .ns-card-icon { background: var(--ns-gold-soft); color: var(--status-warning-text); }
-.ns-status.state-approved .ns-card-icon { background: var(--ns-ok-soft); color: var(--status-success-text); }
-.ns-status.state-returned .ns-card-icon { background: var(--ns-warn-soft); color: var(--status-warning-text); }
 
 .ns-signer {
   display: flex;
@@ -654,113 +642,7 @@
 .ns-actions { display: flex; flex-direction: column; gap: 8px; }
 .ns-actions .ui-btn { padding-top: 9px; padding-bottom: 9px; }
 
-.ns-next {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  margin-bottom: 14px;
-  border-radius: var(--radius-md);
-  background: var(--ns-gold-soft);
-  border: 1px solid var(--ns-gold-line);
-}
-.ns-next small { font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--text-3); }
-.ns-next strong { font-size: 14px; color: var(--text-1); }
-.ns-next span { font-size: 12.5px; color: var(--text-3); }
-
 .ns-confirm { margin: 0; font-size: 14px; line-height: 1.6; color: var(--text-2); }
-
-/* ─── Quotations tab ─────────────────────────────────────────────────────── */
-.ns-tabcard { padding: 20px; }
-.ns-tab-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-.ns-tab-head h3 { margin: 0; font-size: 15.5px; font-weight: 800; color: var(--text-1); }
-.ns-tab-head p { margin: 4px 0 0; font-size: 12.5px; color: var(--text-3); }
-
-.ns-quotes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; padding-top: 10px; }
-.ns-quote {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--radius-md);
-  background: var(--surface-1);
-}
-.ns-quote.recommended { border: 2px solid var(--status-success); background: var(--ns-ok-soft); }
-.ns-quote-flag {
-  position: absolute;
-  top: -11px;
-  right: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  background: var(--status-success);
-  color: var(--text-on-brand);
-  font-size: 11px;
-  font-weight: 800;
-}
-.ns-quote h4 { margin: 0; font-size: 14.5px; font-weight: 800; color: var(--text-1); }
-.ns-quote-origin { font-size: 12.5px; color: var(--text-3); }
-.ns-quote-price {
-  margin: 10px 0;
-  padding: 10px 0;
-  border-top: 1px solid var(--border-1);
-  border-bottom: 1px solid var(--border-1);
-  font-family: var(--font-display);
-  font-size: 21px;
-  font-weight: 800;
-  color: var(--text-1);
-  font-variant-numeric: tabular-nums;
-}
-.ns-quote.recommended .ns-quote-price { color: var(--status-success-text); }
-[data-theme='dark'] .ns-quote.recommended .ns-quote-price { color: var(--status-success-bright); }
-.ns-quote dl { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.ns-quote dl div { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 8px; font-size: 12.5px; }
-.ns-quote dt { color: var(--text-3); font-weight: 600; }
-.ns-quote dd { margin: 0; color: var(--text-2); line-height: 1.45; }
-
-/* ─── History timeline ───────────────────────────────────────────────────── */
-.ns-timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.ns-timeline li { position: relative; display: flex; gap: 14px; padding-bottom: 18px; }
-.ns-timeline li:last-child { padding-bottom: 0; }
-.ns-timeline li::before {
-  content: '';
-  position: absolute;
-  left: 13px;
-  top: 28px;
-  bottom: 0;
-  width: 2px;
-  background: var(--border-1);
-}
-.ns-timeline li:last-child::before { display: none; }
-.ns-tl-dot {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--status-success);
-  color: var(--text-on-brand);
-}
-.ns-timeline li.chairman .ns-tl-dot { background: var(--brand-gold-dark); }
-.ns-tl-body {
-  flex: 1;
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid var(--border-1);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
-}
-.ns-tl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.ns-tl-top strong { font-size: 13.5px; color: var(--text-1); }
-.ns-tl-top time { font-size: 12px; color: var(--text-3); }
-.ns-tl-role { display: block; font-size: 12px; color: var(--text-3); margin-top: 1px; }
-.ns-tl-body p { margin: 8px 0 10px; font-size: 13px; line-height: 1.6; color: var(--text-2); white-space: pre-line; }
 
 /* ─── Certificate ────────────────────────────────────────────────────────── */
 .ns-cert {
@@ -790,7 +672,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ns-meter i, .ns-file, .ns-filter, .ns-tabs button { transition: none; }
+  .ns-file, .ns-filter { transition: none; }
 }
 
 /* ─── START-A-NOTE-SHEET DIALOG (portal: variables live on .nsf) ─────────────── */

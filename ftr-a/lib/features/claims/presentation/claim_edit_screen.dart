@@ -97,7 +97,9 @@ class _FormState extends ConsumerState<_Form> {
         if (!l.system) l,
     ];
     if (_isConveyance) {
-      _periodStart = c.periodStart == null ? null : DateTime.parse(c.periodStart!);
+      _periodStart = c.periodStart == null
+          ? null
+          : DateTime.parse(c.periodStart!);
       _periodEnd = c.periodEnd == null ? null : DateTime.parse(c.periodEnd!);
     } else {
       _depart = c.departAt == null ? null : Dhaka.wall(c.departAt!);
@@ -248,7 +250,7 @@ class _FormState extends ConsumerState<_Form> {
       if (!mounted) return;
       AppToast.show(context, l10n.claimSaved, tone: StatusTone.success);
       if (widget.claim == null) {
-        unawaited(context.pushReplacement(AppRoutes.claimDetail(saved.id)));
+        context.pushReplacement(AppRoutes.claimDetail(saved.id));
       } else {
         context.pop();
       }
@@ -256,8 +258,7 @@ class _FormState extends ConsumerState<_Form> {
       if (!mounted) return;
       setState(() {
         _error = switch (e.code) {
-          ApiErrorCode.offline ||
-          ApiErrorCode.timeout => l10n.claimErrOffline,
+          ApiErrorCode.offline || ApiErrorCode.timeout => l10n.claimErrOffline,
           _ => l10n.claimErrSave,
         };
       });
@@ -307,7 +308,10 @@ class _FormState extends ConsumerState<_Form> {
             children: [
               Icon(claimTypeIcon(_type)),
               const SizedBox(width: Space.sm),
-              Text(claimTypeLabel(l10n, _type), style: theme.textTheme.titleMedium),
+              Text(
+                claimTypeLabel(l10n, _type),
+                style: theme.textTheme.titleMedium,
+              ),
             ],
           ),
           const SizedBox(height: Space.lg),
@@ -316,9 +320,8 @@ class _FormState extends ConsumerState<_Form> {
             controller: _purpose,
             required: true,
             maxLength: 200,
-            validator: (v) => (v ?? '').trim().length < 3
-                ? l10n.claimErrPurpose
-                : null,
+            validator: (v) =>
+                (v ?? '').trim().length < 3 ? l10n.claimErrPurpose : null,
           ),
           const SizedBox(height: Space.md),
           if (_isConveyance) ...[
@@ -326,7 +329,11 @@ class _FormState extends ConsumerState<_Form> {
               label: l10n.claimFieldPeriodFrom,
               value: _periodStart == null
                   ? null
-                  : DateFmt.range(dateKey(_periodStart!), dateKey(_periodStart!), lang),
+                  : DateFmt.range(
+                      dateKey(_periodStart!),
+                      dateKey(_periodStart!),
+                      lang,
+                    ),
               onTap: () => unawaited(_pickPeriod(start: true)),
               invalid: _showErrors && _periodStart == null,
             ),
@@ -335,7 +342,11 @@ class _FormState extends ConsumerState<_Form> {
               label: l10n.claimFieldPeriodTo,
               value: _periodEnd == null
                   ? null
-                  : DateFmt.range(dateKey(_periodEnd!), dateKey(_periodEnd!), lang),
+                  : DateFmt.range(
+                      dateKey(_periodEnd!),
+                      dateKey(_periodEnd!),
+                      lang,
+                    ),
               onTap: () => unawaited(_pickPeriod(start: false)),
               invalid: _showErrors && _periodEnd == null,
             ),
@@ -433,7 +444,8 @@ class _FormState extends ConsumerState<_Form> {
                 color: context.bogcl.danger,
                 child: const Icon(Icons.delete_outline, color: Colors.white),
               ),
-              onDismissed: (_) => setState(() => _lines = [..._lines]..removeAt(i)),
+              onDismissed: (_) =>
+                  setState(() => _lines = [..._lines]..removeAt(i)),
               child: ListRow(
                 title: l.category == 'MILEAGE'
                     ? '${claimCategoryLabel(l10n, l.category)} · '

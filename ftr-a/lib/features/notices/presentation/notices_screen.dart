@@ -8,7 +8,6 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/notices/domain/notice_models.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_providers.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_ui.dart';
-import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:flutter/material.dart';

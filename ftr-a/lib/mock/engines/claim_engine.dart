@@ -801,7 +801,7 @@ abstract final class ClaimEngine {
       store,
       claim,
       'CLAIM_SETTLED',
-      Bi('Claim paid', 'দাবির অর্থ পরিশোধিত'),
+      const Bi('Claim paid', 'দাবির অর্থ পরিশোধিত'),
       Bi(
         '${claim['claimNo']} was paid, voucher ${claim['voucherNo']}.',
         '${claim['claimNo']} পরিশোধিত, ভাউচার ${claim['voucherNo']}।',
@@ -865,7 +865,7 @@ abstract final class ClaimEngine {
           store,
           c,
           'CLAIM_APPROVED',
-          Bi('Claim approved', 'দাবি অনুমোদিত'),
+          const Bi('Claim approved', 'দাবি অনুমোদিত'),
           Bi(
             '${c['claimNo']} is approved and queued for payment.',
             '${c['claimNo']} অনুমোদিত হয়েছে, পরিশোধের অপেক্ষায়।',

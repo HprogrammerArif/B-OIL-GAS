@@ -69,16 +69,16 @@ class BusRoute {
     occupancyPct: (j['occupancyPct']! as num).toDouble(),
     waitlistLength: (j['waitlistLength']! as num).toInt(),
     busNo: (j['busNo'] as String?) ?? '',
-    stops: [
-      for (final s in j['stops']! as List) BusStop.fromJson(_map(s)),
-    ],
+    stops: [for (final s in j['stops']! as List) BusStop.fromJson(_map(s))],
     myStatus: switch (j['myStatus']) {
       'SEAT' => RouteMyStatus.seat,
       'WAITING' => RouteMyStatus.waiting,
       'OFFERED' => RouteMyStatus.offered,
       _ => null,
     },
-    admin: j['admin'] == null ? null : BusAdminDetail.fromJson(_map(j['admin'])),
+    admin: j['admin'] == null
+        ? null
+        : BusAdminDetail.fromJson(_map(j['admin'])),
   );
 
   final String id;

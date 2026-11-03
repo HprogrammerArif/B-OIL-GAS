@@ -33,7 +33,8 @@ String claimStatusLabel(AppL10n l10n, ClaimStatus s) => switch (s) {
 
 StatusTone claimStatusTone(ClaimStatus s) => switch (s) {
   ClaimStatus.draft || ClaimStatus.cancelled => StatusTone.neutral,
-  ClaimStatus.pendingManager || ClaimStatus.pendingFinance => StatusTone.warning,
+  ClaimStatus.pendingManager ||
+  ClaimStatus.pendingFinance => StatusTone.warning,
   ClaimStatus.approved => StatusTone.info,
   ClaimStatus.settled => StatusTone.success,
   ClaimStatus.returned => StatusTone.warning,
@@ -51,8 +52,8 @@ String advanceStatusLabel(AppL10n l10n, AdvanceStatus s) => switch (s) {
 };
 
 StatusTone advanceStatusTone(AdvanceStatus s) => switch (s) {
-  AdvanceStatus.pendingManager || AdvanceStatus.pendingFinance =>
-    StatusTone.warning,
+  AdvanceStatus.pendingManager ||
+  AdvanceStatus.pendingFinance => StatusTone.warning,
   AdvanceStatus.approved => StatusTone.info,
   AdvanceStatus.disbursed || AdvanceStatus.settled => StatusTone.success,
   AdvanceStatus.rejected => StatusTone.danger,

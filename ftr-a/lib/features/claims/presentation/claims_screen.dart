@@ -144,11 +144,11 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
             child: RefreshIndicator(
               onRefresh: _refresh,
               child: switch (_tab) {
-                _Tab.claims => const _ClaimList(scope: 'mine', showPolicy: true),
-                _Tab.advances => _AdvanceList(
+                _Tab.claims => const _ClaimList(
                   scope: 'mine',
-                  onAction: _settle,
+                  showPolicy: true,
                 ),
+                _Tab.advances => _AdvanceList(scope: 'mine', onAction: _settle),
                 _Tab.payable => _Payables(onAction: _settle),
               },
             ),
@@ -171,7 +171,8 @@ class _ClaimList extends ConsumerWidget {
     final list = ref.watch(claimsProvider(scope));
     return list.when(
       loading: () => const SkeletonList(),
-      error: (_, _) => ErrorState(onRetry: () => ref.invalidate(claimsProvider)),
+      error: (_, _) =>
+          ErrorState(onRetry: () => ref.invalidate(claimsProvider)),
       data: (items) => ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 96),
@@ -214,7 +215,11 @@ class ClaimRow extends StatelessWidget {
     final lang = Localizations.localeOf(context).languageCode;
     final period = claim.periodStart == null
         ? null
-        : DateFmt.range(claim.periodStart!, claim.periodEnd ?? claim.periodStart!, lang);
+        : DateFmt.range(
+            claim.periodStart!,
+            claim.periodEnd ?? claim.periodStart!,
+            lang,
+          );
     return ListRow(
       title:
           '${claimTypeLabel(l10n, claim.type)} · '
@@ -256,7 +261,10 @@ class _PolicyCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.claimPolicyTitle(policy.band), style: theme.textTheme.titleSmall),
+              Text(
+                l10n.claimPolicyTitle(policy.band),
+                style: theme.textTheme.titleSmall,
+              ),
               const SizedBox(height: Space.sm),
               Text(
                 l10n.claimPolicyConveyance(
@@ -337,7 +345,11 @@ class _AdvanceList extends ConsumerWidget {
                       horizontal: Space.lg,
                       vertical: Space.xs,
                     ),
-                    child: AdvanceCard(advance: a, scope: scope, onAction: onAction),
+                    child: AdvanceCard(
+                      advance: a,
+                      scope: scope,
+                      onAction: onAction,
+                    ),
                   ),
               ],
             ),
@@ -520,7 +532,11 @@ class _Payables extends ConsumerWidget {
               horizontal: Space.lg,
               vertical: Space.xs,
             ),
-            child: AdvanceCard(advance: x, scope: 'payable', onAction: onAction),
+            child: AdvanceCard(
+              advance: x,
+              scope: 'payable',
+              onAction: onAction,
+            ),
           ),
       ],
     );

@@ -1091,4 +1091,966 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get demoLocationMock => 'Mock GPS';
+
+  @override
+  String get moduleNotices => 'Notices';
+
+  @override
+  String get moduleClaims => 'Claims';
+
+  @override
+  String get moduleBus => 'Staff bus';
+
+  @override
+  String get noticesTitle => 'Notices';
+
+  @override
+  String get noticeFilterAll => 'All';
+
+  @override
+  String get noticeFilterUnread => 'Unread';
+
+  @override
+  String noticeFilterUnreadCount(int count) {
+    return 'Unread ($count)';
+  }
+
+  @override
+  String get noticeFilterAck => 'To acknowledge';
+
+  @override
+  String noticeFilterAckCount(int count) {
+    return 'To acknowledge ($count)';
+  }
+
+  @override
+  String get noticeFilterMine => 'Published by me';
+
+  @override
+  String get noticeCompose => 'New notice';
+
+  @override
+  String get noticeEmptyTitle => 'No notices';
+
+  @override
+  String get noticeEmptyMessage =>
+      'New notices from your organisation will appear here.';
+
+  @override
+  String get noticeUnread => 'New';
+
+  @override
+  String get noticeNeedsAck => 'Acknowledge';
+
+  @override
+  String get noticePinned => 'Pinned';
+
+  @override
+  String get noticeDetailTitle => 'Notice';
+
+  @override
+  String get noticeNotFound => 'Notice not found';
+
+  @override
+  String get noticeNotFoundMessage =>
+      'It may have expired or is not meant for you.';
+
+  @override
+  String get noticeAcked => 'Acknowledged';
+
+  @override
+  String get noticeAckFailed => 'Could not acknowledge. Try again.';
+
+  @override
+  String get noticeAckAction => 'I have read and understood';
+
+  @override
+  String noticeAckedOn(String date) {
+    return 'Acknowledged on $date';
+  }
+
+  @override
+  String noticeAudience(String name) {
+    return 'For: $name';
+  }
+
+  @override
+  String get noticeReach => 'Reach';
+
+  @override
+  String noticeReadStat(int read, int total) {
+    return 'Read $read of $total';
+  }
+
+  @override
+  String noticeAckStat(int ack, int total) {
+    return 'Acknowledged $ack of $total';
+  }
+
+  @override
+  String get noticeViewReceipts => 'Who has read this';
+
+  @override
+  String get noticeReceiptAcked => 'Acknowledged';
+
+  @override
+  String noticeReceiptRead(String date) {
+    return 'Read $date';
+  }
+
+  @override
+  String get noticeReceiptUnread => 'Not read';
+
+  @override
+  String get noticeCatGeneral => 'General';
+
+  @override
+  String get noticeCatPolicy => 'Policy';
+
+  @override
+  String get noticeCatSafety => 'Safety';
+
+  @override
+  String get noticeCatOperations => 'Operations';
+
+  @override
+  String get noticeCatAdmin => 'Administration';
+
+  @override
+  String get noticeCatHr => 'HR';
+
+  @override
+  String get noticeCatExecutive => 'Executive';
+
+  @override
+  String get noticePrioNormal => 'Normal';
+
+  @override
+  String get noticePrioHigh => 'High';
+
+  @override
+  String get noticePrioCritical => 'Critical';
+
+  @override
+  String get noticeFieldCategory => 'Category';
+
+  @override
+  String get noticeFieldTitle => 'Title';
+
+  @override
+  String get noticeFieldBody => 'Message';
+
+  @override
+  String get noticeFieldPriority => 'Priority';
+
+  @override
+  String get noticeFieldAudience => 'Audience';
+
+  @override
+  String get noticeFieldRequireAck => 'Require acknowledgement';
+
+  @override
+  String get noticeFieldPin => 'Pin to the top';
+
+  @override
+  String get noticeCriticalHint =>
+      'Critical notices alert every recipient immediately.';
+
+  @override
+  String get noticeAudAll => 'Everyone';
+
+  @override
+  String get noticeAudDepartment => 'A department';
+
+  @override
+  String get noticeAudSite => 'A site';
+
+  @override
+  String get noticePublish => 'Publish';
+
+  @override
+  String get noticePublishConfirmTitle => 'Publish this notice?';
+
+  @override
+  String get noticePublishConfirmMessage =>
+      'Recipients are notified straight away. A published notice cannot be edited.';
+
+  @override
+  String get noticePublished => 'Notice published';
+
+  @override
+  String get noticeErrMaxPinned =>
+      'Five notices are already pinned. Unpin one first or publish without pinning.';
+
+  @override
+  String get noticeErrForbidden =>
+      'You cannot publish to this audience or category.';
+
+  @override
+  String get noticeErrFailed =>
+      'Could not publish. Check the form and try again.';
+
+  @override
+  String get claimsTitle => 'Claims';
+
+  @override
+  String get claimTabClaims => 'My claims';
+
+  @override
+  String get claimTabAdvances => 'Advances';
+
+  @override
+  String get claimTabPayable => 'To pay';
+
+  @override
+  String get claimNew => 'New claim';
+
+  @override
+  String get claimNewTitle => 'New claim';
+
+  @override
+  String get claimEditTitle => 'Edit claim';
+
+  @override
+  String get claimDetailTitle => 'Claim';
+
+  @override
+  String get claimEmptyTitle => 'No claims yet';
+
+  @override
+  String get claimEmptyMessage =>
+      'Tap New claim to file travel, conveyance or event expenses.';
+
+  @override
+  String get claimTypeTada => 'Travel and DA';
+
+  @override
+  String get claimTypeConveyance => 'Conveyance';
+
+  @override
+  String get claimTypeTour => 'Tour and event';
+
+  @override
+  String get claimTypeTadaHint =>
+      'Official trips: tickets, hotel, meals and daily allowance';
+
+  @override
+  String get claimTypeConveyanceHint =>
+      'Local travel within a month: CNG, rickshaw, ride share';
+
+  @override
+  String get claimTypeTourHint =>
+      'Tours and events, with an optional advance to adjust';
+
+  @override
+  String get claimStatusDraft => 'Draft';
+
+  @override
+  String get claimStatusPendingManager => 'With manager';
+
+  @override
+  String get claimStatusPendingFinance => 'With Finance';
+
+  @override
+  String get claimStatusApproved => 'Approved';
+
+  @override
+  String get claimStatusSettled => 'Paid';
+
+  @override
+  String get claimStatusReturned => 'Returned';
+
+  @override
+  String get claimStatusRejected => 'Rejected';
+
+  @override
+  String get claimStatusCancelled => 'Cancelled';
+
+  @override
+  String get claimCatDa => 'Daily allowance';
+
+  @override
+  String get claimCatTicket => 'Ticket';
+
+  @override
+  String get claimCatHotel => 'Hotel';
+
+  @override
+  String get claimCatMeals => 'Meals';
+
+  @override
+  String get claimCatMileage => 'Mileage';
+
+  @override
+  String get claimCatCng => 'CNG';
+
+  @override
+  String get claimCatRickshaw => 'Rickshaw';
+
+  @override
+  String get claimCatRideShare => 'Ride share';
+
+  @override
+  String get claimCatBusFare => 'Bus fare';
+
+  @override
+  String get claimCatEvent => 'Event cost';
+
+  @override
+  String get claimCatOther => 'Other';
+
+  @override
+  String get claimModeNone => 'Not specified';
+
+  @override
+  String get claimModeExecutiveCar => 'Executive car';
+
+  @override
+  String get claimModeCompanyCar => 'Company car';
+
+  @override
+  String get claimModePoolCar => 'Pool car';
+
+  @override
+  String get claimModeAir => 'Domestic flight';
+
+  @override
+  String get claimModeAcTrain => 'AC train';
+
+  @override
+  String get claimModeFirstTrain => 'First class train';
+
+  @override
+  String get claimModeTrain => 'Train';
+
+  @override
+  String get claimModeAcBus => 'AC bus';
+
+  @override
+  String get claimModeBus => 'Bus';
+
+  @override
+  String claimPolicyTitle(String band) {
+    return 'Your entitlements (band $band)';
+  }
+
+  @override
+  String claimPolicyConveyance(String used, String cap) {
+    return 'Conveyance this month: $used of $cap';
+  }
+
+  @override
+  String claimPolicyDa(String dhaka, String district) {
+    return 'Daily allowance: $dhaka Dhaka, $district elsewhere';
+  }
+
+  @override
+  String claimPolicyHotel(String cap) {
+    return 'Hotel up to $cap per night';
+  }
+
+  @override
+  String get claimFieldPurpose => 'Purpose';
+
+  @override
+  String get claimFieldEmployee => 'Employee';
+
+  @override
+  String get claimFieldPeriod => 'Period';
+
+  @override
+  String get claimFieldPeriodFrom => 'From';
+
+  @override
+  String get claimFieldPeriodTo => 'To';
+
+  @override
+  String get claimFieldDepart => 'Departure';
+
+  @override
+  String get claimFieldReturn => 'Return';
+
+  @override
+  String get claimFieldDestination => 'Destination';
+
+  @override
+  String get claimFieldMode => 'Travel mode';
+
+  @override
+  String get claimFieldAdvance => 'Advance to adjust';
+
+  @override
+  String get claimAdvanceNone => 'No advance';
+
+  @override
+  String get claimDestDhaka => 'Dhaka';
+
+  @override
+  String get claimDestOther => 'Outside Dhaka';
+
+  @override
+  String get claimDaAuto =>
+      'Daily allowance is added automatically from your departure and return times.';
+
+  @override
+  String claimLines(int count) {
+    return 'Expense lines ($count)';
+  }
+
+  @override
+  String get claimNoLinesYet => 'No expenses added yet.';
+
+  @override
+  String get claimLineAdd => 'Add expense';
+
+  @override
+  String get claimLineEdit => 'Edit expense';
+
+  @override
+  String get claimLineSave => 'Save expense';
+
+  @override
+  String get claimLineAuto => 'Auto';
+
+  @override
+  String get claimLineDeclared => 'Declared';
+
+  @override
+  String get claimFieldCategory => 'Category';
+
+  @override
+  String get claimFieldDate => 'Date';
+
+  @override
+  String get claimFieldAmount => 'Amount (BDT)';
+
+  @override
+  String get claimFieldNights => 'Nights';
+
+  @override
+  String get claimFieldDistance => 'Distance (km)';
+
+  @override
+  String get claimFieldFrom => 'From';
+
+  @override
+  String get claimFieldTo => 'To';
+
+  @override
+  String get claimFieldDescription => 'Note';
+
+  @override
+  String claimMileageHint(String rate) {
+    return 'Paid at $rate per km';
+  }
+
+  @override
+  String claimKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String claimReceiptHint(String amount) {
+    return 'A receipt is required above $amount.';
+  }
+
+  @override
+  String get claimReceiptAdd => 'Add receipt photo';
+
+  @override
+  String get claimReceiptAttached => 'Receipt attached';
+
+  @override
+  String get claimDeclaration => 'No receipt, I declare this expense';
+
+  @override
+  String claimDeclarationHint(String amount) {
+    return 'Allowed for small CNG, rickshaw and meal expenses up to $amount.';
+  }
+
+  @override
+  String claimEnteredTotal(String amount) {
+    return 'Entered: $amount';
+  }
+
+  @override
+  String get claimSaveDraft => 'Save draft';
+
+  @override
+  String get claimSaved => 'Draft saved';
+
+  @override
+  String get claimErrRequired => 'Required';
+
+  @override
+  String get claimErrPurpose => 'Enter at least 3 characters';
+
+  @override
+  String get claimErrDates => 'Choose valid dates';
+
+  @override
+  String get claimErrAmount => 'Enter a valid amount';
+
+  @override
+  String get claimErrDistance => 'Enter the distance in km';
+
+  @override
+  String get claimErrNights => 'Enter 1 to 60 nights';
+
+  @override
+  String get claimErrSave =>
+      'Could not save the claim. Check the details and try again.';
+
+  @override
+  String get claimErrOffline =>
+      'You are offline. Connect to the internet and try again.';
+
+  @override
+  String get claimErrFailed => 'Something went wrong. Try again.';
+
+  @override
+  String get claimErrBlocked => 'Fix the blocking checks before submitting.';
+
+  @override
+  String get claimTotal => 'Total';
+
+  @override
+  String get claimAdvanceAdjusted => 'Advance adjusted';
+
+  @override
+  String get claimNetPayable => 'Payable to you';
+
+  @override
+  String get claimNetRefund => 'To return to company';
+
+  @override
+  String get claimVoucher => 'Voucher';
+
+  @override
+  String get claimReviewerComment => 'Reviewer comment';
+
+  @override
+  String get claimRoute => 'Approval route';
+
+  @override
+  String get claimSubmit => 'Submit for approval';
+
+  @override
+  String get claimSubmitConfirmTitle => 'Submit this claim?';
+
+  @override
+  String get claimSubmitConfirmMessage =>
+      'It goes to your manager and then Finance. You cannot edit it while it is pending.';
+
+  @override
+  String get claimSubmitted => 'Claim submitted';
+
+  @override
+  String get claimEdit => 'Edit';
+
+  @override
+  String get claimCancel => 'Cancel claim';
+
+  @override
+  String get claimCancelConfirm => 'Cancel this claim?';
+
+  @override
+  String get claimCancelled => 'Claim cancelled';
+
+  @override
+  String get claimWithdraw => 'Withdraw claim';
+
+  @override
+  String get claimPay => 'Mark as paid';
+
+  @override
+  String claimPayConfirm(String amount) {
+    return 'Pay $amount?';
+  }
+
+  @override
+  String get claimPayMessage =>
+      'A voucher is created and the employee is notified. This cannot be undone.';
+
+  @override
+  String get claimPaid => 'Payment recorded';
+
+  @override
+  String get claimFlagNoLines => 'Add at least one expense line.';
+
+  @override
+  String get claimFlagReceipt =>
+      'A receipt or declaration is missing on a line.';
+
+  @override
+  String claimFlagHotel(String amount) {
+    return 'Hotel is above the nightly limit. Eligible: $amount.';
+  }
+
+  @override
+  String claimFlagConveyance(String amount) {
+    return 'Monthly conveyance limit exceeded. Eligible: $amount.';
+  }
+
+  @override
+  String get claimFlagOverlap => 'This period overlaps another claim.';
+
+  @override
+  String get claimFlagDuplicate => 'The same receipt is used more than once.';
+
+  @override
+  String get claimFlagLate => 'Filed after the 60 day window.';
+
+  @override
+  String get claimFlagMode =>
+      'Travel mode is above your entitlement. Finance will review.';
+
+  @override
+  String get claimFlagMileage => 'Long mileage trip. Finance will review.';
+
+  @override
+  String get advNew => 'Request advance';
+
+  @override
+  String get advNewTitle => 'Tour advance';
+
+  @override
+  String get advIntro =>
+      'Request cash in advance for an upcoming tour. Adjust it against your tour claim afterwards.';
+
+  @override
+  String get advFieldAmount => 'Amount (BDT)';
+
+  @override
+  String get advFieldTourStart => 'Tour starts';
+
+  @override
+  String get advFieldTourEnd => 'Tour ends';
+
+  @override
+  String get advErrAmount => 'Enter an amount up to 5,00,000';
+
+  @override
+  String get advErrOverdue =>
+      'You have an earlier advance that is not yet settled. Settle it first.';
+
+  @override
+  String get advErrFailed => 'Could not request the advance. Try again.';
+
+  @override
+  String get advSubmit => 'Submit request';
+
+  @override
+  String get advSubmitted => 'Advance requested';
+
+  @override
+  String get advEmptyTitle => 'No advances';
+
+  @override
+  String get advEmptyMessage => 'Request an advance before a tour.';
+
+  @override
+  String get advStatusDisbursed => 'Disbursed';
+
+  @override
+  String get advSettleHint => 'Not yet adjusted. Link it to a tour claim.';
+
+  @override
+  String get advCancel => 'Cancel request';
+
+  @override
+  String get advCancelConfirm => 'Cancel this advance request?';
+
+  @override
+  String get advCancelled => 'Advance cancelled';
+
+  @override
+  String get advDisburse => 'Disburse';
+
+  @override
+  String advDisburseConfirm(String amount) {
+    return 'Disburse $amount?';
+  }
+
+  @override
+  String get advDisbursed => 'Advance disbursed';
+
+  @override
+  String get payClaims => 'Claims ready to pay';
+
+  @override
+  String get payAdvances => 'Advances to disburse';
+
+  @override
+  String get payEmptyTitle => 'Nothing to pay';
+
+  @override
+  String get payEmptyMessage => 'Approved claims and advances appear here.';
+
+  @override
+  String get busTitle => 'Staff bus';
+
+  @override
+  String get busTabMySeat => 'My seat';
+
+  @override
+  String get busTabRoutes => 'Routes';
+
+  @override
+  String get busRouteTitle => 'Route';
+
+  @override
+  String busRouteMeta(String bus, String km) {
+    return 'Bus $bus · $km km';
+  }
+
+  @override
+  String busFreeSeats(String free, String total) {
+    return '$free of $total seats free';
+  }
+
+  @override
+  String busFull(String count) {
+    return 'Full · $count waiting';
+  }
+
+  @override
+  String get busMySeatBadge => 'My route';
+
+  @override
+  String get busWaitingBadge => 'Waiting';
+
+  @override
+  String get busOfferedBadge => 'Seat offered';
+
+  @override
+  String get busReleasedBadge => 'Released';
+
+  @override
+  String get busEmptyTitle => 'No bus seat yet';
+
+  @override
+  String get busEmptyMessage =>
+      'Pick a route and join its waitlist. You are offered a seat in turn.';
+
+  @override
+  String get busBrowse => 'Browse routes';
+
+  @override
+  String busSeatNo(String no) {
+    return 'Seat $no';
+  }
+
+  @override
+  String busStopLine(String stop, String morning, String evening) {
+    return '$stop · morning $morning · evening $evening';
+  }
+
+  @override
+  String busStopTimes(String morning, String evening) {
+    return 'Morning $morning · Evening $evening';
+  }
+
+  @override
+  String get busStops => 'Stops';
+
+  @override
+  String get busJoin => 'Join waitlist';
+
+  @override
+  String busJoinConfirm(String route) {
+    return 'Join the waitlist for $route?';
+  }
+
+  @override
+  String get busJoinMessage =>
+      'You are placed in line by application time. When a seat frees up you have 48 hours to accept.';
+
+  @override
+  String get busJoined => 'Added to the waitlist';
+
+  @override
+  String get busWaitlistTitle => 'On the waitlist';
+
+  @override
+  String busPosition(String pos) {
+    return 'Position $pos';
+  }
+
+  @override
+  String busEstimate(String days) {
+    return 'Estimated wait: about $days days';
+  }
+
+  @override
+  String get busLeave => 'Leave waitlist';
+
+  @override
+  String get busLeaveConfirm => 'Leave the waitlist?';
+
+  @override
+  String get busLeft => 'Removed from the waitlist';
+
+  @override
+  String busOfferTitle(String seat) {
+    return 'Seat $seat is yours to take';
+  }
+
+  @override
+  String busOfferLeft(String h, String m) {
+    return '${h}h ${m}m left to respond';
+  }
+
+  @override
+  String get busOfferExpired => 'Offer expired';
+
+  @override
+  String get busAccept => 'Accept seat';
+
+  @override
+  String get busAccepted => 'Seat confirmed';
+
+  @override
+  String get busDecline => 'Decline';
+
+  @override
+  String get busDeclineConfirm => 'Decline this seat?';
+
+  @override
+  String get busDeclineMessage =>
+      'You will be removed from this waitlist and the seat goes to the next person.';
+
+  @override
+  String get busDeclined => 'Offer declined';
+
+  @override
+  String get busChooseStop => 'Choose your stop';
+
+  @override
+  String get busConfirmSeat => 'Confirm seat';
+
+  @override
+  String get busRelease => 'Release seat for a while';
+
+  @override
+  String get busReleaseTitle => 'Release your seat';
+
+  @override
+  String get busReleaseHint =>
+      'Going on leave or travelling? Free the seat for up to 60 days and take it back later.';
+
+  @override
+  String get busReleaseFrom => 'From';
+
+  @override
+  String get busReleaseTo => 'Until';
+
+  @override
+  String get busReleaseReason => 'Reason';
+
+  @override
+  String get busReleased => 'Seat released';
+
+  @override
+  String busReleasedRange(String range) {
+    return 'Released $range';
+  }
+
+  @override
+  String get busReclaim => 'Take seat back';
+
+  @override
+  String get busReclaimConfirm => 'Take your seat back?';
+
+  @override
+  String get busReclaimMessage =>
+      'This works only if nobody else is using it right now.';
+
+  @override
+  String get busReclaimed => 'Seat is yours again';
+
+  @override
+  String get busErrFailed => 'That did not work. Try again.';
+
+  @override
+  String get busErrOfferExpired => 'This offer has expired.';
+
+  @override
+  String get busErrHasSeat => 'You already have a bus seat.';
+
+  @override
+  String get busErrAlreadyWaiting => 'You are already on a waitlist.';
+
+  @override
+  String get busSeatMap => 'Seat map';
+
+  @override
+  String get busLegendTaken => 'Taken';
+
+  @override
+  String get busLegendReleased => 'Released';
+
+  @override
+  String get busLegendOffered => 'Offered';
+
+  @override
+  String get busLegendFree => 'Free';
+
+  @override
+  String busQueue(int count) {
+    return 'Waitlist ($count)';
+  }
+
+  @override
+  String get busQueueEmpty => 'Nobody is waiting.';
+
+  @override
+  String busPriorityLevel(String level) {
+    return 'Priority $level';
+  }
+
+  @override
+  String busPriorityTitle(String name) {
+    return 'Priority for $name';
+  }
+
+  @override
+  String get busPriorityReason => 'Reason';
+
+  @override
+  String get busPriorityReasonHint =>
+      'Explain the override (at least 10 characters). It is recorded in the audit log.';
+
+  @override
+  String get busPrioritySave => 'Save priority';
+
+  @override
+  String get busPrioritySaved => 'Priority updated';
+
+  @override
+  String get busEnd => 'End allocation';
+
+  @override
+  String busEndConfirm(String seat) {
+    return 'End the allocation of seat $seat?';
+  }
+
+  @override
+  String get busEndMessage =>
+      'The seat is offered to the next person on the waitlist.';
+
+  @override
+  String get busEnded => 'Allocation ended';
+
+  @override
+  String get busBroadcast => 'Broadcast to this route';
+
+  @override
+  String get busBroadcastMessage => 'Message';
+
+  @override
+  String get busBroadcastSend => 'Send';
+
+  @override
+  String get busBroadcastSent => 'Message sent';
 }

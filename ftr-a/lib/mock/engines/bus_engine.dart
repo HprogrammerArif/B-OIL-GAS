@@ -35,16 +35,17 @@ abstract final class BusEngine {
       .toList();
 
   static List<Json> queueOf(MockStore store, String routeId) {
-    final waiting = store
-        .all(Col.busWaitlist)
-        .where((w) => w['routeId'] == routeId && w['status'] == 'WAITING')
-        .toList();
-    waiting.sort((a, b) {
-      final p = b.intVal('priority').compareTo(a.intVal('priority'));
-      if (p != 0) return p;
-      final t = a.str('appliedAt').compareTo(b.str('appliedAt'));
-      return t != 0 ? t : a.str('id').compareTo(b.str('id'));
-    });
+    final waiting =
+        store
+            .all(Col.busWaitlist)
+            .where((w) => w['routeId'] == routeId && w['status'] == 'WAITING')
+            .toList()
+          ..sort((a, b) {
+            final p = b.intVal('priority').compareTo(a.intVal('priority'));
+            if (p != 0) return p;
+            final t = a.str('appliedAt').compareTo(b.str('appliedAt'));
+            return t != 0 ? t : a.str('id').compareTo(b.str('id'));
+          });
     return waiting;
   }
 
@@ -524,11 +525,7 @@ abstract final class BusEngine {
       'waitlistLength': queueOf(store, id).length,
       'busNo': r['busNo'],
       'stops': [for (final s in r.objList('stops')) stopWire(s)],
-      'myStatus': mine != null
-          ? 'SEAT'
-          : entry != null
-          ? entry.str('status')
-          : null,
+      'myStatus': mine != null ? 'SEAT' : entry?.str('status'),
     };
   }
 

@@ -58,7 +58,8 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
       final l10n = context.l10n;
       AppToast.show(
         context,
-        e.rule == 'POLICY_VIOLATION' || e.code == ApiErrorCode.validation
+        e.code == ApiErrorCode.policyViolation ||
+                e.code == ApiErrorCode.validationError
             ? l10n.claimErrBlocked
             : failed,
         tone: StatusTone.danger,
@@ -215,7 +216,8 @@ class _Body extends ConsumerWidget {
                             c.displayEmployee(bangla: bangla),
                           ),
                         _Fact(l10n.claimFieldPurpose, c.purpose),
-                        if (period != null) _Fact(l10n.claimFieldPeriod, period),
+                        if (period != null)
+                          _Fact(l10n.claimFieldPeriod, period),
                         if (c.destinationName != null)
                           _Fact(l10n.claimFieldDestination, c.destinationName!),
                         if (c.travelMode != null)
@@ -238,10 +240,7 @@ class _Body extends ConsumerWidget {
                             (c.netSettlement ?? 0) >= 0
                                 ? l10n.claimNetPayable
                                 : l10n.claimNetRefund,
-                            bdt(
-                              (c.netSettlement ?? 0).abs(),
-                              bangla: bangla,
-                            ),
+                            bdt((c.netSettlement ?? 0).abs(), bangla: bangla),
                             strong: true,
                           ),
                         ],
@@ -300,7 +299,10 @@ class _Body extends ConsumerWidget {
                     size: 20,
                   ),
                   trailing: l.system
-                      ? StatusPill(label: l10n.claimLineAuto, tone: StatusTone.info)
+                      ? StatusPill(
+                          label: l10n.claimLineAuto,
+                          tone: StatusTone.info,
+                        )
                       : l.isDeclaration
                       ? StatusPill(label: l10n.claimLineDeclared)
                       : null,

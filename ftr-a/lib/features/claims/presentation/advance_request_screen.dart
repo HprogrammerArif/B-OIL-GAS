@@ -106,7 +106,7 @@ class _AdvanceRequestScreenState extends ConsumerState<AdvanceRequestScreen> {
     final theme = Theme.of(context);
     final lang = Localizations.localeOf(context).languageCode;
 
-    Widget picker(String label, DateTime? v, bool start) => InkWell(
+    Widget picker(String label, DateTime? v, {required bool start}) => InkWell(
       onTap: () => unawaited(_pick(start: start)),
       child: InputDecorator(
         decoration: InputDecoration(
@@ -114,7 +114,9 @@ class _AdvanceRequestScreenState extends ConsumerState<AdvanceRequestScreen> {
           suffixIcon: const Icon(Icons.calendar_today_outlined),
           errorText: _showErrors && v == null ? l10n.claimErrDates : null,
         ),
-        child: Text(v == null ? '—' : DateFmt.range(dateKey(v), dateKey(v), lang)),
+        child: Text(
+          v == null ? '—' : DateFmt.range(dateKey(v), dateKey(v), lang),
+        ),
       ),
     );
 
@@ -136,8 +138,12 @@ class _AdvanceRequestScreenState extends ConsumerState<AdvanceRequestScreen> {
               label: l10n.advFieldAmount,
               controller: _amount,
               required: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+              ],
               validator: (v) {
                 final n = double.tryParse((v ?? '').trim());
                 return n == null || n <= 0 || n > 500000
@@ -155,9 +161,9 @@ class _AdvanceRequestScreenState extends ConsumerState<AdvanceRequestScreen> {
                   (v ?? '').trim().length < 3 ? l10n.claimErrPurpose : null,
             ),
             const SizedBox(height: Space.md),
-            picker(l10n.advFieldTourStart, _start, true),
+            picker(l10n.advFieldTourStart, _start, start: true),
             const SizedBox(height: Space.md),
-            picker(l10n.advFieldTourEnd, _end, false),
+            picker(l10n.advFieldTourEnd, _end, start: false),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.only(top: Space.md),

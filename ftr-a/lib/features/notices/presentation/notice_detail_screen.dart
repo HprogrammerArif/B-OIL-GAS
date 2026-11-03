@@ -57,11 +57,13 @@ class _NoticeDetailScreenState extends ConsumerState<NoticeDetailScreen> {
   void _syncLists() {
     if (_refreshedLists) return;
     _refreshedLists = true;
-    Future.microtask(() {
-      ref
-        ..invalidate(noticesProvider)
-        ..invalidate(noticeCountsProvider);
-    });
+    unawaited(
+      Future.microtask(() {
+        ref
+          ..invalidate(noticesProvider)
+          ..invalidate(noticeCountsProvider);
+      }),
+    );
   }
 
   @override

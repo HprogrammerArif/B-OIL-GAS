@@ -45,7 +45,7 @@ class ClaimRepository {
     }
   }
 
-  Future<Claim> save({String? id, required Map<String, Object?> body}) async {
+  Future<Claim> save({required Map<String, Object?> body, String? id}) async {
     try {
       final res = id == null
           ? await _dio.post<Object?>('/claims', data: body)

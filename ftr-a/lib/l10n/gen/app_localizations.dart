@@ -1968,6 +1968,1728 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Mock GPS'**
   String get demoLocationMock;
+
+  /// No description provided for @moduleNotices.
+  ///
+  /// In en, this message translates to:
+  /// **'Notices'**
+  String get moduleNotices;
+
+  /// No description provided for @moduleClaims.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims'**
+  String get moduleClaims;
+
+  /// No description provided for @moduleBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff bus'**
+  String get moduleBus;
+
+  /// No description provided for @noticesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notices'**
+  String get noticesTitle;
+
+  /// No description provided for @noticeFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get noticeFilterAll;
+
+  /// No description provided for @noticeFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get noticeFilterUnread;
+
+  /// No description provided for @noticeFilterUnreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread ({count})'**
+  String noticeFilterUnreadCount(int count);
+
+  /// No description provided for @noticeFilterAck.
+  ///
+  /// In en, this message translates to:
+  /// **'To acknowledge'**
+  String get noticeFilterAck;
+
+  /// No description provided for @noticeFilterAckCount.
+  ///
+  /// In en, this message translates to:
+  /// **'To acknowledge ({count})'**
+  String noticeFilterAckCount(int count);
+
+  /// No description provided for @noticeFilterMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Published by me'**
+  String get noticeFilterMine;
+
+  /// No description provided for @noticeCompose.
+  ///
+  /// In en, this message translates to:
+  /// **'New notice'**
+  String get noticeCompose;
+
+  /// No description provided for @noticeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notices'**
+  String get noticeEmptyTitle;
+
+  /// No description provided for @noticeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'New notices from your organisation will appear here.'**
+  String get noticeEmptyMessage;
+
+  /// No description provided for @noticeUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get noticeUnread;
+
+  /// No description provided for @noticeNeedsAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledge'**
+  String get noticeNeedsAck;
+
+  /// No description provided for @noticePinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned'**
+  String get noticePinned;
+
+  /// No description provided for @noticeDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice'**
+  String get noticeDetailTitle;
+
+  /// No description provided for @noticeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice not found'**
+  String get noticeNotFound;
+
+  /// No description provided for @noticeNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have expired or is not meant for you.'**
+  String get noticeNotFoundMessage;
+
+  /// No description provided for @noticeAcked.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get noticeAcked;
+
+  /// No description provided for @noticeAckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not acknowledge. Try again.'**
+  String get noticeAckFailed;
+
+  /// No description provided for @noticeAckAction.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read and understood'**
+  String get noticeAckAction;
+
+  /// No description provided for @noticeAckedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged on {date}'**
+  String noticeAckedOn(String date);
+
+  /// No description provided for @noticeAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'For: {name}'**
+  String noticeAudience(String name);
+
+  /// No description provided for @noticeReach.
+  ///
+  /// In en, this message translates to:
+  /// **'Reach'**
+  String get noticeReach;
+
+  /// No description provided for @noticeReadStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Read {read} of {total}'**
+  String noticeReadStat(int read, int total);
+
+  /// No description provided for @noticeAckStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged {ack} of {total}'**
+  String noticeAckStat(int ack, int total);
+
+  /// No description provided for @noticeViewReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Who has read this'**
+  String get noticeViewReceipts;
+
+  /// No description provided for @noticeReceiptAcked.
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledged'**
+  String get noticeReceiptAcked;
+
+  /// No description provided for @noticeReceiptRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read {date}'**
+  String noticeReceiptRead(String date);
+
+  /// No description provided for @noticeReceiptUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Not read'**
+  String get noticeReceiptUnread;
+
+  /// No description provided for @noticeCatGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get noticeCatGeneral;
+
+  /// No description provided for @noticeCatPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy'**
+  String get noticeCatPolicy;
+
+  /// No description provided for @noticeCatSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get noticeCatSafety;
+
+  /// No description provided for @noticeCatOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get noticeCatOperations;
+
+  /// No description provided for @noticeCatAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Administration'**
+  String get noticeCatAdmin;
+
+  /// No description provided for @noticeCatHr.
+  ///
+  /// In en, this message translates to:
+  /// **'HR'**
+  String get noticeCatHr;
+
+  /// No description provided for @noticeCatExecutive.
+  ///
+  /// In en, this message translates to:
+  /// **'Executive'**
+  String get noticeCatExecutive;
+
+  /// No description provided for @noticePrioNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get noticePrioNormal;
+
+  /// No description provided for @noticePrioHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get noticePrioHigh;
+
+  /// No description provided for @noticePrioCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get noticePrioCritical;
+
+  /// No description provided for @noticeFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get noticeFieldCategory;
+
+  /// No description provided for @noticeFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get noticeFieldTitle;
+
+  /// No description provided for @noticeFieldBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get noticeFieldBody;
+
+  /// No description provided for @noticeFieldPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get noticeFieldPriority;
+
+  /// No description provided for @noticeFieldAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Audience'**
+  String get noticeFieldAudience;
+
+  /// No description provided for @noticeFieldRequireAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Require acknowledgement'**
+  String get noticeFieldRequireAck;
+
+  /// No description provided for @noticeFieldPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to the top'**
+  String get noticeFieldPin;
+
+  /// No description provided for @noticeCriticalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical notices alert every recipient immediately.'**
+  String get noticeCriticalHint;
+
+  /// No description provided for @noticeAudAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get noticeAudAll;
+
+  /// No description provided for @noticeAudDepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'A department'**
+  String get noticeAudDepartment;
+
+  /// No description provided for @noticeAudSite.
+  ///
+  /// In en, this message translates to:
+  /// **'A site'**
+  String get noticeAudSite;
+
+  /// No description provided for @noticePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get noticePublish;
+
+  /// No description provided for @noticePublishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish this notice?'**
+  String get noticePublishConfirmTitle;
+
+  /// No description provided for @noticePublishConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients are notified straight away. A published notice cannot be edited.'**
+  String get noticePublishConfirmMessage;
+
+  /// No description provided for @noticePublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Notice published'**
+  String get noticePublished;
+
+  /// No description provided for @noticeErrMaxPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Five notices are already pinned. Unpin one first or publish without pinning.'**
+  String get noticeErrMaxPinned;
+
+  /// No description provided for @noticeErrForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot publish to this audience or category.'**
+  String get noticeErrForbidden;
+
+  /// No description provided for @noticeErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not publish. Check the form and try again.'**
+  String get noticeErrFailed;
+
+  /// No description provided for @claimsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims'**
+  String get claimsTitle;
+
+  /// No description provided for @claimTabClaims.
+  ///
+  /// In en, this message translates to:
+  /// **'My claims'**
+  String get claimTabClaims;
+
+  /// No description provided for @claimTabAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances'**
+  String get claimTabAdvances;
+
+  /// No description provided for @claimTabPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'To pay'**
+  String get claimTabPayable;
+
+  /// No description provided for @claimNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New claim'**
+  String get claimNew;
+
+  /// No description provided for @claimNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New claim'**
+  String get claimNewTitle;
+
+  /// No description provided for @claimEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit claim'**
+  String get claimEditTitle;
+
+  /// No description provided for @claimDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get claimDetailTitle;
+
+  /// No description provided for @claimEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No claims yet'**
+  String get claimEmptyTitle;
+
+  /// No description provided for @claimEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap New claim to file travel, conveyance or event expenses.'**
+  String get claimEmptyMessage;
+
+  /// No description provided for @claimTypeTada.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel and DA'**
+  String get claimTypeTada;
+
+  /// No description provided for @claimTypeConveyance.
+  ///
+  /// In en, this message translates to:
+  /// **'Conveyance'**
+  String get claimTypeConveyance;
+
+  /// No description provided for @claimTypeTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour and event'**
+  String get claimTypeTour;
+
+  /// No description provided for @claimTypeTadaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Official trips: tickets, hotel, meals and daily allowance'**
+  String get claimTypeTadaHint;
+
+  /// No description provided for @claimTypeConveyanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Local travel within a month: CNG, rickshaw, ride share'**
+  String get claimTypeConveyanceHint;
+
+  /// No description provided for @claimTypeTourHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tours and events, with an optional advance to adjust'**
+  String get claimTypeTourHint;
+
+  /// No description provided for @claimStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get claimStatusDraft;
+
+  /// No description provided for @claimStatusPendingManager.
+  ///
+  /// In en, this message translates to:
+  /// **'With manager'**
+  String get claimStatusPendingManager;
+
+  /// No description provided for @claimStatusPendingFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'With Finance'**
+  String get claimStatusPendingFinance;
+
+  /// No description provided for @claimStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get claimStatusApproved;
+
+  /// No description provided for @claimStatusSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get claimStatusSettled;
+
+  /// No description provided for @claimStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get claimStatusReturned;
+
+  /// No description provided for @claimStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get claimStatusRejected;
+
+  /// No description provided for @claimStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get claimStatusCancelled;
+
+  /// No description provided for @claimCatDa.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance'**
+  String get claimCatDa;
+
+  /// No description provided for @claimCatTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get claimCatTicket;
+
+  /// No description provided for @claimCatHotel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel'**
+  String get claimCatHotel;
+
+  /// No description provided for @claimCatMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals'**
+  String get claimCatMeals;
+
+  /// No description provided for @claimCatMileage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mileage'**
+  String get claimCatMileage;
+
+  /// No description provided for @claimCatCng.
+  ///
+  /// In en, this message translates to:
+  /// **'CNG'**
+  String get claimCatCng;
+
+  /// No description provided for @claimCatRickshaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Rickshaw'**
+  String get claimCatRickshaw;
+
+  /// No description provided for @claimCatRideShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Ride share'**
+  String get claimCatRideShare;
+
+  /// No description provided for @claimCatBusFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus fare'**
+  String get claimCatBusFare;
+
+  /// No description provided for @claimCatEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event cost'**
+  String get claimCatEvent;
+
+  /// No description provided for @claimCatOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get claimCatOther;
+
+  /// No description provided for @claimModeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get claimModeNone;
+
+  /// No description provided for @claimModeExecutiveCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Executive car'**
+  String get claimModeExecutiveCar;
+
+  /// No description provided for @claimModeCompanyCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Company car'**
+  String get claimModeCompanyCar;
+
+  /// No description provided for @claimModePoolCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool car'**
+  String get claimModePoolCar;
+
+  /// No description provided for @claimModeAir.
+  ///
+  /// In en, this message translates to:
+  /// **'Domestic flight'**
+  String get claimModeAir;
+
+  /// No description provided for @claimModeAcTrain.
+  ///
+  /// In en, this message translates to:
+  /// **'AC train'**
+  String get claimModeAcTrain;
+
+  /// No description provided for @claimModeFirstTrain.
+  ///
+  /// In en, this message translates to:
+  /// **'First class train'**
+  String get claimModeFirstTrain;
+
+  /// No description provided for @claimModeTrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Train'**
+  String get claimModeTrain;
+
+  /// No description provided for @claimModeAcBus.
+  ///
+  /// In en, this message translates to:
+  /// **'AC bus'**
+  String get claimModeAcBus;
+
+  /// No description provided for @claimModeBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus'**
+  String get claimModeBus;
+
+  /// No description provided for @claimPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your entitlements (band {band})'**
+  String claimPolicyTitle(String band);
+
+  /// No description provided for @claimPolicyConveyance.
+  ///
+  /// In en, this message translates to:
+  /// **'Conveyance this month: {used} of {cap}'**
+  String claimPolicyConveyance(String used, String cap);
+
+  /// No description provided for @claimPolicyDa.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance: {dhaka} Dhaka, {district} elsewhere'**
+  String claimPolicyDa(String dhaka, String district);
+
+  /// No description provided for @claimPolicyHotel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel up to {cap} per night'**
+  String claimPolicyHotel(String cap);
+
+  /// No description provided for @claimFieldPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get claimFieldPurpose;
+
+  /// No description provided for @claimFieldEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get claimFieldEmployee;
+
+  /// No description provided for @claimFieldPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get claimFieldPeriod;
+
+  /// No description provided for @claimFieldPeriodFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get claimFieldPeriodFrom;
+
+  /// No description provided for @claimFieldPeriodTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get claimFieldPeriodTo;
+
+  /// No description provided for @claimFieldDepart.
+  ///
+  /// In en, this message translates to:
+  /// **'Departure'**
+  String get claimFieldDepart;
+
+  /// No description provided for @claimFieldReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get claimFieldReturn;
+
+  /// No description provided for @claimFieldDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get claimFieldDestination;
+
+  /// No description provided for @claimFieldMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel mode'**
+  String get claimFieldMode;
+
+  /// No description provided for @claimFieldAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance to adjust'**
+  String get claimFieldAdvance;
+
+  /// No description provided for @claimAdvanceNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No advance'**
+  String get claimAdvanceNone;
+
+  /// No description provided for @claimDestDhaka.
+  ///
+  /// In en, this message translates to:
+  /// **'Dhaka'**
+  String get claimDestDhaka;
+
+  /// No description provided for @claimDestOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside Dhaka'**
+  String get claimDestOther;
+
+  /// No description provided for @claimDaAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily allowance is added automatically from your departure and return times.'**
+  String get claimDaAuto;
+
+  /// No description provided for @claimLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense lines ({count})'**
+  String claimLines(int count);
+
+  /// No description provided for @claimNoLinesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses added yet.'**
+  String get claimNoLinesYet;
+
+  /// No description provided for @claimLineAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get claimLineAdd;
+
+  /// No description provided for @claimLineEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get claimLineEdit;
+
+  /// No description provided for @claimLineSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save expense'**
+  String get claimLineSave;
+
+  /// No description provided for @claimLineAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get claimLineAuto;
+
+  /// No description provided for @claimLineDeclared.
+  ///
+  /// In en, this message translates to:
+  /// **'Declared'**
+  String get claimLineDeclared;
+
+  /// No description provided for @claimFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get claimFieldCategory;
+
+  /// No description provided for @claimFieldDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get claimFieldDate;
+
+  /// No description provided for @claimFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (BDT)'**
+  String get claimFieldAmount;
+
+  /// No description provided for @claimFieldNights.
+  ///
+  /// In en, this message translates to:
+  /// **'Nights'**
+  String get claimFieldNights;
+
+  /// No description provided for @claimFieldDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance (km)'**
+  String get claimFieldDistance;
+
+  /// No description provided for @claimFieldFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get claimFieldFrom;
+
+  /// No description provided for @claimFieldTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get claimFieldTo;
+
+  /// No description provided for @claimFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get claimFieldDescription;
+
+  /// No description provided for @claimMileageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid at {rate} per km'**
+  String claimMileageHint(String rate);
+
+  /// No description provided for @claimKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String claimKm(String km);
+
+  /// No description provided for @claimReceiptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A receipt is required above {amount}.'**
+  String claimReceiptHint(String amount);
+
+  /// No description provided for @claimReceiptAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add receipt photo'**
+  String get claimReceiptAdd;
+
+  /// No description provided for @claimReceiptAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt attached'**
+  String get claimReceiptAttached;
+
+  /// No description provided for @claimDeclaration.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt, I declare this expense'**
+  String get claimDeclaration;
+
+  /// No description provided for @claimDeclarationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed for small CNG, rickshaw and meal expenses up to {amount}.'**
+  String claimDeclarationHint(String amount);
+
+  /// No description provided for @claimEnteredTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered: {amount}'**
+  String claimEnteredTotal(String amount);
+
+  /// No description provided for @claimSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get claimSaveDraft;
+
+  /// No description provided for @claimSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get claimSaved;
+
+  /// No description provided for @claimErrRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get claimErrRequired;
+
+  /// No description provided for @claimErrPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 3 characters'**
+  String get claimErrPurpose;
+
+  /// No description provided for @claimErrDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose valid dates'**
+  String get claimErrDates;
+
+  /// No description provided for @claimErrAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get claimErrAmount;
+
+  /// No description provided for @claimErrDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the distance in km'**
+  String get claimErrDistance;
+
+  /// No description provided for @claimErrNights.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1 to 60 nights'**
+  String get claimErrNights;
+
+  /// No description provided for @claimErrSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the claim. Check the details and try again.'**
+  String get claimErrSave;
+
+  /// No description provided for @claimErrOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Connect to the internet and try again.'**
+  String get claimErrOffline;
+
+  /// No description provided for @claimErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get claimErrFailed;
+
+  /// No description provided for @claimErrBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the blocking checks before submitting.'**
+  String get claimErrBlocked;
+
+  /// No description provided for @claimTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get claimTotal;
+
+  /// No description provided for @claimAdvanceAdjusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance adjusted'**
+  String get claimAdvanceAdjusted;
+
+  /// No description provided for @claimNetPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'Payable to you'**
+  String get claimNetPayable;
+
+  /// No description provided for @claimNetRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'To return to company'**
+  String get claimNetRefund;
+
+  /// No description provided for @claimVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher'**
+  String get claimVoucher;
+
+  /// No description provided for @claimReviewerComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewer comment'**
+  String get claimReviewerComment;
+
+  /// No description provided for @claimRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Approval route'**
+  String get claimRoute;
+
+  /// No description provided for @claimSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for approval'**
+  String get claimSubmit;
+
+  /// No description provided for @claimSubmitConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit this claim?'**
+  String get claimSubmitConfirmTitle;
+
+  /// No description provided for @claimSubmitConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It goes to your manager and then Finance. You cannot edit it while it is pending.'**
+  String get claimSubmitConfirmMessage;
+
+  /// No description provided for @claimSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim submitted'**
+  String get claimSubmitted;
+
+  /// No description provided for @claimEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get claimEdit;
+
+  /// No description provided for @claimCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel claim'**
+  String get claimCancel;
+
+  /// No description provided for @claimCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this claim?'**
+  String get claimCancelConfirm;
+
+  /// No description provided for @claimCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim cancelled'**
+  String get claimCancelled;
+
+  /// No description provided for @claimWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw claim'**
+  String get claimWithdraw;
+
+  /// No description provided for @claimPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as paid'**
+  String get claimPay;
+
+  /// No description provided for @claimPayConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}?'**
+  String claimPayConfirm(String amount);
+
+  /// No description provided for @claimPayMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A voucher is created and the employee is notified. This cannot be undone.'**
+  String get claimPayMessage;
+
+  /// No description provided for @claimPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get claimPaid;
+
+  /// No description provided for @claimFlagNoLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one expense line.'**
+  String get claimFlagNoLines;
+
+  /// No description provided for @claimFlagReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'A receipt or declaration is missing on a line.'**
+  String get claimFlagReceipt;
+
+  /// No description provided for @claimFlagHotel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel is above the nightly limit. Eligible: {amount}.'**
+  String claimFlagHotel(String amount);
+
+  /// No description provided for @claimFlagConveyance.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly conveyance limit exceeded. Eligible: {amount}.'**
+  String claimFlagConveyance(String amount);
+
+  /// No description provided for @claimFlagOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'This period overlaps another claim.'**
+  String get claimFlagOverlap;
+
+  /// No description provided for @claimFlagDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'The same receipt is used more than once.'**
+  String get claimFlagDuplicate;
+
+  /// No description provided for @claimFlagLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed after the 60 day window.'**
+  String get claimFlagLate;
+
+  /// No description provided for @claimFlagMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel mode is above your entitlement. Finance will review.'**
+  String get claimFlagMode;
+
+  /// No description provided for @claimFlagMileage.
+  ///
+  /// In en, this message translates to:
+  /// **'Long mileage trip. Finance will review.'**
+  String get claimFlagMileage;
+
+  /// No description provided for @advNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Request advance'**
+  String get advNew;
+
+  /// No description provided for @advNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour advance'**
+  String get advNewTitle;
+
+  /// No description provided for @advIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cash in advance for an upcoming tour. Adjust it against your tour claim afterwards.'**
+  String get advIntro;
+
+  /// No description provided for @advFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (BDT)'**
+  String get advFieldAmount;
+
+  /// No description provided for @advFieldTourStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour starts'**
+  String get advFieldTourStart;
+
+  /// No description provided for @advFieldTourEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour ends'**
+  String get advFieldTourEnd;
+
+  /// No description provided for @advErrAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount up to 5,00,000'**
+  String get advErrAmount;
+
+  /// No description provided for @advErrOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an earlier advance that is not yet settled. Settle it first.'**
+  String get advErrOverdue;
+
+  /// No description provided for @advErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not request the advance. Try again.'**
+  String get advErrFailed;
+
+  /// No description provided for @advSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get advSubmit;
+
+  /// No description provided for @advSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance requested'**
+  String get advSubmitted;
+
+  /// No description provided for @advEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No advances'**
+  String get advEmptyTitle;
+
+  /// No description provided for @advEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request an advance before a tour.'**
+  String get advEmptyMessage;
+
+  /// No description provided for @advStatusDisbursed.
+  ///
+  /// In en, this message translates to:
+  /// **'Disbursed'**
+  String get advStatusDisbursed;
+
+  /// No description provided for @advSettleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet adjusted. Link it to a tour claim.'**
+  String get advSettleHint;
+
+  /// No description provided for @advCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get advCancel;
+
+  /// No description provided for @advCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this advance request?'**
+  String get advCancelConfirm;
+
+  /// No description provided for @advCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance cancelled'**
+  String get advCancelled;
+
+  /// No description provided for @advDisburse.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse'**
+  String get advDisburse;
+
+  /// No description provided for @advDisburseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disburse {amount}?'**
+  String advDisburseConfirm(String amount);
+
+  /// No description provided for @advDisbursed.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance disbursed'**
+  String get advDisbursed;
+
+  /// No description provided for @payClaims.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims ready to pay'**
+  String get payClaims;
+
+  /// No description provided for @payAdvances.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances to disburse'**
+  String get payAdvances;
+
+  /// No description provided for @payEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay'**
+  String get payEmptyTitle;
+
+  /// No description provided for @payEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved claims and advances appear here.'**
+  String get payEmptyMessage;
+
+  /// No description provided for @busTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff bus'**
+  String get busTitle;
+
+  /// No description provided for @busTabMySeat.
+  ///
+  /// In en, this message translates to:
+  /// **'My seat'**
+  String get busTabMySeat;
+
+  /// No description provided for @busTabRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get busTabRoutes;
+
+  /// No description provided for @busRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get busRouteTitle;
+
+  /// No description provided for @busRouteMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus {bus} · {km} km'**
+  String busRouteMeta(String bus, String km);
+
+  /// No description provided for @busFreeSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'{free} of {total} seats free'**
+  String busFreeSeats(String free, String total);
+
+  /// No description provided for @busFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full · {count} waiting'**
+  String busFull(String count);
+
+  /// No description provided for @busMySeatBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'My route'**
+  String get busMySeatBadge;
+
+  /// No description provided for @busWaitingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get busWaitingBadge;
+
+  /// No description provided for @busOfferedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat offered'**
+  String get busOfferedBadge;
+
+  /// No description provided for @busReleasedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Released'**
+  String get busReleasedBadge;
+
+  /// No description provided for @busEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bus seat yet'**
+  String get busEmptyTitle;
+
+  /// No description provided for @busEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a route and join its waitlist. You are offered a seat in turn.'**
+  String get busEmptyMessage;
+
+  /// No description provided for @busBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse routes'**
+  String get busBrowse;
+
+  /// No description provided for @busSeatNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {no}'**
+  String busSeatNo(String no);
+
+  /// No description provided for @busStopLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{stop} · morning {morning} · evening {evening}'**
+  String busStopLine(String stop, String morning, String evening);
+
+  /// No description provided for @busStopTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning {morning} · Evening {evening}'**
+  String busStopTimes(String morning, String evening);
+
+  /// No description provided for @busStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops'**
+  String get busStops;
+
+  /// No description provided for @busJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join waitlist'**
+  String get busJoin;
+
+  /// No description provided for @busJoinConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the waitlist for {route}?'**
+  String busJoinConfirm(String route);
+
+  /// No description provided for @busJoinMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are placed in line by application time. When a seat frees up you have 48 hours to accept.'**
+  String get busJoinMessage;
+
+  /// No description provided for @busJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the waitlist'**
+  String get busJoined;
+
+  /// No description provided for @busWaitlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On the waitlist'**
+  String get busWaitlistTitle;
+
+  /// No description provided for @busPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position {pos}'**
+  String busPosition(String pos);
+
+  /// No description provided for @busEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated wait: about {days} days'**
+  String busEstimate(String days);
+
+  /// No description provided for @busLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave waitlist'**
+  String get busLeave;
+
+  /// No description provided for @busLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the waitlist?'**
+  String get busLeaveConfirm;
+
+  /// No description provided for @busLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from the waitlist'**
+  String get busLeft;
+
+  /// No description provided for @busOfferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {seat} is yours to take'**
+  String busOfferTitle(String seat);
+
+  /// No description provided for @busOfferLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{h}h {m}m left to respond'**
+  String busOfferLeft(String h, String m);
+
+  /// No description provided for @busOfferExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer expired'**
+  String get busOfferExpired;
+
+  /// No description provided for @busAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept seat'**
+  String get busAccept;
+
+  /// No description provided for @busAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat confirmed'**
+  String get busAccepted;
+
+  /// No description provided for @busDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get busDecline;
+
+  /// No description provided for @busDeclineConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline this seat?'**
+  String get busDeclineConfirm;
+
+  /// No description provided for @busDeclineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be removed from this waitlist and the seat goes to the next person.'**
+  String get busDeclineMessage;
+
+  /// No description provided for @busDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer declined'**
+  String get busDeclined;
+
+  /// No description provided for @busChooseStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your stop'**
+  String get busChooseStop;
+
+  /// No description provided for @busConfirmSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm seat'**
+  String get busConfirmSeat;
+
+  /// No description provided for @busRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Release seat for a while'**
+  String get busRelease;
+
+  /// No description provided for @busReleaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Release your seat'**
+  String get busReleaseTitle;
+
+  /// No description provided for @busReleaseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Going on leave or travelling? Free the seat for up to 60 days and take it back later.'**
+  String get busReleaseHint;
+
+  /// No description provided for @busReleaseFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get busReleaseFrom;
+
+  /// No description provided for @busReleaseTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Until'**
+  String get busReleaseTo;
+
+  /// No description provided for @busReleaseReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get busReleaseReason;
+
+  /// No description provided for @busReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat released'**
+  String get busReleased;
+
+  /// No description provided for @busReleasedRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Released {range}'**
+  String busReleasedRange(String range);
+
+  /// No description provided for @busReclaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Take seat back'**
+  String get busReclaim;
+
+  /// No description provided for @busReclaimConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Take your seat back?'**
+  String get busReclaimConfirm;
+
+  /// No description provided for @busReclaimMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This works only if nobody else is using it right now.'**
+  String get busReclaimMessage;
+
+  /// No description provided for @busReclaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat is yours again'**
+  String get busReclaimed;
+
+  /// No description provided for @busErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Try again.'**
+  String get busErrFailed;
+
+  /// No description provided for @busErrOfferExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer has expired.'**
+  String get busErrOfferExpired;
+
+  /// No description provided for @busErrHasSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a bus seat.'**
+  String get busErrHasSeat;
+
+  /// No description provided for @busErrAlreadyWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already on a waitlist.'**
+  String get busErrAlreadyWaiting;
+
+  /// No description provided for @busSeatMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat map'**
+  String get busSeatMap;
+
+  /// No description provided for @busLegendTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken'**
+  String get busLegendTaken;
+
+  /// No description provided for @busLegendReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Released'**
+  String get busLegendReleased;
+
+  /// No description provided for @busLegendOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'Offered'**
+  String get busLegendOffered;
+
+  /// No description provided for @busLegendFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get busLegendFree;
+
+  /// No description provided for @busQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist ({count})'**
+  String busQueue(int count);
+
+  /// No description provided for @busQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is waiting.'**
+  String get busQueueEmpty;
+
+  /// No description provided for @busPriorityLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority {level}'**
+  String busPriorityLevel(String level);
+
+  /// No description provided for @busPriorityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority for {name}'**
+  String busPriorityTitle(String name);
+
+  /// No description provided for @busPriorityReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get busPriorityReason;
+
+  /// No description provided for @busPriorityReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the override (at least 10 characters). It is recorded in the audit log.'**
+  String get busPriorityReasonHint;
+
+  /// No description provided for @busPrioritySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save priority'**
+  String get busPrioritySave;
+
+  /// No description provided for @busPrioritySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority updated'**
+  String get busPrioritySaved;
+
+  /// No description provided for @busEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End allocation'**
+  String get busEnd;
+
+  /// No description provided for @busEndConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'End the allocation of seat {seat}?'**
+  String busEndConfirm(String seat);
+
+  /// No description provided for @busEndMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The seat is offered to the next person on the waitlist.'**
+  String get busEndMessage;
+
+  /// No description provided for @busEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation ended'**
+  String get busEnded;
+
+  /// No description provided for @busBroadcast.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast to this route'**
+  String get busBroadcast;
+
+  /// No description provided for @busBroadcastMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get busBroadcastMessage;
+
+  /// No description provided for @busBroadcastSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get busBroadcastSend;
+
+  /// No description provided for @busBroadcastSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Message sent'**
+  String get busBroadcastSent;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

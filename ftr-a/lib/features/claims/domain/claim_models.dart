@@ -9,7 +9,7 @@ enum ClaimType {
   conveyance('CONVEYANCE'),
   tourEvent('TOUR_EVENT');
 
-  const ClaimType(this.wire);
+  ClaimType(this.wire);
 
   final String wire;
 
@@ -27,7 +27,7 @@ enum ClaimStatus {
   rejected('REJECTED'),
   cancelled('CANCELLED');
 
-  const ClaimStatus(this.wire);
+  ClaimStatus(this.wire);
 
   final String wire;
 
@@ -47,14 +47,12 @@ enum AdvanceStatus {
   rejected('REJECTED'),
   cancelled('CANCELLED');
 
-  const AdvanceStatus(this.wire);
+  AdvanceStatus(this.wire);
 
   final String wire;
 
-  static AdvanceStatus parse(String wire) => values.firstWhere(
-    (s) => s.wire == wire,
-    orElse: () => pendingManager,
-  );
+  static AdvanceStatus parse(String wire) =>
+      values.firstWhere((s) => s.wire == wire, orElse: () => pendingManager);
 }
 
 @immutable
@@ -266,7 +264,9 @@ class Claim {
         for (final f in (j['flags'] as List?) ?? const [])
           ClaimFlag.fromJson(_map(f)),
       ],
-      advance: j['advance'] == null ? null : Advance.fromJson(_map(j['advance'])),
+      advance: j['advance'] == null
+          ? null
+          : Advance.fromJson(_map(j['advance'])),
       reviewComment: j['reviewComment'] as String?,
       workflowInstanceId: j['workflowInstanceId'] as String?,
     );

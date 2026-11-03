@@ -189,7 +189,7 @@ void seedNotices(MockStore store) {
       final code = e.str('empCode');
       final isUnread = unread[code]?.contains(s.ref) ?? false;
       final read = !isUnread && (code == 'EMP-0001' || (i++ % 3 != 0));
-      final acked = read && s.ack && (code == 'EMP-0001' || i % 2 == 0);
+      final acked = read && s.ack && (code == 'EMP-0001' || i.isEven);
       store.put(Col.noticeReceipts, {
         'id': NoticeEngine.receiptId(id, e.str('id')),
         'noticeId': id,

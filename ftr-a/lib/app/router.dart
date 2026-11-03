@@ -6,11 +6,21 @@ import 'package:bogcl_oneops/features/attendance/presentation/regularise_screen.
 import 'package:bogcl_oneops/features/auth/presentation/loading_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/login_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/bus/presentation/bus_route_screen.dart';
+import 'package:bogcl_oneops/features/bus/presentation/bus_screen.dart';
+import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
+import 'package:bogcl_oneops/features/claims/presentation/advance_request_screen.dart';
+import 'package:bogcl_oneops/features/claims/presentation/claim_detail_screen.dart';
+import 'package:bogcl_oneops/features/claims/presentation/claim_edit_screen.dart';
+import 'package:bogcl_oneops/features/claims/presentation/claims_screen.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_apply_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_detail_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
 import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
+import 'package:bogcl_oneops/features/notices/presentation/notice_compose_screen.dart';
+import 'package:bogcl_oneops/features/notices/presentation/notice_detail_screen.dart';
+import 'package:bogcl_oneops/features/notices/presentation/notices_screen.dart';
 import 'package:bogcl_oneops/features/notifications/presentation/inbox_screen.dart';
 import 'package:bogcl_oneops/features/outbox/presentation/outbox_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -76,6 +86,64 @@ GoRouter router(Ref ref) {
                           initialDate: state.uri.queryParameters['date'],
                           initialType: state.uri.queryParameters['type'],
                         ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'notices',
+                    builder: (context, state) => const NoticesScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) =>
+                            const NoticeComposeScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            NoticeDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'claims',
+                    builder: (context, state) => const ClaimsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => ClaimEditScreen(
+                          type: ClaimType.parse(
+                            state.uri.queryParameters['type'] ?? 'TADA',
+                          ),
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'advance',
+                        builder: (context, state) =>
+                            const AdvanceRequestScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            ClaimDetailScreen(id: state.pathParameters['id']!),
+                        routes: [
+                          GoRoute(
+                            path: 'edit',
+                            builder: (context, state) =>
+                                ClaimEditScreen(id: state.pathParameters['id']),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'bus',
+                    builder: (context, state) => const BusScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'routes/:id',
+                        builder: (context, state) =>
+                            BusRouteScreen(id: state.pathParameters['id']!),
                       ),
                     ],
                   ),

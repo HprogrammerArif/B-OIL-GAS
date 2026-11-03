@@ -13,7 +13,6 @@ import 'package:bogcl_oneops/features/bus/presentation/bus_ui.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
-import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
@@ -145,7 +144,10 @@ class _RoutesTab extends ConsumerWidget {
                       Text(
                         l10n.busRouteMeta(
                           r.busNo,
-                          digits(r.distanceKm.toStringAsFixed(0), bangla: bangla),
+                          digits(
+                            r.distanceKm.toStringAsFixed(0),
+                            bangla: bangla,
+                          ),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
@@ -197,10 +199,7 @@ class _MySeatTab extends ConsumerStatefulWidget {
 class _MySeatTabState extends ConsumerState<_MySeatTab> {
   bool _busy = false;
 
-  Future<void> _run(
-    Future<MySeat> Function() action,
-    String done,
-  ) async {
+  Future<void> _run(Future<MySeat> Function() action, String done) async {
     final l10n = context.l10n;
     setState(() => _busy = true);
     try {
@@ -216,14 +215,10 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
         ..invalidate(mySeatProvider)
         ..invalidate(busRoutesProvider);
       if (!mounted) return;
-      AppToast.show(
-        context,
-        switch (e.rule) {
-          'OFFER_EXPIRED' => l10n.busErrOfferExpired,
-          _ => l10n.busErrFailed,
-        },
-        tone: StatusTone.danger,
-      );
+      AppToast.show(context, switch (e.rule) {
+        'OFFER_EXPIRED' => l10n.busErrOfferExpired,
+        _ => l10n.busErrFailed,
+      }, tone: StatusTone.danger);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -274,12 +269,13 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
   }
 
   Future<void> _release(SeatAllocation a) async {
-    final r = await showModalBottomSheet<({String from, String to, String reason})>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => const _ReleaseSheet(),
-    );
+    final r =
+        await showModalBottomSheet<({String from, String to, String reason})>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (_) => const _ReleaseSheet(),
+        );
     if (r == null || !mounted) return;
     await _run(
       () => ref
@@ -313,7 +309,8 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
     final seat = ref.watch(mySeatProvider);
     return seat.when(
       loading: () => const SkeletonList(itemCount: 3),
-      error: (_, _) => ErrorState(onRetry: () => ref.invalidate(mySeatProvider)),
+      error: (_, _) =>
+          ErrorState(onRetry: () => ref.invalidate(mySeatProvider)),
       data: (s) {
         if (s.isEmpty) {
           return ListView(
@@ -351,7 +348,10 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.celebration_outlined, color: context.bogcl.info),
+                          Icon(
+                            Icons.celebration_outlined,
+                            color: context.bogcl.info,
+                          ),
                           const SizedBox(width: Space.sm),
                           Expanded(
                             child: Text(
@@ -386,7 +386,9 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                           Expanded(
                             child: PrimaryButton.secondary(
                               label: l10n.busDecline,
-                              onPressed: _busy ? null : () => unawaited(_decline(w)),
+                              onPressed: _busy
+                                  ? null
+                                  : () => unawaited(_decline(w)),
                             ),
                           ),
                         ],
@@ -461,7 +463,9 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                       else
                         PrimaryButton.secondary(
                           label: l10n.busRelease,
-                          onPressed: _busy ? null : () => unawaited(_release(a)),
+                          onPressed: _busy
+                              ? null
+                              : () => unawaited(_release(a)),
                         ),
                     ],
                   ),
@@ -498,7 +502,9 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                       const SizedBox(height: Space.md),
                       PrimaryButton.secondary(
                         label: l10n.busLeave,
-                        onPressed: _busy ? null : () => unawaited(_leaveQueue(w)),
+                        onPressed: _busy
+                            ? null
+                            : () => unawaited(_leaveQueue(w)),
                       ),
                     ],
                   ),
@@ -534,7 +540,10 @@ class _StopSheetState extends State<_StopSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.busChooseStop, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              l10n.busChooseStop,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: Space.sm),
             Flexible(
               child: SingleChildScrollView(
@@ -615,7 +624,7 @@ class _ReleaseSheetState extends State<_ReleaseSheet> {
     final lang = Localizations.localeOf(context).languageCode;
     final reasonOk = _reason.text.trim().length >= 3;
 
-    Widget picker(String label, DateTime? v, bool from) => InkWell(
+    Widget picker(String label, DateTime? v, {required bool from}) => InkWell(
       onTap: () => unawaited(_pick(from: from)),
       child: InputDecorator(
         decoration: InputDecoration(
@@ -623,7 +632,9 @@ class _ReleaseSheetState extends State<_ReleaseSheet> {
           suffixIcon: const Icon(Icons.calendar_today_outlined),
           errorText: _showErrors && v == null ? l10n.claimErrDates : null,
         ),
-        child: Text(v == null ? '—' : DateFmt.range(dateKey(v), dateKey(v), lang)),
+        child: Text(
+          v == null ? '—' : DateFmt.range(dateKey(v), dateKey(v), lang),
+        ),
       ),
     );
 
@@ -635,20 +646,25 @@ class _ReleaseSheetState extends State<_ReleaseSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.busReleaseTitle, style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                l10n.busReleaseTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: Space.xs),
               Text(l10n.busReleaseHint),
               const SizedBox(height: Space.lg),
-              picker(l10n.busReleaseFrom, _from, true),
+              picker(l10n.busReleaseFrom, _from, from: true),
               const SizedBox(height: Space.md),
-              picker(l10n.busReleaseTo, _to, false),
+              picker(l10n.busReleaseTo, _to, from: false),
               const SizedBox(height: Space.md),
               AppTextField(
                 label: l10n.busReleaseReason,
                 controller: _reason,
                 required: true,
                 maxLength: 200,
-                errorText: _showErrors && !reasonOk ? l10n.claimErrPurpose : null,
+                errorText: _showErrors && !reasonOk
+                    ? l10n.claimErrPurpose
+                    : null,
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: Space.lg),

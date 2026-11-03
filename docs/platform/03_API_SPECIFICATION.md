@@ -534,6 +534,23 @@ Validation: `title` 5–160; `body` 10–20 000 (markdown subset); `titleBn/body
 
 **Prototype note:** the prototype stored a single `acknowledgedCount` integer and claimed "788 employees"; production keeps per-user `NoticeReceipt` and computes counts from it.
 
+### 7.3 Pitch-app mock mapping (Flutter `ftr-a`)
+
+The in-app mock implements a reduced, role-aware subset (Phase 3c). Paths are relative to the mock base URL; envelope as §1.
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/notices/options` | `notices:create` | Replaces `compose-options`: `{ categories[], audiences[{type,refId,label,labelBn,recipientCount}], maxPinned, pinnedCount }`. POLICY category is not offered (its approval workflow `NOTICE_PUBLISH` arrives with Phase 4); EXECUTIVE only for Chairman/EA. |
+| GET | `/notices` | `notices:read` | `?filter=all|unread|ack|mine`; each item embeds `receipt`. |
+| GET | `/notices/unread-count` | `notices:read` | `{ unread, awaitingAck }` for list chips. |
+| GET | `/notices/{id}` | `notices:read` | Marks the receipt read. Authors also get `stats` (recipients/read/acked). |
+| POST | `/notices/{id}/ack` | `notices:read` | `CONFLICT` if already acknowledged. |
+| POST | `/notices` | `notices:create` | Create-and-publish in one step (no draft or scheduling). Pin over the limit of 5 → `CONFLICT` rule `MAX_PINNED`. Audience outside the caller's `notices:publish` scope → `FORBIDDEN`. |
+| GET | `/notices/{id}/receipts` | author or `notices:manage` | Per-recipient read/ack rows. |
+
+Deferred in the mock: drafts, scheduling, edit, archive, attachments, PDF, SMS channel, broadcasts banner.
+
+
 ---
 
 ## 8. MOD-02 — Dashboards & Voice Briefings
@@ -1122,6 +1139,25 @@ Policy engine (`server/src/modules/claims/policy.ts`), producing `policyFlags[{l
 
 `netSettlement = totalAmount − advance.amount` (negative = refund to treasury). **Prototype note:** the prototype used a flat ৳1,500/day; production uses the grade's `ExpensePolicy` and half-day rule.
 
+### 17.4 Pitch-app mock mapping (Flutter `ftr-a`)
+
+Implemented by `mock/engines/claim_engine.dart` (Phase 3d). Differences from §17.2:
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/claims/policy` | `claims:read` | Band A–E derived from grade, DA (Dhaka/district), hotel and conveyance caps, mileage rate, receipt threshold, declaration limit (৳1,000 for CNG/rickshaw/meals), allowed categories and modes, conveyance used this month. |
+| GET | `/claims` | `claims:read` | `?scope=mine|team|payable&status=&type=`. |
+| POST / PUT | `/claims`, `/claims/{id}` | `claims:create` | Header and the full line set in one body (replaces PATCH + PUT lines). The server re-computes DA lines (BR-11-03 full/half day), mileage amounts, totals, `policyAmount`, `netSettlement` and flags on every save. Receipts reference uploaded `receiptFileId`s. |
+| POST | `/claims/{id}/submit` | `claims:submit` | HARD flags (`NO_LINES`, `RECEIPT_REQUIRED`, `HOTEL_CAP_EXCEEDED`, `CONVEYANCE_CAP_EXCEEDED`, `DUPLICATE_RECEIPT`, `OVERLAPPING_PERIOD`, `LATE_SUBMISSION`) → `POLICY_VIOLATION` with `details[].rule`. SOFT flags (`MODE_ABOVE_ENTITLEMENT`, `MILEAGE_LONG`) go to approvers. Files workflow `CLAIM`; no line manager → auto-approved. |
+| POST | `/claims/{id}/cancel` | claimant | DRAFT/RETURNED cancel; pending claims are withdrawn through the workflow. |
+| POST | `/claims/{id}/pay` | `claims:settle` | Replaces `/settle`: APPROVED → SETTLED, mints `VCH-{YYYY}-{NNNNN}`, settles a linked advance, notifies the claimant. The claimant cannot pay their own claim. |
+| GET / POST | `/claims/advances` | `claims:advance` | Replaces `/advances`; `?scope=mine|payable`; body `{ amount, purpose, tourStart, tourEnd }`; max ৳5,00,000; `CONFLICT` rule `ADVANCE_OVERDUE` if an earlier disbursed advance is unlinked 30 days after its tour ended. Workflow `TOUR_ADVANCE` (manager → Finance). |
+| POST | `/claims/advances/{id}/cancel` | self | Before disbursement. |
+| POST | `/claims/advances/{id}/disburse` | `claims:settle` | APPROVED → DISBURSED. |
+
+Deferred in the mock: BEFTN CSV export, Finance line adjustments, executive step above ৳5,00,000, `ADVANCE_SETTLEMENT_OVERDUE` notifications, PDF, KPIs, policy CRUD. Approver actions use the Approvals Center (Phase 4).
+
+
 ---
 
 ## 18. MOD-14 — Commuter Bus & FIFO Waitlist
@@ -1178,6 +1214,27 @@ When a seat becomes `VACATED` (release, offboarding, admin vacate) or a new seat
 ```
 
 Errors: `INVALID_STATE_TRANSITION` (offer not PENDING), `POLICY_VIOLATION` `OFFER_EXPIRED` (`expiresAt < now`, job may not have run yet — accept fails and the expiry is applied), `CONFLICT` (employee got a seat elsewhere meanwhile). Side-effects: notification `BUS_SEAT_CONFIRMED` (or `APPROVAL_PENDING` to supervisor when `bus.adminConfirm`), socket `bus:occupancy` to route room, due item DONE, audit `BUS_SEAT_ALLOCATED`.
+
+### 18.4 Pitch-app mock mapping (Flutter `ftr-a`)
+
+Implemented by `mock/engines/bus_engine.dart` (Phase 3e). Offer expiry is processed lazily by `BusEngine.tick` on every `/bus/*` request (stands in for the server job). Offer window 48 h; queue order `priority DESC, appliedAt ASC`.
+
+| Method | Path | Permission | Notes |
+| :--- | :--- | :--- | :--- |
+| GET | `/bus/routes` | `bus:read` | Occupancy (`capacity, occupied, vacated, free, occupancyPct, waitlistLength`), stops with morning/evening times, `myStatus` = `SEAT|WAITING|OFFERED|null`. |
+| GET | `/bus/routes/{id}` | `bus:read` | Adds `admin: { seats[], queue[] }` when the caller has `bus:manage`. |
+| GET | `/bus/my-seat` | `bus:read` | Replaces `/bus/me`: `{ allocation, waitlist }` with position and estimated wait (14 days per place). |
+| POST | `/bus/routes/{id}/waitlist` | `bus:seat-self` | Join. `CONFLICT` rules `ALREADY_HAS_SEAT`, `ALREADY_WAITING`. A free seat is offered to the head of the queue immediately. |
+| POST | `/bus/waitlist/{id}/accept` | `bus:seat-self` | `{ stopId }`; `POLICY_VIOLATION` `OFFER_EXPIRED` after the window. Replaces `/offer/accept`. |
+| POST | `/bus/waitlist/{id}/decline`, `/cancel` | `bus:seat-self` | Decline an offer / leave the queue; the seat moves on. |
+| POST | `/bus/waitlist/{id}/priority` | `bus:manage` | `{ priority 0–9, reason ≥ 10 when > 0 }`, audited. |
+| POST | `/bus/allocations/{id}/release` | `bus:seat-self` | `{ from, to, reason }`, at most 60 days; seat shows as VACATED and may be offered to the queue. |
+| POST | `/bus/allocations/{id}/reclaim` | `bus:seat-self` | Only while the seat is still free. |
+| POST | `/bus/allocations/{id}/end` | `bus:allocate` | Admin ends an allocation; the seat is re-offered. |
+| POST | `/bus/broadcasts` | `bus:broadcast` | `{ routeId?, message }` → `{ recipients }`. |
+
+Deferred in the mock: lady/executive seat categories, SHIFT_PASS/GUEST bookings, swaps, boarding scans, manifests, route and bus CRUD, admin-confirm workflow.
+
 
 ---
 

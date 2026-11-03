@@ -99,10 +99,7 @@ class BusRepository {
   });
 
   Future<void> broadcast({required String message, String? routeId}) =>
-      _adminPost('/bus/broadcasts', {
-        'message': message,
-        'routeId': ?routeId,
-      });
+      _adminPost('/bus/broadcasts', {'message': message, 'routeId': ?routeId});
 }
 
 @Riverpod(keepAlive: true)

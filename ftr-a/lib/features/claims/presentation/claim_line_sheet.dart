@@ -76,7 +76,8 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
   bool _uploading = false;
 
   late final List<String> _categories = [
-    for (final c in widget.policy.categories[widget.type.wire] ?? const [])
+    for (final c
+        in widget.policy.categories[widget.type.wire] ?? const <String>[])
       if (c != 'DA') c,
   ];
 
@@ -195,7 +196,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
     final bangla = context.isBangla;
     final mileage = _category == 'MILEAGE';
     final hint = widget.policy.receiptRequiredAbove;
-    final decimal = [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))];
+    final decimal = [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))];
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -216,7 +217,9 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                 const SizedBox(height: Space.lg),
                 DropdownButtonFormField<String>(
                   initialValue: _category,
-                  decoration: InputDecoration(labelText: l10n.claimFieldCategory),
+                  decoration: InputDecoration(
+                    labelText: l10n.claimFieldCategory,
+                  ),
                   items: [
                     for (final c in _categories)
                       DropdownMenuItem(
@@ -237,7 +240,9 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                       labelText: l10n.claimFieldDate,
                       suffixIcon: const Icon(Icons.calendar_today_outlined),
                     ),
-                    child: Text(DateFmt.range(dateKey(_date), dateKey(_date), lang)),
+                    child: Text(
+                      DateFmt.range(dateKey(_date), dateKey(_date), lang),
+                    ),
                   ),
                 ),
                 const SizedBox(height: Space.md),
@@ -355,7 +360,10 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                       title: Text(l10n.claimDeclaration),
                       subtitle: Text(
                         l10n.claimDeclarationHint(
-                          bdt(widget.policy.declarationMaxAmount, bangla: bangla),
+                          bdt(
+                            widget.policy.declarationMaxAmount,
+                            bangla: bangla,
+                          ),
                         ),
                       ),
                       value: _declaration,

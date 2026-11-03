@@ -581,5 +581,581 @@
   "demoLocationHq": "At Head Office",
   "demoLocationPlant": "At Plant",
   "demoLocationOutside": "Outside site",
-  "demoLocationMock": "Mock GPS"
+  "demoLocationMock": "Mock GPS",
+  "moduleNotices": "Notices",
+  "moduleClaims": "Claims",
+  "moduleBus": "Staff bus",
+  "noticesTitle": "Notices",
+  "noticeFilterAll": "All",
+  "noticeFilterUnread": "Unread",
+  "noticeFilterUnreadCount": "Unread ({count})",
+  "@noticeFilterUnreadCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeFilterAck": "To acknowledge",
+  "noticeFilterAckCount": "To acknowledge ({count})",
+  "@noticeFilterAckCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeFilterMine": "Published by me",
+  "noticeCompose": "New notice",
+  "noticeEmptyTitle": "No notices",
+  "noticeEmptyMessage": "New notices from your organisation will appear here.",
+  "noticeUnread": "New",
+  "noticeNeedsAck": "Acknowledge",
+  "noticePinned": "Pinned",
+  "noticeDetailTitle": "Notice",
+  "noticeNotFound": "Notice not found",
+  "noticeNotFoundMessage": "It may have expired or is not meant for you.",
+  "noticeAcked": "Acknowledged",
+  "noticeAckFailed": "Could not acknowledge. Try again.",
+  "noticeAckAction": "I have read and understood",
+  "noticeAckedOn": "Acknowledged on {date}",
+  "@noticeAckedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeAudience": "For: {name}",
+  "@noticeAudience": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeReach": "Reach",
+  "noticeReadStat": "Read {read} of {total}",
+  "@noticeReadStat": {
+    "placeholders": {
+      "read": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeAckStat": "Acknowledged {ack} of {total}",
+  "@noticeAckStat": {
+    "placeholders": {
+      "ack": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noticeViewReceipts": "Who has read this",
+  "noticeReceiptAcked": "Acknowledged",
+  "noticeReceiptRead": "Read {date}",
+  "@noticeReceiptRead": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noticeReceiptUnread": "Not read",
+  "noticeCatGeneral": "General",
+  "noticeCatPolicy": "Policy",
+  "noticeCatSafety": "Safety",
+  "noticeCatOperations": "Operations",
+  "noticeCatAdmin": "Administration",
+  "noticeCatHr": "HR",
+  "noticeCatExecutive": "Executive",
+  "noticePrioNormal": "Normal",
+  "noticePrioHigh": "High",
+  "noticePrioCritical": "Critical",
+  "noticeFieldCategory": "Category",
+  "noticeFieldTitle": "Title",
+  "noticeFieldBody": "Message",
+  "noticeFieldPriority": "Priority",
+  "noticeFieldAudience": "Audience",
+  "noticeFieldRequireAck": "Require acknowledgement",
+  "noticeFieldPin": "Pin to the top",
+  "noticeCriticalHint": "Critical notices alert every recipient immediately.",
+  "noticeAudAll": "Everyone",
+  "noticeAudDepartment": "A department",
+  "noticeAudSite": "A site",
+  "noticePublish": "Publish",
+  "noticePublishConfirmTitle": "Publish this notice?",
+  "noticePublishConfirmMessage": "Recipients are notified straight away. A published notice cannot be edited.",
+  "noticePublished": "Notice published",
+  "noticeErrMaxPinned": "Five notices are already pinned. Unpin one first or publish without pinning.",
+  "noticeErrForbidden": "You cannot publish to this audience or category.",
+  "noticeErrFailed": "Could not publish. Check the form and try again.",
+  "claimsTitle": "Claims",
+  "claimTabClaims": "My claims",
+  "claimTabAdvances": "Advances",
+  "claimTabPayable": "To pay",
+  "claimNew": "New claim",
+  "claimNewTitle": "New claim",
+  "claimEditTitle": "Edit claim",
+  "claimDetailTitle": "Claim",
+  "claimEmptyTitle": "No claims yet",
+  "claimEmptyMessage": "Tap New claim to file travel, conveyance or event expenses.",
+  "claimTypeTada": "Travel and DA",
+  "claimTypeConveyance": "Conveyance",
+  "claimTypeTour": "Tour and event",
+  "claimTypeTadaHint": "Official trips: tickets, hotel, meals and daily allowance",
+  "claimTypeConveyanceHint": "Local travel within a month: CNG, rickshaw, ride share",
+  "claimTypeTourHint": "Tours and events, with an optional advance to adjust",
+  "claimStatusDraft": "Draft",
+  "claimStatusPendingManager": "With manager",
+  "claimStatusPendingFinance": "With Finance",
+  "claimStatusApproved": "Approved",
+  "claimStatusSettled": "Paid",
+  "claimStatusReturned": "Returned",
+  "claimStatusRejected": "Rejected",
+  "claimStatusCancelled": "Cancelled",
+  "claimCatDa": "Daily allowance",
+  "claimCatTicket": "Ticket",
+  "claimCatHotel": "Hotel",
+  "claimCatMeals": "Meals",
+  "claimCatMileage": "Mileage",
+  "claimCatCng": "CNG",
+  "claimCatRickshaw": "Rickshaw",
+  "claimCatRideShare": "Ride share",
+  "claimCatBusFare": "Bus fare",
+  "claimCatEvent": "Event cost",
+  "claimCatOther": "Other",
+  "claimModeNone": "Not specified",
+  "claimModeExecutiveCar": "Executive car",
+  "claimModeCompanyCar": "Company car",
+  "claimModePoolCar": "Pool car",
+  "claimModeAir": "Domestic flight",
+  "claimModeAcTrain": "AC train",
+  "claimModeFirstTrain": "First class train",
+  "claimModeTrain": "Train",
+  "claimModeAcBus": "AC bus",
+  "claimModeBus": "Bus",
+  "claimPolicyTitle": "Your entitlements (band {band})",
+  "@claimPolicyTitle": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      }
+    }
+  },
+  "claimPolicyConveyance": "Conveyance this month: {used} of {cap}",
+  "@claimPolicyConveyance": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "cap": {
+        "type": "String"
+      }
+    }
+  },
+  "claimPolicyDa": "Daily allowance: {dhaka} Dhaka, {district} elsewhere",
+  "@claimPolicyDa": {
+    "placeholders": {
+      "dhaka": {
+        "type": "String"
+      },
+      "district": {
+        "type": "String"
+      }
+    }
+  },
+  "claimPolicyHotel": "Hotel up to {cap} per night",
+  "@claimPolicyHotel": {
+    "placeholders": {
+      "cap": {
+        "type": "String"
+      }
+    }
+  },
+  "claimFieldPurpose": "Purpose",
+  "claimFieldEmployee": "Employee",
+  "claimFieldPeriod": "Period",
+  "claimFieldPeriodFrom": "From",
+  "claimFieldPeriodTo": "To",
+  "claimFieldDepart": "Departure",
+  "claimFieldReturn": "Return",
+  "claimFieldDestination": "Destination",
+  "claimFieldMode": "Travel mode",
+  "claimFieldAdvance": "Advance to adjust",
+  "claimAdvanceNone": "No advance",
+  "claimDestDhaka": "Dhaka",
+  "claimDestOther": "Outside Dhaka",
+  "claimDaAuto": "Daily allowance is added automatically from your departure and return times.",
+  "claimLines": "Expense lines ({count})",
+  "@claimLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "claimNoLinesYet": "No expenses added yet.",
+  "claimLineAdd": "Add expense",
+  "claimLineEdit": "Edit expense",
+  "claimLineSave": "Save expense",
+  "claimLineAuto": "Auto",
+  "claimLineDeclared": "Declared",
+  "claimFieldCategory": "Category",
+  "claimFieldDate": "Date",
+  "claimFieldAmount": "Amount (BDT)",
+  "claimFieldNights": "Nights",
+  "claimFieldDistance": "Distance (km)",
+  "claimFieldFrom": "From",
+  "claimFieldTo": "To",
+  "claimFieldDescription": "Note",
+  "claimMileageHint": "Paid at {rate} per km",
+  "@claimMileageHint": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "claimKm": "{km} km",
+  "@claimKm": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "claimReceiptHint": "A receipt is required above {amount}.",
+  "@claimReceiptHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimReceiptAdd": "Add receipt photo",
+  "claimReceiptAttached": "Receipt attached",
+  "claimDeclaration": "No receipt, I declare this expense",
+  "claimDeclarationHint": "Allowed for small CNG, rickshaw and meal expenses up to {amount}.",
+  "@claimDeclarationHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimEnteredTotal": "Entered: {amount}",
+  "@claimEnteredTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimSaveDraft": "Save draft",
+  "claimSaved": "Draft saved",
+  "claimErrRequired": "Required",
+  "claimErrPurpose": "Enter at least 3 characters",
+  "claimErrDates": "Choose valid dates",
+  "claimErrAmount": "Enter a valid amount",
+  "claimErrDistance": "Enter the distance in km",
+  "claimErrNights": "Enter 1 to 60 nights",
+  "claimErrSave": "Could not save the claim. Check the details and try again.",
+  "claimErrOffline": "You are offline. Connect to the internet and try again.",
+  "claimErrFailed": "Something went wrong. Try again.",
+  "claimErrBlocked": "Fix the blocking checks before submitting.",
+  "claimTotal": "Total",
+  "claimAdvanceAdjusted": "Advance adjusted",
+  "claimNetPayable": "Payable to you",
+  "claimNetRefund": "To return to company",
+  "claimVoucher": "Voucher",
+  "claimReviewerComment": "Reviewer comment",
+  "claimRoute": "Approval route",
+  "claimSubmit": "Submit for approval",
+  "claimSubmitConfirmTitle": "Submit this claim?",
+  "claimSubmitConfirmMessage": "It goes to your manager and then Finance. You cannot edit it while it is pending.",
+  "claimSubmitted": "Claim submitted",
+  "claimEdit": "Edit",
+  "claimCancel": "Cancel claim",
+  "claimCancelConfirm": "Cancel this claim?",
+  "claimCancelled": "Claim cancelled",
+  "claimWithdraw": "Withdraw claim",
+  "claimPay": "Mark as paid",
+  "claimPayConfirm": "Pay {amount}?",
+  "@claimPayConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimPayMessage": "A voucher is created and the employee is notified. This cannot be undone.",
+  "claimPaid": "Payment recorded",
+  "claimFlagNoLines": "Add at least one expense line.",
+  "claimFlagReceipt": "A receipt or declaration is missing on a line.",
+  "claimFlagHotel": "Hotel is above the nightly limit. Eligible: {amount}.",
+  "@claimFlagHotel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimFlagConveyance": "Monthly conveyance limit exceeded. Eligible: {amount}.",
+  "@claimFlagConveyance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "claimFlagOverlap": "This period overlaps another claim.",
+  "claimFlagDuplicate": "The same receipt is used more than once.",
+  "claimFlagLate": "Filed after the 60 day window.",
+  "claimFlagMode": "Travel mode is above your entitlement. Finance will review.",
+  "claimFlagMileage": "Long mileage trip. Finance will review.",
+  "advNew": "Request advance",
+  "advNewTitle": "Tour advance",
+  "advIntro": "Request cash in advance for an upcoming tour. Adjust it against your tour claim afterwards.",
+  "advFieldAmount": "Amount (BDT)",
+  "advFieldTourStart": "Tour starts",
+  "advFieldTourEnd": "Tour ends",
+  "advErrAmount": "Enter an amount up to 5,00,000",
+  "advErrOverdue": "You have an earlier advance that is not yet settled. Settle it first.",
+  "advErrFailed": "Could not request the advance. Try again.",
+  "advSubmit": "Submit request",
+  "advSubmitted": "Advance requested",
+  "advEmptyTitle": "No advances",
+  "advEmptyMessage": "Request an advance before a tour.",
+  "advStatusDisbursed": "Disbursed",
+  "advSettleHint": "Not yet adjusted. Link it to a tour claim.",
+  "advCancel": "Cancel request",
+  "advCancelConfirm": "Cancel this advance request?",
+  "advCancelled": "Advance cancelled",
+  "advDisburse": "Disburse",
+  "advDisburseConfirm": "Disburse {amount}?",
+  "@advDisburseConfirm": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "advDisbursed": "Advance disbursed",
+  "payClaims": "Claims ready to pay",
+  "payAdvances": "Advances to disburse",
+  "payEmptyTitle": "Nothing to pay",
+  "payEmptyMessage": "Approved claims and advances appear here.",
+  "busTitle": "Staff bus",
+  "busTabMySeat": "My seat",
+  "busTabRoutes": "Routes",
+  "busRouteTitle": "Route",
+  "busRouteMeta": "Bus {bus} · {km} km",
+  "@busRouteMeta": {
+    "placeholders": {
+      "bus": {
+        "type": "String"
+      },
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "busFreeSeats": "{free} of {total} seats free",
+  "@busFreeSeats": {
+    "placeholders": {
+      "free": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "busFull": "Full · {count} waiting",
+  "@busFull": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "busMySeatBadge": "My route",
+  "busWaitingBadge": "Waiting",
+  "busOfferedBadge": "Seat offered",
+  "busReleasedBadge": "Released",
+  "busEmptyTitle": "No bus seat yet",
+  "busEmptyMessage": "Pick a route and join its waitlist. You are offered a seat in turn.",
+  "busBrowse": "Browse routes",
+  "busSeatNo": "Seat {no}",
+  "@busSeatNo": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "busStopLine": "{stop} · morning {morning} · evening {evening}",
+  "@busStopLine": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "morning": {
+        "type": "String"
+      },
+      "evening": {
+        "type": "String"
+      }
+    }
+  },
+  "busStopTimes": "Morning {morning} · Evening {evening}",
+  "@busStopTimes": {
+    "placeholders": {
+      "morning": {
+        "type": "String"
+      },
+      "evening": {
+        "type": "String"
+      }
+    }
+  },
+  "busStops": "Stops",
+  "busJoin": "Join waitlist",
+  "busJoinConfirm": "Join the waitlist for {route}?",
+  "@busJoinConfirm": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "busJoinMessage": "You are placed in line by application time. When a seat frees up you have 48 hours to accept.",
+  "busJoined": "Added to the waitlist",
+  "busWaitlistTitle": "On the waitlist",
+  "busPosition": "Position {pos}",
+  "@busPosition": {
+    "placeholders": {
+      "pos": {
+        "type": "String"
+      }
+    }
+  },
+  "busEstimate": "Estimated wait: about {days} days",
+  "@busEstimate": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "busLeave": "Leave waitlist",
+  "busLeaveConfirm": "Leave the waitlist?",
+  "busLeft": "Removed from the waitlist",
+  "busOfferTitle": "Seat {seat} is yours to take",
+  "@busOfferTitle": {
+    "placeholders": {
+      "seat": {
+        "type": "String"
+      }
+    }
+  },
+  "busOfferLeft": "{h}h {m}m left to respond",
+  "@busOfferLeft": {
+    "placeholders": {
+      "h": {
+        "type": "String"
+      },
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "busOfferExpired": "Offer expired",
+  "busAccept": "Accept seat",
+  "busAccepted": "Seat confirmed",
+  "busDecline": "Decline",
+  "busDeclineConfirm": "Decline this seat?",
+  "busDeclineMessage": "You will be removed from this waitlist and the seat goes to the next person.",
+  "busDeclined": "Offer declined",
+  "busChooseStop": "Choose your stop",
+  "busConfirmSeat": "Confirm seat",
+  "busRelease": "Release seat for a while",
+  "busReleaseTitle": "Release your seat",
+  "busReleaseHint": "Going on leave or travelling? Free the seat for up to 60 days and take it back later.",
+  "busReleaseFrom": "From",
+  "busReleaseTo": "Until",
+  "busReleaseReason": "Reason",
+  "busReleased": "Seat released",
+  "busReleasedRange": "Released {range}",
+  "@busReleasedRange": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "busReclaim": "Take seat back",
+  "busReclaimConfirm": "Take your seat back?",
+  "busReclaimMessage": "This works only if nobody else is using it right now.",
+  "busReclaimed": "Seat is yours again",
+  "busErrFailed": "That did not work. Try again.",
+  "busErrOfferExpired": "This offer has expired.",
+  "busErrHasSeat": "You already have a bus seat.",
+  "busErrAlreadyWaiting": "You are already on a waitlist.",
+  "busSeatMap": "Seat map",
+  "busLegendTaken": "Taken",
+  "busLegendReleased": "Released",
+  "busLegendOffered": "Offered",
+  "busLegendFree": "Free",
+  "busQueue": "Waitlist ({count})",
+  "@busQueue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "busQueueEmpty": "Nobody is waiting.",
+  "busPriorityLevel": "Priority {level}",
+  "@busPriorityLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "busPriorityTitle": "Priority for {name}",
+  "@busPriorityTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "busPriorityReason": "Reason",
+  "busPriorityReasonHint": "Explain the override (at least 10 characters). It is recorded in the audit log.",
+  "busPrioritySave": "Save priority",
+  "busPrioritySaved": "Priority updated",
+  "busEnd": "End allocation",
+  "busEndConfirm": "End the allocation of seat {seat}?",
+  "@busEndConfirm": {
+    "placeholders": {
+      "seat": {
+        "type": "String"
+      }
+    }
+  },
+  "busEndMessage": "The seat is offered to the next person on the waitlist.",
+  "busEnded": "Allocation ended",
+  "busBroadcast": "Broadcast to this route",
+  "busBroadcastMessage": "Message",
+  "busBroadcastSend": "Send",
+  "busBroadcastSent": "Message sent"
 }

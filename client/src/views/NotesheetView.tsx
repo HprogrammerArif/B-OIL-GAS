@@ -1,31 +1,25 @@
-import { useCallback, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import { today, nowStamp } from '../lib/clock';
 import { signatureCode } from '../lib/hash';
 import { useCurrentUser, useCan } from '../auth/session';
-import {
-  FileText, QrCode, Lock, Layers, Printer, Plus, Inbox, PenTool, ArrowDown, Building2, CalendarDays, Hash,
-} from 'lucide-react';
+import { Plus, Inbox } from 'lucide-react';
 import OfficialDocumentModal, { DocumentData } from '../components/OfficialDocumentModal';
 import InitiateNotesheetModal, {
   NewNotesheetData,
   AVAILABLE_OFFICERS,
 } from '../components/notesheet/InitiateNotesheetModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
-import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
+import { Button, EmptyState, PageHeader } from '../components/ui';
 import { approvalStore } from '../store/approvalStore';
 import { useNotesheetStore, NoteFile, isTurnOf, pendingStepOf } from '../store/notesheetStore';
 import FileRail from './notesheet/FileRail';
-import RouteStepper from './notesheet/RouteStepper';
 import SignPanel from './notesheet/SignPanel';
 import CertificateModal from './notesheet/CertificateModal';
-import { BudgetCard, FileFacts, HistoryTab, NoteList, QuotationsTab, StatusCard } from './notesheet/Panels';
-import {
-  STATE_TONE, URGENCY_TONE, fileStateOf, stateLabel, urgencyLabel,
-} from './notesheet/helpers';
-
-type Tab = 'sheet' | 'compare' | 'audit';
+import FileSummary from './notesheet/Summary';
+import { BudgetCheck, Discussion, PriceComparison } from './notesheet/Panels';
+import { fileStateOf } from './notesheet/helpers';
 
 export default function NotesheetView({ role, lang }: ViewProps) {
   const { files, addFile, signStep, returnFileForRevision } = useNotesheetStore();
@@ -55,7 +49,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
   const [activeFileId, setActiveFileId] = useState<string>(
     () => (visibleFiles.find((f) => stateOf(f) === 'mine') ?? visibleFiles[0])?.id ?? '',
   );
-  const [activeTab, setActiveTab] = useState<Tab>('sheet');
   const [showCertModal, setShowCertModal] = useState(false);
   const [showOfficialDoc, setShowOfficialDoc] = useState(false);
   const [showInitiateModal, setShowInitiateModal] = useState(false);
@@ -155,7 +148,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
     addFile(newFile);
     setActiveFileId(newFile.id);
-    setActiveTab('sheet');
 
     // Mirror to the approvals queue
     approvalStore.addNotesheetApproval(newFile.id, data.fileNo, data.title, data.initiatorName, data.dept, data.amount);
@@ -255,10 +247,10 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
   const header = (
     <PageHeader
-      title={t('Electronic Note-Sheet & Document Approvals', 'ই-নোটশীট ও ডিজিটাল অনুমোদন', lang)}
+      title={t('Note-Sheets', 'নোট-শীট', lang)}
       description={t(
-        'Sequential departmental review, transparent remarks, and verified digital signatures.',
-        'ধারাবাহিক বিভাগীয় অনুমোদন, সুস্পষ্ট মন্তব্য ও ডিজিটাল স্বাক্ষর খতিয়ান।',
+        'A note-sheet is the official file where a request is explained, reviewed and approved by each officer in turn.',
+        'নোট-শীট হলো দাপ্তরিক ফাইল, যেখানে একটি আবেদন ব্যাখ্যা করা হয়, এবং প্রত্যেক কর্মকর্তা ক্রমানুসারে পর্যালোচনা ও অনুমোদন করেন।',
         lang,
       )}
       actions={newButton}
@@ -281,20 +273,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     );
   }
 
-  const tabs: { key: Tab; label: string; icon: ReactNode; count?: number }[] = [
-    { key: 'sheet', label: t('Note sheet', 'নোটশীট', lang), icon: <FileText size={14} />, count: currentFile.notes.length },
-    { key: 'compare', label: t('Vendor quotations', 'দরপত্র', lang), icon: <Layers size={14} />, count: currentFile.quotations.length },
-    { key: 'audit', label: t('Signatures & history', 'স্বাক্ষর ও খতিয়ান', lang), icon: <Lock size={14} /> },
-  ];
-
-  const onTabKey = (e: KeyboardEvent, index: number) => {
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    e.preventDefault();
-    const next = tabs[(index + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
-    setActiveTab(next.key);
-    document.getElementById(`ns-tab-${next.key}`)?.focus();
-  };
-
   return (
     <div className="ns-page">
       {header}
@@ -306,127 +284,44 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           lang={lang}
           canSign={canSign}
           stateOf={stateOf}
-          onSelect={(id) => { setActiveFileId(id); setActiveTab('sheet'); }}
+          onSelect={setActiveFileId}
         />
 
         <div className="ns-main">
-          {/* File header */}
-          <section className="ns-card ns-filehead" aria-label={t('Selected file', 'নির্বাচিত ফাইল', lang)}>
-            <div className="ns-fh-top">
-              <div className="ns-fh-title">
-                <span className="ns-org">{t('Bashundhara Oil & Gas Company Limited', 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস কোম্পানি লিমিটেড', lang)}</span>
-                <h3>{currentFile.title}</h3>
-                <div className="ns-meta">
-                  <span><Hash size={13} /> <code>{currentFile.fileNo}</code></span>
-                  <span><CalendarDays size={13} /> {currentFile.date}</span>
-                  <span><Building2 size={13} /> {currentFile.dept}</span>
-                </div>
-              </div>
-              <div className="ns-amount">
-                <small>{t('Financial value', 'আর্থিক মূল্য', lang)}</small>
-                <strong>{currentFile.amount}</strong>
-              </div>
+          <FileSummary
+            file={currentFile}
+            state={state}
+            lang={lang}
+            myRole={user?.role}
+            isFinal={isFinalStep}
+            awaitingName={awaitingName}
+            nextName={nextStep?.officerName ?? null}
+            onPrint={() => setShowOfficialDoc(true)}
+            onCertificate={() => setShowCertModal(true)}
+            onJumpToSign={jumpToSign}
+          />
+
+          <div className={`ns-sheet ${isMyTurn ? 'with-side' : ''}`}>
+            <div className="ns-doc">
+              <PriceComparison file={currentFile} lang={lang} />
+              <BudgetCheck file={currentFile} lang={lang} />
+              <Discussion file={currentFile} state={state} awaitingName={awaitingName} lang={lang} />
             </div>
 
-            <div className="ns-fh-bottom">
-              <div className="ns-pills">
-                <StatusPill tone={STATE_TONE[state]}>{stateLabel(state, currentFile, lang)}</StatusPill>
-                {!isApproved && (
-                  <StatusPill tone={URGENCY_TONE[currentFile.urgency]}>{urgencyLabel(currentFile.urgency, lang)}</StatusPill>
-                )}
-              </div>
-              <div className="ns-fh-actions">
-                <Button variant="secondary" size="sm" icon={<Printer size={13} />} onClick={() => setShowOfficialDoc(true)}>
-                  {t('Print', 'প্রিন্ট', lang)}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<QrCode size={13} />}
-                  onClick={() => setShowCertModal(true)}
-                  disabled={!isApproved}
-                  title={isApproved ? undefined : t('Available once the file is approved', 'ফাইল অনুমোদিত হলে পাওয়া যাবে', lang)}
-                >
-                  {t('Approval certificate', 'অনুমোদন সনদ', lang)}
-                </Button>
-              </div>
-            </div>
-
-            {isMyTurn && activeTab === 'sheet' && (
-              <div className="ns-callout" role="status">
-                <PenTool size={15} />
-                <span>
-                  <strong>{isFinalStep ? t('This file is waiting for your final approval.', 'ফাইলটি আপনার চূড়ান্ত অনুমোদনের অপেক্ষায়।', lang) : t('This file is waiting for your signature.', 'ফাইলটি আপনার স্বাক্ষরের অপেক্ষায়।', lang)}</strong>
-                  {' '}{t('Read the paragraphs below, then sign.', 'নিচের অনুচ্ছেদগুলো পড়ে স্বাক্ষর করুন।', lang)}
-                </span>
-                <button type="button" onClick={jumpToSign}>{t('Go to signing', 'স্বাক্ষরে যান', lang)} <ArrowDown size={13} /></button>
+            {isMyTurn && user && (
+              <div className="ns-side">
+                <SignPanel
+                  key={`${currentFile.id}:${currentPendingStep?.id ?? 'final'}`}
+                  file={currentFile}
+                  user={user}
+                  lang={lang}
+                  isFinal={isFinalStep}
+                  nextOfficer={nextStep?.officerName ?? null}
+                  onSign={handleSign}
+                  onReturn={() => setShowReturnModal(true)}
+                />
               </div>
             )}
-          </section>
-
-          {/* Tabs */}
-          <div className="ns-tabs" role="tablist" aria-label={t('File sections', 'ফাইলের অংশ', lang)}>
-            {tabs.map((tab, i) => (
-              <button
-                key={tab.key}
-                id={`ns-tab-${tab.key}`}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.key}
-                aria-controls="ns-tabpanel"
-                tabIndex={activeTab === tab.key ? 0 : -1}
-                className={activeTab === tab.key ? 'active' : ''}
-                onClick={() => setActiveTab(tab.key)}
-                onKeyDown={(e) => onTabKey(e, i)}
-              >
-                {tab.icon} {tab.label}
-                {tab.count !== undefined && <span className="ns-count-pill">{tab.count}</span>}
-              </button>
-            ))}
-          </div>
-
-          <div id="ns-tabpanel" role="tabpanel" aria-labelledby={`ns-tab-${activeTab}`}>
-            {activeTab === 'sheet' && (
-              <div className="ns-sheet">
-                <div className="ns-doc">
-                  <section className="ns-card ns-paper">
-                    <RouteStepper file={currentFile} lang={lang} myRole={user?.role} />
-                    <NoteList file={currentFile} state={state} awaitingName={awaitingName} lang={lang} />
-                  </section>
-                  <BudgetCard file={currentFile} lang={lang} />
-                </div>
-
-                <div className="ns-side">
-                  {isMyTurn && user ? (
-                    <SignPanel
-                      key={`${currentFile.id}:${currentPendingStep?.id ?? 'final'}`}
-                      file={currentFile}
-                      user={user}
-                      lang={lang}
-                      isFinal={isFinalStep}
-                      nextOfficer={nextStep?.officerName ?? null}
-                      onSign={handleSign}
-                      onReturn={() => setShowReturnModal(true)}
-                    />
-                  ) : (
-                    <StatusCard
-                      file={currentFile}
-                      state={state}
-                      isFinal={isFinalStep}
-                      awaitingName={awaitingName}
-                      awaitingRole={awaitingRole}
-                      lang={lang}
-                      onHistory={() => setActiveTab('audit')}
-                      onCertificate={() => setShowCertModal(true)}
-                    />
-                  )}
-                  <FileFacts file={currentFile} lang={lang} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'compare' && <QuotationsTab file={currentFile} lang={lang} />}
-            {activeTab === 'audit' && <HistoryTab file={currentFile} state={state} awaitingName={awaitingName} lang={lang} />}
           </div>
         </div>
       </div>

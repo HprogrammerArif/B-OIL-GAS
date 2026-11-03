@@ -11,7 +11,7 @@ Future<MockResponse> _swept(
   Future<MockResponse> Function() body,
 ) async {
   BusEngine.tick(ctx.store);
-  return body();
+  return await body();
 }
 
 String? _text(Json body, String key) {

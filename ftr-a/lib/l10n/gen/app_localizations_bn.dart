@@ -1089,4 +1089,964 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get demoLocationMock => 'নকল GPS';
+
+  @override
+  String get moduleNotices => 'নোটিশ';
+
+  @override
+  String get moduleClaims => 'বিল ও দাবি';
+
+  @override
+  String get moduleBus => 'স্টাফ বাস';
+
+  @override
+  String get noticesTitle => 'নোটিশ';
+
+  @override
+  String get noticeFilterAll => 'সব';
+
+  @override
+  String get noticeFilterUnread => 'অপঠিত';
+
+  @override
+  String noticeFilterUnreadCount(int count) {
+    return 'অপঠিত ($count)';
+  }
+
+  @override
+  String get noticeFilterAck => 'স্বীকারের অপেক্ষায়';
+
+  @override
+  String noticeFilterAckCount(int count) {
+    return 'স্বীকারের অপেক্ষায় ($count)';
+  }
+
+  @override
+  String get noticeFilterMine => 'আমার প্রকাশিত';
+
+  @override
+  String get noticeCompose => 'নতুন নোটিশ';
+
+  @override
+  String get noticeEmptyTitle => 'কোনো নোটিশ নেই';
+
+  @override
+  String get noticeEmptyMessage => 'প্রতিষ্ঠানের নতুন নোটিশ এখানে দেখা যাবে।';
+
+  @override
+  String get noticeUnread => 'নতুন';
+
+  @override
+  String get noticeNeedsAck => 'স্বীকার করুন';
+
+  @override
+  String get noticePinned => 'পিন করা';
+
+  @override
+  String get noticeDetailTitle => 'নোটিশ';
+
+  @override
+  String get noticeNotFound => 'নোটিশ পাওয়া যায়নি';
+
+  @override
+  String get noticeNotFoundMessage =>
+      'এটির মেয়াদ শেষ হয়ে থাকতে পারে অথবা এটি আপনার জন্য নয়।';
+
+  @override
+  String get noticeAcked => 'স্বীকার করা হয়েছে';
+
+  @override
+  String get noticeAckFailed => 'স্বীকার করা যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get noticeAckAction => 'আমি পড়েছি ও বুঝেছি';
+
+  @override
+  String noticeAckedOn(String date) {
+    return '$date তারিখে স্বীকার করা হয়েছে';
+  }
+
+  @override
+  String noticeAudience(String name) {
+    return 'প্রাপক: $name';
+  }
+
+  @override
+  String get noticeReach => 'প্রাপ্তি';
+
+  @override
+  String noticeReadStat(int read, int total) {
+    return 'পড়েছেন $read/$total';
+  }
+
+  @override
+  String noticeAckStat(int ack, int total) {
+    return 'স্বীকার $ack/$total';
+  }
+
+  @override
+  String get noticeViewReceipts => 'কারা পড়েছেন';
+
+  @override
+  String get noticeReceiptAcked => 'স্বীকার করেছেন';
+
+  @override
+  String noticeReceiptRead(String date) {
+    return 'পড়েছেন $date';
+  }
+
+  @override
+  String get noticeReceiptUnread => 'পড়েননি';
+
+  @override
+  String get noticeCatGeneral => 'সাধারণ';
+
+  @override
+  String get noticeCatPolicy => 'নীতিমালা';
+
+  @override
+  String get noticeCatSafety => 'নিরাপত্তা';
+
+  @override
+  String get noticeCatOperations => 'অপারেশন';
+
+  @override
+  String get noticeCatAdmin => 'প্রশাসন';
+
+  @override
+  String get noticeCatHr => 'মানবসম্পদ';
+
+  @override
+  String get noticeCatExecutive => 'নির্বাহী';
+
+  @override
+  String get noticePrioNormal => 'সাধারণ';
+
+  @override
+  String get noticePrioHigh => 'জরুরি';
+
+  @override
+  String get noticePrioCritical => 'অত্যন্ত জরুরি';
+
+  @override
+  String get noticeFieldCategory => 'বিভাগ';
+
+  @override
+  String get noticeFieldTitle => 'শিরোনাম';
+
+  @override
+  String get noticeFieldBody => 'বার্তা';
+
+  @override
+  String get noticeFieldPriority => 'অগ্রাধিকার';
+
+  @override
+  String get noticeFieldAudience => 'প্রাপক';
+
+  @override
+  String get noticeFieldRequireAck => 'স্বীকৃতি বাধ্যতামূলক';
+
+  @override
+  String get noticeFieldPin => 'উপরে পিন করুন';
+
+  @override
+  String get noticeCriticalHint =>
+      'অত্যন্ত জরুরি নোটিশ সব প্রাপককে সঙ্গে সঙ্গে জানায়।';
+
+  @override
+  String get noticeAudAll => 'সবাই';
+
+  @override
+  String get noticeAudDepartment => 'একটি বিভাগ';
+
+  @override
+  String get noticeAudSite => 'একটি সাইট';
+
+  @override
+  String get noticePublish => 'প্রকাশ করুন';
+
+  @override
+  String get noticePublishConfirmTitle => 'নোটিশটি প্রকাশ করবেন?';
+
+  @override
+  String get noticePublishConfirmMessage =>
+      'প্রাপকদের সঙ্গে সঙ্গে জানানো হবে। প্রকাশিত নোটিশ সম্পাদনা করা যায় না।';
+
+  @override
+  String get noticePublished => 'নোটিশ প্রকাশিত হয়েছে';
+
+  @override
+  String get noticeErrMaxPinned =>
+      'ইতিমধ্যে পাঁচটি নোটিশ পিন করা আছে। পিন ছাড়া প্রকাশ করুন।';
+
+  @override
+  String get noticeErrForbidden =>
+      'এই প্রাপক বা বিভাগে প্রকাশ করার অনুমতি আপনার নেই।';
+
+  @override
+  String get noticeErrFailed =>
+      'প্রকাশ করা যায়নি। ফর্ম দেখে আবার চেষ্টা করুন।';
+
+  @override
+  String get claimsTitle => 'বিল ও দাবি';
+
+  @override
+  String get claimTabClaims => 'আমার দাবি';
+
+  @override
+  String get claimTabAdvances => 'অগ্রিম';
+
+  @override
+  String get claimTabPayable => 'পরিশোধযোগ্য';
+
+  @override
+  String get claimNew => 'নতুন দাবি';
+
+  @override
+  String get claimNewTitle => 'নতুন দাবি';
+
+  @override
+  String get claimEditTitle => 'দাবি সম্পাদনা';
+
+  @override
+  String get claimDetailTitle => 'দাবি';
+
+  @override
+  String get claimEmptyTitle => 'এখনও কোনো দাবি নেই';
+
+  @override
+  String get claimEmptyMessage =>
+      'ভ্রমণ, যাতায়াত বা অনুষ্ঠানের খরচের জন্য নতুন দাবি চাপুন।';
+
+  @override
+  String get claimTypeTada => 'ভ্রমণ ও ডিএ';
+
+  @override
+  String get claimTypeConveyance => 'যাতায়াত বিল';
+
+  @override
+  String get claimTypeTour => 'সফর ও অনুষ্ঠান';
+
+  @override
+  String get claimTypeTadaHint =>
+      'দাপ্তরিক ভ্রমণ: টিকিট, হোটেল, খাবার ও দৈনিক ভাতা';
+
+  @override
+  String get claimTypeConveyanceHint =>
+      'মাসের স্থানীয় যাতায়াত: সিএনজি, রিকশা, রাইড শেয়ার';
+
+  @override
+  String get claimTypeTourHint => 'সফর ও অনুষ্ঠান, চাইলে অগ্রিম সমন্বয়সহ';
+
+  @override
+  String get claimStatusDraft => 'খসড়া';
+
+  @override
+  String get claimStatusPendingManager => 'ম্যানেজারের কাছে';
+
+  @override
+  String get claimStatusPendingFinance => 'অর্থ বিভাগে';
+
+  @override
+  String get claimStatusApproved => 'অনুমোদিত';
+
+  @override
+  String get claimStatusSettled => 'পরিশোধিত';
+
+  @override
+  String get claimStatusReturned => 'ফেরত';
+
+  @override
+  String get claimStatusRejected => 'প্রত্যাখ্যাত';
+
+  @override
+  String get claimStatusCancelled => 'বাতিল';
+
+  @override
+  String get claimCatDa => 'দৈনিক ভাতা';
+
+  @override
+  String get claimCatTicket => 'টিকিট';
+
+  @override
+  String get claimCatHotel => 'হোটেল';
+
+  @override
+  String get claimCatMeals => 'খাবার';
+
+  @override
+  String get claimCatMileage => 'মাইলেজ';
+
+  @override
+  String get claimCatCng => 'সিএনজি';
+
+  @override
+  String get claimCatRickshaw => 'রিকশা';
+
+  @override
+  String get claimCatRideShare => 'রাইড শেয়ার';
+
+  @override
+  String get claimCatBusFare => 'বাস ভাড়া';
+
+  @override
+  String get claimCatEvent => 'অনুষ্ঠানের খরচ';
+
+  @override
+  String get claimCatOther => 'অন্যান্য';
+
+  @override
+  String get claimModeNone => 'নির্দিষ্ট নয়';
+
+  @override
+  String get claimModeExecutiveCar => 'এক্সিকিউটিভ গাড়ি';
+
+  @override
+  String get claimModeCompanyCar => 'কোম্পানির গাড়ি';
+
+  @override
+  String get claimModePoolCar => 'পুল গাড়ি';
+
+  @override
+  String get claimModeAir => 'অভ্যন্তরীণ ফ্লাইট';
+
+  @override
+  String get claimModeAcTrain => 'এসি ট্রেন';
+
+  @override
+  String get claimModeFirstTrain => 'প্রথম শ্রেণির ট্রেন';
+
+  @override
+  String get claimModeTrain => 'ট্রেন';
+
+  @override
+  String get claimModeAcBus => 'এসি বাস';
+
+  @override
+  String get claimModeBus => 'বাস';
+
+  @override
+  String claimPolicyTitle(String band) {
+    return 'আপনার প্রাপ্যতা (ব্যান্ড $band)';
+  }
+
+  @override
+  String claimPolicyConveyance(String used, String cap) {
+    return 'এই মাসের যাতায়াত: $cap-এর মধ্যে $used';
+  }
+
+  @override
+  String claimPolicyDa(String dhaka, String district) {
+    return 'দৈনিক ভাতা: ঢাকায় $dhaka, অন্যত্র $district';
+  }
+
+  @override
+  String claimPolicyHotel(String cap) {
+    return 'হোটেল রাতপ্রতি সর্বোচ্চ $cap';
+  }
+
+  @override
+  String get claimFieldPurpose => 'উদ্দেশ্য';
+
+  @override
+  String get claimFieldEmployee => 'কর্মী';
+
+  @override
+  String get claimFieldPeriod => 'সময়কাল';
+
+  @override
+  String get claimFieldPeriodFrom => 'শুরু';
+
+  @override
+  String get claimFieldPeriodTo => 'শেষ';
+
+  @override
+  String get claimFieldDepart => 'যাত্রা শুরু';
+
+  @override
+  String get claimFieldReturn => 'ফেরা';
+
+  @override
+  String get claimFieldDestination => 'গন্তব্য';
+
+  @override
+  String get claimFieldMode => 'যাতায়াতের মাধ্যম';
+
+  @override
+  String get claimFieldAdvance => 'সমন্বয়ের অগ্রিম';
+
+  @override
+  String get claimAdvanceNone => 'অগ্রিম নেই';
+
+  @override
+  String get claimDestDhaka => 'ঢাকা';
+
+  @override
+  String get claimDestOther => 'ঢাকার বাইরে';
+
+  @override
+  String get claimDaAuto =>
+      'যাত্রা ও ফেরার সময় থেকে দৈনিক ভাতা নিজে থেকেই যোগ হবে।';
+
+  @override
+  String claimLines(int count) {
+    return 'খরচের তালিকা ($count)';
+  }
+
+  @override
+  String get claimNoLinesYet => 'এখনও কোনো খরচ যোগ করা হয়নি।';
+
+  @override
+  String get claimLineAdd => 'খরচ যোগ করুন';
+
+  @override
+  String get claimLineEdit => 'খরচ সম্পাদনা';
+
+  @override
+  String get claimLineSave => 'খরচ সংরক্ষণ';
+
+  @override
+  String get claimLineAuto => 'স্বয়ংক্রিয়';
+
+  @override
+  String get claimLineDeclared => 'ঘোষিত';
+
+  @override
+  String get claimFieldCategory => 'ধরন';
+
+  @override
+  String get claimFieldDate => 'তারিখ';
+
+  @override
+  String get claimFieldAmount => 'পরিমাণ (টাকা)';
+
+  @override
+  String get claimFieldNights => 'রাত';
+
+  @override
+  String get claimFieldDistance => 'দূরত্ব (কিমি)';
+
+  @override
+  String get claimFieldFrom => 'কোথা থেকে';
+
+  @override
+  String get claimFieldTo => 'কোথায়';
+
+  @override
+  String get claimFieldDescription => 'মন্তব্য';
+
+  @override
+  String claimMileageHint(String rate) {
+    return 'প্রতি কিমিতে $rate হারে';
+  }
+
+  @override
+  String claimKm(String km) {
+    return '$km কিমি';
+  }
+
+  @override
+  String claimReceiptHint(String amount) {
+    return '$amount-এর বেশি হলে রসিদ বাধ্যতামূলক।';
+  }
+
+  @override
+  String get claimReceiptAdd => 'রসিদের ছবি যোগ করুন';
+
+  @override
+  String get claimReceiptAttached => 'রসিদ সংযুক্ত';
+
+  @override
+  String get claimDeclaration => 'রসিদ নেই, আমি খরচটি ঘোষণা করছি';
+
+  @override
+  String claimDeclarationHint(String amount) {
+    return 'ছোট সিএনজি, রিকশা ও খাবারের খরচে $amount পর্যন্ত অনুমোদিত।';
+  }
+
+  @override
+  String claimEnteredTotal(String amount) {
+    return 'যোগ করা: $amount';
+  }
+
+  @override
+  String get claimSaveDraft => 'খসড়া সংরক্ষণ';
+
+  @override
+  String get claimSaved => 'খসড়া সংরক্ষিত';
+
+  @override
+  String get claimErrRequired => 'আবশ্যক';
+
+  @override
+  String get claimErrPurpose => 'কমপক্ষে ৩টি অক্ষর লিখুন';
+
+  @override
+  String get claimErrDates => 'সঠিক তারিখ বাছুন';
+
+  @override
+  String get claimErrAmount => 'সঠিক পরিমাণ লিখুন';
+
+  @override
+  String get claimErrDistance => 'কিমিতে দূরত্ব লিখুন';
+
+  @override
+  String get claimErrNights => '১ থেকে ৬০ রাত লিখুন';
+
+  @override
+  String get claimErrSave =>
+      'দাবি সংরক্ষণ করা যায়নি। তথ্য দেখে আবার চেষ্টা করুন।';
+
+  @override
+  String get claimErrOffline =>
+      'আপনি অফলাইনে আছেন। ইন্টারনেটে যুক্ত হয়ে আবার চেষ্টা করুন।';
+
+  @override
+  String get claimErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get claimErrBlocked =>
+      'জমা দেওয়ার আগে বাধা দেওয়া সমস্যাগুলো ঠিক করুন।';
+
+  @override
+  String get claimTotal => 'মোট';
+
+  @override
+  String get claimAdvanceAdjusted => 'সমন্বিত অগ্রিম';
+
+  @override
+  String get claimNetPayable => 'আপনার প্রাপ্য';
+
+  @override
+  String get claimNetRefund => 'কোম্পানিকে ফেরত';
+
+  @override
+  String get claimVoucher => 'ভাউচার';
+
+  @override
+  String get claimReviewerComment => 'পর্যালোচকের মন্তব্য';
+
+  @override
+  String get claimRoute => 'অনুমোদনের ধাপ';
+
+  @override
+  String get claimSubmit => 'অনুমোদনের জন্য জমা দিন';
+
+  @override
+  String get claimSubmitConfirmTitle => 'দাবিটি জমা দেবেন?';
+
+  @override
+  String get claimSubmitConfirmMessage =>
+      'এটি আপনার ম্যানেজার ও পরে অর্থ বিভাগে যাবে। অপেক্ষমাণ থাকলে সম্পাদনা করা যাবে না।';
+
+  @override
+  String get claimSubmitted => 'দাবি জমা হয়েছে';
+
+  @override
+  String get claimEdit => 'সম্পাদনা';
+
+  @override
+  String get claimCancel => 'দাবি বাতিল';
+
+  @override
+  String get claimCancelConfirm => 'দাবিটি বাতিল করবেন?';
+
+  @override
+  String get claimCancelled => 'দাবি বাতিল হয়েছে';
+
+  @override
+  String get claimWithdraw => 'দাবি প্রত্যাহার';
+
+  @override
+  String get claimPay => 'পরিশোধিত চিহ্নিত করুন';
+
+  @override
+  String claimPayConfirm(String amount) {
+    return '$amount পরিশোধ করবেন?';
+  }
+
+  @override
+  String get claimPayMessage =>
+      'ভাউচার তৈরি হবে ও কর্মীকে জানানো হবে। এটি ফেরানো যায় না।';
+
+  @override
+  String get claimPaid => 'পরিশোধ নথিভুক্ত হয়েছে';
+
+  @override
+  String get claimFlagNoLines => 'কমপক্ষে একটি খরচ যোগ করুন।';
+
+  @override
+  String get claimFlagReceipt => 'একটি খরচে রসিদ বা ঘোষণা নেই।';
+
+  @override
+  String claimFlagHotel(String amount) {
+    return 'হোটেল খরচ রাতের সীমার বেশি। প্রাপ্য: $amount।';
+  }
+
+  @override
+  String claimFlagConveyance(String amount) {
+    return 'মাসিক যাতায়াত সীমা ছাড়িয়েছে। প্রাপ্য: $amount।';
+  }
+
+  @override
+  String get claimFlagOverlap => 'এই সময়কাল অন্য দাবির সঙ্গে মিলে যাচ্ছে।';
+
+  @override
+  String get claimFlagDuplicate => 'একই রসিদ একাধিকবার ব্যবহার হয়েছে।';
+
+  @override
+  String get claimFlagLate => '৬০ দিনের সময়সীমার পরে জমা।';
+
+  @override
+  String get claimFlagMode =>
+      'যাতায়াতের মাধ্যম আপনার প্রাপ্যতার ঊর্ধ্বে। অর্থ বিভাগ দেখবে।';
+
+  @override
+  String get claimFlagMileage => 'দীর্ঘ মাইলেজ ভ্রমণ। অর্থ বিভাগ দেখবে।';
+
+  @override
+  String get advNew => 'অগ্রিম চান';
+
+  @override
+  String get advNewTitle => 'সফর অগ্রিম';
+
+  @override
+  String get advIntro =>
+      'আসন্ন সফরের জন্য আগাম অর্থ চান। পরে সফরের দাবির সঙ্গে সমন্বয় করুন।';
+
+  @override
+  String get advFieldAmount => 'পরিমাণ (টাকা)';
+
+  @override
+  String get advFieldTourStart => 'সফর শুরু';
+
+  @override
+  String get advFieldTourEnd => 'সফর শেষ';
+
+  @override
+  String get advErrAmount => '৫,০০,০০০ পর্যন্ত পরিমাণ লিখুন';
+
+  @override
+  String get advErrOverdue =>
+      'আগের একটি অগ্রিম এখনও সমন্বয় হয়নি। আগে সেটি সমন্বয় করুন।';
+
+  @override
+  String get advErrFailed => 'অগ্রিম চাওয়া যায়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get advSubmit => 'অনুরোধ জমা দিন';
+
+  @override
+  String get advSubmitted => 'অগ্রিমের অনুরোধ জমা হয়েছে';
+
+  @override
+  String get advEmptyTitle => 'কোনো অগ্রিম নেই';
+
+  @override
+  String get advEmptyMessage => 'সফরের আগে অগ্রিম চাইতে পারেন।';
+
+  @override
+  String get advStatusDisbursed => 'বিতরিত';
+
+  @override
+  String get advSettleHint =>
+      'এখনও সমন্বয় হয়নি। সফরের দাবির সঙ্গে যুক্ত করুন।';
+
+  @override
+  String get advCancel => 'অনুরোধ বাতিল';
+
+  @override
+  String get advCancelConfirm => 'অগ্রিমের অনুরোধ বাতিল করবেন?';
+
+  @override
+  String get advCancelled => 'অগ্রিম বাতিল হয়েছে';
+
+  @override
+  String get advDisburse => 'বিতরণ করুন';
+
+  @override
+  String advDisburseConfirm(String amount) {
+    return '$amount বিতরণ করবেন?';
+  }
+
+  @override
+  String get advDisbursed => 'অগ্রিম বিতরণ হয়েছে';
+
+  @override
+  String get payClaims => 'পরিশোধের জন্য প্রস্তুত দাবি';
+
+  @override
+  String get payAdvances => 'বিতরণের অপেক্ষায় অগ্রিম';
+
+  @override
+  String get payEmptyTitle => 'পরিশোধের কিছু নেই';
+
+  @override
+  String get payEmptyMessage => 'অনুমোদিত দাবি ও অগ্রিম এখানে দেখা যাবে।';
+
+  @override
+  String get busTitle => 'স্টাফ বাস';
+
+  @override
+  String get busTabMySeat => 'আমার আসন';
+
+  @override
+  String get busTabRoutes => 'রুট';
+
+  @override
+  String get busRouteTitle => 'রুট';
+
+  @override
+  String busRouteMeta(String bus, String km) {
+    return 'বাস $bus · $km কিমি';
+  }
+
+  @override
+  String busFreeSeats(String free, String total) {
+    return '$totalটির মধ্যে $freeটি আসন খালি';
+  }
+
+  @override
+  String busFull(String count) {
+    return 'পূর্ণ · $count জন অপেক্ষায়';
+  }
+
+  @override
+  String get busMySeatBadge => 'আমার রুট';
+
+  @override
+  String get busWaitingBadge => 'অপেক্ষায়';
+
+  @override
+  String get busOfferedBadge => 'আসন প্রস্তাবিত';
+
+  @override
+  String get busReleasedBadge => 'ছাড়া হয়েছে';
+
+  @override
+  String get busEmptyTitle => 'এখনও বাসের আসন নেই';
+
+  @override
+  String get busEmptyMessage =>
+      'রুট বেছে অপেক্ষমাণ তালিকায় যুক্ত হন। পালা এলে আসন প্রস্তাব করা হবে।';
+
+  @override
+  String get busBrowse => 'রুট দেখুন';
+
+  @override
+  String busSeatNo(String no) {
+    return 'আসন $no';
+  }
+
+  @override
+  String busStopLine(String stop, String morning, String evening) {
+    return '$stop · সকাল $morning · সন্ধ্যা $evening';
+  }
+
+  @override
+  String busStopTimes(String morning, String evening) {
+    return 'সকাল $morning · সন্ধ্যা $evening';
+  }
+
+  @override
+  String get busStops => 'স্টপেজ';
+
+  @override
+  String get busJoin => 'অপেক্ষমাণ তালিকায় যুক্ত হন';
+
+  @override
+  String busJoinConfirm(String route) {
+    return '$route রুটের অপেক্ষমাণ তালিকায় যুক্ত হবেন?';
+  }
+
+  @override
+  String get busJoinMessage =>
+      'আবেদনের সময় অনুযায়ী আপনি সারিতে থাকবেন। আসন খালি হলে গ্রহণ করতে ৪৮ ঘণ্টা পাবেন।';
+
+  @override
+  String get busJoined => 'অপেক্ষমাণ তালিকায় যুক্ত হয়েছেন';
+
+  @override
+  String get busWaitlistTitle => 'অপেক্ষমাণ তালিকায়';
+
+  @override
+  String busPosition(String pos) {
+    return 'অবস্থান $pos';
+  }
+
+  @override
+  String busEstimate(String days) {
+    return 'আনুমানিক অপেক্ষা: প্রায় $days দিন';
+  }
+
+  @override
+  String get busLeave => 'তালিকা ছাড়ুন';
+
+  @override
+  String get busLeaveConfirm => 'অপেক্ষমাণ তালিকা ছাড়বেন?';
+
+  @override
+  String get busLeft => 'তালিকা থেকে সরানো হয়েছে';
+
+  @override
+  String busOfferTitle(String seat) {
+    return 'আসন $seat আপনার জন্য প্রস্তুত';
+  }
+
+  @override
+  String busOfferLeft(String h, String m) {
+    return 'সাড়া দিতে বাকি $h ঘণ্টা $m মিনিট';
+  }
+
+  @override
+  String get busOfferExpired => 'প্রস্তাবের মেয়াদ শেষ';
+
+  @override
+  String get busAccept => 'আসন নিন';
+
+  @override
+  String get busAccepted => 'আসন নিশ্চিত হয়েছে';
+
+  @override
+  String get busDecline => 'প্রত্যাখ্যান';
+
+  @override
+  String get busDeclineConfirm => 'আসনটি প্রত্যাখ্যান করবেন?';
+
+  @override
+  String get busDeclineMessage =>
+      'আপনি এই তালিকা থেকে বাদ পড়বেন ও আসনটি পরের জন পাবেন।';
+
+  @override
+  String get busDeclined => 'প্রস্তাব প্রত্যাখ্যাত';
+
+  @override
+  String get busChooseStop => 'আপনার স্টপেজ বাছুন';
+
+  @override
+  String get busConfirmSeat => 'আসন নিশ্চিত করুন';
+
+  @override
+  String get busRelease => 'কিছুদিনের জন্য আসন ছাড়ুন';
+
+  @override
+  String get busReleaseTitle => 'আসন ছেড়ে দিন';
+
+  @override
+  String get busReleaseHint =>
+      'ছুটি বা সফরে যাচ্ছেন? সর্বোচ্চ ৬০ দিন আসন খালি রাখুন, পরে ফিরে নিন।';
+
+  @override
+  String get busReleaseFrom => 'শুরু';
+
+  @override
+  String get busReleaseTo => 'শেষ';
+
+  @override
+  String get busReleaseReason => 'কারণ';
+
+  @override
+  String get busReleased => 'আসন ছাড়া হয়েছে';
+
+  @override
+  String busReleasedRange(String range) {
+    return 'ছাড়া আছে $range';
+  }
+
+  @override
+  String get busReclaim => 'আসন ফিরে নিন';
+
+  @override
+  String get busReclaimConfirm => 'আসন ফিরে নেবেন?';
+
+  @override
+  String get busReclaimMessage => 'এখন অন্য কেউ ব্যবহার না করলেই এটি কাজ করবে।';
+
+  @override
+  String get busReclaimed => 'আসন আবার আপনার';
+
+  @override
+  String get busErrFailed => 'কাজটি হয়নি। আবার চেষ্টা করুন।';
+
+  @override
+  String get busErrOfferExpired => 'এই প্রস্তাবের মেয়াদ শেষ।';
+
+  @override
+  String get busErrHasSeat => 'আপনার ইতিমধ্যে বাসের আসন আছে।';
+
+  @override
+  String get busErrAlreadyWaiting => 'আপনি ইতিমধ্যে একটি তালিকায় আছেন।';
+
+  @override
+  String get busSeatMap => 'আসনের নকশা';
+
+  @override
+  String get busLegendTaken => 'দখলে';
+
+  @override
+  String get busLegendReleased => 'ছাড়া';
+
+  @override
+  String get busLegendOffered => 'প্রস্তাবিত';
+
+  @override
+  String get busLegendFree => 'খালি';
+
+  @override
+  String busQueue(int count) {
+    return 'অপেক্ষমাণ তালিকা ($count)';
+  }
+
+  @override
+  String get busQueueEmpty => 'কেউ অপেক্ষায় নেই।';
+
+  @override
+  String busPriorityLevel(String level) {
+    return 'অগ্রাধিকার $level';
+  }
+
+  @override
+  String busPriorityTitle(String name) {
+    return '$name-এর অগ্রাধিকার';
+  }
+
+  @override
+  String get busPriorityReason => 'কারণ';
+
+  @override
+  String get busPriorityReasonHint =>
+      'অগ্রাধিকার বদলের কারণ লিখুন (কমপক্ষে ১০ অক্ষর)। এটি অডিট লগে থাকবে।';
+
+  @override
+  String get busPrioritySave => 'অগ্রাধিকার সংরক্ষণ';
+
+  @override
+  String get busPrioritySaved => 'অগ্রাধিকার হালনাগাদ হয়েছে';
+
+  @override
+  String get busEnd => 'বরাদ্দ শেষ করুন';
+
+  @override
+  String busEndConfirm(String seat) {
+    return 'আসন $seat-এর বরাদ্দ শেষ করবেন?';
+  }
+
+  @override
+  String get busEndMessage =>
+      'আসনটি অপেক্ষমাণ তালিকার পরের জনকে প্রস্তাব করা হবে।';
+
+  @override
+  String get busEnded => 'বরাদ্দ শেষ হয়েছে';
+
+  @override
+  String get busBroadcast => 'এই রুটে বার্তা পাঠান';
+
+  @override
+  String get busBroadcastMessage => 'বার্তা';
+
+  @override
+  String get busBroadcastSend => 'পাঠান';
+
+  @override
+  String get busBroadcastSent => 'বার্তা পাঠানো হয়েছে';
 }
