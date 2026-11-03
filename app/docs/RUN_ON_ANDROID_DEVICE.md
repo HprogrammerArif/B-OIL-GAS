@@ -169,6 +169,13 @@ Battery-saver on some brands (Xiaomi, Oppo, Huawei) can kill the app or delay no
 | `SDK location not found` | Set `ANDROID_HOME`, or create `android\local.properties` with `sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk` (file is git-ignored). |
 | `INSTALL_FAILED_USER_RESTRICTED` | Xiaomi/Oppo: enable *Install via USB* / disable MIUI optimization prompts. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Uninstall the old app (`adb uninstall com.bogcl.oneops.dev`) then reinstall. |
+| `JAVA_HOME is set to an invalid directory` | The folder name in `JAVA_HOME` does not match the installed JDK (e.g. `...20.1-hotspot` vs `...20.101-hotspot`). Check `Get-ChildItem "C:\Program Files\Eclipse Adoptium"`, then set it (PowerShell uses `$env:JAVA_HOME`, not `$JAVA_HOME`). Terminals opened before the change keep the old value; reopen Cursor. In Git Bash: `export JAVA_HOME='C:\Program Files\Eclipse Adoptium\<jdk-folder>'`. |
+| `device offline` for `emulator-5554` | A dead emulator is registered. `adb kill-server; adb start-server`, and always build with `--device`. |
+| `unauthorized` in `adb devices` | Accept "Allow USB debugging" on the phone or revoke authorizations in Developer options and replug. |
+| `ConfigError: expected package.json path ... C:\project\package.json` | You ran Expo outside `app/`. `cd` into `app/` first; never accept the "install expo@latest" prompt. Git Bash needs forward slashes (`cd /c/project/B-OIL-GAS/app`). |
+| Launcher says `Failed to connect to <PC-IP>:8081` | Phone cannot reach Metro over Wi-Fi/LTE. Keep `npx expo start --dev-client` running, run `adb reverse tcp:8081 tcp:8081`, then connect to `http://localhost:8081` in the launcher. |
+| `window is not defined` / `setValueWithKeyAsync` spam in Metro | Harmless web/SSR pre-render noise (fixed by `ssrSafeStorage`); start only Android with `--android`. |
+| "This screen isn't available in this version yet" | The link targets a module not built yet; see `docs/FEATURE_STATUS.md`. |
 | Gradle: Java version error | Use JDK 17: `$env:JAVA_HOME="<jdk17 path>"`. Stop stale daemons: `cd android; .\gradlew.bat --stop`. |
 | Gradle out of memory / slow | Close other apps; `android\gradle.properties` already tunes memory; keep the repo path short. |
 | Windows path too long during build | Enable long paths (`reg add HKLM\SYSTEM\CurrentControlSet\Control\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f`, admin), reboot. |

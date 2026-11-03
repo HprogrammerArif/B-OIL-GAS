@@ -23,11 +23,35 @@ export const routes = {
   settings: "/settings" as Href,
 };
 
-/** Only prefixes with a registered screen; anything else falls back so a tap never lands on "unmatched route". */
-const KNOWN_PREFIXES = ["/approvals/", "/notices/", "/leave/", "/attendance/"];
-const KNOWN_EXACT = ["/attendance", "/leave"];
+/**
+ * Single registry of paths that have a registered screen. Anything linked from the home quick actions,
+ * the More grid or a server `route` must pass `isRouteBuilt`, so a tap never lands on a dead end.
+ * Add a path here in the same change that adds its screen.
+ */
+const BUILT_EXACT = [
+  "/",
+  "/inbox",
+  "/notifications",
+  "/profile",
+  "/settings",
+  "/attendance",
+  "/attendance/history",
+  "/attendance/regularise",
+  "/leave",
+  "/leave/new",
+  "/notices",
+  "/notices/compose",
+  "/notices/broadcast",
+  "/approvals/history",
+];
+const BUILT_PREFIXES = ["/approvals/", "/notices/", "/leave/", "/attendance/"];
+
+export function isRouteBuilt(path: string): boolean {
+  const clean = path.split("?")[0] ?? path;
+  return BUILT_EXACT.includes(clean) || BUILT_PREFIXES.some((p) => clean.startsWith(p) && clean.length > p.length);
+}
 
 export function fromServerRoute(route: string | undefined, fallback: Href = routes.inbox): Href {
-  if (route && (KNOWN_EXACT.includes(route) || KNOWN_PREFIXES.some((p) => route.startsWith(p)))) return route as Href;
+  if (route && isRouteBuilt(route)) return route as Href;
   return fallback;
 }

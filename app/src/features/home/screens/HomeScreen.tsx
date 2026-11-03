@@ -13,6 +13,7 @@ import { usePermissions } from "@/hooks/usePermission";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { baseApi } from "@/redux/api/baseApi";
 import { homeVariantChanged } from "@/redux/slices/ui.slice";
+import { isRouteBuilt } from "@/lib/routes";
 import type { PermissionKey } from "@/types/domain/identity";
 import { HomeHeader } from "../components/HomeHeader";
 import { QuickActions, type QuickAction } from "../components/QuickActions";
@@ -63,7 +64,7 @@ export function HomeScreen() {
     () =>
       VARIANT_ACTIONS[variant]
         .map((k) => ACTIONS[k])
-        .filter((a): a is ActionDef => !!a && perms.can(a.permission))
+        .filter((a): a is ActionDef => !!a && isRouteBuilt(a.href) && perms.can(a.permission))
         .slice(0, 8)
         .map(({ labelKey, permission: _p, ...a }) => ({ ...a, label: t(labelKey as "actions.punch") })),
     [variant, perms, t],

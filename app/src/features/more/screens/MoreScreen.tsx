@@ -8,6 +8,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useLocalized } from "@/hooks/useLanguage";
 import { usePermissions } from "@/hooks/usePermission";
 import { haptic } from "@/lib/haptics";
+import { isRouteBuilt } from "@/lib/routes";
 import { useGetMeQuery } from "@/features/auth/api";
 import { signOut } from "@/features/auth/session";
 import { useAppDispatch } from "@/redux/hooks";
@@ -19,7 +20,7 @@ export function MoreScreen() {
   const dispatch = useAppDispatch();
   const { navigation } = usePermissions();
   const { data: me } = useGetMeQuery();
-  const modules = MODULES.filter((m) => navigation.includes(m.key) && m.key !== "attendance");
+  const modules = MODULES.filter((m) => navigation.includes(m.key) && m.key !== "attendance" && isRouteBuilt(m.href));
 
   const confirmSignOut = () =>
     Alert.alert(t("actions.signOut"), undefined, [
@@ -84,8 +85,6 @@ export function MoreScreen() {
         <ListRow icon="person-circle-outline" title={t("more.profile")} onPress={() => router.push("/profile" as Href)} />
         <Divider inset={64} />
         <ListRow icon="settings-outline" title={t("more.settings")} onPress={() => router.push("/settings" as Href)} />
-        <Divider inset={64} />
-        <ListRow icon="cloud-upload-outline" title={t("more.outbox")} onPress={() => router.push("/outbox" as Href)} />
         <Divider inset={64} />
         <ListRow icon="log-out-outline" title={t("actions.signOut")} destructive chevron={false} onPress={confirmSignOut} />
       </Card>
