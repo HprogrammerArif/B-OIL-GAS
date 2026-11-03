@@ -248,9 +248,7 @@ class NoticeReceipts {
 
   factory NoticeReceipts.fromJson(Map<String, Object?> j) => NoticeReceipts(
     stats: NoticeStats.fromJson(_map(j['stats'])),
-    items: [
-      for (final r in j['items']! as List) ReceiptRow.fromJson(_map(r)),
-    ],
+    items: [for (final r in j['items']! as List) ReceiptRow.fromJson(_map(r))],
   );
 
   final NoticeStats stats;

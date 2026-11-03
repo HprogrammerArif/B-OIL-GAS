@@ -94,8 +94,7 @@ class _NoticesScreenState extends ConsumerState<NoticesScreen> {
           Expanded(
             child: list.when(
               loading: () => const SkeletonList(),
-              error: (_, _) =>
-                  ErrorState(onRetry: () => unawaited(_refresh())),
+              error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
               data: (items) => RefreshIndicator(
                 onRefresh: _refresh,
                 child: items.isEmpty

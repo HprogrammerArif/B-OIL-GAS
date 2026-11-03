@@ -83,7 +83,11 @@ class _NoticeDetailScreenState extends ConsumerState<NoticeDetailScreen> {
               ),
         data: (n) {
           _syncLists();
-          return _Body(notice: n, acking: _acking, onAck: () => unawaited(_ack()));
+          return _Body(
+            notice: n,
+            acking: _acking,
+            onAck: () => unawaited(_ack()),
+          );
         },
       ),
     );
@@ -91,7 +95,11 @@ class _NoticeDetailScreenState extends ConsumerState<NoticeDetailScreen> {
 }
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.notice, required this.acking, required this.onAck});
+  const _Body({
+    required this.notice,
+    required this.acking,
+    required this.onAck,
+  });
 
   final Notice notice;
   final bool acking;
@@ -182,7 +190,10 @@ class _Body extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _StatBar(
-                    label: l10n.noticeReadStat(stats.readCount, stats.recipientCount),
+                    label: l10n.noticeReadStat(
+                      stats.readCount,
+                      stats.recipientCount,
+                    ),
                     value: stats.recipientCount == 0
                         ? 0
                         : stats.readCount / stats.recipientCount,
@@ -190,7 +201,10 @@ class _Body extends ConsumerWidget {
                   if (notice.requiresAck) ...[
                     const SizedBox(height: Space.md),
                     _StatBar(
-                      label: l10n.noticeAckStat(stats.ackCount, stats.recipientCount),
+                      label: l10n.noticeAckStat(
+                        stats.ackCount,
+                        stats.recipientCount,
+                      ),
                       value: stats.recipientCount == 0
                           ? 0
                           : stats.ackCount / stats.recipientCount,

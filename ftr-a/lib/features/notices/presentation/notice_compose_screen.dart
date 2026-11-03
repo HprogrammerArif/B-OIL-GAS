@@ -185,7 +185,10 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
         SegmentedButton<NoticePriority>(
           segments: [
             for (final p in NoticePriority.values)
-              ButtonSegment(value: p, label: Text(noticePriorityLabel(l10n, p))),
+              ButtonSegment(
+                value: p,
+                label: Text(noticePriorityLabel(l10n, p)),
+              ),
           ],
           selected: {_priority},
           onSelectionChanged: (s) => setState(() => _priority = s.first),
@@ -288,7 +291,9 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
           label: l10n.noticePublish,
           icon: Icons.send_outlined,
           loading: _submitting,
-          onPressed: _valid() && !_submitting ? () => unawaited(_submit(o)) : null,
+          onPressed: _valid() && !_submitting
+              ? () => unawaited(_submit(o))
+              : null,
         ),
       ],
     );

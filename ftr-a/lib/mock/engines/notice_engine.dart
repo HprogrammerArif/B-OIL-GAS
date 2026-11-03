@@ -154,11 +154,7 @@ abstract final class NoticeEngine {
     };
   }
 
-  static Json publish(
-    MockStore store,
-    AuthContext auth,
-    Json body,
-  ) {
+  static Json publish(MockStore store, AuthContext auth, Json body) {
     final roles = auth.user.strList('roles');
     final title = _text(body, 'title', 3, NoticePolicy.titleMax);
     final text = _text(body, 'body', 5, NoticePolicy.bodyMax);
@@ -197,7 +193,8 @@ abstract final class NoticeEngine {
       }
     }
     final now = DateTime.fromMillisecondsSinceEpoch(store.nowMs(), isUtc: true);
-    final id = 'not_${store.collection(Col.notices).length + 1}_${store.nowMs()}';
+    final id =
+        'not_${store.collection(Col.notices).length + 1}_${store.nowMs()}';
     final notice = <String, Object?>{
       'id': id,
       'refNo': nextRef(store, now.year),

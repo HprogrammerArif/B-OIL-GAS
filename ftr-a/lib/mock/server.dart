@@ -8,10 +8,13 @@ import 'package:bogcl_oneops/core/utils/logger.dart';
 import 'package:bogcl_oneops/mock/handlers/attendance_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/audit_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/bus_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/claim_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/file_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/leave_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/me_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/notice_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/notification_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/workflow_handlers.dart';
 import 'package:bogcl_oneops/mock/http.dart';
@@ -62,6 +65,9 @@ class MockServer {
       ...fileRoutes(),
       ...leaveRoutes(),
       ...attendanceRoutes(),
+      ...noticeRoutes(),
+      ...claimRoutes(),
+      ...busRoutes(),
     ]);
   }
 

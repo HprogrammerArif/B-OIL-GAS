@@ -1,7 +1,7 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Lang, t } from '../types';
-import { Printer, Download, QrCode, ShieldCheck } from 'lucide-react';
-import { showToast } from './ToastManager';
+import { Printer, QrCode, ShieldCheck, FileText, BadgeCheck } from 'lucide-react';
+import { Button, Modal } from './ui';
 
 export interface DocumentData {
   type: 'notesheet' | 'trip_pass' | 'gate_pass';
@@ -13,6 +13,8 @@ export interface DocumentData {
   authorizerRole: string;
   amountOrValue?: string;
   sapReference?: string;
+  /** Drives the stamp: only approved documents carry the approval seal. Defaults to approved. */
+  status?: 'approved' | 'in_progress' | 'returned';
   paragraphs: { label: string; text: string; signedBy: string; hash?: string }[];
 }
 
@@ -23,212 +25,96 @@ interface OfficialDocumentModalProps {
   docData: DocumentData;
 }
 
-export default function OfficialDocumentModal({
-  isOpen,
-  onClose,
-  lang,
-  docData,
-}: OfficialDocumentModalProps) {
-  if (!isOpen) return null;
+/** Print preview. Print or "Save as PDF" both go through the browser print dialog. */
+export default function OfficialDocumentModal({ isOpen, onClose, lang, docData }: OfficialDocumentModalProps) {
+  // While open, print CSS hides the rest of the app so only the paper is printed.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    document.body.classList.add('ns-printing');
+    return () => document.body.classList.remove('ns-printing');
+  }, [isOpen]);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleDownload = () => {
-    showToast(
-      t(
-        `Official PDF Ready: ${docData.docNumber}.pdf (Signed & Stamped)`,
-        `অফিসিয়াল পিডিএফ প্রস্তুত: ${docData.docNumber}.pdf (স্বাক্ষর ও সিলমোহর সংযুক্ত)`,
-        lang
-      ),
-      'gold'
-    );
-  };
+  const status = docData.status ?? 'approved';
+  const approved = status === 'approved';
+  const stamp = approved
+    ? t('Approved', 'অনুমোদিত', lang)
+    : status === 'returned'
+      ? t('Returned for correction', 'সংশোধনের জন্য ফেরত', lang)
+      : t('Not yet approved', 'এখনও অনুমোদিত নয়', lang);
 
   return (
-    <div className="modal-bg" onClick={onClose} style={{ zIndex: 1200 }}>
-      <div
-        className="modal"
-        style={{ maxWidth: '720px', width: '92%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Top Actions */}
-        <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)', padding: '14px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={18} color="var(--brand-gold)" />
-            <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px' }}>
-              {t('Official Company Document & Print Preview', 'দাপ্তরিক নথি ও প্রিন্ট প্রিভিউ', lang)}
-            </h3>
-          </div>
-          <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={onClose}>×</button>
-        </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="lg"
+      icon={<FileText size={17} />}
+      title={t('Print preview', 'প্রিন্ট প্রিভিউ', lang)}
+      footer={(
+        <>
+          <span className="nsd-foot-note">
+            <ShieldCheck size={14} /> {t('Each paragraph carries its signature code.', 'প্রতিটি অনুচ্ছেদে স্বাক্ষর কোড আছে।', lang)}
+          </span>
+          <Button variant="secondary" onClick={onClose}>{t('Close', 'বন্ধ করুন', lang)}</Button>
+          <Button variant="primary" icon={<Printer size={14} />} onClick={() => window.print()}>
+            {t('Print / Save as PDF', 'প্রিন্ট / পিডিএফ সংরক্ষণ', lang)}
+          </Button>
+        </>
+      )}
+    >
+      <div className="nsd-stage">
+        <article className="nsd-paper printable-paper">
+          <span className="nsd-watermark" aria-hidden>Bashundhara Oil &amp; Gas</span>
 
-        {/* Printable Sheet */}
-        <div className="modal-body" style={{ overflowY: 'auto', padding: '24px', background: 'var(--surface-2)' }}>
-          <div
-            className="printable-paper"
-            style={{
-              background: 'var(--surface-1)',
-              border: '1px solid var(--border-2)',
-              borderRadius: '8px',
-              padding: '36px 40px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              position: 'relative',
-              color: 'var(--text-1)',
-              fontFamily: 'serif',
-            }}
-          >
-            {/* Watermark */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%) rotate(-30deg)',
-                fontSize: '52px',
-                fontWeight: 900,
-                color: 'rgba(165, 28, 48, 0.04)',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                letterSpacing: '4px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Bashundhara Oil & Gas
+          <header className="nsd-letterhead">
+            <div className="nsd-brand">
+              <span className="nsd-logo" aria-hidden>B</span>
+              <div>
+                <h2>{t('Bashundhara Oil & Gas Company Ltd.', 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস কোম্পানি লিমিটেড', lang)}</h2>
+                <small>{t('A concern of Bashundhara Group · Official record', 'বসুন্ধরা গ্রুপের একটি প্রতিষ্ঠান · দাপ্তরিক নথি', lang)}</small>
+              </div>
             </div>
+            <div className="nsd-docmeta">
+              <code>{docData.docNumber}</code>
+              <span>{t('Date', 'তারিখ', lang)}: {docData.date}</span>
+              {docData.sapReference && <span>{t('Ref', 'রেফ', lang)}: <code>{docData.sapReference}</code></span>}
+            </div>
+          </header>
 
-            {/* Letterhead */}
-            <div style={{ borderBottom: '2px solid var(--brand-crimson)', paddingBottom: '16px', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        background: 'var(--brand-crimson)',
-                        color: 'var(--brand-gold)',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '20px',
-                        fontWeight: 900,
-                      }}
-                    >
-                      B
-                    </div>
-                    <div>
-                      <h2 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--brand-crimson)', margin: 0, letterSpacing: '0.5px' }}>
-                        BASHUNDHARA OIL & GAS COMPANY LTD.
-                      </h2>
-                      <div style={{ fontSize: '11px', color: 'var(--text-3)', fontFamily: 'sans-serif' }}>
-                        A Concern of Bashundhara Group • Official Record
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontFamily: 'sans-serif' }}>
-                    Plot-3, Block-G, Umme Kulsum Road, Baridhara R/A, Dhaka-1229 • Keraniganj Plant
-                  </div>
-                </div>
+          <section className="nsd-subject">
+            <span className="nsd-dept">{t('Department', 'বিভাগ', lang)}: {docData.department}</span>
+            <h3>{t('Subject', 'বিষয়', lang)}: {docData.title}</h3>
+            {docData.amountOrValue && (
+              <p>{approved ? t('Approved amount', 'অনুমোদিত অর্থ', lang) : t('Proposed amount', 'প্রস্তাবিত অর্থ', lang)}: <strong>{docData.amountOrValue}</strong></p>
+            )}
+          </section>
 
-                <div style={{ textAlign: 'right', fontFamily: 'sans-serif' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: 'monospace' }}>{docData.docNumber}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Date: {docData.date}</div>
-                  {docData.sapReference && (
-                    <div style={{ fontSize: '10px', color: 'var(--status-info)', fontFamily: 'monospace', marginTop: '2px' }}>
-                      Ref: {docData.sapReference}
-                    </div>
+          <section className="nsd-paras">
+            {docData.paragraphs.map((para, idx) => (
+              <div key={idx} className="nsd-para">
+                <p><strong>{para.label}:</strong> {para.text}</p>
+                <div className="nsd-para-foot">
+                  <span>— {para.signedBy}</span>
+                  {para.hash && (
+                    <span className="nsd-code"><BadgeCheck size={12} /> {t('Stamp code', 'স্ট্যাম্প কোড', lang)}: {para.hash}</span>
                   )}
                 </div>
               </div>
+            ))}
+          </section>
+
+          <footer className="nsd-seal">
+            <div className="nsd-verify">
+              <QrCode size={56} aria-hidden />
+              <small>{t('Verify this document with its reference number and the stamp codes above.', 'রেফারেন্স নম্বর ও উপরের স্ট্যাম্প কোড দিয়ে নথিটি যাচাই করুন।', lang)}</small>
             </div>
-
-            {/* Subject */}
-            <div style={{ fontFamily: 'sans-serif', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-3)' }}>
-                Department: {docData.department}
-              </div>
-              <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-1)', marginTop: '4px', borderLeft: '3px solid var(--brand-crimson)', paddingLeft: '10px' }}>
-                SUBJECT: {docData.title}
-              </div>
-              {docData.amountOrValue && (
-                <div style={{ fontSize: '12px', color: 'var(--brand-crimson)', fontWeight: 700, marginTop: '4px', paddingLeft: '10px' }}>
-                  Approved Amount / Value: {docData.amountOrValue}
-                </div>
-              )}
+            <div className="nsd-sign">
+              <span className={`nsd-stamp ${approved ? 'ok' : 'pending'}`}>{stamp}</span>
+              <strong>{docData.authorizedBy}</strong>
+              <small>{approved ? docData.authorizerRole : `${docData.authorizerRole} · ${t('final approver', 'চূড়ান্ত অনুমোদনকারী', lang)}`}</small>
             </div>
-
-            {/* Paragraphs */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
-              {docData.paragraphs.map((para, idx) => (
-                <div key={idx} style={{ fontSize: '12.5px', lineHeight: '1.7', color: 'var(--text-1)', textAlign: 'justify' }}>
-                  <strong>{para.label}:</strong> {para.text}
-                  <div style={{ marginTop: '4px', fontSize: '10.5px', color: 'var(--text-3)', fontFamily: 'sans-serif', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
-                    <span>— {para.signedBy}</span>
-                    {para.hash && (
-                      <span style={{ fontFamily: 'monospace', fontSize: '9.5px', color: 'var(--status-success)' }}>
-                        ✓ Stamp Code: {para.hash.slice(0, 26)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Seal & Authorization Box */}
-            <div style={{ borderTop: '1px dashed var(--border-2)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontFamily: 'sans-serif', flexWrap: 'wrap', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <QrCode size={64} color="var(--text-1)" />
-                <div style={{ fontSize: '9.5px', color: 'var(--text-3)', maxWidth: '240px', lineHeight: 1.4 }}>
-                  Scan this QR code at any company gate or office desk to verify this official document.
-                </div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    border: '2px solid var(--brand-crimson)',
-                    color: 'var(--brand-crimson)',
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    fontWeight: 900,
-                    fontSize: '11px',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    transform: 'rotate(-5deg)',
-                    marginBottom: '8px',
-                  }}
-                >
-                  ★ BOGCL APPROVED ★
-                </div>
-                <div style={{ fontSize: '12px', fontWeight: 800 }}>{docData.authorizedBy}</div>
-                <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>{docData.authorizerRole}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <span style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)' }}>
-            ✓ {t('Verified Official Company Record', 'যাচাইকৃত প্রাতিষ্ঠানিক নথি', lang)}
-          </span>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn-sm-ghost" onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Download size={14} />
-              <span>{t('Download PDF', 'পিডিএফ ডাউনলোড', lang)}</span>
-            </button>
-            <button className="btn-primary" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Printer size={14} />
-              <span>{t('Print Document', 'নথি প্রিন্ট করুন', lang)}</span>
-            </button>
-          </div>
-        </div>
+          </footer>
+        </article>
       </div>
-    </div>
+    </Modal>
   );
 }

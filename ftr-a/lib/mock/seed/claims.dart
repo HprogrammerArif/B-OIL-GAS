@@ -120,8 +120,22 @@ void seedClaims(MockStore store) {
       voucher: 'VCH-2026-00112',
       paidDaysAgo: 18,
       lines: [
-        _line('a1', 'CNG', 38, 'Baridhara to Motijheel dealer', 420, declaration: true),
-        _line('a2', 'RICKSHAW', 37, 'Local visit, Mirpur', 180, declaration: true),
+        _line(
+          'a1',
+          'CNG',
+          38,
+          'Baridhara to Motijheel dealer',
+          420,
+          declaration: true,
+        ),
+        _line(
+          'a2',
+          'RICKSHAW',
+          37,
+          'Local visit, Mirpur',
+          180,
+          declaration: true,
+        ),
         _line('a3', 'RIDE_SHARE', 35, 'Airport to office', 1250, receipt: true),
       ],
     ),
@@ -141,10 +155,32 @@ void seedClaims(MockStore store) {
       place: 'Chattogram',
       mode: 'AC_TRAIN',
       lines: [
-        _line('b1', 'TICKET', 12, 'AC train, Dhaka to Chattogram', 1650, receipt: true),
+        _line(
+          'b1',
+          'TICKET',
+          12,
+          'AC train, Dhaka to Chattogram',
+          1650,
+          receipt: true,
+        ),
         _line('b2', 'TICKET', 10, 'AC train, return', 1650, receipt: true),
-        _line('b3', 'HOTEL', 12, 'Hotel, 2 nights', 9800, nights: 2, receipt: true),
-        _line('b4', 'MEALS', 11, 'Working lunch with dealers', 850, declaration: true),
+        _line(
+          'b3',
+          'HOTEL',
+          12,
+          'Hotel, 2 nights',
+          9800,
+          nights: 2,
+          receipt: true,
+        ),
+        _line(
+          'b4',
+          'MEALS',
+          11,
+          'Working lunch with dealers',
+          850,
+          declaration: true,
+        ),
       ],
     ),
     _claim(
@@ -158,9 +194,32 @@ void seedClaims(MockStore store) {
       endAgo: 2,
       createdDaysAgo: 1,
       lines: [
-        _line('c1', 'CNG', 6, 'Office to Tejgaon depot', 360, declaration: true),
-        _line('c2', 'MILEAGE', 4, 'Bike, depot round trip', 0, km: 42.5, from: 'Baridhara', to: 'Narayanganj depot'),
-        _line('c3', 'RIDE_SHARE', 2, 'Client meeting, Gulshan', 780, receipt: true),
+        _line(
+          'c1',
+          'CNG',
+          6,
+          'Office to Tejgaon depot',
+          360,
+          declaration: true,
+        ),
+        _line(
+          'c2',
+          'MILEAGE',
+          4,
+          'Bike, depot round trip',
+          0,
+          km: 42.5,
+          from: 'Baridhara',
+          to: 'Narayanganj depot',
+        ),
+        _line(
+          'c3',
+          'RIDE_SHARE',
+          2,
+          'Client meeting, Gulshan',
+          780,
+          receipt: true,
+        ),
       ],
     ),
     _claim(
@@ -200,7 +259,11 @@ void seedClaims(MockStore store) {
 
   final pending = store.get(Col.claims, 'clm_0034')!;
   final owner = store.get(Col.employees, pending.str('employeeId'))!;
-  ClaimEngine.fileWorkflow(store, store.get(Col.users, owner.str('userId'))!, pending);
+  ClaimEngine.fileWorkflow(
+    store,
+    store.get(Col.users, owner.str('userId'))!,
+    pending,
+  );
 
   final today = WorkCalendar.today();
   String at(int daysAgo) => WorkCalendar.atTime(

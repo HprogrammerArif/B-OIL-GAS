@@ -64,13 +64,15 @@ List<RouteDef> noticeRoutes() => [
       }
       if (r == null || !NoticeEngine.isActive(n)) continue;
       if (filter == 'unread' && r['readAt'] != null) continue;
-      if (filter == 'ack' && !(n['requiresAck'] == true && r['ackedAt'] == null)) {
+      if (filter == 'ack' &&
+          !(n['requiresAck'] == true && r['ackedAt'] == null)) {
         continue;
       }
       rows.add((notice: n, receipt: r));
     }
     rows.sort((x, y) {
-      final pin = (y.notice['isPinned'] == true ? 1 : 0) -
+      final pin =
+          (y.notice['isPinned'] == true ? 1 : 0) -
           (x.notice['isPinned'] == true ? 1 : 0);
       if (pin != 0 && filter != 'mine') return pin;
       return y.notice.str('publishedAt').compareTo(x.notice.str('publishedAt'));
@@ -99,7 +101,11 @@ List<RouteDef> noticeRoutes() => [
       if (r['readAt'] == null) unread++;
       if (n['requiresAck'] == true && r['ackedAt'] == null) ack++;
     }
-    return ok({'unread': unread, 'awaitingAck': ack, 'employeeId': a.employeeId});
+    return ok({
+      'unread': unread,
+      'awaitingAck': ack,
+      'employeeId': a.employeeId,
+    });
   }, permission: ['notices:read']),
   RouteDef('GET', '/notices/:id', (ctx) async {
     final n = _readable(ctx);
@@ -110,7 +116,13 @@ List<RouteDef> noticeRoutes() => [
       await ctx.store.commit();
     }
     return ok(
-      NoticeEngine.wire(ctx.store, n, r, detail: true, manager: _isManager(ctx, n)),
+      NoticeEngine.wire(
+        ctx.store,
+        n,
+        r,
+        detail: true,
+        manager: _isManager(ctx, n),
+      ),
     );
   }, permission: ['notices:read']),
   RouteDef('POST', '/notices/:id/ack', (ctx) async {
@@ -129,7 +141,15 @@ List<RouteDef> noticeRoutes() => [
       ..['readAt'] = r['readAt'] ?? now;
     ctx.store.put(Col.noticeReceipts, r);
     await ctx.store.commit();
-    return ok(NoticeEngine.wire(ctx.store, n, r, detail: true, manager: _isManager(ctx, n)));
+    return ok(
+      NoticeEngine.wire(
+        ctx.store,
+        n,
+        r,
+        detail: true,
+        manager: _isManager(ctx, n),
+      ),
+    );
   }, permission: ['notices:read']),
   RouteDef('POST', '/notices', (ctx) async {
     final a = ctx.requireAuth();

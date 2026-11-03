@@ -50,14 +50,14 @@ abstract final class BusEngine {
 
   static Json? activeAllocation(MockStore store, String employeeId) => store
       .all(Col.busAllocations)
-      .where(
-        (a) => a['employeeId'] == employeeId && a['status'] != 'ENDED',
-      )
+      .where((a) => a['employeeId'] == employeeId && a['status'] != 'ENDED')
       .firstOrNull;
 
   static Json? openEntry(MockStore store, String employeeId) => store
       .all(Col.busWaitlist)
-      .where((w) => w['employeeId'] == employeeId && _open.contains(w['status']))
+      .where(
+        (w) => w['employeeId'] == employeeId && _open.contains(w['status']),
+      )
       .firstOrNull;
 
   /// Seats nobody holds and no open offer reserves.
@@ -191,7 +191,12 @@ abstract final class BusEngine {
     return w;
   }
 
-  static Json accept(MockStore store, AuthContext auth, String id, String? stopId) {
+  static Json accept(
+    MockStore store,
+    AuthContext auth,
+    String id,
+    String? stopId,
+  ) {
     final w = _entryOf(store, auth, id);
     if (w['status'] != 'OFFERED') {
       throw invalidTransition('This offer is no longer open');
@@ -269,18 +274,15 @@ abstract final class BusEngine {
 
   static Json _ownAllocation(MockStore store, AuthContext auth, String id) {
     final a = store.get(Col.busAllocations, id);
-    if (a == null || a['employeeId'] != auth.employeeId || a['status'] == 'ENDED') {
+    if (a == null ||
+        a['employeeId'] != auth.employeeId ||
+        a['status'] == 'ENDED') {
       throw notFound('Seat');
     }
     return a;
   }
 
-  static Json release(
-    MockStore store,
-    AuthContext auth,
-    String id,
-    Json body,
-  ) {
+  static Json release(MockStore store, AuthContext auth, String id, Json body) {
     final a = _ownAllocation(store, auth, id);
     if (a['status'] != 'ACTIVE') {
       throw invalidTransition('This seat is already released');
@@ -288,17 +290,23 @@ abstract final class BusEngine {
     final from = body['from'];
     final to = body['to'];
     final today = WorkCalendar.today();
-    if (from is! String || !WorkCalendar.isValidKey(from) || from.compareTo(today) < 0) {
+    if (from is! String ||
+        !WorkCalendar.isValidKey(from) ||
+        from.compareTo(today) < 0) {
       throw validationError('from', 'Choose a start date from today');
     }
-    if (to is! String || !WorkCalendar.isValidKey(to) || to.compareTo(from) < 0) {
+    if (to is! String ||
+        !WorkCalendar.isValidKey(to) ||
+        to.compareTo(from) < 0) {
       throw validationError('to', 'Choose an end date');
     }
     if (WorkCalendar.daysBetween(from, to) > BusPolicy.maxReleaseDays) {
       throw validationError('to', 'A seat can be released for up to 60 days');
     }
     final reason = body['reason'];
-    if (reason is! String || reason.trim().length < 3 || reason.trim().length > 200) {
+    if (reason is! String ||
+        reason.trim().length < 3 ||
+        reason.trim().length > 200) {
       throw validationError('reason', 'Enter a reason');
     }
     a
@@ -382,8 +390,12 @@ abstract final class BusEngine {
     }
     final reason = body['reason'];
     if (p > 0 &&
-        (reason is! String || reason.trim().length < BusPolicy.priorityReasonMin)) {
-      throw validationError('reason', 'Give a reason of at least 10 characters');
+        (reason is! String ||
+            reason.trim().length < BusPolicy.priorityReasonMin)) {
+      throw validationError(
+        'reason',
+        'Give a reason of at least 10 characters',
+      );
     }
     w
       ..['priority'] = p
@@ -433,7 +445,8 @@ abstract final class BusEngine {
           a.str('employeeId'),
     };
     store.put(Col.busBroadcasts, {
-      'id': 'bb_${store.collection(Col.busBroadcasts).length + 1}_${_now(store)}',
+      'id':
+          'bb_${store.collection(Col.busBroadcasts).length + 1}_${_now(store)}',
       'routeId': routeId,
       'message': text,
       'sentByEmployeeId': auth.employeeId,

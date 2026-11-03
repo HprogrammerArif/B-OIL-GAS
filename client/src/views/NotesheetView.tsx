@@ -227,23 +227,25 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     authorizerRole: finalApprover?.roleName ?? '',
     amountOrValue: currentFile.amount,
     sapReference: currentFile.sapRef,
+    status: state === 'approved' ? 'approved' : state === 'returned' ? 'returned' : 'in_progress',
     paragraphs: currentFile.notes.map((n) => ({
-      label: `Para ${n.para} (${n.dept})`,
+      label: `${t('Para', 'অনুচ্ছেদ', lang)} ${n.para} (${n.dept})`,
       text: n.body,
       signedBy: `${n.author} — ${n.role}`,
       hash: n.hash,
     })),
   } : null;
 
-  const initiateModal = (
+  // Mounted only while open so each new note-sheet starts from a clean form.
+  const initiateModal = showInitiateModal ? (
     <InitiateNotesheetModal
-      isOpen={showInitiateModal}
+      isOpen
       onClose={() => setShowInitiateModal(false)}
       onSubmit={handleCreateNotesheet}
       lang={lang}
       currentRole={role}
     />
-  );
+  ) : null;
 
   const newButton = canCreate ? (
     <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowInitiateModal(true)}>

@@ -86,7 +86,14 @@ abstract final class ClaimPolicy {
       'RICKSHAW',
       'OTHER',
     ],
-    'CONVEYANCE': ['CNG', 'RICKSHAW', 'RIDE_SHARE', 'BUS_FARE', 'MILEAGE', 'OTHER'],
+    'CONVEYANCE': [
+      'CNG',
+      'RICKSHAW',
+      'RIDE_SHARE',
+      'BUS_FARE',
+      'MILEAGE',
+      'OTHER',
+    ],
   };
 
   static const _bands = <String, ExpensePolicy>{
@@ -169,7 +176,12 @@ abstract final class ClaimEngine {
     _ => 'TOUR',
   };
 
-  static String nextNo(MockStore store, String prefix, int year, {int pad = 4}) {
+  static String nextNo(
+    MockStore store,
+    String prefix,
+    int year, {
+    int pad = 4,
+  }) {
     var max = 0;
     final col = prefix == 'ADV' ? Col.advances : Col.claims;
     final field = prefix == 'ADV' ? 'advanceNo' : 'claimNo';
@@ -228,7 +240,9 @@ abstract final class ClaimEngine {
         'id': 'da_$d',
         'category': 'DA',
         'date': d,
-        'description': factor == 1 ? 'Daily allowance' : 'Daily allowance (half day)',
+        'description': factor == 1
+            ? 'Daily allowance'
+            : 'Daily allowance (half day)',
         'amount': rate * factor,
         'system': true,
         'isDeclaration': true,
@@ -266,8 +280,12 @@ abstract final class ClaimEngine {
         ),
       );
       claim
-        ..['periodStart'] = WorkCalendar.dateOf(DateTime.parse(claim.str('departAt')))
-        ..['periodEnd'] = WorkCalendar.dateOf(DateTime.parse(claim.str('returnAt')));
+        ..['periodStart'] = WorkCalendar.dateOf(
+          DateTime.parse(claim.str('departAt')),
+        )
+        ..['periodEnd'] = WorkCalendar.dateOf(
+          DateTime.parse(claim.str('returnAt')),
+        );
     }
     lines.addAll(userLines);
     claim['lines'] = lines;
@@ -304,13 +322,9 @@ abstract final class ClaimEngine {
     ExpensePolicy policy,
   ) {
     final out = <Json>[];
-    void add(String code, String sev, {String? lineId, num? amount}) =>
-        out.add({
-          'code': code,
-          'severity': sev,
-          'lineId': ?lineId,
-          'amount': ?amount,
-        });
+    void add(String code, String sev, {String? lineId, num? amount}) => out.add(
+      {'code': code, 'severity': sev, 'lineId': ?lineId, 'amount': ?amount},
+    );
     final lines = claim.objList('lines');
     final type = claim.str('type');
     if (lines.isEmpty) add('NO_LINES', 'HARD');
@@ -330,8 +344,12 @@ abstract final class ClaimEngine {
       if (cat == 'HOTEL' && policy.hotelCap != null) {
         final nights = math.max(1, (l['nights'] as num?)?.toInt() ?? 1);
         if (amount / nights > policy.hotelCap!) {
-          add('HOTEL_CAP_EXCEEDED', 'HARD', lineId: l.str('id'),
-              amount: _r2(amount - policy.hotelCap! * nights));
+          add(
+            'HOTEL_CAP_EXCEEDED',
+            'HARD',
+            lineId: l.str('id'),
+            amount: _r2(amount - policy.hotelCap! * nights),
+          );
         }
       }
       if (cat == 'MILEAGE' &&
@@ -344,9 +362,7 @@ abstract final class ClaimEngine {
       }
     }
     final mode = claim.strOrNull('travelMode');
-    if (type != 'CONVEYANCE' &&
-        mode != null &&
-        !policy.modes.contains(mode)) {
+    if (type != 'CONVEYANCE' && mode != null && !policy.modes.contains(mode)) {
       add('MODE_ABOVE_ENTITLEMENT', 'SOFT');
     }
     final start = claim.strOrNull('periodStart');
@@ -362,12 +378,19 @@ abstract final class ClaimEngine {
       if (type == 'CONVEYANCE') {
         final month = start.substring(0, 7);
         final others = _open(store, claim)
-            .where((c) => c['type'] == 'CONVEYANCE' && c.str('periodStart').startsWith(month))
+            .where(
+              (c) =>
+                  c['type'] == 'CONVEYANCE' &&
+                  c.str('periodStart').startsWith(month),
+            )
             .fold<double>(0, (s, c) => s + (c['totalAmount']! as num));
         final total = others + (claim['totalAmount']! as num);
         if (total > policy.conveyanceCap) {
-          add('CONVEYANCE_CAP_EXCEEDED', 'HARD',
-              amount: _r2(total - policy.conveyanceCap));
+          add(
+            'CONVEYANCE_CAP_EXCEEDED',
+            'HARD',
+            amount: _r2(total - policy.conveyanceCap),
+          );
         }
       }
       if (WorkCalendar.daysBetween(end, WorkCalendar.today()) >
@@ -388,10 +411,14 @@ abstract final class ClaimEngine {
             c['status'] != 'CANCELLED',
       );
 
-  static bool _receiptUsedElsewhere(MockStore store, Json claim, String fileId) =>
-      _open(store, claim).any(
-        (c) => c.objList('lines').any((l) => l['receiptFileId'] == fileId),
-      );
+  static bool _receiptUsedElsewhere(
+    MockStore store,
+    Json claim,
+    String fileId,
+  ) => _open(
+    store,
+    claim,
+  ).any((c) => c.objList('lines').any((l) => l['receiptFileId'] == fileId));
 
   // ---- Input ----
 
@@ -401,7 +428,8 @@ abstract final class ClaimEngine {
       throw validationError('type', 'Choose a claim type');
     }
     final now = store.nowIso();
-    final id = 'clm_${store.collection(Col.claims).length + 1}_${store.nowMs()}';
+    final id =
+        'clm_${store.collection(Col.claims).length + 1}_${store.nowMs()}';
     final claim = <String, Object?>{
       'id': id,
       'claimNo': nextNo(store, _prefix(type), DateTime.now().year),
@@ -451,7 +479,10 @@ abstract final class ClaimEngine {
         throw validationError('periodEnd', 'Enter a valid period');
       }
       if (e.compareTo(WorkCalendar.today()) > 0) {
-        throw validationError('periodEnd', 'The period cannot be in the future');
+        throw validationError(
+          'periodEnd',
+          'The period cannot be in the future',
+        );
       }
       claim
         ..['periodStart'] = s
@@ -524,7 +555,10 @@ abstract final class ClaimEngine {
         }
         final from = l['fromPlace'];
         final to = l['toPlace'];
-        if (from is! String || from.trim().isEmpty || to is! String || to.trim().isEmpty) {
+        if (from is! String ||
+            from.trim().isEmpty ||
+            to is! String ||
+            to.trim().isEmpty) {
           throw validationError('lines[$i].fromPlace', 'Enter from and to');
         }
         line
@@ -553,7 +587,10 @@ abstract final class ClaimEngine {
             (f['uploaderUserId'] != auth.user['id']) ||
             f['status'] != 'UPLOADED' ||
             f['scanStatus'] == 'INFECTED') {
-          throw validationError('lines[$i].receiptFileId', 'Receipt is not usable');
+          throw validationError(
+            'lines[$i].receiptFileId',
+            'Receipt is not usable',
+          );
         }
         line['receiptFileId'] = fid;
       }
@@ -593,7 +630,12 @@ abstract final class ClaimEngine {
     for (final l in lines) {
       final fid = l.strOrNull('receiptFileId');
       if (fid != null) {
-        FileEngine.attach(store, fid, ownerType: 'Claim', ownerId: claim.str('id'));
+        FileEngine.attach(
+          store,
+          fid,
+          ownerType: 'Claim',
+          ownerId: claim.str('id'),
+        );
       }
     }
   }
@@ -636,7 +678,9 @@ abstract final class ClaimEngine {
     final now = store.nowIso();
     claim
       ..['submittedAt'] = now
-      ..['resubmits'] = returned ? claim.intVal('resubmits') + 1 : claim['resubmits']
+      ..['resubmits'] = returned
+          ? claim.intVal('resubmits') + 1
+          : claim['resubmits']
       ..['reviewComment'] = null
       ..['updatedAt'] = now;
     if (emp['lineManager'] == null) {
@@ -793,7 +837,11 @@ abstract final class ClaimEngine {
     );
   }
 
-  static void _onClaimEvent(MockStore store, Json instance, WorkflowEvent event) {
+  static void _onClaimEvent(
+    MockStore store,
+    Json instance,
+    WorkflowEvent event,
+  ) {
     final c = store.get(Col.claims, instance.str('objectId'));
     if (c == null) return;
     final now = store.nowIso();
@@ -848,7 +896,9 @@ abstract final class ClaimEngine {
       throw validationError('amount', 'Enter an amount up to ৳500,000');
     }
     final purpose = body['purpose'];
-    if (purpose is! String || purpose.trim().length < 5 || purpose.trim().length > 200) {
+    if (purpose is! String ||
+        purpose.trim().length < 5 ||
+        purpose.trim().length > 200) {
       throw validationError('purpose', 'Enter the purpose');
     }
     final start = body['tourStart'];
@@ -856,19 +906,22 @@ abstract final class ClaimEngine {
     if (start is! String || !WorkCalendar.isValidKey(start)) {
       throw validationError('tourStart', 'Enter a valid date');
     }
-    if (end is! String || !WorkCalendar.isValidKey(end) || end.compareTo(start) < 0) {
+    if (end is! String ||
+        !WorkCalendar.isValidKey(end) ||
+        end.compareTo(start) < 0) {
       throw validationError('tourEnd', 'Enter a valid date');
     }
     final today = WorkCalendar.today();
-    final overdue = store.all(Col.advances).where((a) =>
-        a['employeeId'] == auth.employeeId &&
-        a['status'] == 'DISBURSED' &&
-        a['claimId'] == null &&
-        WorkCalendar.daysBetween(
-              a.str('tourEnd'),
-              today,
-            ) >
-            ClaimPolicy.advanceSettlementDays);
+    final overdue = store
+        .all(Col.advances)
+        .where(
+          (a) =>
+              a['employeeId'] == auth.employeeId &&
+              a['status'] == 'DISBURSED' &&
+              a['claimId'] == null &&
+              WorkCalendar.daysBetween(a.str('tourEnd'), today) >
+                  ClaimPolicy.advanceSettlementDays,
+        );
     if (overdue.isNotEmpty) {
       throw HttpError(
         ApiErrorCode.conflict,
@@ -879,7 +932,8 @@ abstract final class ClaimEngine {
       );
     }
     final now = store.nowIso();
-    final id = 'adv_${store.collection(Col.advances).length + 1}_${store.nowMs()}';
+    final id =
+        'adv_${store.collection(Col.advances).length + 1}_${store.nowMs()}';
     final adv = <String, Object?>{
       'id': id,
       'advanceNo': nextNo(store, 'ADV', DateTime.now().year),
@@ -999,7 +1053,11 @@ abstract final class ClaimEngine {
     throw invalidTransition('This advance can no longer be cancelled');
   }
 
-  static void _onAdvanceEvent(MockStore store, Json instance, WorkflowEvent event) {
+  static void _onAdvanceEvent(
+    MockStore store,
+    Json instance,
+    WorkflowEvent event,
+  ) {
     final a = store.get(Col.advances, instance.str('objectId'));
     if (a == null) return;
     switch (event) {
@@ -1008,7 +1066,9 @@ abstract final class ClaimEngine {
             .where((s) => s['status'] == 'ACTIVE')
             .map((s) => s.str('key'))
             .firstOrNull;
-        a['status'] = active == 'FINANCE' ? 'PENDING_FINANCE' : 'PENDING_MANAGER';
+        a['status'] = active == 'FINANCE'
+            ? 'PENDING_FINANCE'
+            : 'PENDING_MANAGER';
       case WorkflowEvent.approved:
         a['status'] = 'APPROVED';
       case WorkflowEvent.rejected:
@@ -1047,8 +1107,14 @@ abstract final class ClaimEngine {
       'totalAmount': c['totalAmount'],
       'policyAmount': c['policyAmount'],
       'netSettlement': c['netSettlement'],
-      'hardFlags': c.objList('flags').where((f) => f['severity'] == 'HARD').length,
-      'softFlags': c.objList('flags').where((f) => f['severity'] == 'SOFT').length,
+      'hardFlags': c
+          .objList('flags')
+          .where((f) => f['severity'] == 'HARD')
+          .length,
+      'softFlags': c
+          .objList('flags')
+          .where((f) => f['severity'] == 'SOFT')
+          .length,
       'voucherNo': c['voucherNo'],
       'paidAt': c['paidAt'],
       'submittedAt': c['submittedAt'],
