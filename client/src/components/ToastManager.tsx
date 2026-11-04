@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
-interface Toast { id: number; message: string; type: 'default' | 'success' | 'gold' | 'info' | 'warn' | 'danger'; }
+interface Toast {
+  id: number;
+  message: string;
+  type: 'default' | 'success' | 'gold' | 'info' | 'warn' | 'danger';
+}
 
 let addToast: ((msg: string, type?: Toast['type']) => void) | null = null;
 
@@ -17,18 +21,15 @@ export default function ToastManager() {
       setToasts(prev => [...prev, { id, message, type }]);
       setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4500);
     };
-    return () => { addToast = null; };
+    return () => {
+      addToast = null;
+    };
   }, []);
 
-  const icons: Record<Toast['type'], string> = {
-    default: '🔔', success: '✅', gold: '👑', info: 'ℹ️', warn: '⚠️', danger: '🚨',
-  };
-
   return (
-    <div className="toast-wrap">
+    <div className="toast-wrap" role="status" aria-live="polite">
       {toasts.map(toast => (
         <div key={toast.id} className={`toast ${toast.type}`}>
-          <span>{icons[toast.type]}</span>
           <span>{toast.message}</span>
         </div>
       ))}
