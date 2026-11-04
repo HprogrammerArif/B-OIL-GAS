@@ -49,7 +49,7 @@ export default function BroadcastModal({ onClose, lang = 'en' }: BroadcastModalP
       <div className="modal">
         <div className="modal-hd">
           <h3>
-            <span>📢</span> {t("Chairman's Company-Wide Announcement", 'চেয়ারম্যানের বিশেষ প্রাতিষ্ঠানিক ঘোষণা', lang)}
+            <Megaphone size={18} style={{ color: 'var(--brand-crimson)' }} /> {t("Chairman's Company-Wide Announcement", 'চেয়ারম্যানের বিশেষ প্রাতিষ্ঠানিক ঘোষণা', lang)}
           </h3>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>

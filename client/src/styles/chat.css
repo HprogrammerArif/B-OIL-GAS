@@ -4,17 +4,17 @@
    re-derived once on .inner-circle-workspace so most rules need no dark override. */
 
 .inner-circle-workspace {
-  --ic-accent: var(--brand-crimson);
-  --ic-accent-ink: var(--brand-crimson);
-  --ic-accent-soft: color-mix(in srgb, var(--brand-crimson) 8%, var(--surface-1));
-  --ic-accent-softer: color-mix(in srgb, var(--brand-crimson) 4%, var(--surface-1));
-  --ic-accent-line: color-mix(in srgb, var(--brand-crimson) 28%, var(--border-1));
-  --ic-gold-soft: color-mix(in srgb, var(--brand-gold) 14%, var(--surface-1));
-  --ic-gold-line: color-mix(in srgb, var(--brand-gold) 55%, var(--surface-1));
-  --ic-gold-ink: var(--status-warning-text);
-  --ic-hub-bg: var(--ic-accent-softer);
-  --ic-stream-bg: color-mix(in srgb, var(--brand-gold) 3%, var(--surface-0));
-  --ic-hover: color-mix(in srgb, var(--text-1) 5%, transparent);
+  --ic-accent: #1E293B;
+  --ic-accent-ink: #1E293B;
+  --ic-accent-soft: #F1F5F9;
+  --ic-accent-softer: #F8FAFC;
+  --ic-accent-line: #CBD5E1;
+  --ic-gold-soft: #F8FAFC;
+  --ic-gold-line: #CBD5E1;
+  --ic-gold-ink: #334155;
+  --ic-hub-bg: var(--surface-1);
+  --ic-stream-bg: #F8FAFC;
+  --ic-hover: color-mix(in srgb, var(--text-1) 4%, transparent);
 
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr) 300px;
@@ -27,18 +27,21 @@
   border: 1px solid var(--border-1);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   position: relative;
   color: var(--text-1);
 }
 
 [data-theme='dark'] .inner-circle-workspace {
-  --ic-accent-ink: var(--status-danger-bright);
-  --ic-accent-soft: color-mix(in srgb, var(--brand-crimson) 24%, var(--surface-1));
-  --ic-accent-softer: color-mix(in srgb, var(--brand-crimson) 8%, var(--surface-1));
-  --ic-accent-line: color-mix(in srgb, var(--brand-crimson) 55%, var(--border-1));
-  --ic-gold-soft: color-mix(in srgb, var(--brand-gold) 12%, var(--surface-1));
-  --ic-gold-line: color-mix(in srgb, var(--brand-gold) 38%, var(--surface-1));
+  --ic-accent: #334155;
+  --ic-accent-ink: #E2E8F0;
+  --ic-accent-soft: color-mix(in srgb, #334155 45%, var(--surface-1));
+  --ic-accent-softer: color-mix(in srgb, #334155 20%, var(--surface-1));
+  --ic-accent-line: color-mix(in srgb, #64748B 45%, var(--border-1));
+  --ic-gold-soft: color-mix(in srgb, #334155 35%, var(--surface-1));
+  --ic-gold-line: color-mix(in srgb, #64748B 40%, var(--border-1));
+  --ic-gold-ink: #CBD5E1;
+  --ic-hub-bg: var(--surface-1);
   --ic-stream-bg: var(--surface-0);
   --ic-hover: color-mix(in srgb, var(--text-1) 7%, transparent);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
@@ -392,9 +395,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  color: var(--text-on-brand);
+  background: #334155;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .ic-status-indicator {
@@ -509,26 +514,27 @@
 .ic-room-icon-box {
   width: 38px;
   height: 38px;
-  border-radius: 11px;
-  background: linear-gradient(135deg, var(--brand-crimson-light) 0%, var(--brand-crimson-dark) 100%);
-  color: var(--text-on-brand);
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  color: var(--text-2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: var(--shadow-crimson);
 }
 
 .ic-room-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  color: var(--text-on-brand);
+  background: #334155;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12.5px;
   position: relative;
   flex-shrink: 0;
 }
@@ -787,10 +793,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-on-brand);
-  font-size: 11.5px;
+  background: #334155;
+  color: #FFFFFF;
+  font-size: 11px;
   font-weight: 700;
-  box-shadow: var(--shadow-sm);
 }
 
 .ic-msg-content-block {
@@ -1039,10 +1045,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: var(--shadow-crimson);
+  box-shadow: var(--shadow-xs);
   transition: transform 0.15s ease, background 0.15s ease;
 }
-.ic-btn-ack:hover { background: var(--brand-crimson-dark); transform: translateY(-1px); }
+.ic-btn-ack:hover { background: #334155; transform: translateY(-1px); }
 
 .ic-ack-sla { font-size: 10.5px; color: var(--text-3); margin-left: auto; }
 
@@ -1127,7 +1133,7 @@
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  box-shadow: var(--shadow-crimson);
+  box-shadow: var(--shadow-xs);
   transition: transform 0.15s ease;
 }
 .ic-voice-play-btn:hover { transform: scale(1.06); }
@@ -1240,46 +1246,109 @@
 /* ─── Presets + composer ───────────────────────────────────────────────────── */
 .ic-quick-directives {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 8px 16px;
-  background: var(--ic-gold-soft);
-  border-top: 1px solid var(--ic-gold-line);
-  overflow-x: auto;
-  white-space: nowrap;
+  padding: 10px 16px 12px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-1);
   flex-shrink: 0;
-  scrollbar-width: none;
 }
-.ic-quick-directives::-webkit-scrollbar { display: none; }
+
+.ic-quick-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
 .ic-quick-label {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  color: var(--ic-gold-ink);
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--text-3);
+}
+
+.ic-quick-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-2);
+  color: var(--text-3);
+  cursor: pointer;
+}
+.ic-quick-close:hover {
+  color: var(--text-1);
+  border-color: var(--border-2);
+}
+
+.ic-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
 }
 
 .ic-quick-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--surface-1);
-  color: var(--text-2);
-  border: 1px solid var(--ic-gold-line);
-  border-radius: 999px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 11px;
+  text-align: left;
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  min-width: 0;
 }
 .ic-quick-chip:hover {
-  border-color: var(--ic-accent-line);
-  color: var(--ic-accent-ink);
+  border-color: var(--border-2);
   background: var(--ic-accent-soft);
+}
+
+.ic-quick-chip-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ic-quick-chip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ic-quick-chip-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1.25;
+}
+
+.ic-quick-chip-preview {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 /* Recording */
@@ -1462,10 +1531,11 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: var(--shadow-crimson);
+  box-shadow: var(--shadow-xs);
   white-space: nowrap;
 }
-.ic-btn-send:hover:not(:disabled) { background: var(--brand-crimson-dark); transform: translateY(-1px); }
+.ic-btn-send:hover:not(:disabled) { background: #334155; transform: translateY(-1px); }
+.ic-btn-send.directive { background: #334155; color: #FFFFFF; }
 .ic-btn-send:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 .ic-btn-send.gold {
   background: linear-gradient(135deg, var(--brand-gold) 0%, var(--brand-gold-dark) 100%);

@@ -4,8 +4,9 @@ import { showToast } from '../components/ToastManager';
 import {
   Send, Paperclip, Mic, Flag, Pin, PinOff, Search, Phone, Video,
   CheckCheck, Check, Clock, ChevronLeft, MessageSquare, Users, FileText, X, Hash,
-  Lock, Eye, Smile, Copy, Download, ShieldCheck, Zap, Crown, CheckCircle,
+  Lock, Eye, Smile, Copy, Download, ShieldCheck, CheckCircle,
   ArrowDown, PanelRight, SearchX, Wrench, Banknote, Landmark, BarChart3,
+  FileCheck, SlidersHorizontal, Image as ImageIcon, ExternalLink,
 } from 'lucide-react';
 import { operationsStore, useOperationsStore, type ChatMessage, type ChatMember } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
@@ -87,9 +88,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   const [isUrgentFlag, setIsUrgentFlag] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
   const [activeTabFilter, setActiveTabFilter] = useState<TabFilter>('all');
-  const [showRightDrawer, setShowRightDrawer] = useState(true);
+  const [showRightDrawer, setShowRightDrawer] = useState(false);
   const [showQuickDirectives, setShowQuickDirectives] = useState(false);
   const [showCallModal, setShowCallModal] = useState<'voice' | 'video' | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<ChatMessage | null>(null);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
@@ -373,6 +375,12 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
     showToast(t('Voice memo sent.', 'ভয়েস বার্তা পাঠানো হয়েছে।', lang), 'success');
   };
 
+  const isImageFile = (fileName?: string, mime?: string) => {
+    if (mime?.startsWith('image/')) return true;
+    const ext = fileName?.split('.').pop()?.toLowerCase() ?? '';
+    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(ext);
+  };
+
   const handleAttachFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -385,23 +393,91 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
       showToast(t('File is larger than 10 MB.', 'ফাইলের আকার ১০ এমবির বেশি।', lang), 'danger');
       return;
     }
-    appendMessage({
-      id: `doc-${Date.now()}`,
-      senderId: selfId,
-      senderName: selfMeta.name,
-      senderRole: selfMeta.label,
-      senderInitials: selfMeta.initials,
-      senderColor: selfMeta.avatarColor,
-      content: file.name,
-      timestamp: nowTime(),
-      type: 'document',
-      fileName: file.name,
-      fileSize: formatBytes(file.size),
-      isChairman: canIssueDirective,
-      readBy: [],
-      reactions: {},
-    });
-    showToast(t('Document shared.', 'নথি শেয়ার করা হয়েছে।', lang), 'success');
+
+    const pushDocMessage = (fileUrl: string) => {
+      appendMessage({
+        id: `doc-${Date.now()}`,
+        senderId: selfId,
+        senderName: selfMeta.name,
+        senderRole: selfMeta.label,
+        senderInitials: selfMeta.initials,
+        senderColor: selfMeta.avatarColor,
+        content: file.name,
+        timestamp: nowTime(),
+        type: 'document',
+        fileName: file.name,
+        fileSize: formatBytes(file.size),
+        fileUrl,
+        fileMime: file.type || undefined,
+        isChairman: canIssueDirective,
+        readBy: [],
+        reactions: {},
+      });
+      showToast(t('Document shared.', 'নথি শেয়ার করা হয়েছে।', lang), 'success');
+    };
+
+    if (file.size <= 3 * 1024 * 1024) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        pushDocMessage(typeof reader.result === 'string' ? reader.result : URL.createObjectURL(file));
+      };
+      reader.onerror = () => pushDocMessage(URL.createObjectURL(file));
+      reader.readAsDataURL(file);
+    } else {
+      pushDocMessage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDownloadDocument = (msg: ChatMessage) => {
+    const fileName = msg.fileName || msg.content || 'BOGCL_Document.txt';
+    const triggerDownload = (href: string, revokeAfter = false) => {
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (revokeAfter) {
+        window.setTimeout(() => URL.revokeObjectURL(href), 2000);
+      }
+      showToast(t(`Downloaded ${fileName}`, `${fileName} ডাউনলোড সম্পন্ন হয়েছে`, lang), 'success');
+    };
+
+    if (msg.fileUrl) {
+      triggerDownload(msg.fileUrl);
+      return;
+    }
+
+    if (isImageFile(fileName, msg.fileMime)) {
+      triggerDownload('/logoBOGCL.png');
+      return;
+    }
+
+    const summaryBody = [
+      'BASHUNDHARA OIL & GAS COMPANY LTD. (BOGCL)',
+      'OFFICIAL LEADERSHIP DOCUMENT RECORD',
+      '==================================================',
+      `Document Name : ${fileName}`,
+      `Shared By     : ${msg.senderName}${msg.senderRole ? ` (${msg.senderRole})` : ''}`,
+      `Timestamp     : ${msg.timestamp}, ${today()}`,
+      `File Size     : ${msg.fileSize || '2.4 MB'}`,
+      'Verification  : Scanned & Verified by BOGCL Document Gateway',
+      '==================================================',
+      '',
+      'EXECUTIVE SUMMARY:',
+      '- Keraniganj Bitumen Plant daily output: 520 MT Grade 60/70 (+8% vs target).',
+      '- Storage Tanks TK-101 to TK-104 operating within normal temperature & pressure.',
+      '- Quality assurance batch certificates verified by lab control.',
+      '',
+      'Generated from BOGCL OneOps Leadership Workspace.',
+    ].join('\r\n');
+
+    const blob = new Blob([summaryBody], { type: 'text/plain;charset=utf-8' });
+    triggerDownload(URL.createObjectURL(blob), true);
+  };
+
+  const handleViewDocument = (msg: ChatMessage) => {
+    setPreviewDoc(msg);
   };
 
   const handleAcknowledgeDirective = (msgId: string) => {
@@ -451,6 +527,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   const handlePreset = (text: string) => {
     setMessageInput(text);
     setIsDirectiveMode(true);
+    setShowQuickDirectives(false);
     inputRef.current?.focus();
   };
 
@@ -479,7 +556,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
         <div className="ic-directive-card">
           <div className="ic-directive-header">
             <div className="ic-directive-title">
-              <Zap size={14} />
+              <FileCheck size={14} />
               <span>{t('CHAIRMAN DIRECTIVE', 'চেয়ারম্যানের নির্দেশনা', lang)}</span>
             </div>
             <code className="ic-directive-id">{msg.directiveId}</code>
@@ -510,24 +587,37 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
     }
     if (msg.type === 'document') {
       const ext = msg.fileName?.split('.').pop()?.toUpperCase() ?? 'FILE';
+      const isImg = isImageFile(msg.fileName, msg.fileMime);
       return (
         <div className="ic-document-card">
-          <div className="ic-doc-icon-box"><FileText size={22} /></div>
-          <div className="ic-doc-info">
+          <div
+            className="ic-doc-icon-box"
+            onClick={() => handleViewDocument(msg)}
+            style={{ cursor: 'pointer' }}
+            title={t('Click to preview', 'দেখতে ক্লিক করুন', lang)}
+          >
+            {isImg ? <ImageIcon size={20} /> : <FileText size={20} />}
+          </div>
+          <div
+            className="ic-doc-info"
+            onClick={() => handleViewDocument(msg)}
+            style={{ cursor: 'pointer' }}
+            title={t('Click to preview', 'দেখতে ক্লিক করুন', lang)}
+          >
             <div className="ic-doc-name" title={msg.fileName}><Highlight text={msg.fileName ?? ''} query={query} /></div>
             <div className="ic-doc-sub">{msg.fileSize} · {ext} · {t('Scanned & verified', 'স্ক্যানকৃত ও যাচাইকৃত', lang)}</div>
           </div>
           <div className="ic-doc-actions">
             <button
               type="button" className="ic-doc-btn"
-              onClick={() => showToast(t(`Opening ${msg.fileName}…`, `${msg.fileName} খোলা হচ্ছে…`, lang), 'info')}
-              aria-label={t('View document', 'নথি দেখুন', lang)} title={t('View document', 'নথি দেখুন', lang)}
+              onClick={() => handleViewDocument(msg)}
+              aria-label={t('View document', 'নথি দেখুন', lang)} title={t('Preview document', 'নথি প্রিভিউ দেখুন', lang)}
             >
               <Eye size={14} />
             </button>
             <button
               type="button" className="ic-doc-btn"
-              onClick={() => showToast(t(`Downloading ${msg.fileName}…`, `${msg.fileName} ডাউনলোড হচ্ছে…`, lang), 'info')}
+              onClick={() => handleDownloadDocument(msg)}
               aria-label={t('Download document', 'নথি ডাউনলোড করুন', lang)} title={t('Download document', 'নথি ডাউনলোড করুন', lang)}
             >
               <Download size={14} />
@@ -571,7 +661,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
         {!isMe && (
           <div className="ic-msg-avatar-slot">
             {!grouped && (
-              <div className="ic-msg-avatar" style={{ background: msg.senderColor }}>
+              <div className="ic-msg-avatar">
                 {msg.senderInitials}
               </div>
             )}
@@ -805,7 +895,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                     onClick={() => selectTarget({ type: 'dm', id: member.id })}
                   >
                     <span className="ic-avatar-wrap">
-                      <span className="ic-avatar" style={{ background: member.color }}>{member.initials}</span>
+                      <span className="ic-avatar">{member.initials}</span>
                       <span className={`ic-status-indicator ic-dot ${member.status}`} title={statusText(member.status)} />
                     </span>
                     <span className="ic-item-body">
@@ -832,22 +922,6 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             </div>
           )}
         </div>
-
-        <div className="ic-hub-footer">
-          <div className="ic-token-card">
-            <div className="ic-token-dot" />
-            <div className="ic-token-info">
-              <div className="ic-token-title">
-                {canIssueDirective ? t('CHAIRMAN HW-TOKEN #001', 'চেয়ারম্যান হার্ডওয়্যার টোকেন #001', lang) : t('VERIFIED SESSION', 'যাচাইকৃত সেশন', lang)}
-              </div>
-              <div className="ic-token-desc">
-                {canIssueDirective
-                  ? t('Mutual TLS · Keraniganj SCADA synced', 'মিউচুয়াল TLS · কেরানীগঞ্জ SCADA সিঙ্কড', lang)
-                  : t('Mutual TLS · Audit logging on', 'মিউচুয়াল TLS · অডিট লগ চালু', lang)}
-              </div>
-            </div>
-          </div>
-        </div>
       </aside>
 
       {/* ── MIDDLE: conversation & composer ───────────────────────────────── */}
@@ -865,7 +939,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             {isGroup ? (
               <div className="ic-room-icon-box">{activeChannel?.isLocked ? <Lock size={16} /> : <Hash size={16} />}</div>
             ) : (
-              <div className="ic-room-avatar" style={{ background: activeMember?.color }}>
+              <div className="ic-room-avatar">
                 {activeMember?.initials}
                 <span className={`ic-avatar-dot ic-dot ${activeMember?.status ?? 'online'}`} />
               </div>
@@ -966,18 +1040,36 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
         {showQuickDirectives && canIssueDirective && (
           <div className="ic-quick-directives">
-            <div className="ic-quick-label">
-              <Zap size={12} />
-              <span>{t('DIRECTIVE PRESETS', 'দ্রুত নির্দেশাবলি', lang)}</span>
-            </div>
-            {DIRECTIVE_PRESETS.map((p) => (
+            <div className="ic-quick-header">
+              <div className="ic-quick-label">
+                <SlidersHorizontal size={12} />
+                <span>{t('DIRECTIVE PRESETS — Click to insert into message box', 'দ্রুত নির্দেশাবলি — বার্তা বক্সে যুক্ত করতে ক্লিক করুন', lang)}</span>
+              </div>
               <button
-                key={p.id} type="button" className="ic-quick-chip"
-                onClick={() => handlePreset(lang === 'bn' ? p.textBn : p.textEn)}
+                type="button"
+                className="ic-quick-close"
+                onClick={() => setShowQuickDirectives(false)}
+                aria-label={t('Close presets', 'প্রিসেট বন্ধ করুন', lang)}
               >
-                <p.icon size={13} /> {lang === 'bn' ? p.labelBn : p.labelEn}
+                <X size={13} />
               </button>
-            ))}
+            </div>
+            <div className="ic-quick-grid">
+              {DIRECTIVE_PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="ic-quick-chip"
+                  onClick={() => handlePreset(lang === 'bn' ? p.textBn : p.textEn)}
+                >
+                  <span className="ic-quick-chip-icon"><p.icon size={14} /></span>
+                  <span className="ic-quick-chip-body">
+                    <span className="ic-quick-chip-title">{lang === 'bn' ? p.labelBn : p.labelEn}</span>
+                    <span className="ic-quick-chip-preview">{lang === 'bn' ? p.textBn : p.textEn}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1006,7 +1098,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             {isDirectiveMode && (
               <div className="ic-directive-mode-bar">
                 <div className="ic-dir-tag">
-                  <Crown size={13} />
+                  <FileCheck size={13} />
                   <span>{t('FORMAL CHAIRMAN DIRECTIVE · RECORDED IN AUDIT LOG', 'আনুষ্ঠানিক চেয়ারম্যান নির্দেশনা · অডিট লগে সংরক্ষিত', lang)}</span>
                 </div>
                 <button type="button" className="ic-dir-close" onClick={() => setIsDirectiveMode(false)} aria-label={t('Cancel directive mode', 'নির্দেশনা মোড বাতিল', lang)}>
@@ -1046,7 +1138,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                       type="button" className={`ic-tool-btn ${isDirectiveMode ? 'active' : ''}`}
                       onClick={() => setIsDirectiveMode(!isDirectiveMode)} aria-pressed={isDirectiveMode}
                     >
-                      <Crown size={15} />
+                      <FileCheck size={14} />
                       <span>{t('Directive', 'নির্দেশনা', lang)}</span>
                     </button>
                   )}
@@ -1055,7 +1147,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                     onClick={() => setIsUrgentFlag(!isUrgentFlag)} aria-pressed={isUrgentFlag}
                     title={t('Flag as urgent', 'জরুরি হিসেবে চিহ্নিত করুন', lang)}
                   >
-                    <Flag size={15} />
+                    <Flag size={14} />
                     <span>{t('Urgent', 'জরুরি', lang)}</span>
                   </button>
                   <button
@@ -1072,7 +1164,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                       type="button" className={`ic-tool-btn ${showQuickDirectives ? 'active' : ''}`}
                       onClick={() => setShowQuickDirectives(!showQuickDirectives)} aria-pressed={showQuickDirectives}
                     >
-                      <Zap size={14} />
+                      <SlidersHorizontal size={14} />
                       <span>{t('Presets', 'প্রিসেট', lang)}</span>
                     </button>
                   )}
@@ -1095,10 +1187,10 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                     <span className="ic-kbd-hint">{t('Enter to send · Shift+Enter for new line', 'পাঠাতে Enter · নতুন লাইনে Shift+Enter', lang)}</span>
                   )}
                   <button
-                    type="button" className={`ic-btn-send ${isDirectiveMode ? 'gold' : ''}`}
+                    type="button" className={`ic-btn-send ${isDirectiveMode ? 'directive' : ''}`}
                     onClick={handleSendMessage} disabled={!messageInput.trim()}
                   >
-                    <Send size={15} />
+                    <Send size={14} />
                     <span>{isDirectiveMode ? t('Issue directive', 'নির্দেশনা জারি', lang) : t('Send', 'পাঠান', lang)}</span>
                   </button>
                 </div>
@@ -1121,7 +1213,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           <div className="ic-drawer-content">
             {!isGroup && activeMember ? (
               <div className="ic-member-dossier">
-                <div className="ic-dossier-avatar" style={{ background: activeMember.color }}>{activeMember.initials}</div>
+                <div className="ic-dossier-avatar">{activeMember.initials}</div>
                 <div className="ic-dossier-name">{activeMember.name}</div>
                 <div className="ic-dossier-role">{activeMember.role}</div>
                 <div className="ic-dossier-actions">
@@ -1164,7 +1256,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   <div className="ic-roster-list">
                     {roster.map((m) => (
                       <div key={m.id} className="ic-roster-row">
-                        <div className="ic-mini-avatar" style={{ background: m.color }}>{m.initials}</div>
+                        <div className="ic-mini-avatar">{m.initials}</div>
                         <div className="ic-roster-info">
                           <div className="ic-roster-name">{m.id === selfId ? `${m.name} (${t('You', 'আপনি', lang)})` : m.name}</div>
                           <div className="ic-roster-dept">{m.role}</div>
@@ -1193,7 +1285,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                   {pinnedMessages.map((m) => (
                     <button key={m.id} type="button" className="ic-pinned-card" onClick={() => setJumpTo(m.id)}>
                       <span className="ic-pinned-tag">
-                        {m.type === 'directive' ? <Zap size={10} /> : <Pin size={10} />}
+                        {m.type === 'directive' ? <FileCheck size={10} /> : <Pin size={10} />}
                         {m.directiveId ?? t('Pinned message', 'পিনকৃত বার্তা', lang)}
                       </span>
                       <span className="ic-pinned-text">{m.type === 'document' ? m.fileName : m.content}</span>
@@ -1215,7 +1307,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 <div className="ic-vault-list">
                   {sharedFiles.map((m) => (
                     <div key={m.id} className="ic-vault-file">
-                      <button type="button" className="ic-vault-open" onClick={() => setJumpTo(m.id)}>
+                      <button type="button" className="ic-vault-open" onClick={() => handleViewDocument(m)}>
                         <span className="ic-vf-icon"><FileText size={16} /></span>
                         <span className="ic-vf-info">
                           <span className="ic-vf-name" title={m.fileName}>{m.fileName}</span>
@@ -1224,8 +1316,9 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                       </button>
                       <button
                         type="button" className="ic-vf-dl"
-                        onClick={() => showToast(t(`Downloading ${m.fileName}…`, `${m.fileName} ডাউনলোড হচ্ছে…`, lang), 'info')}
+                        onClick={() => handleDownloadDocument(m)}
                         aria-label={t('Download document', 'নথি ডাউনলোড করুন', lang)}
+                        title={t('Download document', 'নথি ডাউনলোড করুন', lang)}
                       >
                         <Download size={14} />
                       </button>
@@ -1236,6 +1329,164 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             </div>
           </div>
         </aside>
+      )}
+
+      {/* ── DOCUMENT & IMAGE PREVIEW MODAL ────────────────────────────────── */}
+      {previewDoc && (
+        <div className="modal-bg" onClick={() => setPreviewDoc(null)}>
+          <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd">
+              <h3>
+                {isImageFile(previewDoc.fileName, previewDoc.fileMime) ? <ImageIcon size={17} /> : <FileText size={17} />}
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {previewDoc.fileName || previewDoc.content}
+                </span>
+              </h3>
+              <button type="button" className="modal-close" onClick={() => setPreviewDoc(null)} aria-label={t('Close', 'বন্ধ করুন', lang)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                  padding: '10px 14px',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border-1)',
+                  borderRadius: '10px',
+                  fontSize: '12px',
+                }}
+              >
+                <div>
+                  <strong style={{ color: 'var(--text-1)' }}>{previewDoc.senderName}</strong>
+                  {previewDoc.senderRole && <span style={{ color: 'var(--text-3)' }}> · {previewDoc.senderRole}</span>}
+                  <div style={{ color: 'var(--text-3)', fontSize: '11px', marginTop: '2px' }}>
+                    {t('Shared at', 'শেয়ারের সময়', lang)} {previewDoc.timestamp} · {previewDoc.fileSize || '2.4 MB'}
+                  </div>
+                </div>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--status-success-text)',
+                    background: 'var(--status-success-bg)',
+                    border: '1px solid var(--status-success-border)',
+                    padding: '3px 9px',
+                    borderRadius: '999px',
+                  }}
+                >
+                  <ShieldCheck size={13} />
+                  {t('Scanned & verified', 'স্ক্যানকৃত ও যাচাইকৃত', lang)}
+                </span>
+              </div>
+
+              {isImageFile(previewDoc.fileName, previewDoc.fileMime) ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--surface-2)',
+                    border: '1px solid var(--border-1)',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    minHeight: '240px',
+                    maxHeight: '420px',
+                    overflow: 'auto',
+                  }}
+                >
+                  <img
+                    src={previewDoc.fileUrl || '/logoBOGCL.png'}
+                    alt={previewDoc.fileName || 'Attached image'}
+                    style={{ maxWidth: '100%', maxHeight: '380px', objectFit: 'contain', borderRadius: '8px' }}
+                  />
+                </div>
+              ) : previewDoc.fileUrl && (previewDoc.fileMime === 'application/pdf' || previewDoc.fileName?.toLowerCase().endsWith('.pdf')) ? (
+                <iframe
+                  src={previewDoc.fileUrl}
+                  title={previewDoc.fileName || 'Document preview'}
+                  style={{
+                    width: '100%',
+                    height: '380px',
+                    border: '1px solid var(--border-1)',
+                    borderRadius: '10px',
+                    background: 'var(--surface-2)',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    background: 'var(--surface-1)',
+                    border: '1px solid var(--border-1)',
+                    borderRadius: '12px',
+                    padding: '18px 20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-1)', paddingBottom: '10px' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                        {t('Bashundhara Oil & Gas Co. Ltd. · Document Preview', 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস কোং লিঃ · নথি প্রিভিউ', lang)}
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-1)', marginTop: '2px' }}>
+                        {previewDoc.fileName}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '11px', fontFamily: 'monospace', background: 'var(--surface-2)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border-1)', color: 'var(--text-2)' }}>
+                      {previewDoc.fileName?.split('.').pop()?.toUpperCase() || 'DOC'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--text-2)', lineHeight: 1.6 }}>
+                    <p style={{ margin: '0 0 8px' }}>
+                      {t(
+                        'Official leadership attachment verified by BOGCL Document Gateway. Click "Download File" below to save a local copy to your device.',
+                        'বিওজিসিএল ডকুমেন্ট গেটওয়ে দ্বারা যাচাইকৃত দাপ্তরিক সংযুক্তি। আপনার ডিভাইসে সংরক্ষণ করতে নিচে "ডাউনলোড করুন" বাটনে ক্লিক করুন।',
+                        lang
+                      )}
+                    </p>
+                    <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--text-2)' }}>
+                      <li>{t('Keraniganj Plant Daily Output: 520 MT Grade 60/70 Bitumen (+8% above target)', 'কেরানীগঞ্জ প্ল্যান্ট দৈনিক উৎপাদন: ৫২০ মেট্রিক টন গ্রেড ৬০/৭০ বিটুমিন (লক্ষ্যমাত্রার চেয়ে ৮% বেশি)', lang)}</li>
+                      <li>{t('Storage Tanks TK-101 to TK-104: Operating within normal temperature and pressure parameters', 'স্টোরেজ ট্যাংক TK-101 হতে TK-104: স্বাভাবিক তাপমাত্রা ও চাপের মধ্যে সচল', lang)}</li>
+                      <li>{t('Quality Assurance: Batch lab test certificates verified and archived', 'মান নিয়ন্ত্রণ: ব্যাচ ল্যাব টেস্ট সনদ যাচাইকৃত ও সংরক্ষিত', lang)}</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-ft">
+              <button type="button" className="btn-outline" onClick={() => setPreviewDoc(null)}>
+                {t('Close', 'বন্ধ করুন', lang)}
+              </button>
+              {previewDoc.fileUrl && (
+                <a
+                  href={previewDoc.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-outline"
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <ExternalLink size={14} />
+                  {t('Open in new tab', 'নতুন ট্যাবে খুলুন', lang)}
+                </a>
+              )}
+              <button type="button" className="btn-primary" onClick={() => handleDownloadDocument(previewDoc)}>
+                <Download size={14} />
+                {t('Download File', 'ফাইল ডাউনলোড করুন', lang)}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showCallModal && (

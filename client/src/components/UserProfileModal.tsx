@@ -179,7 +179,7 @@ export default function UserProfileModal({
                 </h3>
                 <span className="badge gold" style={{ fontSize: '10px', fontFamily: 'monospace' }}>{meta.empId}</span>
                 <span className="badge success" style={{ fontSize: '10px' }}>
-                  🟢 {t('Active Staff', 'সক্রিয় কর্মী', lang)}
+                  {t('Active Staff', 'সক্রিয় কর্মী', lang)}
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--brand-gold)', fontWeight: 600, marginTop: '2px' }}>

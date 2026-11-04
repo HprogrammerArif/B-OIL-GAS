@@ -266,21 +266,6 @@ export default function Topbar({
               ) : null}
               <span className="user-avatar-initials">{meta.initials}</span>
               <span className="avatar-status-dot" title={t('Active Session', 'সক্রিয় সেশন', lang)} />
-              {role === 'chairman' && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
-                    fontSize: '10px',
-                    lineHeight: 1,
-                    pointerEvents: 'none',
-                  }}
-                  title="Chairman & Managing Director"
-                >
-                  👑
-                </span>
-              )}
             </div>
             <ChevronDown size={11} className={`chevron-indicator ${showDropdown ? 'open' : ''}`} />
           </button>
@@ -326,7 +311,7 @@ export default function Topbar({
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div className="name" style={{ fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(meta.name, meta.nameBn, lang)}</span>
-                      <span className="active-pill-badge">🟢 {t('Online', 'অনলাইন', lang)}</span>
+                      <span className="active-pill-badge">{t('Online', 'অনলাইন', lang)}</span>
                     </div>
                     <div className="role" style={{ fontSize: '10.5px', color: 'var(--brand-gold)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t(meta.label, meta.labelBn, lang)}
@@ -478,7 +463,7 @@ export default function Topbar({
                                 borderColor: `${rMeta.avatarColor}40`,
                               }}
                             >
-                              <span className="role-mini-emoji">{rMeta.roleEmoji || '👤'}</span>
+                              <span className="role-mini-emoji" style={{ fontSize: '11px', fontWeight: 700 }}>{rMeta.initials}</span>
                             </div>
                             <div className="role-item-meta">
                               <div className="role-item-name">{t(rMeta.name, rMeta.nameBn, lang)}</div>

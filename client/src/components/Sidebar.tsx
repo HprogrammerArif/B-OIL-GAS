@@ -413,7 +413,7 @@ export default function Sidebar({
           <div className="role-badge-dot" />
           <div className="role-badge-text">
             <div className="label">
-              {role === 'chairman' ? '👑 ' : ''}{t('Signed In As', 'সক্রিয় পদবি', lang)} • {meta.empId}
+              {t('Signed In As', 'সক্রিয় পদবি', lang)} • {meta.empId}
             </div>
             <div className="value">{t(meta.label, meta.labelBn, lang)}</div>
           </div>
