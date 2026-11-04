@@ -1040,6 +1040,7 @@
   transition: all 0.18s ease;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .guest-feed-card:hover {
   border-color: var(--brand-slate-300);
@@ -1599,6 +1600,19 @@
   padding: 18px 20px !important;
   color: var(--text-2) !important;
   background: var(--surface-1) !important;
+  overscroll-behavior: contain;
+}
+.modal > form,
+.modal-dialog > form,
+.app-modal-dialog > form,
+.claims-modal-dialog > form,
+.fleet-modal-dialog > form,
+.notice-modal-dialog > form {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
 }
 .modal-ft {
   flex: 0 0 auto !important;
