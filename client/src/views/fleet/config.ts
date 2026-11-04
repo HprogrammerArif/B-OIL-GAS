@@ -13,6 +13,12 @@ import type { Driver, FleetNotification, Vehicle, VehicleRequisition } from '../
 
 export type FleetMode = 'dispatch' | 'oversight' | 'driver' | 'requester';
 
+/**
+ * Feature Toggle: Tri-Party Full-Desk Chat System (`FleetChatCenter` & `TripChatModal`).
+ * Set to `true` to re-enable the Messages tab and Tri-Party Chat buttons across Fleet & Dispatch.
+ */
+export const ENABLE_FLEET_CHAT_DESK = false;
+
 /** Display labels for requisition, driver and vehicle status values. */
 const FLEET_STATUS_LABEL: Record<string, readonly [string, string]> = {
   pending: ['Pending', 'অপেক্ষমাণ'],

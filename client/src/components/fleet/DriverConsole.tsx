@@ -5,7 +5,7 @@ import { showToast } from '../ToastManager';
 import DriverCallModal from './DriverCallModal';
 import { EmptyState } from '../ui';
 import { useCurrentUser } from '../../auth/session';
-import { driverRecordFor } from '../../views/fleet/config';
+import { driverRecordFor, ENABLE_FLEET_CHAT_DESK } from '../../views/fleet/config';
 import { nextRef } from '../../lib/refs';
 import { nowTime } from '../../lib/clock';
 import {
@@ -275,13 +275,15 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => onOpenChat(activeMission)}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--status-info-bg)', color: 'var(--status-info-text)', border: '1px solid var(--status-info-border)', cursor: 'pointer' }}
-              >
-                <MessageSquare size={13} />
-                {t('Mission Chat (3-Way)', 'ট্রিপ চ্যাট', lang)}
-              </button>
+              {ENABLE_FLEET_CHAT_DESK && (
+                <button
+                  onClick={() => onOpenChat(activeMission)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--status-info-bg)', color: 'var(--status-info-text)', border: '1px solid var(--status-info-border)', cursor: 'pointer' }}
+                >
+                  <MessageSquare size={13} />
+                  {t('Mission Chat (3-Way)', 'ট্রিপ চ্যাট', lang)}
+                </button>
+              )}
               <button
                 onClick={() => initiateCall(activeMission.requesterName, activeMission.dept, activeMission.phone || '+880 1712-334455')}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--status-success-bg)', color: 'var(--status-success-text)', border: '1px solid var(--status-success-border)', cursor: 'pointer' }}

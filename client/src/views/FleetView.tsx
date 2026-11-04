@@ -5,7 +5,7 @@ import { showToast } from '../components/ToastManager';
 import { useFleetStore, Driver, Vehicle, VehicleRequisition, TripChatMessage, FleetNotification } from '../store/fleetStore';
 import { useCurrentUser } from '../auth/session';
 import { nowTime } from '../lib/clock';
-import { fleetModeFor, fleetPartyFor, requisitionsVisibleTo, notificationsVisibleTo, findPoolingSuggestion, fleetStatusLabel } from './fleet/config';
+import { fleetModeFor, fleetPartyFor, requisitionsVisibleTo, notificationsVisibleTo, findPoolingSuggestion, fleetStatusLabel, ENABLE_FLEET_CHAT_DESK } from './fleet/config';
 import {
   Truck, Car, Fuel, MapPin, CheckCircle, Clock, AlertCircle,
   Plus, Users, Navigation, QrCode, FileText, Sparkles, Award,
@@ -63,7 +63,7 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [driverTab, setDriverTab] = useState<'console' | 'chat_center'>('console');
 
   // Check if dedicated chat center tab is active across roles to lock viewport and maximize chat area
-  const isChatTabActive = (isEmployee && employeeTab === 'chat_center') || (!isEmployee && !isDriver && activeAdminTab === 'chat_center') || (isDriver && driverTab === 'chat_center');
+  const isChatTabActive = ENABLE_FLEET_CHAT_DESK && ((isEmployee && employeeTab === 'chat_center') || (!isEmployee && !isDriver && activeAdminTab === 'chat_center') || (isDriver && driverTab === 'chat_center'));
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -814,7 +814,9 @@ export default function FleetView({ role, lang }: ViewProps) {
                   { id: 'telematics', label: t('Vehicle locations', 'গাড়ির অবস্থান', lang), icon: Navigation, tone: 'blue' as const },
                   { id: 'fuel', label: t('Fuel vouchers', 'ফুয়েল ভাউচার', lang), icon: Fuel, tone: 'emerald' as const },
                   { id: 'gate_manifest', label: t('Gate log', 'গেট লগ', lang), icon: FileText, tone: 'violet' as const },
-                  { id: 'chat_center', label: t('Messages', 'বার্তা', lang), icon: MessageSquare, tone: 'indigo' as const },
+                  ...(ENABLE_FLEET_CHAT_DESK
+                    ? [{ id: 'chat_center' as const, label: t('Messages', 'বার্তা', lang), icon: MessageSquare, tone: 'indigo' as const }]
+                    : []),
                 ]
               : []),
           ]}
@@ -822,7 +824,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── Employee Navigation Tabs ─── */}
-      {isEmployee && (
+      {isEmployee && ENABLE_FLEET_CHAT_DESK && (
         <FleetTabs
           compact={isChatTabActive}
           ariaLabel={t('Travel desk sections', 'ট্রাভেল ডেস্ক বিভাগ', lang)}
@@ -836,7 +838,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── Driver Navigation Tabs ─── */}
-      {isDriver && (
+      {isDriver && ENABLE_FLEET_CHAT_DESK && (
         <FleetTabs
           compact={isChatTabActive}
           ariaLabel={t('Driver terminal sections', 'ড্রাইভার টার্মিনাল বিভাগ', lang)}
@@ -854,13 +856,14 @@ export default function FleetView({ role, lang }: ViewProps) {
         <DriverConsole
           lang={lang}
           onOpenChat={(req) => {
+            if (!ENABLE_FLEET_CHAT_DESK) return;
             setSelectedChatChannelId(req.id);
             setDriverTab('chat_center');
           }}
         />
       )}
 
-      {isDriver && driverTab === 'chat_center' && (
+      {ENABLE_FLEET_CHAT_DESK && isDriver && driverTab === 'chat_center' && (
         <div className="fleet-chat-desk-container">
           <FleetChatCenter
             party={party}
@@ -1141,29 +1144,31 @@ export default function FleetView({ role, lang }: ViewProps) {
                               )}
 
                               {/* ─── Dedicated Tri-Party Mission Coordination Chat (Driver ↔ Employee ↔ Admin) ─── */}
-                              <button
-                                className="btn-outline"
-                                style={{
-                                  fontSize: '11px',
-                                  padding: '4px 9px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '5px',
-                                  color: 'var(--status-info-text)',
-                                  borderColor: 'var(--status-info-bright)',
-                                  background: 'rgba(29, 78, 216, 0.06)',
-                                  fontWeight: 700,
-                                  borderRadius: '8px',
-                                }}
-                                onClick={() => {
-                                  setActiveChatReq(r);
-                                  setSelectedChatChannelId(r.id);
-                                }}
-                                title={t('Open Tri-Party Mission Chat (Driver ↔ Staff ↔ Admin)', 'চালক, কর্মকর্তা ও ডেসপ্যাচ ত্রি-পক্ষীয় চ্যাট খুলুন', lang)}
-                              >
-                                <MessageSquare size={12} color="var(--status-info)" />
-                                <span>{t('Tri-Party Chat', 'ত্রি-পক্ষীয় চ্যাট', lang)}</span>
-                              </button>
+                              {ENABLE_FLEET_CHAT_DESK && (
+                                <button
+                                  className="btn-outline"
+                                  style={{
+                                    fontSize: '11px',
+                                    padding: '4px 9px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    color: 'var(--status-info-text)',
+                                    borderColor: 'var(--status-info-bright)',
+                                    background: 'rgba(29, 78, 216, 0.06)',
+                                    fontWeight: 700,
+                                    borderRadius: '8px',
+                                  }}
+                                  onClick={() => {
+                                    setActiveChatReq(r);
+                                    setSelectedChatChannelId(r.id);
+                                  }}
+                                  title={t('Open Tri-Party Mission Chat (Driver ↔ Staff ↔ Admin)', 'চালক, কর্মকর্তা ও ডেসপ্যাচ ত্রি-পক্ষীয় চ্যাট খুলুন', lang)}
+                                >
+                                  <MessageSquare size={12} color="var(--status-info)" />
+                                  <span>{t('Tri-Party Chat', 'ত্রি-পক্ষীয় চ্যাট', lang)}</span>
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -1683,7 +1688,7 @@ export default function FleetView({ role, lang }: ViewProps) {
       {/* ══════════════════════════════════════════════════════════════
           TAB 6: DEDICATED DISPATCH COMMUNICATIONS DESK (Staff & Admin)
           ══════════════════════════════════════════════════════════════ */}
-      {((isEmployee && employeeTab === 'chat_center') || (isTransportAdmin && activeAdminTab === 'chat_center')) && (
+      {ENABLE_FLEET_CHAT_DESK && ((isEmployee && employeeTab === 'chat_center') || (isTransportAdmin && activeAdminTab === 'chat_center')) && (
         <div className="fleet-chat-desk-container">
           <FleetChatCenter
             party={party}
@@ -2111,19 +2116,21 @@ export default function FleetView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button
-                type="button"
-                style={{ padding: '9px 16px', borderRadius: '10px', border: '1.5px solid var(--status-info)', color: 'var(--status-info-text)', backgroundColor: 'var(--status-info-bg)', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-                onClick={() => {
-                  const targetReq = selectedTripPassReq;
-                  setSelectedTripPassReq(null);
-                  setActiveChatReq(targetReq);
-                }}
-              >
-                <MessageSquare size={14} />
-                {t('Open Trip Chat', 'ট্রিপ চ্যাট খুলুন', lang)}
-              </button>
+            <div className="fleet-modal-ft" style={{ padding: '16px 28px', backgroundColor: 'var(--surface-0)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: ENABLE_FLEET_CHAT_DESK ? 'space-between' : 'flex-end', alignItems: 'center' }}>
+              {ENABLE_FLEET_CHAT_DESK && (
+                <button
+                  type="button"
+                  style={{ padding: '9px 16px', borderRadius: '10px', border: '1.5px solid var(--status-info)', color: 'var(--status-info-text)', backgroundColor: 'var(--status-info-bg)', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  onClick={() => {
+                    const targetReq = selectedTripPassReq;
+                    setSelectedTripPassReq(null);
+                    setActiveChatReq(targetReq);
+                  }}
+                >
+                  <MessageSquare size={14} />
+                  {t('Open Trip Chat', 'ট্রিপ চ্যাট খুলুন', lang)}
+                </button>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <button
@@ -2271,22 +2278,24 @@ export default function FleetView({ role, lang }: ViewProps) {
       )}
 
       {/* ─── Tri-Party Trip Chat Modal ─────────────────────────────── */}
-      <TripChatModal
-        isOpen={Boolean(activeChatReq)}
-        onClose={() => setActiveChatReq(null)}
-        requisition={activeChatReq}
-        party={party}
-        senderName={user?.name ?? ''}
-        readOnly={isOversight}
-        lang={lang}
-        onOpenFullDesk={isOversight ? undefined : (req) => {
-          setActiveChatReq(null);
-          setSelectedChatChannelId(req.id);
-          if (isEmployee) setEmployeeTab('chat_center');
-          else if (isDriver) setDriverTab('chat_center');
-          else setActiveAdminTab('chat_center');
-        }}
-      />
+      {ENABLE_FLEET_CHAT_DESK && (
+        <TripChatModal
+          isOpen={Boolean(activeChatReq)}
+          onClose={() => setActiveChatReq(null)}
+          requisition={activeChatReq}
+          party={party}
+          senderName={user?.name ?? ''}
+          readOnly={isOversight}
+          lang={lang}
+          onOpenFullDesk={isOversight ? undefined : (req) => {
+            setActiveChatReq(null);
+            setSelectedChatChannelId(req.id);
+            if (isEmployee) setEmployeeTab('chat_center');
+            else if (isDriver) setDriverTab('chat_center');
+            else setActiveAdminTab('chat_center');
+          }}
+        />
+      )}
 
       {/* ─── Fleet Logistics Notifications Drawer ──────────────────── */}
       <FleetNotificationsDrawer
@@ -2298,7 +2307,7 @@ export default function FleetView({ role, lang }: ViewProps) {
           const req = requisitions.find(r => r.id === reqId);
           if (req) setSelectedTripPassReq(req);
         }}
-        onOpenChat={isOversight ? undefined : (reqId) => {
+        onOpenChat={!ENABLE_FLEET_CHAT_DESK || isOversight ? undefined : (reqId) => {
           setShowNotificationsDrawer(false);
           setSelectedChatChannelId(reqId);
           if (isEmployee) setEmployeeTab('chat_center');
