@@ -955,9 +955,6 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 )}
               </div>
               <p className="ic-room-desc" title={roomSubtitle}>
-                {!isGroup && activeMember && (
-                  <><span className={`ic-dot inline ${activeMember.status}`} /> {statusText(activeMember.status)} · </>
-                )}
                 {roomSubtitle}
               </p>
             </div>
