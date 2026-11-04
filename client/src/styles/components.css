@@ -1501,6 +1501,25 @@
 .notice-hd { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px; }
 
 /* ─── MODAL (SYSTEM-WIDE ENTERPRISE STANDARD) ─────────────────────────────────── */
+html.modal-scroll-locked,
+body.modal-scroll-locked,
+html:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop, .drawer-backdrop, .command-palette-backdrop, .ic-call-overlay, .sidebar-mobile-backdrop, .lock-screen-backdrop),
+body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop, .drawer-backdrop, .command-palette-backdrop, .ic-call-overlay, .sidebar-mobile-backdrop, .lock-screen-backdrop) {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+.modal-bg,
+.app-modal-overlay,
+.eam-modal-overlay,
+.apv-drawer-backdrop,
+.drawer-backdrop,
+.command-palette-backdrop,
+.ic-call-overlay,
+.lock-screen-backdrop {
+  overscroll-behavior: contain !important;
+}
+
 .modal-bg {
   position: fixed !important;
   inset: 0 !important;

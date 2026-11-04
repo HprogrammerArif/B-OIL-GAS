@@ -60,6 +60,7 @@ export default function LockScreenModal({
 
   const modalContent = (
     <div
+      className="lock-screen-backdrop"
       style={{
         position: 'fixed',
         top: 0,
