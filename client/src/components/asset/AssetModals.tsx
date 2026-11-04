@@ -233,54 +233,54 @@ export function RegisterAssetModal({
               <Plus size={19} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('Commission & Capitalize Enterprise Asset', 'নতুন মূলধনী সম্পদ নিবন্ধন ও কমিশনিং', lang)}</h3>
-              <div className="eam-modal-subtitle">ISO 55001 / ISO 14224 taxonomy • Fixed-asset capitalization</div>
+              <h3 className="eam-modal-title">{t('Add Purchased Equipment to Register', 'নতুন মূলধনী সম্পদ নিবন্ধন ও কমিশনিং', lang)}</h3>
+              <div className="eam-modal-subtitle">{t('Record details, assign an operator or store pool, and set yearly depreciation.', 'তথ্য নথিভুক্ত করুন, দায়িত্বপ্রাপ্ত কর্মকর্তা নির্ধারণ করুন এবং বার্ষিক অবচয় নির্ধারণ করুন।', lang)}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+        <form onSubmit={handleSubmit}>
           <div className="eam-modal-body">
             {/* 1-Click Quick-Fill Templates */}
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
                 <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
-                <span>{t('1-Click Quick-Fill Equipment Templates', 'দ্রুত পূরণের টেমপ্লেট নির্বাচন করুন', lang)}</span>
+                <span>{t('Fill with an example', 'দ্রুত পূরণের টেমপ্লেট নির্বাচন করুন', lang)}</span>
               </div>
               <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('pump')}>⚙️ Refinery Pump</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('laptop')}>💻 Corporate Laptop</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('tanker')}>🚛 30kL Bitumen Tanker</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('safety')}>🛡️ ATEX Gas Detector</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('lab')}>🔬 QC Lab Rheometer</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('pump')}>{t('Refinery Pump', 'রিফাইনারি পাম্প', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('laptop')}>{t('Corporate Laptop', 'কর্পোরেট ল্যাপটপ', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('tanker')}>{t('30kL Bitumen Tanker', '৩০কেএল বিটুমিন ট্যাংকার', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('safety')}>{t('Gas Detector', 'গ্যাস ডিটেক্টর', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('lab')}>{t('Lab Rheometer', 'ল্যাব রিওমিটার', lang)}</button>
               </div>
             </div>
 
             <div className="eam-form-section-title">
-              1. {t('Asset Identity, Placement & Custody', 'সম্পদের পরিচিতি, অবস্থান ও হেফাজত', lang)}
+              1. {t('Equipment Identity, Site & Operator', 'সম্পদের পরিচিতি, অবস্থান ও হেফাজত', lang)}
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Asset Tag Code', 'অ্যাসেট ট্যাগ কোড', lang)} *</label>
+                <label className="eam-label">{t('Equipment Tag Code', 'অ্যাসেট ট্যাগ কোড', lang)} *</label>
                 <input type="text" className="eam-input" value={tag} onChange={(e) => setTag(e.target.value)} required />
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('ISO 14224 Equipment Class', 'সরঞ্জাম শ্রেণী', lang)} *</label>
+                <label className="eam-label">{t('Equipment Category', 'সরঞ্জাম শ্রেণী', lang)} *</label>
                 <select className="eam-select" value={category} onChange={(e) => setCategory(e.target.value as AssetCategory)}>
-                  <option value="plant">⚙️ Refinery Plant & Process Machinery</option>
-                  <option value="vehicle">🚛 Heavy Fleet & Bitumen Tankers</option>
-                  <option value="it">💻 SCADA, DCS & Corporate IT Hardware</option>
-                  <option value="safety">🛡️ HSE, Fire & Gas Detection</option>
-                  <option value="lab">🔬 QC Metrology & Bitumen Lab</option>
-                  <option value="corporate">🏢 Corporate Facility & Infrastructure</option>
+                  <option value="plant">{t('Refinery Plant & Process Machinery', 'রিফাইনারি প্ল্যান্ট ও প্রসেস যন্ত্রপাতি', lang)}</option>
+                  <option value="vehicle">{t('Heavy Fleet & Bitumen Tankers', 'ভারী বহর ও বিটুমিন ট্যাংকার', lang)}</option>
+                  <option value="it">{t('Control Systems & Corporate IT', 'কন্ট্রোল সিস্টেম ও কর্পোরেট আইটি', lang)}</option>
+                  <option value="safety">{t('Safety, Fire & Gas Detection', 'নিরাপত্তা, অগ্নি ও গ্যাস শনাক্তকরণ', lang)}</option>
+                  <option value="lab">{t('Quality Control & Bitumen Lab', 'মান নিয়ন্ত্রণ ও বিটুমিন ল্যাব', lang)}</option>
+                  <option value="corporate">{t('Office & Facility Infrastructure', 'অফিস ও স্থাপনা অবকাঠামো', lang)}</option>
                 </select>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('Asset / Equipment Full Title', 'যন্ত্রপাতির পূর্ণ নাম', lang)} *</label>
+              <label className="eam-label">{t('Equipment Full Name', 'যন্ত্রপাতির পূর্ণ নাম', lang)} *</label>
               <input
                 type="text"
                 className="eam-input"
@@ -301,22 +301,22 @@ export function RegisterAssetModal({
                 </select>
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Functional Location (Unit / Bay / Floor)', 'ইউনিট বা অবস্থান', lang)}</label>
+                <label className="eam-label">{t('Unit, Bay or Floor', 'ইউনিট বা অবস্থান', lang)}</label>
                 <input type="text" className="eam-input" value={functionalLocation} onChange={(e) => setFunctionalLocation(e.target.value)} />
               </div>
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('RCM Criticality Class', 'ঝুঁকি ও গুরুত্ব শ্রেণী', lang)}</label>
+                <label className="eam-label">{t('Importance Level', 'ঝুঁকি ও গুরুত্ব শ্রেণী', lang)}</label>
                 <select className="eam-select" value={criticality} onChange={(e) => setCriticality(e.target.value as AssetCriticality)}>
-                  <option value="critical_a">Class A — Safety / Production Critical</option>
-                  <option value="essential_b">Class B — Operational Essential</option>
-                  <option value="general_c">Class C — General Corporate / Support</option>
+                  <option value="critical_a">{t('Safety or Production Critical', 'নিরাপত্তা বা উৎপাদন ক্রিটিক্যাল', lang)}</option>
+                  <option value="essential_b">{t('Operations Essential', 'অপারেশন আবশ্যক', lang)}</option>
+                  <option value="general_c">{t('General Office / Support', 'সাধারণ অফিস / সহায়তা', lang)}</option>
                 </select>
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Assigned Custodian Officer', 'দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}</label>
+                <label className="eam-label">{t('Assigned Operator / Custodian', 'দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}</label>
                 <select
                   className="eam-select"
                   value={selectedEmpId}
@@ -325,7 +325,7 @@ export function RegisterAssetModal({
                 >
                   {activeEmployees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.name} ({emp.id} · {emp.dept})
+                      {emp.name} — {emp.dept}
                     </option>
                   ))}
                 </select>
@@ -340,7 +340,7 @@ export function RegisterAssetModal({
               />
               <span>
                 {t(
-                  'Hold initially in Central Store Pool (Stage 3: Capitalized & QR-Tagged, ready for later custodian deployment)',
+                  'Keep in Central Store Pool for now (assign to an operator later)',
                   'প্রাথমিকভাবে কেন্দ্রীয় স্টোর পুলে রাখুন (পরবর্তীতে কর্মীকে বরাদ্দ দেওয়ার জন্য)',
                   lang
                 )}
@@ -348,31 +348,31 @@ export function RegisterAssetModal({
             </label>
 
             <div className="eam-form-section-title">
-              2. {t('IAS 16 Valuation, Salvage & Depreciation Policy', 'মূল্যায়ন ও অবচয় নীতি (IAS 16)', lang)}
+              2. {t('Purchase Cost, Scrap Value & Yearly Depreciation', 'মূল্যায়ন ও অবচয় নীতি', lang)}
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Acquisition Cost / CAPEX (BDT ৳)', 'ক্রয়মূল্য (টাকা)', lang)}</label>
+                <label className="eam-label">{t('Purchase Cost (BDT ৳)', 'ক্রয়মূল্য (টাকা)', lang)}</label>
                 <input type="number" className="eam-input" value={purchaseCost} onChange={(e) => setPurchaseCost(e.target.value)} />
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Residual / Salvage Value (BDT ৳)', 'অবশিষ্ট মূল্য (টাকা)', lang)}</label>
+                <label className="eam-label">{t('Expected Scrap / Resale Value (BDT ৳)', 'অবশিষ্ট মূল্য (টাকা)', lang)}</label>
                 <input type="number" className="eam-input" value={salvageValue} onChange={(e) => setSalvageValue(e.target.value)} />
               </div>
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Useful Economic Life (Years)', 'আয়ুষ্কাল (বছর)', lang)}</label>
+                <label className="eam-label">{t('Expected Lifespan (Years)', 'আয়ুষ্কাল (বছর)', lang)}</label>
                 <input type="number" className="eam-input" value={usefulLifeYears} onChange={(e) => setUsefulLifeYears(e.target.value)} />
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('IAS 16 Depreciation Method', 'অবচয় পদ্ধতি (IAS 16)', lang)}</label>
+                <label className="eam-label">{t('Depreciation Method', 'অবচয় পদ্ধতি', lang)}</label>
                 <select className="eam-select" value={depMethod} onChange={(e) => setDepMethod(e.target.value as DepreciationMethod)}>
-                  <option value="SLM">Straight-Line Method (SLM)</option>
-                  <option value="WDV">Written-Down / Declining Balance (WDV)</option>
-                  <option value="UOP">Units of Production / Runtime Hours (UoP)</option>
+                  <option value="SLM">{t('Equal amount each year (Straight-Line)', 'প্রতি বছর সমান হারে (SLM)', lang)}</option>
+                  <option value="WDV">{t('Higher in early years (Declining Balance)', 'প্রথম দিকে বেশি হারে (WDV)', lang)}</option>
+                  <option value="UOP">{t('Based on running hours (Usage)', 'ব্যবহারের ঘণ্টার ওপর ভিত্তি করে (UoP)', lang)}</option>
                 </select>
               </div>
             </div>
@@ -380,21 +380,21 @@ export function RegisterAssetModal({
             {/* Live Calculated Depreciation Preview */}
             <div className="eam-live-calc-box">
               <div>
-                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Depreciable Base:', 'অবচয়যোগ্য ভিত্তি:', lang)}</span>{' '}
-                <strong>৳{livePreview.depBase.toLocaleString()}</strong>
+                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Depreciable Value:', 'অবচয়যোগ্য ভিত্তি:', lang)}</span>{' '}
+                <strong>৳{livePreview.depBase.toLocaleString('en-IN')}</strong>
               </div>
               <div>
-                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Yr-1 Charge:', 'বার্ষিক অবচয়:', lang)}</span>{' '}
-                <strong style={{ color: 'var(--brand-crimson)' }}>৳{livePreview.annual.toLocaleString()}/yr</strong>
+                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Yearly Drop:', 'বার্ষিক অবচয়:', lang)}</span>{' '}
+                <strong style={{ color: 'var(--brand-crimson)' }}>৳{livePreview.annual.toLocaleString('en-IN')}/yr</strong>
               </div>
               <div>
-                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Monthly FI-AA:', 'মাসিক চার্জ:', lang)}</span>{' '}
-                <strong style={{ color: 'var(--status-success)' }}>৳{livePreview.monthly.toLocaleString()}/mo</strong>
+                <span style={{ color: 'var(--brand-slate-500)' }}>{t('Monthly Drop:', 'মাসিক চার্জ:', lang)}</span>{' '}
+                <strong style={{ color: 'var(--status-success)' }}>৳{livePreview.monthly.toLocaleString('en-IN')}/mo</strong>
               </div>
             </div>
 
             <div className="eam-form-section-title">
-              3. {t('OEM Nameplate, Warranty & Statutory Calibration', 'প্রস্তুতকারক, ওয়ারেন্টি ও সংবিধিবদ্ধ ক্যালিব্রেশন', lang)}
+              3. {t('Manufacturer, Warranty & Inspection Schedule', 'প্রস্তুতকারক, ওয়ারেন্টি ও পরিদর্শন সময়সূচী', lang)}
             </div>
 
             <div className="eam-form-grid-3">
@@ -522,8 +522,8 @@ export function TransferAssetModal({
               <ArrowRightLeft size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('Assign / Transfer Custody & Site Gate Pass', 'সম্পদ হস্তান্তর ও গেট পাস ইস্যু', lang)}</h3>
-              <div className="eam-modal-subtitle">{asset.tag} • {asset.name}</div>
+              <h3 className="eam-modal-title">{t('Transfer Equipment & Issue Gate Pass', 'সম্পদ হস্তান্তর ও গেট পাস ইস্যু', lang)}</h3>
+              <div className="eam-modal-subtitle">{asset.name}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -532,15 +532,15 @@ export function TransferAssetModal({
         <form onSubmit={handleSubmit}>
           <div className="eam-modal-body">
             <div className="eam-spec-box" style={{ marginBottom: '14px' }}>
-              <div className="eam-spec-lbl">{t('Current Custody & Origin Site', 'বর্তমান হেফাজতকারী ও অবস্থান', lang)}</div>
+              <div className="eam-spec-lbl">{t('Current Operator & Site', 'বর্তমান হেফাজতকারী ও অবস্থান', lang)}</div>
               <div className="eam-spec-val">{asset.custodian} ({asset.department})</div>
-              <div className="eam-spec-sub">📍 {asset.facility} — {asset.functionalLocation}</div>
+              <div className="eam-spec-sub">{asset.facility} — {asset.functionalLocation}</div>
             </div>
 
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
                 <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
-                <span>{t('Quick Handover Scenarios', 'স্থানান্তরের ধরন নির্বাচন করুন', lang)}</span>
+                <span>{t('Fill with a common handover reason', 'স্থানান্তরের ধরন নির্বাচন করুন', lang)}</span>
               </div>
               <div className="eam-preset-chips">
                 <button
@@ -551,7 +551,7 @@ export function TransferAssetModal({
                     setReason('Deployed from Central Store Pool to active custodian duty with signed handover.');
                   }}
                 >
-                  📦 Store Pool Deployment
+                  {t('From Store Pool', 'স্টোর পুল থেকে বরাদ্দ', lang)}
                 </button>
                 <button
                   type="button"
@@ -562,7 +562,7 @@ export function TransferAssetModal({
                     setReason('Inter-site operational transfer under Security Material Gate Pass.');
                   }}
                 >
-                  🚛 Inter-Site Gate Pass
+                  {t('Between Sites (Gate Pass)', 'অন্য স্থাপনায় স্থানান্তর', lang)}
                 </button>
                 <button
                   type="button"
@@ -571,17 +571,17 @@ export function TransferAssetModal({
                     setReason('Departmental custodian reassignment following role rotation.');
                   }}
                 >
-                  👤 Officer Reassignment
+                  {t('Change Operator', 'কর্মকর্তা পরিবর্তন', lang)}
                 </button>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('New Receiving Custodian', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
+              <label className="eam-label">{t('New Receiving Operator', 'নতুন গ্রহণকারী কর্মকর্তা', lang)} *</label>
               <select className="eam-select" value={toEmpId} onChange={(e) => setToEmpId(e.target.value)}>
                 {activeEmployees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
-                    {emp.name} — {emp.designation} ({emp.id} · {emp.dept})
+                    {emp.name} — {emp.designation} ({emp.dept})
                   </option>
                 ))}
               </select>
@@ -589,7 +589,7 @@ export function TransferAssetModal({
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Destination Facility', 'গন্তব্য স্থাপনা', lang)}</label>
+                <label className="eam-label">{t('Destination Site', 'গন্তব্য স্থাপনা', lang)}</label>
                 <select className="eam-select" value={toFacility} onChange={(e) => setToFacility(e.target.value as AssetFacility)}>
                   <option value="Keraniganj Bitumen Refinery">Keraniganj Bitumen Refinery</option>
                   <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
@@ -597,13 +597,13 @@ export function TransferAssetModal({
                 </select>
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Target Functional Location', 'গন্তব্য ইউনিট / ডেস্ক', lang)} *</label>
+                <label className="eam-label">{t('Destination Unit or Desk', 'গন্তব্য ইউনিট / ডেস্ক', lang)} *</label>
                 <input type="text" className="eam-input" value={toLocation} onChange={(e) => setToLocation(e.target.value)} required />
               </div>
             </div>
 
             <div className="eam-field" style={{ marginBottom: 0 }}>
-              <label className="eam-label">{t('Transfer Justification & Gate Pass Remarks', 'স্থানান্তরের কারণ ও নির্দেশনা', lang)} *</label>
+              <label className="eam-label">{t('Why is this equipment moving?', 'স্থানান্তরের কারণ ও নির্দেশনা', lang)} *</label>
               <textarea className="eam-textarea" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} required />
             </div>
           </div>
@@ -611,7 +611,7 @@ export function TransferAssetModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-primary">
-              <ArrowRightLeft size={15} /> {t('Issue Gate Pass & Initiate Handover', 'গেট পাস ইস্যু ও স্থানান্তর শুরু করুন', lang)}
+              <ArrowRightLeft size={15} /> {t('Issue Gate Pass & Start Handover', 'গেট পাস ইস্যু ও স্থানান্তর শুরু করুন', lang)}
             </button>
           </div>
         </form>
@@ -742,34 +742,34 @@ export function CreateWorkOrderModal({
               <Wrench size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('Dispatch Maintenance / Calibration Work Order', 'রক্ষণাবেক্ষণ ও ক্যালিব্রেশন কার্যাদেশ তৈরি', lang)}</h3>
-              <div className="eam-modal-subtitle">Work order • Lock-out/tag-out • IAS 16 CAPEX/OPEX split</div>
+              <h3 className="eam-modal-title">{t('Create Servicing or Repair Work Order', 'রক্ষণাবেক্ষণ ও ক্যালিব্রেশন কার্যাদেশ তৈরি', lang)}</h3>
+              <div className="eam-modal-subtitle">{t('Schedule servicing, safety calibration, or breakdown repair for a machine.', 'যন্ত্রের সার্ভিসিং, ক্যালিব্রেশন বা মেরামতের কাজের আদেশ দিন।', lang)}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+        <form onSubmit={handleSubmit}>
           <div className="eam-modal-body">
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
                 <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
-                <span>{t('1-Click Work Order Presets', 'দ্রুত কার্যাদেশ টেমপ্লেট', lang)}</span>
+                <span>{t('Fill with a common work order', 'দ্রুত কার্যাদেশ টেমপ্লেট', lang)}</span>
               </div>
               <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cal')}>📐 Statutory Calibration</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('pm')}>🔧 Scheduled PM</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cm')}>🚨 Breakdown Repair</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('capex')}>💎 IAS 16 Major Overhaul</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cal')}>{t('Safety Calibration', 'নিরাপত্তা ক্যালিব্রেশন', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('pm')}>{t('Scheduled Service', 'নিয়মিত সার্ভিস', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cm')}>{t('Breakdown Repair', 'ব্রেকডাউন মেরামত', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('capex')}>{t('Major Overhaul', 'বৃহৎ ওভারহল', lang)}</button>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('Target Asset Tag', 'লক্ষ্যকৃত সম্পদ', lang)} *</label>
+              <label className="eam-label">{t('Machine / Equipment', 'লক্ষ্যকৃত সম্পদ', lang)} *</label>
               <select className="eam-select" value={chosenAsset?.id || ''} onChange={(e) => setAssetId(e.target.value)}>
                 {activeAssets.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.tag} — {a.name} ({a.facility})
+                    {a.name} ({a.facility})
                   </option>
                 ))}
               </select>
@@ -1012,8 +1012,14 @@ export function SubmitAssetRequisitionModal({
               <FilePlus size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('New Asset / Replacement CAPEX Requisition', 'নতুন সম্পদ বা প্রতিস্থাপন রিকুইজিশন', lang)}</h3>
-              <div className="eam-modal-subtitle">Stage 1 Lifecycle Birth • Multi-Tier Budget & Executive Sanction</div>
+              <h3 className="eam-modal-title">{t('Request New or Replacement Equipment', 'নতুন সম্পদ বা প্রতিস্থাপন রিকুইজিশন', lang)}</h3>
+              <div className="eam-modal-subtitle">
+                {t(
+                  'Ask to buy new or replacement equipment. Department head and leadership approve based on cost.',
+                  'নতুন বা প্রতিস্থাপন সরঞ্জাম কেনার আবেদন। খরচের পরিমাণের ওপর ভিত্তি করে অনুমোদন হবে।',
+                  lang
+                )}
+              </div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1024,35 +1030,35 @@ export function SubmitAssetRequisitionModal({
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
                 <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
-                <span>{t('1-Click Requisition Templates', 'দ্রুত রিকুইজিশন টেমপ্লেট', lang)}</span>
+                <span>{t('Fill with an example', 'দ্রুত রিকুইজিশন টেমপ্লেট', lang)}</span>
               </div>
               <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('laptop')}>💻 Field ERP Laptop</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('thermal')}>🌡️ Thermal IR Camera</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('lab')}>🔬 Digital Penetrometer</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('pump')}>⚙️ Standby Pump Skid</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('laptop')}>{t('Field Laptop', 'ফিল্ড ল্যাপটপ', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('thermal')}>{t('Thermal IR Camera', 'থার্মাল ক্যামেরা', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('lab')}>{t('Digital Penetrometer', 'ডিজিটাল পেনেট্রোমিটার', lang)}</button>
+                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('pump')}>{t('Standby Pump Skid', 'স্ট্যান্ডবাই পাম্প স্কিড', lang)}</button>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('Requested Equipment / Asset Title', 'প্রয়োজনীয় সরঞ্জামের নাম', lang)} *</label>
+              <label className="eam-label">{t('Equipment Needed', 'প্রয়োজনীয় সরঞ্জামের নাম', lang)} *</label>
               <input type="text" className="eam-input" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Asset Category', 'সম্পদ শ্রেণী', lang)}</label>
+                <label className="eam-label">{t('Category', 'সম্পদ শ্রেণী', lang)}</label>
                 <select className="eam-select" value={category} onChange={(e) => setCategory(e.target.value as AssetCategory)}>
-                  <option value="it">💻 SCADA / Corporate IT & Mobility</option>
-                  <option value="plant">⚙️ Refinery Plant Machinery</option>
-                  <option value="vehicle">🚛 Fleet & Tanker</option>
-                  <option value="safety">🛡️ Safety & Detection</option>
-                  <option value="lab">🔬 QC Lab Metrology</option>
-                  <option value="corporate">🏢 Corporate Facility</option>
+                  <option value="it">{t('IT, Computers & Control', 'আইটি, কম্পিউটার ও কন্ট্রোল', lang)}</option>
+                  <option value="plant">{t('Refinery Plant Machinery', 'রিফাইনারি প্ল্যান্ট যন্ত্রপাতি', lang)}</option>
+                  <option value="vehicle">{t('Vehicles & Tankers', 'যানবাহন ও ট্যাংকার', lang)}</option>
+                  <option value="safety">{t('Safety & Gas Detection', 'নিরাপত্তা ও গ্যাস শনাক্তকরণ', lang)}</option>
+                  <option value="lab">{t('Quality Control Lab', 'মান নিয়ন্ত্রণ ল্যাব', lang)}</option>
+                  <option value="corporate">{t('Office & Building', 'অফিস ও ভবন', lang)}</option>
                 </select>
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Deployment Facility', 'ব্যবহারের স্থাপনা', lang)}</label>
+                <label className="eam-label">{t('Site Where Needed', 'ব্যবহারের স্থাপনা', lang)}</label>
                 <select className="eam-select" value={facility} onChange={(e) => setFacility(e.target.value as AssetFacility)}>
                   <option value="Bashundhara Corporate HQ, Baridhara">Bashundhara Corporate HQ, Baridhara</option>
                   <option value="Keraniganj Bitumen Refinery">Keraniganj Bitumen Refinery</option>
@@ -1063,34 +1069,58 @@ export function SubmitAssetRequisitionModal({
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Estimated CAPEX Budget (BDT ৳)', 'আনুমানিক মূল্য (টাকা)', lang)} *</label>
+                <label className="eam-label">
+                  {t('Estimated Cost (BDT ৳)', 'আনুমানিক মূল্য (টাকা)', lang)} *{' '}
+                  {Number(cost) > 0 && (
+                    <span style={{ color: 'var(--brand-crimson)', fontWeight: 800 }}>
+                      (৳{(Number(cost) || 0).toLocaleString('en-IN')})
+                    </span>
+                  )}
+                </label>
                 <input type="number" className="eam-input" value={cost} onChange={(e) => setCost(e.target.value)} required />
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Urgency Level', 'জরুরিতা', lang)}</label>
+                <label className="eam-label">{t('Urgency', 'জরুরিতা', lang)}</label>
                 <select className="eam-select" value={urgency} onChange={(e) => setUrgency(e.target.value as 'critical' | 'high' | 'normal')}>
-                  <option value="normal">Normal — Planned Quarterly CAPEX</option>
-                  <option value="high">High — Operational Bottleneck</option>
-                  <option value="critical">Critical — Safety / Breakdown Replacement</option>
+                  <option value="normal">{t('Normal — Planned purchase', 'স্বাভাবিক — পরিকল্পিত ক্রয়', lang)}</option>
+                  <option value="high">{t('High — Slowing down work', 'উচ্চ — কাজে বিঘ্ন ঘটছে', lang)}</option>
+                  <option value="critical">{t('Critical — Safety or breakdown replacement', 'জরুরি — নিরাপত্তা বা ব্রেকডাউন প্রতিস্থাপন', lang)}</option>
                 </select>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('Required Technical Specifications', 'প্রযুক্তিগত স্পেসিফিকেশন', lang)} *</label>
+              <label className="eam-label">{t('Key Specifications Needed', 'প্রযুক্তিগত স্পেসিফিকেশন', lang)} *</label>
               <input type="text" className="eam-input" value={specs} onChange={(e) => setSpecs(e.target.value)} required />
             </div>
 
-            <div className="eam-field" style={{ marginBottom: 0 }}>
-              <label className="eam-label">{t('Business / ROI Justification', 'ব্যবসায়িক যৌক্তিকতা', lang)} *</label>
+            <div className="eam-field">
+              <label className="eam-label">{t('Why this equipment is needed', 'ব্যবসায়িক যৌক্তিকতা', lang)} *</label>
               <textarea className="eam-textarea" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} required />
+            </div>
+
+            <div className="eam-live-calc-box" style={{ marginBottom: 0 }}>
+              <span>
+                <strong>{t('What happens next:', 'পরবর্তী ধাপ:', lang)}</strong>{' '}
+                {(Number(cost) || 0) >= 500000
+                  ? t(
+                      'Because the estimated cost is ৳5,00,000 or more, this request goes to your Department Head, Finance, and the Managing Director for approval.',
+                      'প্রাক্কলিত ব্যয় ৳৫,০০,০০০ বা তার বেশি হওয়ায় এটি বিভাগীয় প্রধান, অর্থ বিভাগ এবং ব্যবস্থাপনা পরিচালকের অনুমোদনের জন্য যাবে।',
+                      lang
+                    )
+                  : t(
+                      'This request goes to your Department Head and Finance for approval before purchase.',
+                      'ক্রয়ের আগে এটি আপনার বিভাগীয় প্রধান এবং অর্থ বিভাগের অনুমোদনের জন্য যাবে।',
+                      lang
+                    )}
+              </span>
             </div>
           </div>
 
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-primary">
-              <CheckCircle size={15} /> {t('Submit Asset Requisition', 'রিকুইজিশন দাখিল করুন', lang)}
+              <CheckCircle size={15} /> {t('Submit Request', 'রিকুইজিশন দাখিল করুন', lang)}
             </button>
           </div>
         </form>
@@ -1141,8 +1171,8 @@ export function InitiateDecommissionModal({
               <ShieldAlert size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('Initiate Stage-7 Condemnation & Decommissioning', 'অকেজো ঘোষণা ও ডিকমিশনিং জরিপ শুরু', lang)}</h3>
-              <div className="eam-modal-subtitle">{asset.tag} • Carrying NBV: ৳{fin.netBookValue.toLocaleString()}</div>
+              <h3 className="eam-modal-title">{t('Retire Machine from Service', 'অকেজো ঘোষণা ও ডিকমিশনিং জরিপ শুরু', lang)}</h3>
+              <div className="eam-modal-subtitle">{asset.name} • {t('Book Value:', 'বর্তমান মূল্য:', lang)} ৳{fin.netBookValue.toLocaleString('en-IN')}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1160,30 +1190,30 @@ export function InitiateDecommissionModal({
                 marginBottom: '14px',
               }}
             >
-              <div style={{ fontWeight: 800, color: 'var(--brand-slate-900)' }}>{asset.name} ({asset.serialNo})</div>
+              <div style={{ fontWeight: 800, color: 'var(--brand-slate-900)' }}>{asset.name}</div>
               <div style={{ marginTop: '4px', color: 'var(--brand-slate-600)' }}>
-                Age: <strong>{asset.ageYears} / {asset.usefulLifeYears} yrs</strong> · Repair/CAPEX Ratio:{' '}
-                <strong style={{ color: 'var(--status-danger)' }}>{fin.repairToCapexRatioPct}%</strong> · Carrying NBV:{' '}
-                <strong>৳{fin.netBookValue.toLocaleString()}</strong>
+                {t('Age:', 'বয়স:')} <strong>{asset.ageYears} / {asset.usefulLifeYears} {t('yrs', 'বছর', lang)}</strong> · {t('Repairs vs Cost:', 'মেরামত ও মূল্যের অনুপাত:', lang)}{' '}
+                <strong style={{ color: 'var(--status-danger)' }}>{fin.repairToCapexRatioPct}%</strong> · {t('Book Value:', 'বর্তমান মূল্য:', lang)}{' '}
+                <strong>৳{fin.netBookValue.toLocaleString('en-IN')}</strong>
               </div>
             </div>
 
             <div className="eam-field">
-              <label className="eam-label">{t('Primary Condemnation Cause', 'ডিকমিশনিং-এর প্রধান কারণ', lang)}</label>
+              <label className="eam-label">{t('Main Reason for Retirement', 'ডিকমিশনিং-এর প্রধান কারণ', lang)}</label>
               <select
                 className="eam-select"
                 value={reason}
                 onChange={(e) => setReason(e.target.value as AssetDisposalDossier['reason'])}
               >
-                <option value="Economic Life Exhausted">Economic Life Exhausted (High Repair-to-Replacement Ratio)</option>
-                <option value="Irreparable Breakdown">Irreparable Mechanical / Structural Failure</option>
-                <option value="Technological Obsolescence">Technological / Cybersecurity Obsolescence</option>
-                <option value="Regulatory / Safety Condemnation">Statutory DoE / BSTI / HSE Safety Condemnation</option>
+                <option value="Economic Life Exhausted">{t('Lifespan reached / too costly to keep repairing', 'আয়ুষ্কাল শেষ / মেরামত ব্যয় বেশি', lang)}</option>
+                <option value="Irreparable Breakdown">{t('Cannot be repaired after breakdown', 'মেরামত-অযোগ্য যান্ত্রিক ত্রুটি', lang)}</option>
+                <option value="Technological Obsolescence">{t('Outdated technology', 'প্রযুক্তিগতভাবে পুরনো', lang)}</option>
+                <option value="Regulatory / Safety Condemnation">{t('Failed safety or government inspection', 'নিরাপত্তা বা সরকারি পরিদর্শনে অকৃতকার্য', lang)}</option>
               </select>
             </div>
 
             <div className="eam-field" style={{ marginBottom: 0 }}>
-              <label className="eam-label">{t('Engineering / Audit Survey Findings', 'কারিগরি জরিপ প্রতিবেদন', lang)} *</label>
+              <label className="eam-label">{t('Inspection Findings & Notes', 'কারিগরি জরিপ প্রতিবেদন', lang)} *</label>
               <textarea className="eam-textarea" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} required />
             </div>
           </div>
@@ -1191,7 +1221,7 @@ export function InitiateDecommissionModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-danger">
-              <Archive size={15} /> {t('Move to Stage-7 Condemned Queue', 'ডিকমিশন তালিকায় স্থানান্তর করুন', lang)}
+              <Archive size={15} /> {t('Retire Machine & Move to Scrap Queue', 'ডিকমিশন তালিকায় স্থানান্তর করুন', lang)}
             </button>
           </div>
         </form>
@@ -1263,8 +1293,8 @@ export function FinalizeDisposalModal({
               <DollarSign size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('Executive Write-Off & Stage-8 Disposal Realization', 'চূড়ান্ত অবলোপন, নিলাম ও আর্কাইভ অনুমোদন', lang)}</h3>
-              <div className="eam-modal-subtitle">Asset retirement • IAS 16.71 gain/loss posting</div>
+              <h3 className="eam-modal-title">{t('Record Final Sale or Scrap', 'চূড়ান্ত অবলোপন, নিলাম ও আর্কাইভ অনুমোদন', lang)}</h3>
+              <div className="eam-modal-subtitle">{asset.name}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1273,26 +1303,26 @@ export function FinalizeDisposalModal({
         <form onSubmit={handleSubmit}>
           <div className="eam-modal-body">
             <div className="eam-field">
-              <label className="eam-label">{t('Disposal Execution Channel', 'নিষ্পত্তি / বিক্রয়ের মাধ্যম', lang)}</label>
+              <label className="eam-label">{t('How is it being disposed?', 'নিষ্পত্তি / বিক্রয়ের মাধ্যম', lang)}</label>
               <select
                 className="eam-select"
                 value={method}
                 onChange={(e) => setMethod(e.target.value as NonNullable<AssetDisposalDossier['disposalMethod']>)}
               >
-                <option value="Public Tender / Auction">Sealed Public Tender / Corporate Auction</option>
-                <option value="OEM Trade-In">Authorized OEM Upgrade Trade-In Credit</option>
-                <option value="Certified Scrap / E-Waste Recycling">DoE Certified Scrap / E-Waste Recycler</option>
-                <option value="Insurance Claim Write-Off">Insurance Total-Loss Claim Settlement</option>
+                <option value="Public Tender / Auction">{t('Public Tender / Auction', 'পাবলিক টেন্ডার / নিলাম', lang)}</option>
+                <option value="OEM Trade-In">{t('Manufacturer Trade-In Credit', 'প্রস্তুতকারক ট্রেড-ইন ক্রেডিট', lang)}</option>
+                <option value="Certified Scrap / E-Waste Recycling">{t('Certified Scrap / E-Waste Recycler', 'অনুমোদিত স্ক্র্যাপ / ই-ওয়েস্ট রিসাইক্লার', lang)}</option>
+                <option value="Insurance Claim Write-Off">{t('Insurance Claim Settlement', 'বীমা দাবি নিষ্পত্তি', lang)}</option>
               </select>
             </div>
 
             <div className="eam-form-grid-2">
               <div className="eam-field">
-                <label className="eam-label">{t('Winning Bidder / Recycler / Counterparty', 'ক্রেতা বা রিসাইক্লিং প্রতিষ্ঠান', lang)} *</label>
+                <label className="eam-label">{t('Buyer or Recycler Name', 'ক্রেতা বা রিসাইক্লিং প্রতিষ্ঠান', lang)} *</label>
                 <input type="text" className="eam-input" value={buyer} onChange={(e) => setBuyer(e.target.value)} required />
               </div>
               <div className="eam-field">
-                <label className="eam-label">{t('Realized Proceeds / Credit (BDT ৳)', 'প্রাপ্ত নিলাম/স্ক্র্যাপ মূল্য (টাকা)', lang)} *</label>
+                <label className="eam-label">{t('Sale / Scrap Proceeds (BDT ৳)', 'প্রাপ্ত নিলাম/স্ক্র্যাপ মূল্য (টাকা)', lang)} *</label>
                 <input type="number" className="eam-input" value={proceeds} onChange={(e) => setProceeds(e.target.value)} required />
               </div>
             </div>
@@ -1300,19 +1330,19 @@ export function FinalizeDisposalModal({
             {/* Live IAS 16 Gain/Loss Accounting Preview */}
             <div className="eam-spec-box" style={{ fontSize: '12px' }}>
               <div style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--brand-slate-900)' }}>
-                📊 {t('Retirement Journal Preview', 'অবলোপন হিসাব প্রাকদর্শন', lang)} ({asset.sapAssetNo})
+                {t('Write-Off Summary', 'অবলোপন হিসাব প্রাকদর্শন', lang)}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span>Gross Capitalized Cost:</span>
-                <strong>৳{fin.grossCapitalizedCost.toLocaleString()}</strong>
+                <span>{t('Total Purchase Cost:', 'মোট ক্রয়মূল্য:', lang)}</span>
+                <strong>৳{fin.grossCapitalizedCost.toLocaleString('en-IN')}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span>Accumulated Depreciation Reversed:</span>
-                <strong>৳{fin.accumulatedDepreciation.toLocaleString()}</strong>
+                <span>{t('Depreciation Used:', 'পুঞ্জীভূত অবচয়:', lang)}</span>
+                <strong>৳{fin.accumulatedDepreciation.toLocaleString('en-IN')}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span>Carrying Net Book Value (NBV) at Retirement:</span>
-                <strong>৳{fin.netBookValue.toLocaleString()}</strong>
+                <span>{t('Current Book Value:', 'বর্তমান বইমূল্য:', lang)}</span>
+                <strong>৳{fin.netBookValue.toLocaleString('en-IN')}</strong>
               </div>
               <div
                 style={{
@@ -1323,9 +1353,9 @@ export function FinalizeDisposalModal({
                   fontSize: '13px',
                 }}
               >
-                <strong>{gainOrLoss >= 0 ? 'Net Gain on Disposal (GL Income):' : 'Net Loss on Write-Off (GL Expense):'}</strong>
+                <strong>{gainOrLoss >= 0 ? t('Net Gain on Sale:', 'বিক্রয়ে নিট লাভ:', lang) : t('Net Loss on Write-Off:', 'অবলোপনে নিট ক্ষতি:', lang)}</strong>
                 <strong style={{ color: gainOrLoss >= 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>
-                  {gainOrLoss >= 0 ? `+৳${gainOrLoss.toLocaleString()}` : `-৳${Math.abs(gainOrLoss).toLocaleString()}`}
+                  {gainOrLoss >= 0 ? `+৳${gainOrLoss.toLocaleString('en-IN')}` : `-৳${Math.abs(gainOrLoss).toLocaleString('en-IN')}`}
                 </strong>
               </div>
             </div>
@@ -1334,7 +1364,7 @@ export function FinalizeDisposalModal({
           <div className="eam-modal-ft">
             <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
             <button type="submit" className="btn-gold" style={{ fontWeight: 800 }}>
-              👑 {t('Sanction Write-Off & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
+              <CheckCircle size={15} /> {t('Approve Write-Off & Archive', 'অবলোপন অনুমোদন ও আর্কাইভ করুন', lang)}
             </button>
           </div>
         </form>
@@ -1392,8 +1422,8 @@ export function DepreciationScheduleModal({
               <DollarSign size={18} />
             </div>
             <div>
-              <h3 className="eam-modal-title">{t('IAS 16 / BAS 16 Fixed Asset Depreciation Schedule', 'স্থায়ী সম্পদ অবচয় তফসিল (IAS 16)', lang)}</h3>
-              <div className="eam-modal-subtitle">{asset.tag} • {asset.sapAssetNo} • Cost Center: {asset.glCostCenter}</div>
+              <h3 className="eam-modal-title">{t('Yearly Value & Depreciation Schedule', 'স্থায়ী সম্পদ অবচয় তফসিল', lang)}</h3>
+              <div className="eam-modal-subtitle">{asset.name} • {asset.facility}</div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -1413,19 +1443,19 @@ export function DepreciationScheduleModal({
           >
             <div style={{ fontSize: '12px', lineHeight: 1.55 }}>
               <div>
-                <strong>Gross Capitalized:</strong> ৳{fin.grossCapitalizedCost.toLocaleString()} ·{' '}
-                <strong>Salvage Floor:</strong> ৳{asset.salvageValue.toLocaleString()}
+                <strong>{t('Purchase Cost:', 'ক্রয়মূল্য:', lang)}</strong> ৳{fin.grossCapitalizedCost.toLocaleString('en-IN')} ·{' '}
+                <strong>{t('Expected Scrap Value:', 'অবশিষ্ট মূল্য:', lang)}</strong> ৳{asset.salvageValue.toLocaleString('en-IN')}
               </div>
               <div>
-                <strong>Carrying NBV:</strong>{' '}
-                <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>৳{fin.netBookValue.toLocaleString()}</span> ·{' '}
-                <strong>Lifetime TCO:</strong> ৳{fin.totalCostOfOwnership.toLocaleString()}
+                <strong>{t('Current Book Value:', 'বর্তমান মূল্য:', lang)}</strong>{' '}
+                <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>৳{fin.netBookValue.toLocaleString('en-IN')}</span> ·{' '}
+                <strong>{t('Lifetime Cost (Purchase + Repairs):', 'আজীবন মোট ব্যয়:', lang)}</strong> ৳{fin.totalCostOfOwnership.toLocaleString('en-IN')}
               </div>
             </div>
 
             {canEditPolicy && asset.lifecycleStage !== 'disposed' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800 }}>{t('IAS 16 Policy:', 'পদ্ধতি:', lang)}</span>
+                <span style={{ fontSize: '11px', fontWeight: 800 }}>{t('Method:', 'পদ্ধতি:', lang)}</span>
                 {(['SLM', 'WDV', 'UOP'] as DepreciationMethod[]).map((m) => (
                   <button
                     key={m}
@@ -1450,10 +1480,10 @@ export function DepreciationScheduleModal({
                 <tr>
                   <th>{t('Yr', 'বছর', lang)}</th>
                   <th>{t('Fiscal Year', 'অর্থবছর', lang)}</th>
-                  <th>{t('Opening NBV', 'প্রারম্ভিক মূল্য', lang)}</th>
-                  <th>{t('Annual Charge', 'বার্ষিক অবচয়', lang)}</th>
-                  <th>{t('Accumulated Dep.', 'পুঞ্জীভূত অবচয়', lang)}</th>
-                  <th>{t('Closing NBV', 'সমাপনী মূল্য', lang)}</th>
+                  <th>{t('Opening Value', 'প্রারম্ভিক মূল্য', lang)}</th>
+                  <th>{t('Yearly Drop', 'বার্ষিক অবচয়', lang)}</th>
+                  <th>{t('Total Depreciation', 'পুঞ্জীভূত অবচয়', lang)}</th>
+                  <th>{t('Closing Value', 'সমাপনী মূল্য', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1470,12 +1500,12 @@ export function DepreciationScheduleModal({
                       <td>Yr {r.yearNumber}</td>
                       <td>
                         FY {r.calendarYear}{' '}
-                        {isCurrentYear && <span className="badge info" style={{ fontSize: '9px' }}>Current</span>}
+                        {isCurrentYear && <span className="badge info" style={{ fontSize: '9px' }}>{t('Current', 'চলমান', lang)}</span>}
                       </td>
-                      <td>৳{r.openingNbv.toLocaleString()}</td>
-                      <td style={{ color: 'var(--status-danger)' }}>-৳{r.annualCharge.toLocaleString()}</td>
-                      <td>৳{r.accumulatedDep.toLocaleString()}</td>
-                      <td style={{ fontWeight: 700, color: 'var(--status-success)' }}>৳{r.closingNbv.toLocaleString()}</td>
+                      <td>৳{r.openingNbv.toLocaleString('en-IN')}</td>
+                      <td style={{ color: 'var(--status-danger)' }}>-৳{r.annualCharge.toLocaleString('en-IN')}</td>
+                      <td>৳{r.accumulatedDep.toLocaleString('en-IN')}</td>
+                      <td style={{ fontWeight: 700, color: 'var(--status-success)' }}>৳{r.closingNbv.toLocaleString('en-IN')}</td>
                     </tr>
                   );
                 })}
@@ -1487,7 +1517,7 @@ export function DepreciationScheduleModal({
         <div className="eam-modal-ft">
           <button type="button" className="btn-outline" onClick={onClose}>{t('Close', 'বন্ধ করুন', lang)}</button>
           <button type="button" className="btn-primary" onClick={handleExportCsv}>
-            <Download size={14} /> {t('Export Depreciation Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
+            <Download size={14} /> {t('Export Schedule (CSV)', 'সিএসভি ডাউনলোড করুন', lang)}
           </button>
         </div>
       </div>
@@ -1521,10 +1551,10 @@ export function AssetPassportModal({
             </div>
             <div>
               <h3 className="eam-modal-title">
-                {t('Digital Equipment Passport & Metal QR Plate', 'ডিজিটাল সরঞ্জাম পাসপোর্ট ও মেটাল কিউআর ট্যাগ', lang)}
+                {t('Metal QR Plate & Equipment Passport', 'ডিজিটাল সরঞ্জাম পাসপোর্ট ও মেটাল কিউআর ট্যাগ', lang)}
               </h3>
               <div className="eam-modal-subtitle">
-                ISO 55001 • Ledger {asset.sapAssetNo}
+                {asset.name}
               </div>
             </div>
           </div>
@@ -1600,7 +1630,12 @@ export function AssetPassportModal({
           </div>
 
           <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.5 }}>
-            ℹ️ <strong>Field Verification:</strong> Scanning this QR/RFID plate on any ATEX Zone-1 tablet or mobile terminal loads immutable custody history, calibration certificates, and open LOTO work orders.
+            <strong>{t('Field verification:', 'মাঠপর্যায়ে যাচাই:', lang)}</strong>{' '}
+            {t(
+              'Scanning this plate opens the full custody history, calibration certificates, and open repair orders.',
+              'এই প্লেট স্ক্যান করলে পূর্ণ হস্তান্তর ইতিহাস, ক্যালিব্রেশন সনদ ও চলমান কাজের আদেশ দেখা যাবে।',
+              lang
+            )}
           </div>
         </div>
 
@@ -1614,7 +1649,7 @@ export function AssetPassportModal({
               onClose();
             }}
           >
-            <Printer size={15} /> {t('Print Anodized Metal QR Tag', 'ধাতব কিউআর ট্যাগ প্রিন্ট', lang)}
+            <Printer size={15} /> {t('Print Metal QR Tag', 'ধাতব কিউআর ট্যাগ প্রিন্ট', lang)}
           </button>
         </div>
       </div>
@@ -1660,10 +1695,10 @@ export function AssetScannerModal({
             </div>
             <div>
               <h3 className="eam-modal-title">
-                {t('Optical QR, Barcode & UHF RFID Scanner', 'অপটিক্যাল কিউআর ও আরএফআইডি স্ক্যানার', lang)}
+                {t('Scan Equipment QR or Tag', 'অপটিক্যাল কিউআর ও আরএফআইডি স্ক্যানার', lang)}
               </h3>
               <div className="eam-modal-subtitle">
-                Field Custody & Calibration Lookup • Aim at Equipment Nameplate
+                {t('Aim at the equipment plate or search below to open its record.', 'সরঞ্জামের প্লেটের দিকে ধরুন অথবা নিচে খুঁজে রেকর্ড খুলুন।', lang)}
               </div>
             </div>
           </div>
@@ -1700,7 +1735,7 @@ export function AssetScannerModal({
               />
             </div>
             <div style={{ position: 'absolute', bottom: '8px', fontSize: '10.5px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-              ATEX OPTICAL + NFC READER • READY
+              {t('Camera ready — aim at tag', 'ক্যামেরা প্রস্তুত — ট্যাগের দিকে ধরুন', lang)}
             </div>
           </div>
 
@@ -1709,7 +1744,7 @@ export function AssetScannerModal({
             <input
               type="text"
               className="eam-search-input"
-              placeholder={t('Search by tag, ledger no. or equipment...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
+              placeholder={t('Search by equipment name, operator, or tag...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
               value={scanQuery}
               onChange={(e) => setScanQuery(e.target.value)}
             />
@@ -1732,13 +1767,13 @@ export function AssetScannerModal({
                 onClick={() => {
                   onSelectScanned(a);
                   onClose();
-                  showToast(t(`✓ Scanned ${a.tag} (${a.sapAssetNo}). Loaded full 360° lifetime dossier.`, `✓ ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
+                  showToast(t(`Opened ${a.name}.`, `ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
                 }}
               >
                 <span style={{ textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '8px' }}>
-                  <strong style={{ color: 'var(--brand-crimson)', fontFamily: 'monospace' }}>{a.tag}</strong> — {a.name}
+                  <strong>{a.name}</strong> — <span style={{ color: 'var(--brand-slate-500)' }}>{a.facility}</span>
                 </span>
-                <span className="badge success" style={{ flexShrink: 0 }}>Scan ➔</span>
+                <span className="badge success" style={{ flexShrink: 0 }}>{t('Open', 'খুলুন', lang)}</span>
               </button>
             ))}
           </div>

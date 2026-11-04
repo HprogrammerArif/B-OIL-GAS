@@ -759,7 +759,18 @@
     max-height: calc(90vh - 125px) !important;
     padding: 16px !important;
     flex: 1 1 auto !important;
+    min-height: 0 !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+
+  .eam-modal > form,
+  .modal > form,
+  .modal-dialog > form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   .modal-ft,

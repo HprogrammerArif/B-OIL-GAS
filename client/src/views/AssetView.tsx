@@ -24,6 +24,7 @@ import {
   AssetScannerModal,
 } from '../components/asset/AssetModals';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
+import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
 import {
   Wrench,
   ShieldCheck,
@@ -31,7 +32,6 @@ import {
   Search,
   Download,
   Plus,
-  RefreshCw,
   Barcode,
   CheckCircle,
   Clock,
@@ -47,7 +47,6 @@ import {
   FilePlus,
   UserCheck,
   ShieldAlert,
-  Sparkles,
   CheckSquare,
   Square,
   Eye,
@@ -57,6 +56,7 @@ import {
   QrCode,
   ExternalLink,
   SlidersHorizontal,
+  Check,
 } from 'lucide-react';
 
 type MainModuleTab = 'register' | 'maintenance' | 'financials' | 'transfers' | 'disposal';
@@ -349,64 +349,36 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     return transfers.find((tr) => tr.assetId === selectedAsset.id && tr.status === 'in_transit') || null;
   }, [selectedAsset, transfers]);
 
-  // Format BDT compact helper
+  const bn = (n: number) => (lang === 'bn' ? n.toLocaleString('bn-BD') : String(n));
+  const fmtTaka = (val: number) => `৳${Math.round(val).toLocaleString('en-IN')}`;
   const fmtBdtShort = (val: number) => {
-    if (val >= 10000000) return `৳${(val / 10000000).toFixed(2)} Cr`;
-    if (val >= 100000) return `৳${(val / 100000).toFixed(2)}L`;
-    return `৳${val.toLocaleString()}`;
+    if (val >= 10000000) return `৳${(val / 10000000).toFixed(2)} ${t('Cr', 'কোটি', lang)}`;
+    if (val >= 100000) return `৳${(val / 100000).toFixed(2)} ${t('Lakh', 'লক্ষ', lang)}`;
+    return fmtTaka(val);
   };
 
-  // Badge Helpers
   const getStageBadge = (stage: LifecycleStage, daysToService?: number) => {
     switch (stage) {
       case 'operational':
-        return <span className="badge success">{t('Operational', 'সক্রিয় চালু', lang)}</span>;
+        if (daysToService !== undefined && daysToService > 0 && daysToService <= 30) {
+          return <StatusPill tone="warn">{t(`Service in ${daysToService}d`, `${bn(daysToService)} দিনে সার্ভিস`, lang)}</StatusPill>;
+        }
+        return <StatusPill tone="success">{t('Running', 'সক্রিয় চালু', lang)}</StatusPill>;
       case 'in_stock':
-        return <span className="badge info">{t('Store Pool', 'স্টোর পুল', lang)}</span>;
+        return <StatusPill tone="info">{t('In warehouse', 'স্টোরে রাখা', lang)}</StatusPill>;
       case 'in_transfer':
-        return <span className="badge travel">{t('In Transit', 'স্থানান্তরধীন', lang)}</span>;
+        return <StatusPill tone="purple">{t('In transit', 'স্থানান্তরধীন', lang)}</StatusPill>;
       case 'calibration_due':
-        return (
-          <span className="badge danger">
-            {t(`Audit Due (${daysToService ?? 10}d)`, `ক্যালিব্রেশন (${daysToService ?? 10} দিন)`, lang)}
-          </span>
-        );
+        return <StatusPill tone="danger">{t(`Service due (${daysToService ?? 10}d)`, `সার্ভিস বাকি (${bn(daysToService ?? 10)} দিন)`, lang)}</StatusPill>;
       case 'maintenance':
-        return <span className="badge warn">{t('Under Overhaul', 'মেরামতাধীন', lang)}</span>;
+        return <StatusPill tone="warn">{t('In repair', 'মেরামতাধীন', lang)}</StatusPill>;
       case 'decommissioned':
-        return <span className="badge danger">{t('Condemned', 'অকেজো ঘোষিত', lang)}</span>;
+        return <StatusPill tone="danger">{t('Ready to retire', 'অবসরের অপেক্ষায়', lang)}</StatusPill>;
       case 'disposed':
-        return (
-          <span className="badge" style={{ background: 'var(--brand-slate-200)', color: 'var(--brand-slate-700)' }}>
-            {t('10y Archive', 'নিষ্পত্তিকৃত আর্কাইভ', lang)}
-          </span>
-        );
+        return <StatusPill tone="neutral">{t('Archived', 'আর্কাইভ', lang)}</StatusPill>;
     }
   };
 
-  const getCriticalityBadge = (crit: AssetRecord['criticality']) => {
-    if (crit === 'critical_a') {
-      return (
-        <span style={{ fontSize: '9.5px', fontWeight: 800, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(220,38,38,0.12)', color: 'var(--status-danger)' }}>
-          Class-A
-        </span>
-      );
-    }
-    if (crit === 'essential_b') {
-      return (
-        <span style={{ fontSize: '9.5px', fontWeight: 700, padding: '1.5px 6px', borderRadius: '4px', background: 'rgba(217,119,6,0.12)', color: 'var(--status-warning)' }}>
-          Class-B
-        </span>
-      );
-    }
-    return (
-      <span style={{ fontSize: '9.5px', fontWeight: 600, padding: '1.5px 6px', borderRadius: '4px', background: 'var(--brand-slate-100)', color: 'var(--brand-slate-500)' }}>
-        Class-C
-      </span>
-    );
-  };
-
-  // Export Master Financial Ledger CSV
   const handleExportMasterLedgerCsv = () => {
     const header =
       'Tag,Ledger_No,Title,Category,Facility,GL_Cost_Center,Lifecycle_Stage,Method,Gross_CAPEX_BDT,Accumulated_Dep_BDT,Net_Book_Value_BDT,Cumulative_OPEX_BDT,TCO_BDT,Repair_Ratio_Pct\n';
@@ -436,407 +408,222 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         improvementsRequired: data.improvementsRequired,
       },
       currentPersona.name,
-      currentPersona.label
+      currentPersona.label,
     );
     setShowRejectModal(false);
     showToast(
       t(
         `Fault / Deficiency logged on ${selectedAsset.tag} & Corrective Work Order auto-dispatched.`,
         `${selectedAsset.tag}-এ ত্রুটি নথিভুক্ত ও মেরামত কার্যাদেশ তৈরি হয়েছে।`,
-        lang
+        lang,
       ),
-      'warn'
+      'warn',
     );
   };
 
   const selectedFinancials = selectedAsset ? calculateAssetFinancials(selectedAsset) : null;
 
-  // Smart Contextual Next-Action Guidance Renderer for 360° Cockpit
-  const renderSmartNextAction = () => {
-    if (!selectedAsset || !selectedFinancials || selectedAsset.lifecycleStage === 'disposed') return null;
+  /** Sort assets so machines needing attention come first. */
+  const urgencyRank = (a: AssetRecord): number => {
+    if (a.lifecycleStage === 'disposed') return 90;
+    if (a.defectQuery) return 5;
+    if (!a.custodianAcknowledged) return 10;
+    if (a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance') return 15;
+    if (a.lifecycleStage === 'decommissioned') return 20;
+    if (a.daysToService > 0 && a.daysToService <= 30) return 25;
+    if (a.lifecycleStage === 'in_transfer') return 30;
+    if (a.lifecycleStage === 'in_stock') return 35;
+    return 50;
+  };
 
-    // 1. Custody Acceptance Signature Pending
-    if (!selectedAsset.custodianAcknowledged) {
-      const isCustodian = !!user && isMyCustody(selectedAsset, user);
+  const sortedAssets = useMemo(() => {
+    return [...filteredAssets].sort((a, b) => {
+      const r = urgencyRank(a) - urgencyRank(b);
+      if (r !== 0) return r;
+      if (a.daysToService !== b.daysToService) return a.daysToService - b.daysToService;
+      return a.healthScore - b.healthScore;
+    });
+  }, [filteredAssets]);
 
-      return (
-        <div className="eam-next-action">
-          <div className="eam-next-action-text">
-            <UserCheck size={17} style={{ color: 'var(--status-warning)', flexShrink: 0 }} />
-            <div>
-              <strong>{t('Action Required — Custody Handover Sign-Off:', 'প্রয়োজনীয় পদক্ষেপ — হেফাজত গ্রহণ স্বাক্ষর:', lang)}</strong>{' '}
-              {t(
-                `Issued to ${selectedAsset.custodian}. Digital handover receipt is awaiting acceptance.`,
-                `${selectedAsset.custodian}-কে বরাদ্দকৃত। ডিজিটাল গ্রহণ স্বাক্ষর এখনও সম্পন্ন হয়নি।`,
-                lang
-              )}
-            </div>
-          </div>
-          {isCustodian ? (
-            <button
-              type="button"
-              className="btn-gold"
-              style={{ padding: '6px 13px', fontSize: '11.5px', fontWeight: 800 }}
-              onClick={() => {
-                acknowledgeCustody(selectedAsset.id, currentPersona.name, currentPersona.label);
-                showToast(
-                  t(`✓ Custody receipt digitally signed for ${selectedAsset.tag}!`, `✓ ${selectedAsset.tag}-এর হেফাজত গ্রহণ স্বাক্ষর সম্পন্ন!`, lang),
-                  'gold'
-                );
-              }}
-            >
-              ✍️ {t('Sign Custody Receipt', 'গ্রহণ স্বাক্ষর করুন', lang)}
-            </button>
-          ) : (
-            <span style={{ fontSize: '11px', color: 'var(--status-warning-text)', fontWeight: 600, padding: '4px 8px', background: 'var(--status-warning-bg)', borderRadius: '4px' }}>
-              {t('Awaiting Custodian Sign-Off', 'হেফাজতকারীর স্বাক্ষরের অপেক্ষায়', lang)}
-            </span>
-          )}
-        </div>
-      );
+  const activeOnlyCount = roleScopedAssets.filter((a) => a.lifecycleStage !== 'disposed').length;
+  const workingCount = roleScopedAssets.filter((a) => a.lifecycleStage === 'operational').length;
+  const openWoCount = baseWorkOrders.filter((w) => w.status !== 'completed').length;
+  const openReqCount = visibleRequisitions.filter((r) => r.stage !== 'commissioned' && r.stage !== 'rejected').length;
+
+  const verdictWarn = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0 || decommissionedAssets.length > 0;
+  const verdict = roleConfig.isSelfServiceOnly
+    ? activeOnlyCount === 0
+      ? t('No equipment is assigned to you right now. Use "Request equipment" if you need a machine or device.', 'আপনার নামে এখন কোনো সরঞ্জাম বরাদ্দ নেই। প্রয়োজন হলে "যন্ত্রপাতির আবেদন" চাপুন।', lang)
+      : t(
+        `${activeOnlyCount} ${activeOnlyCount === 1 ? 'item is' : 'items are'} in your custody${portfolioStats.pendingSignOffs > 0 ? `. ${portfolioStats.pendingSignOffs} ${portfolioStats.pendingSignOffs === 1 ? 'needs' : 'need'} your handover signature` : ''}${portfolioStats.calAlerts > 0 ? `. ${portfolioStats.calAlerts} due for service soon` : ''}.`,
+        `আপনার হেফাজতে ${bn(activeOnlyCount)}টি সরঞ্জাম আছে${portfolioStats.pendingSignOffs > 0 ? `। ${bn(portfolioStats.pendingSignOffs)}টিতে আপনার গ্রহণ স্বাক্ষর বাকি` : ''}${portfolioStats.calAlerts > 0 ? `। ${bn(portfolioStats.calAlerts)}টির সার্ভিসিং আসন্ন` : ''}।`,
+        lang,
+      )
+    : t(
+      `${activeOnlyCount} machines (${fmtBdtShort(portfolioStats.totalNbv)} book value), ${workingCount} working.${portfolioStats.calAlerts > 0 ? ` ${portfolioStats.calAlerts} need service or repair.` : ''}${portfolioStats.pendingSignOffs > 0 ? ` ${portfolioStats.pendingSignOffs} awaiting handover sign-off.` : ''}${decommissionedAssets.length > 0 ? ` ${decommissionedAssets.length} ready to retire.` : ''}`,
+      `${bn(activeOnlyCount)}টি মেশিন (বর্তমান বইমূল্য ${fmtBdtShort(portfolioStats.totalNbv)}), ${bn(workingCount)}টি চালু।${portfolioStats.calAlerts > 0 ? ` ${bn(portfolioStats.calAlerts)}টির সার্ভিস বা মেরামত দরকার।` : ''}${portfolioStats.pendingSignOffs > 0 ? ` ${bn(portfolioStats.pendingSignOffs)}টিতে গ্রহণ স্বাক্ষর বাকি।` : ''}${decommissionedAssets.length > 0 ? ` ${bn(decommissionedAssets.length)}টি অবসরের অপেক্ষায়।` : ''}`,
+      lang,
+    );
+
+  /** Plain status and next action for the selected machine. */
+  const machineNextStep = (a: AssetRecord): { tone: 'ok' | 'warn'; text: string; cta?: React.ReactNode } => {
+    if (a.lifecycleStage === 'disposed') {
+      return {
+        tone: 'ok',
+        text: t(
+          `Retired and archived under voucher ${a.disposalDossier?.sapRetirementVoucher ?? '—'}. Nothing for you to do.`,
+          `ভাউচার ${a.disposalDossier?.sapRetirementVoucher ?? '—'}-এর অধীনে অবসরপ্রাপ্ত ও আর্কাইভ। আপনার কিছু করার নেই।`,
+          lang,
+        ),
+      };
     }
-
-    // 2. Asset In Transit under Gate Pass
-    if (selectedAsset.lifecycleStage === 'in_transfer' && selectedOpenTransfer) {
-      return (
-        <div className="eam-next-action info">
-          <div className="eam-next-action-text">
-            <ArrowRightLeft size={17} style={{ color: 'var(--status-info)', flexShrink: 0 }} />
-            <div>
-              <strong>{t('In Transit under Gate Pass', 'গেট পাসের অধীনে স্থানান্তরধীন', lang)} ({selectedOpenTransfer.gatePassNo}):</strong>{' '}
-              {t(
-                `En route to ${selectedOpenTransfer.toCustodian} at ${selectedOpenTransfer.toFacility}.`,
-                `গন্তব্য: ${selectedOpenTransfer.toFacility} (${selectedOpenTransfer.toCustodian})।`,
-                lang
-              )}
-            </div>
-          </div>
-          {canReceiveTransfer(selectedOpenTransfer) ? (
-          <button
-            type="button"
-            className="btn-primary"
-            style={{ padding: '6px 13px', fontSize: '11.5px' }}
+    if (!a.custodianAcknowledged) {
+      const isCustodian = !!user && isMyCustody(a, user);
+      return {
+        tone: 'warn',
+        text: isCustodian
+          ? t('Issued to you. Sign the handover receipt to confirm you received it in good condition.', 'আপনার নামে বরাদ্দ হয়েছে। ভালো অবস্থায় বুঝে পেয়েছেন নিশ্চিত করতে গ্রহণ স্বাক্ষর করুন।', lang)
+          : t(`Issued to ${a.custodian}. Waiting for their handover signature. Nothing for you to do.`, `${a.custodian}-কে বরাদ্দ দেওয়া হয়েছে। তাঁর গ্রহণ স্বাক্ষরের অপেক্ষায়। আপনার কিছু করার নেই।`, lang),
+        cta: isCustodian ? (
+          <Button
+            size="sm"
+            variant="gold"
+            icon={<Check size={13} />}
             onClick={() => {
-              completeTransfer(selectedOpenTransfer.id, currentPersona.name, currentPersona.label);
-              showToast(
-                t(
-                  `✓ Gate Pass ${selectedOpenTransfer.gatePassNo} closed! ${selectedAsset.tag} received at destination.`,
-                  `✓ গেট পাস ${selectedOpenTransfer.gatePassNo} সম্পন্ন ও হস্তান্তরিত!`,
-                  lang
-                ),
-                'success'
-              );
+              acknowledgeCustody(a.id, currentPersona.name, currentPersona.label);
+              showToast(t(`Custody receipt signed for ${a.name}.`, `${a.name}-এর গ্রহণ স্বাক্ষর সম্পন্ন।`, lang), 'gold');
             }}
           >
-            <CheckCircle size={13} /> {t('Confirm Arrival & Close Gate Pass', 'প্রাপ্তি নিশ্চিত করুন', lang)}
-          </button>
-          ) : (
-            <span style={{ fontSize: '11px', color: 'var(--status-info)', fontWeight: 600 }}>
-              {t('Awaiting receipt at destination', 'গন্তব্যে প্রাপ্তির অপেক্ষায়', lang)}
-            </span>
-          )}
-        </div>
-      );
+            {t('Sign handover receipt', 'গ্রহণ স্বাক্ষর করুন', lang)}
+          </Button>
+        ) : undefined,
+      };
     }
-
-    // 3. Asset Sitting in Central Store Pool (Stage 3)
-    if (selectedAsset.lifecycleStage === 'in_stock' && roleConfig.canTransferCustody) {
-      return (
-        <div className="eam-next-action info">
-          <div className="eam-next-action-text">
-            <Package size={17} style={{ color: 'var(--status-info)', flexShrink: 0 }} />
-            <div>
-              <strong>{t('Ready in Central Store Pool (Stage 3):', 'কেন্দ্রীয় স্টোর পুলে প্রস্তুত:', lang)}</strong>{' '}
-              {t(
-                'Capitalized & QR-tagged. Assign to an active officer or plant unit to commission into Stage-4 service.',
-                'সক্রিয় অপারেশনে যুক্ত করতে একজন কর্মকর্তার হেফাজতে বরাদ্দ দিন।',
-                lang
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn-primary"
-            style={{ padding: '6px 13px', fontSize: '11.5px' }}
-            onClick={() => setShowTransferModal(true)}
+    if (a.lifecycleStage === 'in_transfer' && selectedOpenTransfer) {
+      const canRecv = canReceiveTransfer(selectedOpenTransfer);
+      return {
+        tone: 'warn',
+        text: canRecv
+          ? t(`In transit to ${selectedOpenTransfer.toCustodian} at ${selectedOpenTransfer.toFacility}. Confirm when it arrives.`, `${selectedOpenTransfer.toFacility}-এ ${selectedOpenTransfer.toCustodian}-এর কাছে পথে আছে। পৌঁছালে প্রাপ্তি নিশ্চিত করুন।`, lang)
+          : t(`In transit to ${selectedOpenTransfer.toCustodian} at ${selectedOpenTransfer.toFacility}. Waiting for receipt at destination.`, `${selectedOpenTransfer.toFacility}-এ ${selectedOpenTransfer.toCustodian}-এর কাছে পথে আছে। গন্তব্যে প্রাপ্তির অপেক্ষায়।`, lang),
+        cta: canRecv ? (
+          <Button
+            size="sm"
+            icon={<CheckCircle size={13} />}
+            onClick={() => {
+              completeTransfer(selectedOpenTransfer.id, currentPersona.name, currentPersona.label);
+              showToast(t(`Gate pass ${selectedOpenTransfer.gatePassNo} closed and received.`, `গেট পাস ${selectedOpenTransfer.gatePassNo} সম্পন্ন ও গৃহীত।`, lang), 'success');
+            }}
           >
-            <ArrowRightLeft size={13} /> {t('Assign Custodian & Deploy', 'কর্মকর্তাকে বরাদ্দ দিন', lang)}
-          </button>
-        </div>
-      );
+            {t('Confirm arrival', 'প্রাপ্তি নিশ্চিত করুন', lang)}
+          </Button>
+        ) : undefined,
+      };
     }
-
-    // 4. Calibration Due / Under Overhaul
-    if (
-      (selectedAsset.lifecycleStage === 'calibration_due' ||
-        selectedAsset.lifecycleStage === 'maintenance' ||
-        (selectedAsset.daysToService > 0 && selectedAsset.daysToService <= 20)) &&
-      (roleConfig.canCertifyCalibration || roleConfig.canManageWorkOrders)
-    ) {
-      return (
-        <div className="eam-next-action danger">
-          <div className="eam-next-action-text">
-            <AlertTriangle size={17} style={{ color: 'var(--status-danger)', flexShrink: 0 }} />
-            <div>
-              <strong>{t('Statutory Calibration / Reliability Attention:', 'সংবিধিবদ্ধ ক্যালিব্রেশন / সার্ভিস সতর্কতা:', lang)}</strong>{' '}
-              {t(
-                `Next ${selectedAsset.regulatoryAuthority || 'PM'} window is ${selectedAsset.daysToService} days (${selectedAsset.nextServiceDate}).`,
-                `পরবর্তী ক্যালিব্রেশন তারিখ ${selectedAsset.nextServiceDate} (${selectedAsset.daysToService} দিন বাকি)।`,
-                lang
-              )}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+    if (a.lifecycleStage === 'in_stock') {
+      return {
+        tone: 'warn',
+        text: roleConfig.canTransferCustody
+          ? t('Sitting in the central warehouse. Assign it to an operator or plant unit to put it into service.', 'কেন্দ্রীয় স্টোরে রাখা আছে। চালু করতে একজন কর্মকর্তা বা ইউনিটে বরাদ্দ দিন।', lang)
+          : t('Stored in the central warehouse until assigned.', 'বরাদ্দ না হওয়া পর্যন্ত কেন্দ্রীয় স্টোরে রাখা আছে।', lang),
+        cta: roleConfig.canTransferCustody ? (
+          <Button size="sm" icon={<ArrowRightLeft size={13} />} onClick={() => setShowTransferModal(true)}>
+            {t('Assign custodian', 'হেফাজতকারী বরাদ্দ দিন', lang)}
+          </Button>
+        ) : undefined,
+      };
+    }
+    if (a.lifecycleStage === 'decommissioned') {
+      const cl = a.disposalDossier?.checklist;
+      const done = cl ? [cl.technicalSurveySigned, cl.decontaminationOrDataWipeCertified, cl.sparesHarvested, cl.financeCfoVetted].filter(Boolean).length : 0;
+      return {
+        tone: 'warn',
+        text: roleConfig.canAuthorizeWriteOff
+          ? t(`Marked for retirement (${done} of 4 pre-disposal checks done). Verify the checklist and authorize write-off.`, `অবসরের জন্য চিহ্নিত (৪টি যাচাইয়ের ${bn(done)}টি সম্পন্ন)। চেকলিস্ট দেখে চূড়ান্ত অবলোপন অনুমোদন করুন।`, lang)
+          : t(`Marked for retirement (${done} of 4 checks done). Waiting for CFO / Chairman write-off approval.`, `অবসরের জন্য চিহ্নিত (৪টি যাচাইয়ের ${bn(done)}টি সম্পন্ন)। চূড়ান্ত অবলোপন অনুমোদনের অপেক্ষায়।`, lang),
+        cta: (
+          <Button size="sm" variant="gold" onClick={() => setActiveTab('disposal')}>
+            {t('Open retirement checklist', 'অবসর চেকলিস্ট খুলুন', lang)}
+          </Button>
+        ),
+      };
+    }
+    if (a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance' || (a.daysToService > 0 && a.daysToService <= 30)) {
+      const canAct = roleConfig.canCertifyCalibration || roleConfig.canManageWorkOrders;
+      return {
+        tone: 'warn',
+        text: a.lifecycleStage === 'maintenance'
+          ? t(`Under repair. Next service date is ${a.nextServiceDate}.`, `মেরামতাধীন। পরবর্তী সার্ভিস তারিখ ${a.nextServiceDate}।`, lang)
+          : t(`Service or inspection is due in ${a.daysToService} days (${a.nextServiceDate}).`, `আগামী ${bn(a.daysToService)} দিনের মধ্যে (${a.nextServiceDate}) সার্ভিস বা পরীক্ষা বাকি।`, lang),
+        cta: canAct ? (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {roleConfig.canCertifyCalibration && (
-              <button
-                type="button"
-                className="btn-primary"
-                style={{ padding: '6px 12px', fontSize: '11.5px' }}
+              <Button
+                size="sm"
+                icon={<CheckCircle size={13} />}
                 onClick={() => {
-                  certifyAssetDirect(selectedAsset.id, currentPersona.name, currentPersona.label);
-                  showToast(
-                    t(`✓ Calibration certified for ${selectedAsset.tag}!`, `✓ ${selectedAsset.tag}-এর ক্যালিব্রেশন প্রত্যয়িত!`, lang),
-                    'success'
-                  );
+                  certifyAssetDirect(a.id, currentPersona.name, currentPersona.label);
+                  showToast(t(`Service certified for ${a.name}.`, `${a.name}-এর সার্ভিস প্রত্যয়িত।`, lang), 'success');
                 }}
               >
-                <CheckCircle size={13} /> {t('Certify Now', 'প্রত্যয়ন করুন', lang)}
-              </button>
+                {t('Certify service', 'সার্ভিস প্রত্যয়ন', lang)}
+              </Button>
             )}
             {roleConfig.canManageWorkOrders && (
-              <button
-                type="button"
-                className="btn-outline"
-                style={{ padding: '6px 12px', fontSize: '11.5px' }}
-                onClick={() => setShowWorkOrderModal(true)}
-              >
-                <Wrench size={13} /> {t('Create WO', 'কার্যাদেশ', lang)}
-              </button>
+              <Button size="sm" variant="secondary" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
+                {t('Create repair order', 'মেরামত আদেশ', lang)}
+              </Button>
             )}
           </div>
-        </div>
-      );
+        ) : undefined,
+      };
     }
-
-    // 5. Stage-7 Condemned Pending Write-Off
-    if (selectedAsset.lifecycleStage === 'decommissioned') {
-      return (
-        <div className="eam-next-action danger">
-          <div className="eam-next-action-text">
-            <ShieldAlert size={17} style={{ color: 'var(--status-danger)', flexShrink: 0 }} />
-            <div>
-              <strong>{t('Stage-7 Condemned — Awaiting Write-Off & Disposal:', 'পর্যায়-৭ অকেজো ঘোষিত — চূড়ান্ত অবলোপন অপেক্ষমাণ:', lang)}</strong>{' '}
-              {t(
-                'Complete the 4-point pre-disposal safety & CFO audit checklist before retirement is posted.',
-                '৪-দফা প্রাক-অবলোপন যাচাইকরণ সম্পন্ন করে নিলাম নিষ্পত্তি করুন।',
-                lang
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="btn-gold"
-            style={{ padding: '6px 13px', fontSize: '11.5px', fontWeight: 800 }}
-            onClick={() => setActiveTab('disposal')}
-          >
-            📋 {t('Open Write-Off Checklist', 'চেকলিস্ট খুলুন', lang)}
-          </button>
-        </div>
-      );
-    }
-
-    return null;
+    return {
+      tone: 'ok',
+      text: t(
+        `Running normally (${a.healthScore}% health). Next service in ${a.daysToService} days (${a.nextServiceDate}). Nothing for you to do.`,
+        `স্বাভাবিকভাবে চলছে (${bn(a.healthScore)}% স্বাস্থ্য)। পরবর্তী সার্ভিস ${bn(a.daysToService)} দিন পরে (${a.nextServiceDate})। আপনার কিছু করার নেই।`,
+        lang,
+      ),
+    };
   };
 
   return (
     <div className="view-container">
-      {/* ══════════════════════════════════════════════════════════════════════
-          SECTION HEADER + PRIMARY QUICK ACTIONS
-          ══════════════════════════════════════════════════════════════════════ */}
-      <div className="section-header" style={{ marginBottom: '10px' }}>
-        <div>
-          <h2 className="section-title">
-            🏗️{' '}
-            {roleConfig.isSelfServiceOnly
-              ? t('My Assigned Equipment & Requests', 'আমার বরাদ্দকৃত সরঞ্জাম ও রিকুইজিশন', lang)
-              : t('Machinery & Equipment Lifetime Tracking', 'যন্ত্রপাতি ও সরঞ্জাম জীবনচক্র ট্র্যাকিং', lang)}
-          </h2>
-          <p className="section-subtitle">
-            {t(
-              'Track machine health, scheduled servicing, equipment locations, and retirement.',
-              'কারখানার যন্ত্রপাতি ও মেশিনের স্বাস্থ্য, সার্ভিসিং সময়সূচী, হেফাজতকারী এবং অবসর ব্যবস্থাপনা।',
-              lang
+      <PageHeader
+        title={
+          roleConfig.isSelfServiceOnly
+            ? t('My assigned equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
+            : t('Assets & equipment', 'যন্ত্রপাতি ও সরঞ্জাম', lang)
+        }
+        description={
+          roleConfig.isSelfServiceOnly
+            ? t('Equipment in your custody, when it needs service, and your requests.', 'আপনার হেফাজতে থাকা সরঞ্জাম, সার্ভিসের সময়সূচী এবং আপনার আবেদন।', lang)
+            : t('Machines and equipment across our sites, sorted with the ones that need attention first.', 'সব সাইটের যন্ত্রপাতি ও সরঞ্জাম — যেগুলোতে আগে নজর দরকার সেগুলো শুরুতে দেখানো।', lang)
+        }
+        actions={
+          <>
+            <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
+              {t('Scan tag', 'ট্যাগ স্ক্যান', lang)}
+            </Button>
+            <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
+              {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
+            </Button>
+            {roleConfig.canRegisterAsset && (
+              <Button icon={<Plus size={14} />} onClick={() => setShowRegisterModal(true)}>
+                {t('Add machine', 'নতুন মেশিন যুক্ত', lang)}
+              </Button>
             )}
-          </p>
-        </div>
+          </>
+        }
+      />
 
-        <div className="btn-group" style={{ flexWrap: 'wrap' }}>
-          {roleConfig.canRegisterAsset && (
-            <button type="button" className="btn-primary" onClick={() => setShowRegisterModal(true)}>
-              <Plus size={15} /> {t('Add Machine', 'নতুন মেশিন যুক্ত', lang)}
-            </button>
-          )}
-          <button
-            type="button"
-            className={roleConfig.canRegisterAsset ? 'btn-outline' : 'btn-primary'}
-            onClick={() => setShowRequisitionModal(true)}
-          >
-            <FilePlus size={15} /> {t('Request Equipment', 'যন্ত্রপাতির আবেদন', lang)}
-          </button>
-          <button type="button" className="btn-outline" onClick={() => setShowScanModal(true)}>
-            <Barcode size={15} /> {t('Scan Tag', 'ট্যাগ স্ক্যান', lang)}
-          </button>
-        </div>
-      </div>
+      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
+        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+        <span>{verdict}</span>
+      </p>
 
-      {/* Sleek RBAC Authority Strip */}
-      <div className="eam-role-strip" style={{ padding: '8px 14px', marginBottom: '14px' }}>
-        <div className="eam-role-strip-left" style={{ gap: '10px' }}>
-          <div className="eam-role-avatar" style={{ width: '30px', height: '30px', fontSize: '11px', background: currentPersona.avatarColor }}>
-            {currentPersona.initials}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-              {currentPersona.name} ({currentPersona.label})
-            </span>
-            <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>•</span>
-            <span style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)' }}>
-              {t(roleConfig.roleTitle, roleConfig.roleTitleBn, lang)}
-            </span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="eam-scope-pill" style={{ padding: '3px 9px', fontSize: '10.5px' }}>
-            <Sparkles size={11} /> {t(roleConfig.scopeBadge, roleConfig.scopeBadgeBn, lang)}
-          </span>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          INTERACTIVE 1-CLICK KPI WORKLIST RIBBON
-          ══════════════════════════════════════════════════════════════════════ */}
-      <div className="eam-kpi-grid">
-        {/* KPI 1: Portfolio Carrying NBV */}
-        <button
-          type="button"
-          className="eam-kpi-card crimson"
-          onClick={() => {
-            setActiveTab('register');
-            resetAllFilters();
-          }}
-        >
-          <div className="eam-kpi-top">
-            <span className="eam-kpi-label">
-              {roleConfig.isSelfServiceOnly
-                ? t('My Equipment Value', 'আমার হেফাজতে সম্পদের মূল্য', lang)
-                : t('Total Machinery Value', 'মোট সম্পদের বর্তমান মূল্য', lang)}
-            </span>
-            <span className="eam-kpi-icon"><DollarSign size={15} /></span>
-          </div>
-          <div className="eam-kpi-val">{fmtBdtShort(portfolioStats.totalNbv)}</div>
-          <div className="eam-kpi-foot">
-            <span>{t(`Purchase cost: ${fmtBdtShort(portfolioStats.totalGross)} (${portfolioStats.activeCount} assets)`, `মূল ক্রয়মূল্য: ${fmtBdtShort(portfolioStats.totalGross)} (${portfolioStats.activeCount}টি)`, lang)}</span>
-            <span className="eam-kpi-hint">{t('View All →', 'সকল দেখুন →', lang)}</span>
-          </div>
-        </button>
-
-        {/* KPI 2: Operational Availability & Custody Sign-Offs */}
-        <button
-          type="button"
-          className={`eam-kpi-card emerald ${kpiFilter === 'pending_signoff' ? 'is-active' : ''}`}
-          onClick={() => {
-            setActiveTab('register');
-            if (portfolioStats.pendingSignOffs > 0) {
-              setKpiFilter((prev) => (prev === 'pending_signoff' ? 'none' : 'pending_signoff'));
-            } else {
-              setStageFilter((prev) => (prev === 'operational' ? 'active_all' : 'operational'));
-            }
-          }}
-        >
-          <div className="eam-kpi-top">
-            <span className="eam-kpi-label">{t('Working & Ready', 'সক্রিয় ও প্রস্তুত মেশিন', lang)}</span>
-            <span className="eam-kpi-icon"><ShieldCheck size={15} /></span>
-          </div>
-          <div className="eam-kpi-val">{portfolioStats.availabilityPct}%</div>
-          <div className="eam-kpi-foot">
-            <span>
-              {portfolioStats.pendingSignOffs > 0
-                ? t(`✍️ ${portfolioStats.pendingSignOffs} sign-off pending`, `✍️ ${portfolioStats.pendingSignOffs} জনের স্বাক্ষর বাকি`, lang)
-                : t('✓ 100% assigned & signed', '✓ ১০০% দায়িত্ব নিশ্চিত', lang)}
-            </span>
-            <span className="eam-kpi-hint">
-              {kpiFilter === 'pending_signoff' ? t('Reset ×', 'রিসেট ×', lang) : t('Filter →', 'ফিল্টার →', lang)}
-            </span>
-          </div>
-        </button>
-
-        {/* KPI 3: Calibration & PM Alerts */}
-        <button
-          type="button"
-          className={`eam-kpi-card amber ${kpiFilter === 'cal_alerts' ? 'is-active' : ''}`}
-          onClick={() => {
-            setActiveTab('register');
-            setKpiFilter((prev) => (prev === 'cal_alerts' ? 'none' : 'cal_alerts'));
-          }}
-        >
-          <div className="eam-kpi-top">
-            <span className="eam-kpi-label">{t('Servicing & Inspections Due', 'সার্ভিসিং ও পরীক্ষা বাকি', lang)}</span>
-            <span className="eam-kpi-icon"><Wrench size={15} /></span>
-          </div>
-          <div className="eam-kpi-val">
-            {portfolioStats.calAlerts} {t('Machines', 'টি মেশিন', lang)}
-          </div>
-          <div className="eam-kpi-foot">
-            <span>{t(`${baseWorkOrders.filter((w) => w.status !== 'completed').length} active repair orders`, `${baseWorkOrders.filter((w) => w.status !== 'completed').length}টি মেরামতের কাজ চলমান`, lang)}</span>
-            <span className="eam-kpi-hint">
-              {kpiFilter === 'cal_alerts' ? t('Reset ×', 'রিসেট ×', lang) : t('Filter Due →', 'বাকিগুলো →', lang)}
-            </span>
-          </div>
-        </button>
-
-        {/* KPI 4: TCO / Write-Off Watch (or Open Requisitions for Staff) */}
-        <button
-          type="button"
-          className={`eam-kpi-card blue ${kpiFilter === 'eol_watch' ? 'is-active' : ''}`}
-          onClick={() => {
-            if (roleConfig.isSelfServiceOnly) {
-              setActiveTab('transfers');
-            } else if (decommissionedAssets.length > 0 && activeTab !== 'disposal') {
-              setActiveTab('disposal');
-            } else {
-              setActiveTab('register');
-              setStageFilter('all');
-              setKpiFilter((prev) => (prev === 'eol_watch' ? 'none' : 'eol_watch'));
-            }
-          }}
-        >
-          <div className="eam-kpi-top">
-            <span className="eam-kpi-label">
-              {roleConfig.isSelfServiceOnly
-                ? t('My Open Requests', 'আমার চলমান আবেদন', lang)
-                : t('Retired / Scrap Watch', 'অবসরপ্রাপ্ত ও পুরনো মেশিন', lang)}
-            </span>
-            <span className="eam-kpi-icon"><Archive size={15} /></span>
-          </div>
-          <div className="eam-kpi-val">
-            {roleConfig.isSelfServiceOnly
-              ? `${visibleRequisitions.length} Req`
-              : `${decommissionedAssets.length} ${t('Ready to Scrap', 'স্ক্র্যাপ প্রস্তুত', lang)}`}
-          </div>
-          <div className="eam-kpi-foot">
-            <span>
-              {roleConfig.isSelfServiceOnly
-                ? t('Approval tracked live', 'অনুমোদন প্রক্রিয়া চলছে', lang)
-                : t(`${disposedAssets.length} archived records`, `${disposedAssets.length}টি স্থায়ী আর্কাইভ`, lang)}
-            </span>
-            <span className="eam-kpi-hint">{t('Open →', 'খুলুন →', lang)}</span>
-          </div>
-        </button>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          EXECUTIVE 5-MODULE NAVIGATION BAR (Streamlined & Responsive)
-          ══════════════════════════════════════════════════════════════════════ */}
+      {/* Main module tabs */}
       <div className="eam-nav-bar">
         <button
           type="button"
@@ -844,12 +631,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           onClick={() => setActiveTab('register')}
         >
           <Layers size={15} />
-          <span>
-            {roleConfig.isSelfServiceOnly
-              ? t('My Assigned Equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
-              : t('Machinery Register', 'মেশিন রেজিস্টার', lang)}
-          </span>
-          <span className="eam-nav-count">{roleScopedAssets.filter((a) => a.lifecycleStage !== 'disposed').length}</span>
+          <span>{roleConfig.isSelfServiceOnly ? t('My equipment', 'আমার সরঞ্জাম', lang) : t('Machines', 'মেশিন তালিকা', lang)}</span>
+          <span className="eam-nav-count">{activeOnlyCount}</span>
         </button>
 
         <button
@@ -858,24 +641,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           onClick={() => setActiveTab('maintenance')}
         >
           <Wrench size={15} />
-          <span>
-            {roleConfig.isSelfServiceOnly
-              ? t('Service Logs', 'সার্ভিস লগ', lang)
-              : t('Repairs & Servicing', 'সার্ভিসিং ও মেরামত', lang)}
-          </span>
-          <span className="eam-nav-count warn">{baseWorkOrders.filter((w) => w.status !== 'completed').length}</span>
+          <span>{t('Repairs & service', 'মেরামত ও সার্ভিস', lang)}</span>
+          <span className={`eam-nav-count ${openWoCount > 0 ? 'warn' : ''}`}>{openWoCount}</span>
         </button>
-
-        {roleConfig.canViewFinancialLedger && (
-          <button
-            type="button"
-            className={`eam-nav-tab ${activeTab === 'financials' ? 'active' : ''}`}
-            onClick={() => setActiveTab('financials')}
-          >
-            <DollarSign size={15} />
-            <span>{t('Valuation & Depreciation', 'সম্পদ মূল্য ও অবচয়', lang)}</span>
-          </button>
-        )}
 
         <button
           type="button"
@@ -885,12 +653,10 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           <ArrowRightLeft size={15} />
           <span>
             {roleConfig.isSelfServiceOnly
-              ? t('Equipment Requisitions', 'নতুন যন্ত্রপাতির আবেদন', lang)
-              : t('Requests & Transfers', 'আবেদন ও স্থানান্তর', lang)}
+              ? t('My requests', 'আমার আবেদন', lang)
+              : t('Requests & transfers', 'আবেদন ও স্থানান্তর', lang)}
           </span>
-          <span className="eam-nav-count">
-            {visibleRequisitions.filter((r) => r.stage !== 'commissioned' && r.stage !== 'rejected').length}
-          </span>
+          <span className="eam-nav-count">{openReqCount}</span>
         </button>
 
         {!roleConfig.isSelfServiceOnly && (
@@ -900,210 +666,178 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             onClick={() => setActiveTab('disposal')}
           >
             <Archive size={15} />
-            <span>{t('Retired & Scrap', 'অবসর ও স্ক্র্যাপ', lang)}</span>
+            <span>{t('Retirement & scrap', 'অবসর ও স্ক্র্যাপ', lang)}</span>
             {decommissionedAssets.length > 0 && (
               <span className="eam-nav-count danger">{decommissionedAssets.length}</span>
             )}
           </button>
         )}
+
+        {roleConfig.canViewFinancialLedger && (
+          <button
+            type="button"
+            className={`eam-nav-tab ${activeTab === 'financials' ? 'active' : ''}`}
+            onClick={() => setActiveTab('financials')}
+          >
+            <DollarSign size={15} />
+            <span>{t('Book value & depreciation', 'বইমূল্য ও অবচয়', lang)}</span>
+          </button>
+        )}
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TAB 1: MASTER REGISTER & 360° CRADLE-TO-GRAVE COCKPIT
-          ══════════════════════════════════════════════════════════════════════ */}
+      {/* TAB 1: MACHINES REGISTER & DETAIL PANEL */}
       {activeTab === 'register' && (
         <>
-          {/* Unified Filter & View-Mode Toolbar */}
-          <div className="eam-toolbar">
-            {!roleConfig.isSelfServiceOnly && (
-              <div className="eam-toolbar-top">
-                <div className="eam-cat-chips">
-                  {(
-                    [
-                      ['all', t('All Machines', 'সকল মেশিন', lang)],
-                      ['plant', `⚙️ ${t('Refinery Plant', 'রিফাইনারি প্ল্যান্ট', lang)}`],
-                      ['vehicle', `🚛 ${t('Tankers & Fleet', 'ট্যাংকার ও ফ্লিট', lang)}`],
-                      ['it', `💻 ${t('Control & IT', 'নিয়ন্ত্রণ ও আইটি', lang)}`],
-                      ['safety', `🛡️ ${t('Safety Gear', 'নিরাপত্তা সরঞ্জাম', lang)}`],
-                      ['lab', `🔬 ${t('Lab Instruments', 'পরীক্ষাগার যন্ত্র', lang)}`],
-                      ['corporate', `🏢 ${t('Corporate Office', 'করপোরেট অফিস', lang)}`],
-                    ] as const
-                  ).map(([catKey, label]) => {
-                    const count = categoryCounts[catKey] ?? 0;
-                    if (catKey === 'corporate' && count === 0 && categoryFilter !== 'corporate') return null;
-                    return (
-                      <button
-                        key={catKey}
-                        type="button"
-                        className={`eam-cat-chip ${categoryFilter === catKey ? 'active' : ''}`}
-                        onClick={() => setCategoryFilter(catKey)}
-                      >
-                        <span>{label}</span>
-                        <span className="eam-cat-chip-count">{count}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+          <div className="card mb-4 inc-filters">
+            <div className="inc-chips" style={{ justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <button
+                  type="button"
+                  className={`parcel-pill-tab ${kpiFilter === 'none' && stageFilter === 'active_all' ? 'active' : ''}`}
+                  onClick={() => { setKpiFilter('none'); setStageFilter('active_all'); }}
+                >
+                  {t('All active', 'সব সক্রিয়', lang)} ({activeOnlyCount})
+                </button>
+                <button
+                  type="button"
+                  className={`parcel-pill-tab ${kpiFilter === 'cal_alerts' ? 'active' : ''}`}
+                  onClick={() => { setStageFilter('active_all'); setKpiFilter((prev) => (prev === 'cal_alerts' ? 'none' : 'cal_alerts')); }}
+                >
+                  {t('Service due or in repair', 'সার্ভিস বাকি বা মেরামতাধীন', lang)} ({portfolioStats.calAlerts})
+                </button>
+                {portfolioStats.pendingSignOffs > 0 && (
+                  <button
+                    type="button"
+                    className={`parcel-pill-tab ${kpiFilter === 'pending_signoff' ? 'active' : ''}`}
+                    onClick={() => { setStageFilter('active_all'); setKpiFilter((prev) => (prev === 'pending_signoff' ? 'none' : 'pending_signoff')); }}
+                  >
+                    {t('Awaiting sign-off', 'স্বাক্ষর বাকি', lang)} ({portfolioStats.pendingSignOffs})
+                  </button>
+                )}
+                {!roleConfig.isSelfServiceOnly && decommissionedAssets.length > 0 && (
+                  <button
+                    type="button"
+                    className={`parcel-pill-tab ${stageFilter === 'decommissioned' ? 'active' : ''}`}
+                    onClick={() => { setKpiFilter('none'); setStageFilter((prev) => (prev === 'decommissioned' ? 'active_all' : 'decommissioned')); }}
+                  >
+                    {t('Ready to retire', 'অবসরের অপেক্ষায়', lang)} ({decommissionedAssets.length})
+                  </button>
+                )}
+              </div>
 
-                {/* Desktop View-Mode Switcher: Split Cockpit vs Full Table */}
+              {!roleConfig.isSelfServiceOnly && (
                 <div className="eam-view-switcher">
                   <button
                     type="button"
                     className={`eam-view-btn ${viewMode === 'cockpit' ? 'active' : ''}`}
                     onClick={() => setViewMode('cockpit')}
                   >
-                    <LayoutGrid size={13} /> {t('360° View', '৩৬০° ভিউ', lang)}
+                    <LayoutGrid size={13} /> {t('Split view', 'স্প্লিট ভিউ', lang)}
                   </button>
                   <button
                     type="button"
                     className={`eam-view-btn ${viewMode === 'table' ? 'active' : ''}`}
                     onClick={() => setViewMode('table')}
                   >
-                    <TableIcon size={13} /> {t('Table View', 'টেবিল ভিউ', lang)}
+                    <TableIcon size={13} /> {t('Table', 'টেবিল', lang)}
                   </button>
                 </div>
-              </div>
-            )}
-
-            <div className="eam-toolbar-controls">
-              <div className="eam-search-box">
-                <Search size={14} className="eam-search-icon" />
-                <input
-                  type="text"
-                  className="eam-search-input"
-                  placeholder={t('Search machine name, tag, location, or operator...', 'মেশিনের নাম, ট্যাগ, অবস্থান বা অপারেটর খুঁজুন...', lang)}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <button
-                    type="button"
-                    className="eam-search-clear"
-                    onClick={() => setSearchTerm('')}
-                    title="Clear search"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-
-              {/* Quick Health / Condition Filter Pills */}
-              <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className={`eam-cat-chip ${stageFilter === 'operational' ? 'active' : ''}`}
-                  style={{ padding: '4px 10px', fontSize: '11px' }}
-                  onClick={() => {
-                    setKpiFilter('none');
-                    setStageFilter((prev) => (prev === 'operational' ? 'active_all' : 'operational'));
-                  }}
-                >
-                  🟢 {t('Running Normal', 'সক্রিয় চালু', lang)}
-                </button>
-                <button
-                  type="button"
-                  className={`eam-cat-chip ${kpiFilter === 'cal_alerts' ? 'active' : ''}`}
-                  style={{ padding: '4px 10px', fontSize: '11px' }}
-                  onClick={() => {
-                    setStageFilter('active_all');
-                    setKpiFilter((prev) => (prev === 'cal_alerts' ? 'none' : 'cal_alerts'));
-                  }}
-                >
-                  🟡 {t('Service Due', 'সার্ভিস বাকি', lang)}
-                </button>
-                <button
-                  type="button"
-                  className={`eam-cat-chip ${stageFilter === 'maintenance' ? 'active' : ''}`}
-                  style={{ padding: '4px 10px', fontSize: '11px' }}
-                  onClick={() => {
-                    setKpiFilter('none');
-                    setStageFilter((prev) => (prev === 'maintenance' ? 'active_all' : 'maintenance'));
-                  }}
-                >
-                  🔴 {t('In Repair', 'মেরামতাধীন', lang)}
-                </button>
-              </div>
-
-              {!roleConfig.isSelfServiceOnly && (
-                <button
-                  type="button"
-                  className={`eam-view-btn ${showAdvancedFilters ? 'active' : ''}`}
-                  style={{ height: '36px', padding: '0 10px', border: '1.5px solid var(--brand-slate-200)', borderRadius: '8px' }}
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  title="Toggle more filters"
-                >
-                  <SlidersHorizontal size={13} /> {t('Filters', 'ফিল্টার', lang)}
-                </button>
               )}
+            </div>
 
-              {hasActiveFilters && (
-                <button type="button" className="eam-reset-btn" onClick={resetAllFilters}>
-                  <X size={13} /> {t('Reset', 'রিসেট', lang)} ({filteredAssets.length})
+            <div className="inc-search">
+              <Search size={15} />
+              <input
+                type="text"
+                className="form-input"
+                placeholder={t('Search by machine name, place, operator or tag…', 'মেশিনের নাম, স্থান, অপারেটর বা ট্যাগ দিয়ে খুঁজুন…', lang)}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button type="button" onClick={() => setSearchTerm('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                  <X size={15} />
                 </button>
               )}
             </div>
 
-            {/* Optional Collapsible Secondary Filters (Site & Full Lifecycle Stage) */}
-            {showAdvancedFilters && !roleConfig.isSelfServiceOnly && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px dashed var(--brand-slate-200)' }}>
-                <select
-                  className="eam-filter-select"
-                  value={facilityFilter}
-                  onChange={(e) => setFacilityFilter(e.target.value)}
-                >
-                  <option value="all">{t('All 3 Facilities', 'সকল স্থাপনা (৩টি)', lang)}</option>
-                  <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
-                  <option value="Bashundhara Corporate HQ, Baridhara">Baridhara Corporate HQ</option>
-                  <option value="Chattogram Patenga Terminal">Chattogram Marine Terminal</option>
-                </select>
+            {!roleConfig.isSelfServiceOnly && (
+              <details className="inc-more">
+                <summary>
+                  <SlidersHorizontal size={13} /> {t('More filters (category, site, stage)', 'আরও ফিল্টার (ধরন, স্থাপনা, ধাপ)', lang)}
+                  {hasActiveFilters && (
+                    <button
+                      type="button"
+                      className="apv-clear"
+                      style={{ marginLeft: 10 }}
+                      onClick={(e) => { e.preventDefault(); resetAllFilters(); }}
+                    >
+                      {t('Clear filters', 'ফিল্টার মুছুন', lang)}
+                    </button>
+                  )}
+                </summary>
+                <div className="inc-more-grid">
+                  <select className="form-input" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as 'all' | AssetCategory)}>
+                    <option value="all">{t('Every category', 'সব ধরন', lang)} ({categoryCounts.all ?? 0})</option>
+                    <option value="plant">{t('Refinery plant', 'রিফাইনারি প্ল্যান্ট', lang)} ({categoryCounts.plant ?? 0})</option>
+                    <option value="vehicle">{t('Tankers & fleet', 'ট্যাংকার ও ফ্লিট', lang)} ({categoryCounts.vehicle ?? 0})</option>
+                    <option value="it">{t('Control & IT', 'নিয়ন্ত্রণ ও আইটি', lang)} ({categoryCounts.it ?? 0})</option>
+                    <option value="safety">{t('Safety gear', 'নিরাপত্তা সরঞ্জাম', lang)} ({categoryCounts.safety ?? 0})</option>
+                    <option value="lab">{t('Lab instruments', 'পরীক্ষাগার যন্ত্র', lang)} ({categoryCounts.lab ?? 0})</option>
+                    {(categoryCounts.corporate ?? 0) > 0 && (
+                      <option value="corporate">{t('Corporate office', 'করপোরেট অফিস', lang)} ({categoryCounts.corporate ?? 0})</option>
+                    )}
+                  </select>
 
-                <select
-                  className="eam-filter-select"
-                  value={stageFilter}
-                  onChange={(e) => setStageFilter(e.target.value)}
-                >
-                  <option value="active_all">{t('Active Machinery (Excl. Disposed)', 'সক্রিয় যন্ত্রপাতি', lang)}</option>
-                  <option value="operational">Operational (Stage 4)</option>
-                  <option value="in_stock">In Warehouse (Stage 3)</option>
-                  <option value="in_transfer">In Transit (Stage 5)</option>
-                  <option value="calibration_due">Inspection / Service Due (Stage 6)</option>
-                  <option value="maintenance">Under Repair (Stage 6)</option>
-                  <option value="decommissioned">Worn-Out / Condemned (Stage 7)</option>
-                  <option value="disposed">Archived Scrap (Stage 8)</option>
-                  <option value="all">All (Including Scrapped)</option>
-                </select>
-              </div>
+                  <select className="form-input" value={facilityFilter} onChange={(e) => setFacilityFilter(e.target.value)}>
+                    <option value="all">{t('Every site', 'সব স্থাপনা', lang)}</option>
+                    <option value="Keraniganj Bitumen Refinery">Keraniganj Refinery</option>
+                    <option value="Bashundhara Corporate HQ, Baridhara">Baridhara Corporate HQ</option>
+                    <option value="Chattogram Patenga Terminal">Chattogram Marine Terminal</option>
+                  </select>
+
+                  <select className="form-input" value={stageFilter} onChange={(e) => setStageFilter(e.target.value)}>
+                    <option value="active_all">{t('Active (excluding archived)', 'সক্রিয় (আর্কাইভ বাদে)', lang)}</option>
+                    <option value="operational">{t('In service', 'সক্রিয় চালু', lang)}</option>
+                    <option value="in_stock">{t('In warehouse', 'স্টোরে রাখা', lang)}</option>
+                    <option value="in_transfer">{t('In transit', 'স্থানান্তরধীন', lang)}</option>
+                    <option value="calibration_due">{t('Service due', 'সার্ভিস বাকি', lang)}</option>
+                    <option value="maintenance">{t('In repair', 'মেরামতাধীন', lang)}</option>
+                    <option value="decommissioned">{t('Ready to retire', 'অবসরের অপেক্ষায়', lang)}</option>
+                    <option value="disposed">{t('Archived', 'আর্কাইভ', lang)}</option>
+                    <option value="all">{t('All (including archived)', 'সব (আর্কাইভসহ)', lang)}</option>
+                  </select>
+                </div>
+              </details>
             )}
           </div>
 
-          {/* Mobile List / 360° Dossier Switcher */}
           {viewMode === 'cockpit' && (
             <div className="mobile-view-toggle">
               <button type="button" className={mobileTab === 'list' ? 'active' : ''} onClick={() => setMobileTab('list')}>
-                <Layers size={14} /> {t('Asset Feed', 'সম্পদ তালিকা', lang)} ({filteredAssets.length})
+                <Layers size={14} /> {t('Machines', 'মেশিন তালিকা', lang)} ({sortedAssets.length})
               </button>
               <button type="button" className={mobileTab === 'detail' ? 'active' : ''} onClick={() => setMobileTab('detail')}>
-                <FileText size={14} /> {t('360° Dossier', 'জীবনচক্র ডসিয়ার', lang)} {selectedAsset ? `(${selectedAsset.tag})` : ''}
+                <FileText size={14} /> {t('Selected machine', 'নির্বাচিত মেশিন', lang)}
               </button>
             </div>
           )}
 
-          {/* MODE A: FULL-WIDTH MASTER TABLE VIEW */}
           {viewMode === 'table' ? (
             <div className="card">
               <div className="card-hd">
                 <div className="card-hd-left">
                   <div className="card-hd-icon"><TableIcon size={16} /></div>
                   <div>
-                    <div className="card-title">{t('ISO 14224 Enterprise Asset Master Table', 'এন্টারপ্রাইজ মূলধনী সম্পদ পূর্ণ তালিকা', lang)}</div>
+                    <div className="card-title">{t('All machines', 'মেশিনের তালিকা', lang)}</div>
                     <div className="card-subtitle">
-                      {t('Showing', 'প্রদর্শিত:', lang)} {filteredAssets.length} {t('assets — click any row to open its 360° Cockpit Dossier', 'টি সম্পদ — যেকোনো সারিতে ক্লিক করে ৩৬০° ডসিয়ার খুলুন', lang)}
+                      {t(`Showing ${sortedAssets.length} — click any row to open its details`, `${bn(sortedAssets.length)}টি প্রদর্শিত — বিস্তারিত দেখতে যেকোনো সারিতে ক্লিক করুন`, lang)}
                     </div>
                   </div>
                 </div>
-                <button type="button" className="btn-outline" onClick={handleExportMasterLedgerCsv}>
-                  <Download size={14} /> {t('Export CSV', 'সিএসভি এক্সপোর্ট', lang)}
-                </button>
+                <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportMasterLedgerCsv}>
+                  {t('Download CSV', 'সিএসভি ডাউনলোড', lang)}
+                </Button>
               </div>
 
               <div className="card-body" style={{ padding: 0 }}>
@@ -1111,24 +845,23 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th>{t('Tag & Equipment Title', 'ট্যাগ ও যন্ত্রপাতির নাম', lang)}</th>
-                        <th>{t('Facility & Location', 'স্থাপনা ও অবস্থান', lang)}</th>
-                        <th>{t('Custodian Officer', 'হেফাজতকারী কর্মকর্তা', lang)}</th>
-                        <th>{t('Carrying NBV', 'বর্তমান বইমূল্য', lang)}</th>
-                        <th>{t('Health & Next Audit', 'স্বাস্থ্য ও ক্যালিব্রেশন', lang)}</th>
-                        <th>{t('Stage', 'ধাপ', lang)}</th>
-                        <th style={{ textAlign: 'right' }}>{t('360° Dossier', 'ডসিয়ার', lang)}</th>
+                        <th>{t('Machine', 'মেশিন', lang)}</th>
+                        <th>{t('Site & location', 'স্থাপনা ও অবস্থান', lang)}</th>
+                        <th>{t('Operator', 'দায়িত্বপ্রাপ্ত', lang)}</th>
+                        <th>{t('Book value', 'বর্তমান বইমূল্য', lang)}</th>
+                        <th>{t('Health & next service', 'স্বাস্থ্য ও পরবর্তী সার্ভিস', lang)}</th>
+                        <th>{t('Where it stands', 'বর্তমান অবস্থা', lang)}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredAssets.length === 0 ? (
+                      {sortedAssets.length === 0 ? (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--brand-slate-400)' }}>
-                            {t('No assets match the active filters.', 'নির্বাচিত ফিল্টারে কোনো সম্পদ পাওয়া যায়নি।', lang)}
+                          <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-3)' }}>
+                            {t('No machines match the active filters.', 'নির্বাচিত ফিল্টারে কোনো মেশিন পাওয়া যায়নি।', lang)}
                           </td>
                         </tr>
                       ) : (
-                        filteredAssets.map((item) => {
+                        sortedAssets.map((item) => {
                           const f = calculateAssetFinancials(item);
                           return (
                             <tr
@@ -1140,61 +873,34 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               }}
                             >
                               <td>
-                                <div style={{ fontWeight: 700, fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{item.name}</div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                                  <span className="eam-tag-mono">{item.tag}</span>
-                                  {getCriticalityBadge(item.criticality)}
-                                </div>
+                                <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>{item.name}</div>
+                                <div style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>{item.oem} · {item.modelNo}</div>
                               </td>
                               <td>
-                                <div style={{ fontSize: '12px', fontWeight: 600 }}>{item.facility.split(',')[0]}</div>
-                                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{item.functionalLocation}</div>
+                                <div style={{ fontSize: '12.5px', fontWeight: 600 }}>{item.facility.split(',')[0]}</div>
+                                <div style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>{item.functionalLocation}</div>
                               </td>
                               <td>
-                                <div style={{ fontSize: '12px', fontWeight: 600 }}>{item.custodian}</div>
-                                {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' ? (
-                                  <span className="badge warn" style={{ fontSize: '9.5px' }}>✍️ Sign Pending</span>
-                                ) : (
-                                  <span style={{ fontSize: '10.5px', color: 'var(--status-success)', fontWeight: 600 }}>✓ Verified</span>
+                                <div style={{ fontSize: '12.5px', fontWeight: 600 }}>{item.custodian}</div>
+                                {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' && (
+                                  <span style={{ fontSize: '11px', color: 'var(--status-warning-text)', fontWeight: 600 }}>
+                                    {t('Awaiting signature', 'স্বাক্ষর বাকি', lang)}
+                                  </span>
                                 )}
                               </td>
-                              <td>
-                                <div style={{ fontWeight: 800, fontSize: '12.5px' }}>
-                                  {item.lifecycleStage === 'disposed' ? '৳0 (Retired)' : fmtBdtShort(f.netBookValue)}
-                                </div>
-                                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', fontFamily: 'monospace' }}>
-                                  {item.depreciationMethod} · {item.sapAssetNo}
-                                </div>
+                              <td style={{ fontWeight: 700, fontSize: '13px' }}>
+                                {item.lifecycleStage === 'disposed' ? t('Retired', 'অবসরপ্রাপ্ত', lang) : fmtBdtShort(f.netBookValue)}
                               </td>
                               <td>
                                 {item.lifecycleStage === 'disposed' || item.lifecycleStage === 'decommissioned' ? (
-                                  <span style={{ fontSize: '11px', color: 'var(--brand-slate-400)' }}>End-of-Life</span>
+                                  <span style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>—</span>
                                 ) : (
-                                  <>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: item.healthScore >= 85 ? 'var(--status-success)' : 'var(--status-warning)' }}>
-                                      ♥ {item.healthScore}% Health
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: item.daysToService <= 15 ? 'var(--status-danger)' : 'var(--brand-slate-500)' }}>
-                                      Audit in {item.daysToService}d
-                                    </div>
-                                  </>
+                                  <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+                                    <strong>{item.healthScore}%</strong> · {t(`in ${item.daysToService}d`, `${bn(item.daysToService)} দিন`, lang)}
+                                  </div>
                                 )}
                               </td>
                               <td>{getStageBadge(item.lifecycleStage, item.daysToService)}</td>
-                              <td style={{ textAlign: 'right' }}>
-                                <button
-                                  type="button"
-                                  className="btn-outline"
-                                  style={{ padding: '5px 10px', fontSize: '11px' }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedAssetId(item.id);
-                                    setViewMode('cockpit');
-                                  }}
-                                >
-                                  <Eye size={12} /> {t('Open 360°', 'খুলুন', lang)}
-                                </button>
-                              </td>
                             </tr>
                           );
                         })
@@ -1205,9 +911,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               </div>
             </div>
           ) : (
-            /* MODE B: TWO-COLUMN 360° COCKPIT MASTER-DETAIL LAYOUT */
             <div className="eam-cockpit-grid">
-              {/* LEFT PANEL: Clean Selectable Asset Feed Cards */}
+              {/* LEFT PANEL: Clean asset list */}
               <div className={`eam-feed-panel ${mobileTab === 'detail' ? 'eam-mobile-hidden' : ''}`}>
                 <div className="eam-feed-hd">
                   <div>
@@ -1215,48 +920,35 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                       <Layers size={15} style={{ color: 'var(--brand-crimson)' }} />
                       <span>
                         {roleConfig.isSelfServiceOnly
-                          ? t('My Custody Equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
-                          : t('Asset Portfolio Feed', 'সম্পদ তালিকা', lang)}
+                          ? t('My equipment', 'আমার সরঞ্জাম', lang)
+                          : t('Machines (needs attention first)', 'মেশিন তালিকা (জরুরি আগে)', lang)}
                       </span>
                     </div>
                     <div className="eam-feed-count">
-                      {t('Showing', 'প্রদর্শিত', lang)} <strong>{filteredAssets.length}</strong>{' '}
-                      {t('of', '/', lang)} {roleScopedAssets.length} {t('records', 'টি রেকর্ড', lang)}
+                      {t(`Showing ${sortedAssets.length} of ${roleScopedAssets.length}`, `${bn(roleScopedAssets.length)}টির মধ্যে ${bn(sortedAssets.length)}টি`, lang)}
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    className="btn-sm-ghost"
-                    title="Sync Data"
-                    onClick={() =>
-                      showToast(
-                        t('Synchronized with central accounts and plant machines.', 'কেন্দ্রীয় হিসাব ও কারখানা যন্ত্রপাতির সাথে তথ্য সিঙ্ক সম্পন্ন।', lang),
-                        'info'
-                      )
-                    }
-                  >
-                    <RefreshCw size={13} /> {t('Sync Data', 'সিঙ্ক', lang)}
-                  </button>
                 </div>
 
                 <div className="eam-feed-list">
-                  {filteredAssets.length === 0 ? (
-                    <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--brand-slate-400)', fontSize: '12.5px' }}>
-                      <div style={{ marginBottom: '10px' }}>
-                        {t('No assets match your current filter criteria.', 'নির্বাচিত ফিল্টারে কোনো সম্পদ পাওয়া যায়নি।', lang)}
-                      </div>
-                      {hasActiveFilters && (
-                        <button type="button" className="btn-outline" style={{ fontSize: '11.5px' }} onClick={resetAllFilters}>
-                          {t('Reset All Filters', 'সকল ফিল্টার রিসেট করুন', lang)}
-                        </button>
-                      )}
-                    </div>
+                  {sortedAssets.length === 0 ? (
+                    <EmptyState
+                      compact
+                      icon={<Layers size={20} />}
+                      title={t('No machines match these filters', 'এই ফিল্টারে কোনো মেশিন নেই', lang)}
+                      action={
+                        hasActiveFilters ? (
+                          <Button variant="secondary" size="sm" onClick={resetAllFilters}>
+                            {t('Clear filters', 'ফিল্টার মুছুন', lang)}
+                          </Button>
+                        ) : undefined
+                      }
+                    />
                   ) : (
-                    filteredAssets.map((item) => {
-                      const f = calculateAssetFinancials(item);
+                    sortedAssets.map((item) => {
                       const isSelected = selectedAsset?.id === item.id;
-                      const healthColor = item.healthScore >= 85 ? 'var(--status-success)' : item.healthScore >= 60 ? 'var(--status-warning)' : 'var(--status-danger)';
+                      const healthColor =
+                        item.healthScore >= 85 ? 'var(--status-success-solid)' : item.healthScore >= 60 ? 'var(--status-warning-solid)' : 'var(--status-danger-solid)';
 
                       return (
                         <button
@@ -1268,55 +960,30 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             setMobileTab('detail');
                           }}
                         >
-                          <div className="eam-feed-row-top">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
-                              <span className="eam-tag-mono">🏷️ {item.tag}</span>
-                              {getCriticalityBadge(item.criticality)}
-                            </div>
+                          <div className="ast-row-top">
+                            <span className="eam-feed-name">{item.name}</span>
                             {getStageBadge(item.lifecycleStage, item.daysToService)}
                           </div>
 
-                          <div className="eam-feed-name">{item.name}</div>
-
                           <div className="eam-feed-meta">
-                            <span>📍 {item.facility.split(',')[0]}</span>
-                            <span>•</span>
-                            <span>👤 {item.custodian}</span>
+                            <span>{item.facility.split(',')[0]}</span>
+                            <span>·</span>
+                            <span>{item.custodian}</span>
                             {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' && (
-                              <span className="badge warn" style={{ fontSize: '9px', padding: '1px 5px' }}>
-                                ✍️ Sign Pending
+                              <span style={{ color: 'var(--status-warning-text)', fontWeight: 700 }}>
+                                · {t('Sign-off needed', 'স্বাক্ষর বাকি', lang)}
                               </span>
                             )}
                           </div>
 
-                          <div className="eam-feed-metrics">
-                            <div>
-                              {roleConfig.canViewFinancialLedger ? (
-                                <span>
-                                  {t('Value:', 'মূল্য:', lang)}{' '}
-                                  <strong style={{ color: 'var(--brand-slate-900)' }}>
-                                    {item.lifecycleStage === 'disposed' ? '৳0 (Retired)' : fmtBdtShort(f.netBookValue)}
-                                  </strong>
-                                </span>
-                              ) : (
-                                <span style={{ color: 'var(--brand-slate-500)' }}>S/N: {item.serialNo}</span>
-                              )}
-                            </div>
-
-                            {item.lifecycleStage !== 'disposed' && item.lifecycleStage !== 'decommissioned' ? (
-                              <div className="eam-health-pill" style={{ color: healthColor }}>
-                                <div className="eam-mini-bar">
-                                  <div
-                                    className="eam-mini-bar-fill"
-                                    style={{ width: `${item.healthScore}%`, background: healthColor }}
-                                  />
-                                </div>
-                                <span>♥ {item.healthScore}%</span>
+                          {item.lifecycleStage !== 'disposed' && item.lifecycleStage !== 'decommissioned' && (
+                            <div className="ast-row-health">
+                              <div className="hs-bar" style={{ flex: 1 }} aria-hidden>
+                                <span style={{ width: `${item.healthScore}%`, background: healthColor }} />
                               </div>
-                            ) : (
-                              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>{t('Retired', 'অবসরপ্রাপ্ত', lang)}</span>
-                            )}
-                          </div>
+                              <small>{t(`${item.healthScore}% health`, `${bn(item.healthScore)}% স্বাস্থ্য`, lang)}</small>
+                            </div>
+                          )}
                         </button>
                       );
                     })
@@ -1324,571 +991,428 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 </div>
               </div>
 
-              {/* RIGHT PANEL: 360° ASSET COCKPIT HERO & DOSSIER */}
-              {selectedAsset && selectedFinancials && (
-                <div className={`eam-dossier-shell ${mobileTab === 'list' ? 'eam-mobile-hidden' : ''}`}>
-                  {/* Executive Navy-Crimson Hero Header */}
-                  <div className="eam-dossier-hero">
-                    <div className="eam-hero-top">
-                      <div className="eam-hero-badges">
-                        <span className="eam-hero-tag">🏷️ {selectedAsset.tag}</span>
-                        <span className="eam-hero-sap">{selectedAsset.sapAssetNo}</span>
-                        {getCriticalityBadge(selectedAsset.criticality)}
+              {/* RIGHT PANEL: Clean detail card answering What / Where / Why / What next */}
+              {selectedAsset && selectedFinancials && (() => {
+                const next = machineNextStep(selectedAsset);
+                return (
+                  <div className={`eam-dossier-shell ${mobileTab === 'list' ? 'eam-mobile-hidden' : ''}`}>
+                    <div className="ast-detail-head">
+                      <button
+                        type="button"
+                        className="btn-outline mobile-view-toggle"
+                        style={{ padding: '6px 12px', fontSize: '12px', width: 'auto', marginBottom: '10px' }}
+                        onClick={() => setMobileTab('list')}
+                      >
+                        <ArrowLeft size={13} /> {t('Back to list', 'তালিকায় ফিরুন', lang)}
+                      </button>
+
+                      <div className="ast-head-top">
+                        <div>
+                          <h3 className="ast-title">{selectedAsset.name}</h3>
+                          <p className="ast-origin">
+                            {selectedAsset.facility} · {selectedAsset.functionalLocation} · {t('Operator:', 'দায়িত্বপ্রাপ্ত:', lang)}{' '}
+                            <strong>{selectedAsset.custodian}</strong> ({selectedAsset.department})
+                          </p>
+                          <p className="ast-purpose">{selectedAsset.specs}</p>
+                        </div>
                         {getStageBadge(selectedAsset.lifecycleStage, selectedAsset.daysToService)}
                       </div>
 
-                      <button
-                        type="button"
-                        className="eam-hero-qr-btn"
-                        onClick={() => setShowPassportModal(true)}
-                      >
-                        <QrCode size={14} /> {t('Metal QR Passport', 'কিউআর পাসপোর্ট', lang)}
-                      </button>
-                    </div>
-
-                    <h3 className="eam-hero-title">{selectedAsset.name}</h3>
-                    <div className="eam-hero-sub">
-                      <span>🏭 {selectedAsset.oem} ({selectedAsset.modelNo})</span>
-                      <span>•</span>
-                      <span>S/N: {selectedAsset.serialNo}</span>
-                      <span>•</span>
-                      <span>📍 {selectedAsset.facility} ({selectedAsset.functionalLocation})</span>
-                    </div>
-
-                    {/* 4 Telemetry Micro-Tiles */}
-                    <div className="eam-hero-telemetry">
-                      <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">
-                          {roleConfig.canViewFinancialLedger
-                            ? t('Current Value', 'বর্তমান মূল্যায়ন', lang)
-                            : t('Commissioned Date', 'কমিশনিং তারিখ', lang)}
+                      {/* What happens next / what do I do */}
+                      <div className={`lv-status ${next.tone === 'warn' ? 'warn' : 'ok'}`} style={{ marginTop: 12, marginBottom: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: '1 1 240px' }}>
+                          {next.tone === 'warn' ? <AlertTriangle size={16} /> : <CheckCircle size={16} />}
+                          <span>{next.text}</span>
                         </div>
-                        <div className="eam-hero-tile-val" style={{ color: 'var(--status-success-bright)' }}>
-                          {roleConfig.canViewFinancialLedger
-                            ? selectedAsset.lifecycleStage === 'disposed'
-                              ? '৳0 (Retired)'
-                              : fmtBdtShort(selectedFinancials.netBookValue)
-                            : selectedAsset.commissioningDate}
-                        </div>
-                        <div className="eam-hero-tile-sub">
-                          {roleConfig.canViewFinancialLedger
-                            ? t(`Cost: ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)}`, `মূল ব্যয়: ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)}`, lang)
-                            : selectedAsset.glCostCenter}
-                        </div>
+                        {next.cta}
                       </div>
 
-                      <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Machine Health', 'মেশিনের স্বাস্থ্য অবস্থা', lang)}</div>
-                        <div className="eam-hero-tile-val">
-                          {selectedAsset.lifecycleStage === 'disposed'
-                            ? 'Archived'
-                            : `${selectedAsset.healthScore}% Good`}
-                        </div>
-                        <div className="eam-hero-tile-sub">
-                          {t(`Est. Remaining Life: ${selectedFinancials.remainingUsefulLifeYears} yrs`, `অবশিষ্ট আয়ু: ${selectedFinancials.remainingUsefulLifeYears} বছর`, lang)}
-                        </div>
-                      </div>
-
-                      <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Next Service Due', 'পরবর্তী সার্ভিসিং', lang)}</div>
-                        <div
-                          className="eam-hero-tile-val"
-                          style={{
-                            color:
-                              selectedAsset.daysToService > 0 && selectedAsset.daysToService <= 20
-                                ? 'var(--status-danger-bright)'
-                                : 'var(--text-on-brand)',
-                          }}
-                        >
-                          {selectedAsset.lifecycleStage === 'disposed'
-                            ? 'Retired'
-                            : `${selectedAsset.daysToService} ${t('days', 'দিন বাকি', lang)}`}
-                        </div>
-                        <div className="eam-hero-tile-sub">
-                          {selectedAsset.nextServiceDate}
-                        </div>
-                      </div>
-
-                      <div className="eam-hero-tile">
-                        <div className="eam-hero-tile-lbl">{t('Assigned Operator', 'দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}</div>
-                        <div className="eam-hero-tile-val" style={{ fontSize: '12.5px' }}>
-                          {selectedAsset.custodian}
-                        </div>
-                        <div
-                          className="eam-hero-tile-sub"
-                          style={{ color: selectedAsset.custodianAcknowledged ? 'var(--status-success-bright)' : 'var(--status-warning-bright)' }}
-                        >
-                          {selectedAsset.custodianAcknowledged ? t('✓ Handover Signed', '✓ দায়িত্ব নিশ্চিত', lang) : t('⏳ Awaiting Sign-Off', '⏳ গ্রহণ স্বাক্ষর বাকি', lang)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Dossier Body */}
-                  <div className="eam-dossier-body">
-                    {/* Mobile Back Button */}
-                    <button
-                      type="button"
-                      className="btn-outline mobile-view-toggle"
-                      style={{ padding: '6px 12px', fontSize: '11.5px', width: 'auto', marginBottom: '12px' }}
-                      onClick={() => setMobileTab('list')}
-                    >
-                      <ArrowLeft size={13} /> {t('Back to Asset Feed', 'সম্পদ তালিকায় ফিরুন', lang)}
-                    </button>
-
-                    {/* Smart Contextual Next-Action Guidance Bar */}
-                    {renderSmartNextAction()}
-
-                    {/* Connected 8-Stage Cradle-to-Grave Stepper */}
-                    <AssetLifecycleStepper asset={selectedAsset} lang={lang} />
-
-                    {/* Clean Segmented Dossier Sub-Tabs */}
-                    <div className="eam-subtabs">
-                      <button
-                        type="button"
-                        className={`eam-subtab ${inspectorTab === 'overview' ? 'active' : ''}`}
-                        onClick={() => setInspectorTab('overview')}
-                      >
-                        <Eye size={13} /> {t('Specs & Actions', 'বিবরণ ও কার্যাবলী', lang)}
-                      </button>
-                      <button
-                        type="button"
-                        className={`eam-subtab ${inspectorTab === 'timeline' ? 'active' : ''}`}
-                        onClick={() => setInspectorTab('timeline')}
-                      >
-                        <History size={13} /> {t('Activity Log', 'কার্যক্রম ইতিহাস', lang)} ({selectedAsset.lifecycleEvents.length})
-                      </button>
-                      <button
-                        type="button"
-                        className={`eam-subtab ${inspectorTab === 'custody' ? 'active' : ''}`}
-                        onClick={() => setInspectorTab('custody')}
-                      >
-                        <UserCheck size={13} /> {t('Custody History', 'দায়িত্ব হস্তান্তর', lang)} ({selectedAsset.custodyHistory.length})
-                      </button>
-                      {!roleConfig.isSelfServiceOnly && (
-                        <button
-                          type="button"
-                          className={`eam-subtab ${inspectorTab === 'spares' ? 'active' : ''}`}
-                          onClick={() => setInspectorTab('spares')}
-                        >
-                          <Package size={13} /> {t('Spare Parts', 'খুচরা যন্ত্রাংশ', lang)} ({selectedAsset.spares.length})
-                        </button>
-                      )}
-                    </div>
-
-                    {/* SUB-TAB A: OVERVIEW, SPECS & ROLE-GATED CONTROLS */}
-                    {inspectorTab === 'overview' && (
-                      <div>
-                        <div className="eam-spec-box" style={{ marginBottom: '10px' }}>
-                          <div className="eam-spec-lbl">
-                            {t('Technical Operating Specifications & Duty Rating', 'প্রযুক্তিগত বৈশিষ্ট্য ও অপারেটিং স্পেসিফিকেশন', lang)}
-                          </div>
-                          <div className="eam-spec-val" style={{ fontWeight: 600, lineHeight: 1.45 }}>
-                            {selectedAsset.specs}
-                          </div>
-                        </div>
-
-                        <div className="eam-info-grid-2">
-                          <div className="eam-spec-box">
-                            <div className="eam-spec-lbl">{t('Functional Placement & GL Cost Center', 'অবস্থান ও জিএল কস্ট সেন্টার', lang)}</div>
-                            <div className="eam-spec-val">{selectedAsset.functionalLocation}</div>
-                            <div className="eam-spec-sub" style={{ fontFamily: 'monospace', color: 'var(--brand-crimson)', fontWeight: 700 }}>
-                              {selectedAsset.glCostCenter} • {selectedAsset.department}
-                            </div>
-                          </div>
-
-                          <div className="eam-spec-box">
-                            <div className="eam-spec-lbl">{t('Procurement, Commissioning & AMC', 'ক্রয়, কমিশনিং ও এএমসি', lang)}</div>
-                            <div className="eam-spec-val">
-                              {t('Commissioned:', 'কমিশনিং:', lang)} {selectedAsset.commissioningDate}
-                            </div>
-                            <div className="eam-spec-sub">
-                              {selectedAsset.amcVendor ? `AMC: ${selectedAsset.amcVendor}` : `Warranty Expiry: ${selectedAsset.warrantyExpiry}`}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Financial Snapshot Grid */}
-                        {roleConfig.canViewFinancialLedger && (
-                          <div className="eam-info-grid-3">
-                            <div className="eam-spec-box">
-                              <div className="eam-spec-lbl">{t('Total Purchase Cost (Capitalized)', 'মোট মূলধন ক্রয়মূল্য', lang)}</div>
-                              <div className="eam-spec-val">৳{selectedFinancials.grossCapitalizedCost.toLocaleString()}</div>
-                              <div className="eam-spec-sub">Expected Scrap/Resale: ৳{selectedAsset.salvageValue.toLocaleString()}</div>
-                            </div>
-                            <div className="eam-spec-box">
-                              <div className="eam-spec-lbl">{t('Current Book Value (Net Value)', 'বর্তমান বইমূল্য (Net Value)', lang)}</div>
-                              <div className="eam-spec-val" style={{ color: 'var(--status-success)' }}>
-                                {selectedAsset.lifecycleStage === 'disposed'
-                                  ? '৳0 (Retired)'
-                                  : `৳${selectedFinancials.netBookValue.toLocaleString()}`}
-                              </div>
-                              <div className="eam-spec-sub">
-                                -{fmtBdtShort(selectedFinancials.annualDepreciation)}/yr (Depreciation)
-                              </div>
-                            </div>
-                            <div className="eam-spec-box">
-                              <div className="eam-spec-lbl">{t('Total Lifetime Cost (Purchase + Repairs)', 'মোট জীবনচক্র ব্যয় (ক্রয় + মেরামত)', lang)}</div>
-                              <div
-                                className="eam-spec-val"
-                                style={{ color: selectedFinancials.repairToCapexRatioPct >= 50 ? 'var(--status-danger)' : undefined }}
-                              >
-                                ৳{selectedFinancials.totalCostOfOwnership.toLocaleString()}
-                              </div>
-                              <div className="eam-spec-sub">
-                                Repairs vs Cost: <strong>{selectedFinancials.repairToCapexRatioPct}%</strong>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Active Deficiency Alert */}
-                        {selectedAsset.defectQuery && (
-                          <div
-                            style={{
-                              background: 'rgba(220, 38, 38, 0.08)',
-                              border: '1.5px solid rgba(220, 38, 38, 0.32)',
-                              borderRadius: '9px',
-                              padding: '11px 13px',
-                              marginBottom: '12px',
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--status-danger)', fontWeight: 800, fontSize: '12px' }}>
-                              <AlertTriangle size={14} />
-                              <span>{t('Active Maintenance / Calibration Deficiency', 'সক্রিয় ত্রুটি / ক্যালিব্রেশন আপত্তি', lang)}</span>
-                            </div>
-                            <div style={{ fontSize: '11.5px', marginTop: '4px' }}>
-                              <strong>{selectedAsset.defectQuery.reason}:</strong> {selectedAsset.defectQuery.observation}
-                            </div>
-                            <div style={{ fontSize: '11px', color: 'var(--status-success)', marginTop: '3px', fontWeight: 700 }}>
-                              ➔ {selectedAsset.defectQuery.improvementsRequired}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Retired & Archived Summary Box */}
-                        {selectedAsset.disposalDossier && selectedAsset.lifecycleStage === 'disposed' && (
-                          <div className="eam-spec-box" style={{ borderLeft: '4px solid var(--brand-slate-500)', marginBottom: '12px' }}>
-                            <div style={{ fontWeight: 800, fontSize: '12.5px', marginBottom: '4px' }}>
-                              🏛️ {t('Stage-8 Retired & Archived Dossier', 'নিষ্পত্তিকৃত সংবিধিবদ্ধ আর্কাইভ রেকর্ড', lang)} ({selectedAsset.disposalDossier.sapRetirementVoucher})
-                            </div>
-                            <div style={{ fontSize: '11.5px' }}>
-                              Channel: <strong>{selectedAsset.disposalDossier.disposalMethod}</strong> • Counterparty:{' '}
-                              <strong>{selectedAsset.disposalDossier.buyerOrVendor}</strong>
-                            </div>
-                            <div style={{ fontSize: '11.5px', marginTop: '3px' }}>
-                              Proceeds: <strong>৳{selectedAsset.disposalDossier.salvageProceedsBdt?.toLocaleString()}</strong> • IAS 16 Gain/Loss:{' '}
-                              <strong style={{ color: (selectedAsset.disposalDossier.gainOrLossBdt || 0) >= 0 ? 'var(--status-success)' : 'var(--status-danger)' }}>
-                                {(selectedAsset.disposalDossier.gainOrLossBdt || 0) >= 0
-                                  ? `+৳${selectedAsset.disposalDossier.gainOrLossBdt?.toLocaleString()}`
-                                  : `-৳${Math.abs(selectedAsset.disposalDossier.gainOrLossBdt || 0).toLocaleString()}`}
-                              </strong>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Organized Lifecycle Action Toolbar */}
-                        <div className="eam-action-section">
-                          <div className="eam-action-section-lbl">
-                            {t('Quick Actions & Machine Controls', 'দ্রুত কার্যাবলী ও নিয়ন্ত্রণ', lang)}
-                          </div>
-                          <div className="eam-actions-grid">
-                            {roleConfig.canCertifyCalibration &&
-                              selectedAsset.lifecycleStage !== 'disposed' &&
-                              selectedAsset.lifecycleStage !== 'decommissioned' && (
-                                <button
-                                  type="button"
-                                  className="btn-primary"
-                                  onClick={() => {
-                                    certifyAssetDirect(selectedAsset.id, currentPersona.name, currentPersona.label);
-                                    showToast(
-                                      t(
-                                        `✓ Service & quality certified for ${selectedAsset.tag}. Next service set in ${selectedAsset.calibrationCycleDays} days.`,
-                                        `✓ ${selectedAsset.tag}-এর সার্ভিস ও মান প্রত্যয়ন সম্পন্ন হয়েছে।`,
-                                        lang
-                                      ),
-                                      'success'
-                                    );
-                                  }}
-                                >
-                                  <CheckCircle size={14} /> {t('Certify Service & Quality', 'সার্ভিস ও মান প্রত্যয়ন', lang)}
-                                </button>
-                              )}
-
-                            {roleConfig.canManageWorkOrders &&
-                              selectedAsset.lifecycleStage !== 'disposed' &&
-                              selectedAsset.lifecycleStage !== 'decommissioned' && (
-                                <button type="button" className="btn-outline" onClick={() => setShowWorkOrderModal(true)}>
-                                  <Wrench size={14} /> {t('Create Repair Order', 'মেরামত কার্যাদেশ জারি', lang)}
-                                </button>
-                              )}
-
-                            {roleConfig.canTransferCustody &&
-                              selectedAsset.lifecycleStage !== 'disposed' &&
-                              selectedAsset.lifecycleStage !== 'decommissioned' && (
-                                <button type="button" className="btn-outline" onClick={() => setShowTransferModal(true)}>
-                                  <ArrowRightLeft size={14} /> {t('Transfer Machine / Gate Pass', 'মেশিন স্থানান্তর / গেট পাস', lang)}
-                                </button>
-                              )}
-
-                            {roleConfig.canViewFinancialLedger && (
-                              <button type="button" className="btn-outline" onClick={() => setScheduleTargetAsset(selectedAsset)}>
-                                <DollarSign size={14} /> {t('Yearly Value Drop Table', 'বার্ষিক অবচয় তালিকা', lang)}
-                              </button>
-                            )}
-
-                            {selectedAsset.lifecycleStage !== 'disposed' &&
-                              selectedAsset.lifecycleStage !== 'decommissioned' && (
-                                <button
-                                  type="button"
-                                  className="btn-outline"
-                                  style={{ borderColor: 'rgba(220,38,38,0.45)', color: 'var(--status-danger)' }}
-                                  onClick={() => setShowRejectModal(true)}
-                                >
-                                  <RotateCcw size={14} />
-                                  {roleConfig.isSelfServiceOnly
-                                    ? t('Report Defect', 'ত্রুটি রিপোর্ট করুন', lang)
-                                    : t('Report Machine Defect', 'যন্ত্রপাতির সমস্যা জানান', lang)}
-                                </button>
-                              )}
-
-                            {selectedAsset.lifecycleStage !== 'disposed' && onNavigate && (
-                              <button
-                                type="button"
-                                className="btn-outline"
-                                style={{ borderColor: 'rgba(239, 68, 68, 0.45)', color: 'var(--status-danger)', background: 'rgba(239, 68, 68, 0.05)' }}
-                                onClick={() => {
-                                  onNavigate('incident');
-                                  showToast(
-                                    t(
-                                      `Opening Safety Cockpit to report equipment event for ${selectedAsset.tag} (${selectedAsset.name}).`,
-                                      `${selectedAsset.tag} এর জন্য ইনসিডেন্ট বা ঝুঁকি রিপোর্ট করতে সেফটি ককপিট খোলা হচ্ছে।`,
-                                      lang
-                                    ),
-                                    'gold'
-                                  );
-                                }}
-                              >
-                                <AlertTriangle size={14} color="var(--status-danger)" />
-                                {t('Report Safety Incident', 'নিরাপত্তা ঝুঁকি রিপোর্ট', lang)}
-                              </button>
-                            )}
-
-                            {roleConfig.canInitiateDecommission &&
-                              selectedAsset.lifecycleStage !== 'decommissioned' &&
-                              selectedAsset.lifecycleStage !== 'disposed' && (
-                                <button
-                                  type="button"
-                                  className="btn-outline-danger"
-                                  onClick={() => setShowDecommissionModal(true)}
-                                >
-                                  <Archive size={14} /> {t('Retire Machine (End-of-Life)', 'মেশিন অবসর ঘোষণা', lang)}
-                                </button>
-                              )}
-
-                            {roleConfig.canAuthorizeWriteOff && selectedAsset.lifecycleStage === 'decommissioned' && (
-                              <button
-                                type="button"
-                                className="btn-gold"
-                                style={{ fontWeight: 800 }}
-                                onClick={() => setDisposalTargetAsset(selectedAsset)}
-                              >
-                                👑 {t('Final Approval: Sell or Scrap Asset', 'চূড়ান্ত অনুমোদন: বিক্রয় বা স্ক্র্যাপ', lang)}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SUB-TAB B: IMMUTABLE CRADLE-TO-GRAVE AUDIT TIMELINE */}
-                    {inspectorTab === 'timeline' && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
-                        {selectedAsset.lifecycleEvents.map((ev) => (
-                          <div
-                            key={ev.id}
-                            className="eam-spec-box"
-                            style={{ borderLeft: '3.5px solid var(--brand-crimson)' }}
-                          >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
-                                <span style={{ fontWeight: 800, fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{ev.title}</span>
-                                {typeof ev.financialDeltaBdt === 'number' && ev.financialDeltaBdt !== 0 && (
-                                  <span className={`badge ${ev.financialDeltaBdt > 0 ? 'info' : 'warn'}`} style={{ fontSize: '10px' }}>
-                                    {ev.financialDeltaBdt > 0
-                                      ? `CAPEX +৳${ev.financialDeltaBdt.toLocaleString()}`
-                                      : `৳${ev.financialDeltaBdt.toLocaleString()}`}
-                                  </span>
-                                )}
-                              </div>
-                              <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <Clock size={11} /> {ev.timestamp}
-                              </span>
-                            </div>
-
-                            <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', marginTop: '4px', lineHeight: 1.45 }}>
-                              {ev.notes}
-                            </div>
-
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: '6px',
-                                marginTop: '7px',
-                                paddingTop: '6px',
-                                borderTop: '1px dashed var(--brand-slate-200)',
-                                fontSize: '10.5px',
-                                color: 'var(--brand-slate-500)',
+                      {/* Role-gated action bar right at the top */}
+                      <div className="ast-top-actions">
+                        {roleConfig.canCertifyCalibration &&
+                          selectedAsset.lifecycleStage !== 'disposed' &&
+                          selectedAsset.lifecycleStage !== 'decommissioned' && (
+                            <Button
+                              size="sm"
+                              icon={<CheckCircle size={13} />}
+                              onClick={() => {
+                                certifyAssetDirect(selectedAsset.id, currentPersona.name, currentPersona.label);
+                                showToast(
+                                  t(
+                                    `Service certified for ${selectedAsset.name}. Next service in ${selectedAsset.calibrationCycleDays} days.`,
+                                    `${selectedAsset.name}-এর সার্ভিস প্রত্যয়ন সম্পন্ন।`,
+                                    lang,
+                                  ),
+                                  'success',
+                                );
                               }}
                             >
-                              <span>
-                                Actor: <strong>{ev.actor}</strong> ({ev.actorRole})
-                              </span>
-                              <span style={{ fontFamily: 'monospace', color: 'var(--status-success)', fontWeight: 700 }}>
-                                {ev.sapRef ? `${ev.sapRef} · ` : ''}
-                                {ev.hash.slice(0, 22)}...
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                              {t('Certify service', 'সার্ভিস প্রত্যয়ন', lang)}
+                            </Button>
+                          )}
 
-                    {/* SUB-TAB C: CUSTODY & LOCATION CHAIN */}
-                    {inspectorTab === 'custody' && (
-                      <div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', marginBottom: '12px' }}>
-                          {selectedAsset.custodyHistory.map((ch, idx) => {
-                            const isCurrent = !ch.returnedDate;
-                            return (
-                              <div
-                                key={ch.id}
-                                className="eam-spec-box"
-                                style={{
-                                  border: isCurrent ? '1.5px solid var(--status-success)' : undefined,
-                                  background: isCurrent ? 'rgba(5, 150, 105, 0.05)' : undefined,
-                                }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                                  <strong style={{ fontSize: '12.5px' }}>
-                                    #{idx + 1} · {ch.custodianName} {ch.custodianEmpId ? `(${ch.custodianEmpId})` : ''}
-                                  </strong>
-                                  <span className={`badge ${isCurrent ? 'success' : 'info'}`}>
-                                    {isCurrent ? t('Current Holder', 'বর্তমান হেফাজতকারী', lang) : `Returned: ${ch.returnedDate}`}
-                                  </span>
-                                </div>
-                                <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
-                                  📍 {ch.facility} — {ch.functionalLocation} ({ch.department})
-                                </div>
-                                <div style={{ fontSize: '11px', marginTop: '4px' }}>
-                                  Assigned: <strong>{ch.assignedDate}</strong>
-                                  {ch.gatePassRef ? ` • Gate Pass: ${ch.gatePassRef}` : ''} •{' '}
-                                  {ch.acknowledged ? (
-                                    <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>
-                                      ✓ E-Signed {ch.acknowledgedAt ? `(${ch.acknowledgedAt})` : ''}
-                                    </span>
-                                  ) : (
-                                    <span style={{ color: 'var(--status-warning)', fontWeight: 700 }}>⏳ Signature Pending</span>
-                                  )}
-                                </div>
-                                <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                                  Condition: {ch.conditionOnHandover}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        {roleConfig.canManageWorkOrders &&
+                          selectedAsset.lifecycleStage !== 'disposed' &&
+                          selectedAsset.lifecycleStage !== 'decommissioned' && (
+                            <Button size="sm" variant="secondary" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
+                              {t('Create repair order', 'মেরামত আদেশ', lang)}
+                            </Button>
+                          )}
 
                         {roleConfig.canTransferCustody &&
                           selectedAsset.lifecycleStage !== 'disposed' &&
                           selectedAsset.lifecycleStage !== 'decommissioned' && (
-                            <button
-                              type="button"
-                              className="btn-primary"
-                              style={{ width: '100%', justifyContent: 'center' }}
-                              onClick={() => setShowTransferModal(true)}
-                            >
-                              <ArrowRightLeft size={14} /> {t('Initiate New Custody / Site Gate Pass Transfer', 'নতুন হস্তান্তর বা সাইট স্থানান্তর করুন', lang)}
-                            </button>
+                            <Button size="sm" variant="secondary" icon={<ArrowRightLeft size={13} />} onClick={() => setShowTransferModal(true)}>
+                              {t('Transfer / gate pass', 'স্থানান্তর / গেট পাস', lang)}
+                            </Button>
                           )}
-                      </div>
-                    )}
 
-                    {/* SUB-TAB D: BOM CRITICAL SPARE PARTS */}
-                    {inspectorTab === 'spares' && (
-                      <div>
-                        {selectedAsset.spares.length === 0 ? (
-                          <div style={{ padding: '24px', textAlign: 'center', fontSize: '12.5px', color: 'var(--brand-slate-400)' }}>
-                            {t('No dedicated BOM sub-assembly spares registered for this unit (sealed/IT equipment).', 'এই সরঞ্জামের জন্য আলাদা কোনো খুচরা যন্ত্রাংশ বিওএম তালিকাভুক্ত নেই।', lang)}
+                        {selectedAsset.lifecycleStage !== 'disposed' &&
+                          selectedAsset.lifecycleStage !== 'decommissioned' && (
+                            <Button size="sm" variant="outline-danger" icon={<RotateCcw size={13} />} onClick={() => setShowRejectModal(true)}>
+                              {t('Report defect', 'ত্রুটি জানান', lang)}
+                            </Button>
+                          )}
+
+                        {selectedAsset.lifecycleStage !== 'disposed' && onNavigate && (
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            icon={<AlertTriangle size={13} />}
+                            onClick={() => {
+                              onNavigate('incident');
+                              showToast(
+                                t(`Opening Safety & Incidents for ${selectedAsset.name}.`, `${selectedAsset.name}-এর জন্য নিরাপত্তা পাতা খোলা হচ্ছে।`, lang),
+                                'gold',
+                              );
+                            }}
+                          >
+                            {t('Report safety incident', 'নিরাপত্তা ঘটনা জানান', lang)}
+                          </Button>
+                        )}
+
+                        {roleConfig.canInitiateDecommission &&
+                          selectedAsset.lifecycleStage !== 'decommissioned' &&
+                          selectedAsset.lifecycleStage !== 'disposed' && (
+                            <Button size="sm" variant="ghost" icon={<Archive size={13} />} onClick={() => setShowDecommissionModal(true)}>
+                              {t('Retire machine', 'অবসর ঘোষণা', lang)}
+                            </Button>
+                          )}
+
+                        {roleConfig.canAuthorizeWriteOff && selectedAsset.lifecycleStage === 'decommissioned' && (
+                          <Button size="sm" variant="gold" onClick={() => setDisposalTargetAsset(selectedAsset)}>
+                            {t('Approve sale or scrap', 'বিক্রয় বা স্ক্র্যাপ অনুমোদন', lang)}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="eam-dossier-body">
+                      {/* Active Deficiency Alert */}
+                      {selectedAsset.defectQuery && (
+                        <div className="inc-injury" style={{ marginBottom: 12 }}>
+                          <AlertTriangle size={15} />
+                          <div>
+                            <strong>{selectedAsset.defectQuery.reason}:</strong> {selectedAsset.defectQuery.observation}
+                            {selectedAsset.defectQuery.improvementsRequired && (
+                              <div style={{ marginTop: 3, fontWeight: 600 }}>→ {selectedAsset.defectQuery.improvementsRequired}</div>
+                            )}
                           </div>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
-                            {selectedAsset.spares.map((sp) => {
-                              const isLow = sp.stockQty <= sp.minReorderQty;
+                        </div>
+                      )}
+
+                      {/* Compact 1-line stage bar */}
+                      <AssetLifecycleStepper asset={selectedAsset} lang={lang} />
+
+                      {/* Sub-tabs */}
+                      <div className="eam-subtabs">
+                        <button
+                          type="button"
+                          className={`eam-subtab ${inspectorTab === 'overview' ? 'active' : ''}`}
+                          onClick={() => setInspectorTab('overview')}
+                        >
+                          <Eye size={13} /> {t('Summary', 'সারসংক্ষেপ', lang)}
+                        </button>
+                        <button
+                          type="button"
+                          className={`eam-subtab ${inspectorTab === 'timeline' ? 'active' : ''}`}
+                          onClick={() => setInspectorTab('timeline')}
+                        >
+                          <History size={13} /> {t('History', 'ইতিহাস', lang)} ({selectedAsset.lifecycleEvents.length})
+                        </button>
+                        <button
+                          type="button"
+                          className={`eam-subtab ${inspectorTab === 'custody' ? 'active' : ''}`}
+                          onClick={() => setInspectorTab('custody')}
+                        >
+                          <UserCheck size={13} /> {t('Custody', 'হস্তান্তর', lang)} ({selectedAsset.custodyHistory.length})
+                        </button>
+                        {!roleConfig.isSelfServiceOnly && (
+                          <button
+                            type="button"
+                            className={`eam-subtab ${inspectorTab === 'spares' ? 'active' : ''}`}
+                            onClick={() => setInspectorTab('spares')}
+                          >
+                            <Package size={13} /> {t('Spare parts', 'খুচরা যন্ত্রাংশ', lang)} ({selectedAsset.spares.length})
+                          </button>
+                        )}
+                      </div>
+
+                      {/* SUB-TAB A: SUMMARY (each figure shown once, codes & cost breakdown behind disclosures) */}
+                      {inspectorTab === 'overview' && (
+                        <div>
+                          <div className="ast-summary-facts">
+                            <div className="eam-spec-box">
+                              <div className="eam-spec-lbl">{t('Health & service', 'স্বাস্থ্য ও সার্ভিস', lang)}</div>
+                              <div className="eam-spec-val">
+                                {selectedAsset.lifecycleStage === 'disposed'
+                                  ? t('Retired', 'অবসরপ্রাপ্ত', lang)
+                                  : t(`${selectedAsset.healthScore}% good · next service ${selectedAsset.nextServiceDate}`, `${bn(selectedAsset.healthScore)}% ভালো · পরবর্তী সার্ভিস ${selectedAsset.nextServiceDate}`, lang)}
+                              </div>
+                              <div className="eam-spec-sub">
+                                {t('Commissioned:', 'চালুর তারিখ:', lang)} {selectedAsset.commissioningDate}
+                                {selectedAsset.amcVendor ? ` · AMC: ${selectedAsset.amcVendor}` : ''}
+                              </div>
+                            </div>
+
+                            {roleConfig.canViewFinancialLedger && (
+                              <div className="eam-spec-box">
+                                <div className="eam-spec-lbl">{t('Current book value', 'বর্তমান বইমূল্য', lang)}</div>
+                                <div className="eam-spec-val" style={{ color: 'var(--status-success-text)' }}>
+                                  {selectedAsset.lifecycleStage === 'disposed'
+                                    ? t('৳0 (retired)', '৳০ (অবসরপ্রাপ্ত)', lang)
+                                    : `${fmtBdtShort(selectedFinancials.netBookValue)} (${fmtTaka(selectedFinancials.netBookValue)})`}
+                                </div>
+                                <div className="eam-spec-sub">
+                                  {t(`Bought for ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)} · drops ${fmtBdtShort(selectedFinancials.annualDepreciation)}/yr`, `ক্রয়মূল্য ${fmtBdtShort(selectedFinancials.grossCapitalizedCost)} · বার্ষিক অবচয় ${fmtBdtShort(selectedFinancials.annualDepreciation)}`, lang)}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {selectedAsset.disposalDossier && selectedAsset.lifecycleStage === 'disposed' && (
+                            <div className="eam-spec-box" style={{ marginBottom: 12 }}>
+                              <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: 4 }}>
+                                {t('Retirement summary', 'অবসর সারসংক্ষেপ', lang)}
+                              </div>
+                              <div style={{ fontSize: '12px', color: 'var(--text-2)' }}>
+                                {selectedAsset.disposalDossier.disposalMethod} · {selectedAsset.disposalDossier.buyerOrVendor} ·{' '}
+                                {t('Proceeds:', 'প্রাপ্ত অর্থ:', lang)} <strong>{fmtTaka(selectedAsset.disposalDossier.salvageProceedsBdt || 0)}</strong>
+                              </div>
+                            </div>
+                          )}
+
+                          {roleConfig.canViewFinancialLedger && (
+                            <details className="apv-ref-details" style={{ marginTop: 10 }}>
+                              <summary>{t('Cost & depreciation details', 'ব্যয় ও অবচয়ের বিস্তারিত', lang)}</summary>
+                              <dl className="apv-facts">
+                                <div>
+                                  <dt>{t('Purchase cost', 'ক্রয়মূল্য', lang)}</dt>
+                                  <dd>{fmtTaka(selectedFinancials.grossCapitalizedCost)}</dd>
+                                </div>
+                                <div>
+                                  <dt>{t('Accumulated depreciation', 'পুঞ্জীভূত অবচয়', lang)}</dt>
+                                  <dd>-{fmtTaka(selectedFinancials.accumulatedDepreciation)}</dd>
+                                </div>
+                                <div>
+                                  <dt>{t('Repairs spent so far', 'এ পর্যন্ত মেরামত খরচ', lang)}</dt>
+                                  <dd>{fmtTaka(selectedAsset.cumulativeMaintenanceOpex)} ({selectedFinancials.repairToCapexRatioPct}%)</dd>
+                                </div>
+                                <div>
+                                  <dt>{t('Total lifetime cost', 'মোট জীবনচক্র ব্যয়', lang)}</dt>
+                                  <dd>{fmtTaka(selectedFinancials.totalCostOfOwnership)}</dd>
+                                </div>
+                                <div>
+                                  <dt>{t('Expected scrap value', 'প্রত্যাশিত স্ক্র্যাপ মূল্য', lang)}</dt>
+                                  <dd>{fmtTaka(selectedAsset.salvageValue)}</dd>
+                                </div>
+                              </dl>
+                              <div style={{ marginTop: 8 }}>
+                                <Button size="sm" variant="secondary" icon={<DollarSign size={13} />} onClick={() => setScheduleTargetAsset(selectedAsset)}>
+                                  {t('Open yearly depreciation table', 'বার্ষিক অবচয় সারণি খুলুন', lang)}
+                                </Button>
+                              </div>
+                            </details>
+                          )}
+
+                          <details className="apv-ref-details" style={{ marginTop: 8 }}>
+                            <summary>{t('Technical & tag details', 'প্রযুক্তিগত ও ট্যাগ তথ্য', lang)}</summary>
+                            <dl className="apv-facts">
+                              <div><dt>{t('Asset tag', 'অ্যাসেট ট্যাগ', lang)}</dt><dd className="mono">{selectedAsset.tag}</dd></div>
+                              <div><dt>{t('Register no.', 'রেজিস্টার নং', lang)}</dt><dd className="mono">{selectedAsset.sapAssetNo}</dd></div>
+                              <div><dt>{t('Serial no.', 'সিরিয়াল নং', lang)}</dt><dd className="mono">{selectedAsset.serialNo}</dd></div>
+                              <div><dt>{t('Maker & model', 'প্রস্তুতকারক ও মডেল', lang)}</dt><dd>{selectedAsset.oem} ({selectedAsset.modelNo})</dd></div>
+                              <div><dt>{t('Cost center', 'কস্ট সেন্টার', lang)}</dt><dd className="mono">{selectedAsset.glCostCenter}</dd></div>
+                              <div>
+                                <dt>{t('Criticality', 'গুরুত্ব শ্রেণী', lang)}</dt>
+                                <dd>{selectedAsset.criticality === 'critical_a' ? 'Class A (Critical)' : selectedAsset.criticality === 'essential_b' ? 'Class B (Essential)' : 'Class C (Standard)'}</dd>
+                              </div>
+                            </dl>
+                            <div style={{ marginTop: 8 }}>
+                              <Button size="sm" variant="secondary" icon={<QrCode size={13} />} onClick={() => setShowPassportModal(true)}>
+                                {t('Open QR passport', 'কিউআর পাসপোর্ট খুলুন', lang)}
+                              </Button>
+                            </div>
+                          </details>
+                        </div>
+                      )}
+                      {/* SUB-TAB B: HISTORY */}
+                      {inspectorTab === 'timeline' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
+                          {selectedAsset.lifecycleEvents.map((ev) => (
+                            <div
+                              key={ev.id}
+                              className="eam-spec-box"
+                              style={{ borderLeft: '3px solid var(--brand-crimson)' }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>{ev.title}</span>
+                                  {typeof ev.financialDeltaBdt === 'number' && ev.financialDeltaBdt !== 0 && (
+                                    <StatusPill tone={ev.financialDeltaBdt > 0 ? 'info' : 'warn'}>
+                                      {ev.financialDeltaBdt > 0 ? `+${fmtTaka(ev.financialDeltaBdt)}` : fmtTaka(ev.financialDeltaBdt)}
+                                    </StatusPill>
+                                  )}
+                                </div>
+                                <span style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  <Clock size={11} /> {ev.timestamp}
+                                </span>
+                              </div>
+
+                              <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px', lineHeight: 1.45 }}>
+                                {ev.notes}
+                              </div>
+
+                              <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '6px' }}>
+                                {t('By', 'সম্পাদনকারী:', lang)} <strong>{ev.actor}</strong> ({ev.actorRole})
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* SUB-TAB C: CUSTODY */}
+                      {inspectorTab === 'custody' && (
+                        <div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', marginBottom: '12px' }}>
+                            {selectedAsset.custodyHistory.map((ch) => {
+                              const isCurrent = !ch.returnedDate;
                               return (
                                 <div
-                                  key={sp.id}
+                                  key={ch.id}
                                   className="eam-spec-box"
                                   style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    flexWrap: 'wrap',
-                                    gap: '10px',
+                                    border: isCurrent ? '1.5px solid var(--status-success-border)' : undefined,
+                                    background: isCurrent ? 'var(--status-success-bg)' : undefined,
                                   }}
                                 >
-                                  <div>
-                                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{sp.name}</div>
-                                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontFamily: 'monospace', marginTop: '2px' }}>
-                                      Part: {sp.partNo} • Unit Cost: ৳{sp.unitCostBdt.toLocaleString()} • Lead: {sp.leadTimeDays}d
-                                    </div>
-                                    <div style={{ marginTop: '5px' }}>
-                                      <span className={`badge ${isLow ? 'danger' : 'success'}`}>
-                                        Stock: {sp.stockQty} pcs {isLow ? `(<= Min ${sp.minReorderQty} Reorder!)` : '(Healthy)'}
-                                      </span>
-                                    </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                                    <strong style={{ fontSize: '13px' }}>{ch.custodianName}</strong>
+                                    <StatusPill tone={isCurrent ? 'success' : 'info'}>
+                                      {isCurrent ? t('Current holder', 'বর্তমান হেফাজতকারী', lang) : `${t('Returned', 'ফেরত', lang)} ${ch.returnedDate}`}
+                                    </StatusPill>
                                   </div>
-
-                                  {roleConfig.canManageWorkOrders && (
-                                    <div style={{ display: 'flex', gap: '6px' }}>
-                                      <button
-                                        type="button"
-                                        className="btn-outline"
-                                        style={{ fontSize: '11.5px', padding: '6px 11px' }}
-                                        disabled={sp.stockQty <= 0}
-                                        onClick={() => {
-                                          consumeSparePart(selectedAsset.id, sp.id, currentPersona.name, currentPersona.label);
-                                          showToast(t(`Issued 1x ${sp.partNo} to ${selectedAsset.tag} maintenance.`, 'খুচরা যন্ত্রাংশ ইস্যু করা হয়েছে।', lang), 'info');
-                                        }}
-                                      >
-                                        Issue 1x
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="btn-primary"
-                                        style={{ fontSize: '11.5px', padding: '6px 11px' }}
-                                        onClick={() => {
-                                          restockSparePart(selectedAsset.id, sp.id, 3);
-                                          showToast(t(`Restocked +3 pcs of ${sp.partNo} in Plant Store.`, 'স্টোরে +৩টি যন্ত্রাংশ যুক্ত হয়েছে।', lang), 'success');
-                                        }}
-                                      >
-                                        +3 Restock
-                                      </button>
-                                    </div>
-                                  )}
+                                  <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '3px' }}>
+                                    {ch.facility} · {ch.functionalLocation} ({ch.department})
+                                  </div>
+                                  <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '4px' }}>
+                                    {t('Assigned:', 'বরাদ্দ:', lang)} <strong>{ch.assignedDate}</strong>
+                                    {' · '}
+                                    {ch.acknowledged ? (
+                                      <span style={{ color: 'var(--status-success-text)', fontWeight: 700 }}>
+                                        {t('Signed', 'স্বাক্ষরিত', lang)} {ch.acknowledgedAt ? `(${ch.acknowledgedAt})` : ''}
+                                      </span>
+                                    ) : (
+                                      <span style={{ color: 'var(--status-warning-text)', fontWeight: 700 }}>{t('Awaiting signature', 'স্বাক্ষর বাকি', lang)}</span>
+                                    )}
+                                  </div>
                                 </div>
                               );
                             })}
                           </div>
-                        )}
-                      </div>
-                    )}
+
+                          {roleConfig.canTransferCustody &&
+                            selectedAsset.lifecycleStage !== 'disposed' &&
+                            selectedAsset.lifecycleStage !== 'decommissioned' && (
+                              <Button block icon={<ArrowRightLeft size={14} />} onClick={() => setShowTransferModal(true)}>
+                                {t('Transfer to another custodian or site', 'অন্য কর্মকর্তা বা স্থাপনায় হস্তান্তর করুন', lang)}
+                              </Button>
+                            )}
+                        </div>
+                      )}
+
+                      {/* SUB-TAB D: SPARE PARTS */}
+                      {inspectorTab === 'spares' && (
+                        <div>
+                          {selectedAsset.spares.length === 0 ? (
+                            <EmptyState
+                              compact
+                              icon={<Package size={18} />}
+                              title={t('No spare parts registered for this item', 'এই সরঞ্জামের জন্য আলাদা খুচরা যন্ত্রাংশ নেই', lang)}
+                            />
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+                              {selectedAsset.spares.map((sp) => {
+                                const isLow = sp.stockQty <= sp.minReorderQty;
+                                return (
+                                  <div
+                                    key={sp.id}
+                                    className="eam-spec-box"
+                                    style={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                      flexWrap: 'wrap',
+                                      gap: '10px',
+                                    }}
+                                  >
+                                    <div>
+                                      <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-1)' }}>{sp.name}</div>
+                                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '2px' }}>
+                                        {t('Unit cost:', 'একক মূল্য:', lang)} {fmtTaka(sp.unitCostBdt)} · {t(`Lead time ${sp.leadTimeDays}d`, `সরবরাহ সময় ${bn(sp.leadTimeDays)} দিন`, lang)}
+                                      </div>
+                                      <div style={{ marginTop: '5px' }}>
+                                        <StatusPill tone={isLow ? 'danger' : 'success'}>
+                                          {t(`${sp.stockQty} in stock`, `${bn(sp.stockQty)}টি মজুদ`, lang)}{isLow ? ` · ${t('Reorder needed', 'পুনরায় অর্ডার দিন', lang)}` : ''}
+                                        </StatusPill>
+                                      </div>
+                                    </div>
+
+                                    {roleConfig.canManageWorkOrders && (
+                                      <div style={{ display: 'flex', gap: '6px' }}>
+                                        <Button
+                                          size="sm"
+                                          variant="secondary"
+                                          disabled={sp.stockQty <= 0}
+                                          onClick={() => {
+                                            consumeSparePart(selectedAsset.id, sp.id, currentPersona.name, currentPersona.label);
+                                            showToast(t(`Issued 1 × ${sp.name}.`, '১টি খুচরা যন্ত্রাংশ ইস্যু করা হয়েছে।', lang), 'info');
+                                          }}
+                                        >
+                                          {t('Issue 1', '১টি দিন', lang)}
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          onClick={() => {
+                                            restockSparePart(selectedAsset.id, sp.id, 3);
+                                            showToast(t(`Restocked +3 of ${sp.name}.`, 'স্টোরে +৩টি যন্ত্রাংশ যুক্ত হয়েছে।', lang), 'success');
+                                          }}
+                                        >
+                                          {t('+3 restock', '+৩টি মজুদ', lang)}
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
         </>
@@ -1934,7 +1458,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                   className={`eam-cat-chip ${woFilter === 'cal' ? 'active' : ''}`}
                   onClick={() => setWoFilter('cal')}
                 >
-                  📐 {t('Statutory CAL', 'ক্যালিব্রেশন', lang)}
+                  {t('Statutory CAL', 'ক্যালিব্রেশন', lang)}
                 </button>
                 <button
                   type="button"
@@ -2010,16 +1534,16 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                           onClick={() => inspectAssetInCockpit(wo.assetId)}
                           title="Inspect asset in 360° Cockpit"
                         >
-                          🏷️ {wo.assetTag} <ExternalLink size={10} style={{ display: 'inline', marginLeft: '2px' }} />
+                          {wo.assetTag} <ExternalLink size={10} style={{ display: 'inline', marginLeft: '2px' }} />
                         </button>
                         {wo.lotoPermitRef && (
-                          <span className="badge danger" style={{ fontSize: '10px' }}>🔒 {wo.lotoPermitRef}</span>
+                          <span className="badge danger" style={{ fontSize: '10px' }}>{wo.lotoPermitRef}</span>
                         )}
                         {wo.coveredByWarranty && (
-                          <span className="badge success" style={{ fontSize: '10px' }}>🛡️ OEM Warranty (৳0)</span>
+                          <span className="badge success" style={{ fontSize: '10px' }}>OEM Warranty (৳0)</span>
                         )}
                         {wo.isCapexOverhaul && (
-                          <span className="badge gold" style={{ fontSize: '10px' }}>💎 IAS 16 Capitalized Overhaul</span>
+                          <span className="badge gold" style={{ fontSize: '10px' }}>Capitalized Overhaul</span>
                         )}
                       </div>
 
@@ -2130,18 +1654,18 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
             }}
           >
             <span>
-              <strong>Active Capital Base:</strong> ৳{portfolioStats.totalGross.toLocaleString()}
+              <strong>Active Capital Base:</strong> {fmtTaka(portfolioStats.totalGross)}
             </span>
             <span>
               <strong>Accumulated Depreciation:</strong>{' '}
-              <span style={{ color: 'var(--status-danger)', fontWeight: 700 }}>-৳{portfolioStats.totalAccDep.toLocaleString()}</span>
+              <span style={{ color: 'var(--status-danger)', fontWeight: 700 }}>-{fmtTaka(portfolioStats.totalAccDep)}</span>
             </span>
             <span>
               <strong>Current Book Value:</strong>{' '}
-              <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>৳{portfolioStats.totalNbv.toLocaleString()}</span>
+              <span style={{ color: 'var(--status-success)', fontWeight: 800 }}>{fmtTaka(portfolioStats.totalNbv)}</span>
             </span>
             <span>
-              <strong>Total Cost (CAPEX + OPEX):</strong> ৳{portfolioStats.totalTco.toLocaleString()}
+              <strong>Total Cost (CAPEX + OPEX):</strong> {fmtTaka(portfolioStats.totalTco)}
             </span>
           </div>
 
@@ -2183,19 +1707,19 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             Age: {a.ageYears}/{a.usefulLifeYears}y
                           </div>
                         </td>
-                        <td style={{ fontWeight: 700 }}>৳{f.grossCapitalizedCost.toLocaleString()}</td>
+                        <td style={{ fontWeight: 700 }}>{fmtTaka(f.grossCapitalizedCost)}</td>
                         <td>
                           <span className="badge info" style={{ fontSize: '10px' }}>{a.depreciationMethod}</span>
                           <div style={{ fontSize: '11px', color: 'var(--status-danger)', marginTop: '2px', fontWeight: 600 }}>
-                            -৳{f.annualDepreciation.toLocaleString()}/yr
+                            -{fmtTaka(f.annualDepreciation)}/yr
                           </div>
                         </td>
-                        <td>৳{f.accumulatedDepreciation.toLocaleString()}</td>
+                        <td>{fmtTaka(f.accumulatedDepreciation)}</td>
                         <td style={{ fontWeight: 800, color: a.lifecycleStage === 'disposed' ? 'var(--brand-slate-400)' : 'var(--status-success)' }}>
                           {a.lifecycleStage === 'disposed' ? '৳0 (Retired)' : `৳${f.netBookValue.toLocaleString()}`}
                         </td>
                         <td>
-                          <div style={{ fontWeight: 700 }}>৳{f.totalCostOfOwnership.toLocaleString()}</div>
+                          <div style={{ fontWeight: 700 }}>{fmtTaka(f.totalCostOfOwnership)}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                             <div className="eam-mini-bar" style={{ width: '54px' }}>
                               <div
@@ -2207,7 +1731,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               />
                             </div>
                             <span style={{ fontSize: '10.5px', fontWeight: 700, color: ratioBarColor }}>
-                              {f.repairToCapexRatioPct}% {f.repairToCapexRatioPct >= 50 ? '⚠️ EoL' : ''}
+                              {f.repairToCapexRatioPct}% {f.repairToCapexRatioPct >= 50 ? 'EoL' : ''}
                             </span>
                           </div>
                         </td>
@@ -2294,7 +1818,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             {req.urgency.toUpperCase()}
                           </span>
                           <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-gold-dark)' }}>
-                            Est. CAPEX: ৳{req.estimatedCapexBdt.toLocaleString()}
+                            Est. CAPEX: {fmtTaka(req.estimatedCapexBdt)}
                           </span>
                         </div>
 
@@ -2372,7 +1896,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                 {req.stage === 'pending_hod'
                                   ? t('Endorse & Forward →', 'সুপারিশ ও প্রেরণ →', lang)
                                   : req.stage === 'pending_executive'
-                                  ? t('👑 Sanction CAPEX Budget', '👑 বাজেট চূড়ান্ত অনুমোদন', lang)
+                                  ? t('Sanction CAPEX Budget', 'বাজেট চূড়ান্ত অনুমোদন', lang)
                                   : t('✓ Receive GRN & Mint Asset Tag', '✓ গ্রহণ ও অ্যাসেট ট্যাগ তৈরি', lang)}
                               </button>
                             ) : (
@@ -2536,7 +2060,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '12px' }}>
                           <div style={{ flex: '1 1 360px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                              <span className="eam-tag-mono">🏷️ {a.tag}</span>
+                              <span className="eam-tag-mono">{a.tag}</span>
                               <span style={{ fontSize: '11px', fontFamily: 'monospace', color: 'var(--brand-slate-500)' }}>
                                 {a.sapAssetNo}
                               </span>
@@ -2552,8 +2076,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                           </div>
 
                           <div style={{ textAlign: 'right', fontSize: '12px' }}>
-                            <div>Orig. CAPEX: <strong>৳{fin.grossCapitalizedCost.toLocaleString()}</strong></div>
-                            <div>Carrying NBV: <strong style={{ color: 'var(--status-danger)' }}>৳{fin.netBookValue.toLocaleString()}</strong></div>
+                            <div>Orig. CAPEX: <strong>{fmtTaka(fin.grossCapitalizedCost)}</strong></div>
+                            <div>Carrying NBV: <strong style={{ color: 'var(--status-danger)' }}>{fmtTaka(fin.netBookValue)}</strong></div>
                             <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
                               Survey by: {a.disposalDossier?.initiatedBy}
                             </div>
@@ -2598,7 +2122,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                           <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                            🔒 Segregation of Duties: Final balance-sheet write-off requires <strong>Chairman & MD</strong> or <strong>CFO / Head of Finance</strong> sanction.
+                            Segregation of Duties: Final balance-sheet write-off requires <strong>Chairman & MD</strong> or <strong>CFO / Head of Finance</strong> sanction.
                           </span>
 
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -2643,7 +2167,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                                   setDisposalTargetAsset(a);
                                 }}
                               >
-                                👑 {t('Authorize Write-Off & Execute Disposal', 'চূড়ান্ত অবলোপন ও নিলাম নিষ্পত্তি', lang)}
+                                {t('Authorize Write-Off & Execute Disposal', 'চূড়ান্ত অবলোপন ও নিলাম নিষ্পত্তি', lang)}
                               </button>
                             ) : (
                               <span className="badge warn">Awaiting CFO / Chairman Write-Off Sanction</span>
@@ -2701,8 +2225,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             <div style={{ fontWeight: 600, fontSize: '12px' }}>{d?.disposalMethod}</div>
                             <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>{d?.buyerOrVendor}</div>
                           </td>
-                          <td>৳{(d?.netBookValueAtDisposal || 0).toLocaleString()}</td>
-                          <td style={{ fontWeight: 700 }}>৳{(d?.salvageProceedsBdt || 0).toLocaleString()}</td>
+                          <td>{fmtTaka((d?.netBookValueAtDisposal || 0))}</td>
+                          <td style={{ fontWeight: 700 }}>{fmtTaka((d?.salvageProceedsBdt || 0))}</td>
                           <td>
                             <span className={`badge ${gl >= 0 ? 'success' : 'danger'}`} style={{ fontWeight: 800 }}>
                               {gl >= 0 ? `+৳${gl.toLocaleString()} Gain` : `-৳${Math.abs(gl).toLocaleString()} Loss`}
