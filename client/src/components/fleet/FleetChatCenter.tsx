@@ -220,7 +220,7 @@ export default function FleetChatCenter({
       selectedChannelId,
       personaRole,
       personaName,
-      `🎙️ Audio dispatch voice note (${durationStr})`,
+      `Audio dispatch voice note (${durationStr})`,
       {
         messageType: 'voice_note',
         voiceData: { duration: durationStr }
@@ -247,7 +247,7 @@ export default function FleetChatCenter({
       messageType: 'location_share',
       locationData: { title: locTitle, address: locAddress, coordinates: '23.8166° N, 90.4328° E' },
     });
-    showToast(t('📍 Location pin shared with driver and transport admin', 'লোকেশন পিন শেয়ার করা হয়েছে', lang), 'success');
+    showToast(t('Location pin shared with driver and transport admin', 'লোকেশন পিন শেয়ার করা হয়েছে', lang), 'success');
   };
 
   // Toll Claim Submission
@@ -377,14 +377,14 @@ export default function FleetChatCenter({
               className={`fleet-chat-tab-pill ${channelFilterTab === 'trips' ? 'active' : ''}`}
               style={{ fontSize: '11px', padding: '3px 8px' }}
             >
-              🚗 {t('Trips', 'ট্রিপ', lang)} ({relevantRequisitions.length})
+              {t('Trips', 'ট্রিপ', lang)} ({relevantRequisitions.length})
             </button>
             <button
               onClick={() => setChannelFilterTab('direct')}
               className={`fleet-chat-tab-pill ${channelFilterTab === 'direct' ? 'active' : ''}`}
               style={{ fontSize: '11px', padding: '3px 8px' }}
             >
-              🛡️ {t('Hotlines', 'হটলাইন', lang)} ({directChannels.length})
+              {t('Hotlines', 'হটলাইন', lang)} ({directChannels.length})
             </button>
           </div>
         </div>
@@ -541,11 +541,11 @@ export default function FleetChatCenter({
                               </strong>
                               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {lastMsg.voiceData
-                                  ? '🎙️ Voice note dispatch'
+                                  ? 'Voice note dispatch'
                                   : lastMsg.tollData
-                                  ? `🧾 Toll: ৳${lastMsg.tollData.amount}`
+                                  ? `Toll: ৳${lastMsg.tollData.amount}`
                                   : lastMsg.locationData
-                                  ? '📍 GPS pickup pin'
+                                  ? 'GPS pickup pin'
                                   : lastMsg.text}
                               </span>
                             </div>

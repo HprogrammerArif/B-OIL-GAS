@@ -407,23 +407,6 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Role Badge */}
-      {!isCollapsed ? (
-        <div className={`role-badge${role === 'chairman' ? ' chairman' : ''}`}>
-          <div className="role-badge-dot" />
-          <div className="role-badge-text">
-            <div className="label">
-              {t('Signed In As', 'সক্রিয় পদবি', lang)} • {meta.empId}
-            </div>
-            <div className="value">{t(meta.label, meta.labelBn, lang)}</div>
-          </div>
-        </div>
-      ) : (
-        <div className={`role-badge-mini${role === 'chairman' ? ' chairman' : ''}`} title={`${meta.name} (${meta.empId}) — ${t(meta.label, meta.labelBn, lang)}`}>
-          <div className="role-badge-dot" />
-        </div>
-      )}
-
       {/* Role-Specific Navigation */}
       <nav className="sidebar-nav">
         {sections.map((section, si) => (

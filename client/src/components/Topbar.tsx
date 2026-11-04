@@ -311,7 +311,6 @@ export default function Topbar({
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div className="name" style={{ fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(meta.name, meta.nameBn, lang)}</span>
-                      <span className="active-pill-badge">{t('Online', 'অনলাইন', lang)}</span>
                     </div>
                     <div className="role" style={{ fontSize: '10.5px', color: 'var(--brand-gold)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t(meta.label, meta.labelBn, lang)}
