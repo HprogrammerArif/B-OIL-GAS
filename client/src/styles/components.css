@@ -3229,8 +3229,8 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-lg);
-  padding: 6px;
-  margin-bottom: 22px;
+  padding: 4px;
+  margin-bottom: 14px;
   box-shadow: var(--shadow-xs);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

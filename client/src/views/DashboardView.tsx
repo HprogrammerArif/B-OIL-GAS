@@ -73,7 +73,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     : hour < 17
       ? t('Good afternoon', 'শুভ অপরাহ্ণ', lang)
       : t('Good evening', 'শুভ সন্ধ্যা', lang);
-  const today = new Date().toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
 
   const myRequisition = data.fleet.myRequisitions[0] ?? null;
   const myRecord = data.workforce.myRecord;
@@ -84,8 +84,8 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     <div className="view-container page-enter-active">
       <PageHeader
         title={greeting}
-        description={t('What needs you today, and how things stand.', 'আজ আপনার কী করণীয়, এবং এখন অবস্থা কেমন।', lang)}
-        meta={today}
+
+
         actions={(
           <>
             {role === 'chairman' && canBroadcast && (
@@ -116,7 +116,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
       />
 
       {tabs.length > 1 && (
-        <div className="cockpit-tabs-container mb-4" role="tablist">
+        <div className="cockpit-tabs-container" role="tablist">
           {tabs.map((tab) => (
             <button
               key={tab.id}
