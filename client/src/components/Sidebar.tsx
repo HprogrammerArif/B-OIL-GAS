@@ -370,7 +370,6 @@ export default function Sidebar({
   const sections = ROLE_NAV[role]
     .map((s) => ({ ...s, items: s.items.filter((i) => canAccessView(role, i.view)) }))
     .filter((s) => s.items.length > 0);
-  const liveBadges = useLiveNavBadges(role);
 
   const normalizedActiveView: AppView = activeView === 'vehicle_request' ? 'fleet' : activeView;
 
@@ -378,7 +377,9 @@ export default function Sidebar({
     <aside className={`sidebar${isCollapsed ? ' collapsed' : ''}${isMobileOpen ? ' mobile-open' : ''}`}>
       {/* Brand Header */}
       <div className="sidebar-header">
-        <div className="brand-emblem">B</div>
+        <div className="brand-emblem">
+          <img src="/logoBOGCL.png" alt="BOGCL Logo" />
+        </div>
         {!isCollapsed && (
           <div className="brand-text">
             <h1>BASHUNDHARA</h1>
@@ -432,7 +433,6 @@ export default function Sidebar({
             )}
             {section.items.map((item) => {
               const isActive = normalizedActiveView === item.view;
-              const badge = liveBadges[item.view];
               return (
                 <a
                   key={item.view + '-' + si}
@@ -445,13 +445,6 @@ export default function Sidebar({
                 >
                   <div className="nav-icon-wrap">{item.icon}</div>
                   {!isCollapsed && <span className="nav-label">{t(item.label, item.labelBn, lang)}</span>}
-                  {badge && (
-                    <span
-                      className={`nav-badge${badge.type === 'warn' ? ' warn' : ''}${badge.type === 'info' ? ' info' : ''}${isCollapsed ? ' badge-dot' : ''}`}
-                    >
-                      {!isCollapsed ? badge.text : ''}
-                    </span>
-                  )}
                   {isActive && <span className="nav-active-glow" />}
                 </a>
               );
@@ -459,23 +452,6 @@ export default function Sidebar({
           </React.Fragment>
         ))}
       </nav>
-
-      {/* Footer */}
-      <div className="sidebar-footer">
-        {!isCollapsed ? (
-          <div className="sidebar-footer-content">
-            <div className="footer-status-row">
-              <div className="online-dot" />
-              <span>{t('Online', 'অনলাইন', lang)}</span>
-            </div>
-            <div className="footer-version-row">
-              <span className="badge-version">OneOps v2.5</span>
-            </div>
-          </div>
-        ) : (
-          <div className="online-dot" title={t('Online', 'অনলাইন', lang)} />
-        )}
-      </div>
     </aside>
   );
 }
