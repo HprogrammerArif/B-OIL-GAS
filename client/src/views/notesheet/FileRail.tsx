@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Search, X, SearchX } from 'lucide-react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { Search, X, SearchX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { StatusPill } from '../../components/ui';
 import type { NoteFile } from '../../store/notesheetStore';
@@ -17,11 +17,20 @@ interface FileRailProps {
   onSelect: (id: string) => void;
 }
 
-/** File switcher: searchable, filterable list that becomes a horizontal strip on narrow widths. */
+/** File switcher: searchable, filterable list that becomes an interactive horizontal carousel on narrow widths. */
 export default function FileRail({ files, activeId, lang, canSign, stateOf, onSelect }: FileRailProps) {
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
+
+  const listRef = useRef<HTMLUListElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasMovedRef = useRef(false);
 
   const counts = useMemo(() => {
     const c: Record<FileState, number> = { mine: 0, waiting: 0, returned: 0, approved: 0 };
@@ -42,6 +51,121 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
     if (!q) return true;
     return [f.fileNo, f.title, f.dept, f.initiatorName ?? ''].some((v) => v.toLowerCase().includes(q));
   });
+
+  const updateScrollState = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 6);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+  }, []);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    updateScrollState();
+
+    const handleScroll = () => updateScrollState();
+    el.addEventListener('scroll', handleScroll, { passive: true });
+
+    const ro = new ResizeObserver(() => updateScrollState());
+    ro.observe(el);
+
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      ro.disconnect();
+    };
+  }, [updateScrollState, visible]);
+
+  // Translate vertical mouse wheel over horizontal carousel to smooth horizontal scroll
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (el.scrollWidth > el.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        const canScroll =
+          (e.deltaY > 0 && el.scrollLeft < el.scrollWidth - el.clientWidth - 1) ||
+          (e.deltaY < 0 && el.scrollLeft > 1);
+        if (canScroll) {
+          e.preventDefault();
+          el.scrollBy({ left: e.deltaY * 1.2, behavior: 'auto' });
+        }
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  // Smooth scroll buttons
+  const scrollTrack = (direction: 'left' | 'right') => {
+    const el = listRef.current;
+    if (!el) return;
+    const scrollAmount = Math.max(280, Math.floor(el.clientWidth * 0.7));
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  // Mouse drag-to-scroll gesture
+  const handleMouseDown = (e: React.MouseEvent<HTMLUListElement>) => {
+    if (e.button !== 0) return;
+    const el = listRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    startXRef.current = e.pageX;
+    startScrollLeftRef.current = el.scrollLeft;
+    hasMovedRef.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLUListElement>) => {
+    if (!isDraggingRef.current || !listRef.current) return;
+    const dx = e.pageX - startXRef.current;
+    if (Math.abs(dx) > 4) {
+      hasMovedRef.current = true;
+    }
+    listRef.current.scrollLeft = startScrollLeftRef.current - dx;
+  };
+
+  const handleMouseUp = () => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    }
+  };
+
+  const handleCardClick = (fileId: string) => {
+    if (hasMovedRef.current) {
+      hasMovedRef.current = false;
+      return;
+    }
+    onSelect(fileId);
+  };
+
+  // Auto-scroll active card into view if partially hidden
+  useEffect(() => {
+    if (!activeId || !listRef.current) return;
+    const activeEl = listRef.current.querySelector<HTMLElement>(`[data-file-id="${activeId}"]`);
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }, [activeId]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const idx = visible.findIndex((f) => f.id === activeId);
+      if (idx !== -1) {
+        const nextIdx = e.key === 'ArrowRight' ? Math.min(idx + 1, visible.length - 1) : Math.max(idx - 1, 0);
+        if (nextIdx !== idx) {
+          e.preventDefault();
+          onSelect(visible[nextIdx].id);
+        }
+      }
+    }
+  };
 
   return (
     <aside className="ns-rail" aria-label={t('Note-sheet files', 'নোট-শীট ফাইল', lang)}>
@@ -75,41 +199,78 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
         </div>
       </div>
 
-      <ul className="ns-file-list">
-        {visible.map((file) => {
-          const state = stateOf(file);
-          const active = file.id === activeId;
-          return (
-            <li key={file.id}>
-              <button
-                type="button"
-                className={`ns-file state-${state} ${active ? 'active' : ''}`}
-                aria-current={active ? 'true' : undefined}
-                onClick={() => onSelect(file.id)}
-              >
-                <span className="ns-file-title">{file.title}</span>
-                <span className="ns-file-meta">
-                  <span className="ns-file-no">{file.fileNo.split('/').slice(-2).join('/')}</span>
-                  <strong>{file.amount}</strong>
-                </span>
-                <span className="ns-file-foot">
-                  <StatusPill tone={STATE_TONE[state]}>{stateLabel(state, file, lang)}</StatusPill>
-                  {state !== 'approved' && file.urgency === 'urgent' && (
-                    <StatusPill tone={URGENCY_TONE[file.urgency]}>{urgencyLabel(file.urgency, lang)}</StatusPill>
-                  )}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-        {visible.length === 0 && (
-          <li className="ns-rail-empty">
-            <SearchX size={18} />
-            <span>{t('No files match.', 'কোনো ফাইল মেলেনি।', lang)}</span>
-            <button type="button" onClick={() => { setFilter('all'); setQuery(''); }}>{t('Show all', 'সব দেখুন', lang)}</button>
-          </li>
+      <div className={`ns-file-track-container ${canScrollLeft ? 'has-scroll-left' : ''} ${canScrollRight ? 'has-scroll-right' : ''}`}>
+        {canScrollLeft && (
+          <button
+            type="button"
+            className="ns-track-nav ns-track-nav-prev"
+            onClick={() => scrollTrack('left')}
+            aria-label={t('Previous files', 'পূর্ববর্তী ফাইল', lang)}
+            title={t('Previous files', 'পূর্ববর্তী ফাইল', lang)}
+          >
+            <ChevronLeft size={18} />
+          </button>
         )}
-      </ul>
+
+        <ul
+          ref={listRef}
+          className={`ns-file-list ${isDragging ? 'is-dragging' : ''}`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="list"
+          aria-label={t('Files list', 'ফাইল তালিকা', lang)}
+        >
+          {visible.map((file) => {
+            const state = stateOf(file);
+            const active = file.id === activeId;
+            return (
+              <li key={file.id} data-file-id={file.id}>
+                <button
+                  type="button"
+                  className={`ns-file state-${state} ${active ? 'active' : ''}`}
+                  aria-current={active ? 'true' : undefined}
+                  onClick={() => handleCardClick(file.id)}
+                >
+                  <span className="ns-file-title">{file.title}</span>
+                  <span className="ns-file-meta">
+                    <span className="ns-file-no">{file.fileNo.split('/').slice(-2).join('/')}</span>
+                    <strong>{file.amount}</strong>
+                  </span>
+                  <span className="ns-file-foot">
+                    <StatusPill tone={STATE_TONE[state]}>{stateLabel(state, file, lang)}</StatusPill>
+                    {state !== 'approved' && file.urgency === 'urgent' && (
+                      <StatusPill tone={URGENCY_TONE[file.urgency]}>{urgencyLabel(file.urgency, lang)}</StatusPill>
+                    )}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+          {visible.length === 0 && (
+            <li className="ns-rail-empty">
+              <SearchX size={18} />
+              <span>{t('No files match.', 'কোনো ফাইল মেলেনি।', lang)}</span>
+              <button type="button" onClick={() => { setFilter('all'); setQuery(''); }}>{t('Show all', 'সব দেখুন', lang)}</button>
+            </li>
+          )}
+        </ul>
+
+        {canScrollRight && (
+          <button
+            type="button"
+            className="ns-track-nav ns-track-nav-next"
+            onClick={() => scrollTrack('right')}
+            aria-label={t('Next files', 'পরবর্তী ফাইল', lang)}
+            title={t('Next files', 'পরবর্তী ফাইল', lang)}
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+      </div>
     </aside>
   );
 }

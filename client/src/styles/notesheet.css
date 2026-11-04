@@ -152,6 +152,64 @@
 .ns-filter.active { background: var(--ns-accent-soft); border-color: var(--ns-accent-line); color: var(--ns-accent-ink); }
 .ns-filter.active b { background: color-mix(in srgb, var(--brand-crimson) 16%, var(--surface-1)); color: var(--ns-accent-ink); }
 
+/* ─── File rail track container & carousel navigation ─────────────────────── */
+.ns-file-track-container {
+  position: relative;
+  width: 100%;
+}
+
+.ns-track-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--surface-1);
+  border: 1px solid var(--border-2);
+  color: var(--text-1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ns-track-nav:hover {
+  background: var(--brand-crimson);
+  color: #FFFFFF;
+  border-color: var(--brand-crimson);
+  box-shadow: 0 6px 18px rgba(165, 28, 48, 0.35);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.ns-track-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.ns-track-nav-prev {
+  left: -8px;
+}
+
+.ns-track-nav-next {
+  right: -8px;
+}
+
+[data-theme="dark"] .ns-track-nav {
+  background: var(--surface-inverse);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .ns-track-nav:hover {
+  background: var(--brand-crimson);
+  color: #FFFFFF;
+  border-color: var(--brand-crimson);
+}
+
 .ns-file-list {
   list-style: none;
   margin: 0;
@@ -159,6 +217,51 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.ns-file-list:focus-visible {
+  outline: 2px solid var(--brand-crimson);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+.ns-file-list.is-dragging {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.ns-file-list.is-dragging * {
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* Custom sleek scrollbar for horizontal & vertical modes */
+.ns-file-list::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+.ns-file-list::-webkit-scrollbar-track {
+  background: var(--surface-2, rgba(0, 0, 0, 0.04));
+  border-radius: 4px;
+}
+.ns-file-list::-webkit-scrollbar-thumb {
+  background: var(--brand-slate-300, #cbd5e1);
+  border-radius: 4px;
+}
+.ns-file-list::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-crimson, #a51c30);
+}
+
+[data-theme="dark"] .ns-file-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+[data-theme="dark"] .ns-file-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+[data-theme="dark"] .ns-file-list::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-crimson);
 }
 .ns-file {
   width: 100%;
@@ -226,8 +329,10 @@
   .ns-file-list {
     flex-direction: row;
     overflow-x: auto;
-    padding-bottom: 6px;
+    padding-bottom: 8px;
     scroll-snap-type: x proximity;
+    cursor: grab;
+    -webkit-overflow-scrolling: touch;
   }
   .ns-file-list > li { flex: 0 0 min(280px, 78%); scroll-snap-align: start; }
   .ns-file { height: 100%; }
