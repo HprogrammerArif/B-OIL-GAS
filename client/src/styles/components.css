@@ -1607,17 +1607,27 @@
   background: var(--surface-1) !important;
   overscroll-behavior: contain;
 }
-.modal > form,
-.modal-dialog > form,
-.app-modal-dialog > form,
-.claims-modal-dialog > form,
-.fleet-modal-dialog > form,
-.notice-modal-dialog > form {
+.modal > form:not(.modal-body),
+.modal-dialog > form:not(.modal-body),
+.app-modal-dialog > form:not(.modal-body),
+.claims-modal-dialog > form:not(.modal-body),
+.fleet-modal-dialog > form:not(.fleet-modal-body),
+.notice-modal-dialog > form:not(.notice-modal-body) {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 auto !important;
   min-height: 0 !important;
   overflow: hidden !important;
+}
+.modal > form.modal-body,
+.modal-dialog > form.modal-body,
+.fleet-modal-dialog > form.fleet-modal-body,
+.notice-modal-dialog > form.notice-modal-body {
+  display: block !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
 }
 .modal-ft {
   flex: 0 0 auto !important;
@@ -1671,26 +1681,28 @@
 
 .notice-modal-body {
   flex: 1 1 auto !important;
+  min-height: 0 !important;
   overflow-y: auto !important;
-  padding: 26px 32px !important;
+  overscroll-behavior: contain;
+  padding: 18px 24px !important;
   background: var(--surface-1) !important;
   box-sizing: border-box !important;
 }
 
 .notice-modal-ft {
   flex: 0 0 auto !important;
-  padding: 16px 28px !important;
+  padding: 12px 22px !important;
   background: var(--surface-0) !important;
   border-top: 1px solid var(--border-1) !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 14px !important;
   box-sizing: border-box !important;
 }
 
 .notice-field-group {
-  margin-bottom: 20px !important;
+  margin-bottom: 13px !important;
   box-sizing: border-box !important;
 }
 
@@ -1698,20 +1710,20 @@
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   color: var(--text-2) !important;
-  margin-bottom: 7px !important;
+  margin-bottom: 5px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0.4px !important;
 }
 
 .notice-input, .notice-select, .notice-textarea {
   width: 100% !important;
-  padding: 11px 16px !important;
-  border: 1.5px solid var(--border-2) !important;
-  border-radius: 10px !important;
-  font-size: 13.5px !important;
+  padding: 7px 11px !important;
+  border: 1px solid var(--border-2) !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
   font-family: var(--font-main) !important;
   color: var(--text-1) !important;
   background: var(--surface-1) !important;
@@ -1728,10 +1740,10 @@
 
 /* ─── ENTERPRISE FLEET & LOGISTICS MODAL SUITE ───────────────────────────────── */
 .fleet-modal-dialog {
-  max-width: 840px !important;
+  max-width: 780px !important;
   width: 95% !important;
   max-height: 92vh !important;
-  border-radius: 20px !important;
+  border-radius: 16px !important;
   box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
   background: var(--surface-1) !important;
   display: flex !important;
@@ -1749,7 +1761,7 @@
 
 .fleet-modal-hd {
   flex: 0 0 auto !important;
-  padding: 16px 24px !important;
+  padding: 12px 20px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -1760,15 +1772,15 @@
 }
 
 .fleet-modal-profile-strip {
-  padding: 10px 24px;
+  padding: 8px 20px;
   background: var(--surface-0);
   border-bottom: 1px solid var(--brand-slate-200, var(--border-1));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  font-size: 12px;
+  font-size: 11.5px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -1781,8 +1793,10 @@
 
 .fleet-modal-body {
   flex: 1 1 auto !important;
+  min-height: 0 !important;
   overflow-y: auto !important;
-  padding: 22px 28px !important;
+  overscroll-behavior: contain;
+  padding: 14px 20px !important;
   background: var(--surface-1) !important;
   box-sizing: border-box !important;
 }
@@ -1794,13 +1808,13 @@
 
 .fleet-modal-ft {
   flex: 0 0 auto !important;
-  padding: 14px 24px !important;
+  padding: 10px 20px !important;
   background: var(--surface-0) !important;
   border-top: 1px solid var(--border-1) !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  gap: 16px !important;
+  gap: 12px !important;
   box-sizing: border-box !important;
 }
 
@@ -1812,11 +1826,11 @@
 /* Preset Bar in Requisition Modal */
 .fleet-preset-bar {
   background: var(--surface-0);
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 8px 12px;
+  border-radius: 10px;
   border: 1px solid var(--brand-slate-200, var(--border-1));
   box-sizing: border-box;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 [data-theme="dark"] .fleet-preset-bar {
@@ -1825,8 +1839,8 @@
 }
 
 .fleet-preset-chip {
-  padding: 5px 12px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 7px;
   border: 1px solid var(--brand-slate-300, var(--border-2));
   background: var(--surface-1);
   font-size: 11px;
@@ -1835,6 +1849,9 @@
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .fleet-preset-chip:hover {
@@ -1857,10 +1874,10 @@
 /* Route Telemetry HUD in Modal */
 .fleet-telemetry-hud {
   background: var(--surface-0);
-  border: 1.5px solid var(--brand-slate-200, var(--border-1));
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-bottom: 20px;
+  border: 1px solid var(--brand-slate-200, var(--border-1));
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 
@@ -1870,12 +1887,12 @@
 }
 
 .fleet-mode-card {
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 9px 12px;
+  border-radius: 9px;
   text-align: left;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1.5px solid var(--brand-slate-300, var(--border-2));
+  border: 1px solid var(--brand-slate-300, var(--border-2));
   background: var(--surface-0);
   display: flex;
   align-items: center;
@@ -1888,9 +1905,9 @@
 }
 
 .fleet-mode-card.active {
-  border: 2px solid var(--status-info);
+  border: 1.5px solid var(--status-info);
   background: var(--status-info-bg);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
 }
 
 [data-theme="dark"] .fleet-mode-card {
@@ -1906,13 +1923,13 @@
 .fleet-passenger-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 10px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 7px;
   background: var(--surface-1);
   border: 1px solid var(--brand-slate-300, var(--border-2));
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  font-size: 12px;
+  font-size: 11.5px;
 }
 
 [data-theme="dark"] .fleet-passenger-chip {
@@ -1922,8 +1939,8 @@
 
 .fleet-passenger-dropdown {
   margin-top: 6px;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 10px;
+  border-radius: 10px;
   background: var(--surface-1);
   border: 1px solid var(--brand-slate-300, var(--border-2));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -1939,8 +1956,8 @@
 .fleet-route-stat-box {
   background: var(--surface-1);
   border: 1px solid var(--brand-slate-200, var(--border-1));
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 7px 10px;
   box-sizing: border-box;
   transition: all 0.15s ease;
 }
