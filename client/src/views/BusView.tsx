@@ -13,7 +13,7 @@ import {
   Printer, ArrowUpRight, Zap, CheckCircle2, UserCheck, Info,
   Fuel, Activity, Gauge, AlertCircle, Share2, Lock, Sparkles,
   ArrowUpDown, Send, Check, RotateCcw, Download, Tag, Radio,
-  HelpCircle, AlertOctagon
+  HelpCircle, AlertOctagon, Sun, Sunset, User, Ticket, DoorOpen, Flame
 } from 'lucide-react';
 
 import type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle } from '../components/bus/busTypes';
@@ -190,13 +190,28 @@ export default function BusView({ role, lang }: ViewProps) {
   const isMySeatVacated = mySeat?.status === 'vacated';
   const myWaitlistEntry = waitlist.find(w => w.staffId === currentStaffMeta.empId);
 
-  // Counts
+  // Counts (active route)
   const occupiedCount = seats.filter(s => s.status === 'occupied').length;
   const vacatedCount = seats.filter(s => s.status === 'vacated').length;
   const emptyCount = seats.filter(s => s.status === 'empty').length;
   const boardedCount = seats.filter(s => s.status === 'occupied' && s.boarded).length;
   const totalSeats = seats.length;
-  const fillRate = ((occupiedCount / totalSeats) * 100).toFixed(0);
+  const fillRate = totalSeats > 0 ? ((occupiedCount / totalSeats) * 100).toFixed(0) : '0';
+
+  // Fleet-wide aggregate counts across all buses
+  const fleetTotals = useMemo(() => {
+    const totalBuses = buses.length;
+    const totalCapacity = buses.reduce((sum, b) => sum + b.capacity, 0);
+    let totalOccupied = 0;
+    let totalVacated = 0;
+    Object.values(routeSeats).forEach(rSeats => {
+      totalOccupied += rSeats.filter(s => s.status === 'occupied').length;
+      totalVacated += rSeats.filter(s => s.status === 'vacated').length;
+    });
+    const totalFree = Math.max(0, totalCapacity - totalOccupied);
+    const pct = totalCapacity > 0 ? Math.round((totalOccupied / totalCapacity) * 100) : 0;
+    return { totalBuses, totalCapacity, totalOccupied, totalVacated, totalFree, pct };
+  }, [buses, routeSeats]);
 
   // Search filtering logic
   const filteredSearchSeats = useMemo(() => {
@@ -680,11 +695,12 @@ export default function BusView({ role, lang }: ViewProps) {
   return (
     <div className="view-container view-transition-wrapper">
       {/* ─── Top Header with Perspective Switcher & Enterprise Quick Tools ── */}
-      <div className="section-header" style={{ marginBottom: '14px' }}>
+      <div className="section-header" style={{ marginBottom: '12px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              🚍 {t('Plant Transit & Bus Seat Reservation Management', 'প্ল্যান্ট যাতায়াত ও বাস সিট রিজার্ভেশন ম্যানেজমেন্ট', lang)}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Bus size={21} color="var(--brand-crimson)" />
+              {t('Staff Shuttle Buses & Seats', 'স্টাফ শাটল বাস ও সিট রিজার্ভেশন', lang)}
             </h2>
             <span className="badge info" style={{ fontSize: '10px' }}>
               {activeRoute.coachNo}
@@ -713,9 +729,10 @@ export default function BusView({ role, lang }: ViewProps) {
             border: '1px solid var(--brand-slate-300)'
           }}>
             <button
+              type="button"
               onClick={() => {
                 setCommuteDirection('inbound');
-                showToast(t('Switched to Morning Inbound Shift (City ➔ Plant Gate-1)', 'সকালের শিফট (শহর ➔ প্ল্যান্ট)', lang), 'info');
+                showToast(t('Switched to Morning Inbound Shift (City → Plant Gate-1)', 'সকালের শিফট (শহর → প্ল্যান্ট)', lang), 'info');
               }}
               style={{
                 background: commuteDirection === 'inbound' ? 'var(--surface-1)' : 'transparent',
@@ -733,12 +750,14 @@ export default function BusView({ role, lang }: ViewProps) {
               }}
               title="City to Plant Morning Shift"
             >
-              <span>🌅 {t('Morning Inbound', 'সকাল শিফট', lang)}</span>
+              <Sun size={12} color="var(--status-warning)" />
+              <span>{t('Morning Inbound', 'সকাল শিফট', lang)}</span>
             </button>
             <button
+              type="button"
               onClick={() => {
                 setCommuteDirection('outbound');
-                showToast(t('Switched to Evening Outbound Return (Plant Gate-1 ➔ City)', 'সন্ধ্যার ফিরতি শিফট (প্ল্যান্ট ➔ শহর)', lang), 'info');
+                showToast(t('Switched to Evening Outbound Return (Plant Gate-1 → City)', 'সন্ধ্যার ফিরতি শিফট (প্ল্যান্ট → শহর)', lang), 'info');
               }}
               style={{
                 background: commuteDirection === 'outbound' ? 'var(--surface-1)' : 'transparent',
@@ -756,81 +775,86 @@ export default function BusView({ role, lang }: ViewProps) {
               }}
               title="Plant to City Evening Return"
             >
-              <span>🌇 {t('Evening Return', 'সন্ধ্যা ফিরতি', lang)}</span>
+              <Sunset size={12} color="var(--status-info)" />
+              <span>{t('Evening Return', 'সন্ধ্যা ফিরতি', lang)}</span>
             </button>
           </div>
 
           {canManageBus && (
-          <div style={{
-            background: 'var(--brand-slate-100)',
-            padding: '3px',
-            borderRadius: '8px',
-            display: 'flex',
-            border: '1px solid var(--brand-slate-300)'
-          }}>
-            <button
-              onClick={() => setActivePerspective('staff')}
-              style={{
-                background: activePerspective === 'staff' ? 'var(--surface-1)' : 'transparent',
-                color: activePerspective === 'staff' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: activePerspective === 'staff' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              <span>👤 {t('Staff View', 'স্টাফ ভিউ', lang)}</span>
-            </button>
+            <div style={{
+              background: 'var(--brand-slate-100)',
+              padding: '3px',
+              borderRadius: '8px',
+              display: 'flex',
+              border: '1px solid var(--brand-slate-300)'
+            }}>
+              <button
+                type="button"
+                onClick={() => setActivePerspective('staff')}
+                style={{
+                  background: activePerspective === 'staff' ? 'var(--surface-1)' : 'transparent',
+                  color: activePerspective === 'staff' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: activePerspective === 'staff' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <User size={12} />
+                <span>{t('Staff View', 'স্টাফ ভিউ', lang)}</span>
+              </button>
 
-            <button
-              onClick={() => setActivePerspective('supervisor')}
-              style={{
-                background: activePerspective === 'supervisor' ? 'var(--brand-gold)' : 'transparent',
-                color: activePerspective === 'supervisor' ? 'var(--text-1)' : 'var(--brand-slate-500)',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: activePerspective === 'supervisor' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-              }}
-            >
-              <Shield size={12} />
-              <span>{t('Supervisor Deck', 'সুপারভাইজার', lang)}</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setActivePerspective('supervisor')}
+                style={{
+                  background: activePerspective === 'supervisor' ? 'var(--brand-gold)' : 'transparent',
+                  color: activePerspective === 'supervisor' ? 'var(--text-1)' : 'var(--brand-slate-500)',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: activePerspective === 'supervisor' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <Shield size={12} />
+                <span>{t('Supervisor Deck', 'সুপারভাইজার', lang)}</span>
+              </button>
+            </div>
           )}
 
           {/* Security Gate Manifest */}
-          <button className="btn-outline" onClick={() => setShowManifestModal(true)} title="Security Gate Commuter Manifest">
+          <button type="button" className="btn-outline" onClick={() => setShowManifestModal(true)} title="Security Gate Commuter Manifest">
             <FileText size={13} /> {t('Gate Manifest', 'গেট পাস তালিকা', lang)}
           </button>
 
           {/* Conductor Scanner */}
           {canManageBus && (
-            <button className="btn-outline" onClick={() => setShowScannerModal(true)}>
+            <button type="button" className="btn-outline" onClick={() => setShowScannerModal(true)}>
               <Smartphone size={13} /> {t('Conductor Scanner', 'স্ক্যানার', lang)}
             </button>
           )}
 
           {/* Timetable */}
-          <button className="btn-outline" onClick={() => setShowTimetableModal(true)}>
+          <button type="button" className="btn-outline" onClick={() => setShowTimetableModal(true)}>
             <Calendar size={13} /> {t('Timetable', 'সময়সূচী', lang)}
           </button>
 
           {/* My Boarding Pass */}
           {mySeat && (
             <button
+              type="button"
               className="btn-primary"
               onClick={() => {
                 setQrSeatTarget(mySeat);
@@ -843,6 +867,31 @@ export default function BusView({ role, lang }: ViewProps) {
         </div>
       </div>
 
+      {/* ── One-sentence status line (replaces 4 KPI cards & stacked admin banners) ── */}
+      <div className="lv-status" style={{ marginBottom: '12px' }}>
+        <span className={`lv-status-dot ${waitlist.length > 0 && vacatedCount > 0 ? 'warn' : 'ok'}`} />
+        <span className="lv-status-text">
+          {t(
+            `${fleetTotals.totalBuses} staff coaches running across ${fleetTotals.totalBuses} routes today — ${fleetTotals.totalOccupied} of ${fleetTotals.totalCapacity} seats booked (${fleetTotals.pct}%), ${fleetTotals.totalFree} seats free`,
+            `আজ ${fleetTotals.totalBuses}টি রুটে ${fleetTotals.totalBuses}টি স্টাফ বাস চলছে — ${fleetTotals.totalCapacity}টি আসনের মধ্যে ${fleetTotals.totalOccupied}টি বুককৃত (${fleetTotals.pct}%), ${fleetTotals.totalFree}টি আসন খালি`,
+            lang,
+          )}
+          {waitlist.length > 0 && (
+            <>
+              {' · '}
+              <strong style={{ color: 'var(--status-warning-text)' }}>
+                {t(
+                  `${waitlist.length} staff waiting in standby queue`,
+                  `${waitlist.length} জন স্ট্যান্ডবাই তালিকায় অপেক্ষমাণ`,
+                  lang,
+                )}
+              </strong>
+            </>
+          )}
+          {'.'}
+        </span>
+      </div>
+
       {/* ─── Live Transit Notice / Incident Broadcast Bar ───────────── */}
       {routeAlert.active && (
         <div style={{
@@ -850,7 +899,7 @@ export default function BusView({ role, lang }: ViewProps) {
           border: routeAlert.type === 'warning' ? '1px solid var(--status-warning-bright)' : '1px solid rgba(59, 130, 246, 0.25)',
           padding: '8px 14px',
           borderRadius: '10px',
-          marginBottom: '14px',
+          marginBottom: '12px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -867,6 +916,7 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
           {activePerspective === 'supervisor' && (
             <button
+              type="button"
               className="btn-outline"
               style={{ fontSize: '10.5px', padding: '3px 8px', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
               onClick={() => setShowBroadcastModal(true)}
@@ -877,7 +927,7 @@ export default function BusView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─── Role Operational Boundary Callout Strip ────────────────── */}
+      {/* ─── Role Operational Toolbar (Single Unified Bar per Perspective) ── */}
       {activePerspective === 'staff' ? (
         <div style={{
           background: 'rgba(59, 130, 246, 0.06)',
@@ -902,6 +952,7 @@ export default function BusView({ role, lang }: ViewProps) {
             </div>
           </div>
           <button
+            type="button"
             className="btn-outline"
             style={{ fontSize: '10.5px', padding: '3px 8px' }}
             onClick={() => setShowPolicyModal(true)}
@@ -910,213 +961,214 @@ export default function BusView({ role, lang }: ViewProps) {
           </button>
         </div>
       ) : (
-        <>
-          {/* Supervisor Status Banner */}
-          <div style={{
-            background: 'rgba(212, 175, 55, 0.08)',
-            border: '1.5px solid var(--brand-gold)',
-            padding: '9px 14px',
-            borderRadius: '10px',
-            marginBottom: '10px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '11.5px',
-            color: 'var(--brand-slate-900)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Shield size={16} color="var(--status-warning-text)" />
-              <div>
-                <strong>{t('Plant Transport Supervisor Administrative Mode (Md. Kamruzzaman):', 'পরিবহন পরিদর্শক প্রশাসনিক মোড:', lang)}</strong>{' '}
-                {t(
-                  'Full operational control to register buses, define road paths & sequential stops, assign drivers, reserve specific seats for any employee, and execute automated FIFO promotions.',
-                  'বাস নিবন্ধন, রোড ও স্টপেজ নির্ধারণ, চালক নিয়োগ, কর্মচারীদের আসন বরাদ্দ এবং স্বয়ংক্রিয় ফিফো বণ্টনের সম্পূর্ণ প্রশাসনিক ক্ষমতা।',
-                  lang
-                )}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '6px' }}>
+        /* Single Unified Supervisor Command Bar (replaces the 3 duplicate stacked banners) */
+        <div style={{
+          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
+          border: '1.5px solid rgba(212, 175, 55, 0.6)',
+          borderRadius: '12px',
+          padding: '10px 14px',
+          marginBottom: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.16)'
+        }}>
+          {/* View Sub-Tabs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', padding: '3px', borderRadius: '8px', gap: '3px' }}>
               <button
-                className="btn-outline"
-                style={{ fontSize: '10.5px', padding: '4px 9px', borderColor: 'var(--brand-gold)', color: 'var(--status-warning-text)' }}
-                onClick={() => setShowBroadcastModal(true)}
-              >
-                <Send size={11} /> {t('Broadcast Delay', 'বিলম্ব বিজ্ঞপ্তি', lang)}
-              </button>
-              <button
-                className="btn-gold"
-                style={{ fontSize: '10.5px', padding: '4px 10px', whiteSpace: 'nowrap' }}
-                onClick={handleSupervisorAutoFIFO}
-              >
-                <Sparkles size={12} /> {t('⚡ Run Auto-FIFO Engine', 'স্বয়ংক্রিয় ফিফো রান', lang)}
-              </button>
-            </div>
-          </div>
-
-          {/* Supervisor Command Sub-Tabs & Direct Actions */}
-          <div style={{
-            background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
-            border: '1.5px solid rgba(212, 175, 55, 0.6)',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            marginBottom: '14px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '10px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
-          }}>
-            {/* View Sub-Tabs */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {t('Supervisor View:', 'সুপারভাইজার ভিউ:', lang)}
-              </span>
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', padding: '3px', borderRadius: '8px', gap: '3px' }}>
-                <button
-                  onClick={() => setSupervisorSubTab('fleet')}
-                  style={{
-                    background: supervisorSubTab === 'fleet' ? 'var(--brand-gold)' : 'transparent',
-                    color: supervisorSubTab === 'fleet' ? 'var(--text-1)' : 'var(--text-inverse)',
-                    border: 'none',
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    fontSize: '11.5px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Bus size={13} />
-                  <span>{t('10-Bus Fleet & Road Corridors', '১০টি বাস ও রোড করিডোর তালিকা', lang)}</span>
-                  <span style={{
-                    fontSize: '10px',
-                    background: supervisorSubTab === 'fleet' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
-                    padding: '1px 5px',
-                    borderRadius: '10px'
-                  }}>
-                    {buses.length}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setSupervisorSubTab('seats')}
-                  style={{
-                    background: supervisorSubTab === 'seats' ? 'var(--brand-gold)' : 'transparent',
-                    color: supervisorSubTab === 'seats' ? 'var(--text-1)' : 'var(--text-inverse)',
-                    border: 'none',
-                    padding: '5px 12px',
-                    borderRadius: '6px',
-                    fontSize: '11.5px',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <Users size={13} />
-                  <span>{t('Interactive 52-Seat Coach & FIFO Desk', '৫২-সিটার বাস লেআউট ও ফিফো', lang)}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Direct Supervisor Action Triggers */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setShowRegisterBusModal(true)}
+                type="button"
+                onClick={() => setSupervisorSubTab('fleet')}
                 style={{
-                  background: 'linear-gradient(135deg, var(--status-success-solid) 0%, var(--status-success-solid) 100%)',
-                  color: 'var(--text-on-brand)',
+                  background: supervisorSubTab === 'fleet' ? 'var(--brand-gold)' : 'transparent',
+                  color: supervisorSubTab === 'fleet' ? 'var(--text-1)' : 'var(--text-inverse)',
                   border: 'none',
-                  padding: '5px 11px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
                   fontSize: '11.5px',
                   fontWeight: 800,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <UserPlus size={13} />
-                <span>+ {t('Enlist New Bus', 'নতুন বাস যুক্ত করুন', lang)}</span>
+                <Bus size={13} />
+                <span>{t('All 10 Buses & Routes', 'সবগুলো বাস ও রুট', lang)}</span>
+                <span style={{
+                  fontSize: '10px',
+                  background: supervisorSubTab === 'fleet' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
+                  padding: '1px 6px',
+                  borderRadius: '10px'
+                }}>
+                  {buses.length}
+                </span>
               </button>
 
               <button
-                onClick={() => {
-                  setRouteToEdit(activeRoute);
-                  setShowRouteBuilderModal(true);
-                }}
+                type="button"
+                onClick={() => setSupervisorSubTab('seats')}
                 style={{
-                  background: 'rgba(212, 175, 55, 0.18)',
-                  border: '1.5px solid var(--brand-gold)',
-                  color: 'var(--status-warning-bright)',
-                  padding: '5px 11px',
+                  background: supervisorSubTab === 'seats' ? 'var(--brand-gold)' : 'transparent',
+                  color: supervisorSubTab === 'seats' ? 'var(--text-1)' : 'var(--text-inverse)',
+                  border: 'none',
+                  padding: '6px 12px',
                   borderRadius: '6px',
                   fontSize: '11.5px',
                   fontWeight: 800,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px'
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <MapPin size={13} />
-                <span>{t('Define Road & Stops', 'রোড ও স্টপেজ তৈরি', lang)}</span>
-              </button>
-
-              <button
-                onClick={() => setShowSupervisorSeatModal(true)}
-                style={{
-                  background: 'rgba(59, 130, 246, 0.18)',
-                  border: '1.5px solid var(--status-info-bright)',
-                  color: 'var(--status-info-bright)',
-                  padding: '5px 11px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <Award size={13} />
-                <span>{t('Reserve Seat for Staff', 'স্টাফের জন্য সিট রিজার্ভ', lang)}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
-                  setReassignBusTarget(b);
-                  setShowReassignBusModal(true);
-                }}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  color: 'var(--text-inverse)',
-                  padding: '5px 11px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <RefreshCw size={13} />
-                <span>{t('Reassign Bus', 'বাস পরিবর্তন', lang)}</span>
+                <Users size={13} />
+                <span>{t('Seat Map & Standby Queue', 'সিট ম্যাপ ও অপেক্ষাতালিকা', lang)}</span>
               </button>
             </div>
           </div>
-        </>
+
+          {/* Single Set of Supervisor Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setShowRegisterBusModal(true)}
+              style={{
+                background: 'var(--status-success-solid)',
+                color: 'var(--text-on-brand)',
+                border: 'none',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <UserPlus size={13} />
+              <span>{t('+ Add Bus', '+ নতুন বাস', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setRouteToEdit(activeRoute);
+                setShowRouteBuilderModal(true);
+              }}
+              style={{
+                background: 'rgba(212, 175, 55, 0.18)',
+                border: '1.5px solid var(--brand-gold)',
+                color: 'var(--status-warning-bright)',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <MapPin size={13} />
+              <span>{t('Edit Route & Stops', 'রুট ও স্টপ', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSupervisorSeatModal(true)}
+              style={{
+                background: 'rgba(59, 130, 246, 0.18)',
+                border: '1.5px solid var(--status-info-bright)',
+                color: 'var(--status-info-bright)',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Award size={13} />
+              <span>{t('Assign Seat', 'সিট বরাদ্দ', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
+                setReassignBusTarget(b);
+                setShowReassignBusModal(true);
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                color: 'var(--text-inverse)',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <RefreshCw size={13} />
+              <span>{t('Reassign Bus', 'বাস পরিবর্তন', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowBroadcastModal(true)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                color: 'var(--text-inverse)',
+                padding: '5px 10px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Send size={12} />
+              <span>{t('Broadcast Notice', 'বিজ্ঞপ্তি', lang)}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSupervisorAutoFIFO}
+              style={{
+                background: 'var(--brand-gold)',
+                border: 'none',
+                color: 'var(--text-1)',
+                padding: '5px 11px',
+                borderRadius: '6px',
+                fontSize: '11.5px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Sparkles size={12} />
+              <span>{t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}</span>
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ─── Conditionally Render: Fleet Overview Grid vs. Coach Fuselage View ─── */}
@@ -1194,9 +1246,15 @@ export default function BusView({ role, lang }: ViewProps) {
                       : isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
                   </span>
                 </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {activeRoute.name}
-                  {mySeat && <> · 📍 {mySeat.pickupPoint} ({commuteDirection === 'inbound' ? mySeat.pickupTime : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')})</>}
+                <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                  <span>{activeRoute.name}</span>
+                  {mySeat && (
+                    <>
+                      <span>·</span>
+                      <MapPin size={10} />
+                      <span>{mySeat.pickupPoint} ({commuteDirection === 'inbound' ? mySeat.pickupTime : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')})</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -1475,8 +1533,8 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(16, 185, 129, 0.2)', border: '1px solid var(--status-success)', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', color: 'var(--status-success-bright)', fontWeight: 700 }}>
-                  <CheckCheck size={12} />
-                  <span>DOOR 1 🚪</span>
+                  <DoorOpen size={12} />
+                  <span>{t('DOOR 1', 'গেট ১', lang)}</span>
                 </div>
               </div>
 
@@ -1649,10 +1707,13 @@ export default function BusView({ role, lang }: ViewProps) {
               }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Shield size={11} color="var(--status-danger)" />
-                  <span>EMERGENCY DOOR 2</span>
+                  <span>{t('EMERGENCY DOOR 2', 'জরুরি গেট ২', lang)}</span>
                 </span>
-                <span style={{ fontWeight: 700, letterSpacing: '0.6px' }}>REAR CARGO & FIRST-AID STATION</span>
-                <span>🧯 FIRE EXT</span>
+                <span style={{ fontWeight: 700, letterSpacing: '0.6px' }}>{t('REAR CARGO & FIRST-AID STATION', 'পিছনের লাগেজ ও প্রাথমিক চিকিৎসা', lang)}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Flame size={11} color="var(--status-danger)" />
+                  <span>{t('FIRE EXT', 'অগ্নিনির্বাপক', lang)}</span>
+                </span>
               </div>
             </div>
 
@@ -1682,7 +1743,7 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Interactive Commuter & FIFO Queue Cockpit */}
+        {/* RIGHT COLUMN: Interactive Commuter & FIFO Queue Cockpit (3 Clean Tabs) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {/* Cockpit Tab Navigation */}
           <div style={{ display: 'flex', gap: '4px', borderBottom: '2px solid var(--brand-slate-200)', paddingBottom: '2px', overflowX: 'auto' }}>
@@ -1704,7 +1765,7 @@ export default function BusView({ role, lang }: ViewProps) {
               }}
             >
               <Award size={13} />
-              <span>{t('Seat Dossier', 'আসন বিবরণ', lang)} {selectedSeat ? `#${selectedSeat.num}` : ''}</span>
+              <span>{t('Seat & Passenger', 'আসন ও যাত্রী', lang)} {selectedSeat ? `(#${String(selectedSeat.num).padStart(2, '0')})` : ''}</span>
             </button>
 
             <button
@@ -1712,11 +1773,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'fifo' ? '3px solid var(--brand-gold)' : '3px solid transparent',
+                borderBottom: (activeTab === 'fifo' || activeTab === 'roster') ? '3px solid var(--brand-gold)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'fifo' ? 'var(--status-warning-text)' : 'var(--brand-slate-600)',
+                color: (activeTab === 'fifo' || activeTab === 'roster') ? 'var(--status-warning-text)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1725,7 +1786,7 @@ export default function BusView({ role, lang }: ViewProps) {
               }}
             >
               <Users size={13} />
-              <span>{t('FIFO Waitlist', 'ফিফো তালিকা', lang)}</span>
+              <span>{t('Standby Queue & Roster', 'স্ট্যান্ডবাই ও রোস্টার', lang)}</span>
               <span className="badge gold" style={{ fontSize: '8.5px', padding: '1px 5px' }}>{waitlist.length}</span>
             </button>
 
@@ -1734,11 +1795,11 @@ export default function BusView({ role, lang }: ViewProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                borderBottom: activeTab === 'route' ? '3px solid var(--status-info)' : '3px solid transparent',
+                borderBottom: (activeTab === 'route' || activeTab === 'driver') ? '3px solid var(--status-info)' : '3px solid transparent',
                 padding: '7px 11px',
                 fontSize: '12px',
                 fontWeight: 700,
-                color: activeTab === 'route' ? 'var(--status-info)' : 'var(--brand-slate-600)',
+                color: (activeTab === 'route' || activeTab === 'driver') ? 'var(--status-info)' : 'var(--brand-slate-600)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -1747,53 +1808,11 @@ export default function BusView({ role, lang }: ViewProps) {
               }}
             >
               <Navigation size={13} />
-              <span>{t('Route Corridors', 'রুট স্টপ', lang)}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('driver')}
-              style={{
-                background: 'none',
-                border: 'none',
-                borderBottom: activeTab === 'driver' ? '3px solid var(--status-success)' : '3px solid transparent',
-                padding: '7px 11px',
-                fontSize: '12px',
-                fontWeight: 700,
-                color: activeTab === 'driver' ? 'var(--status-success)' : 'var(--brand-slate-600)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <Fuel size={13} />
-              <span>{t('Fleet & Crew', 'বাস ও ক্রু', lang)}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('roster')}
-              style={{
-                background: 'none',
-                border: 'none',
-                borderBottom: activeTab === 'roster' ? '3px solid var(--status-purple)' : '3px solid transparent',
-                padding: '7px 11px',
-                fontSize: '12px',
-                fontWeight: 700,
-                color: activeTab === 'roster' ? 'var(--status-purple)' : 'var(--brand-slate-600)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <FileText size={13} />
-              <span>{t('Shift Roster', 'রোস্টার তালিকা', lang)}</span>
+              <span>{t('Route Stops & Crew', 'রুট স্টপ ও ক্রু', lang)}</span>
             </button>
           </div>
 
-          {/* TAB 1: Selected Seat Dossier */}
+          {/* TAB 1: Selected Seat & Passenger Dossier */}
           {activeTab === 'dossier' && selectedSeat && (
             <div className="card">
               <div className="card-hd">
@@ -1803,7 +1822,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   </div>
                   <div>
                     <div className="card-title">
-                      {t(`Seat Dossier #${selectedSeat.num} (${selectedSeat.col.replace('_', ' ').toUpperCase()})`, `সিট বিস্তারিত #${selectedSeat.num}`, lang)}
+                      {t(`Seat #${String(selectedSeat.num).padStart(2, '0')} (${selectedSeat.col.replace('_', ' ').toUpperCase()})`, `সিট #${selectedSeat.num}`, lang)}
                     </div>
                     <div className="card-subtitle">
                       Row {selectedSeat.row} · {selectedSeat.assignedTo || t('Unassigned Empty Seat', 'খালি আসন', lang)}
@@ -1842,7 +1861,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     fontWeight: 800,
                     color: 'var(--brand-slate-700)'
                   }}>
-                    {selectedSeat.assignedTo ? selectedSeat.assignedTo.split(' ').map(n => n[0]).slice(0, 2).join('') : '💺'}
+                    {selectedSeat.assignedTo ? selectedSeat.assignedTo.split(' ').map(n => n[0]).slice(0, 2).join('') : <User size={20} />}
                   </div>
 
                   <div>
@@ -1850,7 +1869,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       {selectedSeat.assignedTo || t('No Passenger Assigned', 'কোনো যাত্রী বরাদ্দ নেই', lang)}
                     </div>
                     <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                      {selectedSeat.staffId ? `${selectedSeat.staffId} · ` : ''}{selectedSeat.dept || t('Available for instant shift reservation', 'তাৎক্ষণিক বুকিংযোগ্য আসন', lang)}
+                      {selectedSeat.dept || t('Available for instant shift reservation', 'তাৎক্ষণিক বুকিংযোগ্য আসন', lang)}
                     </div>
                   </div>
                 </div>
@@ -1859,22 +1878,23 @@ export default function BusView({ role, lang }: ViewProps) {
                 <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
                     <span style={{ color: 'var(--brand-slate-500)' }}>{t('Assigned Route', 'বরাদ্দকৃত রুট', lang)}:</span>
-                    <strong>{activeRoute.coachNo} (Route-1)</strong>
+                    <strong>{activeRoute.name}</strong>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Designated Pickup Stop', 'পিকআপ স্টপ', lang)}:</span>
-                    <span style={{ fontWeight: 600 }}>📍 {selectedSeat.pickupPoint || 'Mirpur-10 / Farmgate'}</span>
+                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Pickup Stop', 'পিকআপ স্টপ', lang)}:</span>
+                    <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={12} color="var(--brand-crimson)" />
+                      {selectedSeat.pickupPoint || 'Mirpur-10 / Farmgate'}
+                    </span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Scheduled Boarding Time', 'বোর্ডিং সময়', lang)}:</span>
-                    <span style={{ fontWeight: 600 }}>⏰ {selectedSeat.pickupTime || (commuteDirection === 'inbound' ? '07:18 AM' : '05:15 PM')}</span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Mobile Contact', 'মোবাইল নম্বর', lang)}:</span>
-                    <code>{selectedSeat.phone || 'N/A'}</code>
+                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Scheduled Boarding', 'বোর্ডিং সময়', lang)}:</span>
+                    <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={12} color="var(--brand-gold)" />
+                      {selectedSeat.pickupTime || (commuteDirection === 'inbound' ? '07:18 AM' : '05:15 PM')}
+                    </span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
@@ -1888,6 +1908,17 @@ export default function BusView({ role, lang }: ViewProps) {
                       {selectedSeat.bookingType === 'shift_pass' ? t('Single Shift Pass', 'সিঙ্গেল শিফট পাস', lang) : t('Permanent Roster', 'স্থায়ী রোস্টার', lang)}
                     </span>
                   </div>
+
+                  {selectedSeat.assignedTo && (
+                    <details className="apv-ref-details" style={{ marginTop: '4px' }}>
+                      <summary>{t('Staff ID & contact reference', 'কর্মী আইডি ও যোগাযোগ রেফারেন্স', lang)}</summary>
+                      <div className="apv-ref-body" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginTop: '4px' }}>
+                        <span>{t('Staff ID', 'কর্মী আইডি', lang)}: <code>{selectedSeat.staffId || 'N/A'}</code></span>
+                        <span>{t('Phone', 'মোবাইল', lang)}: <code>{selectedSeat.phone || 'N/A'}</code></span>
+                        <span>{t('Coach Plate', 'বাস নম্বর', lang)}: <code>{activeRoute.coachNo}</code></span>
+                      </div>
+                    </details>
+                  )}
 
                   {selectedSeat.vacatedReason && (
                     <div style={{
@@ -1913,7 +1944,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       style={{ width: '100%', justifyContent: 'center', fontSize: '12px' }}
                       onClick={() => handleOpenBookModal(selectedSeat)}
                     >
-                      <Sparkles size={14} /> {t(`⚡ Book & Reserve Seat #${selectedSeat.num}`, `সিট #${selectedSeat.num} বুক করুন`, lang)}
+                      <Sparkles size={14} /> {t(`Book & Reserve Seat #${selectedSeat.num}`, `সিট #${selectedSeat.num} বুক করুন`, lang)}
                     </button>
                   )}
 
@@ -1972,7 +2003,7 @@ export default function BusView({ role, lang }: ViewProps) {
                             style={{ flex: 1, justifyContent: 'center' }}
                             onClick={() => handleSupervisorManualAllocate(waitlist[0], selectedSeat.num)}
                           >
-                            ⚡ {t(`Assign to #1 ${waitlist[0].name}`, `বরাদ্দ দিন #${waitlist[0].name}-কে`, lang)}
+                            <Zap size={13} /> {t(`Assign to #1 ${waitlist[0].name}`, `বরাদ্দ দিন #${waitlist[0].name}-কে`, lang)}
                           </button>
                         ) : (
                           <button
@@ -2035,366 +2066,324 @@ export default function BusView({ role, lang }: ViewProps) {
             </div>
           )}
 
-          {/* TAB 2: FIFO Standby Queue Radar */}
-          {activeTab === 'fifo' && (
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
-                    <Users size={18} />
-                  </div>
-                  <div>
-                    <div className="card-title">
-                      {t('FIFO Standby Queue Radar', 'ফিফো স্ট্যান্ডবাই অপেক্ষাতালিকা', lang)}
+          {/* TAB 2: Standby Queue & Shift Passenger Roster (Combined) */}
+          {(activeTab === 'fifo' || activeTab === 'roster') && (
+            <>
+              <div className="card">
+                <div className="card-hd">
+                  <div className="card-hd-left">
+                    <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
+                      <Users size={18} />
                     </div>
-                    <div className="card-subtitle">
-                      {t('Strict First-In-First-Out shift fairness algorithm certified by Plant HR', 'প্ল্যান্ট এইচআর অনুমোদিত স্বচ্ছ অগ্রাধিকার তালিকা', lang)}
+                    <div>
+                      <div className="card-title">
+                        {t('Standby Queue (FIFO)', 'স্ট্যান্ডবাই অপেক্ষাতালিকা (FIFO)', lang)}
+                      </div>
+                      <div className="card-subtitle">
+                        {t('First-In-First-Out promotion when a seat is released', 'কোনো আসন ফাঁকা হলে ক্রমানুসারে স্বয়ংক্রিয় বরাদ্দ', lang)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Role-based queue action */}
-                {activePerspective === 'staff' ? (
-                  myWaitlistEntry ? (
-                    <button
-                      className="btn-outline"
-                      style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }}
-                      onClick={handleCancelMyWaitlist}
-                    >
-                      {t('Leave Queue', 'আবেদন বাতিল', lang)}
-                    </button>
+                  {/* Role-based queue action */}
+                  {activePerspective === 'staff' ? (
+                    myWaitlistEntry ? (
+                      <button
+                        className="btn-outline"
+                        style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--status-danger)', borderColor: 'var(--status-danger)' }}
+                        onClick={handleCancelMyWaitlist}
+                      >
+                        {t('Leave Queue', 'আবেদন বাতিল', lang)}
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-primary"
+                        style={{ fontSize: '11px', padding: '4px 10px' }}
+                        onClick={() => setShowJoinModal(true)}
+                      >
+                        <UserPlus size={13} /> {t('Request Standby Seat', 'সিটের আবেদন', lang)}
+                      </button>
+                    )
                   ) : (
                     <button
-                      className="btn-primary"
+                      className="btn-gold"
                       style={{ fontSize: '11px', padding: '4px 10px' }}
-                      onClick={() => setShowJoinModal(true)}
+                      onClick={handleSupervisorAutoFIFO}
                     >
-                      <UserPlus size={13} /> {t('Request Standby Seat', 'সিটের আবেদন', lang)}
+                      <Sparkles size={13} /> {t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}
                     </button>
-                  )
-                ) : (
-                  <button
-                    className="btn-gold"
-                    style={{ fontSize: '11px', padding: '4px 10px' }}
-                    onClick={handleSupervisorAutoFIFO}
-                  >
-                    <Sparkles size={13} /> {t('⚡ Auto-Allocate FIFO', 'স্বয়ংক্রিয় ফিফো বরাদ্দ', lang)}
-                  </button>
-                )}
-              </div>
+                  )}
+                </div>
 
-              <div className="card-body">
-                {/* FIFO Explainer Strip */}
-                <div style={{
-                  background: 'rgba(212, 175, 55, 0.08)',
-                  border: '1px solid var(--brand-gold)',
-                  borderRadius: '8px',
-                  padding: '9px 12px',
-                  marginBottom: '12px',
-                  fontSize: '11.5px',
-                  color: 'var(--brand-slate-700)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <Info size={16} color="var(--brand-gold)" />
-                  <div>
-                    <strong>{t('Standby Queue Policy:', 'স্বচ্ছ অপেক্ষমাণ তালিকা নীতি:', lang)}</strong>{' '}
-                    {t(
-                      'Applications are placed in order of submission time. When any seat is freed, it automatically offers to the next person.',
-                      'আবেদনের সময়ক্রম অনুযায়ী তালিকা তৈরি হয়। কোনো আসন ফাঁকা হলে স্বয়ংক্রিয়ভাবে পরবর্তী সহকর্মীকে বরাদ্দ করা হয়।',
-                      lang
+                <div className="card-body">
+                  {/* Candidate Queue Cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {waitlist.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px', color: 'var(--brand-slate-500)' }}>
+                        <CheckCircle2 size={28} color="var(--status-success)" style={{ margin: '0 auto 6px' }} />
+                        <div style={{ fontWeight: 700, fontSize: '12px' }}>{t('No Pending Standby Requests', 'কোনো অপেক্ষমান প্রার্থী নেই', lang)}</div>
+                      </div>
+                    ) : (
+                      waitlist.map((candidate) => {
+                        const isRankOne = candidate.rank === 1;
+                        const isMe = candidate.staffId === currentStaffMeta.empId || candidate.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase());
+
+                        return (
+                          <div
+                            key={candidate.staffId}
+                            className={`fifo-card-item ${isRankOne ? 'rank-1' : ''}`}
+                            style={{
+                              border: isMe ? '2px solid var(--brand-crimson)' : undefined,
+                              background: isMe ? 'rgba(225, 29, 72, 0.04)' : undefined
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '7px',
+                                background: isRankOne ? 'var(--brand-gold)' : 'var(--brand-slate-200)',
+                                color: isRankOne ? 'var(--text-1)' : 'var(--brand-slate-700)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '12px',
+                                fontWeight: 800
+                              }}>
+                                #{candidate.rank}
+                              </div>
+
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{candidate.name}</strong>
+                                  {isMe && <span className="badge danger" style={{ fontSize: '8px', padding: '1px 4px' }}>YOU</span>}
+                                  <span className={`badge ${candidate.priority === 'Emergency' ? 'danger' : candidate.priority === 'Overtime' ? 'purple' : 'info'}`} style={{ fontSize: '8.5px', padding: '1px 4px' }}>
+                                    {candidate.priority}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span>{candidate.dept}</span>
+                                  <span>·</span>
+                                  <MapPin size={10} />
+                                  <span>{candidate.pickupPoint}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Button: Visible only to Supervisor */}
+                            {activePerspective === 'supervisor' ? (
+                              vacatedCount > 0 ? (
+                                <button
+                                  className="btn-gold"
+                                  style={{ fontSize: '10px', padding: '4px 8px' }}
+                                  onClick={() => {
+                                    const firstVacated = seats.find(s => s.status === 'vacated');
+                                    if (firstVacated) {
+                                      handleSupervisorManualAllocate(candidate, firstVacated.num);
+                                    }
+                                  }}
+                                >
+                                  {t('Assign', 'বরাদ্দ', lang)} #{seats.find(s => s.status === 'vacated')?.num}
+                                </button>
+                              ) : (
+                                <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                  <Clock size={10} /> {t('Standby', 'অপেক্ষমান', lang)}
+                                </span>
+                              )
+                            ) : (
+                              <div style={{ textAlign: 'right' }}>
+                                <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>{candidate.joinedAt}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
+              </div>
 
-                {/* Candidate Queue Cards */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {waitlist.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '30px', color: 'var(--brand-slate-500)' }}>
-                      <CheckCircle2 size={32} color="var(--status-success)" style={{ margin: '0 auto 8px' }} />
-                      <div style={{ fontWeight: 700 }}>{t('No Pending Waitlist Candidates', 'কোনো অপেক্ষমান প্রার্থী নেই', lang)}</div>
+              {/* Integrated Shift Passenger Roster below the Standby Queue */}
+              <div className="card">
+                <div className="card-hd">
+                  <div className="card-hd-left">
+                    <div className="card-hd-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', color: 'var(--status-purple)' }}>
+                      <FileText size={18} />
                     </div>
-                  ) : (
-                    waitlist.map((candidate) => {
-                      const isRankOne = candidate.rank === 1;
-                      const isMe = candidate.staffId === currentStaffMeta.empId || candidate.name.toLowerCase().includes(currentStaffMeta.shortName.toLowerCase());
+                    <div>
+                      <div className="card-title">
+                        {t('Confirmed Shift Roster', 'নিশ্চিত যাত্রী রোস্টার', lang)}
+                      </div>
+                      <div className="card-subtitle">
+                        {occupiedCount} {t('Booked Passengers', 'বুক করা যাত্রী', lang)} · {boardedCount} {t('Boarded', 'বোর্ডে উপস্থিত', lang)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="btn-outline" style={{ fontSize: '11px', padding: '4px 8px' }} onClick={() => setShowManifestModal(true)}>
+                    <Printer size={12} /> {t('Print Roster', 'প্রিন্ট', lang)}
+                  </button>
+                </div>
+
+                <div className="card-body" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                  <table className="data-table" style={{ fontSize: '11.5px', margin: 0 }}>
+                    <thead>
+                      <tr>
+                        <th style={{ width: '40px' }}>{t('Seat', 'সিট', lang)}</th>
+                        <th>{t('Passenger Name', 'যাত্রীর নাম', lang)}</th>
+                        <th>{t('Pickup Station', 'পিকআপ স্টপ', lang)}</th>
+                        <th>{t('Blood', 'রক্ত', lang)}</th>
+                        <th style={{ textAlign: 'right' }}>{t('Status', 'অবস্থা', lang)}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {seats.filter(s => s.status === 'occupied').map(s => (
+                        <tr key={s.num} onClick={() => { setSelectedSeat(s); setActiveTab('dossier'); }} style={{ cursor: 'pointer' }}>
+                          <td><strong>#{s.num}</strong></td>
+                          <td>
+                            <div>
+                              <span style={{ fontWeight: 700 }}>{s.assignedTo}</span>
+                              <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)' }}>{s.dept}</div>
+                            </div>
+                          </td>
+                          <td>{s.pickupPoint}</td>
+                          <td><span className="badge danger" style={{ fontSize: '9px' }}>{s.bloodGroup || 'O+'}</span></td>
+                          <td style={{ textAlign: 'right' }}>
+                            <span className={`badge ${s.boarded ? 'success' : 'info'}`} style={{ fontSize: '9px' }}>
+                              {s.boarded ? t('Boarded', 'উপস্থিত', lang) : t('Waiting', 'অপেক্ষমান', lang)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* TAB 3: Route Stops & Crew (Combined, without fake telemetry) */}
+          {(activeTab === 'route' || activeTab === 'driver') && (
+            <>
+              <div className="card">
+                <div className="card-hd">
+                  <div className="card-hd-left">
+                    <div className="card-hd-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--status-info)' }}>
+                      <Navigation size={18} />
+                    </div>
+                    <div>
+                      <div className="card-title">
+                        {t('Route Stops & Boarding Schedule', 'রুট স্টপেজ ও সময়সূচী', lang)}
+                      </div>
+                      <div className="card-subtitle">
+                        {commuteDirection === 'inbound' ? t('Morning Inbound (City → Plant)', 'সকালের শিফট (শহর → প্ল্যান্ট)', lang) : t('Evening Return (Plant → City)', 'সন্ধ্যার ফিরতি শিফট (প্ল্যান্ট → শহর)', lang)} · {activeStops.length} {t('Stops', 'স্টপেজ', lang)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-body">
+                  <div className="route-stop-timeline">
+                    {activeStops.map((stop: RouteStop) => {
+                      const isPassed = stop.status === 'passed';
+                      const isActive = stop.status === 'active';
 
                       return (
                         <div
-                          key={candidate.staffId}
-                          className={`fifo-card-item ${isRankOne ? 'rank-1' : ''}`}
-                          style={{
-                            border: isMe ? '2px solid var(--brand-crimson)' : undefined,
-                            background: isMe ? 'rgba(225, 29, 72, 0.04)' : undefined
-                          }}
+                          key={stop.id}
+                          className={`route-stop-node ${isPassed ? 'passed' : isActive ? 'active' : ''}`}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '7px',
-                              background: isRankOne ? 'var(--brand-gold)' : 'var(--brand-slate-200)',
-                              color: isRankOne ? 'var(--text-1)' : 'var(--brand-slate-700)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              fontWeight: 800
-                            }}>
-                              #{candidate.rank}
+                          <div className="route-stop-dot" />
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
+                                {lang === 'bn' ? stop.nameBn : stop.name}
+                              </div>
+                              <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
+                                {t('Scheduled', 'সময়', lang)}: <strong>{stop.scheduledTime}</strong> · {stop.distanceKm}
+                              </div>
                             </div>
 
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <strong style={{ fontSize: '12.5px', color: 'var(--brand-slate-900)' }}>{candidate.name}</strong>
-                                {isMe && <span className="badge danger" style={{ fontSize: '8px', padding: '1px 4px' }}>YOU</span>}
-                                <span className={`badge ${candidate.priority === 'Emergency' ? 'danger' : candidate.priority === 'Overtime' ? 'purple' : 'info'}`} style={{ fontSize: '8.5px', padding: '1px 4px' }}>
-                                  {candidate.priority}
-                                </span>
-                              </div>
-                              <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                                {candidate.dept} · 📍 {candidate.pickupPoint}
+                            <div style={{ textAlign: 'right' }}>
+                              <span className={`badge ${isPassed ? 'success' : isActive ? 'gold' : ''}`} style={{ fontSize: '9.5px' }}>
+                                {isPassed ? t('Passed', 'অতিক্রম', lang) : isActive ? t('At Station', 'বর্তমান স্টপ', lang) : t('Upcoming', 'আসন্ন', lang)}
+                              </span>
+                              <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
+                                +{stop.passengers} {t('passengers', 'যাত্রী', lang)}
                               </div>
                             </div>
                           </div>
-
-                          {/* Action Button: Visible only to Supervisor */}
-                          {activePerspective === 'supervisor' ? (
-                            vacatedCount > 0 ? (
-                              <button
-                                className="btn-gold"
-                                style={{ fontSize: '10px', padding: '4px 8px' }}
-                                onClick={() => {
-                                  const firstVacated = seats.find(s => s.status === 'vacated');
-                                  if (firstVacated) {
-                                    handleSupervisorManualAllocate(candidate, firstVacated.num);
-                                  }
-                                }}
-                              >
-                                {t('Assign', 'বরাদ্দ', lang)} #{seats.find(s => s.status === 'vacated')?.num}
-                              </button>
-                            ) : (
-                              <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>
-                                ⏳ {t('Standby', 'অপেক্ষমান', lang)}
-                              </span>
-                            )
-                          ) : (
-                            <div style={{ textAlign: 'right' }}>
-                              <span style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>{candidate.joinedAt}</span>
-                            </div>
-                          )}
                         </div>
                       );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: Route Stops & Live Telemetry */}
-          {activeTab === 'route' && (
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(59, 130, 246, 0.12)', color: 'var(--status-info)' }}>
-                    <Navigation size={18} />
-                  </div>
-                  <div>
-                    <div className="card-title">
-                      {t('Route Corridor Stations & Geofenced Telemetry', 'রুট স্টেশন ও জিওফেন্স ট্র্যাকিং', lang)}
-                    </div>
-                    <div className="card-subtitle">
-                      {commuteDirection === 'inbound' ? t('Morning Inbound (City ➔ Plant)', 'সকালের শিফট (শহর ➔ প্ল্যান্ট)', lang) : t('Evening Outbound (Plant ➔ City)', 'সন্ধ্যার ফিরতি শিফট (প্ল্যান্ট ➔ শহর)', lang)} · {activeStops.length} {t('Stoppages', 'স্টপেজ', lang)}
-                    </div>
+                    })}
                   </div>
                 </div>
-
-                <span className="badge info">{activeRoute.speed} Active</span>
               </div>
 
-              <div className="card-body">
-                <div className="route-stop-timeline">
-                  {activeStops.map((stop: RouteStop) => {
-                    const isPassed = stop.status === 'passed';
-                    const isActive = stop.status === 'active';
-
-                    return (
-                      <div
-                        key={stop.id}
-                        className={`route-stop-node ${isPassed ? 'passed' : isActive ? 'active' : ''}`}
-                      >
-                        <div className="route-stop-dot" />
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div>
-                            <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                              {lang === 'bn' ? stop.nameBn : stop.name}
-                            </div>
-                            <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                              {t('Scheduled', 'সময়', lang)}: <strong>{stop.scheduledTime}</strong> · {stop.distanceKm}
-                            </div>
-                          </div>
-
-                          <div style={{ textAlign: 'right' }}>
-                            <span className={`badge ${isPassed ? 'success' : isActive ? 'gold' : ''}`} style={{ fontSize: '9.5px' }}>
-                              {isPassed ? t('Passed', 'অতিক্রম', lang) : isActive ? t('At Station', 'বর্তমান স্টপ', lang) : t('Upcoming', 'আসন্ন', lang)}
-                            </span>
-                            <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>
-                              +{stop.passengers} {t('passengers', 'যাত্রী', lang)}
-                            </div>
-                          </div>
-                        </div>
+              {/* Driver, Conductor & 24/7 Dispatch Card */}
+              <div className="card">
+                <div className="card-hd">
+                  <div className="card-hd-left">
+                    <div className="card-hd-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--status-success)' }}>
+                      <UserCheck size={18} />
+                    </div>
+                    <div>
+                      <div className="card-title">
+                        {t('Assigned Crew & Dispatch Contact', 'নির্ধারিত চালক, কন্ডাক্টর ও হটলাইন', lang)}
                       </div>
-                    );
-                  })}
+                      <div className="card-subtitle">
+                        {activeRoute.coachNo} · {activeRoute.model}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="badge success">{t('Fitness Valid', 'ফিটনেস ক্লিয়ার', lang)}</span>
+                </div>
+
+                <div className="card-body" style={{ fontSize: '12.5px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                    <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
+                      <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <User size={11} /> {t('Certified Driver', 'প্রধান চালক', lang)}
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '2px', color: 'var(--brand-slate-900)' }}>
+                        {activeRoute.driverName}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                        <code>{activeRoute.driverPhone}</code>
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
+                      <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Ticket size={11} /> {t('Bus Conductor', 'কন্ডাক্টর', lang)}
+                      </div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '2px', color: 'var(--brand-slate-900)' }}>
+                        {activeRoute.conductorName}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                        <code>{activeRoute.conductorPhone}</code>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '10px 14px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, color: 'var(--status-danger-text)', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <AlertTriangle size={13} />
+                        <span>{t('24/7 Transport Dispatch Hotline', '২৪/৭ পরিবহন ডিসপ্যাচ হটলাইন', lang)}</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
+                        +880 1711-009988
+                      </div>
+                    </div>
+                    <button className="btn-outline" style={{ borderColor: 'var(--status-danger)', color: 'var(--status-danger)', fontSize: '11px' }} onClick={() => showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info')}>
+                      <Phone size={12} /> {t('Call Dispatch', 'কল করুন', lang)}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* TAB 4: Vehicle & Crew Profile */}
-          {activeTab === 'driver' && (
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--status-success)' }}>
-                    <Fuel size={18} />
-                  </div>
-                  <div>
-                    <div className="card-title">
-                      {t('Vehicle Mechanical Health & Crew Profile', 'গাড়ির ফিটনেস ও ক্রু প্রোফাইল', lang)}
-                    </div>
-                    <div className="card-subtitle">
-                      {activeRoute.coachNo} · {activeRoute.model}
-                    </div>
-                  </div>
-                </div>
-                <span className="badge success">{t('BRTA Fitness Valid', 'ফিটনেস ক্লিয়ার', lang)}</span>
-              </div>
-
-              <div className="card-body" style={{ fontSize: '12.5px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-                  <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-                      👨‍✈️ {t('Certified Driver', 'প্রধান চালক', lang)}
-                    </div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '2px', color: 'var(--brand-slate-900)' }}>
-                      {activeRoute.driverName}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                      Phone: <code>{activeRoute.driverPhone}</code>
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '10px' }}>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>
-                      🎟️ {t('Bus Conductor', 'কন্ডাক্টর', lang)}
-                    </div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, marginTop: '2px', color: 'var(--brand-slate-900)' }}>
-                      {activeRoute.conductorName}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                      Phone: <code>{activeRoute.conductorPhone}</code>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Scorecards */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <div className="driver-score-card">
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Fuel Level:</span>
-                    <strong style={{ color: 'var(--status-success)' }}>82% (Full Tank)</strong>
-                  </div>
-                  <div className="driver-score-card">
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Engine Temp:</span>
-                    <strong>88°C (Normal)</strong>
-                  </div>
-                  <div className="driver-score-card">
-                    <span style={{ color: 'var(--brand-slate-500)' }}>Cabin AC:</span>
-                    <strong style={{ color: 'var(--status-info)' }}>21.5°C Chilled</strong>
-                  </div>
-                  <div className="driver-score-card">
-                    <span style={{ color: 'var(--brand-slate-500)' }}>First-Aid Kit:</span>
-                    <strong style={{ color: 'var(--status-success)' }}>Inspected Oct 2026</strong>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '14px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '10px 14px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 800, color: 'var(--status-danger-text)', fontSize: '12px' }}>
-                      🚨 24/7 Plant Roadside Assistance Hotline
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                      Transport Operations Dispatch: +880 1711-009988
-                    </div>
-                  </div>
-                  <button className="btn-outline" style={{ borderColor: 'var(--status-danger)', color: 'var(--status-danger)', fontSize: '11px' }} onClick={() => showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info')}>
-                    SOS Call
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: Shift Roster & Manifest Quick View */}
-          {activeTab === 'roster' && (
-            <div className="card">
-              <div className="card-hd">
-                <div className="card-hd-left">
-                  <div className="card-hd-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', color: 'var(--status-purple)' }}>
-                    <FileText size={18} />
-                  </div>
-                  <div>
-                    <div className="card-title">
-                      {t('Full Shift Passenger Roster', 'সম্পূর্ণ শিফট যাত্রী রোস্টার', lang)}
-                    </div>
-                    <div className="card-subtitle">
-                      {occupiedCount} {t('Booked Passengers', 'বুক করা যাত্রী', lang)} · {boardedCount} {t('Boarded', 'বোর্ডে উপস্থিত', lang)}
-                    </div>
-                  </div>
-                </div>
-
-                <button className="btn-outline" style={{ fontSize: '11px', padding: '4px 8px' }} onClick={() => setShowManifestModal(true)}>
-                  <Printer size={12} /> {t('Print Roster', 'প্রিন্ট', lang)}
-                </button>
-              </div>
-
-              <div className="card-body" style={{ maxHeight: '380px', overflowY: 'auto' }}>
-                <table className="data-table" style={{ fontSize: '11.5px', margin: 0 }}>
-                  <thead>
-                    <tr>
-                      <th style={{ width: '40px' }}>{t('Seat', 'সিট', lang)}</th>
-                      <th>{t('Passenger Name', 'যাত্রীর নাম', lang)}</th>
-                      <th>{t('Pickup Station', 'পিকআপ স্টপ', lang)}</th>
-                      <th>{t('Blood', 'রক্ত', lang)}</th>
-                      <th style={{ textAlign: 'right' }}>{t('Status', 'অবস্থা', lang)}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {seats.filter(s => s.status === 'occupied').map(s => (
-                      <tr key={s.num} onClick={() => setSelectedSeat(s)} style={{ cursor: 'pointer' }}>
-                        <td><strong>#{s.num}</strong></td>
-                        <td>
-                          <div>
-                            <span style={{ fontWeight: 700 }}>{s.assignedTo}</span>
-                            <div style={{ fontSize: '10px', color: 'var(--brand-slate-500)' }}>{s.staffId} · {s.dept}</div>
-                          </div>
-                        </td>
-                        <td>{s.pickupPoint}</td>
-                        <td><span className="badge danger" style={{ fontSize: '9px' }}>{s.bloodGroup || 'O+'}</span></td>
-                        <td style={{ textAlign: 'right' }}>
-                          <span className={`badge ${s.boarded ? 'success' : 'info'}`} style={{ fontSize: '9px' }}>
-                            {s.boarded ? t('Boarded', 'উপস্থিত', lang) : t('Waiting', 'অপেক্ষমান', lang)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -2777,7 +2766,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 SEAT #{qrSeatTarget?.num ? (qrSeatTarget.num < 10 ? `0${qrSeatTarget.num}` : qrSeatTarget.num) : '05'} · {commuteDirection === 'inbound' ? 'MORNING SHIFT' : 'EVENING RETURN'}
               </div>
               <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                {qrSeatTarget?.dept || 'Sales & Distribution'} · ID: {qrSeatTarget?.staffId || 'EMP-1042'}
+                {qrSeatTarget?.dept || 'Sales & Distribution'}
               </div>
 
               <div style={{
@@ -2793,21 +2782,24 @@ export default function BusView({ role, lang }: ViewProps) {
                 gap: '6px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Coach:</span>
-                  <strong>{activeRoute.coachNo}</strong>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Route & Coach', 'রুট ও কোচ', lang)}:</span>
+                  <strong>{activeRoute.name} ({activeRoute.coachNo})</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Designated Stop:</span>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Pickup Stop', 'পিকআপ স্টপ', lang)}:</span>
                   <span style={{ color: 'var(--status-info)', fontWeight: 700 }}>{qrSeatTarget?.pickupPoint || 'Farmgate Overbridge'} ({qrSeatTarget?.pickupTime || '07:18 AM'})</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Blood Group:</span>
+                  <span style={{ color: 'var(--brand-slate-500)' }}>{t('Blood Group', 'রক্তের গ্রুপ', lang)}:</span>
                   <span className="badge danger" style={{ fontSize: '10px' }}>{qrSeatTarget?.bloodGroup || 'B+'}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--brand-slate-500)' }}>Security Status:</span>
-                  <span style={{ color: 'var(--status-success)', fontWeight: 700 }}>✓ Verified Optical Hash</span>
-                </div>
+                <details className="apv-ref-details" style={{ marginTop: '4px' }}>
+                  <summary>{t('Pass & staff reference', 'পাস ও কর্মী রেফারেন্স', lang)}</summary>
+                  <div className="apv-ref-body" style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: '4px' }}>
+                    <span>{t('Pass ID', 'পাস আইডি', lang)}: <code>BOGCL-PASS-{qrSeatTarget?.staffId || '1042'}-S{qrSeatTarget?.num || 5}</code></span>
+                    <span>{t('Staff ID', 'কর্মী আইডি', lang)}: <code>{qrSeatTarget?.staffId || 'EMP-1042'}</code></span>
+                  </div>
+                </details>
               </div>
             </div>
 
@@ -2906,7 +2898,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         <td><span className="badge danger" style={{ fontSize: '9px' }}>{s.bloodGroup || 'O+'}</span></td>
                         <td style={{ textAlign: 'center' }}>
                           <span className={`badge ${s.boarded ? 'success' : 'warn'}`} style={{ fontSize: '9px' }}>
-                            {s.boarded ? '✓ PASS CLEARED' : '⏳ AWAITING GATE'}
+                            {s.boarded ? t('PASS CLEARED', 'গেট ক্লিয়ার', lang) : t('AWAITING GATE', 'অপেক্ষমান', lang)}
                           </span>
                         </td>
                       </tr>
@@ -3001,7 +2993,10 @@ export default function BusView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{ marginTop: '12px', fontSize: '11.5px', color: 'var(--brand-slate-600)', background: 'var(--brand-slate-50)', border: '1px solid var(--brand-slate-200)', padding: '10px 12px', borderRadius: '8px' }}>
-                <strong style={{ color: 'var(--brand-slate-900)' }}>📌 {t('Plant Transit Rules:', 'প্ল্যান্ট যাতায়াত বিধিমালা:', lang)}</strong>
+                <strong style={{ color: 'var(--brand-slate-900)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <Info size={13} color="var(--brand-crimson)" />
+                  <span>{t('Plant Transit Rules:', 'প্ল্যান্ট যাতায়াত বিধিমালা:', lang)}</span>
+                </strong>
                 <ul style={{ margin: '4px 0 0 16px', padding: 0, lineHeight: '1.5' }}>
                   <li>{t('Standby seats are strictly prioritized according to registration timestamp (FIFO queue).', 'ফিফো পদ্ধতিতে নিবন্ধনের ক্রম অনুযায়ী স্ট্যান্ডবাই আসন বরাদ্দ বাধ্যতামূলক।', lang)}</li>
                   <li>{t('Voluntary seat release must be logged at least 30 minutes before first station departure.', 'সিট ছাড়তে হলে প্রথম স্টপ ছাড়ার কমপক্ষে ৩০ মিনিট পূর্বে কনফার্ম করতে হবে।', lang)}</li>

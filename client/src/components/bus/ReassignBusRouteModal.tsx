@@ -3,7 +3,7 @@ import { BusVehicle, RouteInfo } from './busTypes';
 import { t } from '../../types';
 import {
   RefreshCw, X, CheckCircle, Bus, ArrowRight, Shield,
-  Navigation, AlertCircle, Sparkles, Check
+  Navigation, AlertCircle, Sparkles, Check, Sun
 } from 'lucide-react';
 
 interface ReassignBusRouteModalProps {
@@ -175,8 +175,9 @@ export default function ReassignBusRouteModal({
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
                   {currentRoute?.name.split(':')[1]?.trim() || 'Custom Road Corridor'}
                 </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
-                  🌅 {currentRoute?.inboundStartTime}
+                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Sun size={11} color="var(--brand-gold)" />
+                  <span>{currentRoute?.inboundStartTime}</span>
                 </div>
               </div>
 
@@ -204,8 +205,9 @@ export default function ReassignBusRouteModal({
                 <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
                   {targetRoute?.name.split(':')[1]?.trim() || 'New Destination'}
                 </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '4px', fontWeight: 700 }}>
-                  🌅 {targetRoute?.inboundStartTime}
+                <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Sun size={11} />
+                  <span>{targetRoute?.inboundStartTime}</span>
                 </div>
               </div>
             </div>
