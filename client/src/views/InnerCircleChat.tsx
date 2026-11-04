@@ -997,6 +997,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             className="ic-messages-container" ref={messagesScrollRef} onScroll={handleScroll}
             role="log" aria-live="polite" aria-label={t('Messages', 'বার্তা', lang)}
           >
+            {activeMessages.length > 0 && <div className="ic-stream-spacer" />}
             <div className="ic-date-divider">
               <span className="ic-date-chip">{t(`Today, ${today()}`, `আজ, ${today()}`, lang)}</span>
             </div>
