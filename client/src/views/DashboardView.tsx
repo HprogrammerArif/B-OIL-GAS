@@ -83,29 +83,31 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   return (
     <div className="view-container page-enter-active">
       <PageHeader
+        className="dash-page-header"
         title={greeting}
 
 
         actions={(
           <>
             {role === 'chairman' && canBroadcast && (
-              <Button variant="secondary" icon={<Mic size={14} />} onClick={() => setShowVoiceBriefingModal(true)}>
+              <Button variant="secondary" size="sm" icon={<Mic size={13} />} onClick={() => setShowVoiceBriefingModal(true)}>
                 {t('Send voice briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
               </Button>
             )}
             {role === 'plant_gm' && (
-              <Button variant="gold" onClick={() => setShowBatchReleaseModal(true)}>
+              <Button variant="gold" size="sm" onClick={() => setShowBatchReleaseModal(true)}>
                 {t('Release bitumen batch', 'বিটুমিন ব্যাচ রিলিজ', lang)}
               </Button>
             )}
             {role === 'employee' && (
-              <Button variant="gold" icon={<QrCode size={14} />} onClick={() => setShowGatePassModal(true)}>
+              <Button variant="gold" size="sm" icon={<QrCode size={13} />} onClick={() => setShowGatePassModal(true)}>
                 {t('Digital gate pass', 'ডিজিটাল গেট পাস', lang)}
               </Button>
             )}
             {role === 'driver' && (
               <Button
                 variant="danger"
+                size="sm"
                 onClick={() => showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger')}
               >
                 {t('Emergency SOS', 'জরুরি এসওএস', lang)}
@@ -116,22 +118,25 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
       />
 
       {tabs.length > 1 && (
-        <div className="cockpit-tabs-container" role="tablist">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.icon}
-              <span>{t(tab.label[0], tab.label[1], lang)}</span>
-              {tab.badge !== undefined && (
-                <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>{tab.badge}</span>
-              )}
-            </button>
-          ))}
+        <div className="cockpit-tabs-sticky-wrapper">
+          <div className="cockpit-tabs-container" role="tablist">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.icon}
+                <span>{t(tab.label[0], tab.label[1], lang)}</span>
+                {tab.badge !== undefined && (
+                  <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>{tab.badge}</span>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

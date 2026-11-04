@@ -3224,6 +3224,20 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 /* ─── COCKPIT SEGMENTED TABS STRIP (Reduces Information Overload) ────────── */
+.cockpit-tabs-sticky-wrapper {
+  position: sticky;
+  top: var(--topbar-height, 68px);
+  z-index: 40;
+  background: var(--surface-0);
+  padding: 6px 0 8px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+[data-theme="dark"] .cockpit-tabs-sticky-wrapper {
+  background: var(--surface-0);
+}
+
 .cockpit-tabs-container {
   display: flex;
   align-items: center;
@@ -3233,9 +3247,13 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   border-radius: var(--radius-lg);
   padding: 4px;
   margin-bottom: 14px;
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.cockpit-tabs-sticky-wrapper .cockpit-tabs-container {
+  margin-bottom: 0;
 }
 
 [data-theme="dark"] .cockpit-tabs-container {

@@ -517,6 +517,12 @@
   }
 
   /* Cockpit Segmented Tabs Mobile Polish */
+  .cockpit-tabs-sticky-wrapper {
+    padding: 4px 0 6px !important;
+    margin-top: -4px !important;
+    margin-bottom: 10px !important;
+  }
+
   .cockpit-tabs-container {
     padding: 4px !important;
     gap: 6px !important;
@@ -524,6 +530,10 @@
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
+  }
+
+  .cockpit-tabs-sticky-wrapper .cockpit-tabs-container {
+    margin-bottom: 0 !important;
   }
 
   .cockpit-tabs-container::-webkit-scrollbar {
