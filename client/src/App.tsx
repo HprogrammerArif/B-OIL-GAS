@@ -90,6 +90,44 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Global background scroll lock whenever any modal, drawer, or overlay is open
+  useEffect(() => {
+    const MODAL_SELECTOR =
+      '.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop, .drawer-backdrop, .command-palette-backdrop, .ic-call-overlay, .sidebar-mobile-backdrop, .lock-screen-backdrop';
+
+    const syncBodyScrollLock = () => {
+      const hasOpenModal = document.querySelector(MODAL_SELECTOR) !== null;
+      const htmlEl = document.documentElement;
+      const bodyEl = document.body;
+
+      if (hasOpenModal) {
+        if (!bodyEl.classList.contains('modal-scroll-locked')) {
+          const scrollbarWidth = window.innerWidth - htmlEl.clientWidth;
+          if (scrollbarWidth > 0) {
+            bodyEl.style.paddingRight = `${scrollbarWidth}px`;
+          }
+          htmlEl.classList.add('modal-scroll-locked');
+          bodyEl.classList.add('modal-scroll-locked');
+        }
+      } else if (bodyEl.classList.contains('modal-scroll-locked')) {
+        htmlEl.classList.remove('modal-scroll-locked');
+        bodyEl.classList.remove('modal-scroll-locked');
+        bodyEl.style.paddingRight = '';
+      }
+    };
+
+    syncBodyScrollLock();
+    const observer = new MutationObserver(syncBodyScrollLock);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove('modal-scroll-locked');
+      document.body.classList.remove('modal-scroll-locked');
+      document.body.style.paddingRight = '';
+    };
+  }, []);
+
   const toggleLang = () => setLang((l) => (l === 'en' ? 'bn' : 'en'));
 
   const toggleTheme = () => {

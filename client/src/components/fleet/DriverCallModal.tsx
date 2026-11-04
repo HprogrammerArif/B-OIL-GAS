@@ -88,6 +88,7 @@ export default function DriverCallModal({
 
   return (
     <div
+      className="modal-bg"
       style={{
         position: 'fixed',
         inset: 0,
