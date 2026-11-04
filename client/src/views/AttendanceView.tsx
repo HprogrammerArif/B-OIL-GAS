@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert,
+  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert, Building2, Factory, LocateFixed,
 } from 'lucide-react';
 import { useOperationsStore, type ShiftWorker, type LeaveRequestItem } from '../store/operationsStore';
 import { approvalStore } from '../store/approvalStore';
@@ -68,6 +68,277 @@ function parseDays(from: string, to: string): number {
 function fmtDate(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Compact geofence & location schematic showing where the employee checked in
+ * relative to the Office or Plant and its allowed geofence perimeter.
+ */
+function GeofenceMiniMap({
+  siteId,
+  distanceM,
+  outside,
+  noFix = false,
+  lang,
+}: {
+  siteId: SiteId;
+  distanceM: number;
+  outside: boolean;
+  noFix?: boolean;
+  lang: ViewProps['lang'];
+}) {
+  const site = SITES[siteId];
+  const otherSite = SITES[siteId === 'HQ_BARIDHARA' ? 'PLANT_KERANIGANJ' : 'HQ_BARIDHARA'];
+  const SiteIcon = siteId === 'PLANT_KERANIGANJ' ? Factory : Building2;
+  const OtherIcon = otherSite.id === 'PLANT_KERANIGANJ' ? Factory : Building2;
+  const siteShort = siteId === 'PLANT_KERANIGANJ'
+    ? t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)
+    : t('Head Office, Baridhara', 'প্রধান কার্যালয়, বারিধারা', lang);
+  const otherShort = otherSite.id === 'PLANT_KERANIGANJ'
+    ? t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)
+    : t('Head Office, Baridhara', 'প্রধান কার্যালয়, বারিধারা', lang);
+  const overFenceM = Math.max(0, distanceM - site.radiusM);
+  const insidePct = !outside && !noFix && site.radiusM > 0
+    ? Math.min(82, Math.max(24, Math.round((distanceM / site.radiusM) * 75) + 18))
+    : 86;
+
+  return (
+    <div
+      style={{
+        background: 'var(--surface-0)',
+        border: `1px solid ${outside ? 'var(--status-purple-border, rgba(124, 58, 237, 0.28))' : 'var(--border-1)'}`,
+        borderRadius: 8,
+        padding: '9px 11px',
+        color: 'var(--text-1)',
+      }}
+    >
+      {/* Top header: Site geofence vs current distance */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 7 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--text-1)' }}>
+          <SiteIcon size={12} color="#10B981" />
+          <span>{siteShort}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-3)' }}>
+            · {t(`${site.radiusM} m zone`, `${site.radiusM} মি. জোন`, lang)}
+          </span>
+        </div>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            padding: '1.5px 7px',
+            borderRadius: 999,
+            background: outside ? 'var(--status-purple-bg)' : 'rgba(16, 185, 129, 0.12)',
+            color: outside ? 'var(--status-purple-text)' : '#059669',
+          }}
+        >
+          {noFix
+            ? t('GPS off · manual check-in', 'জিপিএস নেই · ম্যানুয়াল', lang)
+            : outside
+              ? t(`${formatDistance(distanceM)} away (+${formatDistance(overFenceM)} outside)`, `${formatDistance(distanceM)} দূরে (+${formatDistance(overFenceM)} বাইরে)`, lang)
+              : t(`Inside zone · ${formatDistance(distanceM)} from gate`, `জোনের ভেতরে · গেট থেকে ${formatDistance(distanceM)}`, lang)}
+        </span>
+      </div>
+
+      {/* Schematic track: [Site + Geofence Zone] ----dashed line----> [You Right Now] */}
+      <div
+        style={{
+          position: 'relative',
+          height: 50,
+          borderRadius: 7,
+          background:
+            'radial-gradient(circle at 1px 1px, var(--border-1) 1px, transparent 0) 0 0 / 12px 12px, var(--surface-1)',
+          border: '1px solid var(--border-1)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+        }}
+      >
+        {/* Allowed Geofence Zone Box on the left */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: outside ? '38%' : '76%',
+            background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.06) 100%)',
+            borderRight: '1.5px dashed rgba(16, 185, 129, 0.7)',
+            pointerEvents: 'none',
+          }}
+        >
+          <span
+            style={{
+              position: 'absolute',
+              right: 4,
+              top: 3,
+              fontSize: 9,
+              fontWeight: 800,
+              color: '#059669',
+              letterSpacing: 0.2,
+            }}
+          >
+            {site.radiusM}m {t('fence', 'সীমা', lang)}
+          </span>
+        </div>
+
+        {/* Connecting line between Site (left) and You */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 26,
+            right: outside ? 26 : `${100 - insidePct}%`,
+            top: '50%',
+            height: 0,
+            borderTop: outside
+              ? '1.5px dashed var(--status-purple, #7C3AED)'
+              : '2px solid #10B981',
+            transform: 'translateY(-4px)',
+            zIndex: 1,
+          }}
+        />
+
+        {/* Distance pill along the line when outside */}
+        {outside && (
+          <div
+            style={{
+              position: 'absolute',
+              left: '63%',
+              top: '50%',
+              transform: 'translate(-50%, -62%)',
+              background: 'var(--surface-0)',
+              border: '1px solid var(--status-purple-border, rgba(124, 58, 237, 0.35))',
+              color: 'var(--status-purple-text)',
+              fontSize: 9.5,
+              fontWeight: 800,
+              padding: '1px 6px',
+              borderRadius: 999,
+              whiteSpace: 'nowrap',
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            <Navigation size={9} />
+            {noFix ? t('No GPS fix', 'জিপিএস নেই', lang) : formatDistance(distanceM)}
+          </div>
+        )}
+
+        {/* Site Node (Left) */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 2,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#10B981',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.22)',
+              }}
+            >
+              <SiteIcon size={12} />
+            </span>
+            <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-1)' }}>
+              {siteId === 'PLANT_KERANIGANJ' ? t('Plant gate', 'প্ল্যান্ট গেট', lang) : t('HQ gate', 'প্রধান কার্যালয়', lang)}
+            </span>
+          </div>
+          <span style={{ fontSize: 9, color: 'var(--text-3)', paddingLeft: 2 }}>
+            0 m · {site.lat.toFixed(3)}°N, {site.lng.toFixed(3)}°E
+          </span>
+        </div>
+
+        {/* Employee Node (You right now) */}
+        <div
+          style={{
+            position: 'absolute',
+            left: outside ? undefined : `${insidePct}%`,
+            right: outside ? 10 : undefined,
+            transform: outside ? undefined : 'translateX(-50%)',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: outside ? 'flex-end' : 'center',
+            gap: 2,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            {outside && (
+              <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--status-purple-text)' }}>
+                {t('You now', 'আপনার অবস্থান', lang)}
+              </span>
+            )}
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: outside ? 'var(--status-purple-solid, #7C3AED)' : '#059669',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: outside
+                  ? '0 0 0 4px rgba(124, 58, 237, 0.22)'
+                  : '0 0 0 3px rgba(16, 185, 129, 0.25)',
+              }}
+            >
+              <LocateFixed size={12} />
+            </span>
+            {!outside && (
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#059669' }}>
+                {t('You', 'আপনি', lang)} ({formatDistance(distanceM)})
+              </span>
+            )}
+          </div>
+          {outside && (
+            <span style={{ fontSize: 9, color: 'var(--text-3)' }}>
+              {noFix
+                ? t('Unverified location', 'অবস্থান অযাচাইকৃত', lang)
+                : t(`${formatDistance(distanceM)} from gate`, `গেট থেকে ${formatDistance(distanceM)}`, lang)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Sub-footer showing the other BOGCL site for full context */}
+      <div
+        style={{
+          marginTop: 6,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: 10,
+          color: 'var(--text-3)',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <OtherIcon size={11} />
+          {t('Other site:', 'অন্য সাইট:', lang)} <strong style={{ color: 'var(--text-2)' }}>{otherShort}</strong> ({otherSite.radiusM} m {t('zone', 'জোন', lang)})
+        </span>
+        <span>
+          {outside
+            ? t('Supervisor confirmation pending', 'সুপারভাইজারের অনুমোদনের অপেক্ষায়', lang)
+            : t('Verified within site perimeter', 'সাইট সীমার ভেতরে যাচাইকৃত', lang)}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
@@ -277,13 +548,35 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
             </div>
           </div>
 
-          {myRecord?.locationStatus === 'manual_review' && onDuty && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 10px', borderRadius: 8, background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontSize: 12, marginBottom: 12 }}>
-              <ShieldAlert size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-              {myRecord.distanceMeters > 0
-                ? t('Today\'s check-in was outside the site geofence and will be confirmed by your supervisor.', 'আজকের চেক-ইন সাইটের জিওফেন্সের বাইরে ছিল; সুপারভাইজার নিশ্চিত করবেন।', lang)
-                : t('Today\'s check-in had no location fix and will be confirmed by your supervisor.', 'আজকের চেক-ইনে অবস্থান যাচাই হয়নি; সুপারভাইজার নিশ্চিত করবেন।', lang)}
-            </div>
+          {onDuty && myRecord && (
+            myRecord.locationStatus === 'manual_review' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, padding: '10px', borderRadius: 10, background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontSize: 12, marginBottom: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <ShieldAlert size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>
+                    {myRecord.distanceMeters > 0
+                      ? t('Today\'s check-in was outside the site geofence and will be confirmed by your supervisor.', 'আজকের চেক-ইন সাইটের জিওফেন্সের বাইরে ছিল; সুপারভাইজার নিশ্চিত করবেন।', lang)
+                      : t('Today\'s check-in had no location fix and will be confirmed by your supervisor.', 'আজকের চেক-ইনে অবস্থান যাচাই হয়নি; সুপারভাইজার নিশ্চিত করবেন।', lang)}
+                  </span>
+                </div>
+                <GeofenceMiniMap
+                  siteId={myRecord.site}
+                  distanceM={myRecord.distanceMeters}
+                  outside
+                  noFix={myRecord.distanceMeters === 0}
+                  lang={lang}
+                />
+              </div>
+            ) : (
+              <div style={{ marginBottom: 12 }}>
+                <GeofenceMiniMap
+                  siteId={myRecord.site}
+                  distanceM={myRecord.distanceMeters}
+                  outside={false}
+                  lang={lang}
+                />
+              </div>
+            )
           )}
 
           {!onLeaveToday && (
@@ -462,13 +755,21 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         }
       >
         {loc.phase === 'outside' && (
-          <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-            {t(
-              `Your device reports you are ${formatDistance(loc.distanceM)} from ${t(...SITES[loc.siteId].label, 'en')} (accuracy ±${loc.fix.accuracyM} m). Move inside the ${SITES[loc.siteId].radiusM} m perimeter and try again, or check in now and your supervisor will confirm it.`,
-              `আপনার ডিভাইস অনুযায়ী আপনি ${t(...SITES[loc.siteId].label, 'bn')} থেকে ${formatDistance(loc.distanceM)} দূরে (নির্ভুলতা ±${loc.fix.accuracyM} মি.)। ${SITES[loc.siteId].radiusM} মি. সীমার ভেতরে এসে আবার চেষ্টা করুন, অথবা এখন চেক-ইন করুন এবং সুপারভাইজার নিশ্চিত করবেন।`,
-              lang,
-            )}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <GeofenceMiniMap
+              siteId={loc.siteId}
+              distanceM={loc.distanceM}
+              outside
+              lang={lang}
+            />
+            <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+              {t(
+                `Your device reports you are ${formatDistance(loc.distanceM)} from ${t(...SITES[loc.siteId].label, 'en')} (accuracy ±${loc.fix.accuracyM} m). Move inside the ${SITES[loc.siteId].radiusM} m perimeter and try again, or check in now and your supervisor will confirm it.`,
+                `আপনার ডিভাইস অনুযায়ী আপনি ${t(...SITES[loc.siteId].label, 'bn')} থেকে ${formatDistance(loc.distanceM)} দূরে (নির্ভুলতা ±${loc.fix.accuracyM} মি.)। ${SITES[loc.siteId].radiusM} মি. সীমার ভেতরে এসে আবার চেষ্টা করুন, অথবা এখন চেক-ইন করুন এবং সুপারভাইজার নিশ্চিত করবেন।`,
+                lang,
+              )}
+            </p>
+          </div>
         )}
       </Modal>
 
