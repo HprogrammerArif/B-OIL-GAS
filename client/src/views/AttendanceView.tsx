@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert,
+  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert, Building2, Factory, LocateFixed,
 } from 'lucide-react';
 import { useOperationsStore, type ShiftWorker, type LeaveRequestItem } from '../store/operationsStore';
 import { approvalStore } from '../store/approvalStore';
@@ -68,6 +68,277 @@ function parseDays(from: string, to: string): number {
 function fmtDate(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Compact geofence & location schematic showing where the employee checked in
+ * relative to the Office or Plant and its allowed geofence perimeter.
+ */
+function GeofenceMiniMap({
+  siteId,
+  distanceM,
+  outside,
+  noFix = false,
+  lang,
+}: {
+  siteId: SiteId;
+  distanceM: number;
+  outside: boolean;
+  noFix?: boolean;
+  lang: ViewProps['lang'];
+}) {
+  const site = SITES[siteId];
+  const otherSite = SITES[siteId === 'HQ_BARIDHARA' ? 'PLANT_KERANIGANJ' : 'HQ_BARIDHARA'];
+  const SiteIcon = siteId === 'PLANT_KERANIGANJ' ? Factory : Building2;
+  const OtherIcon = otherSite.id === 'PLANT_KERANIGANJ' ? Factory : Building2;
+  const siteShort = siteId === 'PLANT_KERANIGANJ'
+    ? t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)
+    : t('Head Office, Baridhara', 'প্রধান কার্যালয়, বারিধারা', lang);
+  const otherShort = otherSite.id === 'PLANT_KERANIGANJ'
+    ? t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)
+    : t('Head Office, Baridhara', 'প্রধান কার্যালয়, বারিধারা', lang);
+  const overFenceM = Math.max(0, distanceM - site.radiusM);
+  const insidePct = !outside && !noFix && site.radiusM > 0
+    ? Math.min(82, Math.max(24, Math.round((distanceM / site.radiusM) * 75) + 18))
+    : 86;
+
+  return (
+    <div
+      style={{
+        background: 'var(--surface-0)',
+        border: `1px solid ${outside ? 'var(--status-purple-border, rgba(124, 58, 237, 0.28))' : 'var(--border-1)'}`,
+        borderRadius: 8,
+        padding: '9px 11px',
+        color: 'var(--text-1)',
+      }}
+    >
+      {/* Top header: Site geofence vs current distance */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 7 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: 'var(--text-1)' }}>
+          <SiteIcon size={12} color="#10B981" />
+          <span>{siteShort}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-3)' }}>
+            · {t(`${site.radiusM} m zone`, `${site.radiusM} মি. জোন`, lang)}
+          </span>
+        </div>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            padding: '1.5px 7px',
+            borderRadius: 999,
+            background: outside ? 'var(--status-purple-bg)' : 'rgba(16, 185, 129, 0.12)',
+            color: outside ? 'var(--status-purple-text)' : '#059669',
+          }}
+        >
+          {noFix
+            ? t('GPS off · manual check-in', 'জিপিএস নেই · ম্যানুয়াল', lang)
+            : outside
+              ? t(`${formatDistance(distanceM)} away (+${formatDistance(overFenceM)} outside)`, `${formatDistance(distanceM)} দূরে (+${formatDistance(overFenceM)} বাইরে)`, lang)
+              : t(`Inside zone · ${formatDistance(distanceM)} from gate`, `জোনের ভেতরে · গেট থেকে ${formatDistance(distanceM)}`, lang)}
+        </span>
+      </div>
+
+      {/* Schematic track: [Site + Geofence Zone] ----dashed line----> [You Right Now] */}
+      <div
+        style={{
+          position: 'relative',
+          height: 50,
+          borderRadius: 7,
+          background:
+            'radial-gradient(circle at 1px 1px, var(--border-1) 1px, transparent 0) 0 0 / 12px 12px, var(--surface-1)',
+          border: '1px solid var(--border-1)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+        }}
+      >
+        {/* Allowed Geofence Zone Box on the left */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: outside ? '38%' : '76%',
+            background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0.06) 100%)',
+            borderRight: '1.5px dashed rgba(16, 185, 129, 0.7)',
+            pointerEvents: 'none',
+          }}
+        >
+          <span
+            style={{
+              position: 'absolute',
+              right: 4,
+              top: 3,
+              fontSize: 9,
+              fontWeight: 800,
+              color: '#059669',
+              letterSpacing: 0.2,
+            }}
+          >
+            {site.radiusM}m {t('fence', 'সীমা', lang)}
+          </span>
+        </div>
+
+        {/* Connecting line between Site (left) and You */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 26,
+            right: outside ? 26 : `${100 - insidePct}%`,
+            top: '50%',
+            height: 0,
+            borderTop: outside
+              ? '1.5px dashed var(--status-purple, #7C3AED)'
+              : '2px solid #10B981',
+            transform: 'translateY(-4px)',
+            zIndex: 1,
+          }}
+        />
+
+        {/* Distance pill along the line when outside */}
+        {outside && (
+          <div
+            style={{
+              position: 'absolute',
+              left: '63%',
+              top: '50%',
+              transform: 'translate(-50%, -62%)',
+              background: 'var(--surface-0)',
+              border: '1px solid var(--status-purple-border, rgba(124, 58, 237, 0.35))',
+              color: 'var(--status-purple-text)',
+              fontSize: 9.5,
+              fontWeight: 800,
+              padding: '1px 6px',
+              borderRadius: 999,
+              whiteSpace: 'nowrap',
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            <Navigation size={9} />
+            {noFix ? t('No GPS fix', 'জিপিএস নেই', lang) : formatDistance(distanceM)}
+          </div>
+        )}
+
+        {/* Site Node (Left) */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 2,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: '#10B981',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.22)',
+              }}
+            >
+              <SiteIcon size={12} />
+            </span>
+            <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-1)' }}>
+              {siteId === 'PLANT_KERANIGANJ' ? t('Plant gate', 'প্ল্যান্ট গেট', lang) : t('HQ gate', 'প্রধান কার্যালয়', lang)}
+            </span>
+          </div>
+          <span style={{ fontSize: 9, color: 'var(--text-3)', paddingLeft: 2 }}>
+            0 m · {site.lat.toFixed(3)}°N, {site.lng.toFixed(3)}°E
+          </span>
+        </div>
+
+        {/* Employee Node (You right now) */}
+        <div
+          style={{
+            position: 'absolute',
+            left: outside ? undefined : `${insidePct}%`,
+            right: outside ? 10 : undefined,
+            transform: outside ? undefined : 'translateX(-50%)',
+            zIndex: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: outside ? 'flex-end' : 'center',
+            gap: 2,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            {outside && (
+              <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--status-purple-text)' }}>
+                {t('You now', 'আপনার অবস্থান', lang)}
+              </span>
+            )}
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: outside ? 'var(--status-purple-solid, #7C3AED)' : '#059669',
+                color: '#FFFFFF',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: outside
+                  ? '0 0 0 4px rgba(124, 58, 237, 0.22)'
+                  : '0 0 0 3px rgba(16, 185, 129, 0.25)',
+              }}
+            >
+              <LocateFixed size={12} />
+            </span>
+            {!outside && (
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#059669' }}>
+                {t('You', 'আপনি', lang)} ({formatDistance(distanceM)})
+              </span>
+            )}
+          </div>
+          {outside && (
+            <span style={{ fontSize: 9, color: 'var(--text-3)' }}>
+              {noFix
+                ? t('Unverified location', 'অবস্থান অযাচাইকৃত', lang)
+                : t(`${formatDistance(distanceM)} from gate`, `গেট থেকে ${formatDistance(distanceM)}`, lang)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Sub-footer showing the other BOGCL site for full context */}
+      <div
+        style={{
+          marginTop: 6,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 8,
+          fontSize: 10,
+          color: 'var(--text-3)',
+          flexWrap: 'wrap',
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <OtherIcon size={11} />
+          {t('Other site:', 'অন্য সাইট:', lang)} <strong style={{ color: 'var(--text-2)' }}>{otherShort}</strong> ({otherSite.radiusM} m {t('zone', 'জোন', lang)})
+        </span>
+        <span>
+          {outside
+            ? t('Supervisor confirmation pending', 'সুপারভাইজারের অনুমোদনের অপেক্ষায়', lang)
+            : t('Verified within site perimeter', 'সাইট সীমার ভেতরে যাচাইকৃত', lang)}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
@@ -203,6 +474,22 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
   if (!user) return null;
 
   const siteLabel = (id: ShiftWorker['site']) => t(...SITES[id].label, lang);
+  const bn = (n: number) => n.toLocaleString('bn-BD');
+  const requestedDays = fromDate && toDate ? parseDays(fromDate, toDate) : 0;
+  const pendingMine = myLeaves.filter((l) => l.status === 'pending').length;
+  const punchedOutToday = !!myRecord && myRecord.outTime !== 'On Duty' && myRecord.outTime !== '-' && !onLeaveToday;
+
+  /** One plain sentence: where the person stands right now and what to do next. */
+  const dayStatus = onLeaveToday
+    ? t('You are on approved leave today. No punch is needed.', 'আজ আপনি অনুমোদিত ছুটিতে আছেন। পাঞ্চ করতে হবে না।', lang)
+    : onDuty && myRecord
+      ? t(`You punched in at ${myRecord.inTime} at ${siteLabel(myRecord.site)}. Punch out when your shift ends.`, `আপনি ${myRecord.inTime}-এ ${siteLabel(myRecord.site)}-এ পাঞ্চ-ইন করেছেন। শিফট শেষে পাঞ্চ-আউট করুন।`, lang)
+      : punchedOutToday && myRecord
+        ? t(`You worked ${myRecord.inTime} to ${myRecord.outTime} today. Nothing more to do.`, `আজ আপনি ${myRecord.inTime} থেকে ${myRecord.outTime} পর্যন্ত কাজ করেছেন। আর কিছু করার নেই।`, lang)
+        : t(`You have not punched in yet. Be at ${siteLabel(defaultSite)} and tap Punch in.`, `আপনি এখনও পাঞ্চ-ইন করেননি। ${siteLabel(defaultSite)}-এ পৌঁছে পাঞ্চ-ইন চাপুন।`, lang);
+  const leaveStatus = pendingMine > 0
+    ? t(` ${pendingMine} leave ${pendingMine === 1 ? 'request is' : 'requests are'} waiting for your manager.`, ` ${bn(pendingMine)}টি ছুটির আবেদন ম্যানেজারের অপেক্ষায়।`, lang)
+    : '';
 
   return (
     <div className="view-container">
@@ -216,10 +503,15 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         meta={<span style={{ fontSize: 12, color: 'var(--text-3)' }}>{today()}</span>}
         actions={
           <Button variant="secondary" icon={<Plus size={14} />} onClick={() => setShowLeaveModal(true)} disabled={onLeaveToday}>
-            {t('Apply for leave', 'ছুটির আবেদন', lang)}
+            {t('Request leave', 'ছুটির আবেদন', lang)}
           </Button>
         }
       />
+
+      <p className={`lv-status ${onDuty ? 'ok' : ''}`} role="status">
+        {onLeaveToday ? <CalendarDays size={16} /> : onDuty ? <LogIn size={16} /> : <Clock size={16} />}
+        <span>{dayStatus}{leaveStatus}</span>
+      </p>
 
       <div className="responsive-col-2-eq" style={{ marginBottom: 20 }}>
         {/* Punch console */}
@@ -256,13 +548,35 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
             </div>
           </div>
 
-          {myRecord?.locationStatus === 'manual_review' && onDuty && (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '8px 10px', borderRadius: 8, background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontSize: 12, marginBottom: 12 }}>
-              <ShieldAlert size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-              {myRecord.distanceMeters > 0
-                ? t('Today\'s check-in was outside the site geofence and will be confirmed by your supervisor.', 'আজকের চেক-ইন সাইটের জিওফেন্সের বাইরে ছিল; সুপারভাইজার নিশ্চিত করবেন।', lang)
-                : t('Today\'s check-in had no location fix and will be confirmed by your supervisor.', 'আজকের চেক-ইনে অবস্থান যাচাই হয়নি; সুপারভাইজার নিশ্চিত করবেন।', lang)}
-            </div>
+          {onDuty && myRecord && (
+            myRecord.locationStatus === 'manual_review' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, padding: '10px', borderRadius: 10, background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontSize: 12, marginBottom: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <ShieldAlert size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>
+                    {myRecord.distanceMeters > 0
+                      ? t('Today\'s check-in was outside the site geofence and will be confirmed by your supervisor.', 'আজকের চেক-ইন সাইটের জিওফেন্সের বাইরে ছিল; সুপারভাইজার নিশ্চিত করবেন।', lang)
+                      : t('Today\'s check-in had no location fix and will be confirmed by your supervisor.', 'আজকের চেক-ইনে অবস্থান যাচাই হয়নি; সুপারভাইজার নিশ্চিত করবেন।', lang)}
+                  </span>
+                </div>
+                <GeofenceMiniMap
+                  siteId={myRecord.site}
+                  distanceM={myRecord.distanceMeters}
+                  outside
+                  noFix={myRecord.distanceMeters === 0}
+                  lang={lang}
+                />
+              </div>
+            ) : (
+              <div style={{ marginBottom: 12 }}>
+                <GeofenceMiniMap
+                  siteId={myRecord.site}
+                  distanceM={myRecord.distanceMeters}
+                  outside={false}
+                  lang={lang}
+                />
+              </div>
+            )
           )}
 
           {!onLeaveToday && (
@@ -285,15 +599,15 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         {/* My leave */}
         <Card
           title={t('My leave', 'আমার ছুটি', lang)}
-          subtitle={t('Balances for the current year and your requests', 'চলতি বছরের ব্যালেন্স ও আপনার আবেদন', lang)}
+          subtitle={t(`Days you can still take in ${new Date().getFullYear()}, and where your requests stand`, `${new Date().getFullYear()} সালে আর কত দিন ছুটি নিতে পারবেন, এবং আবেদনের অবস্থা`, lang)}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
+          <div className="lv-balances">
             {balances.map((b) => (
-              <div key={b.type} style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '10px 12px' }}>
-                <div style={{ fontSize: 10.5, color: 'var(--text-3)', textTransform: 'uppercase', fontWeight: 700 }}>{t(...LEAVE_LABEL[b.type], lang)}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, marginTop: 2 }}>
-                  {b.left}<span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}> / {LEAVE_ENTITLEMENT[b.type]}</span>
-                </div>
+              <div key={b.type} className={`lv-balance ${b.left === 0 ? 'empty' : ''}`}>
+                <span className="lv-balance-name">{t(...LEAVE_LABEL[b.type], lang)}</span>
+                <strong>{t(`${b.left} ${b.left === 1 ? 'day' : 'days'} left`, `${bn(b.left)} দিন বাকি`, lang)}</strong>
+                <small>{t(`${b.used} of ${LEAVE_ENTITLEMENT[b.type]} used`, `${bn(LEAVE_ENTITLEMENT[b.type])}-এর মধ্যে ${bn(b.used)} ব্যবহৃত`, lang)}</small>
+                <div className="hs-bar" aria-hidden><span style={{ width: `${Math.min(100, (b.used / LEAVE_ENTITLEMENT[b.type]) * 100)}%` }} /></div>
               </div>
             ))}
           </div>
@@ -308,13 +622,13 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myLeaves.map((l) => (
-                <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border-1)', borderRadius: 8 }}>
+                <div key={l.id} className="lv-request">
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700 }}>{t(...LEAVE_LABEL[l.leaveType], lang)} · {l.days} {t(l.days === 1 ? 'day' : 'days', 'দিন', lang)}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{l.fromDate} → {l.toDate} · {l.id}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{l.fromDate} → {l.toDate}</div>
                   </div>
                   <StatusPill tone={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warn'}>
-                    {l.status === 'approved' ? t('Approved', 'অনুমোদিত', lang) : l.status === 'rejected' ? t('Declined', 'প্রত্যাখ্যাত', lang) : t('Pending', 'অপেক্ষমাণ', lang)}
+                    {l.status === 'approved' ? t('Approved', 'অনুমোদিত', lang) : l.status === 'rejected' ? t('Declined', 'প্রত্যাখ্যাত', lang) : t('Waiting for your manager', 'ম্যানেজারের অপেক্ষায়', lang)}
                   </StatusPill>
                 </div>
               ))}
@@ -341,11 +655,6 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
               <div className={`kpi-value ${teamStats.review ? 'text-amber' : ''}`}>{teamStats.review}</div>
               <div className="kpi-sub">{t('Punched in without a location fix', 'অবস্থান যাচাই ছাড়া পাঞ্চ-ইন', lang)}</div>
             </div>
-            <div className="kpi-card">
-              <div className="kpi-label">{t('Leave awaiting decision', 'সিদ্ধান্তের অপেক্ষায় ছুটি', lang)}</div>
-              <div className="kpi-value text-blue">{teamLeaves.filter((l) => l.status === 'pending').length}</div>
-              <div className="kpi-sub">{canApproveLeave ? t('Decide in Approvals', 'অনুমোদন কেন্দ্রে সিদ্ধান্ত নিন', lang) : t('Routed to the approving manager', 'অনুমোদনকারী ব্যবস্থাপকের কাছে পাঠানো', lang)}</div>
-            </div>
           </div>
 
           <Card
@@ -371,7 +680,6 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                     <tr key={r.id}>
                       <td>
                         <div style={{ fontWeight: 600 }}>{r.name}{r.id === user.empId ? ` (${t('you', 'আপনি', lang)})` : ''}</div>
-                        <div style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-3)' }}>{r.id}</div>
                       </td>
                       <td>
                         <div style={{ fontSize: 12 }}>{r.roleTitle}</div>
@@ -447,13 +755,21 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         }
       >
         {loc.phase === 'outside' && (
-          <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-            {t(
-              `Your device reports you are ${formatDistance(loc.distanceM)} from ${t(...SITES[loc.siteId].label, 'en')} (accuracy ±${loc.fix.accuracyM} m). Move inside the ${SITES[loc.siteId].radiusM} m perimeter and try again, or check in now and your supervisor will confirm it.`,
-              `আপনার ডিভাইস অনুযায়ী আপনি ${t(...SITES[loc.siteId].label, 'bn')} থেকে ${formatDistance(loc.distanceM)} দূরে (নির্ভুলতা ±${loc.fix.accuracyM} মি.)। ${SITES[loc.siteId].radiusM} মি. সীমার ভেতরে এসে আবার চেষ্টা করুন, অথবা এখন চেক-ইন করুন এবং সুপারভাইজার নিশ্চিত করবেন।`,
-              lang,
-            )}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <GeofenceMiniMap
+              siteId={loc.siteId}
+              distanceM={loc.distanceM}
+              outside
+              lang={lang}
+            />
+            <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+              {t(
+                `Your device reports you are ${formatDistance(loc.distanceM)} from ${t(...SITES[loc.siteId].label, 'en')} (accuracy ±${loc.fix.accuracyM} m). Move inside the ${SITES[loc.siteId].radiusM} m perimeter and try again, or check in now and your supervisor will confirm it.`,
+                `আপনার ডিভাইস অনুযায়ী আপনি ${t(...SITES[loc.siteId].label, 'bn')} থেকে ${formatDistance(loc.distanceM)} দূরে (নির্ভুলতা ±${loc.fix.accuracyM} মি.)। ${SITES[loc.siteId].radiusM} মি. সীমার ভেতরে এসে আবার চেষ্টা করুন, অথবা এখন চেক-ইন করুন এবং সুপারভাইজার নিশ্চিত করবেন।`,
+                lang,
+              )}
+            </p>
+          </div>
         )}
       </Modal>
 
@@ -495,7 +811,7 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       <Modal
         open={showLeaveModal}
         onClose={() => { setShowLeaveModal(false); setLeaveError(null); }}
-        title={t('Apply for leave', 'ছুটির আবেদন', lang)}
+        title={t('Request leave', 'ছুটির আবেদন', lang)}
         icon={<CalendarDays size={16} />}
         size="sm"
         footer={
@@ -526,7 +842,13 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
           label={t('Reason', 'কারণ', lang)}
           required
           error={leaveError}
-          hint={fromDate && toDate ? t(`${parseDays(fromDate, toDate)} day(s) requested`, `${parseDays(fromDate, toDate)} দিন আবেদন`, lang) : undefined}
+          hint={requestedDays > 0
+            ? t(
+              `${requestedDays} ${requestedDays === 1 ? 'day' : 'days'} requested. You would have ${Math.max(0, (balances.find((b) => b.type === leaveType)?.left ?? 0) - requestedDays)} left.`,
+              `${bn(requestedDays)} দিন আবেদন। অনুমোদিত হলে বাকি থাকবে ${bn(Math.max(0, (balances.find((b) => b.type === leaveType)?.left ?? 0) - requestedDays))} দিন।`,
+              lang,
+            )
+            : undefined}
         >
           {(id) => <textarea id={id} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('e.g. Family event in Chattogram', 'যেমন: চট্টগ্রামে পারিবারিক অনুষ্ঠান', lang)} />}
         </FormField>

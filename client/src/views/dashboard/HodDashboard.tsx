@@ -1,205 +1,142 @@
-import { useState } from 'react';
-import { FileCheck, Check, CheckSquare, Square, Inbox } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check } from 'lucide-react';
 import { t } from '../../types';
 import { showToast } from '../../components/ToastManager';
-import Pagination from '../../components/Pagination';
-import { EmptyState } from '../../components/ui';
+import { Button, EmptyState, Modal, StatusPill } from '../../components/ui';
 import { useCan } from '../../auth/session';
 import { slaMinutesLeft, useNow } from '../../lib/sla';
-import { useApprovalStore, type ApprovalItem } from '../../store/approvalStore';
-import { CATEGORY_LABELS, useMyApprovalQueue } from '../approvals/config';
+import { useApprovalStore } from '../../store/approvalStore';
+import { useMyApprovalQueue } from '../approvals/config';
+import ApprovalCard from '../approvals/ApprovalCard';
+import { useApprovalDecisions } from '../approvals/useApprovalDecisions';
 import { DEPT_BUDGET, deptBudgetUsed, fmtBdt } from './config';
 import { useDashboardData } from './useDashboardData';
 import { DashboardSubViewProps } from './types';
 
-const PAGE_SIZE = 4;
-
-const CATEGORY_ICON: Record<ApprovalItem['category'], string> = {
-  finance: '🧾',
-  procurement: '📦',
-  fleet: '🚗',
-  leave: '🗓️',
-  hr: '👤',
-};
-
-export default function HodDashboard({ lang, activeTab }: DashboardSubViewProps) {
+export default function HodDashboard({ lang, activeTab, onOpenDetailDrawer }: DashboardSubViewProps) {
   const canDecide = useCan('approvals:decide');
-  const { approveApprovalItem, rejectApprovalItem, batchApproveItems } = useApprovalStore();
-  const { user, pending: queue } = useMyApprovalQueue();
+  const { batchApproveItems } = useApprovalStore();
+  const { user, pending } = useMyApprovalQueue();
   const data = useDashboardData();
   const now = useNow();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [page, setPage] = useState(1);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const { requestApprove, requestReturn, modals } = useApprovalDecisions(lang, (id) => {
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+  });
 
-  const reviewer = user ? `${user.name} (${user.label})` : '';
+  const queue = useMemo(
+    () => [...pending].sort((a, b) => slaMinutesLeft(a, now) - slaMinutesLeft(b, now)),
+    [pending, now],
+  );
+  const selected = queue.filter((i) => selectedIds.includes(i.id));
+  const selectedCost = selected.reduce((sum, i) => sum + (i.costTk ?? 0), 0);
+
   const used = deptBudgetUsed(data);
-  const remaining = DEPT_BUDGET.ceilingBdt - used;
-  const usedPct = Math.min(100, (used / DEPT_BUDGET.ceilingBdt) * 100);
+  const left = DEPT_BUDGET.ceilingBdt - used;
+  const usedPct = Math.min(100, Math.round((used / DEPT_BUDGET.ceilingBdt) * 100));
+  const tight = left < DEPT_BUDGET.ceilingBdt * 0.1;
+  const bn = (n: number) => n.toLocaleString('bn-BD');
 
-  const toggleSelect = (id: string) => {
+  const toggle = (id: string) =>
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
 
-  const handleBatchApprove = () => {
-    if (!user || selectedIds.length === 0) return;
-    const res = batchApproveItems(selectedIds, user.role);
+  const approveSelected = () => {
+    if (!user || selected.length === 0) return;
+    const res = batchApproveItems(selected.map((i) => i.id), user.role);
+    setSelectedIds([]);
+    setConfirmOpen(false);
     showToast(
       t(
-        `Approved ${res.count} items (${fmtBdt(res.totalCost)} against this quarter's budget).`,
-        `${res.count.toLocaleString('bn-BD')}টি আবেদন অনুমোদিত (${fmtBdt(res.totalCost)} এই প্রান্তিকের বাজেট থেকে)।`,
+        `Approved ${res.count} requests (${fmtBdt(res.totalCost)} taken from this quarter's budget).`,
+        `${bn(res.count)}টি আবেদন অনুমোদিত (${fmtBdt(res.totalCost)} এই প্রান্তিকের বাজেট থেকে)।`,
         lang,
       ),
       'gold',
     );
-    setSelectedIds([]);
   };
 
-  const handleApprove = (item: ApprovalItem) => {
-    if (!user) return;
-    approveApprovalItem(item.id, undefined, reviewer, user.role);
-    setSelectedIds((prev) => prev.filter((x) => x !== item.id));
-    showToast(t(`Approved ${item.title}.`, `অনুমোদিত: ${item.titleBn || item.title}`, lang), 'success');
-  };
-
-  const handleReturn = (item: ApprovalItem) => {
-    if (!user) return;
-    rejectApprovalItem(
-      item.id,
-      'Returned for correction',
-      t('Returned by the department head for correction or supporting documents.', 'সংশোধন বা সহায়ক কাগজপত্রের জন্য বিভাগীয় প্রধান ফেরত পাঠিয়েছেন।', lang),
-      undefined,
-      reviewer,
-      user.role,
-    );
-    setSelectedIds((prev) => prev.filter((x) => x !== item.id));
-    showToast(t(`Returned ${item.id} to the applicant.`, `${item.id} আবেদনকারীর কাছে ফেরত পাঠানো হয়েছে।`, lang), 'info');
-  };
-
-  const pageItems = queue.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  if (activeTab !== 'approvals') return null;
 
   return (
-    <>
-      {activeTab === 'approvals' && (
-        <div className="card mb-5 tab-pane-fade">
-          <div className="card-hd">
-            <div className="card-hd-left">
-              <div className="card-hd-icon"><FileCheck size={18} color="var(--brand-crimson)" /></div>
-              <div>
-                <div className="card-title">{t('Department approval inbox', 'বিভাগীয় অনুমোদন ইনবক্স', lang)}</div>
-                <div className="card-subtitle">{t('Claims, duty travel, procurement and leave routed to you', 'আপনার কাছে পাঠানো দাবি, ভ্রমণ, ক্রয় ও ছুটি', lang)}</div>
-              </div>
-            </div>
+    <section className="tab-pane-fade dash-section" aria-labelledby="hod-title">
+      <header className="dash-sec-head">
+        <div>
+          <h3 id="hod-title">{t('Waiting for your approval', 'আপনার অনুমোদনের অপেক্ষায়', lang)}</h3>
+          <p>{t('Claims, travel, purchases and leave from your department. Most urgent first.', 'আপনার বিভাগের দাবি, ভ্রমণ, ক্রয় ও ছুটি। জরুরিগুলো আগে।', lang)}</p>
+        </div>
+        <div className="cn-head-actions">
+          {canDecide && selected.length > 0 && (
+            <Button variant="gold" size="sm" icon={<Check size={13} />} onClick={() => setConfirmOpen(true)}>
+              {t(`Approve ${selected.length} selected`, `নির্বাচিত ${bn(selected.length)}টি অনুমোদন`, lang)}
+            </Button>
+          )}
+          <StatusPill tone={queue.length > 0 ? 'danger' : 'success'}>
+            {t(`${queue.length} waiting`, `${bn(queue.length)}টি অপেক্ষায়`, lang)}
+          </StatusPill>
+        </div>
+      </header>
 
-            <div className="flex-gap">
-              {canDecide && selectedIds.length > 0 && (
-                <button
-                  className="btn-gold"
-                  style={{ fontSize: '11.5px', padding: '6px 14px', fontWeight: 800 }}
-                  onClick={handleBatchApprove}
-                >
-                  <Check size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                  {t(`Approve ${selectedIds.length} selected`, `নির্বাচিত ${selectedIds.length.toLocaleString('bn-BD')}টি অনুমোদন করুন`, lang)}
-                </button>
-              )}
-              <span className={`badge ${queue.length > 0 ? 'danger' : 'success'}`}>
-                {queue.length} {t('pending', 'অপেক্ষমান', lang)}
-              </span>
-            </div>
-          </div>
+      <div className="hod-budget">
+        <p>
+          {t('This quarter you can still spend', 'এই প্রান্তিকে আপনি আর খরচ করতে পারবেন', lang)}{' '}
+          <strong className={tight ? 'is-tight' : ''}>{fmtBdt(left)}</strong>{' '}
+          <span>{t(`of ${fmtBdt(DEPT_BUDGET.ceilingBdt)}`, `${fmtBdt(DEPT_BUDGET.ceilingBdt)}-এর মধ্যে`, lang)}</span>
+        </p>
+        <div className="hs-bar" role="img" aria-label={t(`${usedPct}% used`, `${bn(usedPct)}% ব্যবহৃত`, lang)}>
+          <span style={{ width: `${usedPct}%`, background: tight ? 'var(--status-danger)' : undefined }} />
+        </div>
+      </div>
 
-          <div className="card-body">
-            {/* Quarter budget */}
-            <div style={{ background: 'var(--surface-0)', border: '1px solid var(--border-1)', padding: '14px 18px', borderRadius: '6px', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-1)' }}>
-                  {t('Quarterly OPEX ceiling', 'ত্রৈমাসিক পরিচালন বাজেট সীমা', lang)}: {fmtBdt(DEPT_BUDGET.ceilingBdt)}
-                </span>
-                <span style={{ color: remaining < DEPT_BUDGET.ceilingBdt * 0.1 ? 'var(--status-danger)' : 'var(--status-success)', fontWeight: 800 }}>
-                  {t('Remaining', 'অবশিষ্ট', lang)}: {fmtBdt(remaining)}
-                </span>
-              </div>
-              <div style={{ height: '8px', background: 'var(--surface-3)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div
-                  style={{
-                    width: `${usedPct}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, var(--status-success-solid), var(--status-warning-solid))',
-                    transition: 'width 0.4s ease',
-                  }}
-                />
-              </div>
-            </div>
-
-            {queue.length === 0 ? (
-              <EmptyState
-                icon={<Inbox size={28} />}
-                title={t('Inbox clear', 'ইনবক্স খালি', lang)}
-                description={t('Nothing from your department is waiting on you.', 'আপনার বিভাগ থেকে কোনো আবেদন অপেক্ষমান নেই।', lang)}
-              />
-            ) : (
-              <div className="approval-queue-list">
-                {pageItems.map((item) => {
-                  const overdue = slaMinutesLeft(item, now) <= 0;
-                  const cat = CATEGORY_LABELS[item.category];
-                  return (
-                    <div key={item.id} className={`approval-queue-item${overdue ? ' overdue' : ''}`}>
-                      {canDecide && (
-                        <button
-                          type="button"
-                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
-                          onClick={() => toggleSelect(item.id)}
-                          aria-label={t('Select for batch approval', 'ব্যাচ অনুমোদনের জন্য নির্বাচন', lang)}
-                        >
-                          {selectedIds.includes(item.id) ? (
-                            <CheckSquare size={18} color="var(--brand-crimson)" />
-                          ) : (
-                            <Square size={18} color="var(--text-muted)" />
-                          )}
-                        </button>
-                      )}
-
-                      <div className="aq-icon">{CATEGORY_ICON[item.category]}</div>
-                      <div className="aq-info">
-                        <div className="aq-title">{t(item.title, item.titleBn || item.title, lang)}</div>
-                        <div className="aq-detail">
-                          {item.requester} · {item.designation} · <span className="aq-type-badge">{t(cat[0], cat[1], lang)}</span>
-                          {(item.costTk ?? 0) > 0 && <strong style={{ color: 'var(--text-1)', marginLeft: '6px' }}>{fmtBdt(item.costTk ?? 0)}</strong>} · {item.date}
-                          {overdue && <span className="badge danger" style={{ marginLeft: '6px' }}>{t('SLA breached', 'সময়সীমা অতিক্রান্ত', lang)}</span>}
-                        </div>
-                      </div>
-                      <div className="aq-actions">
-                        {canDecide ? (
-                          <>
-                            <button className="btn-primary" style={{ fontSize: '11px', padding: '5px 12px' }} onClick={() => handleApprove(item)}>
-                              {t('Approve', 'অনুমোদন', lang)}
-                            </button>
-                            <button className="btn-outline-danger" style={{ fontSize: '11px', padding: '5px 10px' }} onClick={() => handleReturn(item)}>
-                              {t('Return', 'ফেরত', lang)}
-                            </button>
-                          </>
-                        ) : (
-                          <span className="badge info">{t('View only', 'শুধু দেখা', lang)}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {queue.length > PAGE_SIZE && (
-              <Pagination
-                currentPage={page}
-                totalItems={queue.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={setPage}
-                lang={lang}
-              />
-            )}
-          </div>
+      {queue.length === 0 ? (
+        <EmptyState
+          compact
+          title={t('Nothing is waiting for you', 'আপনার জন্য কিছু অপেক্ষমান নেই', lang)}
+          description={t('New requests from your department will appear here.', 'আপনার বিভাগের নতুন আবেদন এখানে দেখা যাবে।', lang)}
+        />
+      ) : (
+        <div className="apv-list">
+          {queue.map((item) => (
+            <ApprovalCard
+              key={item.id}
+              item={item}
+              mode="pending"
+              lang={lang}
+              canDecide={canDecide}
+              selectable={canDecide}
+              selected={selectedIds.includes(item.id)}
+              onToggleSelect={toggle}
+              onOpen={(id) => onOpenDetailDrawer?.(id)}
+              onApprove={requestApprove}
+              onReturn={requestReturn}
+            />
+          ))}
         </div>
       )}
-    </>
+
+      {confirmOpen && (
+        <Modal
+          open
+          onClose={() => setConfirmOpen(false)}
+          size="sm"
+          title={t(`Approve ${selected.length} requests?`, `${bn(selected.length)}টি আবেদন অনুমোদন করবেন?`, lang)}
+          footer={(
+            <>
+              <Button variant="ghost" onClick={() => setConfirmOpen(false)}>{t('Not yet', 'এখনই নয়', lang)}</Button>
+              <Button variant="gold" onClick={approveSelected}>{t('Approve all', 'সব অনুমোদন', lang)}</Button>
+            </>
+          )}
+        >
+          <p className="tr-modal-note">
+            {selectedCost > 0
+              ? t(`Together they use ${fmtBdt(selectedCost)} of this quarter's budget.`, `সব মিলিয়ে এই প্রান্তিকের বাজেট থেকে ${fmtBdt(selectedCost)} লাগবে।`, lang)
+              : t('These requests have no cost.', 'এই আবেদনগুলোতে কোনো খরচ নেই।', lang)}
+          </p>
+        </Modal>
+      )}
+
+      {modals}
+    </section>
   );
 }

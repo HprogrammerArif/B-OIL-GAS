@@ -36,6 +36,22 @@ abstract final class Col {
   static const busWaitlist = 'bus_waitlist';
   static const busBroadcasts = 'bus_broadcasts';
   static const noteSheets = 'note_sheets';
+  static const parcels = 'parcels';
+  static const visitors = 'visitors';
+  static const fleetVehicles = 'fleet_vehicles';
+  static const fleetDrivers = 'fleet_drivers';
+  static const fleetRequisitions = 'fleet_requisitions';
+  static const fleetTrips = 'fleet_trips';
+  static const fleetFuelLogs = 'fleet_fuel_logs';
+  static const incidents = 'incidents';
+  static const incidentCapas = 'incident_capas';
+  static const assets = 'assets';
+  static const assetWorkOrders = 'asset_work_orders';
+  static const assetRequisitions = 'asset_requisitions';
+  static const assetTransfers = 'asset_transfers';
+  static const chatChannels = 'chat_channels';
+  static const chatMessages = 'chat_messages';
+  static const compliance = 'compliance';
 }
 
 const sites = <Json>[

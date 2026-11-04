@@ -1257,177 +1257,12 @@
 }
 
 /* ─── SHIFT HANDOVER LOG ──────────────────────────────────────────────────── */
-.shift-handover-row {
-  padding: 10px 12px;
-  background: var(--brand-slate-100);
-  border: 1px solid var(--brand-slate-200);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-}
-
-.shift-handover-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  font-size: 12.5px;
-  color: var(--brand-slate-900);
-}
-
-.shift-handover-meta {
-  font-size: 11px;
-  color: var(--brand-slate-400);
-  margin-bottom: 4px;
-}
-
-.shift-handover-notes {
-  font-size: 11.5px;
-  color: var(--brand-slate-600);
-  line-height: 1.5;
-  font-style: italic;
-}
 
 /* ─── HOD APPROVAL QUEUE ──────────────────────────────────────────────────── */
-.approval-queue-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.approval-queue-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: var(--brand-slate-100);
-  border: 1px solid var(--brand-slate-200);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.approval-queue-item:hover {
-  background: var(--surface-1);
-  box-shadow: var(--shadow-sm);
-  transform: translateX(2px);
-}
-
-.approval-queue-item.overdue {
-  border-left: 4px solid var(--status-danger);
-  background: rgba(220, 38, 38, 0.03);
-}
-
-.aq-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.aq-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.aq-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--brand-slate-900);
-}
-
-.aq-detail {
-  font-size: 11px;
-  color: var(--brand-slate-400);
-  margin-top: 2px;
-}
-
-.aq-type-badge {
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--brand-crimson);
-  background: var(--brand-crimson-muted);
-  padding: 1px 5px;
-  border-radius: 3px;
-}
-
-.aq-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
 
 /* ─── EMPLOYEE ACTIVITY TIMELINE ──────────────────────────────────────────── */
-.activity-timeline {
-  display: flex;
-  flex-direction: column;
-}
-
-.activity-item {
-  display: flex;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--brand-slate-100);
-  position: relative;
-}
-
-.activity-item:last-child {
-  border-bottom: none;
-}
-
-.activity-dot {
-  font-size: 16px;
-  flex-shrink: 0;
-  width: 24px;
-  text-align: center;
-}
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--brand-slate-900);
-}
-
-.activity-detail {
-  font-size: 11px;
-  color: var(--brand-slate-500);
-  margin-top: 2px;
-}
-
-.activity-time {
-  font-size: 10px;
-  color: var(--brand-slate-400);
-  margin-top: 3px;
-}
 
 /* ─── EMPLOYEE VEHICLE REQUEST ROWS ───────────────────────────────────────── */
-.my-vr-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--brand-slate-100);
-}
-
-.my-vr-row:last-child {
-  border-bottom: none;
-}
-
-.my-vr-id {
-  font-family: monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--brand-crimson);
-}
-
-.my-vr-route {
-  font-size: 11.5px;
-  color: var(--brand-slate-500);
-  margin-top: 2px;
-}
 
 /* ─── DATA TABLE (Transport Admin vehicle requests) ───────────────────────── */
 .data-table {
@@ -1540,17 +1375,9 @@
 [data-theme="dark"] .dcs-alarm-row.medium { background: rgba(217, 119, 6, 0.1); border-color: rgba(217, 119, 6, 0.3); }
 [data-theme="dark"] .dcs-alarm-row.low { background: var(--surface-inverse); border-color: var(--border-inverse); }
 
-[data-theme="dark"] .shift-handover-row { background: var(--surface-inverse); border-color: var(--border-inverse); }
-[data-theme="dark"] .approval-queue-item { background: var(--surface-inverse); border-color: var(--border-inverse); }
-[data-theme="dark"] .approval-queue-item:hover { background: #16254C; }
-[data-theme="dark"] .approval-queue-item.overdue { background: rgba(220, 38, 38, 0.08); }
-
 [data-theme="dark"] .data-table thead th { background: var(--surface-inverse); border-color: var(--border-inverse); color: var(--text-muted); }
 [data-theme="dark"] .data-table tbody td { border-color: var(--border-inverse); color: var(--text-inverse-2); }
 [data-theme="dark"] .data-table tbody tr:hover { background: #16254C; }
-
-[data-theme="dark"] .activity-item { border-color: var(--border-inverse); }
-[data-theme="dark"] .my-vr-row { border-color: var(--border-inverse); }
 
 [data-theme="dark"] .ic-date-divider span { background: var(--surface-inverse-2); color: var(--text-muted); }
 [data-theme="dark"] .ic-send-btn { background: var(--surface-inverse-2); }

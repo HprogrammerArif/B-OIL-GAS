@@ -4859,6 +4859,1260 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Signed. The note-sheet is fully approved.'**
   String get nsSignedFinal;
+
+  /// No description provided for @moduleParcels.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels'**
+  String get moduleParcels;
+
+  /// No description provided for @pcSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a parcel'**
+  String get pcSend;
+
+  /// No description provided for @pcIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Track parcels you send, receive or look after. Type the number on the label to find one.'**
+  String get pcIntro;
+
+  /// No description provided for @pcSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, or enter PKG-2026-0001'**
+  String get pcSearchHint;
+
+  /// No description provided for @pcNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No parcel with that number, or you cannot see it.'**
+  String get pcNotFound;
+
+  /// No description provided for @pcTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get pcTabMine;
+
+  /// No description provided for @pcTabIncoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming to me'**
+  String get pcTabIncoming;
+
+  /// No description provided for @pcTabSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent by me'**
+  String get pcTabSent;
+
+  /// No description provided for @pcTabCarrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrying'**
+  String get pcTabCarrying;
+
+  /// No description provided for @pcTabSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything at my site'**
+  String get pcTabSite;
+
+  /// No description provided for @pcStuckOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Stuck only'**
+  String get pcStuckOnly;
+
+  /// No description provided for @pcEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No parcels yet.'**
+  String get pcEmpty;
+
+  /// No description provided for @pcEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No parcels match.'**
+  String get pcEmptyFiltered;
+
+  /// No description provided for @pcVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs you right now.'**
+  String get pcVerdictNone;
+
+  /// No description provided for @pcVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you: {count}'**
+  String pcVerdictNeed(int count);
+
+  /// No description provided for @pcConfidentialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidential parcel'**
+  String get pcConfidentialTitle;
+
+  /// No description provided for @pcStuckPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Stuck {hours} h'**
+  String pcStuckPill(int hours);
+
+  /// No description provided for @pcStatusCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not handed over yet'**
+  String get pcStatusCreated;
+
+  /// No description provided for @pcStatusDispatched.
+  ///
+  /// In en, this message translates to:
+  /// **'With the courier'**
+  String get pcStatusDispatched;
+
+  /// No description provided for @pcStatusInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get pcStatusInTransit;
+
+  /// No description provided for @pcStatusAtGate.
+  ///
+  /// In en, this message translates to:
+  /// **'At the gate'**
+  String get pcStatusAtGate;
+
+  /// No description provided for @pcStatusOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get pcStatusOut;
+
+  /// No description provided for @pcStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get pcStatusDelivered;
+
+  /// No description provided for @pcStatusHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Held for checking'**
+  String get pcStatusHeld;
+
+  /// No description provided for @pcStatusReturning.
+  ///
+  /// In en, this message translates to:
+  /// **'Going back'**
+  String get pcStatusReturning;
+
+  /// No description provided for @pcStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned'**
+  String get pcStatusReturned;
+
+  /// No description provided for @pcStatusLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get pcStatusLost;
+
+  /// No description provided for @pcStatusDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Damaged'**
+  String get pcStatusDamaged;
+
+  /// No description provided for @pcStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get pcStatusCancelled;
+
+  /// No description provided for @pcCatLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal documents'**
+  String get pcCatLegal;
+
+  /// No description provided for @pcCatSample.
+  ///
+  /// In en, this message translates to:
+  /// **'QC sample'**
+  String get pcCatSample;
+
+  /// No description provided for @pcCatSpares.
+  ///
+  /// In en, this message translates to:
+  /// **'Spare parts'**
+  String get pcCatSpares;
+
+  /// No description provided for @pcCatTender.
+  ///
+  /// In en, this message translates to:
+  /// **'Tender bid'**
+  String get pcCatTender;
+
+  /// No description provided for @pcCatIt.
+  ///
+  /// In en, this message translates to:
+  /// **'IT equipment'**
+  String get pcCatIt;
+
+  /// No description provided for @pcCatConfidential.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidential'**
+  String get pcCatConfidential;
+
+  /// No description provided for @pcCatGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get pcCatGeneral;
+
+  /// No description provided for @pcHandFragile.
+  ///
+  /// In en, this message translates to:
+  /// **'Fragile'**
+  String get pcHandFragile;
+
+  /// No description provided for @pcHandCold.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep cold'**
+  String get pcHandCold;
+
+  /// No description provided for @pcHandHazmat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hazardous'**
+  String get pcHandHazmat;
+
+  /// No description provided for @pcHandUpright.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep upright'**
+  String get pcHandUpright;
+
+  /// No description provided for @pcRetTamper.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal was broken'**
+  String get pcRetTamper;
+
+  /// No description provided for @pcRetDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents damaged'**
+  String get pcRetDamaged;
+
+  /// No description provided for @pcRetWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong documents'**
+  String get pcRetWrong;
+
+  /// No description provided for @pcRetRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient refused it'**
+  String get pcRetRefused;
+
+  /// No description provided for @pcRetUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient not available'**
+  String get pcRetUnavailable;
+
+  /// No description provided for @pcEvCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get pcEvCreated;
+
+  /// No description provided for @pcEvHandover.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed to the courier'**
+  String get pcEvHandover;
+
+  /// No description provided for @pcEvCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recorded'**
+  String get pcEvCheckpoint;
+
+  /// No description provided for @pcEvGateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the gate'**
+  String get pcEvGateIn;
+
+  /// No description provided for @pcEvOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery'**
+  String get pcEvOut;
+
+  /// No description provided for @pcEvCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code confirmed'**
+  String get pcEvCode;
+
+  /// No description provided for @pcEvDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get pcEvDelivered;
+
+  /// No description provided for @pcEvProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem reported'**
+  String get pcEvProblem;
+
+  /// No description provided for @pcEvReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending back started'**
+  String get pcEvReturn;
+
+  /// No description provided for @pcEvReturnCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop on the way back'**
+  String get pcEvReturnCheckpoint;
+
+  /// No description provided for @pcEvReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned to sender'**
+  String get pcEvReturned;
+
+  /// No description provided for @pcEvException.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked lost or damaged'**
+  String get pcEvException;
+
+  /// No description provided for @pcEvCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get pcEvCancelled;
+
+  /// No description provided for @pcEvNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get pcEvNote;
+
+  /// No description provided for @pcNextDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand it to a courier and record the seal.'**
+  String get pcNextDispatch;
+
+  /// No description provided for @pcNextCreatedSender.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the mailroom to hand it to a courier. Nothing for you to do.'**
+  String get pcNextCreatedSender;
+
+  /// No description provided for @pcNextCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not handed to a courier yet.'**
+  String get pcNextCreated;
+
+  /// No description provided for @pcNextGateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'It has arrived. Check the seal and receive it at the gate.'**
+  String get pcNextGateIn;
+
+  /// No description provided for @pcNextAtGateYou.
+  ///
+  /// In en, this message translates to:
+  /// **'It is at the gate. You will get a code when it is sent out to you.'**
+  String get pcNextAtGateYou;
+
+  /// No description provided for @pcNextAtGate.
+  ///
+  /// In en, this message translates to:
+  /// **'At the gate, waiting to go to the recipient.'**
+  String get pcNextAtGate;
+
+  /// No description provided for @pcNextReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'It is on its way to you. Tap I have received it, or read the code to the person delivering it.'**
+  String get pcNextReceive;
+
+  /// No description provided for @pcNextHeldAct.
+  ///
+  /// In en, this message translates to:
+  /// **'The seal or contents have a problem. Send it back to the sender.'**
+  String get pcNextHeldAct;
+
+  /// No description provided for @pcNextHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'Held for checking because of a problem.'**
+  String get pcNextHeld;
+
+  /// No description provided for @pcNextDamagedAct.
+  ///
+  /// In en, this message translates to:
+  /// **'Damaged. Send it back to the sender.'**
+  String get pcNextDamagedAct;
+
+  /// No description provided for @pcNextBackYou.
+  ///
+  /// In en, this message translates to:
+  /// **'It is coming back to you. Tap I have received it when you have it.'**
+  String get pcNextBackYou;
+
+  /// No description provided for @pcNextLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked lost. Nothing more to do.'**
+  String get pcNextLost;
+
+  /// No description provided for @pcNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Nothing more to do.'**
+  String get pcNextCancelled;
+
+  /// No description provided for @pcNextCarryLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it to {to}. Record each stop on the way.'**
+  String pcNextCarryLocal(String to);
+
+  /// No description provided for @pcNextCarry.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it to {dest}. Record each stop on the way.'**
+  String pcNextCarry(String dest);
+
+  /// No description provided for @pcNextComing.
+  ///
+  /// In en, this message translates to:
+  /// **'{courier} is bringing it. Nothing for you to do yet.'**
+  String pcNextComing(String courier);
+
+  /// No description provided for @pcNextRoad.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to {dest}.'**
+  String pcNextRoad(String dest);
+
+  /// No description provided for @pcNextBring.
+  ///
+  /// In en, this message translates to:
+  /// **'Send it out for delivery to {to}. They get a one-time code.'**
+  String pcNextBring(String to);
+
+  /// No description provided for @pcNextAskCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask {name} for the 6-digit code and enter it.'**
+  String pcNextAskCode(String name);
+
+  /// No description provided for @pcNextOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Being delivered to {to}.'**
+  String pcNextOut(String to);
+
+  /// No description provided for @pcNextDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to {to} on {date}.'**
+  String pcNextDelivered(String to, String date);
+
+  /// No description provided for @pcNextCarryBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it back to {from}. Record each stop.'**
+  String pcNextCarryBack(String from);
+
+  /// No description provided for @pcNextBackSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Going back to {from}.'**
+  String pcNextBackSoon(String from);
+
+  /// No description provided for @pcNextReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned to {from}.'**
+  String pcNextReturned(String from);
+
+  /// No description provided for @pcActDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand to courier'**
+  String get pcActDispatch;
+
+  /// No description provided for @pcActCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a stop'**
+  String get pcActCheckpoint;
+
+  /// No description provided for @pcActGateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at gate'**
+  String get pcActGateIn;
+
+  /// No description provided for @pcActReportProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get pcActReportProblem;
+
+  /// No description provided for @pcActOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Send out for delivery'**
+  String get pcActOut;
+
+  /// No description provided for @pcActReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'I have received it'**
+  String get pcActReceive;
+
+  /// No description provided for @pcActEnterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter delivery code'**
+  String get pcActEnterCode;
+
+  /// No description provided for @pcActConfirmCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm code'**
+  String get pcActConfirmCode;
+
+  /// No description provided for @pcActReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back to sender'**
+  String get pcActReturn;
+
+  /// No description provided for @pcActException.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark lost or damaged'**
+  String get pcActException;
+
+  /// No description provided for @pcActAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get pcActAddNote;
+
+  /// No description provided for @pcActResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the code again'**
+  String get pcActResend;
+
+  /// No description provided for @pcActEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get pcActEdit;
+
+  /// No description provided for @pcActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel parcel'**
+  String get pcActCancel;
+
+  /// No description provided for @pcActLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print label'**
+  String get pcActLabel;
+
+  /// No description provided for @pcMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get pcMore;
+
+  /// No description provided for @pcDoneProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem reported. The parcel is on hold.'**
+  String get pcDoneProblem;
+
+  /// No description provided for @pcDoneReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'It is going back to the sender.'**
+  String get pcDoneReturn;
+
+  /// No description provided for @pcDoneException.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded.'**
+  String get pcDoneException;
+
+  /// No description provided for @pcDoneNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note added.'**
+  String get pcDoneNote;
+
+  /// No description provided for @pcDoneResend.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code was sent.'**
+  String get pcDoneResend;
+
+  /// No description provided for @pcDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel cancelled.'**
+  String get pcDoneCancel;
+
+  /// No description provided for @pcDoneDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed to the courier.'**
+  String get pcDoneDispatch;
+
+  /// No description provided for @pcDoneGateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the gate.'**
+  String get pcDoneGateIn;
+
+  /// No description provided for @pcDoneOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out for delivery. The recipient has a code.'**
+  String get pcDoneOut;
+
+  /// No description provided for @pcDoneReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Received. Thank you.'**
+  String get pcDoneReceive;
+
+  /// No description provided for @pcDoneVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery confirmed.'**
+  String get pcDoneVerify;
+
+  /// No description provided for @pcDoneCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recorded.'**
+  String get pcDoneCheckpoint;
+
+  /// No description provided for @pcDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcel created.'**
+  String get pcDoneCreate;
+
+  /// No description provided for @pcDoneEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved.'**
+  String get pcDoneEdit;
+
+  /// No description provided for @pcCancelMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The parcel will not be sent. This cannot be undone.'**
+  String get pcCancelMessage;
+
+  /// No description provided for @pcOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will get a 6-digit code to confirm delivery.'**
+  String pcOutMessage(String name);
+
+  /// No description provided for @pcReceiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm only if the parcel is in your hands.'**
+  String get pcReceiveMessage;
+
+  /// No description provided for @pcErrOtpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is not correct.'**
+  String get pcErrOtpInvalid;
+
+  /// No description provided for @pcErrOtpExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'The code has expired. Ask for a new one.'**
+  String get pcErrOtpExpired;
+
+  /// No description provided for @pcErrOtpLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong codes. Ask the mailroom for help.'**
+  String get pcErrOtpLocked;
+
+  /// No description provided for @pcErrOtpRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many new codes. Try again in an hour.'**
+  String get pcErrOtpRate;
+
+  /// No description provided for @pcErrSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the seal number.'**
+  String get pcErrSeal;
+
+  /// No description provided for @pcErrPhotoNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'A photo is needed.'**
+  String get pcErrPhotoNeeded;
+
+  /// No description provided for @pcErrLostEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'A parcel can be marked lost only after 72 hours without movement.'**
+  String get pcErrLostEarly;
+
+  /// No description provided for @pcErrFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'This parcel is on hold because of a seal problem.'**
+  String get pcErrFlagged;
+
+  /// No description provided for @pcErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get pcErrFailed;
+
+  /// No description provided for @pcErrLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the label.'**
+  String get pcErrLabel;
+
+  /// No description provided for @pcErrPhotoOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo.'**
+  String get pcErrPhotoOpen;
+
+  /// No description provided for @pcErrPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload the photo. Try again.'**
+  String get pcErrPhoto;
+
+  /// No description provided for @pcErrCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a courier.'**
+  String get pcErrCourier;
+
+  /// No description provided for @pcErrLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter where it is.'**
+  String get pcErrLocation;
+
+  /// No description provided for @pcErrProblemNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem in at least 10 characters.'**
+  String get pcErrProblemNote;
+
+  /// No description provided for @pcErrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code.'**
+  String get pcErrCode;
+
+  /// No description provided for @pcErrExceptionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain in at least 20 characters.'**
+  String get pcErrExceptionNote;
+
+  /// No description provided for @pcErrNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a note.'**
+  String get pcErrNote;
+
+  /// No description provided for @pcErrDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what is inside (at least 5 characters).'**
+  String get pcErrDescription;
+
+  /// No description provided for @pcErrRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who receives it.'**
+  String get pcErrRecipient;
+
+  /// No description provided for @pcErrNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number.'**
+  String get pcErrNumber;
+
+  /// No description provided for @pcErrWaybill.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 3 characters.'**
+  String get pcErrWaybill;
+
+  /// No description provided for @pcSheetDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand to courier'**
+  String get pcSheetDispatch;
+
+  /// No description provided for @pcSheetDispatchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose who carries it. Their name goes on the trail.'**
+  String get pcSheetDispatchHelp;
+
+  /// No description provided for @pcSheetCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a stop'**
+  String get pcSheetCheckpoint;
+
+  /// No description provided for @pcSheetCheckpointHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is the parcel now?'**
+  String get pcSheetCheckpointHelp;
+
+  /// No description provided for @pcSheetReturnCheckpointHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is the parcel now, on its way back?'**
+  String get pcSheetReturnCheckpointHelp;
+
+  /// No description provided for @pcSheetGateIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at gate'**
+  String get pcSheetGateIn;
+
+  /// No description provided for @pcSheetGateInHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the seal. If it is broken or the parcel is damaged, switch it off and report.'**
+  String get pcSheetGateInHelp;
+
+  /// No description provided for @pcSheetVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery code'**
+  String get pcSheetVerify;
+
+  /// No description provided for @pcSheetVerifyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the recipient for the 6-digit code they received.'**
+  String get pcSheetVerifyHelp;
+
+  /// No description provided for @pcSheetVerifyReturnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the sender for the 6-digit code they received.'**
+  String get pcSheetVerifyReturnHelp;
+
+  /// No description provided for @pcSheetFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get pcSheetFlag;
+
+  /// No description provided for @pcSheetFlagHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The parcel is held until someone decides what to do.'**
+  String get pcSheetFlagHelp;
+
+  /// No description provided for @pcSheetReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back'**
+  String get pcSheetReturn;
+
+  /// No description provided for @pcSheetReturnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The parcel goes back to {name} with a new code.'**
+  String pcSheetReturnHelp(String name);
+
+  /// No description provided for @pcSheetException.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost or damaged'**
+  String get pcSheetException;
+
+  /// No description provided for @pcSheetExceptionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this only when the parcel cannot be delivered.'**
+  String get pcSheetExceptionHelp;
+
+  /// No description provided for @pcSheetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get pcSheetNote;
+
+  /// No description provided for @pcSheetNoteHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone who can see this parcel can read it.'**
+  String get pcSheetNoteHelp;
+
+  /// No description provided for @pcFieldCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get pcFieldCourier;
+
+  /// No description provided for @pcFieldSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal number (optional)'**
+  String get pcFieldSeal;
+
+  /// No description provided for @pcFieldSealRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal number'**
+  String get pcFieldSealRequired;
+
+  /// No description provided for @pcSealWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This parcel must be sealed because of its value or type.'**
+  String get pcSealWhy;
+
+  /// No description provided for @pcFieldLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is it?'**
+  String get pcFieldLocation;
+
+  /// No description provided for @pcFieldSealIntact.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal is intact'**
+  String get pcFieldSealIntact;
+
+  /// No description provided for @pcSealNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal {no}'**
+  String pcSealNo(String no);
+
+  /// No description provided for @pcReasonSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal broken'**
+  String get pcReasonSeal;
+
+  /// No description provided for @pcReasonDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents damaged'**
+  String get pcReasonDamaged;
+
+  /// No description provided for @pcFieldCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get pcFieldCode;
+
+  /// No description provided for @pcFieldReceivedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Received by (name, optional)'**
+  String get pcFieldReceivedBy;
+
+  /// No description provided for @pcFieldWhatHappened.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get pcFieldWhatHappened;
+
+  /// No description provided for @pcFieldNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get pcFieldNoteOptional;
+
+  /// No description provided for @pcFieldNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get pcFieldNote;
+
+  /// No description provided for @pcPhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo (required)'**
+  String get pcPhotoRequired;
+
+  /// No description provided for @pcPhotoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo (optional)'**
+  String get pcPhotoOptional;
+
+  /// No description provided for @pcPhotoAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo added: {name}'**
+  String pcPhotoAdded(String name);
+
+  /// No description provided for @pcFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get pcFrom;
+
+  /// No description provided for @pcTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get pcTo;
+
+  /// No description provided for @pcCarriedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get pcCarriedBy;
+
+  /// No description provided for @pcTrail.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it has been'**
+  String get pcTrail;
+
+  /// No description provided for @pcReturnLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Return {no}: {reason}'**
+  String pcReturnLine(String no, String reason);
+
+  /// No description provided for @pcViewPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'View photo'**
+  String get pcViewPhoto;
+
+  /// No description provided for @pcDetCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get pcDetCategory;
+
+  /// No description provided for @pcDetWaybill.
+  ///
+  /// In en, this message translates to:
+  /// **'Waybill'**
+  String get pcDetWaybill;
+
+  /// No description provided for @pcDetSeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Seal'**
+  String get pcDetSeal;
+
+  /// No description provided for @pcDetValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Declared value'**
+  String get pcDetValue;
+
+  /// No description provided for @pcDetWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get pcDetWeight;
+
+  /// No description provided for @pcDetHandling.
+  ///
+  /// In en, this message translates to:
+  /// **'Handling'**
+  String get pcDetHandling;
+
+  /// No description provided for @pcDetTrail.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail check'**
+  String get pcDetTrail;
+
+  /// No description provided for @pcSealBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported broken'**
+  String get pcSealBroken;
+
+  /// No description provided for @pcChainOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprints match. Nobody changed the trail.'**
+  String get pcChainOk;
+
+  /// No description provided for @pcChainBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprints do not match. The trail was changed.'**
+  String get pcChainBroken;
+
+  /// No description provided for @pcEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit parcel'**
+  String get pcEditTitle;
+
+  /// No description provided for @pcFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say who gets it and what it is. The mailroom hands it to a courier, and the recipient gets a code to confirm delivery.'**
+  String get pcFormIntro;
+
+  /// No description provided for @pcFieldRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Who receives it'**
+  String get pcFieldRecipient;
+
+  /// No description provided for @pcPickRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a colleague'**
+  String get pcPickRecipient;
+
+  /// No description provided for @pcFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of parcel'**
+  String get pcFieldCategory;
+
+  /// No description provided for @pcFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'What is inside'**
+  String get pcFieldDescription;
+
+  /// No description provided for @pcFieldUrgency.
+  ///
+  /// In en, this message translates to:
+  /// **'How urgent'**
+  String get pcFieldUrgency;
+
+  /// No description provided for @pcUrgNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get pcUrgNormal;
+
+  /// No description provided for @pcFieldValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Value in taka (optional)'**
+  String get pcFieldValue;
+
+  /// No description provided for @pcValueHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Above ৳50,000 a photo is needed on delivery. Above ৳1,00,000 it must be sealed.'**
+  String get pcValueHelp;
+
+  /// No description provided for @pcFieldWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight in kg (optional)'**
+  String get pcFieldWeight;
+
+  /// No description provided for @pcFieldWaybill.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier waybill (optional)'**
+  String get pcFieldWaybill;
+
+  /// No description provided for @pcFieldHandling.
+  ///
+  /// In en, this message translates to:
+  /// **'Special handling'**
+  String get pcFieldHandling;
+
+  /// No description provided for @pcFieldConfidential.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidential'**
+  String get pcFieldConfidential;
+
+  /// No description provided for @pcConfidentialAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'This kind of parcel is always confidential.'**
+  String get pcConfidentialAuto;
+
+  /// No description provided for @pcConfidentialHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Hides what is inside from people who only handle it.'**
+  String get pcConfidentialHelp;
+
+  /// No description provided for @pcSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get pcSaveChanges;
+
+  /// No description provided for @pcCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create parcel'**
+  String get pcCreate;
+
+  /// No description provided for @peopleSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, title or department'**
+  String get peopleSearchHint;
+
+  /// No description provided for @peopleNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No one found.'**
+  String get peopleNone;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

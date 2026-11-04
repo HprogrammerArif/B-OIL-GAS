@@ -305,6 +305,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
           setActiveTab={setActiveTab}
           showGatePassModal={showGatePassModal}
           setShowGatePassModal={setShowGatePassModal}
+          onNavigate={onNavigate}
         />
       )}
 

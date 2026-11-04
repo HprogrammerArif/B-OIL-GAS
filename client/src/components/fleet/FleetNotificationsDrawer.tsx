@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFleetStore, FleetNotification } from '../../store/fleetStore';
+import { ENABLE_FLEET_CHAT_DESK } from '../../views/fleet/config';
 import { t } from '../../types';
 import { showToast } from '../ToastManager';
 import {
@@ -155,7 +156,7 @@ export default function FleetNotificationsDrawer({
             { id: 'assignment', label: t('Assignments', 'বরাদ্দ', lang) },
             { id: 'driver_status', label: t('Driver Status', 'চালক ছুটি', lang) },
             { id: 'maintenance', label: t('Maintenance', 'ওয়ার্কশপ', lang) },
-            { id: 'chat_message', label: t('Trip Chat', 'চ্যাট', lang) },
+            ...(ENABLE_FLEET_CHAT_DESK ? [{ id: 'chat_message', label: t('Trip Chat', 'চ্যাট', lang) }] : []),
           ].map(f => (
             <button
               key={f.id}

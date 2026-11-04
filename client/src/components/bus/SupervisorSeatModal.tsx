@@ -3,7 +3,7 @@ import { Seat, RouteInfo } from './busTypes';
 import { t } from '../../types';
 import {
   Shield, X, CheckCircle, UserMinus, UserCheck, AlertTriangle,
-  UserPlus, Phone, Building, Award, Check, Sparkles, MapPin, Clock, Tag
+  UserPlus, Phone, Building, Award, Check, Sparkles, MapPin, Clock, Tag, User
 } from 'lucide-react';
 
 interface SupervisorSeatModalProps {
@@ -322,9 +322,9 @@ export default function SupervisorSeatModal({
                       transition: 'all 0.15s ease'
                     }}
                   >
-                    <span>👤</span>
+                    <User size={11} />
                     <span>{p.name.split(' ')[0]} {p.name.split(' ')[1] || ''}</span>
-                    <span style={{ opacity: 0.65, fontSize: '9.5px' }}>({p.staffId})</span>
+                    <span style={{ opacity: 0.65, fontSize: '9.5px' }}>· {p.dept}</span>
                   </button>
                 ))}
               </div>

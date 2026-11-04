@@ -23,92 +23,13 @@
   outline-offset: 2px;
 }
 
-.apv-updated {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  color: var(--text-3);
-}
-.apv-spin { animation: apvSpin 0.8s linear infinite; }
-@keyframes apvSpin { to { transform: rotate(360deg); } }
 
-/* ─── KPI ribbon ─────────────────────────────────────────────────────────── */
-.apv-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.apv-kpi {
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 18px 14px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-1);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
-  color: var(--text-1);
-  text-align: left;
-  font-family: inherit;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-}
-.apv-kpi::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: var(--brand-crimson);
-}
-.apv-kpi.warn::before { background: var(--status-warning); }
-.apv-kpi.gold::before { background: var(--brand-gold); }
-.apv-kpi.green::before { background: var(--status-success); }
-
-.apv-kpi-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: var(--text-3);
-}
-.apv-kpi-top i {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-style: normal;
-  background: var(--apv-accent-soft);
-  color: var(--apv-accent-ink);
-  flex-shrink: 0;
-}
-.apv-kpi.warn .apv-kpi-top i { background: var(--apv-warn-soft); color: var(--status-warning-text); }
-.apv-kpi.gold .apv-kpi-top i { background: color-mix(in srgb, var(--brand-gold) 16%, var(--surface-1)); color: var(--status-warning-text); }
-.apv-kpi.green .apv-kpi-top i { background: var(--apv-ok-soft); color: var(--status-success-text); }
-
-.apv-kpi strong {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-  font-variant-numeric: tabular-nums;
-}
-.apv-kpi small { font-size: 11.5px; color: var(--text-3); line-height: 1.4; }
-
-.apv-kpi.clickable { cursor: pointer; width: 100%; }
-.apv-kpi.clickable:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border-2); }
-.apv-kpi.clickable:disabled { cursor: default; opacity: 0.8; }
-.apv-kpi.clickable.active { border-color: var(--apv-accent-line); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-crimson) 10%, transparent); }
+/* ─── One-sentence verdict ──────────────────────────────────────────────── */
+.apv-verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 14px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
+.apv-verdict p { margin: 0; flex: 1 1 260px; font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--text-1); }
+.apv-verdict-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-2); color: var(--text-2); }
+.apv-verdict.urgent { border-color: color-mix(in srgb, var(--status-warning) 45%, var(--border-1)); background: color-mix(in srgb, var(--status-warning) 8%, var(--surface-1)); }
+.apv-verdict.urgent .apv-verdict-icon { background: color-mix(in srgb, var(--status-warning) 18%, var(--surface-1)); color: var(--status-warning-text); }
 
 /* ─── Tabs, search, filters ──────────────────────────────────────────────── */
 .apv-toolbar {
@@ -269,33 +190,6 @@
 /* ─── List ───────────────────────────────────────────────────────────────── */
 .apv-list-wrap { transition: opacity 0.2s ease; }
 /* Skeleton rows shown while the queue refreshes (mirrors the card layout). */
-.apv-skel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
-  gap: 18px;
-  padding: 16px 18px 16px 16px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-1);
-  border-left: 4px solid var(--border-2);
-  border-radius: var(--radius-md);
-}
-.apv-skel-col { display: flex; flex-direction: column; gap: 10px; }
-.apv-skel-col.end { align-items: flex-end; }
-.apv-skel .skeleton { height: 12px; border-radius: 6px; }
-.apv-skel .skeleton.w-20 { width: 20%; }
-.apv-skel .skeleton.w-40 { width: 40%; }
-.apv-skel .skeleton.w-70 { width: 70%; }
-.apv-skel .skeleton.w-90 { width: 90%; }
-.apv-skel .skeleton.title { height: 18px; }
-.apv-skel .skeleton.amount { height: 22px; width: 120px; }
-.apv-skel .skeleton.pill { height: 22px; width: 110px; border-radius: 999px; }
-@container apvlist (max-width: 760px) {
-  .apv-skel { grid-template-columns: minmax(0, 1fr); }
-  .apv-skel-col.end { align-items: flex-start; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .apv-skel .skeleton { animation: none; }
-}
 
 .apv-list-head {
   display: flex;
@@ -688,6 +582,9 @@
 .apv-requester-card strong { font-size: 14px; }
 .apv-requester-card span { font-size: 12px; color: var(--text-3); }
 
+.apv-why { margin: 0 0 12px; padding: 10px 14px; border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border-1); font-size: 13px; line-height: 1.5; color: var(--text-1); }
+.apv-ref-details { margin-top: 16px; border-top: 1px solid var(--border-1); padding-top: 10px; }
+.apv-ref-details summary { cursor: pointer; font-size: 12.5px; font-weight: 700; color: var(--text-3); margin-bottom: 8px; }
 .apv-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -808,13 +705,10 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 900px) {
-  .apv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 560px) {
-  .apv-kpis { gap: 10px; }
-  .apv-kpi { padding: 12px 14px; }
-  .apv-kpi strong { font-size: 22px; }
+  
+  
+  
   .apv-tabs { width: 100%; }
   .apv-tabs button { flex: 1; justify-content: center; padding: 8px 8px; }
   .apv-search { max-width: none; flex-basis: 100%; }

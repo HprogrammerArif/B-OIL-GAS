@@ -4,7 +4,7 @@ import { t } from '../../types';
 import { nextRef } from '../../lib/refs';
 import {
   Bus, X, CheckCircle, Shield, Truck, Calendar, Phone,
-  User, Check, Sparkles, Navigation, Fuel, KeyRound
+  User, Check, Sparkles, Navigation, Fuel, KeyRound, Sun, Sunset, MapPin
 } from 'lucide-react';
 
 interface RegisterBusModalProps {
@@ -217,9 +217,9 @@ export default function RegisterBusModal({
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                   {[
-                    { cap: 52, title: '52 Seats', desc: 'Standard Commuter Cruiser', icon: '🚍' },
-                    { cap: 40, title: '40 Seats', desc: 'Medium Feeder Coach', icon: '🚐' },
-                    { cap: 32, title: '32 Seats', desc: 'VIP Executive Shuttle', icon: '✨' },
+                    { cap: 52, title: '52 Seats', desc: 'Standard Commuter Cruiser', icon: <Bus size={16} /> },
+                    { cap: 40, title: '40 Seats', desc: 'Medium Feeder Coach', icon: <Truck size={16} /> },
+                    { cap: 32, title: '32 Seats', desc: 'VIP Executive Shuttle', icon: <Sparkles size={16} /> },
                   ].map(tier => {
                     const isSel = capacity === tier.cap;
                     return (
@@ -320,10 +320,16 @@ export default function RegisterBusModal({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span><strong>Path:</strong> {selectedRouteObj.corridorRoad}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '16px', marginTop: '6px', fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                    <span>🌅 Morning: <strong>{selectedRouteObj.inboundStartTime}</strong></span>
-                    <span>🌆 Evening: <strong>{selectedRouteObj.outboundStartTime}</strong></span>
-                    <span>📍 Stops: <strong>{selectedRouteObj.inboundStops.length} Stations</strong></span>
+                  <div style={{ display: 'flex', gap: '16px', marginTop: '6px', fontSize: '11px', color: 'var(--brand-slate-600)', flexWrap: 'wrap' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Sun size={12} color="var(--brand-gold)" /> Morning: <strong>{selectedRouteObj.inboundStartTime}</strong>
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Sunset size={12} color="var(--brand-crimson)" /> Evening: <strong>{selectedRouteObj.outboundStartTime}</strong>
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={12} color="var(--status-info)" /> Stops: <strong>{selectedRouteObj.inboundStops.length} Stations</strong>
+                    </span>
                   </div>
                 </div>
               )}

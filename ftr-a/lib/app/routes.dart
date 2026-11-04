@@ -24,6 +24,10 @@ abstract final class AppRoutes {
   static const noteSheetNew = '/home/note-sheets/new';
   static String noteSheetDetail(String id) => '/home/note-sheets/$id';
   static String noteSheetEdit(String id) => '/home/note-sheets/$id/edit';
+  static const parcels = '/home/parcels';
+  static const parcelNew = '/home/parcels/new';
+  static String parcelDetail(String id) => '/home/parcels/$id';
+  static String parcelEdit(String id) => '/home/parcels/$id/edit';
   static const approvals = '/home/approvals';
   static String approvalDetail(String instanceId) =>
       '/home/approvals/$instanceId';

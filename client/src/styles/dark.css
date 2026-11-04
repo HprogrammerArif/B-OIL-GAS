@@ -273,15 +273,6 @@
   color: #CBD5E1;
 }
 
-[data-theme="dark"] .activity-item,
-[data-theme="dark"] .approval-queue-item,
-[data-theme="dark"] .shift-handover-row {
-  background: #111E3D;
-  border-color: #1E293B;
-  color: #E2E8F0;
-}
-
-[data-theme="dark"] .approval-queue-item:hover,
 [data-theme="dark"] .approval-interactive-card:hover {
   background: #16254C !important;
   border-color: #334155 !important;
@@ -940,5 +931,4 @@
   background: #0A1227 !important;
   border-top-color: #1E293B !important;
 }
-
 

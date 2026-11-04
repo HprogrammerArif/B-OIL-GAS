@@ -538,8 +538,6 @@
     white-space: nowrap !important;
   }
 
-
-
   /* Priority Approvals Mobile Card */
   .approval-interactive-card {
     flex-direction: column !important;
@@ -558,29 +556,6 @@
     flex: 1 1 auto !important;
     justify-content: center !important;
     text-align: center !important;
-  }
-
-  /* HOD Approval Queue Mobile Wrap */
-  .approval-queue-item {
-    flex-wrap: wrap !important;
-    padding: 12px !important;
-    gap: 8px !important;
-  }
-
-  .aq-actions {
-    width: 100% !important;
-    margin-top: 6px !important;
-    padding-top: 8px !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
-    display: flex !important;
-    gap: 6px !important;
-  }
-
-  .aq-actions button {
-    flex: 1 !important;
-    justify-content: center !important;
-    padding: 6px 4px !important;
-    font-size: 11px !important;
   }
 
   /* Refinery Output Chart & SCADA Console Mobile */
@@ -784,7 +759,18 @@
     max-height: calc(90vh - 125px) !important;
     padding: 16px !important;
     flex: 1 1 auto !important;
+    min-height: 0 !important;
     -webkit-overflow-scrolling: touch !important;
+  }
+
+  .eam-modal > form,
+  .modal > form,
+  .modal-dialog > form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   .modal-ft,

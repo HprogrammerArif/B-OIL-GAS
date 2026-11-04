@@ -53,7 +53,6 @@ export default function ApprovalCard({
           {mode === 'pending' && item.urgency !== 'normal' && (
             <span className={`apv-chip urgency-${item.urgency}`}>{t(URGENCY_LABEL[item.urgency][0], URGENCY_LABEL[item.urgency][1], lang)}</span>
           )}
-          <span className="apv-ref">{item.id}</span>
         </div>
 
         <h3 className="apv-title">
@@ -73,7 +72,7 @@ export default function ApprovalCard({
               title={lastEndorser ? `${lastEndorser.officerName} — ${lastEndorser.roleName}` : undefined}
             >
               <ShieldCheck size={13} />
-              {t(`${trail.length} endorsement${trail.length > 1 ? 's' : ''}`, `${trail.length}টি সুপারিশ`, lang)}
+              {t(`Endorsed by ${lastEndorser.officerName}`, `সুপারিশ করেছেন ${lastEndorser.officerName}`, lang)}
             </span>
           )}
         </div>
@@ -82,7 +81,6 @@ export default function ApprovalCard({
       <div className="apv-side">
         <div className="apv-amount">
           <strong>{item.amount ?? t('No amount', 'অর্থ নেই', lang)}</strong>
-          <span>{item.sapDocRef}</span>
         </div>
 
         {mode === 'pending' ? (

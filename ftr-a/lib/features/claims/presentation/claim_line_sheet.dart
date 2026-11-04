@@ -145,7 +145,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
     setState(() => _uploading = true);
     try {
       final uploads = ref.read(uploadServiceProvider);
-      final meta = await uploads.upload(picked, purpose: 'RECEIPT');
+      final meta = await uploads.upload(picked, purpose: 'CLAIM_RECEIPT');
       await uploads.awaitClean(meta.id);
       if (!mounted) return;
       setState(() {

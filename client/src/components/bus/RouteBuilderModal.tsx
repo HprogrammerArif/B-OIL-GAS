@@ -3,7 +3,7 @@ import { RouteInfo, RouteStop, BusVehicle } from './busTypes';
 import { t } from '../../types';
 import {
   MapPin, Plus, Trash2, CheckCircle, X, Navigation, Clock,
-  Bus, User, Phone, ArrowRight, ShieldCheck, Compass, Sparkles, ChevronRight
+  Bus, User, Phone, ArrowRight, ShieldCheck, Compass, Sparkles, ChevronRight, Sun, Sunset
 } from 'lucide-react';
 
 interface RouteBuilderModalProps {
@@ -326,8 +326,8 @@ export default function RouteBuilderModal({
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-info-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🌅</span>
-                    <span>{t('Morning Inbound (City ➔ Plant/HQ)', 'সকালের সময়সূচী (শহর ➔ অফিস)', lang)}</span>
+                    <Sun size={14} color="var(--brand-gold)" />
+                    <span>{t('Morning Inbound (City → Plant/HQ)', 'সকালের সময়সূচী (শহর → অফিস)', lang)}</span>
                   </div>
                   <span className="badge info" style={{ fontSize: '10px' }}>Inbound</span>
                 </div>
@@ -353,8 +353,8 @@ export default function RouteBuilderModal({
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🌇</span>
-                    <span>{t('Evening Return (Plant/HQ ➔ City)', 'সন্ধ্যার সময়সূচী (অফিস ➔ শহর)', lang)}</span>
+                    <Sunset size={14} color="var(--brand-crimson)" />
+                    <span>{t('Evening Return (Plant/HQ → City)', 'সন্ধ্যার সময়সূচী (অফিস → শহর)', lang)}</span>
                   </div>
                   <span className="badge gold" style={{ fontSize: '10px' }}>Outbound</span>
                 </div>
@@ -479,7 +479,8 @@ export default function RouteBuilderModal({
                       boxShadow: activeDirectionTab === 'inbound' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                     }}
                   >
-                    <span>🌅 Morning Inbound ({inboundStops.length})</span>
+                    <Sun size={13} color="var(--brand-gold)" />
+                    <span>Morning Inbound ({inboundStops.length})</span>
                   </button>
                   <button
                     type="button"
@@ -499,7 +500,8 @@ export default function RouteBuilderModal({
                       boxShadow: activeDirectionTab === 'outbound' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                     }}
                   >
-                    <span>🌇 Evening Outbound ({outboundStops.length})</span>
+                    <Sunset size={13} color="var(--brand-crimson)" />
+                    <span>Evening Outbound ({outboundStops.length})</span>
                   </button>
                 </div>
               </div>
@@ -547,8 +549,9 @@ export default function RouteBuilderModal({
                             {isLast && <span className="badge success" style={{ fontSize: '9px', padding: '1px 5px' }}>{t('Final Terminus', 'গন্তব্য', lang)}</span>}
                           </div>
                           {st.landmark && (
-                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                              📍 {st.landmark}
+                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <MapPin size={10} />
+                              <span>{st.landmark}</span>
                             </div>
                           )}
                         </div>
@@ -562,12 +565,16 @@ export default function RouteBuilderModal({
                           padding: '3px 8px',
                           borderRadius: '6px',
                           border: '1px solid var(--status-warning-bright)',
-                          fontSize: '11.5px'
+                          fontSize: '11.5px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
                         }}>
-                          ⏰ {st.scheduledTime}
+                          <Clock size={11} />
+                          <span>{st.scheduledTime}</span>
                         </span>
                         <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 600 }}>
-                          🛣️ {st.distanceKm}
+                          {st.distanceKm}
                         </span>
 
                         {!isFirst && !isLast && (

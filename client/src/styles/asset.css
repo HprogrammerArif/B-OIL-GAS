@@ -1133,7 +1133,15 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 90vh;
+  max-height: calc(100vh - 32px);
+}
+
+.eam-modal > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .eam-modal.sm { max-width: 520px; }
@@ -1148,6 +1156,7 @@
   background: linear-gradient(135deg, var(--surface-inverse) 0%, #1B2848 100%);
   color: var(--text-on-brand);
   border-bottom: 2px solid rgba(212, 175, 55, 0.35);
+  flex-shrink: 0;
 }
 
 .eam-modal-hd.crimson {
@@ -1216,6 +1225,8 @@
   padding: 18px 20px;
   overflow-y: auto;
   flex: 1 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
 }
 
 .eam-modal-ft {
@@ -1227,6 +1238,7 @@
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 /* 1-Click Quick-Fill Template Bar inside Modals */
