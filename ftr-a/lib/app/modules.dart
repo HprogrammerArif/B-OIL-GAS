@@ -55,6 +55,18 @@ final List<AppModule> builtModules = [
     route: AppRoutes.parcels,
   ),
   (
+    key: 'visitors',
+    icon: Icons.badge_outlined,
+    label: (l10n) => l10n.moduleVisitors,
+    route: AppRoutes.visits,
+  ),
+  (
+    key: 'fleet',
+    icon: Icons.directions_car_outlined,
+    label: (l10n) => l10n.moduleFleet,
+    route: AppRoutes.fleet,
+  ),
+  (
     key: 'approvals',
     icon: Icons.fact_check_outlined,
     label: (l10n) => l10n.moduleApprovals,

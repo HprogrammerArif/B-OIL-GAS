@@ -38,11 +38,16 @@ abstract final class Col {
   static const noteSheets = 'note_sheets';
   static const parcels = 'parcels';
   static const visitors = 'visitors';
+  static const visits = 'visits';
+  static const visitMusters = 'visit_musters';
+  static const watchlist = 'watchlist';
   static const fleetVehicles = 'fleet_vehicles';
   static const fleetDrivers = 'fleet_drivers';
   static const fleetRequisitions = 'fleet_requisitions';
   static const fleetTrips = 'fleet_trips';
   static const fleetFuelLogs = 'fleet_fuel_logs';
+  static const fleetTolls = 'fleet_tolls';
+  static const fleetSos = 'fleet_sos';
   static const incidents = 'incidents';
   static const incidentCapas = 'incident_capas';
   static const assets = 'assets';

@@ -7,93 +7,109 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'visitor_repository.g.dart';
 
-@riverpod
-VisitorRepository visitorRepository(Ref ref) =>
-    VisitorRepository(ref.watch(dioProvider));
-
+/// `/visits/*` (doc 03 §14).
 class VisitorRepository {
   VisitorRepository(this._dio);
+
   final Dio _dio;
 
-  Future<List<Visitor>> list({String? status, String? category}) async {
+  Future<List<Visit>> list({
+    String view = 'mine',
+    String? status,
+    String? category,
+    String? query,
+  }) async {
     try {
       final res = await _dio.get<Object?>(
-        '/visitors',
+        '/visits',
         queryParameters: {
-          if (status != null) 'status': status,
-          if (category != null) 'category': category,
+          'view': view,
+          'status': ?status,
+          'category': ?category,
+          if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
           'pageSize': 100,
         },
       );
-      return Envelope.page(res.data, Visitor.fromJson).items;
+      return Envelope.page(res.data, Visit.fromJson).items;
     } on DioException catch (e) {
       throwApi(e);
     }
   }
 
-  Future<Visitor> detail(String id) async {
+  Future<Visit> detail(String id) async {
     try {
-      final res = await _dio.get<Object?>('/visitors/$id');
-      return Visitor.fromJson(Envelope.object(res.data));
+      final res = await _dio.get<Object?>('/visits/$id');
+      return Visit.fromJson(Envelope.object(res.data));
     } on DioException catch (e) {
       throwApi(e);
     }
   }
 
-  Future<Visitor> create(Map<String, Object?> body) async {
+  Future<List<VisitZone>> zones(String? siteId) async {
     try {
-      final res = await _dio.post<Object?>('/visitors', data: body);
-      return Visitor.fromJson(Envelope.object(res.data));
-    } on DioException catch (e) {
-      throwApi(e);
-    }
-  }
-
-  Future<Visitor> checkIn(String id) async {
-    try {
-      final res = await _dio.post<Object?>('/visitors/$id/check-in');
-      return Visitor.fromJson(Envelope.object(res.data));
-    } on DioException catch (e) {
-      throwApi(e);
-    }
-  }
-
-  Future<Visitor> checkOut(String id) async {
-    try {
-      final res = await _dio.post<Object?>('/visitors/$id/check-out');
-      return Visitor.fromJson(Envelope.object(res.data));
-    } on DioException catch (e) {
-      throwApi(e);
-    }
-  }
-
-  Future<Visitor> updatePpe(String id, Map<String, bool> ppe) async {
-    try {
-      final res = await _dio.patch<Object?>(
-        '/visitors/$id/ppe',
-        data: {'ppeCleared': ppe},
+      final res = await _dio.get<Object?>(
+        '/visits/zones',
+        queryParameters: {'siteId': ?siteId},
       );
-      return Visitor.fromJson(Envelope.object(res.data));
+      return [
+        for (final e in Envelope.data(res.data)! as List)
+          VisitZone.fromJson(Map<String, Object?>.from(e! as Map)),
+      ];
     } on DioException catch (e) {
       throwApi(e);
     }
   }
 
-  Future<Visitor> completeBriefing(String id) async {
+  Future<VisitMuster> muster() async {
     try {
-      final res = await _dio.post<Object?>('/visitors/$id/briefing');
-      return Visitor.fromJson(Envelope.object(res.data));
+      final res = await _dio.get<Object?>('/visits/muster');
+      return VisitMuster.fromJson(Envelope.object(res.data));
     } on DioException catch (e) {
       throwApi(e);
     }
   }
 
-  Future<Visitor> cancel(String id) async {
+  Future<VisitMuster> musterAct(String verb) async {
     try {
-      final res = await _dio.delete<Object?>('/visitors/$id');
-      return Visitor.fromJson(Envelope.object(res.data));
+      final res = await _dio.post<Object?>('/visits/muster/$verb');
+      return VisitMuster.fromJson(Envelope.object(res.data));
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<Visit> scan(String q) async {
+    try {
+      final res = await _dio.post<Object?>('/visits/scan', data: {'q': q});
+      return Visit.fromJson(Envelope.object(res.data));
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<Visit> create(Map<String, Object?> body) async {
+    try {
+      final res = await _dio.post<Object?>('/visits', data: body);
+      return Visit.fromJson(Envelope.object(res.data));
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<Visit> act(
+    String id,
+    String verb, [
+    Map<String, Object?> body = const {},
+  ]) async {
+    try {
+      final res = await _dio.post<Object?>('/visits/$id/$verb', data: body);
+      return Visit.fromJson(Envelope.object(res.data));
     } on DioException catch (e) {
       throwApi(e);
     }
   }
 }
+
+@Riverpod(keepAlive: true)
+VisitorRepository visitorRepository(Ref ref) =>
+    VisitorRepository(ref.watch(dioProvider));

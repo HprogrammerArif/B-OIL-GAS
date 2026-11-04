@@ -945,6 +945,18 @@ Validation: `visitor.fullName` 2–120; `phone` E.164; `idProofType ∈ NID|PASS
 
 Rules: status must be `APPROVED` (`INVALID_STATE_TRANSITION`; `PRE_REGISTERED` with pending VIP approval → `POLICY_VIOLATION` `APPROVAL_PENDING`); `expectedAt − 2 h ≤ now ≤ expectedEndAt` else `POLICY_VIOLATION` `OUTSIDE_WINDOW` (gate supervisor override with `overrideReason`); PPE rule (14.2); RED zone requires escort check-in presence (escort must be punched-in today per MOD-10 else `ESCORT_ABSENT`); `badgeNo` unique among currently inside visits per site. Notifications `VISIT_ARRIVED` to host (+ escort); socket `visit:status`; pass due item created.
 
+### 14.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/visitor_engine.dart`) implements a subset with these differences:
+
+- Visitor master is reused by normalised phone. ID numbers are stored hashed with last-4 only; the wire never returns the full number. There is no public `/gate-pass/{token}` or SMS: the 6-digit-style QR is the `qrToken` on the in-app pass PDF.
+- Regular / vendor / client / contractor visits auto-approve unless any selected zone is RED. VIP, GOVT and any RED-zone visit stay `PRE_REGISTERED` until `POST /visits/{id}/approve` (`visitors:approve`). There is no `VISIT_VIP_APPROVAL` workflow instance.
+- Watchlist is an exact name or phone match. A hit blocks approve and check-in until `POST /visits/{id}/watchlist { action: clear|deny }` (`visitors:watchlist`). Blacklist throws `VISITOR_BLACKLISTED`.
+- Check-in always needs a `PHOTO` file. YELLOW/RED zones need PPE cleared in the last 12 hours; RED also needs an escort who works at the site. Badge numbers are `BDG-{HQ|PLT|CTG}-NN`, `VIP-NN` or `GOVT-NN`. Overstay (`OVERDUE`) is applied lazily at `expectedEndAt + 30 min`. Hosts may extend twice, up to 8 hours.
+- `GET /visits?view=mine|expected|inside|overdue|to-approve|all`. Each visit carries a `me` block of booleans. `POST /visits/scan { q }` matches visit number, token, plate or badge. Muster is a per-site flag (`/visits/muster/start|end`, `/visits/{id}/muster-safe`).
+- HQ reception is the HR Admin persona (`visitors:gate` at site). Plant gate and HSE (on the Plant GM account) share `visitors:gate`. Chairman holds `visitors:approve` at company scope.
+- Deferred: Levenshtein watchlist, public pass link, ANPR/barrier, hospitality JSON, incident auto-create from CRITICAL findings, escort punch-in check, site-capacity override UI, WhatsApp/SMS.
+
 ---
 
 ## 15. MOD-09 — Fleet & Dispatch
@@ -1029,6 +1041,18 @@ Module dir `fleet`. Models `Driver`, `Vehicle`, `VehicleDocument`, `VehicleRequi
 ```
 
 Validation: `purpose` 5–300; `origin/destination` 2–160; `stops ≤ 6`, each `label` 2–120, `waitMinutes 0–240`; `departAt ≥ now + 30 min` (admins may backdate ≤ 24 h with `priority=CRITICAL`); `returnAt > departAt` and required for ROUND_TRIP; `passengers 1–7` (> 4 forces `MICROBUS_7` or higher else `POLICY_VIOLATION` `CAPACITY_CLASS`); `passengerCount` = `passengers.length`; `departmentId` = requester's; `phone` zPhoneBd. Estimate fields computed server-side (15.2 `/estimate`). Submit side-effects: workflow instance, `FLEET_REQ_ENDORSE` to HOD, `inbox:changed`.
+
+### 15.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/fleet_engine.dart`) implements a subset with these differences:
+
+- Create is always a `DRAFT`; `POST /vehicle-requisitions` with `submit: true` (or `POST …/submit`) starts `VEHICLE_REQUISITION`. There is no Finance step, pooling, GPS stream, fleet chat, maps adapter, or vehicle/driver CRUD UI.
+- Estimate is `GET /fleet/estimate` (destination presets: Keraniganj Plant, Chattogram Terminal, Head Office). Cost is the flat fare + stops + round-trip surcharge; km × rate is applied only when the trip completes.
+- Assign reserves the vehicle and driver (`reservedTripId`) without changing their status. Gate-out (±120 min of `departAt`, transport may override) sets IN_TRANSIT. One loginable driver (`EMP-0821`, LIGHT, breathalyzer PASSED).
+- `GET /vehicle-requisitions?view=mine|driving|to-endorse|dispatch|live|all`. Each requisition carries a `me` block. Notifications use `data.route` `/home/fleet/{id}`.
+- SOS: `POST /trips/{id}/sos` (CRITICAL `FLEET_SOS`, ack required) and standalone `POST /fleet/sos` (list at `/home/fleet/sos`). Tolls over ৳200 need a photo. Fuel vouchers are issued from the engine (`/fuel-vouchers`) without a dedicated screen.
+- HOD endorsement uses the existing template: same-department head, else the line manager (Farida Begum endorses Tanvir Rahman). HQ reception / plant gate is the Transport persona (`fleet:gate`). Chairman and Plant GM have `fleet:read`.
+- Deferred: pooling, live GPS, fleet chat, breathalyzer capture UI, parcel-linked trips (BR-04-10), vehicle/driver master screens.
 
 ---
 

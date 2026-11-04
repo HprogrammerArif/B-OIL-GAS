@@ -3389,4 +3389,801 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get peopleNone => 'কাউকে পাওয়া যায়নি।';
+
+  @override
+  String get moduleVisitors => 'অতিথি';
+
+  @override
+  String get visNew => 'অতিথি নিবন্ধন';
+
+  @override
+  String get visIntro =>
+      'যাঁরা আপনার সাথে দেখা করতে আসছেন, গেটে আছেন, অথবা এখনো ভিতরে আছেন।';
+
+  @override
+  String get visSearchHint => 'নাম, VIS-2026-0001 বা নম্বরপ্লেট দিয়ে খুঁজুন';
+
+  @override
+  String get visNotFound => 'এই নম্বরে কোনো সফর নেই, অথবা আপনি দেখতে পারেন না।';
+
+  @override
+  String get visScanNeedGate => 'শুধু গেট পাস স্ক্যান করতে পারে।';
+
+  @override
+  String get visTabMine => 'আমার';
+
+  @override
+  String get visTabExpected => 'আজকের প্রত্যাশিত';
+
+  @override
+  String get visTabInside => 'এখন ভিতরে';
+
+  @override
+  String get visTabOverdue => 'সময় পেরিয়ে গেছে';
+
+  @override
+  String get visTabApprove => 'আপনার অনুমোদন';
+
+  @override
+  String get visTabAll => 'আমি যা দেখতে পারি';
+
+  @override
+  String get visEmpty => 'এখনো কোনো অতিথি নেই।';
+
+  @override
+  String get visEmptyFiltered => 'কোনো অতিথি মেলেনি।';
+
+  @override
+  String get visVerdictNone => 'এখন আপনার কিছু করার নেই।';
+
+  @override
+  String visVerdictNeed(int count) {
+    return 'আপনার অপেক্ষায়: $count';
+  }
+
+  @override
+  String get visStatusWaiting => 'অনুমোদনের অপেক্ষায়';
+
+  @override
+  String get visStatusExpected => 'পাস প্রস্তুত';
+
+  @override
+  String get visStatusInside => 'ভিতরে আছেন';
+
+  @override
+  String get visStatusOverdue => 'সময় পেরিয়ে গেছে';
+
+  @override
+  String get visStatusDone => 'চলে গেছেন';
+
+  @override
+  String get visStatusDenied => 'অনুমোদিত হয়নি';
+
+  @override
+  String get visStatusCancelled => 'বাতিল';
+
+  @override
+  String get visCatVip => 'ভিআইপি';
+
+  @override
+  String get visCatGovt => 'সরকারি';
+
+  @override
+  String get visCatVendor => 'ভেন্ডর';
+
+  @override
+  String get visCatClient => 'ক্লায়েন্ট';
+
+  @override
+  String get visCatContractor => 'কন্ট্রাক্টর';
+
+  @override
+  String get visCatRegular => 'অতিথি';
+
+  @override
+  String get visNextWatchlist =>
+      'নামটি নজরতালিকায় মিলেছে। খালাস করুন অথবা সফর বাতিল করুন।';
+
+  @override
+  String get visNextWatchlistWait =>
+      'নজরতালিকা যাচাইয়ের জন্য আটকানো। আপনার করণীয় নেই।';
+
+  @override
+  String visNextApprove(String name) {
+    return '$name-এর সফর অনুমোদন করুন।';
+  }
+
+  @override
+  String get visNextHostWait =>
+      'সাইট প্রধানের অনুমোদনের অপেক্ষায়। আপনার করণীয় নেই।';
+
+  @override
+  String get visNextWaiting => 'অনুমোদনের অপেক্ষায়।';
+
+  @override
+  String get visNextPpe => 'পিপিই দেখে তারপর গেটে গ্রহণ করুন।';
+
+  @override
+  String get visNextEscort => 'লাল এলাকায় সঙ্গে থাকার জন্য কাউকে নিয়োগ করুন।';
+
+  @override
+  String visNextCheckIn(String name) {
+    return 'গেটে $name-কে গ্রহণ করুন। একটি ছবি তুলুন।';
+  }
+
+  @override
+  String visNextHostReady(String when) {
+    return 'পাস প্রস্তুত। তাঁরা $when আসবেন। আপনার করণীয় নেই।';
+  }
+
+  @override
+  String visNextReady(String when) {
+    return 'পাস প্রস্তুত। প্রত্যাশিত সময় $when।';
+  }
+
+  @override
+  String visNextCheckOut(String name) {
+    return '$name-কে বের করে ব্যাজ ফেরত নিন।';
+  }
+
+  @override
+  String get visNextInsideHost =>
+      'তাঁরা ভিতরে আছেন। তাঁরা না যাওয়া পর্যন্ত যোগাযোগ রাখুন।';
+
+  @override
+  String get visNextInside => 'সাইটের ভিতরে আছেন।';
+
+  @override
+  String get visNextOverdueAct =>
+      'তাঁরা অতিরিক্ত সময় ধরে আছেন। সময় বাড়ান অথবা বের করে দিন।';
+
+  @override
+  String get visNextOverdue => 'সম্মত সময় পেরিয়ে গেছে।';
+
+  @override
+  String get visNextDone => 'তাঁরা চলে গেছেন।';
+
+  @override
+  String get visNextDenied => 'এই সফর অনুমোদিত হয়নি।';
+
+  @override
+  String get visNextCancelled => 'বাতিল। আর কিছু করার নেই।';
+
+  @override
+  String get visWatchPill => 'নজরতালিকা';
+
+  @override
+  String visHostLine(String name, String site) {
+    return 'আয়োজক: $name, $site';
+  }
+
+  @override
+  String visWhenLine(String start, String end) {
+    return 'প্রত্যাশিত $start থেকে $end';
+  }
+
+  @override
+  String visEscortLine(String name) {
+    return 'সঙ্গী: $name';
+  }
+
+  @override
+  String visBadgeLine(String no) {
+    return 'ব্যাজ $no';
+  }
+
+  @override
+  String get visZones => 'যে এলাকায় যেতে পারবেন';
+
+  @override
+  String get visEscortNeed => 'সঙ্গী দরকার';
+
+  @override
+  String get visFindings => 'যা দেখা গেছে';
+
+  @override
+  String get visDetPhone => 'ফোন';
+
+  @override
+  String get visDetId => 'পরিচয়পত্র';
+
+  @override
+  String get visDetPlate => 'গাড়ি';
+
+  @override
+  String get visPpeOk => 'গেটে পিপিই যাচাই হয়েছে।';
+
+  @override
+  String get visPpeNeeded => 'প্রবেশের আগে পিপিই যাচাই করতে হবে।';
+
+  @override
+  String get visPpeNone => 'এই এলাকায় বিশেষ পিপিই লাগবে না।';
+
+  @override
+  String get visActApprove => 'সফর অনুমোদন করুন';
+
+  @override
+  String get visActDeny => 'অনুমোদন করবেন না';
+
+  @override
+  String get visActCancel => 'সফর বাতিল করুন';
+
+  @override
+  String get visActCheckIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get visActCheckOut => 'বের করে দিন';
+
+  @override
+  String get visActPpe => 'পিপিই যাচাই করুন';
+
+  @override
+  String get visActEscort => 'সঙ্গী নিয়োগ করুন';
+
+  @override
+  String get visActExtend => 'আরও দুই ঘণ্টা দিন';
+
+  @override
+  String get visActFinding => 'পর্যবেক্ষণ যোগ করুন';
+
+  @override
+  String get visActClearWatch => 'নজরতালিকা খালাস করুন';
+
+  @override
+  String get visActSafe => 'নিরাপদ চিহ্নিত করুন';
+
+  @override
+  String get visActPass => 'পাস দেখুন';
+
+  @override
+  String get visApproveMsg => 'তাঁরা একটি পাস পাবেন এবং গেটে গ্রহণ করা যাবে।';
+
+  @override
+  String get visCheckOutMsg =>
+      'তাঁরা চলে গেলে এবং ব্যাজ ফেরত এলেই নিশ্চিত করুন।';
+
+  @override
+  String get visFieldReason => 'কারণ';
+
+  @override
+  String get visSheetCheckIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get visSheetCheckInHelp =>
+      'একটি ছবি তুলুন। ব্যাজ নম্বর আপনাআপনি দেওয়া হবে।';
+
+  @override
+  String get visPhotoRequired => 'ছবি তুলুন (বাধ্যতামূলক)';
+
+  @override
+  String get visPhotoAdded => 'ছবি যোগ হয়েছে';
+
+  @override
+  String get visFieldNda => 'এনডিএ স্বাক্ষরিত';
+
+  @override
+  String get visFieldBriefing => 'নিরাপত্তা ব্রিফিং হয়েছে';
+
+  @override
+  String get visSheetPpe => 'ব্যক্তিগত সুরক্ষা সরঞ্জাম';
+
+  @override
+  String get visSheetPpeHelp =>
+      'যা পরছেন এবং যা বলা হয়েছে শুধু সেগুলোতে টিক দিন।';
+
+  @override
+  String get visPpeHat => 'হেলমেট';
+
+  @override
+  String get visPpeShoes => 'সেফটি জুতা';
+
+  @override
+  String get visPpeVest => 'হাই-ভিজ ভেস্ট';
+
+  @override
+  String get visPpeGoggles => 'গগলস';
+
+  @override
+  String get visPpeH2s => 'এইচটুএস ব্রিফিং';
+
+  @override
+  String get visFieldEscort => 'কে সঙ্গে থাকবেন';
+
+  @override
+  String get visSheetFinding => 'কী দেখেছেন';
+
+  @override
+  String get visFieldArea => 'কোথায়';
+
+  @override
+  String get visFieldFinding => 'কী ঘটেছে';
+
+  @override
+  String get visFindObs => 'মন্তব্য';
+
+  @override
+  String get visFindCrit => 'গুরুতর';
+
+  @override
+  String get visDoneCheckIn => 'গেটে গ্রহণ করা হয়েছে।';
+
+  @override
+  String get visDoneCheckOut => 'বের করে দেওয়া হয়েছে।';
+
+  @override
+  String get visDonePpe => 'পিপিই নথিভুক্ত হয়েছে।';
+
+  @override
+  String get visDoneEscort => 'সঙ্গী নিয়োগ হয়েছে।';
+
+  @override
+  String get visDoneExtend => 'আরও দুই ঘণ্টা দেওয়া হয়েছে।';
+
+  @override
+  String get visDoneFinding => 'পর্যবেক্ষণ নথিভুক্ত হয়েছে।';
+
+  @override
+  String get visDoneWatch => 'নজরতালিকা খালাস হয়েছে।';
+
+  @override
+  String get visDoneSafe => 'নিরাপদ চিহ্নিত হয়েছে।';
+
+  @override
+  String get visDoneApprove => 'সফর অনুমোদিত। পাস প্রস্তুত।';
+
+  @override
+  String get visDoneDeny => 'সফর অনুমোদিত হয়নি।';
+
+  @override
+  String get visDoneCancel => 'সফর বাতিল হয়েছে।';
+
+  @override
+  String get visDoneCreate => 'অতিথি নিবন্ধিত হয়েছে।';
+
+  @override
+  String get visErrPpe => 'প্রবেশের আগে পিপিই যাচাই করুন।';
+
+  @override
+  String get visErrEscort => 'লাল এলাকায় একজন সঙ্গী দরকার।';
+
+  @override
+  String get visErrWatchlist => 'আগে নিরাপত্তাকে নজরতালিকা খালাস করতে হবে।';
+
+  @override
+  String get visErrBlacklist => 'এই ব্যক্তিকে নিবন্ধন বা প্রবেশ করানো যাবে না।';
+
+  @override
+  String get visErrFull => 'ভিতরে অতিথি বেশি। নিরাপত্তা প্রধানকে বলুন।';
+
+  @override
+  String get visErrExtend => 'আজ ইতিমধ্যে দুবার সময় বাড়ানো হয়েছে।';
+
+  @override
+  String get visErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get visErrName => 'অতিথির নাম লিখুন।';
+
+  @override
+  String get visErrPhone => 'ফোন নম্বর লিখুন।';
+
+  @override
+  String get visErrPurpose => 'কেন আসছেন তা লিখুন।';
+
+  @override
+  String get visErrId => 'এই ধরনের অতিথির পরিচয়পত্র নম্বর দরকার।';
+
+  @override
+  String get visFormIntro =>
+      'কে আসছেন, কেন, এবং কোন এলাকায় যেতে পারবেন তা লিখুন। সাধারণ অতিথি সাথে সাথে পাস পান। ভিআইপি, সরকারি এবং লাল এলাকার সফর সাইট প্রধানের অপেক্ষায় থাকে।';
+
+  @override
+  String get visFieldName => 'অতিথির নাম';
+
+  @override
+  String get visFieldOrg => 'প্রতিষ্ঠান (ঐচ্ছিক)';
+
+  @override
+  String get visFieldPhone => 'ফোন';
+
+  @override
+  String get visFieldCategory => 'তাঁরা কে';
+
+  @override
+  String get visFieldPurpose => 'কেন আসছেন';
+
+  @override
+  String get visFieldWhen => 'কখন আসবেন';
+
+  @override
+  String get visFieldSite => 'কোন সাইট';
+
+  @override
+  String get visSiteHq => 'প্রধান কার্যালয়, বারিধারা';
+
+  @override
+  String get visSitePlant => 'কেরানীগঞ্জ প্ল্যান্ট';
+
+  @override
+  String get visSiteCtg => 'চট্টগ্রাম টার্মিনাল';
+
+  @override
+  String get visFieldZones => 'যে এলাকায় যেতে পারবেন';
+
+  @override
+  String get visFieldIdType => 'পরিচয়পত্রের ধরন';
+
+  @override
+  String get visIdNid => 'জাতীয় পরিচয়পত্র';
+
+  @override
+  String get visIdPass => 'পাসপোর্ট';
+
+  @override
+  String get visIdGovt => 'সরকারি ব্যাজ';
+
+  @override
+  String get visIdCo => 'কোম্পানি আইডি';
+
+  @override
+  String get visFieldIdNo => 'পরিচয়পত্র নম্বর';
+
+  @override
+  String get visFieldPlate => 'গাড়ির নম্বর (ঐচ্ছিক)';
+
+  @override
+  String get visCreate => 'অতিথি নিবন্ধন করুন';
+
+  @override
+  String get visMuster => 'কে কে ভিতরে আছেন';
+
+  @override
+  String visMusterIdle(int count) {
+    return '$count জন অতিথি ভিতরে আছেন। হিসাব করতে হলে হাজিরা শুরু করুন।';
+  }
+
+  @override
+  String visMusterActive(int safe, int inside) {
+    return 'হাজিরা চলছে: $inside-এর মধ্যে $safe জন নিরাপদ।';
+  }
+
+  @override
+  String get visMusterStart => 'হাজিরা শুরু করুন';
+
+  @override
+  String get visMusterEnd => 'হাজিরা শেষ করুন';
+
+  @override
+  String get visMusterMissing => 'এখনো নিরাপদ নন';
+
+  @override
+  String get visMusterSafe => 'নিরাপদ';
+
+  @override
+  String get moduleFleet => 'গাড়ি';
+
+  @override
+  String get flIntro =>
+      'গাড়ি চান, একটি বরাদ্দ করুন, অথবা ট্রিপ চালান। পরবর্তী কাজ প্রতিটি সারিতে আছে।';
+
+  @override
+  String get flNew => 'গাড়ি চান';
+
+  @override
+  String get flSearchHint => 'গন্তব্য বা কারণ খুঁজুন';
+
+  @override
+  String get flSos => 'চালকের সাহায্য';
+
+  @override
+  String get flTabMine => 'আমার';
+
+  @override
+  String get flTabDriving => 'আমার ট্রিপ';
+
+  @override
+  String get flTabEndorse => 'আপনার অপেক্ষায়';
+
+  @override
+  String get flTabDispatch => 'বরাদ্দ করতে';
+
+  @override
+  String get flTabLive => 'পথে';
+
+  @override
+  String get flTabAll => 'সব';
+
+  @override
+  String get flEmpty => 'এখানে কোনো গাড়ির আবেদন নেই।';
+
+  @override
+  String get flEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get flVerdictNone => 'আপনার করার কিছু নেই।';
+
+  @override
+  String flVerdictNeed(int count) {
+    return 'আপনার জন্য $countটি অপেক্ষা করছে';
+  }
+
+  @override
+  String get flStatusDraft => 'খসড়া';
+
+  @override
+  String get flStatusPending => 'বিভাগীয় প্রধানের অপেক্ষায়';
+
+  @override
+  String get flStatusApproved => 'গাড়ির অপেক্ষায়';
+
+  @override
+  String get flStatusAssigned => 'গাড়ি বরাদ্দ';
+
+  @override
+  String get flStatusLive => 'পথে';
+
+  @override
+  String get flStatusDone => 'শেষ';
+
+  @override
+  String get flStatusRejected => 'অনুমোদিত হয়নি';
+
+  @override
+  String get flStatusCancelled => 'বাতিল';
+
+  @override
+  String get flNextSubmit => 'এই আবেদন বিভাগীয় প্রধানের কাছে পাঠান।';
+
+  @override
+  String get flNextWaitHod => 'ফরিদা বেগমের অপেক্ষায়। আপনার করার কিছু নেই।';
+
+  @override
+  String flNextEndorse(String name) {
+    return '$name-এর আবেদন অনুমোদন করুন, অথবা অনুমোদন কেন্দ্র থেকে ফেরত পাঠান।';
+  }
+
+  @override
+  String get flNextAssign => 'একটি খালি গাড়ি ও চালক বেছে নিন।';
+
+  @override
+  String get flNextWaitCar => 'পরিবহন একটি গাড়ি দেবে। আপনার করার কিছু নেই।';
+
+  @override
+  String flNextGateOut(String when) {
+    return '$when এর পর গেট দিয়ে বেরোন।';
+  }
+
+  @override
+  String flNextAssigned(String plate) {
+    return '$plate গেটে অপেক্ষা করছে।';
+  }
+
+  @override
+  String get flNextFinish => 'ফিরে এসে শেষ ওডোমিটার লিখুন।';
+
+  @override
+  String flNextLive(String plate) {
+    return '$plate পথে আছে।';
+  }
+
+  @override
+  String get flNextRate => 'এই ট্রিপ রেটিং দিন।';
+
+  @override
+  String get flNextDone => 'এই ট্রিপ শেষ।';
+
+  @override
+  String get flNextFix => 'আবেদন ঠিক করে আবার পাঠান।';
+
+  @override
+  String get flNextRejected => 'এই আবেদন অনুমোদিত হয়নি।';
+
+  @override
+  String get flNextCancelled => 'এই আবেদন বাতিল হয়েছে।';
+
+  @override
+  String get flTypeOne => 'একমুখী';
+
+  @override
+  String get flTypeRound => 'যাতায়াত';
+
+  @override
+  String get flFormIntro =>
+      'কোথায় যাবেন, কেন, এবং কখন তা লিখুন। বিভাগীয় প্রধান অনুমোদন করবেন। তারপর পরিবহন একটি গাড়ি দেবে।';
+
+  @override
+  String get flFieldPurpose => 'কেন গাড়ি দরকার';
+
+  @override
+  String get flFieldDest => 'কোথায় যাবেন';
+
+  @override
+  String get flFieldType => 'ট্রিপের ধরন';
+
+  @override
+  String get flFieldPax => 'কতজন যাবেন';
+
+  @override
+  String get flFieldWhen => 'কখন বেরোবেন';
+
+  @override
+  String get flFieldNote => 'কী হয়েছে';
+
+  @override
+  String get flFieldNoteOpt => 'নোট (ঐচ্ছিক)';
+
+  @override
+  String get flFieldOdo => 'ওডোমিটার (কিমি)';
+
+  @override
+  String get flFieldSos => 'কী সমস্যা';
+
+  @override
+  String get flFieldPlaza => 'টোল প্লাজা';
+
+  @override
+  String get flFieldAmount => 'পরিমাণ (৳)';
+
+  @override
+  String get flFieldFeedback => 'ট্রিপ কেমন ছিল (ঐচ্ছিক)';
+
+  @override
+  String get flFieldRating => 'স্টার (১ থেকে ৫)';
+
+  @override
+  String get flFieldReason => 'কারণ';
+
+  @override
+  String get flCreate => 'আবেদন পাঠান';
+
+  @override
+  String flEstimate(String km, int minutes, String cost, String cls) {
+    return 'প্রায় $km কিমি, $minutes মিনিট, $cost। পরামর্শ: $cls।';
+  }
+
+  @override
+  String get flWhat => 'এটি কী';
+
+  @override
+  String flWho(String name, String when) {
+    return '$when-এ $name চেয়েছেন।';
+  }
+
+  @override
+  String flMeta(String when, String pax, String cls, String cost) {
+    return '$when-এ বেরোবে। $pax জন। $cls। প্রায় $cost।';
+  }
+
+  @override
+  String flAssigned(String plate, String driver) {
+    return 'গাড়ি $plate, চালক $driver।';
+  }
+
+  @override
+  String flPassNo(String pass) {
+    return 'গেট পাস $pass';
+  }
+
+  @override
+  String get flActAssign => 'গাড়ি বরাদ্দ করুন';
+
+  @override
+  String get flActGateOut => 'গেট দিয়ে বেরোন';
+
+  @override
+  String get flActCheckpoint => 'একটি স্টপ লিখুন';
+
+  @override
+  String get flActComplete => 'ট্রিপ শেষ করুন';
+
+  @override
+  String get flActSos => 'সাহায্য লাগবে';
+
+  @override
+  String get flActToll => 'টোল যোগ করুন';
+
+  @override
+  String get flActRate => 'ট্রিপ রেটিং দিন';
+
+  @override
+  String get flActCancel => 'বাতিল';
+
+  @override
+  String get flActPass => 'গেট পাস দেখুন';
+
+  @override
+  String get flActTollOk => 'অনুমোদন';
+
+  @override
+  String get flActTollPay => 'পরিশোধ চিহ্নিত করুন';
+
+  @override
+  String get flActAck => 'আমরা আসছি';
+
+  @override
+  String get flSheetAssign => 'গাড়ি ও চালক বরাদ্দ করুন';
+
+  @override
+  String get flSheetAssignHelp =>
+      'শুধু খালি এবং বৈধ কাগজপত্রের গাড়ি দেখানো হয়েছে।';
+
+  @override
+  String get flDoneCreate => 'আবেদন বিভাগীয় প্রধানের কাছে পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneAssign => 'গাড়ি বরাদ্দ হয়েছে। চালককে জানানো হয়েছে।';
+
+  @override
+  String get flDoneGateOut => 'ট্রিপ শুরু হয়েছে।';
+
+  @override
+  String get flDoneCheckpoint => 'স্টপ নথিভুক্ত হয়েছে।';
+
+  @override
+  String get flDoneComplete => 'ট্রিপ শেষ।';
+
+  @override
+  String get flDoneSos => 'সাহায্যের অনুরোধ পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneToll => 'টোল পর্যালোচনার জন্য পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneRate => 'রেটিং দেওয়ার জন্য ধন্যবাদ।';
+
+  @override
+  String get flDoneCancel => 'আবেদন বাতিল হয়েছে।';
+
+  @override
+  String get flDoneTollOk => 'টোল অনুমোদিত।';
+
+  @override
+  String get flDoneTollPay => 'টোল পরিশোধ চিহ্নিত।';
+
+  @override
+  String get flDoneAck => 'চালককে জানানো হয়েছে সাহায্য আসছে।';
+
+  @override
+  String get flErrPurpose => 'কেন গাড়ি দরকার তা লিখুন।';
+
+  @override
+  String get flErrLead => 'কমপক্ষে এক ঘণ্টা আগে চান, জরুরি না হলে।';
+
+  @override
+  String get flErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get flErrWindow => 'খুব তাড়াতাড়ি বা দেরি। পরিবহনকে বলুন।';
+
+  @override
+  String get flErrVehicle => 'সেই গাড়ি খালি নয় বা কাগজপত্র মেয়াদোত্তীর্ণ।';
+
+  @override
+  String get flErrDriver => 'সেই চালক এই ট্রিপ নিতে পারবেন না।';
+
+  @override
+  String get flErrNoneFree => 'এই ট্রিপের জন্য কোনো খালি গাড়ি ও চালক নেই।';
+
+  @override
+  String get flTolls => 'টোল';
+
+  @override
+  String get flTimeline => 'কী হয়েছে';
+
+  @override
+  String get flSosIntro =>
+      'চালকদের খোলা অনুরোধ। পরিবহন ও গেট সেগুলো স্বীকার করে।';
+
+  @override
+  String get flSosEmpty => 'কোনো সাহায্যের অনুরোধ নেই।';
+
+  @override
+  String get flSosHelp =>
+      'আপনি কোথায় এবং কী সমস্যা তা লিখুন। পরিবহন ও গেট সাথে সাথে দেখবে।';
+
+  @override
+  String get flSosOpen => 'খোলা';
+
+  @override
+  String get flSosAcked => 'সাহায্য আসছে';
 }

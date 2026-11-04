@@ -1910,5 +1910,438 @@
   "pcSaveChanges": "Save changes",
   "pcCreate": "Create parcel",
   "peopleSearchHint": "Search by name, title or department",
-  "peopleNone": "No one found."
+  "peopleNone": "No one found.",
+  "moduleVisitors": "Guests",
+  "visNew": "Register a guest",
+  "visIntro": "People coming to see you, waiting at the gate, or still inside.",
+  "visSearchHint": "Search by name, VIS-2026-0001 or plate",
+  "visNotFound": "No visit with that number, or you cannot see it.",
+  "visScanNeedGate": "Only the gate can scan a pass.",
+  "visTabMine": "Mine",
+  "visTabExpected": "Expected today",
+  "visTabInside": "Inside now",
+  "visTabOverdue": "Stayed too long",
+  "visTabApprove": "Waiting for you",
+  "visTabAll": "Everything I can see",
+  "visEmpty": "No guests yet.",
+  "visEmptyFiltered": "No guests match.",
+  "visVerdictNone": "Nothing needs you right now.",
+  "visVerdictNeed": "Waiting for you: {count}",
+  "@visVerdictNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visStatusWaiting": "Waiting for approval",
+  "visStatusExpected": "Pass ready",
+  "visStatusInside": "Inside",
+  "visStatusOverdue": "Stayed too long",
+  "visStatusDone": "Left",
+  "visStatusDenied": "Not approved",
+  "visStatusCancelled": "Cancelled",
+  "visCatVip": "VIP",
+  "visCatGovt": "Government",
+  "visCatVendor": "Vendor",
+  "visCatClient": "Client",
+  "visCatContractor": "Contractor",
+  "visCatRegular": "Guest",
+  "visNextWatchlist": "A name matched the watchlist. Clear it or deny the visit.",
+  "visNextWatchlistWait": "Held for a watchlist check. Nothing for you to do.",
+  "visNextApprove": "Approve the visit for {name}.",
+  "@visNextApprove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "visNextHostWait": "Waiting for the site head to approve. Nothing for you to do.",
+  "visNextWaiting": "Waiting for approval.",
+  "visNextPpe": "Check their PPE, then receive them at the gate.",
+  "visNextEscort": "Assign someone to stay with them in the red area.",
+  "visNextCheckIn": "Receive {name} at the gate. Take a photo.",
+  "@visNextCheckIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "visNextHostReady": "Pass is ready. They are expected {when}. Nothing for you to do.",
+  "@visNextHostReady": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "visNextReady": "Pass is ready. Expected {when}.",
+  "@visNextReady": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "visNextCheckOut": "Check {name} out and take the badge back.",
+  "@visNextCheckOut": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "visNextInsideHost": "They are inside. Stay reachable until they leave.",
+  "visNextInside": "Inside the site.",
+  "visNextOverdueAct": "They have stayed too long. Extend the time or check them out.",
+  "visNextOverdue": "They have stayed past the agreed time.",
+  "visNextDone": "They have left.",
+  "visNextDenied": "This visit was not approved.",
+  "visNextCancelled": "Cancelled. Nothing more to do.",
+  "visWatchPill": "Watchlist",
+  "visHostLine": "Host: {name} at {site}",
+  "@visHostLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "visWhenLine": "Expected {start} to {end}",
+  "@visWhenLine": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "visEscortLine": "Escort: {name}",
+  "@visEscortLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "visBadgeLine": "Badge {no}",
+  "@visBadgeLine": {
+    "placeholders": {
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "visZones": "Areas they may enter",
+  "visEscortNeed": "Needs escort",
+  "visFindings": "What was seen",
+  "visDetPhone": "Phone",
+  "visDetId": "ID",
+  "visDetPlate": "Vehicle",
+  "visPpeOk": "PPE was cleared at the gate.",
+  "visPpeNeeded": "PPE must be cleared before they enter.",
+  "visPpeNone": "No special PPE for these areas.",
+  "visActApprove": "Approve visit",
+  "visActDeny": "Do not approve",
+  "visActCancel": "Cancel visit",
+  "visActCheckIn": "Receive at gate",
+  "visActCheckOut": "Check out",
+  "visActPpe": "Clear PPE",
+  "visActEscort": "Assign escort",
+  "visActExtend": "Give two more hours",
+  "visActFinding": "Add a finding",
+  "visActClearWatch": "Clear watchlist",
+  "visActSafe": "Mark as safe",
+  "visActPass": "Show pass",
+  "visApproveMsg": "They will get a pass and can be received at the gate.",
+  "visCheckOutMsg": "Confirm only if they have left and the badge is back.",
+  "visFieldReason": "Reason",
+  "visSheetCheckIn": "Receive at the gate",
+  "visSheetCheckInHelp": "Take a photo. The badge number is issued automatically.",
+  "visPhotoRequired": "Take a photo (required)",
+  "visPhotoAdded": "Photo added",
+  "visFieldNda": "NDA signed",
+  "visFieldBriefing": "Safety briefing done",
+  "visSheetPpe": "Personal protective equipment",
+  "visSheetPpeHelp": "Tick only what they are wearing and have been briefed on.",
+  "visPpeHat": "Hard hat",
+  "visPpeShoes": "Safety shoes",
+  "visPpeVest": "Hi-vis vest",
+  "visPpeGoggles": "Goggles",
+  "visPpeH2s": "H2S briefing",
+  "visFieldEscort": "Who stays with them",
+  "visSheetFinding": "What did you see",
+  "visFieldArea": "Where",
+  "visFieldFinding": "What happened",
+  "visFindObs": "Note",
+  "visFindCrit": "Critical",
+  "visDoneCheckIn": "Received at the gate.",
+  "visDoneCheckOut": "Checked out.",
+  "visDonePpe": "PPE recorded.",
+  "visDoneEscort": "Escort assigned.",
+  "visDoneExtend": "Two more hours given.",
+  "visDoneFinding": "Finding recorded.",
+  "visDoneWatch": "Watchlist cleared.",
+  "visDoneSafe": "Marked safe.",
+  "visDoneApprove": "Visit approved. The pass is ready.",
+  "visDoneDeny": "Visit was not approved.",
+  "visDoneCancel": "Visit cancelled.",
+  "visDoneCreate": "Guest registered.",
+  "visErrPpe": "Clear PPE before they enter.",
+  "visErrEscort": "A red area needs an escort.",
+  "visErrWatchlist": "Security must clear the watchlist first.",
+  "visErrBlacklist": "This person cannot be registered or let in.",
+  "visErrFull": "Too many guests inside. Ask a security lead.",
+  "visErrExtend": "Already extended twice today.",
+  "visErrFailed": "Something went wrong. Please try again.",
+  "visErrName": "Enter the guest name.",
+  "visErrPhone": "Enter a phone number.",
+  "visErrPurpose": "Say why they are coming.",
+  "visErrId": "ID number is required for this kind of guest.",
+  "visFormIntro": "Say who is coming, why, and which areas they may enter. Regular guests get a pass at once. VIP, government and red-area visits wait for the site head.",
+  "visFieldName": "Guest name",
+  "visFieldOrg": "Organisation (optional)",
+  "visFieldPhone": "Phone",
+  "visFieldCategory": "Who they are",
+  "visFieldPurpose": "Why they are coming",
+  "visFieldWhen": "When they arrive",
+  "visFieldSite": "Which site",
+  "visSiteHq": "Head Office, Baridhara",
+  "visSitePlant": "Keraniganj Plant",
+  "visSiteCtg": "Chattogram Terminal",
+  "visFieldZones": "Areas they may enter",
+  "visFieldIdType": "ID type",
+  "visIdNid": "National ID",
+  "visIdPass": "Passport",
+  "visIdGovt": "Government badge",
+  "visIdCo": "Company ID",
+  "visFieldIdNo": "ID number",
+  "visFieldPlate": "Vehicle plate (optional)",
+  "visCreate": "Register guest",
+  "visMuster": "Who is inside",
+  "visMusterIdle": "{count} guests are inside. Start a roll-call if you need to account for them.",
+  "@visMusterIdle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visMusterActive": "Roll-call on: {safe} of {inside} marked safe.",
+  "@visMusterActive": {
+    "placeholders": {
+      "safe": {
+        "type": "int"
+      },
+      "inside": {
+        "type": "int"
+      }
+    }
+  },
+  "visMusterStart": "Start roll-call",
+  "visMusterEnd": "End roll-call",
+  "visMusterMissing": "Not yet safe",
+  "visMusterSafe": "Safe",
+  "moduleFleet": "Cars",
+  "flIntro": "Ask for a car, assign one, or drive the trip. The next step is on each row.",
+  "flNew": "Ask for a car",
+  "flSearchHint": "Search destination or purpose",
+  "flSos": "Driver help",
+  "flTabMine": "Mine",
+  "flTabDriving": "My trips",
+  "flTabEndorse": "Waiting for you",
+  "flTabDispatch": "To assign",
+  "flTabLive": "On the road",
+  "flTabAll": "All",
+  "flEmpty": "No vehicle requests here.",
+  "flEmptyFiltered": "Nothing matches that search.",
+  "flVerdictNone": "Nothing waiting on you.",
+  "flVerdictNeed": "{count} waiting on you",
+  "@flVerdictNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "flStatusDraft": "Draft",
+  "flStatusPending": "Waiting for your head of department",
+  "flStatusApproved": "Waiting for a car",
+  "flStatusAssigned": "Car assigned",
+  "flStatusLive": "On the road",
+  "flStatusDone": "Finished",
+  "flStatusRejected": "Not approved",
+  "flStatusCancelled": "Cancelled",
+  "flNextSubmit": "Send this request to your head of department.",
+  "flNextWaitHod": "Waiting for Farida Begum. Nothing for you to do.",
+  "flNextEndorse": "Endorse {name}’s request, or send it back from Approvals.",
+  "@flNextEndorse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "flNextAssign": "Choose a free car and a driver.",
+  "flNextWaitCar": "Transport will assign a car. Nothing for you to do.",
+  "flNextGateOut": "Leave through the gate after {when}.",
+  "@flNextGateOut": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "flNextAssigned": "{plate} is waiting at the gate.",
+  "@flNextAssigned": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "flNextFinish": "Record the last odometer when you return.",
+  "flNextLive": "{plate} is on the way.",
+  "@flNextLive": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "flNextRate": "Rate this trip.",
+  "flNextDone": "This trip is finished.",
+  "flNextFix": "Fix the request and send it again.",
+  "flNextRejected": "This request was not approved.",
+  "flNextCancelled": "This request was cancelled.",
+  "flTypeOne": "One way",
+  "flTypeRound": "There and back",
+  "flFormIntro": "Say where you are going, why, and when. Your head of department endorses it. Transport then gives you a car.",
+  "flFieldPurpose": "Why you need a car",
+  "flFieldDest": "Where you are going",
+  "flFieldType": "Trip type",
+  "flFieldPax": "How many people",
+  "flFieldWhen": "When you leave",
+  "flFieldNote": "What happened",
+  "flFieldNoteOpt": "Note (optional)",
+  "flFieldOdo": "Odometer (km)",
+  "flFieldSos": "What is wrong",
+  "flFieldPlaza": "Toll plaza",
+  "flFieldAmount": "Amount (৳)",
+  "flFieldFeedback": "How was the trip (optional)",
+  "flFieldRating": "Stars (1 to 5)",
+  "flFieldReason": "Reason",
+  "flCreate": "Send request",
+  "flEstimate": "About {km} km, {minutes} minutes, {cost}. Suggested: {cls}.",
+  "@flEstimate": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "cls": {
+        "type": "String"
+      }
+    }
+  },
+  "flWhat": "What is this",
+  "flWho": "Asked by {name} on {when}.",
+  "@flWho": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "flMeta": "Leaves {when}. {pax} people. {cls}. About {cost}.",
+  "@flMeta": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "pax": {
+        "type": "String"
+      },
+      "cls": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "flAssigned": "Car {plate} with {driver}.",
+  "@flAssigned": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "flPassNo": "Gate pass {pass}",
+  "@flPassNo": {
+    "placeholders": {
+      "pass": {
+        "type": "String"
+      }
+    }
+  },
+  "flActAssign": "Assign a car",
+  "flActGateOut": "Leave the gate",
+  "flActCheckpoint": "Record a stop",
+  "flActComplete": "Finish the trip",
+  "flActSos": "Need help",
+  "flActToll": "Add a toll",
+  "flActRate": "Rate the trip",
+  "flActCancel": "Cancel",
+  "flActPass": "Show gate pass",
+  "flActTollOk": "Approve",
+  "flActTollPay": "Mark paid",
+  "flActAck": "We are coming",
+  "flSheetAssign": "Assign a car and a driver",
+  "flSheetAssignHelp": "Only free cars with valid papers are listed.",
+  "flDoneCreate": "Request sent to your head of department.",
+  "flDoneAssign": "Car assigned. The driver has been told.",
+  "flDoneGateOut": "The trip has started.",
+  "flDoneCheckpoint": "Stop recorded.",
+  "flDoneComplete": "Trip finished.",
+  "flDoneSos": "Help request sent.",
+  "flDoneToll": "Toll sent for review.",
+  "flDoneRate": "Thank you for the rating.",
+  "flDoneCancel": "Request cancelled.",
+  "flDoneTollOk": "Toll approved.",
+  "flDoneTollPay": "Toll marked paid.",
+  "flDoneAck": "The driver has been told help is coming.",
+  "flErrPurpose": "Say why you need the car.",
+  "flErrLead": "Ask at least one hour ahead, unless it is critical.",
+  "flErrFailed": "Something went wrong. Please try again.",
+  "flErrWindow": "Too early or too late. Ask transport to override.",
+  "flErrVehicle": "That car is not free or its papers have expired.",
+  "flErrDriver": "That driver cannot take this trip.",
+  "flErrNoneFree": "No free car and driver fit this trip.",
+  "flTolls": "Tolls",
+  "flTimeline": "What happened",
+  "flSosIntro": "Open calls from drivers. Transport and the gate acknowledge them.",
+  "flSosEmpty": "No help requests.",
+  "flSosHelp": "Say where you are and what is wrong. Transport and the gate will see this at once.",
+  "flSosOpen": "Open",
+  "flSosAcked": "Help is coming"
 }

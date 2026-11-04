@@ -15,6 +15,10 @@ import 'package:bogcl_oneops/features/claims/presentation/advance_request_screen
 import 'package:bogcl_oneops/features/claims/presentation/claim_detail_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_edit_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claims_screen.dart';
+import 'package:bogcl_oneops/features/fleet/presentation/fleet_detail_screen.dart';
+import 'package:bogcl_oneops/features/fleet/presentation/fleet_new_screen.dart';
+import 'package:bogcl_oneops/features/fleet/presentation/fleet_screen.dart';
+import 'package:bogcl_oneops/features/fleet/presentation/fleet_sos_screen.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_apply_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_detail_screen.dart';
@@ -31,6 +35,10 @@ import 'package:bogcl_oneops/features/outbox/presentation/outbox_screen.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_detail_screen.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_edit_screen.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcels_screen.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visit_muster_screen.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitor_detail_screen.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitor_register_screen.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitors_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -154,6 +162,46 @@ GoRouter router(Ref ref) {
                             ),
                           ),
                         ],
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'visits',
+                    builder: (context, state) => const VisitorsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) =>
+                            const VisitorRegisterScreen(),
+                      ),
+                      GoRoute(
+                        path: 'muster',
+                        builder: (context, state) => const VisitMusterScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => VisitorDetailScreen(
+                          id: state.pathParameters['id']!,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'fleet',
+                    builder: (context, state) => const FleetScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const FleetNewScreen(),
+                      ),
+                      GoRoute(
+                        path: 'sos',
+                        builder: (context, state) => const FleetSosScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            FleetDetailScreen(id: state.pathParameters['id']!),
                       ),
                     ],
                   ),

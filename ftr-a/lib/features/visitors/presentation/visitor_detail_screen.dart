@@ -1,398 +1,606 @@
+import 'dart:async';
+
 import 'package:bogcl_oneops/app/l10n_ext.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
-import 'package:bogcl_oneops/core/utils/haptics.dart';
-import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/features/visitors/data/visitor_repository.dart';
 import 'package:bogcl_oneops/features/visitors/domain/visitor_models.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitor_pass.dart';
 import 'package:bogcl_oneops/features/visitors/presentation/visitor_providers.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitor_ui.dart';
+import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
+import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-class VisitorDetailScreen extends ConsumerWidget {
+class VisitorDetailScreen extends ConsumerStatefulWidget {
   const VisitorDetailScreen({required this.id, super.key});
 
   final String id;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(visitorDetailProvider(id));
-    return async.when(
-      loading: () =>
-          Scaffold(appBar: AppBar(), body: const SkeletonList()),
-      error: (e, _) => Scaffold(
-        appBar: AppBar(),
-        body: ErrorState(
-          onRetry: () => ref.invalidate(visitorDetailProvider(id)),
-        ),
-      ),
-      data: (visitor) => _Detail(visitor: visitor),
-    );
+  ConsumerState<VisitorDetailScreen> createState() =>
+      _VisitorDetailScreenState();
+}
+
+class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
+  bool _busy = false;
+
+  VisitorRepository get _repo => ref.read(visitorRepositoryProvider);
+
+  void _refresh() => ref
+    ..invalidate(visitDetailProvider)
+    ..invalidate(visitsProvider);
+
+  String _err(ApiException e) {
+    final l10n = context.l10n;
+    return switch (e.rule) {
+      'PPE_NOT_CLEARED' => l10n.visErrPpe,
+      'ESCORT_REQUIRED' => l10n.visErrEscort,
+      'WATCHLIST_HIT' => l10n.visErrWatchlist,
+      'VISITOR_BLACKLISTED' => l10n.visErrBlacklist,
+      'SITE_FULL' => l10n.visErrFull,
+      'EXTEND_LIMIT' => l10n.visErrExtend,
+      _ =>
+        e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
+            ? l10n.claimErrOffline
+            : l10n.visErrFailed,
+    };
   }
-}
 
-class _Detail extends ConsumerStatefulWidget {
-  const _Detail({required this.visitor});
-  final Visitor visitor;
-
-  @override
-  ConsumerState<_Detail> createState() => _DetailState();
-}
-
-class _DetailState extends ConsumerState<_Detail> {
-  bool _loading = false;
-
-  Future<void> _act(
-    BuildContext context,
-    String title,
-    String confirm,
-    Future<Visitor> Function(VisitorRepository) action,
-  ) async {
-    final ok = await showConfirmSheet(
-      context: context,
-      title: title,
-      message: confirm,
-    );
-    if (!ok) return;
-    setState(() => _loading = true);
+  Future<void> _run(Future<void> Function() call, String done) async {
+    setState(() => _busy = true);
     try {
-      final repo = ref.read(visitorRepositoryProvider);
-      await action(repo);
-      if (context.mounted) {
-        ref.invalidate(visitorDetailProvider(widget.visitor.id));
-        AppHaptics.success();
-        showAppToast(context, context.l10n.visActionDone, tone: ToastTone.success);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        showAppToast(context, e.toString(), tone: ToastTone.error);
-      }
+      await call();
+      _refresh();
+      if (!mounted) return;
+      AppToast.show(context, done, tone: StatusTone.success);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(context, _err(e), tone: StatusTone.danger);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
+  Future<void> _confirm(
+    Visit v,
+    String verb,
+    String title,
+    String msg,
+    String done,
+  ) async {
+    final ok = await showConfirmSheet(
+      context,
+      title: title,
+      message: msg,
+      confirmLabel: title,
+    );
+    if (!ok || !mounted) return;
+    await _run(() => _repo.act(v.id, verb), done);
+  }
+
+  Future<void> _reason(Visit v, String verb, String title, String done) async {
+    final c = TextEditingController();
+    final body = await showModalBottomSheet<Map<String, Object?>>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          Space.lg,
+          0,
+          Space.lg,
+          MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: Space.md),
+            AppTextField(
+              label: context.l10n.visFieldReason,
+              controller: c,
+              maxLines: 3,
+            ),
+            const SizedBox(height: Space.md),
+            PrimaryButton(
+              label: title,
+              onPressed: () => Navigator.pop(ctx, {'reason': c.text.trim()}),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(v.id, verb, body), done);
+  }
+
+  Future<void> _checkIn(Visit v) async {
+    final l10n = context.l10n;
+    String? photoId;
+    var nda = false;
+    var brief = false;
+    var uploading = false;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
+            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.visSheetCheckIn,
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+              const SizedBox(height: Space.xs),
+              Text(l10n.visSheetCheckInHelp),
+              const SizedBox(height: Space.md),
+              OutlinedButton.icon(
+                onPressed: uploading
+                    ? null
+                    : () async {
+                        final picked = await pickAttachment(
+                          ctx,
+                          allowFiles: false,
+                        );
+                        if (picked == null) return;
+                        set(() => uploading = true);
+                        try {
+                          final up = ref.read(uploadServiceProvider);
+                          final meta = await up.upload(
+                            picked,
+                            purpose: 'PHOTO',
+                          );
+                          await up.awaitClean(meta.id);
+                          photoId = meta.id;
+                        } finally {
+                          set(() => uploading = false);
+                        }
+                      },
+                icon: Icon(
+                  photoId == null ? Icons.photo_camera_outlined : Icons.check,
+                ),
+                label: Text(
+                  photoId == null ? l10n.visPhotoRequired : l10n.visPhotoAdded,
+                ),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.visFieldNda),
+                value: nda,
+                onChanged: (x) => set(() => nda = x),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.visFieldBriefing),
+                value: brief,
+                onChanged: (x) => set(() => brief = x),
+              ),
+              PrimaryButton(
+                label: l10n.visActCheckIn,
+                onPressed: photoId == null
+                    ? null
+                    : () => Navigator.pop(ctx, true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (ok != true || photoId == null || !mounted) return;
+    await _run(
+      () => _repo.act(v.id, 'check-in', {
+        'photoFileId': photoId,
+        'ndaSigned': nda,
+        'safetyBriefingDone': brief,
+      }),
+      l10n.visDoneCheckIn,
+    );
+  }
+
+  Future<void> _ppe(Visit v) async {
+    final l10n = context.l10n;
+    final flags = {
+      'hardHat': false,
+      'shoes': false,
+      'hiVisVest': false,
+      'goggles': false,
+      'h2sBriefing': false,
+    };
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.visSheetPpe, style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: Space.sm),
+              Text(l10n.visSheetPpeHelp),
+              for (final e in [
+                ('hardHat', l10n.visPpeHat),
+                ('shoes', l10n.visPpeShoes),
+                ('hiVisVest', l10n.visPpeVest),
+                if (v.escortRequired) ('goggles', l10n.visPpeGoggles),
+                if (v.escortRequired) ('h2sBriefing', l10n.visPpeH2s),
+              ])
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(e.$2),
+                  value: flags[e.$1],
+                  onChanged: (x) => set(() => flags[e.$1] = x ?? false),
+                ),
+              PrimaryButton(
+                label: l10n.visActPpe,
+                onPressed: () => Navigator.pop(ctx, true),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    await _run(() => _repo.act(v.id, 'ppe', flags), l10n.visDonePpe);
+  }
+
+  Future<void> _escort(Visit v) async {
+    final pick = await showPersonPicker(
+      context,
+      title: context.l10n.visFieldEscort,
+    );
+    if (pick == null || !mounted) return;
+    await _run(
+      () => _repo.act(v.id, 'escort', {'escortUserId': pick.person.userId}),
+      context.l10n.visDoneEscort,
+    );
+  }
+
+  Future<void> _extend(Visit v) async {
+    final l10n = context.l10n;
+    final end = DateTime.now().toUtc().add(const Duration(hours: 2));
+    await _run(
+      () => _repo.act(v.id, 'extend', {'expectedEndAt': end.toIso8601String()}),
+      l10n.visDoneExtend,
+    );
+  }
+
+  Future<void> _finding(Visit v) async {
+    final l10n = context.l10n;
+    final area = TextEditingController();
+    final note = TextEditingController();
+    var status = 'OBSERVATION';
+    final body = await showModalBottomSheet<Map<String, Object?>>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, set) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
+            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.visSheetFinding,
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+              const SizedBox(height: Space.md),
+              AppTextField(label: l10n.visFieldArea, controller: area),
+              const SizedBox(height: Space.sm),
+              AppTextField(
+                label: l10n.visFieldFinding,
+                controller: note,
+                maxLines: 3,
+              ),
+              const SizedBox(height: Space.sm),
+              SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: 'OBSERVATION',
+                    label: Text(l10n.visFindObs),
+                  ),
+                  ButtonSegment(
+                    value: 'CRITICAL',
+                    label: Text(l10n.visFindCrit),
+                  ),
+                ],
+                selected: {status},
+                onSelectionChanged: (s) => set(() => status = s.first),
+              ),
+              const SizedBox(height: Space.md),
+              PrimaryButton(
+                label: l10n.visActFinding,
+                onPressed: () => Navigator.pop(ctx, {
+                  'area': area.text.trim(),
+                  'finding': note.text.trim(),
+                  'status': status,
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(v.id, 'findings', body), l10n.visDoneFinding);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final visitor = widget.visitor;
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final session = ref.watch(sessionControllerProvider).value;
-    final isGate = session?.profile.roles.contains('SECURITY_GATE') ?? false;
-    final isOwner =
-        session?.profile.id == null
-            ? false
-            : visitor.createdBy.isNotEmpty;
-
-    final canCheckIn = isGate && visitor.status == VisitorStatus.preRegistered;
-    final canCheckOut = isGate && visitor.status == VisitorStatus.checkedIn;
-    final canCancel =
-        visitor.status == VisitorStatus.preRegistered &&
-        (isOwner || isGate);
-
+    final async = ref.watch(visitDetailProvider(widget.id));
+    final v = async.value;
     return Scaffold(
       appBar: AppBar(
-        title: Text(visitor.refNo),
+        title: Text(v?.visitNo ?? l10n.moduleVisitors),
         actions: [
-          _StatusChip(status: visitor.status),
-          const SizedBox(width: Space.md),
+          if (v?.qrToken != null)
+            IconButton(
+              tooltip: l10n.visActPass,
+              onPressed: () => unawaited(printVisitPass(v!)),
+              icon: const Icon(Icons.qr_code_2_outlined),
+            ),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.only(bottom: Space.xxxl),
-              children: [
-                // Identity card
-                _Section(
-                  title: l10n.visIdentity,
-                  children: [
-                    _Row(l10n.visName, visitor.name),
-                    if (visitor.organization.isNotEmpty)
-                      _Row(l10n.visOrganization, visitor.organization),
-                    if (visitor.designation.isNotEmpty)
-                      _Row(l10n.visDesignation, visitor.designation),
-                    _Row(l10n.visCategory, _categoryLabel(l10n, visitor.category)),
-                    if (visitor.phone != null)
-                      _Row(l10n.visPhone, visitor.phone!),
-                    if (visitor.email != null)
-                      _Row(l10n.visEmail, visitor.email!),
-                    if (visitor.idProofType != null)
-                      _Row(
-                        l10n.visIdProof,
-                        '${visitor.idProofType} — ${visitor.idProofNumber ?? ''}',
+      bottomNavigationBar: v == null ? null : _bar(v),
+      body: async.when(
+        loading: () => const SkeletonList(),
+        error: (_, _) => ErrorState(
+          onRetry: () => ref.invalidate(visitDetailProvider(widget.id)),
+        ),
+        data: (v) => RefreshIndicator(
+          onRefresh: () async {
+            _refresh();
+            await ref.read(visitDetailProvider(widget.id).future);
+          },
+          child: _Body(visit: v),
+        ),
+      ),
+    );
+  }
+
+  Widget? _bar(Visit v) {
+    final l10n = context.l10n;
+    final m = v.me;
+    final actions = <(String, VoidCallback)>[
+      if (m.canClearWatchlist)
+        (
+          l10n.visActClearWatch,
+          () => unawaited(
+            _run(
+              () => _repo.act(v.id, 'watchlist', {'action': 'clear'}),
+              l10n.visDoneWatch,
+            ),
+          ),
+        ),
+      if (m.canApprove)
+        (
+          l10n.visActApprove,
+          () => unawaited(
+            _confirm(
+              v,
+              'approve',
+              l10n.visActApprove,
+              l10n.visApproveMsg,
+              l10n.visDoneApprove,
+            ),
+          ),
+        ),
+      if (m.canPpe && v.ppeRequired && !v.ppeCleared)
+        (l10n.visActPpe, () => unawaited(_ppe(v))),
+      if (m.canEscort && v.escortRequired && v.escort == null)
+        (l10n.visActEscort, () => unawaited(_escort(v))),
+      if (m.canCheckIn) (l10n.visActCheckIn, () => unawaited(_checkIn(v))),
+      if (m.canCheckOut)
+        (
+          l10n.visActCheckOut,
+          () => unawaited(
+            _confirm(
+              v,
+              'check-out',
+              l10n.visActCheckOut,
+              l10n.visCheckOutMsg,
+              l10n.visDoneCheckOut,
+            ),
+          ),
+        ),
+      if (m.canExtend) (l10n.visActExtend, () => unawaited(_extend(v))),
+      if (m.canMusterSafe && v.musterSafeAt == null)
+        (
+          l10n.visActSafe,
+          () => unawaited(
+            _run(() => _repo.act(v.id, 'muster-safe'), l10n.visDoneSafe),
+          ),
+        ),
+      if (m.canFinding) (l10n.visActFinding, () => unawaited(_finding(v))),
+      if (m.canDeny)
+        (
+          l10n.visActDeny,
+          () =>
+              unawaited(_reason(v, 'deny', l10n.visActDeny, l10n.visDoneDeny)),
+        ),
+      if (m.canCancel)
+        (
+          l10n.visActCancel,
+          () => unawaited(
+            _reason(v, 'cancel', l10n.visActCancel, l10n.visDoneCancel),
+          ),
+        ),
+    ];
+    if (actions.isEmpty) return null;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(Space.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (i, a) in actions.indexed)
+              Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : Space.sm),
+                child: i == 0
+                    ? PrimaryButton(
+                        label: a.$1,
+                        loading: _busy,
+                        onPressed: a.$2,
+                      )
+                    : PrimaryButton.secondary(
+                        label: a.$1,
+                        onPressed: _busy ? null : a.$2,
                       ),
-                    if (visitor.vehiclePlate != null)
-                      _Row(l10n.visVehicle, visitor.vehiclePlate!),
-                    if (visitor.badgeNo != null)
-                      _Row(l10n.visBadge, visitor.badgeNo!),
-                  ],
-                ),
-                // Visit details
-                _Section(
-                  title: l10n.visVisitDetails,
-                  children: [
-                    _Row(l10n.visHost, visitor.hostName),
-                    _Row(l10n.visHostDept, visitor.hostDept),
-                    _Row(l10n.visPurpose, visitor.purpose),
-                    _Row(
-                      l10n.visExpected,
-                      '${visitor.expectedDate}  ${visitor.expectedTime}',
-                    ),
-                    if (visitor.checkInTime != null)
-                      _Row(
-                        l10n.visCheckIn,
-                        _fmtTime(visitor.checkInTime!),
-                      ),
-                    if (visitor.checkOutTime != null)
-                      _Row(
-                        l10n.visCheckOut,
-                        _fmtTime(visitor.checkOutTime!),
-                      ),
-                    if (visitor.durationMinutes != null)
-                      _Row(
-                        l10n.visDuration,
-                        _fmtDuration(visitor.durationMinutes!),
-                      ),
-                  ],
-                ),
-                // Safety
-                _Section(
-                  title: l10n.visSafety,
-                  children: [
-                    _BoolRow(
-                      l10n.visSafetyBriefing,
-                      visitor.safetyBriefingCompleted,
-                    ),
-                    _BoolRow(l10n.visNda, visitor.ndaSigned),
-                    _BoolRow(l10n.visPpeHardHat, visitor.ppeCleared.hardHat),
-                    _BoolRow(l10n.visPpeGoggles, visitor.ppeCleared.safetyGoggles),
-                    _BoolRow(l10n.visPpeShoes, visitor.ppeCleared.safetyShoes),
-                    _BoolRow(l10n.visPpeVest, visitor.ppeCleared.hiVisVest),
-                    _BoolRow(l10n.visPpeH2s, visitor.ppeCleared.h2sBriefing),
-                  ],
-                ),
-                // Zones
-                if (visitor.permittedZones.isNotEmpty)
-                  _Section(
-                    title: l10n.visZones,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Body extends StatelessWidget {
+  const _Body({required this.visit});
+
+  final Visit visit;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final lang = bangla ? 'bn' : 'en';
+    final theme = Theme.of(context);
+    final v = visit;
+    return ListView(
+      padding: const EdgeInsets.only(bottom: Space.xxl),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(Space.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: Space.sm,
+                    runSpacing: Space.xs,
                     children: [
-                      for (final z in visitor.permittedZones)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Space.lg,
-                            vertical: Space.xs,
-                          ),
-                          child: Row(
-                            children: [
-                              _ZoneDot(level: z.level),
-                              const SizedBox(width: Space.sm),
-                              Expanded(child: Text(z.name)),
-                              if (z.escortRequired)
-                                Chip(
-                                  label: Text(
-                                    l10n.visEscortRequired,
-                                    style: theme.textTheme.labelSmall,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                            ],
-                          ),
+                      StatusPill(
+                        label: visitStatusLabel(l10n, v.status),
+                        tone: visitStatusTone(v.status),
+                      ),
+                      StatusPill(
+                        label: visitCategoryLabel(l10n, v.category),
+                        tone: v.category == 'VIP' || v.category == 'GOVT'
+                            ? StatusTone.executive
+                            : StatusTone.neutral,
+                      ),
+                      if (v.watchlistHit)
+                        StatusPill(
+                          label: l10n.visWatchPill,
+                          tone: StatusTone.danger,
+                        ),
+                      if (v.status == 'OVERDUE')
+                        StatusPill(
+                          label: l10n.visStatusOverdue,
+                          tone: StatusTone.danger,
                         ),
                     ],
                   ),
-                // Actions
-                if (canCheckIn || canCheckOut || canCancel)
-                  Padding(
-                    padding: const EdgeInsets.all(Space.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (canCheckIn)
-                          FilledButton.icon(
-                            onPressed: () => _act(
-                              context,
-                              l10n.visCheckInTitle,
-                              l10n.visCheckInConfirm,
-                              (r) => r.checkIn(visitor.id),
-                            ),
-                            icon: const Icon(Icons.login),
-                            label: Text(l10n.visCheckIn),
-                          ),
-                        if (canCheckOut) ...[
-                          const SizedBox(height: Space.sm),
-                          OutlinedButton.icon(
-                            onPressed: () => _act(
-                              context,
-                              l10n.visCheckOutTitle,
-                              l10n.visCheckOutConfirm,
-                              (r) => r.checkOut(visitor.id),
-                            ),
-                            icon: const Icon(Icons.logout),
-                            label: Text(l10n.visCheckOut),
-                          ),
-                        ],
-                        if (canCancel) ...[
-                          const SizedBox(height: Space.sm),
-                          TextButton(
-                            onPressed: () => _act(
-                              context,
-                              l10n.visCancelTitle,
-                              l10n.visCancelConfirm,
-                              (r) => r.cancel(visitor.id),
-                            ),
-                            child: Text(
-                              l10n.visCancel,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                  const SizedBox(height: Space.md),
+                  Text(v.guest.fullName, style: theme.textTheme.titleLarge),
+                  if (v.guest.organisation != null) Text(v.guest.organisation!),
+                  const SizedBox(height: Space.xs),
+                  Text(v.purpose, style: theme.textTheme.bodyMedium),
+                  const SizedBox(height: Space.md),
+                  Text(
+                    l10n.visHostLine(
+                      v.host.display(bangla: bangla),
+                      v.site.label(bangla: bangla),
                     ),
                   ),
-              ],
-            ),
-    );
-  }
-
-  String _fmtTime(DateTime dt) {
-    final h = dt.hour.toString().padLeft(2, '0');
-    final m = dt.minute.toString().padLeft(2, '0');
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}  $h:$m';
-  }
-
-  String _fmtDuration(int minutes) {
-    if (minutes < 60) return '${minutes}m';
-    return '${minutes ~/ 60}h ${minutes % 60}m';
-  }
-
-  String _categoryLabel(dynamic l10n, VisitorCategory cat) {
-    return switch (cat) {
-      VisitorCategory.vip => l10n.visVip as String,
-      VisitorCategory.govt => l10n.visGovt as String,
-      VisitorCategory.vendor => l10n.visVendor as String,
-      VisitorCategory.client => l10n.visClient as String,
-      VisitorCategory.regular => l10n.visRegular as String,
-    };
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [SectionHeader(title: title), ...children],
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value);
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Space.lg,
-        vertical: Space.xs,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                  Text(
+                    l10n.visWhenLine(
+                      DateFmt.dateTime(v.expectedAt, lang),
+                      DateFmt.dateTime(v.expectedEndAt, lang),
+                    ),
+                  ),
+                  if (v.escort != null)
+                    Text(l10n.visEscortLine(v.escort!.display(bangla: bangla))),
+                  if (v.badgeNo != null) Text(l10n.visBadgeLine(v.badgeNo!)),
+                  const Divider(height: Space.xl),
+                  Text(
+                    visitNextLine(l10n, v, bangla: bangla),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ],
               ),
             ),
           ),
-          Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
-        ],
-      ),
-    );
-  }
-}
-
-class _BoolRow extends StatelessWidget {
-  const _BoolRow(this.label, this.value);
-  final String label;
-  final bool value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Space.lg,
-        vertical: Space.xs,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            value ? Icons.check_circle_outline : Icons.radio_button_unchecked,
-            size: 18,
-            color: value
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outlineVariant,
+        ),
+        SectionHeader(title: l10n.visZones),
+        for (final z in v.zones)
+          ListRow(
+            title: z.label(bangla: bangla),
+            subtitle: z.level,
+            trailing: z.escortRequired
+                ? StatusPill(
+                    label: l10n.visEscortNeed,
+                    tone: StatusTone.warning,
+                  )
+                : null,
           ),
-          const SizedBox(width: Space.sm),
-          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+        if (v.findings.isNotEmpty) ...[
+          SectionHeader(title: l10n.visFindings),
+          for (final f in v.findings)
+            ListRow(
+              title: f.finding,
+              subtitle: '${f.area} · ${DateFmt.dateTime(f.at, lang)}',
+            ),
         ],
-      ),
+        ExpansionTile(
+          title: Text(l10n.nsDetails),
+          childrenPadding: const EdgeInsets.all(Space.lg),
+          children: [
+            if (v.guest.phoneMasked != null)
+              Text('${l10n.visDetPhone}: ${v.guest.phoneMasked}'),
+            if (v.guest.idProofLast4 != null)
+              Text(
+                '${l10n.visDetId}: ${v.guest.idProofType} ••••${v.guest.idProofLast4}',
+              ),
+            if (v.vehiclePlate != null)
+              Text('${l10n.visDetPlate}: ${v.vehiclePlate}'),
+            Text(
+              v.ppeRequired
+                  ? (v.ppeCleared ? l10n.visPpeOk : l10n.visPpeNeeded)
+                  : l10n.visPpeNone,
+            ),
+          ],
+        ),
+      ],
     );
-  }
-}
-
-class _ZoneDot extends StatelessWidget {
-  const _ZoneDot({required this.level});
-  final String level;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (level) {
-      'red' => Theme.of(context).colorScheme.error,
-      'yellow' => const Color(0xFFD97706),
-      _ => const Color(0xFF059669),
-    };
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-  final VisitorStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final (label, tone) = switch (status) {
-      VisitorStatus.preRegistered => (l10n.visStatusExpected, StatusTone.info),
-      VisitorStatus.checkedIn => (l10n.visStatusInside, StatusTone.success),
-      VisitorStatus.checkedOut => (l10n.visStatusDone, StatusTone.neutral),
-      VisitorStatus.overdue => (l10n.visStatusOverdue, StatusTone.danger),
-      VisitorStatus.cancelled => (l10n.visStatusCancelled, StatusTone.neutral),
-    };
-    return StatusPill(label: label, tone: tone);
   }
 }

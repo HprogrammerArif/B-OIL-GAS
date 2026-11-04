@@ -12,6 +12,7 @@ import 'package:bogcl_oneops/mock/handlers/bus_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/claim_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/file_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/fleet_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/leave_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/me_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/note_sheet_handlers.dart';
@@ -19,6 +20,7 @@ import 'package:bogcl_oneops/mock/handlers/notice_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/notification_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/parcel_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/people_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/visitor_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/workflow_handlers.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/mock_config.dart';
@@ -74,6 +76,8 @@ class MockServer {
       ...noteSheetRoutes(),
       ...parcelRoutes(),
       ...peopleRoutes(),
+      ...visitorRoutes(),
+      ...fleetRoutes(),
     ]);
   }
 

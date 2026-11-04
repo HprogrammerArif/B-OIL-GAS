@@ -6113,6 +6113,1482 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'No one found.'**
   String get peopleNone;
+
+  /// No description provided for @moduleVisitors.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests'**
+  String get moduleVisitors;
+
+  /// No description provided for @visNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a guest'**
+  String get visNew;
+
+  /// No description provided for @visIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'People coming to see you, waiting at the gate, or still inside.'**
+  String get visIntro;
+
+  /// No description provided for @visSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, VIS-2026-0001 or plate'**
+  String get visSearchHint;
+
+  /// No description provided for @visNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No visit with that number, or you cannot see it.'**
+  String get visNotFound;
+
+  /// No description provided for @visScanNeedGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the gate can scan a pass.'**
+  String get visScanNeedGate;
+
+  /// No description provided for @visTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get visTabMine;
+
+  /// No description provided for @visTabExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected today'**
+  String get visTabExpected;
+
+  /// No description provided for @visTabInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside now'**
+  String get visTabInside;
+
+  /// No description provided for @visTabOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed too long'**
+  String get visTabOverdue;
+
+  /// No description provided for @visTabApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get visTabApprove;
+
+  /// No description provided for @visTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything I can see'**
+  String get visTabAll;
+
+  /// No description provided for @visEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No guests yet.'**
+  String get visEmpty;
+
+  /// No description provided for @visEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No guests match.'**
+  String get visEmptyFiltered;
+
+  /// No description provided for @visVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs you right now.'**
+  String get visVerdictNone;
+
+  /// No description provided for @visVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you: {count}'**
+  String visVerdictNeed(int count);
+
+  /// No description provided for @visStatusWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get visStatusWaiting;
+
+  /// No description provided for @visStatusExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass ready'**
+  String get visStatusExpected;
+
+  /// No description provided for @visStatusInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside'**
+  String get visStatusInside;
+
+  /// No description provided for @visStatusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed too long'**
+  String get visStatusOverdue;
+
+  /// No description provided for @visStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get visStatusDone;
+
+  /// No description provided for @visStatusDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get visStatusDenied;
+
+  /// No description provided for @visStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get visStatusCancelled;
+
+  /// No description provided for @visCatVip.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get visCatVip;
+
+  /// No description provided for @visCatGovt.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get visCatGovt;
+
+  /// No description provided for @visCatVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor'**
+  String get visCatVendor;
+
+  /// No description provided for @visCatClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get visCatClient;
+
+  /// No description provided for @visCatContractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Contractor'**
+  String get visCatContractor;
+
+  /// No description provided for @visCatRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get visCatRegular;
+
+  /// No description provided for @visNextWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'A name matched the watchlist. Clear it or deny the visit.'**
+  String get visNextWatchlist;
+
+  /// No description provided for @visNextWatchlistWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Held for a watchlist check. Nothing for you to do.'**
+  String get visNextWatchlistWait;
+
+  /// No description provided for @visNextApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the visit for {name}.'**
+  String visNextApprove(String name);
+
+  /// No description provided for @visNextHostWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the site head to approve. Nothing for you to do.'**
+  String get visNextHostWait;
+
+  /// No description provided for @visNextWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval.'**
+  String get visNextWaiting;
+
+  /// No description provided for @visNextPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Check their PPE, then receive them at the gate.'**
+  String get visNextPpe;
+
+  /// No description provided for @visNextEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign someone to stay with them in the red area.'**
+  String get visNextEscort;
+
+  /// No description provided for @visNextCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive {name} at the gate. Take a photo.'**
+  String visNextCheckIn(String name);
+
+  /// No description provided for @visNextHostReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass is ready. They are expected {when}. Nothing for you to do.'**
+  String visNextHostReady(String when);
+
+  /// No description provided for @visNextReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass is ready. Expected {when}.'**
+  String visNextReady(String when);
+
+  /// No description provided for @visNextCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Check {name} out and take the badge back.'**
+  String visNextCheckOut(String name);
+
+  /// No description provided for @visNextInsideHost.
+  ///
+  /// In en, this message translates to:
+  /// **'They are inside. Stay reachable until they leave.'**
+  String get visNextInsideHost;
+
+  /// No description provided for @visNextInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside the site.'**
+  String get visNextInside;
+
+  /// No description provided for @visNextOverdueAct.
+  ///
+  /// In en, this message translates to:
+  /// **'They have stayed too long. Extend the time or check them out.'**
+  String get visNextOverdueAct;
+
+  /// No description provided for @visNextOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'They have stayed past the agreed time.'**
+  String get visNextOverdue;
+
+  /// No description provided for @visNextDone.
+  ///
+  /// In en, this message translates to:
+  /// **'They have left.'**
+  String get visNextDone;
+
+  /// No description provided for @visNextDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'This visit was not approved.'**
+  String get visNextDenied;
+
+  /// No description provided for @visNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Nothing more to do.'**
+  String get visNextCancelled;
+
+  /// No description provided for @visWatchPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist'**
+  String get visWatchPill;
+
+  /// No description provided for @visHostLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Host: {name} at {site}'**
+  String visHostLine(String name, String site);
+
+  /// No description provided for @visWhenLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected {start} to {end}'**
+  String visWhenLine(String start, String end);
+
+  /// No description provided for @visEscortLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Escort: {name}'**
+  String visEscortLine(String name);
+
+  /// No description provided for @visBadgeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge {no}'**
+  String visBadgeLine(String no);
+
+  /// No description provided for @visZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas they may enter'**
+  String get visZones;
+
+  /// No description provided for @visEscortNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs escort'**
+  String get visEscortNeed;
+
+  /// No description provided for @visFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'What was seen'**
+  String get visFindings;
+
+  /// No description provided for @visDetPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get visDetPhone;
+
+  /// No description provided for @visDetId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get visDetId;
+
+  /// No description provided for @visDetPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get visDetPlate;
+
+  /// No description provided for @visPpeOk.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE was cleared at the gate.'**
+  String get visPpeOk;
+
+  /// No description provided for @visPpeNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE must be cleared before they enter.'**
+  String get visPpeNeeded;
+
+  /// No description provided for @visPpeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No special PPE for these areas.'**
+  String get visPpeNone;
+
+  /// No description provided for @visActApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve visit'**
+  String get visActApprove;
+
+  /// No description provided for @visActDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not approve'**
+  String get visActDeny;
+
+  /// No description provided for @visActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel visit'**
+  String get visActCancel;
+
+  /// No description provided for @visActCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at gate'**
+  String get visActCheckIn;
+
+  /// No description provided for @visActCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out'**
+  String get visActCheckOut;
+
+  /// No description provided for @visActPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear PPE'**
+  String get visActPpe;
+
+  /// No description provided for @visActEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign escort'**
+  String get visActEscort;
+
+  /// No description provided for @visActExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Give two more hours'**
+  String get visActExtend;
+
+  /// No description provided for @visActFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a finding'**
+  String get visActFinding;
+
+  /// No description provided for @visActClearWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear watchlist'**
+  String get visActClearWatch;
+
+  /// No description provided for @visActSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as safe'**
+  String get visActSafe;
+
+  /// No description provided for @visActPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Show pass'**
+  String get visActPass;
+
+  /// No description provided for @visApproveMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'They will get a pass and can be received at the gate.'**
+  String get visApproveMsg;
+
+  /// No description provided for @visCheckOutMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm only if they have left and the badge is back.'**
+  String get visCheckOutMsg;
+
+  /// No description provided for @visFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get visFieldReason;
+
+  /// No description provided for @visSheetCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at the gate'**
+  String get visSheetCheckIn;
+
+  /// No description provided for @visSheetCheckInHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo. The badge number is issued automatically.'**
+  String get visSheetCheckInHelp;
+
+  /// No description provided for @visPhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo (required)'**
+  String get visPhotoRequired;
+
+  /// No description provided for @visPhotoAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo added'**
+  String get visPhotoAdded;
+
+  /// No description provided for @visFieldNda.
+  ///
+  /// In en, this message translates to:
+  /// **'NDA signed'**
+  String get visFieldNda;
+
+  /// No description provided for @visFieldBriefing.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety briefing done'**
+  String get visFieldBriefing;
+
+  /// No description provided for @visSheetPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal protective equipment'**
+  String get visSheetPpe;
+
+  /// No description provided for @visSheetPpeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick only what they are wearing and have been briefed on.'**
+  String get visSheetPpeHelp;
+
+  /// No description provided for @visPpeHat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard hat'**
+  String get visPpeHat;
+
+  /// No description provided for @visPpeShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety shoes'**
+  String get visPpeShoes;
+
+  /// No description provided for @visPpeVest.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi-vis vest'**
+  String get visPpeVest;
+
+  /// No description provided for @visPpeGoggles.
+  ///
+  /// In en, this message translates to:
+  /// **'Goggles'**
+  String get visPpeGoggles;
+
+  /// No description provided for @visPpeH2s.
+  ///
+  /// In en, this message translates to:
+  /// **'H2S briefing'**
+  String get visPpeH2s;
+
+  /// No description provided for @visFieldEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Who stays with them'**
+  String get visFieldEscort;
+
+  /// No description provided for @visSheetFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you see'**
+  String get visSheetFinding;
+
+  /// No description provided for @visFieldArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get visFieldArea;
+
+  /// No description provided for @visFieldFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get visFieldFinding;
+
+  /// No description provided for @visFindObs.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get visFindObs;
+
+  /// No description provided for @visFindCrit.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get visFindCrit;
+
+  /// No description provided for @visDoneCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the gate.'**
+  String get visDoneCheckIn;
+
+  /// No description provided for @visDoneCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked out.'**
+  String get visDoneCheckOut;
+
+  /// No description provided for @visDonePpe.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE recorded.'**
+  String get visDonePpe;
+
+  /// No description provided for @visDoneEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Escort assigned.'**
+  String get visDoneEscort;
+
+  /// No description provided for @visDoneExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Two more hours given.'**
+  String get visDoneExtend;
+
+  /// No description provided for @visDoneFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding recorded.'**
+  String get visDoneFinding;
+
+  /// No description provided for @visDoneWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist cleared.'**
+  String get visDoneWatch;
+
+  /// No description provided for @visDoneSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked safe.'**
+  String get visDoneSafe;
+
+  /// No description provided for @visDoneApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit approved. The pass is ready.'**
+  String get visDoneApprove;
+
+  /// No description provided for @visDoneDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit was not approved.'**
+  String get visDoneDeny;
+
+  /// No description provided for @visDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit cancelled.'**
+  String get visDoneCancel;
+
+  /// No description provided for @visDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest registered.'**
+  String get visDoneCreate;
+
+  /// No description provided for @visErrPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear PPE before they enter.'**
+  String get visErrPpe;
+
+  /// No description provided for @visErrEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'A red area needs an escort.'**
+  String get visErrEscort;
+
+  /// No description provided for @visErrWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Security must clear the watchlist first.'**
+  String get visErrWatchlist;
+
+  /// No description provided for @visErrBlacklist.
+  ///
+  /// In en, this message translates to:
+  /// **'This person cannot be registered or let in.'**
+  String get visErrBlacklist;
+
+  /// No description provided for @visErrFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many guests inside. Ask a security lead.'**
+  String get visErrFull;
+
+  /// No description provided for @visErrExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Already extended twice today.'**
+  String get visErrExtend;
+
+  /// No description provided for @visErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get visErrFailed;
+
+  /// No description provided for @visErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the guest name.'**
+  String get visErrName;
+
+  /// No description provided for @visErrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a phone number.'**
+  String get visErrPhone;
+
+  /// No description provided for @visErrPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why they are coming.'**
+  String get visErrPurpose;
+
+  /// No description provided for @visErrId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number is required for this kind of guest.'**
+  String get visErrId;
+
+  /// No description provided for @visFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say who is coming, why, and which areas they may enter. Regular guests get a pass at once. VIP, government and red-area visits wait for the site head.'**
+  String get visFormIntro;
+
+  /// No description provided for @visFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest name'**
+  String get visFieldName;
+
+  /// No description provided for @visFieldOrg.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation (optional)'**
+  String get visFieldOrg;
+
+  /// No description provided for @visFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get visFieldPhone;
+
+  /// No description provided for @visFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Who they are'**
+  String get visFieldCategory;
+
+  /// No description provided for @visFieldPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Why they are coming'**
+  String get visFieldPurpose;
+
+  /// No description provided for @visFieldWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When they arrive'**
+  String get visFieldWhen;
+
+  /// No description provided for @visFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Which site'**
+  String get visFieldSite;
+
+  /// No description provided for @visSiteHq.
+  ///
+  /// In en, this message translates to:
+  /// **'Head Office, Baridhara'**
+  String get visSiteHq;
+
+  /// No description provided for @visSitePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Keraniganj Plant'**
+  String get visSitePlant;
+
+  /// No description provided for @visSiteCtg.
+  ///
+  /// In en, this message translates to:
+  /// **'Chattogram Terminal'**
+  String get visSiteCtg;
+
+  /// No description provided for @visFieldZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas they may enter'**
+  String get visFieldZones;
+
+  /// No description provided for @visFieldIdType.
+  ///
+  /// In en, this message translates to:
+  /// **'ID type'**
+  String get visFieldIdType;
+
+  /// No description provided for @visIdNid.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get visIdNid;
+
+  /// No description provided for @visIdPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport'**
+  String get visIdPass;
+
+  /// No description provided for @visIdGovt.
+  ///
+  /// In en, this message translates to:
+  /// **'Government badge'**
+  String get visIdGovt;
+
+  /// No description provided for @visIdCo.
+  ///
+  /// In en, this message translates to:
+  /// **'Company ID'**
+  String get visIdCo;
+
+  /// No description provided for @visFieldIdNo.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number'**
+  String get visFieldIdNo;
+
+  /// No description provided for @visFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle plate (optional)'**
+  String get visFieldPlate;
+
+  /// No description provided for @visCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Register guest'**
+  String get visCreate;
+
+  /// No description provided for @visMuster.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is inside'**
+  String get visMuster;
+
+  /// No description provided for @visMusterIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guests are inside. Start a roll-call if you need to account for them.'**
+  String visMusterIdle(int count);
+
+  /// No description provided for @visMusterActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll-call on: {safe} of {inside} marked safe.'**
+  String visMusterActive(int safe, int inside);
+
+  /// No description provided for @visMusterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start roll-call'**
+  String get visMusterStart;
+
+  /// No description provided for @visMusterEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End roll-call'**
+  String get visMusterEnd;
+
+  /// No description provided for @visMusterMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet safe'**
+  String get visMusterMissing;
+
+  /// No description provided for @visMusterSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get visMusterSafe;
+
+  /// No description provided for @moduleFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get moduleFleet;
+
+  /// No description provided for @flIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a car, assign one, or drive the trip. The next step is on each row.'**
+  String get flIntro;
+
+  /// No description provided for @flNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a car'**
+  String get flNew;
+
+  /// No description provided for @flSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search destination or purpose'**
+  String get flSearchHint;
+
+  /// No description provided for @flSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver help'**
+  String get flSos;
+
+  /// No description provided for @flTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get flTabMine;
+
+  /// No description provided for @flTabDriving.
+  ///
+  /// In en, this message translates to:
+  /// **'My trips'**
+  String get flTabDriving;
+
+  /// No description provided for @flTabEndorse.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get flTabEndorse;
+
+  /// No description provided for @flTabDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To assign'**
+  String get flTabDispatch;
+
+  /// No description provided for @flTabLive.
+  ///
+  /// In en, this message translates to:
+  /// **'On the road'**
+  String get flTabLive;
+
+  /// No description provided for @flTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get flTabAll;
+
+  /// No description provided for @flEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicle requests here.'**
+  String get flEmpty;
+
+  /// No description provided for @flEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get flEmptyFiltered;
+
+  /// No description provided for @flVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting on you.'**
+  String get flVerdictNone;
+
+  /// No description provided for @flVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting on you'**
+  String flVerdictNeed(int count);
+
+  /// No description provided for @flStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get flStatusDraft;
+
+  /// No description provided for @flStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your head of department'**
+  String get flStatusPending;
+
+  /// No description provided for @flStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a car'**
+  String get flStatusApproved;
+
+  /// No description provided for @flStatusAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Car assigned'**
+  String get flStatusAssigned;
+
+  /// No description provided for @flStatusLive.
+  ///
+  /// In en, this message translates to:
+  /// **'On the road'**
+  String get flStatusLive;
+
+  /// No description provided for @flStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get flStatusDone;
+
+  /// No description provided for @flStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get flStatusRejected;
+
+  /// No description provided for @flStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get flStatusCancelled;
+
+  /// No description provided for @flNextSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this request to your head of department.'**
+  String get flNextSubmit;
+
+  /// No description provided for @flNextWaitHod.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Farida Begum. Nothing for you to do.'**
+  String get flNextWaitHod;
+
+  /// No description provided for @flNextEndorse.
+  ///
+  /// In en, this message translates to:
+  /// **'Endorse {name}’s request, or send it back from Approvals.'**
+  String flNextEndorse(String name);
+
+  /// No description provided for @flNextAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a free car and a driver.'**
+  String get flNextAssign;
+
+  /// No description provided for @flNextWaitCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport will assign a car. Nothing for you to do.'**
+  String get flNextWaitCar;
+
+  /// No description provided for @flNextGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave through the gate after {when}.'**
+  String flNextGateOut(String when);
+
+  /// No description provided for @flNextAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} is waiting at the gate.'**
+  String flNextAssigned(String plate);
+
+  /// No description provided for @flNextFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the last odometer when you return.'**
+  String get flNextFinish;
+
+  /// No description provided for @flNextLive.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} is on the way.'**
+  String flNextLive(String plate);
+
+  /// No description provided for @flNextRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this trip.'**
+  String get flNextRate;
+
+  /// No description provided for @flNextDone.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip is finished.'**
+  String get flNextDone;
+
+  /// No description provided for @flNextFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the request and send it again.'**
+  String get flNextFix;
+
+  /// No description provided for @flNextRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This request was not approved.'**
+  String get flNextRejected;
+
+  /// No description provided for @flNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This request was cancelled.'**
+  String get flNextCancelled;
+
+  /// No description provided for @flTypeOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One way'**
+  String get flTypeOne;
+
+  /// No description provided for @flTypeRound.
+  ///
+  /// In en, this message translates to:
+  /// **'There and back'**
+  String get flTypeRound;
+
+  /// No description provided for @flFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say where you are going, why, and when. Your head of department endorses it. Transport then gives you a car.'**
+  String get flFormIntro;
+
+  /// No description provided for @flFieldPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Why you need a car'**
+  String get flFieldPurpose;
+
+  /// No description provided for @flFieldDest.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you are going'**
+  String get flFieldDest;
+
+  /// No description provided for @flFieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip type'**
+  String get flFieldType;
+
+  /// No description provided for @flFieldPax.
+  ///
+  /// In en, this message translates to:
+  /// **'How many people'**
+  String get flFieldPax;
+
+  /// No description provided for @flFieldWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When you leave'**
+  String get flFieldWhen;
+
+  /// No description provided for @flFieldNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get flFieldNote;
+
+  /// No description provided for @flFieldNoteOpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get flFieldNoteOpt;
+
+  /// No description provided for @flFieldOdo.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer (km)'**
+  String get flFieldOdo;
+
+  /// No description provided for @flFieldSos.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong'**
+  String get flFieldSos;
+
+  /// No description provided for @flFieldPlaza.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll plaza'**
+  String get flFieldPlaza;
+
+  /// No description provided for @flFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (৳)'**
+  String get flFieldAmount;
+
+  /// No description provided for @flFieldFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'How was the trip (optional)'**
+  String get flFieldFeedback;
+
+  /// No description provided for @flFieldRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars (1 to 5)'**
+  String get flFieldRating;
+
+  /// No description provided for @flFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get flFieldReason;
+
+  /// No description provided for @flCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get flCreate;
+
+  /// No description provided for @flEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'About {km} km, {minutes} minutes, {cost}. Suggested: {cls}.'**
+  String flEstimate(String km, int minutes, String cost, String cls);
+
+  /// No description provided for @flWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this'**
+  String get flWhat;
+
+  /// No description provided for @flWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked by {name} on {when}.'**
+  String flWho(String name, String when);
+
+  /// No description provided for @flMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves {when}. {pax} people. {cls}. About {cost}.'**
+  String flMeta(String when, String pax, String cls, String cost);
+
+  /// No description provided for @flAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Car {plate} with {driver}.'**
+  String flAssigned(String plate, String driver);
+
+  /// No description provided for @flPassNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate pass {pass}'**
+  String flPassNo(String pass);
+
+  /// No description provided for @flActAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a car'**
+  String get flActAssign;
+
+  /// No description provided for @flActGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the gate'**
+  String get flActGateOut;
+
+  /// No description provided for @flActCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a stop'**
+  String get flActCheckpoint;
+
+  /// No description provided for @flActComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the trip'**
+  String get flActComplete;
+
+  /// No description provided for @flActSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help'**
+  String get flActSos;
+
+  /// No description provided for @flActToll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a toll'**
+  String get flActToll;
+
+  /// No description provided for @flActRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the trip'**
+  String get flActRate;
+
+  /// No description provided for @flActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get flActCancel;
+
+  /// No description provided for @flActPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Show gate pass'**
+  String get flActPass;
+
+  /// No description provided for @flActTollOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get flActTollOk;
+
+  /// No description provided for @flActTollPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid'**
+  String get flActTollPay;
+
+  /// No description provided for @flActAck.
+  ///
+  /// In en, this message translates to:
+  /// **'We are coming'**
+  String get flActAck;
+
+  /// No description provided for @flSheetAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a car and a driver'**
+  String get flSheetAssign;
+
+  /// No description provided for @flSheetAssignHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only free cars with valid papers are listed.'**
+  String get flSheetAssignHelp;
+
+  /// No description provided for @flDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to your head of department.'**
+  String get flDoneCreate;
+
+  /// No description provided for @flDoneAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Car assigned. The driver has been told.'**
+  String get flDoneAssign;
+
+  /// No description provided for @flDoneGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip has started.'**
+  String get flDoneGateOut;
+
+  /// No description provided for @flDoneCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recorded.'**
+  String get flDoneCheckpoint;
+
+  /// No description provided for @flDoneComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip finished.'**
+  String get flDoneComplete;
+
+  /// No description provided for @flDoneSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Help request sent.'**
+  String get flDoneSos;
+
+  /// No description provided for @flDoneToll.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll sent for review.'**
+  String get flDoneToll;
+
+  /// No description provided for @flDoneRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for the rating.'**
+  String get flDoneRate;
+
+  /// No description provided for @flDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled.'**
+  String get flDoneCancel;
+
+  /// No description provided for @flDoneTollOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll approved.'**
+  String get flDoneTollOk;
+
+  /// No description provided for @flDoneTollPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll marked paid.'**
+  String get flDoneTollPay;
+
+  /// No description provided for @flDoneAck.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver has been told help is coming.'**
+  String get flDoneAck;
+
+  /// No description provided for @flErrPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why you need the car.'**
+  String get flErrPurpose;
+
+  /// No description provided for @flErrLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask at least one hour ahead, unless it is critical.'**
+  String get flErrLead;
+
+  /// No description provided for @flErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get flErrFailed;
+
+  /// No description provided for @flErrWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Too early or too late. Ask transport to override.'**
+  String get flErrWindow;
+
+  /// No description provided for @flErrVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'That car is not free or its papers have expired.'**
+  String get flErrVehicle;
+
+  /// No description provided for @flErrDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'That driver cannot take this trip.'**
+  String get flErrDriver;
+
+  /// No description provided for @flErrNoneFree.
+  ///
+  /// In en, this message translates to:
+  /// **'No free car and driver fit this trip.'**
+  String get flErrNoneFree;
+
+  /// No description provided for @flTolls.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolls'**
+  String get flTolls;
+
+  /// No description provided for @flTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get flTimeline;
+
+  /// No description provided for @flSosIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Open calls from drivers. Transport and the gate acknowledge them.'**
+  String get flSosIntro;
+
+  /// No description provided for @flSosEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No help requests.'**
+  String get flSosEmpty;
+
+  /// No description provided for @flSosHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Say where you are and what is wrong. Transport and the gate will see this at once.'**
+  String get flSosHelp;
+
+  /// No description provided for @flSosOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get flSosOpen;
+
+  /// No description provided for @flSosAcked.
+  ///
+  /// In en, this message translates to:
+  /// **'Help is coming'**
+  String get flSosAcked;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

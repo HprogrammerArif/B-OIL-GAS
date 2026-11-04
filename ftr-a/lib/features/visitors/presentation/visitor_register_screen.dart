@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:bogcl_oneops/app/l10n_ext.dart';
+import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
+import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/visitors/data/visitor_repository.dart';
 import 'package:bogcl_oneops/features/visitors/presentation/visitor_providers.dart';
+import 'package:bogcl_oneops/features/visitors/presentation/visitor_ui.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,180 +24,254 @@ class VisitorRegisterScreen extends ConsumerStatefulWidget {
       _VisitorRegisterScreenState();
 }
 
-class _VisitorRegisterScreenState
-    extends ConsumerState<VisitorRegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _VisitorRegisterScreenState extends ConsumerState<VisitorRegisterScreen> {
   final _name = TextEditingController();
   final _org = TextEditingController();
-  final _designation = TextEditingController();
-  final _purpose = TextEditingController();
   final _phone = TextEditingController();
-  final _vehicle = TextEditingController();
-
+  final _purpose = TextEditingController();
+  final _idNo = TextEditingController();
+  final _plate = TextEditingController();
   String _category = 'REGULAR';
-  String _expectedDate = '';
-  String _expectedTime = '';
-  bool _vipProtocol = false;
-  bool _loading = false;
+  String _siteId = 'site_hq';
+  String _idType = 'NID';
+  late DateTime _when = DateTime.now().add(const Duration(hours: 2));
+  final Set<String> _zones = {};
+  Map<String, String> _errors = {};
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _expectedDate =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    _expectedTime = '10:00';
+    final site = ref
+        .read(sessionControllerProvider)
+        .value
+        ?.profile
+        .employee
+        .site
+        .id;
+    if (site != null) _siteId = site;
   }
 
   @override
   void dispose() {
     _name.dispose();
     _org.dispose();
-    _designation.dispose();
-    _purpose.dispose();
     _phone.dispose();
-    _vehicle.dispose();
+    _purpose.dispose();
+    _idNo.dispose();
+    _plate.dispose();
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
+  bool get _idNeeded => const {'VIP', 'GOVT', 'CONTRACTOR'}.contains(_category);
+
+  Future<void> _pickWhen() async {
+    final d = await showDatePicker(
+      context: context,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 14)),
+      initialDate: _when,
+    );
+    if (d == null || !mounted) return;
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_when),
+    );
+    if (t == null || !mounted) return;
+    setState(() {
+      _when = DateTime(d.year, d.month, d.day, t.hour, t.minute);
+    });
+  }
+
+  Future<void> _save() async {
+    final l10n = context.l10n;
+    final errors = <String, String>{};
+    if (_name.text.trim().length < 2) errors['fullName'] = l10n.visErrName;
+    if (_phone.text.trim().length < 8) errors['phone'] = l10n.visErrPhone;
+    if (_purpose.text.trim().length < 5) errors['purpose'] = l10n.visErrPurpose;
+    if (_idNeeded && _idNo.text.trim().length < 4) {
+      errors['idProofNo'] = l10n.visErrId;
+    }
+    if (errors.isNotEmpty) {
+      setState(() => _errors = errors);
+      return;
+    }
+    setState(() {
+      _errors = {};
+      _saving = true;
+    });
     try {
-      await ref.read(visitorRepositoryProvider).create({
-        'name': _name.text.trim(),
-        'organization': _org.text.trim(),
-        'designation': _designation.text.trim(),
+      final saved = await ref.read(visitorRepositoryProvider).create({
+        'fullName': _name.text.trim(),
+        'organisation': _org.text.trim().isEmpty ? null : _org.text.trim(),
+        'phone': _phone.text.trim(),
         'category': _category,
+        if (_category == 'VIP') 'vipTier': 'VIP',
         'purpose': _purpose.text.trim(),
-        'expectedDate': _expectedDate,
-        'expectedTime': _expectedTime,
-        'phone': _phone.text.trim().isEmpty ? null : _phone.text.trim(),
-        'vehiclePlate':
-            _vehicle.text.trim().isEmpty ? null : _vehicle.text.trim(),
-        'vipProtocol': _vipProtocol,
-        'permittedZones': <Object?>[],
+        'expectedAt': _when.toUtc().toIso8601String(),
+        'siteId': _siteId,
+        'zones': [
+          for (final z in _zones) {'id': z},
+        ],
+        if (_idNeeded) 'idProofType': _idType,
+        if (_idNeeded) 'idProofNo': _idNo.text.trim(),
+        if (_plate.text.trim().isNotEmpty) 'vehiclePlate': _plate.text.trim(),
       });
-      if (mounted) {
-        ref.invalidate(visitorsProvider());
-        showAppToast(
+      ref.invalidate(visitsProvider);
+      if (!mounted) return;
+      AppToast.show(context, l10n.visDoneCreate, tone: StatusTone.success);
+      context.pushReplacement(AppRoutes.visitDetail(saved.id));
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.fieldErrors.isNotEmpty) {
+        setState(() => _errors = e.fieldErrors);
+      } else {
+        AppToast.show(
           context,
-          context.l10n.visRegistered,
-          tone: ToastTone.success,
+          e.rule == 'VISITOR_BLACKLISTED'
+              ? l10n.visErrBlacklist
+              : l10n.visErrFailed,
+          tone: StatusTone.danger,
         );
-        context.pop();
       }
-    } catch (e) {
-      if (mounted) showAppToast(context, e.toString(), tone: ToastTone.error);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final bangla = context.isBangla;
+    final zones = ref.watch(visitZonesProvider(_siteId));
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.visNewTitle)),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(Space.lg),
-          children: [
-            Text(
-              l10n.visFormIntro,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+      appBar: AppBar(title: Text(l10n.visNew)),
+      body: ListView(
+        padding: const EdgeInsets.all(Space.lg),
+        children: [
+          Text(
+            l10n.visFormIntro,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: Space.lg),
+          AppTextField(
+            label: l10n.visFieldName,
+            controller: _name,
+            errorText: _errors['fullName'],
+          ),
+          const SizedBox(height: Space.md),
+          AppTextField(label: l10n.visFieldOrg, controller: _org),
+          const SizedBox(height: Space.md),
+          AppTextField(
+            label: l10n.visFieldPhone,
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            errorText: _errors['phone'],
+          ),
+          const SizedBox(height: Space.md),
+          DropdownButtonFormField<String>(
+            initialValue: _category,
+            decoration: InputDecoration(labelText: l10n.visFieldCategory),
+            items: [
+              for (final c in visitCategories)
+                DropdownMenuItem(
+                  value: c,
+                  child: Text(visitCategoryLabel(l10n, c)),
+                ),
+            ],
+            onChanged: (v) => setState(() => _category = v ?? _category),
+          ),
+          const SizedBox(height: Space.md),
+          AppTextField(
+            label: l10n.visFieldPurpose,
+            controller: _purpose,
+            maxLines: 3,
+            errorText: _errors['purpose'],
+          ),
+          const SizedBox(height: Space.md),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.visFieldWhen),
+            subtitle: Text(_when.toLocal().toString().substring(0, 16)),
+            trailing: const Icon(Icons.event),
+            onTap: () => unawaited(_pickWhen()),
+          ),
+          DropdownButtonFormField<String>(
+            initialValue: _siteId,
+            decoration: InputDecoration(labelText: l10n.visFieldSite),
+            items: [
+              DropdownMenuItem(value: 'site_hq', child: Text(l10n.visSiteHq)),
+              DropdownMenuItem(
+                value: 'site_plant',
+                child: Text(l10n.visSitePlant),
+              ),
+              DropdownMenuItem(value: 'site_ctg', child: Text(l10n.visSiteCtg)),
+            ],
+            onChanged: (v) => setState(() {
+              _siteId = v ?? _siteId;
+              _zones.clear();
+            }),
+          ),
+          const SizedBox(height: Space.md),
+          Text(l10n.visFieldZones, style: theme.textTheme.labelLarge),
+          zones.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => Text(l10n.commonErrorMessage),
+            data: (list) => Wrap(
+              spacing: Space.sm,
+              children: [
+                for (final z in list)
+                  FilterChip(
+                    label: Text(z.label(bangla: bangla)),
+                    selected: _zones.contains(z.id),
+                    onSelected: (on) => setState(
+                      () => on ? _zones.add(z.id) : _zones.remove(z.id),
+                    ),
                   ),
+              ],
             ),
-            const SizedBox(height: Space.lg),
-            AppTextField(
-              controller: _name,
-              label: l10n.visName,
-              required: true,
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? l10n.fieldRequired : null,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              controller: _org,
-              label: l10n.visOrganization,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              controller: _designation,
-              label: l10n.visDesignation,
-            ),
+          ),
+          if (_idNeeded) ...[
             const SizedBox(height: Space.md),
             DropdownButtonFormField<String>(
-              value: _category,
-              decoration: InputDecoration(labelText: l10n.visCategory),
+              initialValue: _idType,
+              decoration: InputDecoration(labelText: l10n.visFieldIdType),
               items: [
-                DropdownMenuItem(value: 'REGULAR', child: Text(l10n.visRegular)),
-                DropdownMenuItem(value: 'VENDOR', child: Text(l10n.visVendor)),
-                DropdownMenuItem(value: 'CLIENT', child: Text(l10n.visClient)),
-                DropdownMenuItem(value: 'GOVT', child: Text(l10n.visGovt)),
-                DropdownMenuItem(value: 'VIP', child: Text(l10n.visVip)),
-              ],
-              onChanged: (v) => setState(() => _category = v ?? _category),
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              controller: _purpose,
-              label: l10n.visPurpose,
-              maxLines: 2,
-              required: true,
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? l10n.fieldRequired : null,
-            ),
-            const SizedBox(height: Space.md),
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    initialValue: _expectedDate,
-                    label: l10n.visExpectedDate,
-                    onChanged: (v) => _expectedDate = v,
-                  ),
+                DropdownMenuItem(value: 'NID', child: Text(l10n.visIdNid)),
+                DropdownMenuItem(
+                  value: 'PASSPORT',
+                  child: Text(l10n.visIdPass),
                 ),
-                const SizedBox(width: Space.sm),
-                Expanded(
-                  child: AppTextField(
-                    initialValue: _expectedTime,
-                    label: l10n.visExpectedTime,
-                    onChanged: (v) => _expectedTime = v,
-                  ),
+                DropdownMenuItem(
+                  value: 'GOVT_BADGE',
+                  child: Text(l10n.visIdGovt),
+                ),
+                DropdownMenuItem(
+                  value: 'COMPANY_ID',
+                  child: Text(l10n.visIdCo),
                 ),
               ],
+              onChanged: (v) => setState(() => _idType = v ?? _idType),
             ),
             const SizedBox(height: Space.md),
             AppTextField(
-              controller: _phone,
-              label: l10n.visPhone,
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              controller: _vehicle,
-              label: l10n.visVehicle,
-            ),
-            if (_category == 'VIP' || _category == 'GOVT') ...[
-              const SizedBox(height: Space.md),
-              SwitchListTile(
-                value: _vipProtocol,
-                onChanged: (v) => setState(() => _vipProtocol = v),
-                title: Text(l10n.visVipProtocol),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ],
-            const SizedBox(height: Space.xl),
-            PrimaryButton(
-              onPressed: _submit,
-              loading: _loading,
-              label: l10n.visRegister,
+              label: l10n.visFieldIdNo,
+              controller: _idNo,
+              errorText: _errors['idProofNo'],
             ),
           ],
-        ),
+          const SizedBox(height: Space.md),
+          AppTextField(label: l10n.visFieldPlate, controller: _plate),
+          const SizedBox(height: Space.lg),
+          PrimaryButton(
+            label: l10n.visCreate,
+            loading: _saving,
+            onPressed: () => unawaited(_save()),
+          ),
+        ],
       ),
     );
   }

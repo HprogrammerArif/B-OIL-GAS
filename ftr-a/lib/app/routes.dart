@@ -28,6 +28,14 @@ abstract final class AppRoutes {
   static const parcelNew = '/home/parcels/new';
   static String parcelDetail(String id) => '/home/parcels/$id';
   static String parcelEdit(String id) => '/home/parcels/$id/edit';
+  static const visits = '/home/visits';
+  static const visitNew = '/home/visits/new';
+  static const visitMuster = '/home/visits/muster';
+  static String visitDetail(String id) => '/home/visits/$id';
+  static const fleet = '/home/fleet';
+  static const fleetNew = '/home/fleet/new';
+  static const fleetSos = '/home/fleet/sos';
+  static String fleetDetail(String id) => '/home/fleet/$id';
   static const approvals = '/home/approvals';
   static String approvalDetail(String instanceId) =>
       '/home/approvals/$instanceId';

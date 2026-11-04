@@ -45,6 +45,26 @@ abstract final class FileAccess {
           _inRoute(store, user, s) ||
           _widerThanSelf(user, 'note-sheets:read');
     });
+    FileEngine.registerOwnerAccess('Visit', (store, user, id) {
+      final v = store.get(Col.visits, id);
+      if (v == null) return false;
+      final me = user['id'];
+      return v['hostUserId'] == me ||
+          v['escortUserId'] == me ||
+          _widerThanSelf(user, 'visitors:read') ||
+          _widerThanSelf(user, 'visitors:gate');
+    });
+    FileEngine.registerOwnerAccess('Trip', (store, user, id) {
+      final t = store.get(Col.fleetTrips, id);
+      if (t == null) return false;
+      final r = store.get(Col.fleetRequisitions, t.str('requisitionId'));
+      final me = user['id'];
+      return t['driverUserId'] == me ||
+          r?['requesterUserId'] == me ||
+          _widerThanSelf(user, 'fleet:dispatch') ||
+          _widerThanSelf(user, 'fleet:gate') ||
+          _widerThanSelf(user, 'fleet:read');
+    });
     FileEngine.registerOwnerAccess('Parcel', (store, user, id) {
       final p = store.get(Col.parcels, id);
       if (p == null) return false;

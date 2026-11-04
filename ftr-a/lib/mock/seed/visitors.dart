@@ -1,175 +1,137 @@
+import 'package:bogcl_oneops/mock/engines/visitor_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
+import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
-Future<void> seedVisitors(MockStore store, int version) async {
-  if (version >= 11) return;
+/// Visits through the real engine so the list shows every stage a persona
+/// can act on: waiting for approval, ready at the gate, inside and overdue.
+void seedVisits(MockStore store) {
+  store.put(Col.watchlist, {
+    'id': 'wl_1',
+    'fullName': 'Nobody On The List',
+    'phoneNorm': '+8801999000000',
+    'reason': 'Demo watchlist row (not used by seeded visits)',
+  });
 
-  final now = store.nowIso();
-  final today = now.substring(0, 10);
-  final yesterday = DateTime.parse(today)
-      .subtract(const Duration(days: 1))
-      .toIso8601String()
-      .substring(0, 10);
+  final emp = seedAuthFor(store, 'EMP-1042');
+  final gm = seedAuthFor(store, 'EMP-0012');
+  final gate = seedAuthFor(store, 'EMP-0045');
+  final hr = seedAuthFor(store, 'EMP-0028');
 
-  final seed = <Json>[
-    {
-      'id': 'vis_001',
-      'refNo': 'VIS-2026-0001',
-      'status': 'CHECKED_IN',
-      'name': 'Kamrul Hasan',
-      'organization': 'Eastern Petrochemical Ltd.',
-      'designation': 'Senior Sales Engineer',
-      'category': 'VENDOR',
-      'hostEmployeeId': 'emp_hod_finance',
-      'hostName': 'Md. Rafiqul Islam',
-      'hostDept': 'Finance & Accounts',
-      'siteId': 'site_hq',
-      'purpose': 'Quarterly contract review for bitumen supply agreement.',
-      'expectedDate': today,
-      'expectedTime': '10:30',
-      'checkInTime': '${today}T10:28:00+06:00',
-      'vehiclePlate': 'DHA-G-11-2234',
-      'phone': '01711-445566',
-      'email': 'kamrul@epl.com.bd',
-      'idProofType': 'National ID',
-      'idProofNumber': '1991123456789',
-      'permittedZones': [
-        {'zoneId': 'z_boardroom', 'name': 'Board Room', 'nameBn': 'বোর্ড রুম', 'level': 'green', 'escortRequired': false},
-        {'zoneId': 'z_reception', 'name': 'Reception', 'nameBn': 'রিসেপশন', 'level': 'green', 'escortRequired': false},
-      ],
-      'vipProtocol': false,
-      'safetyBriefingCompleted': true,
-      'ndaSigned': true,
-      'ppeCleared': {
-        'hardHat': false,
-        'safetyGoggles': false,
-        'safetyShoes': false,
-        'hiVisVest': false,
-        'h2sBriefing': false,
-      },
-      'createdAt': '${today}T09:00:00+06:00',
-      'updatedAt': '${today}T10:28:00+06:00',
-      'createdBy': 'user_hod_finance',
-      'badgeNo': 'B-2026-0112',
-    },
-    {
-      'id': 'vis_002',
-      'refNo': 'VIS-2026-0002',
-      'status': 'PRE_REGISTERED',
-      'name': 'Taherul Alam',
-      'organization': 'Department of Explosives, Bangladesh',
-      'designation': 'Deputy Director',
-      'category': 'GOVT',
-      'hostEmployeeId': 'emp_plant_gm',
-      'hostName': 'Mahmudur Rahman',
-      'hostDept': 'Plant Operations',
-      'siteId': 'site_plant',
-      'purpose': 'Annual statutory safety inspection of refinery units.',
-      'expectedDate': today,
-      'expectedTime': '14:00',
-      'vehiclePlate': 'MET-GA-77-5500',
-      'phone': '01812-009988',
-      'email': 'talam@bde.gov.bd',
-      'idProofType': 'Official Govt Badge',
-      'idProofNumber': 'GOV-2026-DEX-112',
-      'permittedZones': [
-        {'zoneId': 'z_storage', 'name': 'Storage Tank Yard', 'nameBn': 'ট্যাংক ইয়ার্ড', 'level': 'yellow', 'escortRequired': true},
-        {'zoneId': 'z_process', 'name': 'Bitumen Processing Unit', 'nameBn': 'বিটুমিন প্রক্রিয়াকরণ ইউনিট', 'level': 'yellow', 'escortRequired': true},
-        {'zoneId': 'z_control', 'name': 'Control Room', 'nameBn': 'কন্ট্রোল রুম', 'level': 'green', 'escortRequired': false},
-      ],
-      'vipProtocol': true,
-      'safetyBriefingCompleted': false,
-      'ndaSigned': false,
-      'ppeCleared': {
-        'hardHat': false,
-        'safetyGoggles': false,
-        'safetyShoes': false,
-        'hiVisVest': false,
-        'h2sBriefing': false,
-      },
-      'createdAt': '${yesterday}T16:00:00+06:00',
-      'updatedAt': '${yesterday}T16:00:00+06:00',
-      'createdBy': 'user_plant_gm',
-    },
-    {
-      'id': 'vis_003',
-      'refNo': 'VIS-2026-0003',
-      'status': 'CHECKED_OUT',
-      'name': 'Zulaikha Parveen',
-      'organization': 'Meghna Polymers & Chemicals',
-      'designation': 'MD & CEO',
-      'category': 'CLIENT',
-      'hostEmployeeId': 'emp_hod_sales',
-      'hostName': 'Md. Rafiqul Islam',
-      'hostDept': 'Sales & Marketing',
-      'siteId': 'site_hq',
-      'purpose': 'Business development meeting for polymer raw material procurement.',
-      'expectedDate': yesterday,
-      'expectedTime': '11:00',
-      'checkInTime': '${yesterday}T11:05:00+06:00',
-      'checkOutTime': '${yesterday}T13:35:00+06:00',
-      'durationMinutes': 150,
-      'vehiclePlate': 'DHA-GA-41-9800',
-      'phone': '01920-333444',
-      'email': 'zparveen@meghnapoly.com',
-      'idProofType': 'Company ID',
-      'idProofNumber': 'MP-CEO-001',
-      'permittedZones': [
-        {'zoneId': 'z_boardroom', 'name': 'Board Room', 'nameBn': 'বোর্ড রুম', 'level': 'green', 'escortRequired': false},
-      ],
-      'vipProtocol': true,
-      'safetyBriefingCompleted': false,
-      'ndaSigned': true,
-      'ppeCleared': {
-        'hardHat': false,
-        'safetyGoggles': false,
-        'safetyShoes': false,
-        'hiVisVest': false,
-        'h2sBriefing': false,
-      },
-      'createdAt': '${yesterday}T09:30:00+06:00',
-      'updatedAt': '${yesterday}T13:35:00+06:00',
-      'createdBy': 'user_hod_finance',
-    },
-    {
-      'id': 'vis_004',
-      'refNo': 'VIS-2026-0004',
-      'status': 'PRE_REGISTERED',
-      'name': 'Arif Mahmud Khan',
-      'organization': 'BD Road Safety Foundation',
-      'designation': 'Research Associate',
-      'category': 'REGULAR',
-      'hostEmployeeId': 'emp_hse',
-      'hostName': 'Tanvir Ahmed',
-      'hostDept': 'HSE Department',
-      'siteId': 'site_plant',
-      'purpose': 'Road safety assessment and data collection for plant roads.',
-      'expectedDate': today,
-      'expectedTime': '09:00',
-      'phone': '01641-009978',
-      'idProofType': 'National ID',
-      'idProofNumber': '1993445566778',
-      'permittedZones': [
-        {'zoneId': 'z_roads', 'name': 'Internal Plant Roads', 'nameBn': 'অভ্যন্তরীণ সড়ক', 'level': 'green', 'escortRequired': true},
-      ],
-      'vipProtocol': false,
-      'safetyBriefingCompleted': false,
-      'ndaSigned': false,
-      'ppeCleared': {
-        'hardHat': false,
-        'safetyGoggles': false,
-        'safetyShoes': false,
-        'hiVisVest': false,
-        'h2sBriefing': false,
-      },
-      'createdAt': '${yesterday}T18:00:00+06:00',
-      'updatedAt': '${yesterday}T18:00:00+06:00',
-      'createdBy': 'user_emp',
-    },
-  ];
+  DateTime now() => DateTime.parse(store.nowIso());
+  void at(Duration ago) =>
+      VisitEngine.seedClock = now().subtract(ago).toIso8601String();
 
-  for (final v in seed) {
-    store.put(Col.visitors, v.str('id'), v);
-  }
+  // 1. Regular guest at HQ, pass ready — HR can check them in.
+  at(const Duration(hours: 3));
+  VisitEngine.create(store, emp, {
+    'fullName': 'Kamrul Hasan',
+    'organisation': 'Eastern Petrochemical Ltd',
+    'phone': '+8801711445566',
+    'category': 'VENDOR',
+    'purpose': 'Quarterly review of the bitumen supply contract',
+    'expectedAt': now().add(const Duration(hours: 1)).toIso8601String(),
+    'siteId': 'site_hq',
+    'zones': [
+      {'id': 'z_hq_rec'},
+      {'id': 'z_hq_board'},
+    ],
+    'vehiclePlate': 'DHA-G-11-2234',
+  });
+
+  // 2. Government inspector at the plant, waiting for the GM to approve.
+  at(const Duration(hours: 20));
+  VisitEngine.create(store, gm, {
+    'fullName': 'Taherul Alam',
+    'organisation': 'Department of Explosives',
+    'phone': '+8801812009988',
+    'category': 'GOVT',
+    'vipTier': 'GOVT',
+    'idProofType': 'GOVT_BADGE',
+    'idProofNo': 'DEX-2026-112',
+    'purpose': 'Annual statutory safety inspection of the process units',
+    'expectedAt': now().add(const Duration(hours: 2)).toIso8601String(),
+    'siteId': 'site_plant',
+    'escortUserId': gm.user.str('id'),
+    'zones': [
+      {'id': 'z_pl_tank'},
+      {'id': 'z_pl_lab'},
+    ],
+    'vehiclePlate': 'MET-GA-77-5500',
+  });
+
+  // 3. Contractor already inside the plant, overdue — gate checks out,
+  // host can extend.
+  at(const Duration(hours: 6));
+  final inside = VisitEngine.create(store, gm, {
+    'fullName': 'Arif Mahmud Khan',
+    'organisation': 'Keraniganj Mechanical Works',
+    'phone': '+8801641009978',
+    'category': 'CONTRACTOR',
+    'idProofType': 'NID',
+    'idProofNo': '1993445566778',
+    'purpose': 'Pump house gasket replacement',
+    'expectedAt': now().subtract(const Duration(hours: 5)).toIso8601String(),
+    'expectedEndAt': now()
+        .subtract(const Duration(hours: 1, minutes: 40))
+        .toIso8601String(),
+    'siteId': 'site_plant',
+    'zones': [
+      {'id': 'z_pl_pump'},
+    ],
+  });
+  VisitEngine.ppe(store, gate, inside, {
+    'hardHat': true,
+    'shoes': true,
+    'hiVisVest': true,
+  });
+  store.put(Col.files, {
+    'id': 'file_vis_seed_1',
+    'purpose': 'PHOTO',
+    'status': 'CLEAN',
+    'mime': 'image/jpeg',
+    'size': 12000,
+    'originalName': 'gate.jpg',
+    'createdAt': store.nowIso(),
+  });
+  VisitEngine.checkIn(store, gate, inside, {
+    'photoFileId': 'file_vis_seed_1',
+    'ndaSigned': true,
+    'safetyBriefingDone': true,
+  });
+
+  // 4. Client who left HQ yesterday.
+  at(const Duration(hours: 30));
+  final left = VisitEngine.create(store, emp, {
+    'fullName': 'Zulaikha Parveen',
+    'organisation': 'Meghna Polymers and Chemicals',
+    'phone': '+8801920333444',
+    'category': 'CLIENT',
+    'purpose': 'Polymer raw material procurement meeting',
+    'expectedAt': now().subtract(const Duration(hours: 28)).toIso8601String(),
+    'siteId': 'site_hq',
+    'zones': [
+      {'id': 'z_hq_board'},
+    ],
+  });
+  store.put(Col.files, {
+    'id': 'file_vis_seed_2',
+    'purpose': 'PHOTO',
+    'status': 'CLEAN',
+    'mime': 'image/jpeg',
+    'size': 11000,
+    'originalName': 'gate2.jpg',
+    'createdAt': store.nowIso(),
+  });
+  at(const Duration(hours: 27));
+  VisitEngine.checkIn(store, hr, left, {
+    'photoFileId': 'file_vis_seed_2',
+    'ndaSigned': true,
+  });
+  at(const Duration(hours: 25));
+  VisitEngine.checkOut(store, hr, left, {'badgeReturned': true});
+
+  VisitEngine.seedClock = null;
+  VisitEngine.tick(store);
 }
