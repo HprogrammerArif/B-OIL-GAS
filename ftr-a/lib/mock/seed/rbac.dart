@@ -45,6 +45,7 @@ final List<_Spec> _base = [
   _g('files:read', _self),
   _g('search:use', _self),
   _g('due-items:read', _self),
+  _g('employees:read', _co),
 ];
 
 final Map<String, List<_Spec>> _roleGrants = {
@@ -106,8 +107,15 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('note-sheets:read', _co),
     _g('note-sheets:sign', _co),
     _g('fleet:tolls-pay', _co),
+    _g('assets:read', _co),
+    _g('assets:register', _co),
+    _g('assets:commission', _co),
     _g('assets:write-off', _co),
+    _g('assets:dispose', _co),
     _g('assets:depreciation-policy', _co),
+    _g('compliance:read', _co),
+    _g('compliance:approve-fund', _co),
+    _g('employees:clearance', _co),
   ],
   'HR_ADMIN': [
     _g('dashboards:hr', _co),
@@ -178,7 +186,10 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('claims:read', _co),
     _g('attendance:read', _team),
     _g('assets:read', _co),
+    _g('assets:transfer', _co),
+    _g('assets:maintain', _co),
     _g('incidents:read', _site),
+    _g('employees:clearance', _co),
   ],
   'SECURITY_GATE': [
     _g('visitors:read', _site),
@@ -189,6 +200,7 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('parcels:scan', _site),
     _g('fleet:gate', _site),
     _g('incidents:triage', _site),
+    _g('employees:clearance', _site),
   ],
   'MAILROOM': [
     _g('parcels:read', _co),
@@ -209,6 +221,9 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('incidents:statutory', _site),
     _g('notices:create', _site),
     _g('notices:publish', _site),
+    _g('assets:read', _site),
+    _g('assets:loto', _site),
+    _g('compliance:read', _site),
   ],
   'PLANT_GM': [
     _g('dashboards:plant', _site),
@@ -234,14 +249,17 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('assets:custody-assign', _site),
     _g('assets:maintain', _site),
     _g('assets:calibrate', _site),
+    _g('assets:register', _site),
     _g('assets:commission', _site),
     _g('assets:decommission', _site),
+    _g('assets:transfer', _site),
     _g('parcels:read', _site),
     _g('parcels:dispatch', _site),
     _g('fleet:read', _site),
     _g('notices:create', _site),
     _g('notices:publish', _site),
     _g('chat:use', _self),
+    _g('employees:clearance', _site),
   ],
   'CHAIRMAN': [
     _g('dashboards:read', _co),
@@ -334,7 +352,11 @@ const List<_NavRule> _navRules = [
     anyOf: ['visitors:create', 'visitors:gate'],
     readAbove: 'visitors:read',
   ),
-  (module: 'incidents', anyOf: ['incidents:report'], readAbove: null),
+  (
+    module: 'incidents',
+    anyOf: ['incidents:report', 'incidents:triage', 'incidents:read'],
+    readAbove: null,
+  ),
   (module: 'assets', anyOf: ['assets:read'], readAbove: null),
   (module: 'compliance', anyOf: ['compliance:read'], readAbove: null),
   (module: 'employees', anyOf: ['employees:read'], readAbove: null),

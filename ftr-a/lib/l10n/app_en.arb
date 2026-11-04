@@ -2343,5 +2343,629 @@
   "flSosEmpty": "No help requests.",
   "flSosHelp": "Say where you are and what is wrong. Transport and the gate will see this at once.",
   "flSosOpen": "Open",
-  "flSosAcked": "Help is coming"
+  "flSosAcked": "Help is coming",
+  "moduleIncidents": "Safety",
+  "inIntro": "Report what you saw. The safety team triages it, finds the cause, and tracks the fix.",
+  "inNew": "Report what happened",
+  "inSearchHint": "Search title or place",
+  "inTabMine": "Mine",
+  "inTabTriage": "Waiting for you",
+  "inTabOpen": "Still open",
+  "inTabSerious": "Serious",
+  "inTabStatutory": "Government report",
+  "inTabCapa": "My fixes",
+  "inTabAll": "All",
+  "inEmpty": "No safety reports here.",
+  "inEmptyFiltered": "Nothing matches that search.",
+  "inVerdictNone": "Nothing waiting on you.",
+  "inVerdictNeed": "{count} waiting on you",
+  "@inVerdictNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inTypeNear": "Near miss",
+  "inTypeHazard": "Unsafe condition",
+  "inTypeMedical": "Medical treatment",
+  "inTypeLost": "Lost-time injury",
+  "inTypeSpill": "Spill or leak",
+  "inTypeFire": "Fire or heat",
+  "inTypeEquip": "Equipment damaged",
+  "inTypeVehicle": "Vehicle accident",
+  "inTypeEnv": "Environmental",
+  "inTypePipe": "Pressure or piping",
+  "inTypeFatal": "Fatality",
+  "inStageReported": "Waiting for safety",
+  "inStageTriaged": "Assigned",
+  "inStageInvest": "Finding the cause",
+  "inStageCapa": "Fix in progress",
+  "inStageReview": "Waiting to close",
+  "inStageClosed": "Closed",
+  "inRiskLow": "Low risk",
+  "inRiskMedium": "Medium risk",
+  "inRiskHigh": "High risk",
+  "inRiskExtreme": "Extreme risk",
+  "inRiskLine": "Score {score} · {label}",
+  "@inRiskLine": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "inAnonymous": "Someone who asked not to be named",
+  "inNextTriage": "Decide how serious {name}’s report is and name an investigator.",
+  "@inNextTriage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inNextWaitHse": "Waiting for the plant safety lead. Nothing for you to do.",
+  "inNextReported": "Waiting for the safety team.",
+  "inNextStart": "Start the investigation.",
+  "inNextTriaged": "An investigator has been named.",
+  "inNextRca": "Write the three whys and the root cause.",
+  "inNextInvest": "The cause is being found.",
+  "inNextMyCapa": "Do the fix assigned to you.",
+  "inNextVerify": "Confirm a finished fix.",
+  "inNextReview": "All fixes are done. Send it for close.",
+  "inNextCapa": "Fixes are still open.",
+  "inNextSignSafety": "Sign as the safety lead.",
+  "inNextSignGm": "Sign as the plant head to close it.",
+  "inNextReviewWait": "Waiting for the plant head to close it.",
+  "inNextClosed": "This report is closed.",
+  "inFormIntro": "Say what happened, where, and how bad it could have been. Safety sees it at once. You may hide your name.",
+  "inFieldType": "What kind of event",
+  "inFieldTitle": "Short title",
+  "inFieldDesc": "What you saw",
+  "inFieldSite": "Which site",
+  "inFieldZone": "Which area",
+  "inFieldWhen": "When it happened",
+  "inFieldSev": "How bad if it happens again: {n}",
+  "@inFieldSev": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "inFieldLike": "How likely it happens again: {n}",
+  "@inFieldLike": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "inFieldAnon": "Hide my name",
+  "inFieldAnonHelp": "Safety still sees the report. Your name is not shown to others.",
+  "inCreate": "Send report",
+  "inConfirmSerious": "This will page the plant head now",
+  "inConfirmSeriousMsg": "High or extreme scores notify the safety lead and the chairman at once.",
+  "inWhat": "What is this",
+  "inWho": "Reported by {name} on {when}.",
+  "@inWho": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "inMeta": "Happened {when} at {site}, {zone}. Risk score {score}.",
+  "@inMeta": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "site": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "inInvestigator": "Investigator: {name}",
+  "@inInvestigator": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inStatutoryDue": "Must tell {body} by {when}.",
+  "@inStatutoryDue": {
+    "placeholders": {
+      "body": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "inStatutoryDone": "Filed as {receipt}.",
+  "@inStatutoryDone": {
+    "placeholders": {
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "inActTriage": "Triage",
+  "inActInvest": "Start investigation",
+  "inActRca": "Write the cause",
+  "inActCapa": "Add a fix",
+  "inActStatutory": "Record government filing",
+  "inActSignSafety": "Sign as safety",
+  "inActSignGm": "Close as plant head",
+  "inActStart": "Start",
+  "inActComplete": "Done",
+  "inActVerify": "Confirm",
+  "inFieldInvestigator": "Who will investigate",
+  "inFieldOwner": "Who will do the fix",
+  "inFieldWhy1": "Why 1",
+  "inFieldWhy2": "Why 2",
+  "inFieldWhy3": "Why 3",
+  "inFieldRoot": "Root cause",
+  "inFieldCapa": "What must be fixed",
+  "inFieldReceipt": "Receipt or diary number",
+  "inFieldEvidence": "What you did",
+  "inRca": "Root cause",
+  "inFixes": "Fixes",
+  "inDoneCreate": "Report sent to the safety team.",
+  "inDoneTriage": "Investigator named.",
+  "inDoneInvest": "Investigation started.",
+  "inDoneRca": "Root cause recorded.",
+  "inDoneCapa": "Fix assigned.",
+  "inDoneStatutory": "Filing recorded.",
+  "inDoneSignSafety": "Safety signature recorded.",
+  "inDoneSignGm": "Report closed.",
+  "inDoneStart": "Fix started.",
+  "inDoneComplete": "Fix marked done.",
+  "inDoneVerify": "Fix confirmed.",
+  "inErrTitle": "Write a short title.",
+  "inErrDesc": "Describe what you saw in a few sentences.",
+  "inErrFailed": "Something went wrong. Please try again.",
+  "inErrRca": "Find the root cause before adding a fix.",
+  "inErrCapaOpen": "Every fix must be confirmed first.",
+  "inErrCapaSelf": "Someone else must confirm your own fix.",
+  "inErrNotStat": "This report does not need a government filing.",
+  "moduleAssets": "Equipment",
+  "asIntro": "Machines, cars and kits in your care. Those that need a signature, a repair or a safety lock sit first.",
+  "asSearchHint": "Search by name or serial",
+  "asNew": "Add equipment",
+  "asNewIntro": "Register something the company already bought.",
+  "asTabMine": "Mine",
+  "asTabAttention": "Needs you",
+  "asTabSign": "Waiting to sign",
+  "asTabRepair": "In repair",
+  "asTabCal": "Calibration",
+  "asTabRetire": "Ready to retire",
+  "asTabStock": "In store",
+  "asTabCars": "Cars",
+  "asTabAll": "All",
+  "asEmpty": "Nothing in this list.",
+  "asEmptyFiltered": "Nothing matches that search.",
+  "asSummaryNone": "Nothing waiting for you in this list.",
+  "asSummaryNeed": "{count, plural, =1{1 item needs you.} other{{count} items need you.}}",
+  "asWhat": "What is this, and where is it?",
+  "asWhy": "Kept so we know who holds it, what it is worth and when it needs service. {category}.",
+  "asLifeLine": "Stage {stage} of 8 · planned life {years} years",
+  "asBook": "Book value {nbv} · health {health}/100",
+  "asLotoOn": "Locked out. Permit {permit}. Do not operate.",
+  "asStageStock": "In store",
+  "asStageWork": "In use",
+  "asStageMove": "On the move",
+  "asStageRepair": "In repair",
+  "asStageCal": "Calibration due",
+  "asStageLoto": "Locked out",
+  "asStageRetire": "Retired",
+  "asStageGone": "Disposed",
+  "asNextCommission": "Put it into service and, if needed, name who holds it.",
+  "asNextStock": "Waiting in the store. Plant can put it into service.",
+  "asNextReceive": "It is arriving. Confirm you received it.",
+  "asNextMoving": "On the way to another site.",
+  "asNextLotoRelease": "Release the lock-out when the job is safe to restart.",
+  "asNextLotoWait": "Locked out. Waiting for the safety officer.",
+  "asNextFinishJob": "Finish the open job and write what it cost.",
+  "asNextRepair": "A repair is under way.",
+  "asNextCal": "Record the calibration certificate.",
+  "asNextCalWait": "Calibration is due.",
+  "asNextDispose": "All boxes are ready. Close the books.",
+  "asNextWriteOff": "Approve the write-off, then finance can close it.",
+  "asNextRetireWait": "Waiting for finance to finish the retirement file.",
+  "asNextGone": "Gone from the books. Nothing left to do.",
+  "asNextAck": "Sign to confirm you received this.",
+  "asNextOk": "{who} holds it. Nothing for you to do.",
+  "asNextIdle": "In use. Report a fault if something is wrong.",
+  "asFieldName": "What is it called?",
+  "asFieldCategory": "Kind",
+  "asFieldSite": "Site",
+  "asFieldCost": "What did it cost? (taka)",
+  "asFieldLife": "How many years will it last?",
+  "asFieldLocation": "Where will it sit?",
+  "asFieldCritical": "How critical?",
+  "asFieldCommission": "Put into service now",
+  "asFieldHolder": "Who will hold it?",
+  "asFieldHolderNone": "No one yet",
+  "asFieldDefect": "What is wrong?",
+  "asFieldPermit": "Lock-out permit (LOTO-YYYY-NNNN)",
+  "asFieldReason": "Why?",
+  "asFieldSurvey": "Survey notes",
+  "asFieldCert": "Certificate number",
+  "asFieldProceeds": "Sale proceeds (taka, 0 if scrap)",
+  "asFieldToSite": "Receiving site",
+  "asSiteHq": "Head office",
+  "asSitePlant": "Keraniganj plant",
+  "asSiteCtg": "Chattogram terminal",
+  "asCritA": "Plant-critical",
+  "asCritB": "Essential",
+  "asCritC": "General",
+  "asActAck": "I have it",
+  "asActCommission": "Put into service",
+  "asActAssign": "Hand over",
+  "asActFlag": "Something is wrong",
+  "asActLotoOn": "Lock out",
+  "asActLotoOff": "Release lock-out",
+  "asActMove": "Send to another site",
+  "asActReceive": "Received here",
+  "asActCertify": "Record certificate",
+  "asActRetire": "Retire",
+  "asActWriteOff": "Approve write-off",
+  "asActDispose": "Close the books",
+  "asActStart": "Start job",
+  "asActFinish": "Finish job",
+  "asJobs": "Open jobs",
+  "asRetireFile": "Retirement file",
+  "asBoxSurvey": "Technical survey signed",
+  "asBoxClean": "Cleaned / decontaminated",
+  "asBoxSpares": "Spares taken off",
+  "asBoxFinance": "Finance checked",
+  "asDetails": "Details",
+  "asFieldBookFull": "Cost and depreciation",
+  "asBookFull": "Gross {gross} · already written down {accum} · book {nbv} · method {method}",
+  "asPassport": "Tag, serial and maker",
+  "asDoneAck": "Signed.",
+  "asDoneCommission": "In service.",
+  "asDoneAssign": "Handed over. They have three days to sign.",
+  "asDoneFlag": "Fault logged. A repair job was opened.",
+  "asDoneLotoOn": "Locked out.",
+  "asDoneLotoOff": "Lock-out released.",
+  "asDoneMove": "On the way.",
+  "asDoneReceive": "Received.",
+  "asDoneCertify": "Certificate recorded.",
+  "asDoneRetire": "Retired. Finance still has boxes to tick.",
+  "asDoneWriteOff": "Write-off approved.",
+  "asDoneDispose": "Closed on the books.",
+  "asDoneStart": "Job started.",
+  "asDoneFinish": "Job finished.",
+  "asDoneTick": "Box ticked.",
+  "asErrName": "Give it a short name.",
+  "asErrCost": "Enter the purchase cost.",
+  "asErrLife": "Enter the life in years.",
+  "asErrFailed": "Something went wrong. Please try again.",
+  "asErrLoto": "This machine is locked out.",
+  "asErrLotoNeed": "Lock this machine out before work starts.",
+  "asErrAck": "The current holder must sign first.",
+  "asErrList": "Every retirement box must be ticked.",
+  "asErrWrite": "Write-off is not approved yet.",
+  "asErrCal": "Calibrate this first.",
+  "@asSummaryNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@asWhy": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "@asLifeLine": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "@asBook": {
+    "placeholders": {
+      "nbv": {
+        "type": "String"
+      },
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "@asLotoOn": {
+    "placeholders": {
+      "permit": {
+        "type": "String"
+      }
+    }
+  },
+  "@asNextOk": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "@asBookFull": {
+    "placeholders": {
+      "gross": {
+        "type": "String"
+      },
+      "accum": {
+        "type": "String"
+      },
+      "nbv": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "moduleCompliance": "Licences",
+  "cpIntro": "Permits the plant needs to stay open. Those that run out first sit at the top.",
+  "cpSearchHint": "Search by name or number",
+  "cpNew": "Add a licence",
+  "cpNewIntro": "Register a permit the company already holds.",
+  "cpTabMine": "Mine",
+  "cpTabCritical": "This month",
+  "cpTabWarning": "This quarter",
+  "cpTabRenew": "Renewing",
+  "cpTabExpired": "Lapsed",
+  "cpTabAll": "All",
+  "cpEmpty": "Nothing in this list.",
+  "cpEmptyFiltered": "Nothing matches that search.",
+  "cpSummaryNone": "Nothing waiting for you in this list.",
+  "cpSummaryNeed": "{count, plural, =1{1 licence needs you.} other{{count} licences need you.}}",
+  "cpDays": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "cpWhat": "What permit is this?",
+  "cpWho": "{who} looks after it. {days}.",
+  "cpWhy": "Without it the plant cannot legally run that activity.",
+  "cpExpires": "Runs out on {date}.",
+  "cpRenewLine": "Renewal: {stage} · checklist {pct}%",
+  "cpUrgExpired": "Lapsed",
+  "cpUrgCritical": "This month",
+  "cpUrgWarning": "This quarter",
+  "cpUrgOk": "In date",
+  "cpStageReview": "Getting the file ready",
+  "cpStageFiled": "Filed with the office",
+  "cpStageInspect": "Inspection booked",
+  "cpStageVet": "Waiting on the ministry",
+  "cpStageDone": "Renewed",
+  "cpNextStartExpired": "This has lapsed. Open a renewal file.",
+  "cpNextExpired": "This has lapsed. Plant will open a renewal.",
+  "cpNextStartSoon": "It runs out soon. Open a renewal file.",
+  "cpNextOk": "In date until {date}. Nothing for you to do.",
+  "cpNextFund": "Finance must approve the {fee} fee before you can file.",
+  "cpNextTicks": "Tick every box on the checklist, then file it.",
+  "cpNextFile": "File the application with the regulator.",
+  "cpNextWaitFile": "Waiting for the plant to file the application.",
+  "cpNextBook": "Book the inspection and name the inspector.",
+  "cpNextWaitInspect": "Waiting for an inspection date.",
+  "cpNextFindings": "Write what the inspector found.",
+  "cpNextWaitFindings": "Inspection is booked.",
+  "cpNextCert": "Enter the new certificate and the new expiry date.",
+  "cpNextWaitCert": "Waiting for the new certificate.",
+  "cpNextRenewed": "Renewed. Nothing left to do.",
+  "cpFieldTitle": "What is it called?",
+  "cpFieldNo": "Licence number on the paper",
+  "cpFieldKind": "Kind",
+  "cpFieldSite": "Site",
+  "cpFieldExpiry": "When does it run out?",
+  "cpFieldFee": "Renewal fee (taka)",
+  "cpFieldOwner": "Who looks after it?",
+  "cpFieldOwnerMe": "You",
+  "cpFieldInspector": "Inspector name",
+  "cpFieldFindings": "What did they find?",
+  "cpFieldCert": "New certificate number",
+  "cpFieldNewExpiry": "New expiry (YYYY-MM-DD)",
+  "cpFieldChalan": "Challan number",
+  "cpFieldReason": "Why send it back?",
+  "cpFieldSubject": "Letter subject",
+  "cpFieldLetter": "Letter body",
+  "cpSiteHq": "Head office",
+  "cpSitePlant": "Keraniganj plant",
+  "cpActRenew": "Open a renewal",
+  "cpActFund": "Approve the fee",
+  "cpActFile": "File the application",
+  "cpActInspect": "Book inspection",
+  "cpActFindings": "Record findings",
+  "cpActComplete": "Record the new certificate",
+  "cpActAdvance": "Move forward",
+  "cpActBack": "Send back one step",
+  "cpActLetter": "Send a chairman letter",
+  "cpChecklist": "Before we file",
+  "cpDetails": "Details",
+  "cpPassport": "Numbers",
+  "cpDoneRenew": "Renewal file opened.",
+  "cpDoneFund": "Fee approved. The plant can file now.",
+  "cpDoneAdvance": "Moved forward.",
+  "cpDoneBack": "Sent back one step.",
+  "cpDoneLetter": "Letter sent.",
+  "cpDoneTick": "Box ticked.",
+  "cpErrTitle": "Give it a short name.",
+  "cpErrNo": "Enter the number on the paper.",
+  "cpErrFailed": "Something went wrong. Please try again.",
+  "cpErrFund": "Finance must approve the fee first.",
+  "cpErrTicks": "Every box must be marked first.",
+  "cpErrFail": "A failed box is still open.",
+  "cpErrLetter": "A chairman letter is only for licences inside 30 days or already with the ministry.",
+  "cpErrOpen": "A renewal is already open.",
+  "cpErrValidity": "The new expiry must match the usual life of this permit.",
+  "@cpSummaryNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cpDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@cpWho": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpRenewLine": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpNextOk": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpNextFund": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "moduleEmployees": "People",
+  "emIntro": "Who works here, who they report to, and who is leaving.",
+  "emSearchHint": "Search by name, title or phone",
+  "emNew": "Add a colleague",
+  "emNewIntro": "HR records someone who has already joined.",
+  "emTabAll": "At work",
+  "emTabTeam": "My team",
+  "emTabLeaving": "Leaving",
+  "emTabFormer": "Former",
+  "emEmpty": "Nobody in this list.",
+  "emEmptyFiltered": "Nobody matches that search.",
+  "emSummaryNone": "Nothing waiting for you in this list.",
+  "emSummaryNeed": "{count, plural, =1{1 person needs you.} other{{count} people need you.}}",
+  "emStatusActive": "At work",
+  "emStatusLeave": "On leave",
+  "emStatusLeaving": "Leaving",
+  "emStatusFormer": "Left",
+  "emWhat": "Who is this?",
+  "emWho": "Reports to {who}.",
+  "emWhoNone": "No line manager on file.",
+  "emWhy": "The directory is so colleagues can find each other. Sensitive details stay with HR.",
+  "emExitTitle": "Leaving — desks that must sign off",
+  "emLastDay": "Last day {date}.",
+  "emActExit": "Start leaving",
+  "emActClear": "Clear this desk",
+  "emActWaive": "Skip this desk",
+  "emActReclaim": "Take equipment back",
+  "emActClose": "Close the file",
+  "emActCancel": "Keep them",
+  "emActRehire": "Bring them back",
+  "emFieldName": "Full name",
+  "emFieldNameBn": "Name in Bangla",
+  "emFieldTitle": "Job title",
+  "emFieldPhone": "Phone",
+  "emFieldEmail": "Work email",
+  "emFieldDept": "Department",
+  "emFieldSite": "Workplace",
+  "emFieldManager": "Line manager",
+  "emFieldManagerHint": "Optional",
+  "emFieldLastDay": "Last working day (YYYY-MM-DD)",
+  "emFieldExitReason": "Why they are leaving",
+  "emFieldNote": "What you checked",
+  "emFieldWaive": "Why this desk can be skipped",
+  "emFieldVoucher": "Final-pay voucher number",
+  "emFieldCancel": "Why you are keeping them",
+  "emFieldJoined": "Joined",
+  "emFieldGrade": "Grade",
+  "emFieldNid": "National ID",
+  "emFieldEmergency": "Emergency contact",
+  "emFieldReports": "People who report to them",
+  "emPassport": "Staff number",
+  "emDetails": "Details",
+  "emItemPending": "Waiting",
+  "emItemCleared": "Done",
+  "emItemWaived": "Skipped",
+  "emDoneExit": "Exit file opened. Each desk will get a note.",
+  "emDoneClear": "Desk signed off.",
+  "emDoneWaive": "Desk skipped.",
+  "emDoneReclaim": "Equipment taken back.",
+  "emDoneClose": "They have left. Login is closed.",
+  "emDoneCancel": "They stay. Exit file cancelled.",
+  "emDoneRehire": "They are back on the books.",
+  "emErrName": "Give their name.",
+  "emErrTitle": "Give their job title.",
+  "emErrPhone": "Give a phone number.",
+  "emErrFailed": "Something went wrong. Try again.",
+  "emErrProtected": "The Chairman cannot be taken off the books this way.",
+  "emErrSelf": "Another HR colleague must start your own exit.",
+  "emErrAssets": "Take the equipment back first, then tick this desk.",
+  "emErrBus": "End the staff-bus seat first.",
+  "emErrTrips": "Finish their open car trips first.",
+  "emErrFinance": "Settle claims and advances first.",
+  "emErrPending": "Every desk must be cleared or skipped first.",
+  "emErrOpen": "An exit file is already open.",
+  "@emSummaryNeed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@emWho": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "@emLastDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

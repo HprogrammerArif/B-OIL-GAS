@@ -54,9 +54,16 @@ abstract final class Col {
   static const assetWorkOrders = 'asset_work_orders';
   static const assetRequisitions = 'asset_requisitions';
   static const assetTransfers = 'asset_transfers';
+  static const assetEvents = 'asset_events';
+  static const assetCustody = 'asset_custody';
+  static const assetSpares = 'asset_spares';
+  static const assetDisposals = 'asset_disposals';
   static const chatChannels = 'chat_channels';
   static const chatMessages = 'chat_messages';
   static const compliance = 'compliance';
+  static const licenceRenewals = 'licence_renewals';
+  static const licenceLetters = 'licence_letters';
+  static const exitClearances = 'exit_clearances';
 }
 
 const sites = <Json>[

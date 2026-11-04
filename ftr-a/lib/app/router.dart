@@ -3,6 +3,9 @@ import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/features/activity/presentation/activity_screen.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_detail_screen.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approvals_screen.dart';
+import 'package:bogcl_oneops/features/assets/presentation/asset_detail_screen.dart';
+import 'package:bogcl_oneops/features/assets/presentation/asset_new_screen.dart';
+import 'package:bogcl_oneops/features/assets/presentation/assets_screen.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_screen.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/regularise_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/loading_screen.dart';
@@ -20,9 +23,15 @@ import 'package:bogcl_oneops/features/fleet/presentation/fleet_new_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_sos_screen.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_screen.dart';
+import 'package:bogcl_oneops/features/incidents/presentation/incident_detail_screen.dart';
+import 'package:bogcl_oneops/features/incidents/presentation/incident_new_screen.dart';
+import 'package:bogcl_oneops/features/incidents/presentation/incidents_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_apply_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_detail_screen.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
+import 'package:bogcl_oneops/features/licences/presentation/licence_detail_screen.dart';
+import 'package:bogcl_oneops/features/licences/presentation/licence_new_screen.dart';
+import 'package:bogcl_oneops/features/licences/presentation/licences_screen.dart';
 import 'package:bogcl_oneops/features/more/presentation/more_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_detail_screen.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_edit_screen.dart';
@@ -39,6 +48,9 @@ import 'package:bogcl_oneops/features/visitors/presentation/visit_muster_screen.
 import 'package:bogcl_oneops/features/visitors/presentation/visitor_detail_screen.dart';
 import 'package:bogcl_oneops/features/visitors/presentation/visitor_register_screen.dart';
 import 'package:bogcl_oneops/features/visitors/presentation/visitors_screen.dart';
+import 'package:bogcl_oneops/features/workforce/presentation/people_detail_screen.dart';
+import 'package:bogcl_oneops/features/workforce/presentation/people_new_screen.dart';
+import 'package:bogcl_oneops/features/workforce/presentation/people_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -202,6 +214,68 @@ GoRouter router(Ref ref) {
                         path: ':id',
                         builder: (context, state) =>
                             FleetDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'people',
+                    builder: (context, state) => const PeopleScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const PeopleNewScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            PeopleDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'licences',
+                    builder: (context, state) => const LicencesScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const LicenceNewScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => LicenceDetailScreen(
+                          id: state.pathParameters['id']!,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'assets',
+                    builder: (context, state) => const AssetsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const AssetNewScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            AssetDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'incidents',
+                    builder: (context, state) => const IncidentsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'new',
+                        builder: (context, state) => const IncidentNewScreen(),
+                      ),
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) => IncidentDetailScreen(
+                          id: state.pathParameters['id']!,
+                        ),
                       ),
                     ],
                   ),

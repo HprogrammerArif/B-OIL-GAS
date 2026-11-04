@@ -56,6 +56,9 @@ export interface LicenseCard {
   certificateValidity: string;
   auditChecklist: AuditItem[];
   documents: DocVaultItem[];
+  focalEmpId: string;
+  site: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ' | 'TERMINAL_CTG';
+  fundStatus: 'not_required' | 'pending' | 'approved';
 }
 
 const INITIAL_LICENSES: LicenseCard[] = [
@@ -94,6 +97,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Ministry_Quota_Application_Copy.pdf', size: '1.8 MB', date: '15 Oct 2026', type: 'Official Letter' },
       { name: 'Bangladesh_Bank_Clearance_Slip.pdf', size: '940 KB', date: '12 Oct 2026', type: 'Bank Clearance' },
     ],
+    focalEmpId: 'EMP-0001',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
   },
   {
     id: 'EXP-KER-01',
@@ -131,6 +137,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Safety_Valve_Test_Certificate.pdf', size: '1.5 MB', date: '18 Oct 2026', type: 'Safety Certificate' },
       { name: 'Govt_Fee_Payment_Receipt.pdf', size: '820 KB', date: '14 Oct 2026', type: 'Bank Receipt' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
   },
   {
     id: 'CAL-VALVE-08',
@@ -142,7 +151,7 @@ const INITIAL_LICENSES: LicenseCard[] = [
     titleBn: 'প্ল্যান্ট স্টিম বয়লার ও সেফটি ভালভ বার্ষিক ফিটনেস সনদ',
     refNo: 'BOILER/DHAKA/KER-662',
     daysLeft: 22,
-    stage: 2,
+    stage: 1,
     focalPerson: 'Engr. Tariqul Islam',
     focalDesignation: 'Senior Plant Maintenance Engineer',
     lastInspection: '24 Oct 2026',
@@ -164,6 +173,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
     documents: [
       { name: 'Boiler_Pressure_Test_Sheet_Oct2026.pdf', size: '1.4 MB', date: '24 Oct 2026', type: 'Test Sheet' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'pending',
   },
   {
     id: 'DOE-ECC-04',
@@ -200,6 +212,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Water_Treatment_Lab_Report_Oct2026.pdf', size: '2.1 MB', date: '15 Oct 2026', type: 'Lab Report' },
       { name: 'Clean_Air_Monitoring_Summary.pdf', size: '1.8 MB', date: '12 Oct 2026', type: 'Air Quality Log' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
   },
   {
     id: 'FSCD-FIRE-09',
@@ -236,6 +251,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Fire_Hydrant_Pressure_Check_2026.pdf', size: '2.0 MB', date: '05 Oct 2026', type: 'Safety Log' },
       { name: 'Quarterly_Fire_Drill_Attendance.pdf', size: '1.1 MB', date: '01 Oct 2026', type: 'Drill Report' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
   },
   {
     id: 'BSTI-BIT-60',
@@ -271,6 +289,9 @@ const INITIAL_LICENSES: LicenseCard[] = [
     documents: [
       { name: 'BSTI_Lab_Quality_Certificate_Oct2026.pdf', size: '2.4 MB', date: '25 Oct 2026', type: 'BSTI Certificate' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
   },
 ];
 
@@ -2005,7 +2026,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 2;
+const PERSIST_VERSION = 3;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];

@@ -691,6 +691,8 @@
   .kanban-col {
     min-width: 82vw !important;
     max-width: 85vw !important;
+    height: 280px !important;
+    max-height: 280px !important;
     scroll-snap-align: start !important;
   }
 

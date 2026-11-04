@@ -31,7 +31,9 @@ export type Permission =
   // Compliance
   | 'compliance:view'
   | 'compliance:manage'
+  | 'compliance:renew'
   | 'compliance:dispatch_letter'
+  | 'compliance:approve_fund'
   // Fleet & bus
   | 'fleet:request'
   | 'fleet:dispatch'
@@ -90,7 +92,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'approvals:view', 'approvals:decide',
     'notesheet:create', 'notesheet:sign', 'notesheet:view_all',
     'chat:leadership',
-    'compliance:view', 'compliance:manage',
+    'compliance:view', 'compliance:manage', 'compliance:renew',
     'guest:invite', 'guest:view_all',
     'incident:investigate', 'incident:view_all',
     'attendance:team', 'leave:approve',
@@ -135,7 +137,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'approvals:view', 'approvals:decide',
     'notesheet:create', 'notesheet:sign', 'notesheet:view_all',
     'chat:leadership',
-    'compliance:view',
+    'compliance:view', 'compliance:approve_fund',
     'fleet:request',
     'guest:invite',
     'incident:view_all',

@@ -1,351 +1,366 @@
-import React, { useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore } from '../store/operationsStore';
+import { useOperationsStore, type LicenseCard } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import {
-  ShieldCheck, AlertTriangle, Clock, CheckCircle, FileText,
-  Flame, Leaf, Building, ArrowRight, ArrowLeft, Upload, Zap, RefreshCw,
-  ExternalLink, Eye, Award, Check, Download, AlertOctagon,
-  ChevronRight, Printer, Sparkles, Filter, Search, Send,
-  FileCheck, DollarSign, Calendar, User, Scale, CheckSquare, X,
-  BadgeCheck, Info, Radio, HardHat, FileBadge, Lock, HelpCircle, ShieldAlert
+  ShieldCheck, AlertTriangle, Clock, Building, ArrowRight, ArrowLeft,
+  ChevronLeft, ChevronRight,
+  FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Filter, Search,
+  Download, Printer, Send, Check, Flame, CircleDot,
 } from 'lucide-react';
-
-interface AuditItem {
-  item: string;
-  itemBn?: string;
-  passed: boolean;
-}
-
-interface DocVaultItem {
-  name: string;
-  size: string;
-  date: string;
-  type: string;
-}
-
-interface LicenseCard {
-  id: string;
-  tag: 'bsti' | 'doe' | 'fire' | 'env' | 'trade';
-  tagLabel: string;
-  agency: string;
-  agencyBn: string;
-  title: string;
-  titleBn: string;
-  refNo: string;
-  daysLeft: number;
-  stage: number; // 1 to 5
-  focalPerson: string;
-  focalDesignation: string;
-  lastInspection: string;
-  criticality: 'critical' | 'high' | 'medium';
-  sroLawRef: string;
-  feeAmountTk: string;
-  dailyShutdownRiskTk: string;
-  statutoryPenalty: string;
-  statutoryPenaltyBn: string;
-  inspectorName: string;
-  inspectorDesignation: string;
-  ministryRecipient: string;
-  ministryAddress: string;
-  certificateValidity: string;
-  auditChecklist: AuditItem[];
-  documents: DocVaultItem[];
-}
-
-
-const STAGES = [
-  { id: 1, title: '1. Internal Review', titleBn: '১. অভ্যন্তরীণ মূল্যায়ন', color: 'var(--status-purple)', badgeColor: 'var(--status-purple-bg)', textColor: 'var(--status-purple-text)' },
-  { id: 2, title: '2. Application Filed', titleBn: '২. আবেদন দাখিল', color: 'var(--status-info)', badgeColor: 'var(--status-info-bg)', textColor: 'var(--status-info)' },
-  { id: 3, title: '3. Field Inspection', titleBn: '৩. মাঠ পরিদর্শন', color: 'var(--status-warning)', badgeColor: 'var(--status-warning-bg)', textColor: 'var(--status-warning-text)' },
-  { id: 4, title: '4. Ministry Vetting', titleBn: '৪. মন্ত্রণালয়ে যাচাই', color: 'var(--brand-crimson)', badgeColor: 'var(--status-danger-bg)', textColor: 'var(--status-danger-text)' },
-  { id: 5, title: '5. Renewed & Active', titleBn: '৫. সক্রিয় ও নবায়িত', color: 'var(--status-success)', badgeColor: 'var(--status-success-bg)', textColor: 'var(--status-success-text)' },
-];
+import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
+import {
+  AGENCY_FILTERS,
+  STAGES,
+  canAdvance,
+  canApproveThisFee,
+  canDoLetter,
+  canRevert,
+  canToggleChecklist,
+  capsFromUser,
+  checklistComplete,
+  checklistOpen,
+  myWork,
+  nextLine,
+  stageOf,
+} from './compliance/pipeline';
 
 export default function ComplianceView({ lang }: ViewProps) {
   const { licenses, setLicenses } = useOperationsStore();
   const user = useCurrentUser();
-  const canManage = !!user?.permissions.has('compliance:manage');
-  const canDispatch = !!user?.permissions.has('compliance:dispatch_letter');
-  const canDraftLetter = canManage || canDispatch;
-  const [selectedLicense, setSelectedLicense] = useState<LicenseCard | null>(null);
-  const [showDoLetterModal, setShowDoLetterModal] = useState<LicenseCard | null>(null);
+  const caps = capsFromUser(user);
 
-  // Filtering & Search
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showDoLetterModal, setShowDoLetterModal] = useState<LicenseCard | null>(null);
+  const [revertId, setRevertId] = useState<string | null>(null);
+  const [revertReason, setRevertReason] = useState('');
+  const [focusedStage, setFocusedStage] = useState<number | 'all'>('all');
   const [selectedAgencyFilter, setSelectedAgencyFilter] = useState<string>('all');
   const [selectedUrgencyFilter, setSelectedUrgencyFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
-  // Customization of DO Letter in Modal
-  const [doLetterCustomSubject, setDoLetterCustomSubject] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [doLetterDeliveryMode, setDoLetterDeliveryMode] = useState<'enothi' | 'courier' | 'liaison'>('enothi');
 
-  // Advance / Reverse Pipeline Stage
-  const moveLicense = (id: string, dir: number) => {
-    if (!canManage) return;
-    setLicenses(prev => prev.map(lic => {
-      if (lic.id === id) {
-        const nextStage = Math.max(1, Math.min(5, lic.stage + dir));
-        return { ...lic, stage: nextStage };
-      }
-      return lic;
+  const selectedLicense = licenses.find((l) => l.id === selectedId) ?? null;
+
+  const patchLicense = (id: string, patch: Partial<LicenseCard> | ((lic: LicenseCard) => LicenseCard)) => {
+    setLicenses((prev) => prev.map((lic) => {
+      if (lic.id !== id) return lic;
+      return typeof patch === 'function' ? patch(lic) : { ...lic, ...patch };
     }));
-    showToast(t('License pipeline stage updated.', 'লাইসেন্স পাইপলাইন স্টেজ আপডেট করা হয়েছে।', lang), 'success');
   };
 
-  // Toggle checklist item
+  const handleOpenDoLetter = (lic: LicenseCard) => setShowDoLetterModal(lic);
+
+  const tryAdvance = (lic: LicenseCard) => {
+    const gate = canAdvance(lic, caps);
+    if (!gate.ok) {
+      showToast(t(gate.reason ?? 'Cannot advance.', gate.reasonBn ?? 'এখন সরানো যাবে না।', lang), 'warn');
+      return;
+    }
+    const nextStage = Math.min(5, lic.stage + 1);
+    patchLicense(lic.id, { stage: nextStage });
+    const label = stageOf(nextStage);
+    showToast(
+      t(`Moved to ${label.title}.`, `${label.titleBn} ধাপে স্থানান্তর হয়েছে।`, lang),
+      'success',
+    );
+  };
+
   const toggleChecklistItem = (itemIndex: number) => {
-    if (!selectedLicense || !canManage) return;
-    const updatedChecklist = selectedLicense.auditChecklist.map((c, i) => (i === itemIndex ? { ...c, passed: !c.passed } : c));
-    const updated = { ...selectedLicense, auditChecklist: updatedChecklist };
-    setSelectedLicense(updated);
-    setLicenses(prev => prev.map(l => l.id === updated.id ? updated : l));
-    showToast(t('Statutory audit verification updated.', 'অডিট ভেরিফিকেশন হালনাগাদ করা হয়েছে।', lang), 'info');
+    if (!selectedLicense || !canToggleChecklist(selectedLicense, caps, user)) return;
+    patchLicense(selectedLicense.id, (lic) => ({
+      ...lic,
+      auditChecklist: lic.auditChecklist.map((c, i) => (i === itemIndex ? { ...c, passed: !c.passed } : c)),
+    }));
+    showToast(t('Checklist updated.', 'চেকলিস্ট হালনাগাদ হয়েছে।', lang), 'info');
   };
 
-  const handleOpenDoLetter = (lic: LicenseCard) => {
-    setShowDoLetterModal(lic);
-    setDoLetterCustomSubject(`REQUEST FOR EXPEDITED STATUTORY RENEWAL: ${lic.title.toUpperCase()} (REF: ${lic.refNo})`);
+  const approveFee = (lic: LicenseCard) => {
+    if (!canApproveThisFee(lic, caps)) return;
+    patchLicense(lic.id, { fundStatus: 'approved' });
+    showToast(
+      t(`Fee ${lic.feeAmountTk} approved. The plant team can now file.`, `${lic.feeAmountTk} অনুমোদিত। প্ল্যান্ট দল এখন আবেদন দাখিল করতে পারবে।`, lang),
+      'success',
+    );
   };
 
-  // Filtered Licenses
+  const confirmRevert = () => {
+    if (!revertId || revertReason.trim().length < 8) {
+      showToast(t('Write a short reason (8+ characters) to send it back.', 'ফেরত পাঠাতে কমপক্ষে ৮ অক্ষরের কারণ লিখুন।', lang), 'warn');
+      return;
+    }
+    const lic = licenses.find((l) => l.id === revertId);
+    if (!lic || !canRevert(lic, caps)) return;
+    patchLicense(revertId, { stage: Math.max(1, lic.stage - 1) });
+    showToast(t('Filing returned to the previous stage.', 'আবেদন আগের ধাপে ফেরত গেছে।', lang), 'info');
+    setRevertId(null);
+    setRevertReason('');
+  };
+
   const filteredLicenses = useMemo(() => {
-    return licenses.filter(lic => {
-      // Agency Filter
-      if (selectedAgencyFilter !== 'all') {
-        if (selectedAgencyFilter === 'explosives' && lic.tag !== 'fire') return false;
-        if (selectedAgencyFilter === 'doe' && lic.tag !== 'doe') return false;
-        if (selectedAgencyFilter === 'bsti' && lic.tag !== 'bsti') return false;
-        if (selectedAgencyFilter === 'trade' && lic.tag !== 'trade') return false;
-        if (selectedAgencyFilter === 'calibration' && lic.tag !== 'env') return false;
-      }
-      // Urgency Filter
+    return licenses.filter((lic) => {
+      const agency = AGENCY_FILTERS.find((f) => f.id === selectedAgencyFilter);
+      if (agency && agency.id !== 'all' && 'tags' in agency && agency.tags && !agency.tags.includes(lic.tag)) return false;
       if (selectedUrgencyFilter === 'critical' && lic.daysLeft > 30) return false;
       if (selectedUrgencyFilter === 'warning' && (lic.daysLeft <= 30 || lic.daysLeft > 90)) return false;
       if (selectedUrgencyFilter === 'active' && lic.daysLeft <= 90) return false;
-      // Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchTitle = lic.title.toLowerCase().includes(q) || lic.titleBn.toLowerCase().includes(q);
-        const matchRef = lic.refNo.toLowerCase().includes(q);
-        const matchAgency = lic.agency.toLowerCase().includes(q) || lic.agencyBn.toLowerCase().includes(q);
-        const matchFocal = lic.focalPerson.toLowerCase().includes(q);
-        if (!matchTitle && !matchRef && !matchAgency && !matchFocal) return false;
+        const hay = [lic.title, lic.titleBn, lic.refNo, lic.agency, lic.agencyBn, lic.focalPerson].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
       }
       return true;
     });
   }, [licenses, selectedAgencyFilter, selectedUrgencyFilter, searchQuery]);
 
-  // Overall Metrics
-  const criticalLicenses = licenses.filter(l => l.daysLeft <= 30);
-  const closestExpiry = licenses.length ? Math.min(...licenses.map(l => l.daysLeft)) : 0;
+  const criticalLicenses = licenses.filter((l) => l.daysLeft <= 30 && l.stage < 5);
+  const closestExpiry = licenses.length ? Math.min(...licenses.map((l) => l.daysLeft)) : 0;
   const mostCriticalLicense = licenses.length
     ? licenses.reduce((prev, curr) => (curr.daysLeft < prev.daysLeft ? curr : prev), licenses[0])
     : undefined;
-  const renewalsInProgress = licenses.filter(l => l.stage < 5).length;
+  const renewalsInProgress = licenses.filter((l) => l.stage < 5).length;
   const checklistTotal = licenses.reduce((n, l) => n + l.auditChecklist.length, 0);
-  const checklistPassed = licenses.reduce((n, l) => n + l.auditChecklist.filter(c => c.passed).length, 0);
+  const checklistPassed = licenses.reduce((n, l) => n + l.auditChecklist.filter((c) => c.passed).length, 0);
   const readinessPct = checklistTotal ? Math.round((checklistPassed / checklistTotal) * 100) : 100;
-  const agencyCount = new Set(licenses.map(l => l.agency)).size;
+  const agencyCount = new Set(licenses.map((l) => l.agency)).size;
+  const workItems = myWork(filteredLicenses, caps, user, lang);
+
+  const kanbanRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateKanbanScroll = useCallback(() => {
+    const el = kanbanRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 8);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 8);
+  }, []);
+
+  useEffect(() => {
+    const el = kanbanRef.current;
+    if (!el) return;
+    updateKanbanScroll();
+    const onScroll = () => updateKanbanScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const ro = new ResizeObserver(() => updateKanbanScroll());
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      ro.disconnect();
+    };
+  }, [updateKanbanScroll, filteredLicenses, focusedStage]);
+
+  const scrollKanbanByColumn = (dir: -1 | 1) => {
+    const el = kanbanRef.current;
+    if (!el) return;
+    const col = el.querySelector('.kanban-col') as HTMLElement | null;
+    const amount = (col?.offsetWidth ?? 240) + 14;
+    el.scrollBy({ left: dir * amount, behavior: 'smooth' });
+  };
+
+  const scrollStageIntoView = (stageId: number) => {
+    const col = kanbanRef.current?.querySelector(`[data-stage="${stageId}"]`) as HTMLElement | null;
+    col?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+  };
+
+  const pageDesc = caps.canRenew
+    ? t('You run the plant filings: checklist, inspection and certificate.', 'আপনি প্ল্যান্টের আবেদন চালান: চেকলিস্ট, পরিদর্শন ও সনদ।', lang)
+    : caps.canDispatch
+      ? t('You sign DO letters when a permit is close to expiry. The plant team moves the stages.', 'মেয়াদ ঘনিয়ে এলে আপনি ডিও লেটারে স্বাক্ষর করেন। ধাপ সরানো প্ল্যান্ট দলের কাজ।', lang)
+      : caps.canApproveFund
+        ? t('You approve renewal fees so the plant can file with the agency.', 'প্ল্যান্ট আবেদন দাখিল করতে পারার জন্য আপনি নবায়ন ফি অনুমোদন করেন।', lang)
+        : t('Status of statutory permits for the Keraniganj plant. Nothing to approve here.', 'কেরানীগঞ্জ প্ল্যান্টের বিধিবদ্ধ লাইসেন্সের অবস্থা। এখানে আপনার অনুমোদনের কিছু নেই।', lang);
 
   return (
     <div style={{ maxWidth: '1440px', margin: '0 auto', paddingBottom: '40px' }}>
-      {/* Top Header & Barometer */}
-      <div className="flex-between mb-4" style={{ flexWrap: 'wrap', gap: '14px', alignItems: 'flex-start' }}>
-        <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-900)', letterSpacing: '-0.4px', margin: 0 }}>
-            {t('Permits & Licenses', 'লাইসেন্স ও অনুমোদনপত্র', lang)}
-          </h2>
-          <p className="text-muted" style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
-            {canManage
-              ? t('Track renewals, verify audit checklists and keep every permit current.', 'নবায়ন অনুসরণ, অডিট চেকলিস্ট যাচাই এবং প্রতিটি লাইসেন্স হালনাগাদ রাখুন।', lang)
-              : t('Status of statutory permits and renewals for the Keraniganj plant.', 'কেরানীগঞ্জ প্ল্যান্টের বিধিবদ্ধ লাইসেন্স ও নবায়নের অবস্থা।', lang)}
-          </p>
-        </div>
+      <PageHeader
+        title={t('Permits & Licenses', 'লাইসেন্স ও অনুমোদনপত্র', lang)}
+        description={pageDesc}
+        actions={
+          <div style={{ padding: '8px 14px', background: readinessPct >= 85 ? 'var(--status-success-bg)' : 'var(--status-warning-bg)', border: `1px solid ${readinessPct >= 85 ? 'var(--status-success-border)' : 'var(--status-warning-border)'}`, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <ShieldCheck size={20} color={readinessPct >= 85 ? 'var(--status-success)' : 'var(--status-warning)'} />
+            <div style={{ fontSize: '11.5px', color: readinessPct >= 85 ? 'var(--status-success-text)' : 'var(--status-warning-text)' }}>
+              <div style={{ fontWeight: 800, fontSize: '13px' }}>{t(`Audit readiness: ${readinessPct}%`, `অডিট প্রস্তুতি: ${readinessPct}%`, lang)}</div>
+              <div>{t(`${checklistPassed} of ${checklistTotal} checklist items verified`, `${checklistTotal}টির মধ্যে ${checklistPassed}টি যাচাইকৃত`, lang)}</div>
+            </div>
+          </div>
+        }
+      />
 
-        <div style={{ padding: '8px 14px', background: readinessPct >= 85 ? 'var(--status-success-bg)' : 'var(--status-warning-bg)', border: `1px solid ${readinessPct >= 85 ? 'var(--status-success-border)' : 'var(--status-warning-border)'}`, borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <ShieldCheck size={20} color={readinessPct >= 85 ? 'var(--status-success)' : 'var(--status-warning)'} />
-          <div style={{ fontSize: '11.5px', color: readinessPct >= 85 ? 'var(--status-success-text)' : 'var(--status-warning-text)' }}>
-            <div style={{ fontWeight: 800, fontSize: '13px' }}>{t(`Audit readiness: ${readinessPct}%`, `অডিট প্রস্তুতি: ${readinessPct}%`, lang)}</div>
-            <div>{t(`${checklistPassed} of ${checklistTotal} checklist items verified`, `${checklistTotal}টির মধ্যে ${checklistPassed}টি চেকলিস্ট আইটেম যাচাইকৃত`, lang)}</div>
+      <div className="pipe-work">
+        <div className="pipe-work-hd">
+          <div>
+            <h3 className="pipe-work-title">{t('What you need to do', 'আপনার করণীয়', lang)}</h3>
+            <p className="pipe-work-sub">
+              {workItems.length
+                ? t(`${workItems.length} item(s) waiting on you.`, `${workItems.length}টি কাজ আপনার জন্য অপেক্ষা করছে।`, lang)
+                : t('Nothing for you to do on this board.', 'এই বোর্ডে আপনার করার কিছু নেই।', lang)}
+            </p>
           </div>
         </div>
+        {workItems.length === 0 ? (
+          <EmptyState
+            compact
+            icon={<Check size={18} />}
+            title={t('No filings waiting on you', 'আপনার কাছে কোনো আবেদন অপেক্ষা করছে না', lang)}
+            description={
+              mostCriticalLicense && mostCriticalLicense.daysLeft <= 30
+                ? t(
+                    `${mostCriticalLicense.title} expires in ${mostCriticalLicense.daysLeft} days. The plant team is handling the filing.`,
+                    `${mostCriticalLicense.titleBn}-এর মেয়াদ ${mostCriticalLicense.daysLeft} দিনে শেষ। প্ল্যান্ট দল আবেদন চালাচ্ছে।`,
+                    lang,
+                  )
+                : t('All current permits are on track.', 'বর্তমান সব লাইসেন্স সঠিক পথে আছে।', lang)
+            }
+          />
+        ) : (
+          <div className="pipe-work-list">
+            {workItems.map((item) => (
+              <button
+                key={`${item.license.id}-${item.kind}`}
+                type="button"
+                className="pipe-work-row"
+                onClick={() => {
+                  if (item.kind === 'do_letter') handleOpenDoLetter(item.license);
+                  else setSelectedId(item.license.id);
+                }}
+              >
+                <div>
+                  <strong>{t(item.license.title, item.license.titleBn, lang)}</strong>
+                  <span>{t(item.label, item.labelBn, lang)}</span>
+                </div>
+                <StatusPill tone={item.kind === 'do_letter' || item.kind === 'fund' ? 'warn' : 'info'}>
+                  {t(item.label, item.labelBn, lang)}
+                </StatusPill>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Regulatory Risk Barometer */}
       <div className="responsive-col-4 mb-4" style={{ gap: '14px' }}>
         <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-danger)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
-              {t('Nearest Expiry', 'নিকটতম মেয়াদোত্তীর্ণ', lang)}
+              {t('Nearest expiry', 'নিকটতম মেয়াদোত্তীর্ণ', lang)}
             </span>
             <AlertTriangle size={16} color="var(--status-danger)" />
           </div>
           <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-danger)', marginTop: '4px' }}>
-            {closestExpiry} {t('Days Left', 'দিন বাকি', lang)}
+            {closestExpiry} {t('days left', 'দিন বাকি', lang)}
           </div>
           <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
             {t(`${criticalLicenses.length} permit(s) due within 30 days`, `৩০ দিনের মধ্যে ${criticalLicenses.length}টি লাইসেন্স নবায়নযোগ্য`, lang)}
           </div>
         </div>
-
         <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-warning)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
-              {t('Renewals In Progress', 'চলমান নবায়ন', lang)}
-            </span>
-            <RefreshCw size={16} color="var(--status-warning)" />
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>{t('Renewals in progress', 'চলমান নবায়ন', lang)}</span>
+            <Clock size={16} color="var(--status-warning)" />
           </div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-warning-text)', marginTop: '4px' }}>
-            {renewalsInProgress}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-            {t('Not yet at Renewed & Active', 'এখনো সক্রিয় ও নবায়িত ধাপে পৌঁছায়নি', lang)}
-          </div>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-warning-text)', marginTop: '4px' }}>{renewalsInProgress}</div>
+          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>{t('Not yet renewed & active', 'এখনো সক্রিয় ও নবায়িত নয়', lang)}</div>
         </div>
-
         <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-success)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
-              {t('Permits Tracked', 'তদারকিকৃত লাইসেন্স', lang)}
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>{t('Permits tracked', 'তদারকিকৃত লাইসেন্স', lang)}</span>
             <Building size={16} color="var(--status-success)" />
           </div>
           <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
-            {licenses.length} <span style={{ fontSize: '12px', fontWeight: 600 }}>{t('Permits', 'টি লাইসেন্স', lang)}</span>
+            {licenses.length} <span style={{ fontSize: '12px', fontWeight: 600 }}>{t('permits', 'টি লাইসেন্স', lang)}</span>
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-            {t(`Across ${agencyCount} issuing agencies`, `${agencyCount}টি ইস্যুকারী সংস্থা`, lang)}
-          </div>
+          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>{t(`Across ${agencyCount} issuing agencies`, `${agencyCount}টি ইস্যুকারী সংস্থা`, lang)}</div>
         </div>
-
         <div className="card" style={{ padding: '14px 16px', borderLeft: '4px solid var(--status-info)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>
-              {t('Checklist Items Open', 'অসম্পন্ন চেকলিস্ট আইটেম', lang)}
-            </span>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>{t('Checklist items open', 'অসম্পন্ন চেকলিস্ট', lang)}</span>
             <CheckSquare size={16} color="var(--status-info)" />
           </div>
-          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-info)', marginTop: '4px' }}>
-            {checklistTotal - checklistPassed}
-          </div>
-          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-            {t('Must be verified before renewal', 'নবায়নের আগে যাচাই করতে হবে', lang)}
-          </div>
+          <div style={{ fontSize: '22px', fontWeight: 900, color: 'var(--status-info)', marginTop: '4px' }}>{checklistTotal - checklistPassed}</div>
+          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>{t('Must be verified before filing', 'আবেদনের আগে যাচাই করতে হবে', lang)}</div>
         </div>
       </div>
 
-      {/* Critical Countdown Warning Strip */}
-      <div style={{
-        background: 'linear-gradient(90deg, var(--brand-crimson-dark) 0%, var(--brand-crimson) 100%)',
-        color: 'var(--text-on-brand)',
-        padding: '14px 20px',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: '20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        boxShadow: 'var(--shadow-crimson)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 500px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.15)', padding: '8px', borderRadius: '8px', display: 'flex' }}>
-            <AlertTriangle size={22} color="var(--brand-gold-light)" />
+      {mostCriticalLicense && mostCriticalLicense.daysLeft <= 30 && (
+        <div className="pipe-alert critical">
+          <div>
+            <strong>{t('Nearest permit at risk', 'ঝুঁকিতে নিকটতম লাইসেন্স', lang)}</strong>
+            <p>
+              {t(
+                `${mostCriticalLicense.title} — ${mostCriticalLicense.daysLeft} days left, currently in ${stageOf(mostCriticalLicense.stage).title}. ${nextLine(mostCriticalLicense, caps, user, 'en')}`,
+                `${mostCriticalLicense.titleBn} — ${mostCriticalLicense.daysLeft} দিন বাকি, এখন ${stageOf(mostCriticalLicense.stage).titleBn} ধাপে। ${nextLine(mostCriticalLicense, caps, user, 'bn')}`,
+                lang,
+              )}
+            </p>
           </div>
-          <div style={{ fontSize: '13px', lineHeight: 1.5 }}>
-            <div style={{ fontWeight: 800, color: 'var(--status-warning-bright)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{t('CRITICAL COMPLIANCE NOTICE:', 'জরুরি বিধিবদ্ধ নোটিশ:', lang)}</span>
-              <span className="badge danger" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--status-danger-bright)', border: '1px solid var(--status-danger-solid-dark)', fontSize: '10px' }}>
-                {t(`ACTION REQUIRED WITHIN ${mostCriticalLicense?.daysLeft || 7} DAYS`, `${mostCriticalLicense?.daysLeft || 7} দিনের মধ্যে সমাধান প্রয়োজন`, lang)}
-              </span>
-            </div>
-            <div style={{ color: 'var(--text-inverse)', marginTop: '2px' }}>
-              {mostCriticalLicense ? (
-                t(
-                  `${mostCriticalLicense.title} (${mostCriticalLicense.agency}) has ${mostCriticalLicense.daysLeft} days remaining. Current stage: ${STAGES[mostCriticalLicense.stage - 1].title.split('. ')[1]}.`,
-                  `${mostCriticalLicense.titleBn} (${mostCriticalLicense.agencyBn})-এর মেয়াদ শেষ হতে ${mostCriticalLicense.daysLeft} দিন বাকি। বর্তমান ধাপ: ${STAGES[mostCriticalLicense.stage - 1].titleBn.split('. ')[1]}।`,
-                  lang
-                )
-              ) : null}
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {mostCriticalLicense && canDraftLetter && (
-            <button
-              className="btn-gold"
-              style={{ fontSize: '12px', padding: '7px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
-              onClick={() => handleOpenDoLetter(mostCriticalLicense)}
-            >
-              <FileText size={14} />
-              {t('Prepare DO Letter', 'ডিও লেটার প্রস্তুত করুন', lang)}
-            </button>
+          {canDoLetter(mostCriticalLicense, caps) && (
+            <Button variant="gold" size="sm" icon={<FileText size={14} />} onClick={() => handleOpenDoLetter(mostCriticalLicense)}>
+              {caps.canDispatch
+                ? t('Sign DO letter', 'ডিও লেটারে স্বাক্ষর', lang)
+                : t('Draft DO letter', 'ডিও লেটার খসড়া', lang)}
+            </Button>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Filter & Search Toolbar */}
       <div className="card mb-4" style={{ padding: '12px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          {/* Agency Filter Chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', display: 'flex', alignItems: 'center', gap: '4px', marginRight: '4px' }}>
-              <Filter size={13} /> {t('Filter Agency:', 'সংস্থা ফিল্টার:', lang)}
+              <Filter size={13} /> {t('Agency', 'সংস্থা', lang)}
             </span>
-            {[
-              { id: 'all', label: 'All Agencies', labelBn: 'সকল সংস্থা' },
-              { id: 'explosives', label: 'Explosives / Fire', labelBn: 'বিস্ফোরক ও ফায়ার' },
-              { id: 'doe', label: 'Environment (DoE)', labelBn: 'পরিবেশ অধিদপ্তর' },
-              { id: 'bsti', label: 'BSTI Standards', labelBn: 'বিএসটিআই মান' },
-              { id: 'trade', label: 'Energy Div Quota', labelBn: 'জ্বালানি বিভাগ কোটা' },
-              { id: 'calibration', label: 'Metrology / Boilers', labelBn: 'মেট্রোলজি ও বয়লার' },
-            ].map(f => (
+            {AGENCY_FILTERS.map((f) => (
               <button
                 key={f.id}
+                type="button"
                 onClick={() => setSelectedAgencyFilter(f.id)}
                 style={{
-                  fontSize: '11px',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-full)',
+                  fontSize: '11px', padding: '4px 10px', borderRadius: 'var(--radius-full)',
                   border: selectedAgencyFilter === f.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
                   background: selectedAgencyFilter === f.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
                   color: selectedAgencyFilter === f.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
-                  fontWeight: selectedAgencyFilter === f.id ? 700 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
+                  fontWeight: selectedAgencyFilter === f.id ? 700 : 500, cursor: 'pointer',
                 }}
               >
                 {t(f.label, f.labelBn, lang)}
               </button>
             ))}
           </div>
-
-          {/* Search Box */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '240px' }}>
-            <div style={{ position: 'relative', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {[
+              { id: 'all', label: 'Any urgency', labelBn: 'সব' },
+              { id: 'critical', label: '≤ 30 days', labelBn: '≤ ৩০ দিন' },
+              { id: 'warning', label: '31–90 days', labelBn: '৩১–৯০ দিন' },
+              { id: 'active', label: '> 90 days', labelBn: '> ৯০ দিন' },
+            ].map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => setSelectedUrgencyFilter(u.id)}
+                style={{
+                  fontSize: '11px', padding: '4px 10px', borderRadius: 'var(--radius-full)',
+                  border: selectedUrgencyFilter === u.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                  background: selectedUrgencyFilter === u.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
+                  color: selectedUrgencyFilter === u.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
+                  fontWeight: selectedUrgencyFilter === u.id ? 700 : 500, cursor: 'pointer',
+                }}
+              >
+                {t(u.label, u.labelBn, lang)}
+              </button>
+            ))}
+            <div style={{ position: 'relative', minWidth: '220px' }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)' }} />
               <input
                 type="text"
-                placeholder={t('Search license, ref#, focal engineer...', 'লাইসেন্স, রেফারেন্স নং বা কর্মকর্তা খুঁজুন...', lang)}
+                placeholder={t('Search license, ref, focal…', 'লাইসেন্স, রেফারেন্স বা কর্মকর্তা…', lang)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '6px 10px 6px 30px',
-                  fontSize: '12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--brand-slate-200)',
-                  outline: 'none',
-                  background: 'var(--surface-0)'
-                }}
+                style={{ width: '100%', padding: '6px 10px 6px 30px', fontSize: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', outline: 'none', background: 'var(--surface-0)' }}
               />
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--brand-slate-400)' }}
-                >
+                <button type="button" onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--brand-slate-400)' }}>
                   <X size={13} />
                 </button>
               )}
@@ -354,195 +369,246 @@ export default function ComplianceView({ lang }: ViewProps) {
         </div>
       </div>
 
-      {/* 5-Stage Kanban Board */}
       <div className="card mb-5">
         <div className="card-hd">
           <div className="card-hd-left">
-            <div className="card-hd-icon">
-              <Building size={18} />
-            </div>
+            <div className="card-hd-icon"><Building size={18} /></div>
             <div>
-              <div className="card-title">{t('Regulatory Approval Life-Cycle Pipeline', 'নিয়ামক সংস্থা অনুমোদন ও লাইসেন্স পাইপলাইন', lang)}</div>
-              <div className="card-subtitle">{t('Renewals with BSTI, Explosives Dept, Fire Service and DoE, stage by stage', 'বিএসটিআই, বিস্ফোরক অধিদপ্তর, ফায়ার সার্ভিস ও পরিবেশ অধিদপ্তরের লাইসেন্স পাইপলাইন', lang)}</div>
+              <div className="card-title">{t('Renewal pipeline', 'নবায়ন পাইপলাইন', lang)}</div>
+              <div className="card-subtitle">{t('Each permit moves through the same five stages. Click a stage to focus it.', 'প্রতিটি লাইসেন্স একই পাঁচ ধাপ পার হয়। ধাপে ক্লিক করে ফোকাস করুন।', lang)}</div>
             </div>
           </div>
-          <div className="flex-gap" style={{ alignItems: 'center' }}>
-            <span className="telemetry-hide-desktop" style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-              {t('Swipe to see all 5 stages', 'সবগুলো স্টেজ দেখতে স্ক্রল করুন', lang)}
-            </span>
-            <span className="badge info">{filteredLicenses.length} {t('Active Filings', 'টি বিধিবদ্ধ নথি', lang)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="pipe-nav"
+              disabled={!canScrollLeft}
+              aria-label={t('Previous stages', 'আগের ধাপ', lang)}
+              onClick={() => scrollKanbanByColumn(-1)}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              className="pipe-nav"
+              disabled={!canScrollRight}
+              aria-label={t('Next stages', 'পরের ধাপ', lang)}
+              onClick={() => scrollKanbanByColumn(1)}
+            >
+              <ChevronRight size={18} />
+            </button>
+            <StatusPill tone="info">{filteredLicenses.length} {t('filings', 'টি আবেদন', lang)}</StatusPill>
           </div>
         </div>
-
         <div className="card-body">
-          <div className="kanban" style={{ scrollSnapType: 'x mandatory' }}>
-            {STAGES.map(stage => {
-              const stageLicenses = filteredLicenses.filter(l => l.stage === stage.id);
+          <div className="pipe-stepper" role="tablist" aria-label={t('Renewal stages', 'নবায়ন ধাপ', lang)}>
+            {STAGES.map((stage) => {
+              const count = filteredLicenses.filter((l) => l.stage === stage.id).length;
+              const isFocus = focusedStage === stage.id;
               return (
-                <div key={stage.id} className="kanban-col" style={{ scrollSnapAlign: 'start', minWidth: '240px' }}>
+                <button
+                  key={stage.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isFocus}
+                  className={`pipe-step${isFocus ? ' is-focus' : ''}${count === 0 ? ' is-empty' : ''}`}
+                  style={{ color: stage.color }}
+                  onClick={() => {
+                    setFocusedStage(isFocus ? 'all' : stage.id);
+                    scrollStageIntoView(stage.id);
+                  }}
+                >
+                  <div className="pipe-step-idx">
+                    <span>{t(`Stage ${stage.id}`, `ধাপ ${stage.id}`, lang)}</span>
+                    <span className="kanban-count" style={{ background: stage.badgeColor, color: stage.textColor, borderColor: 'transparent' }}>{count}</span>
+                  </div>
+                  <div className="pipe-step-title">{t(stage.title, stage.titleBn, lang)}</div>
+                  <div className="pipe-step-purpose">{t(stage.purpose, stage.purposeBn, lang)}</div>
+                  <div className="pipe-step-bar" />
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="pipe-board">
+            <button
+              type="button"
+              className="pipe-nav pipe-nav-side pipe-nav-left"
+              disabled={!canScrollLeft}
+              aria-label={t('Previous stages', 'আগের ধাপ', lang)}
+              onClick={() => scrollKanbanByColumn(-1)}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              className="pipe-nav pipe-nav-side pipe-nav-right"
+              disabled={!canScrollRight}
+              aria-label={t('Next stages', 'পরের ধাপ', lang)}
+              onClick={() => scrollKanbanByColumn(1)}
+            >
+              <ChevronRight size={20} />
+            </button>
+            <div ref={kanbanRef} className="kanban" style={{ scrollSnapType: 'x mandatory' }}>
+            {STAGES.map((stage) => {
+              const stageLicenses = filteredLicenses.filter((l) => l.stage === stage.id);
+              return (
+                <div
+                  key={stage.id}
+                  data-stage={stage.id}
+                  className={`kanban-col${stageLicenses.length === 0 ? ' is-empty' : ''}${focusedStage === stage.id ? ' is-focus' : ''}`}
+                  style={{ scrollSnapAlign: 'start' }}
+                >
                   <div className={`kanban-col-hd stage-${stage.id}`} style={{ borderBottom: `2px solid ${stage.color}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: stage.color }} />
                       <h4 style={{ margin: 0, fontSize: '12px' }}>{t(stage.title, stage.titleBn, lang)}</h4>
                     </div>
-                    <span className="kanban-count" style={{ background: stage.badgeColor, color: stage.textColor, borderColor: 'transparent' }}>
-                      {stageLicenses.length}
-                    </span>
+                    <span className="kanban-count" style={{ background: stage.badgeColor, color: stage.textColor, borderColor: 'transparent' }}>{stageLicenses.length}</span>
                   </div>
                   <div className="kanban-cards">
-                    {stageLicenses.map(lic => {
+                    {stageLicenses.map((lic) => {
                       const isUrgent = lic.daysLeft <= 30;
                       const isWarn = lic.daysLeft > 30 && lic.daysLeft <= 90;
+                      const line = nextLine(lic, caps, user, lang);
+                      const yours = workItems.some((w) => w.license.id === lic.id);
+                      const gate = canAdvance(lic, caps);
                       return (
                         <div
                           key={lic.id}
                           className="k-card"
-                          onClick={() => setSelectedLicense(lic)}
+                          onClick={() => setSelectedId(lic.id)}
                           style={{
                             borderLeft: isUrgent ? '4px solid var(--status-danger)' : isWarn ? '4px solid var(--status-warning)' : '4px solid var(--status-success)',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            transition: 'all 0.2s ease',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                             <span className={`k-tag ${lic.tag}`}>{lic.tagLabel}</span>
-                            <span className={`k-countdown ${isUrgent ? 'urgent' : isWarn ? 'warning' : 'ok'}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              {isUrgent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--status-danger-solid)', animation: 'pulse 1.5s infinite' }} />}
-                              {lic.daysLeft <= 0 ? t('EXPIRED', 'মেয়াদোত্তীর্ণ', lang) : t(`${lic.daysLeft}d left`, `${lic.daysLeft} দিন বাকি`, lang)}
+                            <span className={`k-countdown ${isUrgent ? 'urgent' : isWarn ? 'warning' : 'ok'}`}>
+                              {lic.daysLeft <= 0 ? t('Expired', 'মেয়াদোত্তীর্ণ', lang) : t(`${lic.daysLeft}d left`, `${lic.daysLeft} দিন বাকি`, lang)}
                             </span>
                           </div>
-
-                          <div className="k-title" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>
-                            {t(lic.title, lic.titleBn, lang)}
-                          </div>
-
+                          <div className="k-title">{t(lic.title, lic.titleBn, lang)}</div>
                           <div className="k-meta">
                             <div style={{ color: 'var(--brand-slate-800)', fontWeight: 600 }}>{t(lic.agency, lic.agencyBn, lang)}</div>
-                            <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                              {lic.refNo}
-                            </div>
+                            <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>{lic.refNo}</div>
                             <div style={{ marginTop: '5px', color: 'var(--brand-slate-600)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <User size={12} color="var(--brand-slate-400)" />
                               <span>{lic.focalPerson}</span>
                             </div>
-                          </div>
-
-                          {(canManage || (lic.daysLeft <= 30 && canDraftLetter)) && (
-                          <div className="k-footer" style={{ paddingTop: '8px' }}>
-                            <div style={{ display: 'flex', gap: '4px' }}>
-                              {canManage && lic.stage > 1 && (
-                                <button
-                                  className="btn-sm-ghost"
-                                  style={{ padding: '3px 8px', fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                                  onClick={(e) => { e.stopPropagation(); moveLicense(lic.id, -1); }}
-                                  title="Return to previous stage"
-                                >
-                                  <ArrowLeft size={11} /> {t('Back', 'পূর্ববর্তী', lang)}
-                                </button>
-                              )}
-                              {canManage && lic.stage < 5 && (
-                                <button
-                                  className="btn-sm-ghost"
-                                  style={{ padding: '3px 8px', fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '2px', color: 'var(--status-info)' }}
-                                  onClick={(e) => { e.stopPropagation(); moveLicense(lic.id, 1); }}
-                                  title="Advance to next stage"
-                                >
-                                  {t('Next', 'পরবর্তী', lang)} <ArrowRight size={11} />
-                                </button>
-                              )}
-                            </div>
-
-                            {lic.daysLeft <= 30 && canDraftLetter && (
-                              <button
-                                className="btn-outline-danger"
-                                style={{ padding: '3px 8px', fontSize: '10.5px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                                onClick={(e) => { e.stopPropagation(); handleOpenDoLetter(lic); }}
-                              >
-                                <FileText size={11} /> {t('DO Letter', 'ডিও লেটার', lang)}
-                              </button>
+                            {lic.fundStatus === 'pending' && (
+                              <div style={{ marginTop: '4px' }}>
+                                <StatusPill tone="warn">{t(`Fee ${lic.feeAmountTk} waiting`, `ফি ${lic.feeAmountTk} অপেক্ষমাণ`, lang)}</StatusPill>
+                              </div>
                             )}
                           </div>
+                          <div className={`k-next${yours ? ' is-yours' : ''}`}>
+                            <CircleDot size={11} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                            {line}
+                          </div>
+                          {(yours || gate.ok || canDoLetter(lic, caps) || canApproveThisFee(lic, caps) || canRevert(lic, caps)) && (
+                            <div className="k-footer" style={{ paddingTop: '8px', flexWrap: 'wrap', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                              {canApproveThisFee(lic, caps) && (
+                                <Button size="sm" variant="primary" onClick={() => approveFee(lic)}>{t('Approve fee', 'ফি অনুমোদন', lang)}</Button>
+                              )}
+                              {gate.ok && (
+                                <Button size="sm" variant="ghost" icon={<ArrowRight size={12} />} onClick={() => tryAdvance(lic)}>
+                                  {t(stage.verb, stage.verbBn, lang)}
+                                </Button>
+                              )}
+                              {canRevert(lic, caps) && (
+                                <Button size="sm" variant="ghost" icon={<ArrowLeft size={12} />} onClick={() => { setRevertId(lic.id); setRevertReason(''); }}>
+                                  {t('Send back', 'ফেরত পাঠান', lang)}
+                                </Button>
+                              )}
+                              {canDoLetter(lic, caps) && lic.daysLeft <= 30 && lic.stage >= 4 && (
+                                <Button size="sm" variant="outline-danger" icon={<FileText size={12} />} onClick={() => handleOpenDoLetter(lic)}>
+                                  {caps.canDispatch ? t('Sign DO', 'ডিও স্বাক্ষর', lang) : t('Draft DO', 'ডিও খসড়া', lang)}
+                                </Button>
+                              )}
+                            </div>
                           )}
                         </div>
                       );
                     })}
-
                     {stageLicenses.length === 0 && (
-                      <div style={{ padding: '32px 10px', textAlign: 'center', color: 'var(--brand-slate-400)', fontSize: '11.5px', border: '1px dashed var(--brand-slate-200)', borderRadius: 'var(--radius-sm)' }}>
-                        {t('No filings in this stage', 'এই ধাপে কোনো আবেদন নেই', lang)}
-                      </div>
+                      <EmptyState
+                        compact
+                        title={t('No filings here', 'এই ধাপে কোনো আবেদন নেই', lang)}
+                        description={t(stage.purpose, stage.purposeBn, lang)}
+                      />
                     )}
                   </div>
                 </div>
               );
             })}
-          </div>
-        </div>
-      </div>
-
-      {/* Tank inspection log */}
-      <div className="card mb-4">
-        <div className="card-hd">
-          <div className="card-hd-left">
-            <div className="card-hd-icon"><Flame size={16} /></div>
-            <div>
-              <div className="card-title">{t('Storage Tank Inspection Log (API 653)', 'স্টোরেজ ট্যাংক পরিদর্শন লগ (এপিআই ৬৫৩)', lang)}</div>
-              <div className="card-subtitle">{t('Latest wall-thickness and relief-valve test results recorded by the inspection team', 'পরিদর্শন দলের সর্বশেষ ওয়াল পুরুত্ব ও রিলিফ ভালভ পরীক্ষার ফলাফল', lang)}</div>
             </div>
           </div>
-          <span className="badge warn">{t('1 retest due', '১টি পুনঃপরীক্ষা বাকি', lang)}</span>
-        </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="doc-table">
-              <thead>
-                <tr>
-                  <th>{t('Tank', 'ট্যাংক', lang)}</th>
-                  <th>{t('Product / Capacity', 'পণ্য / ধারণক্ষমতা', lang)}</th>
-                  <th>{t('Wall Thickness', 'ওয়াল পুরুত্ব', lang)}</th>
-                  <th>{t('Relief Valve Test', 'রিলিফ ভালভ পরীক্ষা', lang)}</th>
-                  <th>{t('Status', 'অবস্থা', lang)}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>TK-101</strong></td>
-                  <td>Bitumen 60/70 (5,000 MT)</td>
-                  <td>12.4 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
-                  <td><span className="badge success">{t('Passed 10 Sep', 'উত্তীর্ণ ১০ সেপ্ট', lang)}</span></td>
-                  <td><span className="badge success">{t('In service', 'চালু', lang)}</span></td>
-                </tr>
-                <tr>
-                  <td><strong>TK-102</strong></td>
-                  <td>Bitumen 80/100 (5,000 MT)</td>
-                  <td>12.1 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
-                  <td><span className="badge success">{t('Passed 10 Sep', 'উত্তীর্ণ ১০ সেপ্ট', lang)}</span></td>
-                  <td><span className="badge success">{t('In service', 'চালু', lang)}</span></td>
-                </tr>
-                <tr style={{ background: 'var(--status-warning-bg)' }}>
-                  <td><strong>TK-201</strong></td>
-                  <td>Emulsion SS-1 (2,000 MT)</td>
-                  <td>11.2 mm ({t('threshold', 'সীমা', lang)} 10.8)</td>
-                  <td><span className="badge warn">{t('Retest overdue (20 Oct)', 'পুনঃপরীক্ষা বাকি (২০ অক্টো)', lang)}</span></td>
-                  <td><span className="badge warn">{t('Monitoring', 'পর্যবেক্ষণে', lang)}</span></td>
-                </tr>
-                <tr>
-                  <td><strong>TK-202</strong></td>
-                  <td>Cutback RC-70 (2,000 MT)</td>
-                  <td>12.3 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
-                  <td><span className="badge success">{t('Passed 04 Oct', 'উত্তীর্ণ ০৪ অক্টো', lang)}</span></td>
-                  <td><span className="badge success">{t('In service', 'চালু', lang)}</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
 
-      {/* Ministry Licensing Dossier & Audit Inspection Modal */}
+      {caps.canRenew && (
+        <div className="card mb-4">
+          <div className="card-hd">
+            <div className="card-hd-left">
+              <div className="card-hd-icon"><Flame size={16} /></div>
+              <div>
+                <div className="card-title">{t('Storage tank inspection log (API 653)', 'স্টোরেজ ট্যাংক পরিদর্শন লগ (এপিআই ৬৫৩)', lang)}</div>
+                <div className="card-subtitle">{t('Wall thickness and relief-valve tests for the tank farm that sits under the Explosives storage permit.', 'বিস্ফোরক স্টোরেজ লাইসেন্সের আওতায় ট্যাংক ফার্মের ওয়াল পুরুত্ব ও রিলিফ ভালভ পরীক্ষা।', lang)}</div>
+              </div>
+            </div>
+            <StatusPill tone="warn">{t('1 retest due', '১টি পুনঃপরীক্ষা বাকি', lang)}</StatusPill>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="doc-table">
+                <thead>
+                  <tr>
+                    <th>{t('Tank', 'ট্যাংক', lang)}</th>
+                    <th>{t('Product / capacity', 'পণ্য / ধারণক্ষমতা', lang)}</th>
+                    <th>{t('Wall thickness', 'ওয়াল পুরুত্ব', lang)}</th>
+                    <th>{t('Relief valve test', 'রিলিফ ভালভ পরীক্ষা', lang)}</th>
+                    <th>{t('Status', 'অবস্থা', lang)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>TK-101</strong></td>
+                    <td>Bitumen 60/70 (5,000 MT)</td>
+                    <td>12.4 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
+                    <td><StatusPill tone="success">{t('Passed 10 Sep', 'উত্তীর্ণ ১০ সেপ্ট', lang)}</StatusPill></td>
+                    <td><StatusPill tone="success">{t('In service', 'চালু', lang)}</StatusPill></td>
+                  </tr>
+                  <tr>
+                    <td><strong>TK-102</strong></td>
+                    <td>Bitumen 80/100 (5,000 MT)</td>
+                    <td>12.1 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
+                    <td><StatusPill tone="success">{t('Passed 10 Sep', 'উত্তীর্ণ ১০ সেপ্ট', lang)}</StatusPill></td>
+                    <td><StatusPill tone="success">{t('In service', 'চালু', lang)}</StatusPill></td>
+                  </tr>
+                  <tr style={{ background: 'var(--status-warning-bg)' }}>
+                    <td><strong>TK-201</strong></td>
+                    <td>Emulsion SS-1 (2,000 MT)</td>
+                    <td>11.2 mm ({t('threshold', 'সীমা', lang)} 10.8)</td>
+                    <td><StatusPill tone="warn">{t('Retest overdue (20 Oct)', 'পুনঃপরীক্ষা বাকি (২০ অক্টো)', lang)}</StatusPill></td>
+                    <td><StatusPill tone="warn">{t('Monitoring', 'পর্যবেক্ষণে', lang)}</StatusPill></td>
+                  </tr>
+                  <tr>
+                    <td><strong>TK-202</strong></td>
+                    <td>Cutback RC-70 (2,000 MT)</td>
+                    <td>12.3 mm ({t('nominal', 'নির্ধারিত', lang)} 12.5)</td>
+                    <td><StatusPill tone="success">{t('Passed 04 Oct', 'উত্তীর্ণ ০৪ অক্টো', lang)}</StatusPill></td>
+                    <td><StatusPill tone="success">{t('In service', 'চালু', lang)}</StatusPill></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedLicense && (
-        <div className="modal-bg" onClick={() => setSelectedLicense(null)}>
+        <div className="modal-bg" onClick={() => setSelectedId(null)}>
           <div className="modal" style={{ maxWidth: '780px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'linear-gradient(135deg, var(--surface-inverse-2) 0%, var(--surface-inverse) 100%)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -554,241 +620,157 @@ export default function ComplianceView({ lang }: ViewProps) {
                     {t(selectedLicense.title, selectedLicense.titleBn, lang)}
                   </h3>
                   <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                    {selectedLicense.agency} • Ref: <span style={{ fontFamily: 'monospace', color: 'var(--text-inverse-2)' }}>{selectedLicense.refNo}</span>
+                    {t(selectedLicense.agency, selectedLicense.agencyBn, lang)} • {selectedLicense.refNo}
                   </div>
                 </div>
               </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedLicense(null)}>×</button>
+              <button type="button" className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedId(null)}>×</button>
             </div>
 
             <div className="modal-body" style={{ maxHeight: '76vh', overflowY: 'auto', padding: '20px' }}>
-              {/* Summary 4-Metrics Strip */}
+              <div style={{ marginBottom: '16px', padding: '12px 14px', background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '8px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', textTransform: 'uppercase' }}>{t('What happens next', 'এরপর কী হবে', lang)}</div>
+                <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '4px' }}>
+                  {nextLine(selectedLicense, caps, user, lang)}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
+                  {t(`From ${selectedLicense.focalPerson} · ${selectedLicense.focalDesignation}`, `${selectedLicense.focalPerson} · ${selectedLicense.focalDesignation}`, lang)}
+                </div>
+              </div>
+
               <div className="responsive-col-4" style={{ gap: '10px', marginBottom: '18px' }}>
                 <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Statutory Law', 'প্রযোজ্য আইন', lang)}</div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '2px', lineHeight: 1.3 }}>{selectedLicense.sroLawRef}</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Statutory law', 'প্রযোজ্য আইন', lang)}</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-900)', marginTop: '2px' }}>{selectedLicense.sroLawRef}</div>
                 </div>
-
                 <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Renewal Fee', 'নবায়ন ফি', lang)}</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Renewal fee', 'নবায়ন ফি', lang)}</div>
                   <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--status-success)', marginTop: '2px' }}>{selectedLicense.feeAmountTk}</div>
+                  {selectedLicense.fundStatus === 'pending' && <div style={{ fontSize: '11px', color: 'var(--status-warning-text)' }}>{t('Waiting on Finance', 'অর্থ বিভাগের অপেক্ষা', lang)}</div>}
                 </div>
-
                 <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
-                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Days to Expiry', 'মেয়াদ শেষ হতে', lang)}</div>
+                  <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Days to expiry', 'মেয়াদ শেষ হতে', lang)}</div>
                   <div style={{ fontSize: '14px', fontWeight: 800, color: selectedLicense.daysLeft <= 30 ? 'var(--status-danger)' : 'var(--status-warning)', marginTop: '2px' }}>
                     {selectedLicense.daysLeft} {t('days', 'দিন', lang)}
                   </div>
                 </div>
-
                 <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                   <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', textTransform: 'uppercase', fontWeight: 700 }}>{t('Validity', 'মেয়াদ', lang)}</div>
                   <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px' }}>{selectedLicense.certificateValidity}</div>
                 </div>
               </div>
 
-              {/* Statutory Non-Compliance Penalty Alert */}
-              <div style={{
-                background: 'var(--status-danger-bg)',
-                border: '1px solid var(--status-danger-bright)',
-                borderRadius: '8px',
-                padding: '12px 14px',
-                marginBottom: '18px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '10px'
-              }}>
+              <div style={{ background: 'var(--status-danger-bg)', border: '1px solid var(--status-danger-bright)', borderRadius: '8px', padding: '12px 14px', marginBottom: '18px', display: 'flex', gap: '10px' }}>
                 <ShieldAlert size={18} color="var(--status-danger)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div style={{ fontSize: '12px', lineHeight: 1.5 }}>
-                  <strong style={{ color: 'var(--status-danger-text)' }}>{t('Statutory Non-Compliance Penalty Exposure:', 'বিধিবদ্ধ আইন অমান্যের সম্ভাব্য দণ্ড ও ঝুঁকি:', lang)}</strong>
-                  <div style={{ color: 'var(--status-danger-text)', marginTop: '2px' }}>
-                    {t(selectedLicense.statutoryPenalty, selectedLicense.statutoryPenaltyBn, lang)}
-                  </div>
+                <div style={{ fontSize: '12px', lineHeight: 1.5, color: 'var(--status-danger-text)' }}>
+                  <strong>{t('If this lapses', 'মেয়াদোত্তীর্ণ হলে', lang)}</strong>
+                  <div style={{ marginTop: '2px' }}>{t(selectedLicense.statutoryPenalty, selectedLicense.statutoryPenaltyBn, lang)}</div>
                 </div>
               </div>
 
-              {/* Inspector & Government Vetting Dossier */}
-              <div style={{
-                background: 'var(--surface-2)',
-                padding: '12px 14px',
-                borderRadius: '8px',
-                marginBottom: '18px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '12px'
-              }}>
+              <div style={{ background: 'var(--surface-2)', padding: '12px 14px', borderRadius: '8px', marginBottom: '18px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    {t('Assigned Ministry Inspector', 'দায়িত্বপ্রাপ্ত সরকারি পরিদর্শক', lang)}
-                  </div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px' }}>
-                    {selectedLicense.inspectorName}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                    {selectedLicense.inspectorDesignation}
-                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>{t('Agency inspector', 'সংস্থার পরিদর্শক', lang)}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px' }}>{selectedLicense.inspectorName}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>{selectedLicense.inspectorDesignation}</div>
                 </div>
-
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    {t('Internal Focal Engineer', 'অভ্যন্তরীণ দায়িত্বপ্রাপ্ত কর্মকর্তা', lang)}
-                  </div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px' }}>
-                    {selectedLicense.focalPerson}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                    {selectedLicense.focalDesignation}
-                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>{t('Plant focal', 'প্ল্যান্ট দায়িত্বপ্রাপ্ত', lang)}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)', marginTop: '2px' }}>{selectedLicense.focalPerson}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>{selectedLicense.focalDesignation}</div>
                 </div>
-
                 <div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    {t('Last Physical Site Inspection', 'সর্বশেষ সরেজমিন পরিদর্শন', lang)}
-                  </div>
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info)', marginTop: '2px' }}>
-                    {selectedLicense.lastInspection}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                    Valid: {selectedLicense.certificateValidity}
-                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 700, textTransform: 'uppercase' }}>{t('Last site inspection', 'সর্বশেষ পরিদর্শন', lang)}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-info)', marginTop: '2px' }}>{selectedLicense.lastInspection}</div>
                 </div>
               </div>
 
-              {/* Pipeline Stage Visual Stepper */}
               <div style={{ marginBottom: '18px', background: 'var(--surface-0)', padding: '14px', borderRadius: '8px', border: '1px solid var(--border-1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                    {t('Regulatory Approval Life-Cycle Progress:', 'অনুমোদন ও নবায়ন অগ্রগতির ধাপ:', lang)}
-                  </div>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: STAGES[selectedLicense.stage - 1].color }}>
-                    {t(`Stage ${selectedLicense.stage} of 5`, `ধাপ ${selectedLicense.stage} / ৫`, lang)}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800 }}>{t('Where this filing is', 'আবেদন এখন যে ধাপে', lang)}</div>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: stageOf(selectedLicense.stage).color }}>
+                    {t(stageOf(selectedLicense.stage).title, stageOf(selectedLicense.stage).titleBn, lang)}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {STAGES.map(s => {
+                  {STAGES.map((s) => {
                     const isCurrent = s.id === selectedLicense.stage;
                     const isPassed = s.id < selectedLicense.stage;
                     return (
                       <div
                         key={s.id}
                         style={{
-                          flex: '1 1 120px',
-                          padding: '8px 6px',
-                          textAlign: 'center',
-                          fontSize: '11px',
-                          borderRadius: '6px',
+                          flex: '1 1 120px', padding: '8px 6px', textAlign: 'center', fontSize: '11px', borderRadius: '6px',
                           background: isCurrent ? s.color : isPassed ? 'var(--status-success)' : 'var(--text-inverse)',
                           color: isCurrent || isPassed ? 'var(--text-on-brand)' : 'var(--text-3)',
-                          fontWeight: isCurrent ? 800 : 600,
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px'
+                          fontWeight: isCurrent ? 800 : 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
                         }}
                       >
                         {isPassed && <Check size={12} />}
-                        {isCurrent && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--surface-1)' }} />}
-                        <span>{s.id}. {t(s.title.split('. ')[1], s.titleBn.split('. ')[1], lang)}</span>
+                        <span>{t(s.title, s.titleBn, lang)}</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Mandatory Statutory Audit Verification Checklist */}
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '12.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <CheckSquare size={16} color="var(--brand-crimson)" />
-                    {t('Mandatory Statutory Audit Checklist:', 'বাধ্যতামূলক বিধিবদ্ধ অডিট চেকলিস্ট:', lang)}
+                    {t('Plant audit checklist', 'প্ল্যান্ট অডিট চেকলিস্ট', lang)}
                   </div>
                   <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)' }}>
-                    {selectedLicense.auditChecklist.filter(c => c.passed).length} / {selectedLicense.auditChecklist.length} {t('Items Verified', 'টি যাচাই সম্পন্ন', lang)}
+                    {selectedLicense.auditChecklist.filter((c) => c.passed).length} / {selectedLicense.auditChecklist.length} {t('verified', 'যাচাইকৃত', lang)}
                   </span>
                 </div>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {selectedLicense.auditChecklist.map((c, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '10px 14px',
-                        background: c.passed ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
-                        border: c.passed ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
-                        borderRadius: '6px',
-                        cursor: canManage ? 'pointer' : 'default',
-                        transition: 'all 0.15s ease'
-                      }}
-                      onClick={() => toggleChecklistItem(idx)}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={c.passed}
-                        disabled={!canManage}
-                        onChange={() => {}}
-                        style={{ cursor: canManage ? 'pointer' : 'default', width: '16px', height: '16px', accentColor: 'var(--status-success-solid)' }}
-                      />
-                      <span style={{ fontSize: '12.5px', color: c.passed ? 'var(--status-success-text)' : 'var(--status-warning-text)', flex: 1, fontWeight: 500 }}>
-                        {t(c.item, c.itemBn ?? c.item, lang)}
-                      </span>
-                      <span style={{
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: c.passed ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
-                        color: c.passed ? 'var(--status-success)' : 'var(--status-warning)'
-                      }}>
-                        {c.passed ? t('VERIFIED', 'যাচাইকৃত', lang) : t('ACTION REQUIRED', 'পদক্ষেপ প্রয়োজন', lang)}
-                      </span>
-                    </div>
-                  ))}
+                  {selectedLicense.auditChecklist.map((c, idx) => {
+                    const canTick = canToggleChecklist(selectedLicense, caps, user);
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px',
+                          background: c.passed ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
+                          border: c.passed ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
+                          borderRadius: '6px', cursor: canTick ? 'pointer' : 'default',
+                        }}
+                        onClick={() => canTick && toggleChecklistItem(idx)}
+                      >
+                        <input type="checkbox" checked={c.passed} disabled={!canTick} onChange={() => {}} style={{ width: '16px', height: '16px' }} />
+                        <span style={{ fontSize: '12.5px', flex: 1, color: c.passed ? 'var(--status-success-text)' : 'var(--status-warning-text)' }}>
+                          {t(c.item, c.itemBn ?? c.item, lang)}
+                        </span>
+                        <span style={{ fontSize: '10px', fontWeight: 800, color: c.passed ? 'var(--status-success)' : 'var(--status-warning)' }}>
+                          {c.passed ? t('Verified', 'যাচাইকৃত', lang) : t('Still open', 'বাকি', lang)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
+                {!canToggleChecklist(selectedLicense, caps, user) && !checklistComplete(selectedLicense) && (
+                  <p style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '8px' }}>
+                    {t(`Waiting for ${selectedLicense.focalPerson} to tick the open items.`, `খোলা আইটেম ${selectedLicense.focalPerson} যাচাই করবেন।`, lang)}
+                  </p>
+                )}
               </div>
 
-              {/* Digital Certificate & Evidence Vault */}
               <div>
-                <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ fontSize: '12.5px', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <FileBadge size={16} color="var(--brand-gold-dark)" />
-                  {t('Digital Certificate & Inspection Evidence Vault:', 'ডিজিটাল সনদ ও পরিদর্শন নথি ভল্ট:', lang)}
+                  {t('Certificates and evidence', 'সনদ ও প্রমাণ', lang)}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {selectedLicense.documents.map((doc, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '10px 14px',
-                        background: 'var(--surface-0)',
-                        border: '1px solid var(--border-1)',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ background: 'var(--status-danger-bg)', color: 'var(--status-danger-text)', padding: '6px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 800 }}>
-                          PDF
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--brand-slate-900)' }}>{doc.name}</div>
-                          <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>
-                            {doc.type} • {doc.size} • Uploaded: {doc.date}
-                          </div>
-                        </div>
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '6px' }}>
+                      <div>
+                        <div style={{ fontSize: '12.5px', fontWeight: 700 }}>{doc.name}</div>
+                        <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>{doc.type} • {doc.size} • {doc.date}</div>
                       </div>
-                      <button
-                        className="btn-sm-ghost"
-                        style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px' }}
-                        onClick={() => showToast(t(`Downloaded official certificate: ${doc.name}`, `নথি ডাউনলোড সম্পন্ন হয়েছে: ${doc.name}`, lang), 'success')}
-                      >
-                        <Download size={13} /> {t('Download', 'ডাউনলোড', lang)}
-                      </button>
+                      <Button size="sm" variant="ghost" icon={<Download size={13} />} onClick={() => showToast(t(`Downloaded ${doc.name}`, `${doc.name} ডাউনলোড হয়েছে`, lang), 'success')}>
+                        {t('Download', 'ডাউনলোড', lang)}
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -796,36 +778,37 @@ export default function ComplianceView({ lang }: ViewProps) {
             </div>
 
             <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-              {canDraftLetter ? (
-                <button
-                  className="btn-gold"
-                  style={{ fontSize: '12px', padding: '7px 16px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                  onClick={() => {
-                    setSelectedLicense(null);
-                    handleOpenDoLetter(selectedLicense);
-                  }}
-                >
-                  <FileText size={14} />
-                  {t('Prepare DO Letter', 'ডিও লেটার প্রস্তুত করুন', lang)}
-                </button>
-              ) : <span />}
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-sm-ghost" onClick={() => setSelectedLicense(null)}>
-                  {t('Close', 'বন্ধ করুন', lang)}
-                </button>
-                {canManage && selectedLicense.stage < 5 && (
-                  <button
-                    className="btn-primary"
-                    style={{ fontSize: '12px', padding: '7px 16px' }}
-                    onClick={() => {
-                      moveLicense(selectedLicense.id, 1);
-                      setSelectedLicense(prev => prev ? { ...prev, stage: prev.stage + 1 } : null);
-                    }}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {canApproveThisFee(selectedLicense, caps) && (
+                  <Button variant="primary" icon={<Check size={14} />} onClick={() => approveFee(selectedLicense)}>
+                    {t(`Approve ${selectedLicense.feeAmountTk}`, `${selectedLicense.feeAmountTk} অনুমোদন`, lang)}
+                  </Button>
+                )}
+                {canDoLetter(selectedLicense, caps) && (
+                  <Button
+                    variant="gold"
+                    icon={<FileText size={14} />}
+                    onClick={() => { setSelectedId(null); handleOpenDoLetter(selectedLicense); }}
                   >
-                    <ArrowRight size={14} />
-                    {t('Advance to Next Stage', 'পরবর্তী ধাপে স্থানান্তর', lang)}
-                  </button>
+                    {caps.canDispatch ? t('Sign DO letter', 'ডিও লেটারে স্বাক্ষর', lang) : t('Draft DO letter', 'ডিও লেটার খসড়া', lang)}
+                  </Button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {canRevert(selectedLicense, caps) && (
+                  <Button variant="ghost" icon={<ArrowLeft size={14} />} onClick={() => { setRevertId(selectedLicense.id); setRevertReason(''); }}>
+                    {t('Send back', 'ফেরত পাঠান', lang)}
+                  </Button>
+                )}
+                <Button variant="ghost" onClick={() => setSelectedId(null)}>{t('Close', 'বন্ধ করুন', lang)}</Button>
+                {caps.canRenew && selectedLicense.stage < 5 && canAdvance(selectedLicense, caps).ok && (
+                  <Button
+                    variant="primary"
+                    icon={<ArrowRight size={14} />}
+                    onClick={() => tryAdvance(selectedLicense)}
+                  >
+                    {t(stageOf(selectedLicense.stage).verb, stageOf(selectedLicense.stage).verbBn, lang)}
+                  </Button>
                 )}
               </div>
             </div>
@@ -833,185 +816,132 @@ export default function ComplianceView({ lang }: ViewProps) {
         </div>
       )}
 
-      {/* Universal Demi-Official (DO) Letter Modal to Ministry */}
-      {showDoLetterModal && (
-        <div className="modal-bg" onClick={() => setShowDoLetterModal(null)}>
-          <div className="modal" style={{ maxWidth: '720px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ background: 'rgba(255,255,255,0.15)', padding: '6px', borderRadius: '6px' }}>
-                  <FileText size={18} color="var(--status-warning-bright)" />
-                </div>
-                <div>
-                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px', fontWeight: 800 }}>
-                    {t('Demi-Official (DO) Expedited Clearance Letter', 'জরুরি ডিও লেটার ড্রাফট ও প্রেরণ', lang)}
-                  </h3>
-                  <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
-                    {t("Office of the Chairman & Managing Director • Bashundhara Group", "চেয়ারম্যানের নির্বাহী দপ্তর • বসুন্ধরা গ্রুপ", lang)}
-                  </div>
-                </div>
-              </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowDoLetterModal(null)}>×</button>
+      {revertId && (
+        <div className="modal-bg" onClick={() => setRevertId(null)}>
+          <div className="modal" style={{ maxWidth: '480px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd">
+              <h3>{t('Send this filing back one stage', 'এই আবেদন এক ধাপ পেছনে পাঠান', lang)}</h3>
+              <button type="button" className="modal-close" onClick={() => setRevertId(null)}>×</button>
             </div>
-
-            <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto', padding: '20px' }}>
-              {/* Delivery Channel Selector */}
-              <div style={{ marginBottom: '14px', background: 'var(--surface-0)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', marginBottom: '6px' }}>
-                  {t('Select Official Dispatch Channel:', 'সরকারি প্রেরণ মাধ্যম নির্বাচন করুন:', lang)}
-                </div>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {[
-                    { id: 'enothi', label: 'Govt e-Nothi Encrypted Dispatch', labelBn: 'সরকারি ই-নথি এনক্রিপ্টেড প্রেরণ' },
-                    { id: 'courier', label: 'Confidential Sealed Diplomatic Courier', labelBn: 'গোপনীয় সিলগালা কুরিয়ার' },
-                    { id: 'liaison', label: 'Executive Liaison Hand-Delivery', labelBn: 'বিশেষ প্রতিনিধির মাধ্যমে সরাসরি প্রদান' },
-                  ].map(c => (
-                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', cursor: 'pointer', color: 'var(--brand-slate-800)' }}>
-                      <input
-                        type="radio"
-                        name="deliveryMode"
-                        checked={doLetterDeliveryMode === c.id}
-                        onChange={() => setDoLetterDeliveryMode(c.id as any)}
-                        style={{ accentColor: 'var(--brand-crimson-dark)' }}
-                      />
-                      <span>{t(c.label, c.labelBn, lang)}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Official Letterhead Simulation */}
-              <div style={{
-                border: '2px solid var(--border-1)',
-                padding: '24px',
-                borderRadius: '6px',
-                background: 'var(--surface-1)',
-                fontSize: '12.5px',
-                lineHeight: 1.6,
-                boxShadow: 'var(--shadow-xs)',
-                position: 'relative'
-              }}>
-                {/* Official Letterhead Crest */}
-                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--brand-crimson-dark)', paddingBottom: '12px', marginBottom: '16px' }}>
-                  <div style={{ fontWeight: 900, fontSize: '16px', color: 'var(--brand-crimson-dark)', letterSpacing: '0.8px' }}>
-                    BASHUNDHARA GROUP
-                  </div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-1)', marginTop: '2px' }}>
-                    OFFICE OF THE CHAIRMAN & MANAGING DIRECTOR
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '2px' }}>
-                    Corporate HQ, Plot-3, Block-G, Umme Kulsum Road, Bashundhara R/A, Dhaka-1229, Bangladesh
-                  </div>
-                </div>
-
-                {/* References & Date */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', fontSize: '11.5px' }}>
-                  <div>
-                    <strong>DO Memo No:</strong> BOGCL/CMD-DO/{showDoLetterModal.tag.toUpperCase()}-2026/089<br />
-                    <strong>License Ref:</strong> <span style={{ fontFamily: 'monospace' }}>{showDoLetterModal.refNo}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <strong>Date:</strong> 29 October 2026<br />
-                    <span style={{ fontSize: '10.5px', color: 'var(--status-danger)', fontWeight: 700 }}>PRIORITY: IMMEDIATE EXPEDITE</span>
-                  </div>
-                </div>
-
-                {/* Ministry Recipient */}
-                <div style={{ marginBottom: '14px' }}>
-                  <strong>To:</strong><br />
-                  <strong>{showDoLetterModal.ministryRecipient}</strong><br />
-                  <span style={{ color: 'var(--text-2)' }}>{showDoLetterModal.ministryAddress}</span>
-                </div>
-
-                {/* Subject Line */}
-                <div style={{
-                  fontWeight: 800,
-                  marginBottom: '12px',
-                  color: 'var(--text-1)',
-                  background: 'var(--surface-0)',
-                  padding: '8px 10px',
-                  borderRadius: '4px',
-                  borderLeft: '4px solid var(--brand-crimson-dark)'
-                }}>
-                  SUBJECT: REQUEST FOR EXPEDITIOUS ISSUANCE OF STATUTORY RENEWAL FOR {showDoLetterModal.title.toUpperCase()} — KERANIGANJ REFINERY & TANK FARM COMPLEX.
-                </div>
-
-                {/* Letter Body */}
-                <div style={{ color: 'var(--text-2)', textAlign: 'justify' }}>
-                  Dear Sir,<br /><br />
-                  Greetings from Bashundhara Oil & Gas Company Limited (BOGCL).<br /><br />
-                  I have the honor to bring to your kind notice that all mandatory statutory safety audits, engineering validations, and technical inspection requisites for the subject filing (<strong>{showDoLetterModal.refNo}</strong>) have been executed with 100% compliance in accordance with the <strong>{showDoLetterModal.sroLawRef}</strong>.<br /><br />
-                  As you are well aware, our Keraniganj Bitumen & Hydrocarbon complex serves as the sovereign national backbone supplying specialized bitumen grades (BDS 1238) to national priority mega-projects, including the Bangabandhu Expressway, Dhaka-Sylhet 4-lane highway expansion, and Roads & Highways Department (RHD) infrastructure nationwide.<br /><br />
-                  Any procedural hiatus in the final renewal vetting risks a statutory plant operational halt, generating an estimated industrial loss of <strong>{showDoLetterModal.dailyShutdownRiskTk}</strong> and disrupting essential national construction timelines.<br /><br />
-                  In view of the complete technical clearance documented herein, I most respectfully solicit your personal directive to your esteemed division to issue the formal renewal certificate without delay.
-                </div>
-
-                {/* Official Signature Block */}
-                <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-                  <div style={{ textAlign: 'center', width: '220px' }}>
-                    {/* Digital Seal Watermark */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px dashed var(--status-danger)',
-                      borderRadius: '50%',
-                      width: '64px',
-                      height: '64px',
-                      color: 'var(--status-danger)',
-                      fontSize: '9px',
-                      fontWeight: 800,
-                      transform: 'rotate(-10deg)',
-                      margin: '0 auto 6px auto'
-                    }}>
-                      BOGCL<br />SEAL
-                    </div>
-                    <div style={{ fontWeight: 800, color: 'var(--text-1)', fontSize: '13px' }}>Ahmed Akbar Sobhan</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>Chairman & Managing Director</div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-3)' }}>Bashundhara Group</div>
-                  </div>
-                </div>
-              </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: 0 }}>
+                {t('A reason is required so the next person knows what to fix.', 'পরবর্তী ব্যক্তি কী সংশোধন করবেন তা জানতে কারণ লাগবে।', lang)}
+              </p>
+              <textarea
+                value={revertReason}
+                onChange={(e) => setRevertReason(e.target.value)}
+                rows={4}
+                style={{ width: '100%', padding: '10px', fontSize: '13px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)', background: 'var(--surface-0)' }}
+                placeholder={t('e.g. Inspection report is missing page 3', 'যেমন: পরিদর্শন প্রতিবেদনের ৩ নং পাতা নেই', lang)}
+              />
             </div>
-
-            <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <button className="btn-sm-ghost" onClick={() => setShowDoLetterModal(null)}>
-                {t('Cancel', 'বাতিল', lang)}
-              </button>
-
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  className="btn-outline"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px' }}
-                  onClick={() => showToast(t('DO Letter sent to executive network printer.', 'ডিও লেটার প্রিন্টারে পাঠানো হয়েছে।', lang), 'info')}
-                >
-                  <Printer size={13} /> {t('Print Letter', 'প্রিন্ট', lang)}
-                </button>
-                <button
-                  className="btn-gold"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800 }}
-                  onClick={() => {
-                    showToast(
-                      canDispatch
-                        ? t(`DO Letter signed and sent via ${doLetterDeliveryMode === 'enothi' ? 'e-Nothi' : doLetterDeliveryMode === 'courier' ? 'courier' : 'executive liaison'} to ${showDoLetterModal.agency}.`, `ডিও লেটার স্বাক্ষর করে ${showDoLetterModal.agencyBn}-এ পাঠানো হয়েছে।`, lang)
-                        : t("Draft sent to the Chairman's Office for signature.", 'স্বাক্ষরের জন্য খসড়া চেয়ারম্যানের দপ্তরে পাঠানো হয়েছে।', lang),
-                      'gold'
-                    );
-                    setShowDoLetterModal(null);
-                  }}
-                >
-                  <Send size={14} />
-                  {canDispatch
-                    ? t('Sign & Send', 'স্বাক্ষর করে পাঠান', lang)
-                    : t('Send to Chairman for Signature', 'স্বাক্ষরের জন্য চেয়ারম্যানের কাছে পাঠান', lang)}
-                </button>
-              </div>
+            <div className="modal-ft" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <Button variant="ghost" onClick={() => setRevertId(null)}>{t('Cancel', 'বাতিল', lang)}</Button>
+              <Button variant="danger" onClick={confirmRevert}>{t('Send back', 'ফেরত পাঠান', lang)}</Button>
             </div>
           </div>
         </div>
       )}
 
+      {showDoLetterModal && (
+        <div className="modal-bg" onClick={() => setShowDoLetterModal(null)}>
+          <div className="modal" style={{ maxWidth: '720px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
+              <div>
+                <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px', fontWeight: 800 }}>
+                  {caps.canDispatch
+                    ? t('Sign the DO letter', 'ডিও লেটারে স্বাক্ষর করুন', lang)
+                    : t('Draft DO letter for the Chairman', 'চেয়ারম্যানের জন্য ডিও লেটার খসড়া', lang)}
+                </h3>
+                <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
+                  {t(showDoLetterModal.title, showDoLetterModal.titleBn, lang)}
+                </div>
+              </div>
+              <button type="button" className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowDoLetterModal(null)}>×</button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto', padding: '20px' }}>
+              <div style={{ marginBottom: '14px', background: 'var(--surface-0)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', marginBottom: '6px' }}>
+                  {t('Dispatch channel', 'প্রেরণ মাধ্যম', lang)}
+                </div>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'enothi', label: 'Government e-Nothi', labelBn: 'সরকারি ই-নথি' },
+                    { id: 'courier', label: 'Sealed courier', labelBn: 'সিলগালা কুরিয়ার' },
+                    { id: 'liaison', label: 'Hand delivery', labelBn: 'সরাসরি প্রদান' },
+                  ].map((c) => (
+                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', cursor: 'pointer' }}>
+                      <input type="radio" name="deliveryMode" checked={doLetterDeliveryMode === c.id} onChange={() => setDoLetterDeliveryMode(c.id as typeof doLetterDeliveryMode)} />
+                      <span>{t(c.label, c.labelBn, lang)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div style={{ border: '2px solid var(--border-1)', padding: '24px', borderRadius: '6px', background: 'var(--surface-1)', fontSize: '12.5px', lineHeight: 1.6 }}>
+                <div style={{ textAlign: 'center', borderBottom: '2px solid var(--brand-crimson-dark)', paddingBottom: '12px', marginBottom: '16px' }}>
+                  <div style={{ fontWeight: 900, fontSize: '16px', color: 'var(--brand-crimson-dark)' }}>BASHUNDHARA GROUP</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700 }}>{t("Office of the Chairman & Managing Director", 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালকের দপ্তর', lang)}</div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', fontSize: '11.5px' }}>
+                  <div>
+                    <strong>DO Memo:</strong> BOGCL/CMD-DO/{showDoLetterModal.tag.toUpperCase()}-2026/089<br />
+                    <strong>License:</strong> {showDoLetterModal.refNo}
+                  </div>
+                  <div style={{ textAlign: 'right' }}><strong>{t('Date', 'তারিখ', lang)}:</strong> 29 October 2026</div>
+                </div>
+                <div style={{ marginBottom: '14px' }}>
+                  <strong>{t('To', 'প্রাপক', lang)}:</strong><br />
+                  <strong>{showDoLetterModal.ministryRecipient}</strong><br />
+                  {showDoLetterModal.ministryAddress}
+                </div>
+                <div style={{ fontWeight: 800, marginBottom: '12px', padding: '8px 10px', background: 'var(--surface-0)', borderLeft: '4px solid var(--brand-crimson-dark)' }}>
+                  {t(
+                    `Request to expedite renewal of ${showDoLetterModal.title} — Keraniganj plant.`,
+                    `${showDoLetterModal.titleBn} নবায়ন দ্রুত ইস্যুর অনুরোধ — কেরানীগঞ্জ প্ল্যান্ট।`,
+                    lang,
+                  )}
+                </div>
+                <div style={{ color: 'var(--text-2)', textAlign: 'justify' }}>
+                  {t(
+                    `Plant checks for ${showDoLetterModal.refNo} are complete under ${showDoLetterModal.sroLawRef}. A delay risks ${showDoLetterModal.dailyShutdownRiskTk} in lost production. Kindly issue the renewal certificate.`,
+                    `${showDoLetterModal.refNo} এর প্ল্যান্ট যাচাই ${showDoLetterModal.sroLawRef} অনুযায়ী সম্পন্ন। বিলম্বে দৈনিক ${showDoLetterModal.dailyShutdownRiskTk} উৎপাদন ক্ষতি হতে পারে। নবায়ন সনদ ইস্যু করার অনুরোধ।`,
+                    lang,
+                  )}
+                </div>
+                <div style={{ marginTop: '24px', textAlign: 'right' }}>
+                  <div style={{ fontWeight: 800 }}>Ahmed Akbar Sobhan</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang)}</div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button variant="ghost" onClick={() => setShowDoLetterModal(null)}>{t('Cancel', 'বাতিল', lang)}</Button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button variant="secondary" icon={<Printer size={13} />} onClick={() => showToast(t('Sent to printer.', 'প্রিন্টারে পাঠানো হয়েছে।', lang), 'info')}>
+                  {t('Print', 'প্রিন্ট', lang)}
+                </Button>
+                <Button
+                  variant="gold"
+                  icon={<Send size={14} />}
+                  onClick={() => {
+                    showToast(
+                      caps.canDispatch
+                        ? t(`Signed and sent to ${showDoLetterModal.agency}.`, `${showDoLetterModal.agencyBn}-এ স্বাক্ষর করে পাঠানো হয়েছে।`, lang)
+                        : t("Draft sent to the Chairman's office for signature.", 'স্বাক্ষরের জন্য খসড়া চেয়ারম্যানের দপ্তরে পাঠানো হয়েছে।', lang),
+                      'gold',
+                    );
+                    setShowDoLetterModal(null);
+                  }}
+                >
+                  {caps.canDispatch
+                    ? t('Sign & send', 'স্বাক্ষর করে পাঠান', lang)
+                    : t('Send to Chairman', 'চেয়ারম্যানের কাছে পাঠান', lang)}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

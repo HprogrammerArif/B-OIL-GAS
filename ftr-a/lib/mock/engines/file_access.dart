@@ -54,6 +54,34 @@ abstract final class FileAccess {
           _widerThanSelf(user, 'visitors:read') ||
           _widerThanSelf(user, 'visitors:gate');
     });
+    FileEngine.registerOwnerAccess('Licence', (store, user, id) {
+      final lic = store.get(Col.compliance, id);
+      if (lic == null) return false;
+      return lic['ownerUserId'] == user['id'] ||
+          _widerThanSelf(user, 'compliance:read') ||
+          _widerThanSelf(user, 'compliance:manage');
+    });
+    FileEngine.registerOwnerAccess('Asset', (store, user, id) {
+      final a = store.get(Col.assets, id);
+      if (a == null) return false;
+      final me = user['id'];
+      final open = store
+          .all(Col.assetCustody)
+          .where((c) => c['assetId'] == id && c['releasedAt'] == null);
+      if (open.any((c) => c['employeeUserId'] == me)) return true;
+      return _widerThanSelf(user, 'assets:read') ||
+          _widerThanSelf(user, 'assets:maintain') ||
+          _widerThanSelf(user, 'assets:loto');
+    });
+    FileEngine.registerOwnerAccess('Incident', (store, user, id) {
+      final i = store.get(Col.incidents, id);
+      if (i == null) return false;
+      final me = user['id'];
+      return i['reporterUserId'] == me ||
+          i['investigatorUserId'] == me ||
+          _widerThanSelf(user, 'incidents:read') ||
+          _widerThanSelf(user, 'incidents:triage');
+    });
     FileEngine.registerOwnerAccess('Trip', (store, user, id) {
       final t = store.get(Col.fleetTrips, id);
       if (t == null) return false;

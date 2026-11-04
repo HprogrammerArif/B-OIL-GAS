@@ -14,8 +14,22 @@ class Bi {
 
 /// Doc 03 §4.2 category chips, derived from the notification `type`.
 String notificationCategory(String type) {
-  const approvals = ['APPROVAL_', 'NOTE_SHEET_', 'DELEGATION_', 'LEAVE_REQ'];
-  const safety = ['INCIDENT_', 'CAPA_', 'FLEET_SOS', 'VISIT_MUSTER'];
+  const approvals = [
+    'APPROVAL_',
+    'NOTE_SHEET_',
+    'DELEGATION_',
+    'LEAVE_REQ',
+    'EXIT_',
+    'CLEARANCE_',
+  ];
+  const safety = [
+    'INCIDENT_',
+    'CAPA_',
+    'FLEET_SOS',
+    'VISIT_MUSTER',
+    'ASSET_LOTO',
+    'ASSET_CALIBRATION',
+  ];
   const transport = ['FLEET_', 'BUS_', 'PARCEL_', 'VISIT_'];
   bool any(List<String> prefixes) => prefixes.any(type.startsWith);
   if (any(approvals) || type == 'CLAIM_SUBMITTED') return 'APPROVALS';

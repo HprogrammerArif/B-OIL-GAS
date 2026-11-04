@@ -36,6 +36,18 @@ abstract final class AppRoutes {
   static const fleetNew = '/home/fleet/new';
   static const fleetSos = '/home/fleet/sos';
   static String fleetDetail(String id) => '/home/fleet/$id';
+  static const incidents = '/home/incidents';
+  static const incidentNew = '/home/incidents/new';
+  static String incidentDetail(String id) => '/home/incidents/$id';
+  static const assets = '/home/assets';
+  static const assetNew = '/home/assets/new';
+  static String assetDetail(String id) => '/home/assets/$id';
+  static const licences = '/home/licences';
+  static const licenceNew = '/home/licences/new';
+  static String licenceDetail(String id) => '/home/licences/$id';
+  static const people = '/home/people';
+  static const peopleNew = '/home/people/new';
+  static String peopleDetail(String id) => '/home/people/$id';
   static const approvals = '/home/approvals';
   static String approvalDetail(String instanceId) =>
       '/home/approvals/$instanceId';

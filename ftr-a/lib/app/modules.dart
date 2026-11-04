@@ -67,6 +67,30 @@ final List<AppModule> builtModules = [
     route: AppRoutes.fleet,
   ),
   (
+    key: 'incidents',
+    icon: Icons.health_and_safety_outlined,
+    label: (l10n) => l10n.moduleIncidents,
+    route: AppRoutes.incidents,
+  ),
+  (
+    key: 'assets',
+    icon: Icons.precision_manufacturing_outlined,
+    label: (l10n) => l10n.moduleAssets,
+    route: AppRoutes.assets,
+  ),
+  (
+    key: 'compliance',
+    icon: Icons.gavel_outlined,
+    label: (l10n) => l10n.moduleCompliance,
+    route: AppRoutes.licences,
+  ),
+  (
+    key: 'employees',
+    icon: Icons.badge_outlined,
+    label: (l10n) => l10n.moduleEmployees,
+    route: AppRoutes.people,
+  ),
+  (
     key: 'approvals',
     icon: Icons.fact_check_outlined,
     label: (l10n) => l10n.moduleApprovals,

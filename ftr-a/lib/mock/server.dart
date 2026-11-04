@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/storage/blob_store.dart';
 import 'package:bogcl_oneops/core/utils/hash.dart';
 import 'package:bogcl_oneops/core/utils/logger.dart';
+import 'package:bogcl_oneops/mock/handlers/asset_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/attendance_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/audit_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
@@ -13,7 +14,9 @@ import 'package:bogcl_oneops/mock/handlers/claim_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/file_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/fleet_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/incident_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/leave_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/licence_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/me_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/note_sheet_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/notice_handlers.dart';
@@ -22,6 +25,7 @@ import 'package:bogcl_oneops/mock/handlers/parcel_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/people_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/visitor_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/workflow_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/workforce_handlers.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/mock_config.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -78,6 +82,10 @@ class MockServer {
       ...peopleRoutes(),
       ...visitorRoutes(),
       ...fleetRoutes(),
+      ...incidentRoutes(),
+      ...assetRoutes(),
+      ...licenceRoutes(),
+      ...workforceRoutes(),
     ]);
   }
 
