@@ -137,6 +137,7 @@ export default function Topbar({
   }, []);
 
   return (
+    <>
     <header className="topbar">
       <div className="topbar-left">
         {/* Mobile Menu Hamburger Button */}
@@ -535,6 +536,7 @@ export default function Topbar({
           )}
         </div>
       </div>
+    </header>
 
       {/* Accounting & System Sync Status Modal */}
       {showSapModal && <SapGatewayModal onClose={() => setShowSapModal(false)} lang={lang} />}
@@ -561,6 +563,6 @@ export default function Topbar({
           }}
         />
       )}
-    </header>
+    </>
   );
 }

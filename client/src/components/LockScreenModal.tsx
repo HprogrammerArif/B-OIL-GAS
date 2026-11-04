@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { Lock, Unlock, LogOut } from 'lucide-react';
 import { showToast } from './ToastManager';
@@ -53,17 +54,27 @@ export default function LockScreenModal({
     }
   };
 
-  return (
+  const portalTarget =
+    (typeof document !== 'undefined' && document.querySelector('.app-shell')) ||
+    (typeof document !== 'undefined' ? document.body : null);
+
+  const modalContent = (
     <div
       style={{
         position: 'fixed',
-        inset: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         background: 'radial-gradient(ellipse at center, var(--surface-inverse) 0%, var(--surface-inverse-deep) 100%)',
-        zIndex: 2000,
+        zIndex: 99999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px',
+        boxSizing: 'border-box',
         color: 'var(--text-on-brand)',
         animation: 'fadeInBackdrop 0.25s ease',
       }}
@@ -230,4 +241,6 @@ export default function LockScreenModal({
       </div>
     </div>
   );
+
+  return portalTarget ? createPortal(modalContent, portalTarget) : modalContent;
 }

@@ -1,4 +1,4 @@
-import { Activity, CalendarDays, Car, QrCode, Receipt, UserCheck, type LucideIcon } from 'lucide-react';
+import { Activity, Building2, CalendarDays, Car, Droplets, QrCode, Receipt, ShieldCheck, UserCheck, type LucideIcon } from 'lucide-react';
 import { t, type AppView } from '../../types';
 import { useCurrentUser } from '../../auth/session';
 import { useOperationsStore } from '../../store/operationsStore';
@@ -155,52 +155,218 @@ export default function EmployeeDashboard({
       {/* Digital gate pass */}
       {showGatePassModal && user && (
         <div className="modal-bg" onClick={() => setShowGatePassModal?.(false)}>
-          <div className="modal" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'var(--brand-crimson)', color: 'var(--text-on-brand)' }}>
+          <div className="modal" style={{ maxWidth: '380px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd" style={{ padding: '11px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <QrCode size={18} color="var(--text-on-brand)" />
-                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
+                <QrCode size={16} color="var(--brand-crimson)" />
+                <h3 style={{ margin: 0, fontSize: '14px' }}>
                   {t('Digital access badge', 'ডিজিটাল প্রবেশপত্র', lang)}
                 </h3>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    background: 'var(--status-success-bg, rgba(16, 185, 129, 0.12))',
+                    color: 'var(--status-success-text, #065F46)',
+                  }}
+                >
+                  {t('Active', 'সক্রিয়', lang)}
+                </span>
               </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowGatePassModal?.(false)}>×</button>
+              <button className="modal-close" style={{ width: '28px', height: '28px' }} onClick={() => setShowGatePassModal?.(false)}>×</button>
             </div>
 
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <div style={{ border: '2px solid var(--border-strong)', borderRadius: '12px', padding: '20px 16px', background: 'var(--surface-0)', boxShadow: '0 4px 14px rgba(0,0,0,0.08)' }}>
-                <div style={{ fontSize: '13px', fontWeight: 900, color: 'var(--brand-crimson)', letterSpacing: '0.5px' }}>
-                  BASHUNDHARA OIL AND GAS COMPANY LTD.
-                </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-3)', marginBottom: '12px' }}>
-                  {t('Corporate HQ & Keraniganj Bitumen Refinery', 'কর্পোরেট সদর দপ্তর ও কেরানীগঞ্জ বিটুমিন রিফাইনারি', lang)}
+            <div className="modal-body" style={{ padding: '14px 16px' }}>
+              <div
+                style={{
+                  border: '1px solid var(--border-2)',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  background: 'var(--surface-0)',
+                  boxShadow: '0 4px 12px rgba(15, 23, 42, 0.06)',
+                }}
+              >
+                {/* Company Crest Banner */}
+                <div
+                  style={{
+                    background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--brand-crimson-dark) 100%)',
+                    color: 'var(--text-on-brand)',
+                    padding: '9px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                  }}
+                >
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '0.4px' }}>
+                      BASHUNDHARA OIL & GAS CO. LTD.
+                    </div>
+                    <div style={{ fontSize: '9.5px', opacity: 0.8 }}>
+                      {t('Official Employee Gate Credential', 'দাপ্তরিক কর্মী গেট পরিচয়পত্র', lang)}
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '9.5px',
+                      fontFamily: 'monospace',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: 'rgba(255, 255, 255, 0.14)',
+                      color: 'var(--brand-gold)',
+                    }}
+                  >
+                    {user.empId}
+                  </span>
                 </div>
 
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--surface-inverse)', color: 'var(--brand-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', fontWeight: 900, margin: '0 auto 8px', border: '2px solid var(--brand-gold)' }}>
-                  {me?.initials ?? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                {/* Employee Identity Row */}
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    borderBottom: '1px solid var(--border-1)',
+                    background: 'var(--surface-1)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '10px',
+                      background: 'var(--surface-inverse)',
+                      color: 'var(--brand-gold)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '15px',
+                      fontWeight: 900,
+                      border: '1.5px solid var(--brand-gold)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {me?.initials ?? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div style={{ textAlign: 'left', minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-1)', lineHeight: 1.2 }}>
+                      {t(user.name, user.nameBn, lang)}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-2)', fontWeight: 600, marginTop: '1px' }}>
+                      {t(user.label, user.labelBn, lang)}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '1px' }}>
+                      {t(user.dept, user.deptBn, lang)}
+                    </div>
+                  </div>
                 </div>
 
-                <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-1)' }}>{t(user.name, user.nameBn, lang)}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t(user.label, user.labelBn, lang)}</div>
-                <div style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--brand-crimson)', marginTop: '2px' }}>
-                  {user.empId}
-                </div>
+                {/* Side-by-Side QR Code & Gate Metadata Grid (zero empty space) */}
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    display: 'grid',
+                    gridTemplateColumns: 'auto 1fr',
+                    gap: '12px',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1px solid var(--border-2)',
+                      borderRadius: '10px',
+                      padding: '8px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <QrCode size={72} color="#0F172A" />
+                    <span style={{ fontSize: '8.5px', fontWeight: 800, letterSpacing: '0.5px', color: '#475569', marginTop: '3px' }}>
+                      {t('SCAN AT GATE', 'গেটে স্ক্যান করুন', lang)}
+                    </span>
+                  </div>
 
-                <div style={{ margin: '14px 0 10px', display: 'flex', justifyContent: 'center' }}>
-                  <QrCode size={110} color="var(--text-1)" />
-                </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left' }}>
+                    <div
+                      style={{
+                        padding: '5px 8px',
+                        borderRadius: '7px',
+                        background: 'var(--surface-1)',
+                        border: '1px solid var(--border-1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                      }}
+                    >
+                      <Building2 size={13} color="var(--status-info)" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '9.5px', color: 'var(--text-3)', lineHeight: 1.1 }}>{t('Primary Site', 'প্রধান কর্মস্থল', lang)}</div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-1)' }}>
+                          {me?.assignedSite === 'PLANT_KERANIGANJ'
+                            ? t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)
+                            : me?.assignedSite === 'TERMINAL_CTG'
+                              ? t('Chattogram Terminal', 'চট্টগ্রাম টার্মিনাল', lang)
+                              : t('Dhaka Corporate HQ', 'ঢাকা সদর দপ্তর', lang)}
+                        </div>
+                      </div>
+                    </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', fontSize: '10.5px', borderTop: '1px solid var(--border-2)', paddingTop: '10px' }}>
-                  <div>{t('Blood group', 'রক্তের গ্রুপ', lang)}: <strong>{me?.bloodGroup ?? '—'}</strong></div>
-                  <div>{t('Site', 'কর্মস্থল', lang)}: <strong>{me?.assignedSite === 'PLANT_KERANIGANJ' ? t('Keraniganj plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang) : me?.assignedSite === 'TERMINAL_CTG' ? t('Chattogram terminal', 'চট্টগ্রাম টার্মিনাল', lang) : t('Dhaka HQ', 'ঢাকা সদর দপ্তর', lang)}</strong></div>
+                    <div
+                      style={{
+                        padding: '5px 8px',
+                        borderRadius: '7px',
+                        background: 'var(--surface-1)',
+                        border: '1px solid var(--border-1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                      }}
+                    >
+                      <ShieldCheck size={13} color="var(--status-success)" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '9.5px', color: 'var(--text-3)', lineHeight: 1.1 }}>{t('Gate Clearance', 'গেট অনুমতি', lang)}</div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-1)' }}>
+                          {t('HQ & Refinery Turnstiles', 'সদর দপ্তর ও রিফাইনারি গেট', lang)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        padding: '5px 8px',
+                        borderRadius: '7px',
+                        background: 'var(--surface-1)',
+                        border: '1px solid var(--border-1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                      }}
+                    >
+                      <Droplets size={13} color="var(--brand-crimson)" style={{ flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '9.5px', color: 'var(--text-3)', lineHeight: 1.1 }}>{t('Blood Group & Status', 'রক্তের গ্রুপ ও অবস্থা', lang)}</div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-1)' }}>
+                          {me?.bloodGroup ?? 'O+'} · {rec && rec.locationStatus !== 'absent' ? t(`In ${rec.inTime}`, `প্রবেশ ${rec.inTime}`, lang) : t('Ready to scan', 'স্ক্যানের জন্য প্রস্তুত', lang)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-3)', fontWeight: 600 }}>
-                {t('Show this QR at the gate turnstile or to security.', 'গেট টার্নস্টাইলে বা নিরাপত্তা কর্মীকে এই কিউআর দেখান।', lang)}
+              <div style={{ marginTop: '8px', fontSize: '10.5px', color: 'var(--text-3)', textAlign: 'center' }}>
+                {t('Present this QR badge at the gate reader or to security staff.', 'গেট রিডারে বা নিরাপত্তা কর্মীকে এই কিউআর ব্যাজটি দেখান।', lang)}
               </div>
             </div>
 
-            <div className="modal-ft">
+            <div className="modal-ft" style={{ padding: '9px 16px' }}>
               <button className="btn-sm-ghost" onClick={() => setShowGatePassModal?.(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
             </div>
           </div>
