@@ -162,164 +162,166 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
           RIGHT SIDE: SLEEK MINIMAL COMMAND CENTRE PANEL (Sports City Style)
           ────────────────────────────────────────────────────────────────── */}
       <aside className="sc-login-panel">
-        <div className="sc-panel-header">
-          <div className="sc-panel-top-row">
-            <h2 className="sc-staff-title">
-              {t('Staff access', 'স্টাফ অ্যাক্সেস', lang)}
-            </h2>
+        <div className="sc-login-content">
+          <div className="sc-panel-header">
+            <div className="sc-panel-top-row">
+              <h2 className="sc-staff-title">
+                {t('Staff access', 'স্টাফ অ্যাক্সেস', lang)}
+              </h2>
 
-            <button
-              type="button"
-              className="sc-lang-toggle-btn"
-              onClick={onLangToggle}
-              title={t('Toggle Language', 'ভাষা পরিবর্তন', lang)}
-            >
-              <Globe size={12} />
-              <span className="sc-lang-badge">{lang === 'en' ? 'বাং' : 'EN'}</span>
-            </button>
-          </div>
-
-          <p className="sc-staff-sub">
-            {t(
-              'Sign In to operate the live complex — or click a demo role below.',
-              'লাইভ প্ল্যাটফর্ম পরিচালনায় সাইন ইন করুন — অথবা নিচের ডেমো রোলে ক্লিক করুন।',
-              lang
-            )}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="sc-form" noValidate>
-          {error && (
-            <div className="sc-error-banner" role="alert">
-              <AlertCircle size={14} />
-              <span>{t(ERROR_TEXT[error].en, ERROR_TEXT[error].bn, lang)}</span>
-            </div>
-          )}
-
-          <div className="sc-input-group">
-            <div className="sc-input-label-row">
-              <label className="sc-input-label" htmlFor="sc-email">
-                {t('Email', 'ইমেইল', lang)}
-              </label>
-            </div>
-            <div className="sc-input-wrap">
-              <input
-                id="sc-email"
-                type="text"
-                className="sc-text-input"
-                value={identifier}
-                onChange={(e) => {
-                  setIdentifier(e.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder={t('name@bashundhara.com or EMP-0001', 'name@bashundhara.com অথবা EMP-0001', lang)}
-                autoComplete="username"
-                autoFocus
-                disabled={isSubmitting || !!telemetryRole}
-              />
-            </div>
-          </div>
-
-          <div className="sc-input-group">
-            <div className="sc-input-label-row">
-              <label className="sc-input-label" htmlFor="sc-password">
-                {t('Password', 'পাসওয়ার্ড', lang)}
-              </label>
-              <a
-                href="#forgot"
-                onClick={(e) => {
-                  e.preventDefault();
-                  showToast(
-                    t('For password reset, contact IT Support Desk at Ext. 4401.', 'পাসওয়ার্ড রিসেট করতে আইটি ডেস্কে (Ext. 4401) কল করুন।', lang),
-                    'info'
-                  );
-                }}
-                className="sc-input-forgot"
-              >
-                {t('Forgot?', 'ভুলে গেছেন?', lang)}
-              </a>
-            </div>
-            <div className="sc-input-wrap">
-              <input
-                id="sc-password"
-                type={showPassword ? 'text' : 'password'}
-                className="sc-text-input"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (error) setError(null);
-                }}
-                autoComplete="current-password"
-                disabled={isSubmitting || !!telemetryRole}
-              />
               <button
                 type="button"
-                className="sc-pw-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                title={showPassword ? t('Hide', 'লুকান', lang) : t('Show', 'দেখান', lang)}
-                tabIndex={-1}
+                className="sc-lang-toggle-btn"
+                onClick={onLangToggle}
+                title={t('Toggle Language', 'ভাষা পরিবর্তন', lang)}
               >
-                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                <Globe size={12} />
+                <span className="sc-lang-badge">{lang === 'en' ? 'বাং' : 'EN'}</span>
               </button>
             </div>
+
+            <p className="sc-staff-sub">
+              {t(
+                'Sign In to operate the live complex — or click a demo role below.',
+                'লাইভ প্ল্যাটফর্ম পরিচালনায় সাইন ইন করুন — অথবা নিচের ডেমো রোলে ক্লিক করুন।',
+                lang
+              )}
+            </p>
           </div>
 
-          <button
-            type="submit"
-            className="sc-submit-btn"
-            disabled={isSubmitting || !!telemetryRole}
-          >
-            {isSubmitting || !!telemetryRole ? (
-              <>
-                <Loader2 size={15} className="spin-anim" />
-                <span>{t('Authenticating…', 'যাচাই করা হচ্ছে…', lang)}</span>
-              </>
-            ) : (
-              <>
-                <span>{t('Enter Command Centre', 'কমান্ড সেন্টারে প্রবেশ করুন', lang)}</span>
-                <ArrowRight size={14} />
-              </>
+          <form onSubmit={handleSubmit} className="sc-form" noValidate>
+            {error && (
+              <div className="sc-error-banner" role="alert">
+                <AlertCircle size={14} />
+                <span>{t(ERROR_TEXT[error].en, ERROR_TEXT[error].bn, lang)}</span>
+              </div>
             )}
-          </button>
-        </form>
 
-        {/* ──────────────────────────────────────────────────────────────
-            DEMO LOGIN (MINIMAL 2-COLUMN GRID LIKE SPORTS CITY)
-            ────────────────────────────────────────────────────────────── */}
-        <div className="sc-demo-section">
-          <div className="sc-demo-header-row">
-            <span className="sc-demo-heading">
-              {t('Demo Login', 'ডেমো লগইন', lang)}
-            </span>
-            <span className="sc-demo-pw-badge">
-              Password <strong>bogcl2026</strong>
-            </span>
-          </div>
-
-          <div className="sc-demo-grid">
-            {DEMO_ROLES.map(({ role: r, labelEn, labelBn, isSpan2 }) => {
-              const meta = ROLE_META[r];
-              const isSelected =
-                identifier.trim().toLowerCase() === meta.email.toLowerCase() ||
-                identifier.trim().toLowerCase() === meta.empId.toLowerCase();
-
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  className={`sc-demo-btn${isSpan2 ? ' span-2' : ''}${isSelected ? ' active' : ''}`}
-                  onClick={() => handleSelectRole(r)}
-                  title={t(
-                    `Load credentials for ${meta.name} (${meta.label})`,
-                    `${meta.nameBn} (${meta.labelBn})-এর তথ্য লোড করুন`,
-                    lang
-                  )}
+            <div className="sc-input-group">
+              <div className="sc-input-label-row">
+                <label className="sc-input-label" htmlFor="sc-email">
+                  {t('Email', 'ইমেইল', lang)}
+                </label>
+              </div>
+              <div className="sc-input-wrap">
+                <input
+                  id="sc-email"
+                  type="text"
+                  className="sc-text-input"
+                  value={identifier}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder={t('name@bashundhara.com or EMP-0001', 'name@bashundhara.com অথবা EMP-0001', lang)}
+                  autoComplete="username"
+                  autoFocus
                   disabled={isSubmitting || !!telemetryRole}
+                />
+              </div>
+            </div>
+
+            <div className="sc-input-group">
+              <div className="sc-input-label-row">
+                <label className="sc-input-label" htmlFor="sc-password">
+                  {t('Password', 'পাসওয়ার্ড', lang)}
+                </label>
+                <a
+                  href="#forgot"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    showToast(
+                      t('For password reset, contact IT Support Desk at Ext. 4401.', 'পাসওয়ার্ড রিসেট করতে আইটি ডেস্কে (Ext. 4401) কল করুন।', lang),
+                      'info'
+                    );
+                  }}
+                  className="sc-input-forgot"
                 >
-                  {t(labelEn, labelBn, lang)}
+                  {t('Forgot?', 'ভুলে গেছেন?', lang)}
+                </a>
+              </div>
+              <div className="sc-input-wrap">
+                <input
+                  id="sc-password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="sc-text-input"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  autoComplete="current-password"
+                  disabled={isSubmitting || !!telemetryRole}
+                />
+                <button
+                  type="button"
+                  className="sc-pw-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  title={showPassword ? t('Hide', 'লুকান', lang) : t('Show', 'দেখান', lang)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-              );
-            })}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="sc-submit-btn"
+              disabled={isSubmitting || !!telemetryRole}
+            >
+              {isSubmitting || !!telemetryRole ? (
+                <>
+                  <Loader2 size={15} className="spin-anim" />
+                  <span>{t('Authenticating…', 'যাচাই করা হচ্ছে…', lang)}</span>
+                </>
+              ) : (
+                <>
+                  <span>{t('Enter Command Centre', 'কমান্ড সেন্টারে প্রবেশ করুন', lang)}</span>
+                  <ArrowRight size={14} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* ──────────────────────────────────────────────────────────────
+              DEMO LOGIN (MINIMAL 2-COLUMN GRID LIKE SPORTS CITY)
+              ────────────────────────────────────────────────────────────── */}
+          <div className="sc-demo-section">
+            <div className="sc-demo-header-row">
+              <span className="sc-demo-heading">
+                {t('Demo Login', 'ডেমো লগইন', lang)}
+              </span>
+              <span className="sc-demo-pw-badge">
+                Password <strong>bogcl2026</strong>
+              </span>
+            </div>
+
+            <div className="sc-demo-grid">
+              {DEMO_ROLES.map(({ role: r, labelEn, labelBn, isSpan2 }) => {
+                const meta = ROLE_META[r];
+                const isSelected =
+                  identifier.trim().toLowerCase() === meta.email.toLowerCase() ||
+                  identifier.trim().toLowerCase() === meta.empId.toLowerCase();
+
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    className={`sc-demo-btn${isSpan2 ? ' span-2' : ''}${isSelected ? ' active' : ''}`}
+                    onClick={() => handleSelectRole(r)}
+                    title={t(
+                      `Load credentials for ${meta.name} (${meta.label})`,
+                      `${meta.nameBn} (${meta.labelBn})-এর তথ্য লোড করুন`,
+                      lang
+                    )}
+                    disabled={isSubmitting || !!telemetryRole}
+                  >
+                    {t(labelEn, labelBn, lang)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </aside>

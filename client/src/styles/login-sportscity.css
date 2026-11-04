@@ -98,21 +98,41 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   RIGHT SIDE: MINIMAL COMMAND CENTRE LOGIN PANEL (400px wide)
+   RIGHT SIDE: BALANCED COMMAND CENTRE LOGIN PANEL (Comfortably brought left)
    ───────────────────────────────────────────────────────────────────────────── */
 .sc-login-panel {
-  width: 400px;
-  min-width: 360px;
-  max-width: 440px;
+  flex: 0 0 42%;
+  width: 42%;
+  min-width: 440px;
+  max-width: 620px;
   background-color: #0B101D;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 40px 32px;
+  padding: 44px 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   position: relative;
   z-index: 5;
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  box-shadow: -16px 0 50px rgba(0, 0, 0, 0.6);
+}
+
+.sc-login-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(229, 179, 88, 0.35) 40%, rgba(229, 179, 88, 0.15) 70%, transparent 100%);
+  pointer-events: none;
+}
+
+.sc-login-content {
+  width: 100%;
+  max-width: 410px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Header */
@@ -385,12 +405,16 @@
     font-size: 32px;
   }
   .sc-login-panel {
+    flex: none;
     width: 100%;
     max-width: 100%;
     min-width: auto;
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     padding: 28px 20px;
+  }
+  .sc-login-content {
+    max-width: 100%;
   }
 }
 
