@@ -60,6 +60,10 @@ abstract final class Col {
   static const assetDisposals = 'asset_disposals';
   static const chatChannels = 'chat_channels';
   static const chatMessages = 'chat_messages';
+  static const chatReceipts = 'chat_receipts';
+  static const chatDirectives = 'chat_directives';
+  static const briefings = 'briefings';
+  static const briefingListens = 'briefing_listens';
   static const compliance = 'compliance';
   static const licenceRenewals = 'licence_renewals';
   static const licenceLetters = 'licence_letters';

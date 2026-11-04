@@ -13,11 +13,14 @@ import 'package:bogcl_oneops/features/auth/presentation/login_screen.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/bus/presentation/bus_route_screen.dart';
 import 'package:bogcl_oneops/features/bus/presentation/bus_screen.dart';
+import 'package:bogcl_oneops/features/chat/presentation/chat_screen.dart';
+import 'package:bogcl_oneops/features/chat/presentation/chat_thread_screen.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/advance_request_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_detail_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_edit_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claims_screen.dart';
+import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_detail_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_new_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_screen.dart';
@@ -214,6 +217,21 @@ GoRouter router(Ref ref) {
                         path: ':id',
                         builder: (context, state) =>
                             FleetDetailScreen(id: state.pathParameters['id']!),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'dashboards',
+                    builder: (context, state) => const DashboardScreen(),
+                  ),
+                  GoRoute(
+                    path: 'chat',
+                    builder: (context, state) => const ChatScreen(),
+                    routes: [
+                      GoRoute(
+                        path: ':id',
+                        builder: (context, state) =>
+                            ChatThreadScreen(id: state.pathParameters['id']!),
                       ),
                     ],
                   ),

@@ -106,6 +106,7 @@ export function checklistComplete(lic: LicenseCard): boolean {
 
 export function canDoLetter(lic: LicenseCard, caps: ComplianceCaps): boolean {
   if (!(caps.canDispatch || caps.canRenew)) return false;
+  if (lic.stage >= 5) return lic.doLetterStatus === 'dispatched';
   return lic.daysLeft <= 30 || lic.stage >= 4;
 }
 
@@ -155,12 +156,20 @@ export function myWork(licenses: LicenseCard[], caps: ComplianceCaps, user: Curr
         labelBn: stage.verbBn,
       });
     }
-    if (caps.canDispatch && lic.stage >= 4 && lic.stage < 5 && lic.daysLeft <= 30) {
+    if (caps.canDispatch && lic.stage >= 4 && lic.stage < 5 && lic.daysLeft <= 30 && lic.doLetterStatus !== 'dispatched') {
       items.push({
         license: lic,
         kind: 'do_letter',
-        label: 'Sign the DO letter',
-        labelBn: 'ডিও লেটারে স্বাক্ষর করুন',
+        label: lic.doLetterStatus === 'awaiting_signature' ? 'Sign the plant draft' : 'Sign the DO letter',
+        labelBn: lic.doLetterStatus === 'awaiting_signature' ? 'প্ল্যান্টের খসড়ায় স্বাক্ষর করুন' : 'ডিও লেটারে স্বাক্ষর করুন',
+      });
+    }
+    if (caps.canRenew && !caps.canDispatch && canDoLetter(lic, caps) && lic.doLetterStatus === 'none' && lic.stage >= 4 && lic.stage < 5) {
+      items.push({
+        license: lic,
+        kind: 'do_letter',
+        label: 'Send DO draft to Chairman',
+        labelBn: 'চেয়ারম্যানের কাছে ডিও খসড়া পাঠান',
       });
     }
   }
@@ -243,6 +252,22 @@ export function nextLine(lic: LicenseCard, caps: ComplianceCaps, user: CurrentUs
     return t(`Waiting for the plant team to record ${lic.inspectorName}'s inspection.`, `প্ল্যান্ট দল ${lic.inspectorName}-এর পরিদর্শন লিপিবদ্ধ করবে।`, lang);
   }
   if (lic.stage === 4) {
+    if (lic.doLetterStatus === 'dispatched') {
+      const via = lic.doLetterChannel === 'courier'
+        ? t(`courier ${lic.doLetterParcelRef ?? ''}`.trim(), `কুরিয়ার ${lic.doLetterParcelRef ?? ''}`.trim(), lang)
+        : lic.doLetterChannel === 'enothi'
+          ? t('e-Nothi', 'ই-নথি', lang)
+          : t('hand delivery', 'হস্তান্তর', lang);
+      return t(
+        `DO ${lic.doLetterMemo ?? ''} sent via ${via}. Waiting on ${lic.agency} for the certificate.`,
+        `ডিও ${lic.doLetterMemo ?? ''} ${via} দিয়ে পাঠানো হয়েছে। সনদের জন্য ${lic.agencyBn}-এর অপেক্ষা।`,
+        lang,
+      );
+    }
+    if (lic.doLetterStatus === 'awaiting_signature') {
+      if (caps.canDispatch) return t('The plant sent a draft. Sign and send it to the agency.', 'প্ল্যান্ট খসড়া পাঠিয়েছে। স্বাক্ষর করে সংস্থায় পাঠান।', lang);
+      return t("Waiting for the Chairman to sign the DO letter.", 'চেয়ারম্যানের ডিও স্বাক্ষরের অপেক্ষা।', lang);
+    }
     if (caps.canDispatch && lic.daysLeft <= 30) {
       return t('Sign the DO letter so the ministry can issue the certificate.', 'সনদ দ্রুত পেতে ডিও লেটারে স্বাক্ষর করুন।', lang);
     }

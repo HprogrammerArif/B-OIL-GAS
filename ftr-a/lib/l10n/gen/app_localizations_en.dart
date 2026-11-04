@@ -5487,4 +5487,97 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get emErrOpen => 'An exit file is already open.';
+
+  @override
+  String get moduleDashboards => 'Today';
+
+  @override
+  String get dbWhat =>
+      'What needs you, and the few numbers that change a decision.';
+
+  @override
+  String get dbWhy =>
+      'These figures are counted from the live files, not typed in.';
+
+  @override
+  String get dbNeedsTitle => 'Needs you today';
+
+  @override
+  String get dbActBrief => 'Send a short briefing';
+
+  @override
+  String get dbFieldTitle => 'Title';
+
+  @override
+  String get dbFieldBody => 'What should they hear (20+ characters)';
+
+  @override
+  String get dbDoneBrief => 'Briefing sent.';
+
+  @override
+  String dbRoiLine(String fleet, String vendor) {
+    return 'Declared: fleet ৳$fleet, vendors ৳$vendor. Not a live calculation.';
+  }
+
+  @override
+  String get moduleChat => 'Leadership chat';
+
+  @override
+  String get chIntro =>
+      'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.';
+
+  @override
+  String get chEmpty => 'No conversations.';
+
+  @override
+  String get chNoMessages => 'No messages yet.';
+
+  @override
+  String get chLocked => 'Invite only';
+
+  @override
+  String get chDirect => 'Message one person';
+
+  @override
+  String get chHint => 'Write a message';
+
+  @override
+  String get chSend => 'Send';
+
+  @override
+  String get chDeleted => 'Message removed.';
+
+  @override
+  String get chSecureNote =>
+      'Encrypted in transit and at rest. Not end-to-end.';
+
+  @override
+  String get chActDirective => 'Issue a directive';
+
+  @override
+  String get chActAck => 'I have it';
+
+  @override
+  String get chActDone => 'Mark done';
+
+  @override
+  String get chFieldTitle => 'Directive title';
+
+  @override
+  String get chFieldBody => 'What must happen';
+
+  @override
+  String chAckCount(int acks, int needed) {
+    return '$acks of $needed have acknowledged.';
+  }
+
+  @override
+  String get demoPlayEvent => 'Play next live event';
+
+  @override
+  String get demoPlayEventHint =>
+      'Drops a leadership message and an inbox ping.';
+
+  @override
+  String get demoPlayEventDone => 'Event played.';
 }

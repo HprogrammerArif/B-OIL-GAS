@@ -10,7 +10,9 @@ import 'package:bogcl_oneops/mock/handlers/attendance_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/audit_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/bus_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/chat_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/claim_handlers.dart';
+import 'package:bogcl_oneops/mock/handlers/dashboard_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/demo_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/file_handlers.dart';
 import 'package:bogcl_oneops/mock/handlers/fleet_handlers.dart';
@@ -86,6 +88,8 @@ class MockServer {
       ...assetRoutes(),
       ...licenceRoutes(),
       ...workforceRoutes(),
+      ...dashboardRoutes(),
+      ...chatRoutes(),
     ]);
   }
 

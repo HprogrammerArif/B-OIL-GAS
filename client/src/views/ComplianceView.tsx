@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore, type LicenseCard } from '../store/operationsStore';
+import { useOperationsStore, type LicenseCard, type LicenseEvent } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
+import { today, nowStamp } from '../lib/clock';
 import {
   ShieldCheck, AlertTriangle, Clock, Building, ArrowRight, ArrowLeft,
   ChevronLeft, ChevronRight,
@@ -25,9 +26,18 @@ import {
   nextLine,
   stageOf,
 } from './compliance/pipeline';
+import {
+  channelLabel,
+  downloadFile,
+  letterHtml,
+  makeCourierParcel,
+  nextDoMemo,
+  printHtml,
+  type DoChannel,
+} from './compliance/doLetter';
 
 export default function ComplianceView({ lang }: ViewProps) {
-  const { licenses, setLicenses } = useOperationsStore();
+  const { licenses, setLicenses, setParcels } = useOperationsStore();
   const user = useCurrentUser();
   const caps = capsFromUser(user);
 
@@ -39,7 +49,10 @@ export default function ComplianceView({ lang }: ViewProps) {
   const [selectedAgencyFilter, setSelectedAgencyFilter] = useState<string>('all');
   const [selectedUrgencyFilter, setSelectedUrgencyFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [doLetterDeliveryMode, setDoLetterDeliveryMode] = useState<'enothi' | 'courier' | 'liaison'>('enothi');
+  const [doLetterDeliveryMode, setDoLetterDeliveryMode] = useState<DoChannel>('enothi');
+  const [stageAction, setStageAction] = useState<{ kind: 'inspect' | 'certificate'; id: string } | null>(null);
+  const [inspectFindings, setInspectFindings] = useState('');
+  const [certConfirm, setCertConfirm] = useState(false);
 
   const selectedLicense = licenses.find((l) => l.id === selectedId) ?? null;
 
@@ -50,7 +63,33 @@ export default function ComplianceView({ lang }: ViewProps) {
     }));
   };
 
-  const handleOpenDoLetter = (lic: LicenseCard) => setShowDoLetterModal(lic);
+  const addEvent = (lic: LicenseCard, text: string, textBn: string): LicenseEvent[] => {
+    const ev: LicenseEvent = {
+      id: `${Date.now()}`,
+      at: nowStamp(lang),
+      actor: user?.name ?? 'System',
+      text,
+      textBn,
+    };
+    return [ev, ...(lic.events ?? [])].slice(0, 20);
+  };
+
+  const handleOpenDoLetter = (lic: LicenseCard) => {
+    setDoLetterDeliveryMode(lic.doLetterChannel ?? 'enothi');
+    setShowDoLetterModal(lic);
+  };
+
+  const commitAdvance = (lic: LicenseCard, extra: Partial<LicenseCard> = {}) => {
+    const nextStage = Math.min(5, lic.stage + 1) as 1 | 2 | 3 | 4 | 5;
+    const label = stageOf(nextStage);
+    patchLicense(lic.id, (row) => ({
+      ...row,
+      ...extra,
+      stage: nextStage,
+      events: addEvent(row, `Moved to ${label.title}.`, `${label.titleBn} ধাপে স্থানান্তর।`),
+    }));
+    showToast(t(`Moved to ${label.title}.`, `${label.titleBn} ধাপে স্থানান্তর হয়েছে।`, lang), 'success');
+  };
 
   const tryAdvance = (lic: LicenseCard) => {
     const gate = canAdvance(lic, caps);
@@ -58,13 +97,154 @@ export default function ComplianceView({ lang }: ViewProps) {
       showToast(t(gate.reason ?? 'Cannot advance.', gate.reasonBn ?? 'এখন সরানো যাবে না।', lang), 'warn');
       return;
     }
-    const nextStage = Math.min(5, lic.stage + 1);
-    patchLicense(lic.id, { stage: nextStage });
-    const label = stageOf(nextStage);
-    showToast(
-      t(`Moved to ${label.title}.`, `${label.titleBn} ধাপে স্থানান্তর হয়েছে।`, lang),
-      'success',
-    );
+    if (lic.stage === 3) {
+      setInspectFindings(lic.inspectionFindings ?? '');
+      setStageAction({ kind: 'inspect', id: lic.id });
+      return;
+    }
+    if (lic.stage === 4) {
+      setCertConfirm(false);
+      setStageAction({ kind: 'certificate', id: lic.id });
+      return;
+    }
+    if (lic.stage === 1) {
+      commitAdvance(lic, {
+        documents: [
+          { name: `Application_${lic.refNo.replace(/\//g, '-')}.html`, size: '48 KB', date: today(), type: 'Application' },
+          ...lic.documents,
+        ],
+      });
+      return;
+    }
+    if (lic.stage === 2) {
+      commitAdvance(lic);
+      return;
+    }
+    commitAdvance(lic);
+  };
+
+  const confirmInspection = () => {
+    const lic = licenses.find((l) => l.id === stageAction?.id);
+    if (!lic || inspectFindings.trim().length < 10) {
+      showToast(t('Write the inspection findings (10+ characters).', 'পরিদর্শনের ফলাফল লিখুন (কমপক্ষে ১০ অক্ষর)।', lang), 'warn');
+      return;
+    }
+    commitAdvance(lic, {
+      inspectionFindings: inspectFindings.trim(),
+      lastInspection: today(),
+      documents: [
+        { name: `Inspection_findings_${lic.refNo.replace(/\//g, '-')}.html`, size: '36 KB', date: today(), type: 'Inspection Report' },
+        ...lic.documents,
+      ],
+    });
+    setStageAction(null);
+  };
+
+  const confirmCertificate = () => {
+    const lic = licenses.find((l) => l.id === stageAction?.id);
+    if (!lic || !certConfirm) {
+      showToast(t('Confirm that the renewal certificate is in hand.', 'নবায়ন সনদ হাতে আছে বলে নিশ্চিত করুন।', lang), 'warn');
+      return;
+    }
+    const certName = `Renewal_Certificate_${lic.refNo.replace(/\//g, '-')}.html`;
+    commitAdvance(lic, {
+      documents: [
+        { name: certName, size: '120 KB', date: today(), type: 'Renewal Certificate' },
+        ...lic.documents,
+      ],
+    });
+    setStageAction(null);
+  };
+
+  const submitDoLetter = () => {
+    const lic = showDoLetterModal;
+    if (!lic || !user) return;
+    if (lic.doLetterStatus === 'dispatched') {
+      setShowDoLetterModal(null);
+      return;
+    }
+    const memo = lic.doLetterMemo || nextDoMemo(lic.tag);
+    const filename = `${memo.replace(/\//g, '_')}.html`;
+    const html = letterHtml(lic, lang, memo, caps.canDispatch);
+
+    if (caps.canDispatch) {
+      let parcelRef: string | undefined;
+      if (doLetterDeliveryMode === 'courier') {
+        const parcel = makeCourierParcel(lic, memo, user.name, user.label);
+        parcelRef = parcel.trackingNo;
+        setParcels((prev) => [parcel, ...prev]);
+      }
+      downloadFile(filename, html);
+      patchLicense(lic.id, (row) => ({
+        ...row,
+        doLetterStatus: 'dispatched',
+        doLetterMemo: memo,
+        doLetterChannel: doLetterDeliveryMode,
+        doLetterAt: nowStamp(lang),
+        doLetterBy: user.name,
+        doLetterParcelRef: parcelRef,
+        documents: [{ name: filename, size: '52 KB', date: today(), type: 'DO Letter' }, ...row.documents],
+        events: addEvent(
+          row,
+          `Signed DO ${memo} and sent via ${channelLabel(doLetterDeliveryMode, 'en')}${parcelRef ? ` (${parcelRef})` : ''}.`,
+          `ডিও ${memo} স্বাক্ষর করে ${channelLabel(doLetterDeliveryMode, 'bn')} দিয়ে পাঠানো হয়েছে${parcelRef ? ` (${parcelRef})` : ''}।`,
+        ),
+      }));
+      const extra = doLetterDeliveryMode === 'courier'
+        ? t(` Courier pouch ${parcelRef} is on the mail desk.`, ` কুরিয়ার পাউচ ${parcelRef} মেইল ডেস্কে আছে।`, lang)
+        : doLetterDeliveryMode === 'enothi'
+          ? t(' Queued on the government e-Nothi adapter.', ' সরকারি ই-নথি অ্যাডাপ্টারে সারিবদ্ধ।', lang)
+          : t(' Marked for executive hand delivery.', ' নির্বাহী হস্তান্তরের জন্য চিহ্নিত।', lang);
+      showToast(t(`DO ${memo} signed and sent to ${lic.agency}.`, `ডিও ${memo} ${lic.agencyBn}-এ স্বাক্ষর করে পাঠানো হয়েছে।`, lang) + extra, 'gold');
+    } else {
+      downloadFile(filename, html);
+      patchLicense(lic.id, (row) => ({
+        ...row,
+        doLetterStatus: 'awaiting_signature',
+        doLetterMemo: memo,
+        doLetterChannel: doLetterDeliveryMode,
+        doLetterAt: nowStamp(lang),
+        doLetterBy: user.name,
+        documents: [{ name: filename, size: '48 KB', date: today(), type: 'DO Letter (draft)' }, ...row.documents],
+        events: addEvent(
+          row,
+          `Draft DO ${memo} sent to the Chairman for signature.`,
+          `ডিও খসড়া ${memo} স্বাক্ষরের জন্য চেয়ারম্যানের কাছে পাঠানো হয়েছে।`,
+        ),
+      }));
+      showToast(t(`Draft ${memo} is waiting on the Chairman's desk.`, `খসড়া ${memo} চেয়ারম্যানের দপ্তরে অপেক্ষা করছে।`, lang), 'gold');
+    }
+    setShowDoLetterModal(null);
+  };
+
+  const printDoLetter = (lic: LicenseCard) => {
+    const memo = lic.doLetterMemo || nextDoMemo(lic.tag);
+    const ok = printHtml(letterHtml(lic, lang, memo, lic.doLetterStatus === 'dispatched' || caps.canDispatch));
+    if (!ok) {
+      showToast(t('Allow pop-ups to print the letter.', 'প্রিন্ট করতে পপ-আপ অনুমোদন করুন।', lang), 'warn');
+      return;
+    }
+    patchLicense(lic.id, (row) => ({
+      ...row,
+      doLetterMemo: row.doLetterMemo || memo,
+      events: addEvent(row, 'DO letter sent to printer.', 'ডিও লেটার প্রিন্টারে পাঠানো হয়েছে।'),
+    }));
+    showToast(t('Print dialog opened for the DO letter.', 'ডিও লেটারের প্রিন্ট ডায়ালগ খোলা হয়েছে।', lang), 'info');
+  };
+
+  const downloadVaultDoc = (lic: LicenseCard, docName: string, docType: string) => {
+    const memo = lic.doLetterMemo || `REF ${lic.refNo}`;
+    const html = docType.toLowerCase().includes('do')
+      ? letterHtml(lic, lang, memo, lic.doLetterStatus === 'dispatched')
+      : `<!doctype html><html><head><meta charset="utf-8"><title>${docName}</title></head>
+<body style="font-family:sans-serif;padding:32px">
+<h2>${docName}</h2>
+<p>${docType} · ${lic.title} · ${lic.refNo}</p>
+<p>Official copy downloaded from BOGCL OneOps on ${today()} by ${user?.name ?? ''}.</p>
+</body></html>`;
+    const file = docName.endsWith('.pdf') ? docName.replace(/\.pdf$/i, '.html') : docName;
+    downloadFile(file, html);
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
   };
 
   const toggleChecklistItem = (itemIndex: number) => {
@@ -92,7 +272,11 @@ export default function ComplianceView({ lang }: ViewProps) {
     }
     const lic = licenses.find((l) => l.id === revertId);
     if (!lic || !canRevert(lic, caps)) return;
-    patchLicense(revertId, { stage: Math.max(1, lic.stage - 1) });
+    patchLicense(revertId, (row) => ({
+      ...row,
+      stage: Math.max(1, row.stage - 1),
+      events: addEvent(row, `Sent back: ${revertReason.trim()}`, `ফেরত: ${revertReason.trim()}`),
+    }));
     showToast(t('Filing returned to the previous stage.', 'আবেদন আগের ধাপে ফেরত গেছে।', lang), 'info');
     setRevertId(null);
     setRevertReason('');
@@ -297,9 +481,11 @@ export default function ComplianceView({ lang }: ViewProps) {
           </div>
           {canDoLetter(mostCriticalLicense, caps) && (
             <Button variant="gold" size="sm" icon={<FileText size={14} />} onClick={() => handleOpenDoLetter(mostCriticalLicense)}>
-              {caps.canDispatch
-                ? t('Sign DO letter', 'ডিও লেটারে স্বাক্ষর', lang)
-                : t('Draft DO letter', 'ডিও লেটার খসড়া', lang)}
+              {mostCriticalLicense.doLetterStatus === 'dispatched'
+                ? t('View DO letter', 'ডিও লেটার দেখুন', lang)
+                : caps.canDispatch
+                  ? t('Sign DO letter', 'ডিও লেটারে স্বাক্ষর', lang)
+                  : t('Draft DO letter', 'ডিও লেটার খসড়া', lang)}
             </Button>
           )}
         </div>
@@ -501,6 +687,16 @@ export default function ComplianceView({ lang }: ViewProps) {
                                 <StatusPill tone="warn">{t(`Fee ${lic.feeAmountTk} waiting`, `ফি ${lic.feeAmountTk} অপেক্ষমাণ`, lang)}</StatusPill>
                               </div>
                             )}
+                            {lic.doLetterStatus === 'awaiting_signature' && (
+                              <div style={{ marginTop: '4px' }}>
+                                <StatusPill tone="gold">{t('DO waiting for Chairman', 'ডিও চেয়ারম্যানের অপেক্ষা', lang)}</StatusPill>
+                              </div>
+                            )}
+                            {lic.doLetterStatus === 'dispatched' && (
+                              <div style={{ marginTop: '4px' }}>
+                                <StatusPill tone="success">{t(`DO sent · ${lic.doLetterMemo ?? ''}`, `ডিও পাঠানো · ${lic.doLetterMemo ?? ''}`, lang)}</StatusPill>
+                              </div>
+                            )}
                           </div>
                           <div className={`k-next${yours ? ' is-yours' : ''}`}>
                             <CircleDot size={11} style={{ marginRight: 4, verticalAlign: 'middle' }} />
@@ -521,9 +717,13 @@ export default function ComplianceView({ lang }: ViewProps) {
                                   {t('Send back', 'ফেরত পাঠান', lang)}
                                 </Button>
                               )}
-                              {canDoLetter(lic, caps) && lic.daysLeft <= 30 && lic.stage >= 4 && (
-                                <Button size="sm" variant="outline-danger" icon={<FileText size={12} />} onClick={() => handleOpenDoLetter(lic)}>
-                                  {caps.canDispatch ? t('Sign DO', 'ডিও স্বাক্ষর', lang) : t('Draft DO', 'ডিও খসড়া', lang)}
+                              {canDoLetter(lic, caps) && lic.stage >= 4 && (
+                                <Button size="sm" variant={lic.doLetterStatus === 'dispatched' ? 'ghost' : 'outline-danger'} icon={<FileText size={12} />} onClick={() => handleOpenDoLetter(lic)}>
+                                  {lic.doLetterStatus === 'dispatched'
+                                    ? t('View DO', 'ডিও দেখুন', lang)
+                                    : caps.canDispatch
+                                      ? t('Sign DO', 'ডিও স্বাক্ষর', lang)
+                                      : t('Draft DO', 'ডিও খসড়া', lang)}
                                 </Button>
                               )}
                             </div>
@@ -636,7 +836,32 @@ export default function ComplianceView({ lang }: ViewProps) {
                 <div style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '4px' }}>
                   {t(`From ${selectedLicense.focalPerson} · ${selectedLicense.focalDesignation}`, `${selectedLicense.focalPerson} · ${selectedLicense.focalDesignation}`, lang)}
                 </div>
+                {selectedLicense.doLetterStatus === 'dispatched' && (
+                  <div style={{ marginTop: '8px' }}>
+                    <StatusPill tone="success">
+                      {t(
+                        `DO ${selectedLicense.doLetterMemo} sent ${selectedLicense.doLetterAt ?? ''} via ${selectedLicense.doLetterChannel ? channelLabel(selectedLicense.doLetterChannel, 'en') : ''}`,
+                        `ডিও ${selectedLicense.doLetterMemo} পাঠানো হয়েছে`,
+                        lang,
+                      )}
+                    </StatusPill>
+                  </div>
+                )}
               </div>
+
+              {(selectedLicense.events?.length ?? 0) > 0 && (
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, marginBottom: '8px' }}>{t('Activity', 'কার্যক্রম', lang)}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {selectedLicense.events.slice(0, 6).map((ev) => (
+                      <div key={ev.id} style={{ fontSize: '12px', padding: '8px 10px', background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '6px' }}>
+                        <div style={{ fontWeight: 600 }}>{t(ev.text, ev.textBn, lang)}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-2)' }}>{ev.actor} · {ev.at}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="responsive-col-4" style={{ gap: '10px', marginBottom: '18px' }}>
                 <div style={{ background: 'var(--surface-0)', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
@@ -768,7 +993,7 @@ export default function ComplianceView({ lang }: ViewProps) {
                         <div style={{ fontSize: '12.5px', fontWeight: 700 }}>{doc.name}</div>
                         <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)' }}>{doc.type} • {doc.size} • {doc.date}</div>
                       </div>
-                      <Button size="sm" variant="ghost" icon={<Download size={13} />} onClick={() => showToast(t(`Downloaded ${doc.name}`, `${doc.name} ডাউনলোড হয়েছে`, lang), 'success')}>
+                      <Button size="sm" variant="ghost" icon={<Download size={13} />} onClick={() => downloadVaultDoc(selectedLicense, doc.name, doc.type)}>
                         {t('Download', 'ডাউনলোড', lang)}
                       </Button>
                     </div>
@@ -843,35 +1068,50 @@ export default function ComplianceView({ lang }: ViewProps) {
         </div>
       )}
 
-      {showDoLetterModal && (
+      {showDoLetterModal && (() => {
+        const doLive = licenses.find((l) => l.id === showDoLetterModal.id) ?? showDoLetterModal;
+        const sent = doLive.doLetterStatus === 'dispatched';
+        const memo = doLive.doLetterMemo || `BOGCL/CMD-DO/${doLive.tag.toUpperCase()}/2026/…`;
+        return (
         <div className="modal-bg" onClick={() => setShowDoLetterModal(null)}>
           <div className="modal" style={{ maxWidth: '720px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'var(--brand-crimson-dark)', color: 'var(--text-on-brand)' }}>
               <div>
                 <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '15px', fontWeight: 800 }}>
-                  {caps.canDispatch
-                    ? t('Sign the DO letter', 'ডিও লেটারে স্বাক্ষর করুন', lang)
-                    : t('Draft DO letter for the Chairman', 'চেয়ারম্যানের জন্য ডিও লেটার খসড়া', lang)}
+                  {sent
+                    ? t('DO letter on file', 'দাখিলকৃত ডিও লেটার', lang)
+                    : caps.canDispatch
+                      ? t('Sign the DO letter', 'ডিও লেটারে স্বাক্ষর করুন', lang)
+                      : t('Draft DO letter for the Chairman', 'চেয়ারম্যানের জন্য ডিও লেটার খসড়া', lang)}
                 </h3>
                 <div style={{ fontSize: '11px', color: 'var(--status-danger-bright)', marginTop: '2px' }}>
-                  {t(showDoLetterModal.title, showDoLetterModal.titleBn, lang)}
+                  {t(doLive.title, doLive.titleBn, lang)}
                 </div>
               </div>
               <button type="button" className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowDoLetterModal(null)}>×</button>
             </div>
             <div className="modal-body" style={{ maxHeight: '74vh', overflowY: 'auto', padding: '20px' }}>
+              {sent && (
+                <div style={{ marginBottom: '12px', padding: '10px 12px', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--status-success-text)' }}>
+                  {t(
+                    `Signed by ${doLive.doLetterBy} on ${doLive.doLetterAt}. Sent via ${doLive.doLetterChannel ? channelLabel(doLive.doLetterChannel, 'en') : ''}${doLive.doLetterParcelRef ? ` · parcel ${doLive.doLetterParcelRef}` : ''}.`,
+                    `${doLive.doLetterBy} স্বাক্ষর করেছেন ${doLive.doLetterAt}।`,
+                    lang,
+                  )}
+                </div>
+              )}
               <div style={{ marginBottom: '14px', background: 'var(--surface-0)', padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--border-1)' }}>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-600)', marginBottom: '6px' }}>
                   {t('Dispatch channel', 'প্রেরণ মাধ্যম', lang)}
                 </div>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {[
-                    { id: 'enothi', label: 'Government e-Nothi', labelBn: 'সরকারি ই-নথি' },
-                    { id: 'courier', label: 'Sealed courier', labelBn: 'সিলগালা কুরিয়ার' },
-                    { id: 'liaison', label: 'Hand delivery', labelBn: 'সরাসরি প্রদান' },
+                    { id: 'enothi' as const, label: 'Government e-Nothi', labelBn: 'সরকারি ই-নথি' },
+                    { id: 'courier' as const, label: 'Sealed courier', labelBn: 'সিলগালা কুরিয়ার' },
+                    { id: 'liaison' as const, label: 'Hand delivery', labelBn: 'সরাসরি প্রদান' },
                   ].map((c) => (
-                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', cursor: 'pointer' }}>
-                      <input type="radio" name="deliveryMode" checked={doLetterDeliveryMode === c.id} onChange={() => setDoLetterDeliveryMode(c.id as typeof doLetterDeliveryMode)} />
+                    <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', cursor: sent ? 'default' : 'pointer' }}>
+                      <input type="radio" name="deliveryMode" disabled={sent} checked={doLetterDeliveryMode === c.id} onChange={() => setDoLetterDeliveryMode(c.id)} />
                       <span>{t(c.label, c.labelBn, lang)}</span>
                     </label>
                   ))}
@@ -884,60 +1124,106 @@ export default function ComplianceView({ lang }: ViewProps) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px', fontSize: '11.5px' }}>
                   <div>
-                    <strong>DO Memo:</strong> BOGCL/CMD-DO/{showDoLetterModal.tag.toUpperCase()}-2026/089<br />
-                    <strong>License:</strong> {showDoLetterModal.refNo}
+                    <strong>DO Memo:</strong> {memo}<br />
+                    <strong>License:</strong> {doLive.refNo}
                   </div>
-                  <div style={{ textAlign: 'right' }}><strong>{t('Date', 'তারিখ', lang)}:</strong> 29 October 2026</div>
+                  <div style={{ textAlign: 'right' }}><strong>{t('Date', 'তারিখ', lang)}:</strong> {today()}</div>
                 </div>
                 <div style={{ marginBottom: '14px' }}>
                   <strong>{t('To', 'প্রাপক', lang)}:</strong><br />
-                  <strong>{showDoLetterModal.ministryRecipient}</strong><br />
-                  {showDoLetterModal.ministryAddress}
+                  <strong>{doLive.ministryRecipient}</strong><br />
+                  {doLive.ministryAddress}
                 </div>
                 <div style={{ fontWeight: 800, marginBottom: '12px', padding: '8px 10px', background: 'var(--surface-0)', borderLeft: '4px solid var(--brand-crimson-dark)' }}>
                   {t(
-                    `Request to expedite renewal of ${showDoLetterModal.title} — Keraniganj plant.`,
-                    `${showDoLetterModal.titleBn} নবায়ন দ্রুত ইস্যুর অনুরোধ — কেরানীগঞ্জ প্ল্যান্ট।`,
+                    `Request to expedite renewal of ${doLive.title} — Keraniganj plant.`,
+                    `${doLive.titleBn} নবায়ন দ্রুত ইস্যুর অনুরোধ — কেরানীগঞ্জ প্ল্যান্ট।`,
                     lang,
                   )}
                 </div>
                 <div style={{ color: 'var(--text-2)', textAlign: 'justify' }}>
                   {t(
-                    `Plant checks for ${showDoLetterModal.refNo} are complete under ${showDoLetterModal.sroLawRef}. A delay risks ${showDoLetterModal.dailyShutdownRiskTk} in lost production. Kindly issue the renewal certificate.`,
-                    `${showDoLetterModal.refNo} এর প্ল্যান্ট যাচাই ${showDoLetterModal.sroLawRef} অনুযায়ী সম্পন্ন। বিলম্বে দৈনিক ${showDoLetterModal.dailyShutdownRiskTk} উৎপাদন ক্ষতি হতে পারে। নবায়ন সনদ ইস্যু করার অনুরোধ।`,
+                    `Plant checks for ${doLive.refNo} are complete under ${doLive.sroLawRef}. A delay risks ${doLive.dailyShutdownRiskTk} in lost production. Kindly issue the renewal certificate.`,
+                    `${doLive.refNo} এর প্ল্যান্ট যাচাই ${doLive.sroLawRef} অনুযায়ী সম্পন্ন। বিলম্বে দৈনিক ${doLive.dailyShutdownRiskTk} উৎপাদন ক্ষতি হতে পারে। নবায়ন সনদ ইস্যু করার অনুরোধ।`,
                     lang,
                   )}
                 </div>
                 <div style={{ marginTop: '24px', textAlign: 'right' }}>
                   <div style={{ fontWeight: 800 }}>Ahmed Akbar Sobhan</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang)}</div>
+                  {sent
+                    ? <div style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 800, marginTop: '4px' }}>{t('SIGNED', 'স্বাক্ষরিত', lang)}</div>
+                    : <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>{t('DRAFT', 'খসড়া', lang)}</div>}
                 </div>
               </div>
             </div>
             <div className="modal-ft" style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Button variant="ghost" onClick={() => setShowDoLetterModal(null)}>{t('Cancel', 'বাতিল', lang)}</Button>
+              <Button variant="ghost" onClick={() => setShowDoLetterModal(null)}>{t('Close', 'বন্ধ করুন', lang)}</Button>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <Button variant="secondary" icon={<Printer size={13} />} onClick={() => showToast(t('Sent to printer.', 'প্রিন্টারে পাঠানো হয়েছে।', lang), 'info')}>
+                <Button variant="secondary" icon={<Printer size={13} />} onClick={() => printDoLetter(doLive)}>
                   {t('Print', 'প্রিন্ট', lang)}
                 </Button>
-                <Button
-                  variant="gold"
-                  icon={<Send size={14} />}
-                  onClick={() => {
-                    showToast(
-                      caps.canDispatch
-                        ? t(`Signed and sent to ${showDoLetterModal.agency}.`, `${showDoLetterModal.agencyBn}-এ স্বাক্ষর করে পাঠানো হয়েছে।`, lang)
-                        : t("Draft sent to the Chairman's office for signature.", 'স্বাক্ষরের জন্য খসড়া চেয়ারম্যানের দপ্তরে পাঠানো হয়েছে।', lang),
-                      'gold',
-                    );
-                    setShowDoLetterModal(null);
-                  }}
-                >
-                  {caps.canDispatch
-                    ? t('Sign & send', 'স্বাক্ষর করে পাঠান', lang)
-                    : t('Send to Chairman', 'চেয়ারম্যানের কাছে পাঠান', lang)}
+                <Button variant="ghost" icon={<Download size={13} />} onClick={() => downloadVaultDoc(doLive, `${memo.replace(/\//g, '_')}.html`, 'DO Letter')}>
+                  {t('Download', 'ডাউনলোড', lang)}
                 </Button>
+                {!sent && (
+                  <Button variant="gold" icon={<Send size={14} />} onClick={submitDoLetter}>
+                    {caps.canDispatch
+                      ? t('Sign & send', 'স্বাক্ষর করে পাঠান', lang)
+                      : t('Send to Chairman', 'চেয়ারম্যানের কাছে পাঠান', lang)}
+                  </Button>
+                )}
               </div>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
+
+      {stageAction && (
+        <div className="modal-bg" onClick={() => setStageAction(null)}>
+          <div className="modal" style={{ maxWidth: '520px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hd">
+              <h3>
+                {stageAction.kind === 'inspect'
+                  ? t('Record field inspection', 'মাঠ পরিদর্শন লিপিবদ্ধ করুন', lang)
+                  : t('Record the renewal certificate', 'নবায়ন সনদ লিপিবদ্ধ করুন', lang)}
+              </h3>
+              <button type="button" className="modal-close" onClick={() => setStageAction(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              {stageAction.kind === 'inspect' ? (
+                <>
+                  <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: 0 }}>
+                    {t('Write what the inspector found. This is kept on the filing.', 'পরিদর্শক কী পেয়েছেন তা লিখুন। এটি আবেদনের সাথে থাকবে।', lang)}
+                  </p>
+                  <textarea
+                    value={inspectFindings}
+                    onChange={(e) => setInspectFindings(e.target.value)}
+                    rows={5}
+                    style={{ width: '100%', padding: '10px', fontSize: '13px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-1)', background: 'var(--surface-0)' }}
+                    placeholder={t('e.g. Site visit complete. Fire pumps tested. No outstanding findings.', 'যেমন: সরেজমিন পরিদর্শন সম্পন্ন। ফায়ার পাম্প পরীক্ষিত।', lang)}
+                  />
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: 0 }}>
+                    {t('The new certificate will be filed and this permit marked active for 12 months.', 'নতুন সনদ দাখিল হবে এবং লাইসেন্স ১২ মাসের জন্য সক্রিয় হবে।', lang)}
+                  </p>
+                  <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '13px' }}>
+                    <input type="checkbox" checked={certConfirm} onChange={(e) => setCertConfirm(e.target.checked)} />
+                    <span>{t('I have the signed renewal certificate from the agency.', 'সংস্থার স্বাক্ষরিত নবায়ন সনদ হাতে আছে।', lang)}</span>
+                  </label>
+                </>
+              )}
+            </div>
+            <div className="modal-ft" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <Button variant="ghost" onClick={() => setStageAction(null)}>{t('Cancel', 'বাতিল', lang)}</Button>
+              <Button variant="primary" onClick={stageAction.kind === 'inspect' ? confirmInspection : confirmCertificate}>
+                {stageAction.kind === 'inspect'
+                  ? t('Save and move to ministry vetting', 'সংরক্ষণ করে মন্ত্রণালয় ধাপে যান', lang)
+                  : t('Mark renewed & active', 'সক্রিয় ও নবায়িত চিহ্নিত করুন', lang)}
+              </Button>
             </div>
           </div>
         </div>

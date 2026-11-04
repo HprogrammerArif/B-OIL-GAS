@@ -5464,4 +5464,95 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get emErrOpen => 'একটি প্রস্থান ফাইল ইতিমধ্যে খোলা।';
+
+  @override
+  String get moduleDashboards => 'আজ';
+
+  @override
+  String get dbWhat =>
+      'আপনার কী করতে হবে, এবং যে কয়েকটি সংখ্যা সিদ্ধান্ত বদলায়।';
+
+  @override
+  String get dbWhy => 'এই সংখ্যাগুলো লাইভ ফাইল থেকে গোনা, টাইপ করা নয়।';
+
+  @override
+  String get dbNeedsTitle => 'আজ আপনার দরকার';
+
+  @override
+  String get dbActBrief => 'সংক্ষিপ্ত ব্রিফিং পাঠান';
+
+  @override
+  String get dbFieldTitle => 'শিরোনাম';
+
+  @override
+  String get dbFieldBody => 'কী শোনাবেন (২০+ অক্ষর)';
+
+  @override
+  String get dbDoneBrief => 'ব্রিফিং পাঠানো হয়েছে।';
+
+  @override
+  String dbRoiLine(String fleet, String vendor) {
+    return 'ঘোষিত: বহর ৳$fleet, বিক্রেতা ৳$vendor। লাইভ হিসাব নয়।';
+  }
+
+  @override
+  String get moduleChat => 'নেতৃত্ব চ্যাট';
+
+  @override
+  String get chIntro =>
+      'নেতৃত্বের ঘর। বার্তা এই ডিভাইসে থাকে। এন্ড-টু-এন্ড নয়।';
+
+  @override
+  String get chEmpty => 'কোনো আলাপ নেই।';
+
+  @override
+  String get chNoMessages => 'এখনও কোনো বার্তা নেই।';
+
+  @override
+  String get chLocked => 'নিমন্ত্রণে';
+
+  @override
+  String get chDirect => 'একজনকে লিখুন';
+
+  @override
+  String get chHint => 'বার্তা লিখুন';
+
+  @override
+  String get chSend => 'পাঠান';
+
+  @override
+  String get chDeleted => 'বার্তা সরানো হয়েছে।';
+
+  @override
+  String get chSecureNote => 'পথে ও সংরক্ষণে এনক্রিপ্টেড। এন্ড-টু-এন্ড নয়।';
+
+  @override
+  String get chActDirective => 'নির্দেশ দিন';
+
+  @override
+  String get chActAck => 'পেয়েছি';
+
+  @override
+  String get chActDone => 'শেষ হয়েছে';
+
+  @override
+  String get chFieldTitle => 'নির্দেশের শিরোনাম';
+
+  @override
+  String get chFieldBody => 'কী করতে হবে';
+
+  @override
+  String chAckCount(int acks, int needed) {
+    return '$needed জনের মধ্যে $acks জন স্বীকার করেছেন।';
+  }
+
+  @override
+  String get demoPlayEvent => 'পরের লাইভ ঘটনা চালান';
+
+  @override
+  String get demoPlayEventHint =>
+      'নেতৃত্বে একটি বার্তা ও ইনবক্সে একটি নোট পড়ে।';
+
+  @override
+  String get demoPlayEventDone => 'ঘটনা চালানো হয়েছে।';
 }

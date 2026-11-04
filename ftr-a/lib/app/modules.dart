@@ -13,6 +13,18 @@ typedef AppModule = ({
 
 final List<AppModule> builtModules = [
   (
+    key: 'dashboards',
+    icon: Icons.insights_outlined,
+    label: (l10n) => l10n.moduleDashboards,
+    route: AppRoutes.dashboards,
+  ),
+  (
+    key: 'chat',
+    icon: Icons.forum_outlined,
+    label: (l10n) => l10n.moduleChat,
+    route: AppRoutes.chat,
+  ),
+  (
     key: 'attendance',
     icon: Icons.fingerprint,
     label: (l10n) => l10n.moduleAttendance,

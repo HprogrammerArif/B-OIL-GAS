@@ -2967,5 +2967,53 @@
         "type": "String"
       }
     }
+  },
+  "moduleDashboards": "Today",
+  "dbWhat": "What needs you, and the few numbers that change a decision.",
+  "dbWhy": "These figures are counted from the live files, not typed in.",
+  "dbNeedsTitle": "Needs you today",
+  "dbActBrief": "Send a short briefing",
+  "dbFieldTitle": "Title",
+  "dbFieldBody": "What should they hear (20+ characters)",
+  "dbDoneBrief": "Briefing sent.",
+  "dbRoiLine": "Declared: fleet ৳{fleet}, vendors ৳{vendor}. Not a live calculation.",
+  "moduleChat": "Leadership chat",
+  "chIntro": "Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.",
+  "chEmpty": "No conversations.",
+  "chNoMessages": "No messages yet.",
+  "chLocked": "Invite only",
+  "chDirect": "Message one person",
+  "chHint": "Write a message",
+  "chSend": "Send",
+  "chDeleted": "Message removed.",
+  "chSecureNote": "Encrypted in transit and at rest. Not end-to-end.",
+  "chActDirective": "Issue a directive",
+  "chActAck": "I have it",
+  "chActDone": "Mark done",
+  "chFieldTitle": "Directive title",
+  "chFieldBody": "What must happen",
+  "chAckCount": "{acks} of {needed} have acknowledged.",
+  "demoPlayEvent": "Play next live event",
+  "demoPlayEventHint": "Drops a leadership message and an inbox ping.",
+  "demoPlayEventDone": "Event played.",
+  "@dbRoiLine": {
+    "placeholders": {
+      "fleet": {
+        "type": "String"
+      },
+      "vendor": {
+        "type": "String"
+      }
+    }
+  },
+  "@chAckCount": {
+    "placeholders": {
+      "acks": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
   }
 }

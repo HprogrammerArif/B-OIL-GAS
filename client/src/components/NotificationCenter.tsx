@@ -106,6 +106,24 @@ export default function NotificationCenter({
         });
       }
 
+      if (can('compliance:dispatch_letter')) {
+        licenses
+          .filter((l) => l.doLetterStatus === 'awaiting_signature')
+          .forEach((l) => {
+            list.push({
+              id: `do-sign-${l.id}`,
+              category: 'approval',
+              title: `DO letter waiting for your signature`,
+              titleBn: 'ডিও লেটারে আপনার স্বাক্ষর বাকি',
+              desc: `${l.title} · ${l.doLetterMemo ?? l.refNo}`,
+              descBn: `${l.titleBn} · ${l.doLetterMemo ?? l.refNo}`,
+              time: t('Action needed', 'পদক্ষেপ প্রয়োজন', lang),
+              unread: !readIds.has(`do-sign-${l.id}`),
+              targetView: 'compliance',
+            });
+          });
+      }
+
       if (can('compliance:view')) {
         const nearest = licenses
           .filter((l) => l.stage < 5 && l.daysLeft <= 30)

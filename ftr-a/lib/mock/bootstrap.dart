@@ -14,6 +14,7 @@ import 'package:bogcl_oneops/mock/seed/assets.dart';
 import 'package:bogcl_oneops/mock/seed/attendance.dart';
 import 'package:bogcl_oneops/mock/seed/audit.dart';
 import 'package:bogcl_oneops/mock/seed/bus.dart';
+import 'package:bogcl_oneops/mock/seed/chat.dart';
 import 'package:bogcl_oneops/mock/seed/claims.dart';
 import 'package:bogcl_oneops/mock/seed/fleet.dart';
 import 'package:bogcl_oneops/mock/seed/incidents.dart';
@@ -52,6 +53,7 @@ final List<Seeder> mockSeeders = [
   seedAssets,
   seedLicences,
   seedWorkforce,
+  seedChat,
 ];
 
 /// The persisted mock store. Provided by [bootstrapMock] at startup.

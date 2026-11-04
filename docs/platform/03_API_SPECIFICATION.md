@@ -581,6 +581,13 @@ Module dirs `dashboards`, `briefings`. Models `VoiceBriefing`, `VoiceBriefingLis
 
 `GET /dashboards/widgets/inner-circle.roster` (permission `dashboards:inner-circle`) returns, for each member of channel `executive-leadership` (or `Setting dashboards.innerCircleUserIds`): `{ user, presence (from `/presence`), todayStatus: "PRESENT"|"ON_APPROVED_LEAVE"|"SICK"|"UNINFORMED_ABSENT"|"IN_MEETING"|"FIELD_DUTY"|"OFF", leave: { refNo, leaveType, isInformed } | null, location?: string }`. `UNINFORMED_ABSENT` = no punch today, no approved/pending `LeaveRequest`, shift started > grace; `SICK` = approved leave of type `SL`; `IN_MEETING` from presence.
 
+### 8.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/dashboard_engine.dart`) implements a subset with these differences:
+
+- `GET /dashboards/me` returns `{ layout, needs[], kpis[], extras[], canBrief }` computed from live collections (BR-02-04/09). Layout is the highest role: CHAIRMAN → PLANT_GM → HR_ADMIN → TRANSPORT_ADMIN → HOD → DRIVER → EMPLOYEE. ROI figures are the declared `DashboardPolicy.roi` constants (BR-02-07). Briefings are transcript-only (`POST /briefings` publishes immediately). No SCADA / DCS / LOTO adapter widgets.
+- Demo menu **Play next live event** (`POST /demo/events/next`) writes a leadership chat line and an inbox ping.
+
 ---
 
 ## 9. MOD-03 — Note-Sheets & E-Sign
@@ -1337,6 +1344,13 @@ Module dir `chat`. Models `ChatChannel`, `ChatMember`, `ChatMessage`, `ChatReadR
 | POST | `/chat/calls` | member | `{ channelId \| userId }` → returns a signalling room token for the WebRTC/voice adapter (**stub in v1**: returns `NOT_IMPLEMENTED` `501` **(extension code)** until the calls provider is selected). |
 
 Retention job deletes messages older than `retentionDays` (hard delete + file objects). Chat is excluded from `AuditLog` (doc 02 §1) but channel membership and directive actions are audited.
+
+### 19.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/chat_engine.dart`) implements a subset with these differences:
+
+- Four seeded rooms: Leadership (locked), Plant operations, Finance, Permits (locked). Members are Chairman, Plant GM, HR and Finance HOD only. Employee, driver and transport personas have no `chat:use`. Copy never claims end-to-end encryption (BR-15-05/17).
+- Send, read, react, DM, issue/ack/execute directive. A send in Plant operations gets a scripted Plant GM reply. Voice, files, calls, retention job and channel admin UI are deferred.
 
 ---
 

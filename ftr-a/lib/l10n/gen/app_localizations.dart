@@ -9965,6 +9965,174 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'An exit file is already open.'**
   String get emErrOpen;
+
+  /// No description provided for @moduleDashboards.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get moduleDashboards;
+
+  /// No description provided for @dbWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs you, and the few numbers that change a decision.'**
+  String get dbWhat;
+
+  /// No description provided for @dbWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'These figures are counted from the live files, not typed in.'**
+  String get dbWhy;
+
+  /// No description provided for @dbNeedsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs you today'**
+  String get dbNeedsTitle;
+
+  /// No description provided for @dbActBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a short briefing'**
+  String get dbActBrief;
+
+  /// No description provided for @dbFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get dbFieldTitle;
+
+  /// No description provided for @dbFieldBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What should they hear (20+ characters)'**
+  String get dbFieldBody;
+
+  /// No description provided for @dbDoneBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefing sent.'**
+  String get dbDoneBrief;
+
+  /// No description provided for @dbRoiLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Declared: fleet ৳{fleet}, vendors ৳{vendor}. Not a live calculation.'**
+  String dbRoiLine(String fleet, String vendor);
+
+  /// No description provided for @moduleChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership chat'**
+  String get moduleChat;
+
+  /// No description provided for @chIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.'**
+  String get chIntro;
+
+  /// No description provided for @chEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations.'**
+  String get chEmpty;
+
+  /// No description provided for @chNoMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet.'**
+  String get chNoMessages;
+
+  /// No description provided for @chLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite only'**
+  String get chLocked;
+
+  /// No description provided for @chDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Message one person'**
+  String get chDirect;
+
+  /// No description provided for @chHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a message'**
+  String get chHint;
+
+  /// No description provided for @chSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chSend;
+
+  /// No description provided for @chDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Message removed.'**
+  String get chDeleted;
+
+  /// No description provided for @chSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted in transit and at rest. Not end-to-end.'**
+  String get chSecureNote;
+
+  /// No description provided for @chActDirective.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue a directive'**
+  String get chActDirective;
+
+  /// No description provided for @chActAck.
+  ///
+  /// In en, this message translates to:
+  /// **'I have it'**
+  String get chActAck;
+
+  /// No description provided for @chActDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark done'**
+  String get chActDone;
+
+  /// No description provided for @chFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Directive title'**
+  String get chFieldTitle;
+
+  /// No description provided for @chFieldBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What must happen'**
+  String get chFieldBody;
+
+  /// No description provided for @chAckCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{acks} of {needed} have acknowledged.'**
+  String chAckCount(int acks, int needed);
+
+  /// No description provided for @demoPlayEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Play next live event'**
+  String get demoPlayEvent;
+
+  /// No description provided for @demoPlayEventHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drops a leadership message and an inbox ping.'**
+  String get demoPlayEventHint;
+
+  /// No description provided for @demoPlayEventDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Event played.'**
+  String get demoPlayEventDone;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

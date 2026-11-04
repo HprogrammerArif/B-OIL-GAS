@@ -21,6 +21,9 @@ String notificationCategory(String type) {
     'LEAVE_REQ',
     'EXIT_',
     'CLEARANCE_',
+    'BRIEFING_',
+    'DIRECTIVE_',
+    'CHAT_',
   ];
   const safety = [
     'INCIDENT_',

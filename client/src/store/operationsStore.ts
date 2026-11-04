@@ -59,6 +59,30 @@ export interface LicenseCard {
   focalEmpId: string;
   site: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ' | 'TERMINAL_CTG';
   fundStatus: 'not_required' | 'pending' | 'approved';
+  doLetterStatus: 'none' | 'awaiting_signature' | 'dispatched';
+  doLetterMemo?: string;
+  doLetterChannel?: 'enothi' | 'courier' | 'liaison';
+  doLetterAt?: string;
+  doLetterBy?: string;
+  doLetterParcelRef?: string;
+  inspectionFindings?: string;
+  events: LicenseEvent[];
+}
+
+export interface LicenseEvent {
+  id: string;
+  at: string;
+  actor: string;
+  text: string;
+  textBn: string;
+}
+
+export function normalizeLicense(lic: LicenseCard): LicenseCard {
+  return {
+    ...lic,
+    doLetterStatus: lic.doLetterStatus ?? 'none',
+    events: lic.events ?? [],
+  };
 }
 
 const INITIAL_LICENSES: LicenseCard[] = [
@@ -100,6 +124,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0001',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'EXP-KER-01',
@@ -140,6 +166,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0012',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'CAL-VALVE-08',
@@ -176,6 +204,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0012',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'pending',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'DOE-ECC-04',
@@ -215,6 +245,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0012',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'FSCD-FIRE-09',
@@ -254,6 +286,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0012',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'BSTI-BIT-60',
@@ -292,6 +326,8 @@ const INITIAL_LICENSES: LicenseCard[] = [
     focalEmpId: 'EMP-0012',
     site: 'PLANT_KERANIGANJ',
     fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
 ];
 
@@ -2026,7 +2062,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 3;
+const PERSIST_VERSION = 4;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
@@ -2044,6 +2080,7 @@ class OperationsStore {
   constructor() {
     const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
     if (saved) Object.assign(this, saved);
+    this.licenses = this.licenses.map(normalizeLicense);
   }
 
   subscribe(listener: () => void): () => void {
@@ -2084,16 +2121,17 @@ class OperationsStore {
     const next = typeof updater === 'function' ? updater(this.licenses) : updater;
     // Automatically normalize Stage 5 (Renewed & Active) permits so they never show urgent expiring alerts!
     this.licenses = next.map((lic) => {
-      if (lic.stage === 5 && lic.daysLeft < 60) {
+      const n = normalizeLicense(lic);
+      if (n.stage === 5 && n.daysLeft < 60) {
         return {
-          ...lic,
+          ...n,
           daysLeft: 365,
           lastInspection: SYSTEM_TODAY,
           certificateValidity: '29 Oct 2026 – 28 Oct 2027 (Renewed)',
-          auditChecklist: lic.auditChecklist.map((c) => ({ ...c, passed: true })),
+          auditChecklist: n.auditChecklist.map((c) => ({ ...c, passed: true })),
         };
       }
-      return lic;
+      return n;
     });
     this.notify();
   }
