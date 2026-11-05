@@ -142,6 +142,9 @@ class _SearchSheetState extends ConsumerState<_SearchSheet> {
     'parcel' => Icons.inventory_2_outlined,
     'visit' => Icons.badge_outlined,
     'notesheet' => Icons.description_outlined,
+    'fleet' => Icons.directions_car_outlined,
+    'bus' => Icons.directions_bus_outlined,
+    'licence' => Icons.verified_outlined,
     _ => Icons.search,
   };
 }

@@ -232,9 +232,8 @@
   user-select: none !important;
 }
 
-.ns-file-list.is-dragging * {
-  user-select: none !important;
-  pointer-events: none !important;
+.ns-file-list.is-dragging .ns-file {
+  cursor: grabbing;
 }
 
 /* Custom sleek scrollbar for horizontal & vertical modes */
@@ -329,13 +328,13 @@
   .ns-file-list {
     flex-direction: row;
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding: 2px 28px 10px;
     scroll-snap-type: x proximity;
     cursor: grab;
     -webkit-overflow-scrolling: touch;
   }
   .ns-file-list > li { flex: 0 0 min(280px, 78%); scroll-snap-align: start; }
-  .ns-file { height: 100%; }
+  .ns-file { height: 100%; cursor: pointer; }
   .ns-rail-top { flex-direction: row; flex-wrap: wrap; align-items: center; }
   .ns-search { flex: 1 1 220px; }
 }

@@ -44,6 +44,24 @@ List<RouteDef> fleetRoutes() => [
       'suggestedCapacityClass': est.$4,
     });
   }, permission: ['fleet:request']),
+  RouteDef('POST', '/fleet/vehicles', (ctx) async {
+    final rec = FleetEngine.registerVehicle(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.bodyObject(),
+    );
+    await ctx.store.commit();
+    return ok(rec, status: 201);
+  }, permission: ['fleet:dispatch']),
+  RouteDef('POST', '/fleet/drivers', (ctx) async {
+    final rec = FleetEngine.enrolDriver(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.bodyObject(),
+    );
+    await ctx.store.commit();
+    return ok(rec, status: 201);
+  }, permission: ['fleet:dispatch']),
   RouteDef('GET', '/fleet/vehicles', (ctx) async {
     ctx.requireAuth();
     return ok([

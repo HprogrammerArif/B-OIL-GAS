@@ -164,6 +164,8 @@
 .inc-steps small { display: block; margin-top: 4px; font-size: 11px; color: var(--text-3); }
 .inc-next { display: flex; align-items: flex-start; gap: 6px; margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--text-1); }
 .inc-next svg { flex-shrink: 0; margin-top: 3px; color: var(--text-3); }
+.inc-waiting { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font-size: 12.5px; color: var(--text-2); }
+.inc-waiting svg { flex-shrink: 0; margin-top: 2px; color: var(--text-3); }
 .inc-fixes { margin-top: 10px; }
 .inc-fixes-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); margin-bottom: 4px; }
 .inc-fixes-head b.done { color: var(--status-success-text); }

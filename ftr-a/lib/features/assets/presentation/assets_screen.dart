@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
+import 'package:bogcl_oneops/features/assets/data/asset_repository.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_providers.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_ui.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
@@ -10,6 +12,7 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
+import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +67,16 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.moduleAssets)),
+      appBar: AppBar(
+        title: Text(l10n.moduleAssets),
+        actions: [
+          IconButton(
+            tooltip: l10n.asAsk,
+            onPressed: () => unawaited(_ask(context)),
+            icon: const Icon(Icons.shopping_bag_outlined),
+          ),
+        ],
+      ),
       floatingActionButton: canAdd
           ? FloatingActionButton.extended(
               onPressed: () => unawaited(context.push(AppRoutes.assetNew)),
@@ -119,7 +131,19 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen> {
                           },
                         );
                         if (tag != null && tag.trim().isNotEmpty && mounted) {
-                          setState(() => _query = tag.trim());
+                          final q = tag.trim();
+                          setState(() => _query = q);
+                          final found = await ref.read(
+                            assetsProvider(view: 'all', query: q).future,
+                          );
+                          if (!mounted || found.isEmpty) return;
+                          final exact = found.where(
+                            (e) => e.tag.toLowerCase() == q.toLowerCase(),
+                          );
+                          final id =
+                              (exact.isEmpty ? found.first : exact.first).id;
+                          if (!context.mounted) return;
+                          unawaited(context.push(AppRoutes.assetDetail(id)));
                         }
                       },
                     ),
@@ -221,5 +245,56 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _ask(BuildContext context) async {
+    final l10n = context.l10n;
+    final name = TextEditingController();
+    final why = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.asAsk),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: name,
+              decoration: InputDecoration(labelText: l10n.asAskName),
+            ),
+            TextField(
+              controller: why,
+              decoration: InputDecoration(labelText: l10n.asAskWhy),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.commonSave),
+          ),
+        ],
+      ),
+    );
+    final n = name.text.trim();
+    final w = why.text.trim();
+    name.dispose();
+    why.dispose();
+    if (ok != true || !mounted) return;
+    try {
+      await ref.read(assetRepositoryProvider).requisition({
+        'name': n,
+        'reason': w,
+      });
+      if (!context.mounted) return;
+      AppToast.show(context, l10n.asAskDone, tone: StatusTone.success);
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
   }
 }

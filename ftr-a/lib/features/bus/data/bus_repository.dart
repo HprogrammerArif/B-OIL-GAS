@@ -113,6 +113,23 @@ class BusRepository {
     }
   }
 
+  Future<void> registerBus(Map<String, Object?> body) =>
+      _adminPost('/bus/routes', body);
+
+  Future<void> reassignBus(String routeId, String busNo) =>
+      _adminPost('/bus/routes/$routeId/bus', {'busNo': busNo});
+
+  Future<Map<String, Object?>> seatMap(String routeId) async {
+    try {
+      final res = await _dio.get<Object?>('/bus/routes/$routeId');
+      final admin = Envelope.object(res.data)['admin'];
+      if (admin is Map) return Map<String, Object?>.from(admin);
+      return const {};
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> requestSwap(String routeId, int seatNo) async {
     try {
       await _dio.post<Object?>(

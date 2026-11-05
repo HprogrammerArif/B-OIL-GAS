@@ -17,7 +17,7 @@ import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
   AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX,
-  CheckCircle2,
+  CheckCircle2, Users,
 } from 'lucide-react';
 
 export const PLANT_ZONES = [
@@ -548,58 +548,69 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       lang,
     );
 
-  /** Plain sentence per card: where the incident is and what the viewer should do. */
+  /** Plain sentence per card: where the incident is, who still owes work, and what you do. */
   const nextStep = (inc: IncidentItem): string => {
     const stage = inc.workflowStage || (inc.capaStatus === 'closed' ? 'closed' : 'under_investigation');
     const items = inc.capaItems || [];
-    const done = items.filter((c) => c.status === 'completed').length;
+    const open = items.filter((c) => c.status !== 'completed');
+    const done = items.length - open.length;
+    const owners = [...new Set(open.map((c) => c.owner).filter(Boolean))];
+    const waiting = owners.length > 0 ? owners.join(', ') : inc.investigationLead;
     const lead = mode === 'investigate';
     switch (stage) {
       case 'reported':
       case 'triaged':
         return lead
           ? t('New report. Check the risk and start finding the cause.', 'নতুন রিপোর্ট। ঝুঁকি যাচাই করে কারণ খোঁজা শুরু করুন।', lang)
-          : t('Waiting for the safety team to check it. Nothing for you to do.', 'নিরাপত্তা দলের যাচাইয়ের অপেক্ষায়। আপনার কিছু করার নেই।', lang);
+          : t('Waiting for the plant safety team to check it. Nothing for you to do.', 'প্ল্যান্ট নিরাপত্তা দলের যাচাইয়ের অপেক্ষায়। আপনার কিছু করার নেই।', lang);
       case 'under_investigation':
         return lead
-          ? t('Find the root cause, then set the fixes.', 'মূল কারণ খুঁজে বের করে সমাধান ঠিক করুন।', lang)
-          : t('The safety team is finding the cause.', 'নিরাপত্তা দল কারণ খুঁজছে।', lang);
+          ? t('Find the root cause, then assign the people who will fix it.', 'মূল কারণ খুঁজে বের করে যারা সমাধান করবেন তাদের দায়িত্ব দিন।', lang)
+          : inc.investigationLead
+            ? t(`${inc.investigationLead} is finding the cause.`, `${inc.investigationLead} কারণ খুঁজছেন।`, lang)
+            : t('The safety team is finding the cause.', 'নিরাপত্তা দল কারণ খুঁজছে।', lang);
       case 'capa_execution':
-        return lead
-          ? done === items.length && items.length > 0
+        if (done === items.length && items.length > 0) {
+          return lead
             ? t('All fixes are done. Verify on site and close the incident.', 'সব সমাধান শেষ। সাইটে যাচাই করে ঘটনাটি বন্ধ করুন।', lang)
-            : t(`${done} of ${items.length} fixes done. Follow up on the rest.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ। বাকিগুলো অনুসরণ করুন।`, lang)
-          : t(`${done} of ${items.length} fixes are done.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ।`, lang);
+            : t('All fixes are done. Waiting for safety and the plant manager to close it.', 'সব সমাধান শেষ। নিরাপত্তা ও প্ল্যান্ট ম্যানেজারের বন্ধ করার অপেক্ষায়।', lang);
+        }
+        return waiting
+          ? t(`${done} of ${items.length} fixes done. Waiting on ${waiting}.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ। অপেক্ষা: ${waiting}।`, lang)
+          : t(`${done} of ${items.length} fixes done.`, `${bn(items.length)}টির মধ্যে ${bn(done)}টি সমাধান শেষ।`, lang);
       default:
         return t('Closed and verified. Nothing more to do.', 'সমাপ্ত ও যাচাইকৃত। আর কিছু করার নেই।', lang);
     }
   };
 
+  const canReport = mode !== 'oversight';
+
   return (
     <div>
-      <PageHeader
-        title={mode === 'reporter' ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang) : t('Safety and incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
-        description={mode === 'investigate'
-          ? t('Check new reports, find the root cause and make sure each fix is done before closing.', 'নতুন রিপোর্ট যাচাই করুন, মূল কারণ খুঁজুন এবং বন্ধ করার আগে প্রতিটি সমাধান নিশ্চিত করুন।', lang)
-          : mode === 'oversight'
-            ? t('Every reported incident and where its investigation stands.', 'সব রিপোর্টকৃত ঘটনা ও তদন্তের অবস্থা।', lang)
-            : t('Report a hazard or incident and follow what happens to it.', 'বিপদ বা দুর্ঘটনা রিপোর্ট করুন এবং তার অগ্রগতি দেখুন।', lang)}
-        actions={
-          <>
-            {canInvestigate && (
-              <Button variant="outline-danger" icon={<Siren size={14} />} onClick={() => setShowEmergencyModal(true)}>
-                {t('Emergency alert', 'জরুরি সতর্কবার্তা', lang)}
-              </Button>
-            )}
-            <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
-              {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
-            </Button>
-            <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setShowLogWizard(true); }}>
-              {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
-            </Button>
-          </>
-        }
-      />
+      {(canReport || canInvestigate) && (
+        <PageHeader
+          title={mode === 'reporter' ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang) : t('Safety and incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
+          actions={
+            <>
+              {canInvestigate && (
+                <Button variant="outline-danger" icon={<Siren size={14} />} onClick={() => setShowEmergencyModal(true)}>
+                  {t('Emergency alert', 'জরুরি সতর্কবার্তা', lang)}
+                </Button>
+              )}
+              {canReport && (
+                <>
+                  <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
+                    {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
+                  </Button>
+                  <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setShowLogWizard(true); }}>
+                    {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
+                  </Button>
+                </>
+              )}
+            </>
+          }
+        />
+      )}
 
       <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
         {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
@@ -741,6 +752,9 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
             const typeMeta = INCIDENT_TYPE_META[inc.incidentType] || INCIDENT_TYPE_META.near_miss;
             const injured = (inc.personsInvolved || []).filter((p) => p.involvementType === 'injured');
             const capaDone = items.length > 0 && items.every((c) => c.status === 'completed');
+            const openFixes = items.filter((c) => c.status !== 'completed');
+            const shownFixes = isExpanded ? items : openFixes;
+            const waitingOn = [...new Set(openFixes.map((c) => c.owner).filter(Boolean))];
 
             return (
               <div key={inc.id} className={`incident-card l${inc.level}`}>
@@ -787,6 +801,19 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
                 <p className="inc-next"><ArrowRight size={13} /> {nextStep(inc)}</p>
 
+                {waitingOn.length > 0 && (
+                  <p className="inc-waiting">
+                    <Users size={13} />
+                    <span>{t(`Responsible now: ${waitingOn.join(' · ')}`, `এখন দায়িত্বে: ${waitingOn.join(' · ')}`, lang)}</span>
+                  </p>
+                )}
+                {!waitingOn.length && stage === 'under_investigation' && inc.investigationLead && (
+                  <p className="inc-waiting">
+                    <Users size={13} />
+                    <span>{t(`Investigator: ${inc.investigationLead}`, `তদন্তকারী: ${inc.investigationLead}`, lang)}</span>
+                  </p>
+                )}
+
                 {items.length > 0 && (
                   <div className="inc-fixes">
                     <div className="inc-fixes-head">
@@ -794,15 +821,17 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                       <b className={capaPct === 100 ? 'done' : ''}>{capaPct}%</b>
                     </div>
                     <div className="hs-bar" aria-hidden><span style={{ width: `${capaPct}%`, background: capaPct === 100 ? 'var(--status-success-solid)' : undefined }} /></div>
-                    {isExpanded && (
+                    {shownFixes.length > 0 && (
                       <ul className="inc-fix-list">
-                        {items.map((c) => (
+                        {shownFixes.map((c) => (
                           <li key={c.id} className={c.status === 'completed' ? 'done' : ''}>
                             <span>
                               <strong>{c.description}</strong>
                               <small>
+                                {t('Assigned to', 'দায়িত্ব', lang)} {c.owner}
+                                {' · '}
                                 {t(c.actionType === 'immediate_containment' ? 'Immediate' : c.actionType === 'preventive' ? 'Prevent repeat' : 'Correct', c.actionType === 'immediate_containment' ? 'তাৎক্ষণিক' : c.actionType === 'preventive' ? 'পুনরাবৃত্তি রোধ' : 'সংশোধন', lang)}
-                                {' · '}{c.owner}{' · '}{t('due', 'সময়সীমা', lang)} {c.dueDate}
+                                {' · '}{t('due', 'সময়সীমা', lang)} {c.dueDate}
                                 {c.verificationEvidence ? ` · ${c.verificationEvidence}` : ''}
                               </small>
                             </span>
@@ -813,7 +842,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                                 {t('Mark done', 'শেষ করুন', lang)}
                               </Button>
                             ) : (
-                              <StatusPill tone="warn">{t('Open', 'চলমান', lang)}</StatusPill>
+                              <StatusPill tone="warn">{t('Still open', 'এখনো চলমান', lang)}</StatusPill>
                             )}
                           </li>
                         ))}
@@ -834,9 +863,9 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
                 <div className="inc-foot">
                   <div className="inc-foot-left">
-                    {items.length > 0 && (
+                    {items.some((c) => c.status === 'completed') && (
                       <Button variant="ghost" size="sm" icon={isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />} onClick={() => setExpandedIncidentId(isExpanded ? null : inc.id)}>
-                        {isExpanded ? t('Hide fixes', 'সমাধান লুকান', lang) : t(`Show fixes (${items.length})`, `সমাধান দেখুন (${bn(items.length)})`, lang)}
+                        {isExpanded ? t('Hide finished fixes', 'শেষ সমাধান লুকান', lang) : t(`Show finished (${completedCount})`, `শেষ দেখুন (${bn(completedCount)})`, lang)}
                       </Button>
                     )}
                     <details className="inc-ref">

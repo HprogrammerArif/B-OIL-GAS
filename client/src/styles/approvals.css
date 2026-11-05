@@ -25,7 +25,7 @@
 
 
 /* ─── One-sentence verdict ──────────────────────────────────────────────── */
-.apv-verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 14px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
+.apv-verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin: 0 0 12px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
 .apv-verdict p { margin: 0; flex: 1 1 260px; font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--text-1); }
 .apv-verdict-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-2); color: var(--text-2); }
 .apv-verdict.urgent { border-color: color-mix(in srgb, var(--status-warning) 45%, var(--border-1)); background: color-mix(in srgb, var(--status-warning) 8%, var(--surface-1)); }

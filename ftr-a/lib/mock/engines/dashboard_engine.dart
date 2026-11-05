@@ -609,6 +609,7 @@ abstract final class DashboardEngine {
                     '${_activeStaff(store, siteId: s.str('id'))} on the books',
                 'bodyBn':
                     '${_activeStaff(store, siteId: s.str('id'))} জন খাতায়',
+                'route': '/home/people',
               },
           ],
         });

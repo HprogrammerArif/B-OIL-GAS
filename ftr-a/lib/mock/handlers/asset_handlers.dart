@@ -68,6 +68,15 @@ List<RouteDef> assetRoutes() => [
         });
     return paginate([for (final i in items) _out(ctx, i)], ctx.query);
   }, permission: _read),
+  RouteDef('POST', '/assets/requisitions', (ctx) async {
+    final rec = AssetEngine.requisition(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.bodyObject(),
+    );
+    await ctx.store.commit();
+    return ok(rec, status: 201);
+  }, permission: ['assets:read']),
   RouteDef('POST', '/assets', (ctx) async {
     final rec = AssetEngine.register(
       ctx.store,

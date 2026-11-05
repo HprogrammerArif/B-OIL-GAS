@@ -34,6 +34,7 @@
   "navMore": "More",
   "navAttendance": "Attendance",
   "navApprovals": "Approvals",
+  "navChat": "Chat",
   "homeSeeAll": "See all",
   "homePrimaryEmployee": "Your day at work",
   "homePrimaryDriver": "Your trip",
@@ -48,6 +49,70 @@
   "homeActApprovals": "Open approvals",
   "homeActAnnounce": "Send a notice",
   "homeActIncidents": "Open incidents",
+  "homeFilesWaiting": "Files waiting for you",
+  "homeFilesClear": "Nothing is waiting. You are clear.",
+  "homeLeadersOnline": "Leadership rooms",
+  "homeRoomQuiet": "No new messages",
+  "homeUnread": "{count} new",
+  "@homeUnread": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeReturnReason": "Why are you sending this back?",
+  "homePlayBriefing": "Play briefing",
+  "homeBriefingLeft": "{seconds}s",
+  "@homeBriefingLeft": {
+    "placeholders": {
+      "seconds": { "type": "int" }
+    }
+  },
+  "homeToday": "Today",
+  "homeNotPunched": "You have not punched in yet.",
+  "homePunchedAt": "Punched in at {time}",
+  "@homePunchedAt": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "homeLeaveLeft": "{days} days left",
+  "@homeLeaveLeft": {
+    "placeholders": {
+      "days": { "type": "String" }
+    }
+  },
+  "homeGatePass": "Ask for a gate pass",
+  "homeLocks": "Locks still on",
+  "homeLocksClear": "No machine is locked out.",
+  "homeReleaseBatch": "Release",
+  "homeOpen": "Open",
+  "busRegister": "Register a bus",
+  "busReassign": "Move a bus",
+  "busSeatMap": "Seat map",
+  "busFieldCode": "Route code",
+  "busFieldName": "Route name",
+  "busFieldPlate": "Bus number",
+  "busSaved": "Saved",
+  "busSeatsFree": "{count} seats free",
+  "@busSeatsFree": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "flRegisterCar": "Register a car",
+  "flEnrolDriver": "Enrol a driver",
+  "flFieldPlate": "Plate",
+  "flFieldType": "Type (SEDAN, MICROBUS)",
+  "flFieldEmp": "Employee code",
+  "flFieldDriverCode": "Driver code",
+  "flSaved": "Saved",
+  "asAsk": "Ask for equipment",
+  "asAskName": "What do you need?",
+  "asAskWhy": "Why",
+  "asAskDone": "Request sent",
+  "chConfirmAck": "Confirm this directive",
+  "chConfirmDone": "Mark this directive done",
+  "chConfirmBody": "This is recorded on the directive. You cannot undo it here.",
   "moreMyWork": "My work",
   "moreOperations": "Operations",
   "moreCompany": "Company",
@@ -2998,12 +3063,14 @@
   "dbRoiLine": "Declared: fleet ৳{fleet}, vendors ৳{vendor}. Not a live calculation.",
   "moduleChat": "Leadership chat",
   "chIntro": "Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.",
-  "chEmpty": "No conversations.",
+  "chEmptyTitle": "No rooms yet",
+  "chEmpty": "Message a colleague to start one.",
   "chNoMessages": "No messages yet.",
   "chLocked": "Invite only",
   "chDirect": "Message one person",
   "chHint": "Write a message",
   "chSend": "Send",
+  "chReact": "React",
   "chDeleted": "Message removed.",
   "chSecureNote": "Encrypted in transit and at rest. Not end-to-end.",
   "chActDirective": "Issue a directive",

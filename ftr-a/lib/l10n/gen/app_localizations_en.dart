@@ -108,6 +108,9 @@ class AppL10nEn extends AppL10n {
   String get navApprovals => 'Approvals';
 
   @override
+  String get navChat => 'Chat';
+
+  @override
   String get homeSeeAll => 'See all';
 
   @override
@@ -148,6 +151,134 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get homeActIncidents => 'Open incidents';
+
+  @override
+  String get homeFilesWaiting => 'Files waiting for you';
+
+  @override
+  String get homeFilesClear => 'Nothing is waiting. You are clear.';
+
+  @override
+  String get homeLeadersOnline => 'Leadership rooms';
+
+  @override
+  String get homeRoomQuiet => 'No new messages';
+
+  @override
+  String homeUnread(int count) {
+    return '$count new';
+  }
+
+  @override
+  String get homeReturnReason => 'Why are you sending this back?';
+
+  @override
+  String get homePlayBriefing => 'Play briefing';
+
+  @override
+  String homeBriefingLeft(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String get homeToday => 'Today';
+
+  @override
+  String get homeNotPunched => 'You have not punched in yet.';
+
+  @override
+  String homePunchedAt(String time) {
+    return 'Punched in at $time';
+  }
+
+  @override
+  String homeLeaveLeft(String days) {
+    return '$days days left';
+  }
+
+  @override
+  String get homeGatePass => 'Ask for a gate pass';
+
+  @override
+  String get homeLocks => 'Locks still on';
+
+  @override
+  String get homeLocksClear => 'No machine is locked out.';
+
+  @override
+  String get homeReleaseBatch => 'Release';
+
+  @override
+  String get homeOpen => 'Open';
+
+  @override
+  String get busRegister => 'Register a bus';
+
+  @override
+  String get busReassign => 'Move a bus';
+
+  @override
+  String get busSeatMap => 'Seat map';
+
+  @override
+  String get busFieldCode => 'Route code';
+
+  @override
+  String get busFieldName => 'Route name';
+
+  @override
+  String get busFieldPlate => 'Bus number';
+
+  @override
+  String get busSaved => 'Saved';
+
+  @override
+  String busSeatsFree(int count) {
+    return '$count seats free';
+  }
+
+  @override
+  String get flRegisterCar => 'Register a car';
+
+  @override
+  String get flEnrolDriver => 'Enrol a driver';
+
+  @override
+  String get flFieldPlate => 'Plate';
+
+  @override
+  String get flFieldType => 'Trip type';
+
+  @override
+  String get flFieldEmp => 'Employee code';
+
+  @override
+  String get flFieldDriverCode => 'Driver code';
+
+  @override
+  String get flSaved => 'Saved';
+
+  @override
+  String get asAsk => 'Ask for equipment';
+
+  @override
+  String get asAskName => 'What do you need?';
+
+  @override
+  String get asAskWhy => 'Why';
+
+  @override
+  String get asAskDone => 'Request sent';
+
+  @override
+  String get chConfirmAck => 'Confirm this directive';
+
+  @override
+  String get chConfirmDone => 'Mark this directive done';
+
+  @override
+  String get chConfirmBody =>
+      'This is recorded on the directive. You cannot undo it here.';
 
   @override
   String get moreMyWork => 'My work';
@@ -2037,9 +2168,6 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get busErrAlreadyWaiting => 'You are already on a waitlist.';
-
-  @override
-  String get busSeatMap => 'Seat map';
 
   @override
   String get busLegendTaken => 'Taken';
@@ -4072,9 +4200,6 @@ class AppL10nEn extends AppL10n {
   String get flFieldDest => 'Where you are going';
 
   @override
-  String get flFieldType => 'Trip type';
-
-  @override
   String get flFieldPax => 'How many people';
 
   @override
@@ -5584,7 +5709,10 @@ class AppL10nEn extends AppL10n {
       'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.';
 
   @override
-  String get chEmpty => 'No conversations.';
+  String get chEmptyTitle => 'No rooms yet';
+
+  @override
+  String get chEmpty => 'Message a colleague to start one.';
 
   @override
   String get chNoMessages => 'No messages yet.';
@@ -5600,6 +5728,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get chSend => 'Send';
+
+  @override
+  String get chReact => 'React';
 
   @override
   String get chDeleted => 'Message removed.';

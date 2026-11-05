@@ -48,8 +48,9 @@ abstract final class AppRoutes {
   static const licenceNew = '/home/licences/new';
   static String licenceDetail(String id) => '/home/licences/$id';
   static const dashboards = '/home/dashboards';
-  static const chat = '/home/chat';
-  static String chatThread(String id) => '/home/chat/$id';
+  static const chat = '/chat';
+  static String chatThread(String id) => '/chat/$id';
+  static const chatLegacy = '/home/chat';
   static const people = '/home/people';
   static const peopleNew = '/home/people/new';
   static String peopleDetail(String id) => '/home/people/$id';

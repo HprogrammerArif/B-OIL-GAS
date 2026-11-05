@@ -192,6 +192,35 @@ List<RouteDef> busRoutes() => [
   ),
   RouteDef(
     'POST',
+    '/bus/routes',
+    (ctx) => _swept(ctx, () async {
+      final rec = BusEngine.registerBus(
+        ctx.store,
+        ctx.requireAuth(),
+        ctx.bodyObject(),
+      );
+      await ctx.store.commit();
+      return ok(rec, status: 201);
+    }),
+    permission: ['bus:manage'],
+  ),
+  RouteDef(
+    'POST',
+    '/bus/routes/:id/bus',
+    (ctx) => _swept(ctx, () async {
+      final rec = BusEngine.reassign(
+        ctx.store,
+        ctx.requireAuth(),
+        ctx.params['id']!,
+        ctx.bodyObject(),
+      );
+      await ctx.store.commit();
+      return ok(rec);
+    }),
+    permission: ['bus:manage'],
+  ),
+  RouteDef(
+    'POST',
     '/bus/swaps/:id/accept',
     (ctx) => _swept(ctx, () async {
       final rec = BusEngine.acceptSwap(

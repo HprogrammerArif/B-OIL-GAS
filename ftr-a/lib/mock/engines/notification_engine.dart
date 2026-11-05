@@ -117,15 +117,40 @@ abstract final class NotificationEngine {
   }
 
   /// Wire shape of [record] in the recipient's language.
+  static String? _route(Json record) {
+    final data = record['data'];
+    if (data is! Map) return null;
+    final given = data['route'];
+    if (given is String && given.isNotEmpty) return given;
+    final wf = data['workflowInstanceId'];
+    if (wf is String && wf.isNotEmpty) return '/approvals/$wf';
+    final id = data['objectId'];
+    if (id is! String || id.isEmpty) return null;
+    return switch (data['objectType']) {
+      'LeaveRequest' => '/home/leave/$id',
+      'Claim' => '/home/claims/$id',
+      'VehicleRequisition' => '/home/fleet/$id',
+      'NoteSheet' => '/home/note-sheets/$id',
+      'Regularisation' => '/attendance',
+      _ => null,
+    };
+  }
+
   static Json toWire(Json record, String lang) {
     final bn = lang == 'BN';
+    final data = record['data'];
+    final map = data is Map
+        ? Map<String, Object?>.from(data)
+        : <String, Object?>{};
+    final route = _route(record);
+    if (route != null) map['route'] = route;
     return {
       'id': record['id'],
       'type': record['type'],
       'priority': record['priority'],
       'title': bn ? record['titleBn'] : record['title'],
       'body': bn ? record['bodyBn'] : record['body'],
-      'data': record['data'],
+      'data': map.isEmpty ? null : map,
       'readAt': record['readAt'],
       'ackRequired': record['ackRequired'],
       'ackedAt': record['ackedAt'],

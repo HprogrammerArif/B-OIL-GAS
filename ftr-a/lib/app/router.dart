@@ -93,8 +93,17 @@ GoRouter router(Ref ref) {
           location.substring(AppRoutes.approvalsLegacy.length) +
           query;
     }
+    if (location.startsWith(AppRoutes.chatLegacy)) {
+      return AppRoutes.chat +
+          location.substring(AppRoutes.chatLegacy.length) +
+          query;
+    }
     if (location.startsWith(AppRoutes.approvals) &&
         session.value?.can('workflow:inbox') != true) {
+      return AppRoutes.home;
+    }
+    if (location.startsWith(AppRoutes.chat) &&
+        session.value?.showChatTab != true) {
       return AppRoutes.home;
     }
     return null;
@@ -220,17 +229,6 @@ GoRouter router(Ref ref) {
                   GoRoute(
                     path: 'dashboards',
                     redirect: (context, state) => AppRoutes.home,
-                  ),
-                  GoRoute(
-                    path: 'chat',
-                    builder: (context, state) => const ChatScreen(),
-                    routes: [
-                      GoRoute(
-                        path: ':id',
-                        builder: (context, state) =>
-                            ChatThreadScreen(id: state.pathParameters['id']!),
-                      ),
-                    ],
                   ),
                   GoRoute(
                     path: 'people',
@@ -399,6 +397,21 @@ GoRouter router(Ref ref) {
                     builder: (context, state) => ApprovalDetailScreen(
                       instanceId: state.pathParameters['id']!,
                     ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.chat,
+                builder: (context, state) => const ChatScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) =>
+                        ChatThreadScreen(id: state.pathParameters['id']!),
                   ),
                 ],
               ),

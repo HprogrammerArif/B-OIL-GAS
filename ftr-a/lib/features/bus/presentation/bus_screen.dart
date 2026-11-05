@@ -101,6 +101,8 @@ class _RoutesTab extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final bangla = context.isBangla;
+    final canManage =
+        ref.watch(sessionControllerProvider).value?.can('bus:manage') ?? false;
     final routes = ref.watch(busRoutesProvider);
     return routes.when(
       loading: () => const SkeletonList(),
@@ -115,6 +117,30 @@ class _RoutesTab extends ConsumerWidget {
           Space.xxxl,
         ),
         children: [
+          if (canManage) ...[
+            Wrap(
+              spacing: Space.sm,
+              children: [
+                TextButton(
+                  onPressed: () => unawaited(_registerBus(context, ref)),
+                  child: Text(l10n.busRegister),
+                ),
+                TextButton(
+                  onPressed: items.isEmpty
+                      ? null
+                      : () => unawaited(_reassignBus(context, ref, items)),
+                  child: Text(l10n.busReassign),
+                ),
+                TextButton(
+                  onPressed: items.isEmpty
+                      ? null
+                      : () => unawaited(_seatMap(context, ref, items.first.id)),
+                  child: Text(l10n.busSeatMap),
+                ),
+              ],
+            ),
+            const SizedBox(height: Space.sm),
+          ],
           for (final r in items)
             Card(
               child: InkWell(
@@ -685,5 +711,150 @@ class _ReleaseSheetState extends State<_ReleaseSheet> {
         ),
       ),
     );
+  }
+}
+
+Future<Map<String, String>?> _ask(
+  BuildContext context, {
+  required String title,
+  required List<(String, String)> fields,
+}) async {
+  final cs = {for (final f in fields) f.$1: TextEditingController()};
+  final body = await showModalBottomSheet<Map<String, String>>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.fromLTRB(
+        Space.lg,
+        0,
+        Space.lg,
+        MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          for (final f in fields) ...[
+            AppTextField(label: f.$2, controller: cs[f.$1]),
+            const SizedBox(height: Space.sm),
+          ],
+          PrimaryButton(
+            label: title,
+            onPressed: () => Navigator.pop(ctx, {
+              for (final e in cs.entries) e.key: e.value.text.trim(),
+            }),
+          ),
+        ],
+      ),
+    ),
+  );
+  for (final c in cs.values) {
+    c.dispose();
+  }
+  return body;
+}
+
+Future<void> _registerBus(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final body = await _ask(
+    context,
+    title: l10n.busRegister,
+    fields: [
+      ('code', l10n.busFieldCode),
+      ('name', l10n.busFieldName),
+      ('busNo', l10n.busFieldPlate),
+    ],
+  );
+  if (body == null || !context.mounted) return;
+  try {
+    await ref.read(busRepositoryProvider).registerBus(body);
+    ref.invalidate(busRoutesProvider);
+    if (context.mounted) {
+      AppToast.show(context, l10n.busSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
+}
+
+Future<void> _reassignBus(
+  BuildContext context,
+  WidgetRef ref,
+  List<BusRoute> routes,
+) async {
+  final l10n = context.l10n;
+  final body = await _ask(
+    context,
+    title: l10n.busReassign,
+    fields: [('busNo', l10n.busFieldPlate)],
+  );
+  if (body == null || !context.mounted) return;
+  try {
+    await ref
+        .read(busRepositoryProvider)
+        .reassignBus(routes.first.id, body['busNo'] ?? '');
+    ref.invalidate(busRoutesProvider);
+    if (context.mounted) {
+      AppToast.show(context, l10n.busSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
+}
+
+Future<void> _seatMap(
+  BuildContext context,
+  WidgetRef ref,
+  String routeId,
+) async {
+  final l10n = context.l10n;
+  try {
+    final map = await ref.read(busRepositoryProvider).seatMap(routeId);
+    if (!context.mounted) return;
+    final seats = map['seats'];
+    final taken = <Map<String, Object?>>[];
+    var empty = 0;
+    if (seats is List) {
+      for (final s in seats) {
+        if (s is! Map) continue;
+        final row = Map<String, Object?>.from(s);
+        if (row['status'] == 'EMPTY') {
+          empty++;
+        } else {
+          taken.add(row);
+        }
+      }
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(Space.lg),
+        children: [
+          Text(l10n.busSeatMap, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.sm),
+          Text(l10n.busSeatsFree(empty)),
+          for (final s in taken.take(12))
+            ListTile(
+              title: Text('${s['seatNo']}'),
+              subtitle: Text(
+                '${(s['occupant'] as Map?)?['name'] ?? s['status']}',
+              ),
+            ),
+        ],
+      ),
+    );
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
   }
 }

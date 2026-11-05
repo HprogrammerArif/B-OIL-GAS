@@ -125,7 +125,8 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       for (final m in builtModules)
         if (s.navigation.contains(m.key) &&
             m.key != 'attendance' &&
-            m.key != 'approvals')
+            m.key != 'approvals' &&
+            !(m.key == 'chat' && s.showChatTab))
           m,
     };
 

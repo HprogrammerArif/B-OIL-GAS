@@ -133,6 +133,45 @@ abstract final class SearchEngine {
         );
       }
     }
+    for (final r in store.all(Col.fleetRequisitions)) {
+      final ref = r.strOrNull('refNo') ?? r.strOrNull('reqNo') ?? '';
+      final dest = r.strOrNull('destination') ?? '';
+      if (ref.toLowerCase().contains(q) || dest.toLowerCase().contains(q)) {
+        add(
+          kind: 'fleet',
+          title: dest.isEmpty ? ref : dest,
+          titleBn: dest.isEmpty ? ref : dest,
+          subtitle: ref,
+          route: '/home/fleet/${r['id']}',
+        );
+      }
+    }
+    for (final r in store.all(Col.busRoutes)) {
+      final code = r.strOrNull('code') ?? '';
+      final name = r.strOrNull('name') ?? code;
+      if (code.toLowerCase().contains(q) || name.toLowerCase().contains(q)) {
+        add(
+          kind: 'bus',
+          title: name,
+          titleBn: r.strOrNull('nameBn') ?? name,
+          subtitle: code,
+          route: '/home/bus/routes/${r['id']}',
+        );
+      }
+    }
+    for (final l in store.all(Col.compliance)) {
+      final title = l.strOrNull('title') ?? '';
+      final no = l.strOrNull('licenceNo') ?? '';
+      if (title.toLowerCase().contains(q) || no.toLowerCase().contains(q)) {
+        add(
+          kind: 'licence',
+          title: title,
+          titleBn: l.strOrNull('titleBn') ?? title,
+          subtitle: no,
+          route: '/home/licences/${l['id']}',
+        );
+      }
+    }
     for (final s in store.all(Col.noteSheets)) {
       final ref = s.strOrNull('fileNo') ?? s.strOrNull('refNo') ?? '';
       if (ref.toLowerCase().contains(q) ||

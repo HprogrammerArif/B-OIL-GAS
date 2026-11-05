@@ -175,6 +175,22 @@ class FleetRepository {
     }
   }
 
+  Future<void> registerVehicle(Map<String, Object?> body) async {
+    try {
+      await _dio.post<Object?>('/fleet/vehicles', data: body);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> enrolDriver(Map<String, Object?> body) async {
+    try {
+      await _dio.post<Object?>('/fleet/drivers', data: body);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> ackSos(String id) async {
     try {
       await _dio.post<Object?>('/fleet/sos/$id/ack');

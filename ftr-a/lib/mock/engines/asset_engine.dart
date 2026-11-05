@@ -1407,6 +1407,29 @@ abstract final class AssetEngine {
     };
   }
 
+  /// Anyone who can see equipment can ask for a new piece.
+  static Json requisition(MockStore store, AuthContext auth, Json body) {
+    if (!_can(auth, 'assets:read')) {
+      throw policyViolation('FORBIDDEN', 'You cannot ask for equipment.');
+    }
+    final name = (body['name'] as String? ?? '').trim();
+    if (name.length < 3) throw validationError('name', 'Name is too short');
+    final reason = (body['reason'] as String? ?? '').trim();
+    if (reason.length < 3) {
+      throw validationError('reason', 'Say why you need it');
+    }
+    final rec = <String, Object?>{
+      'id': 'areq_${store.nowMs()}',
+      'requesterUserId': auth.user['id'],
+      'name': name,
+      'reason': reason,
+      'status': 'OPEN',
+      'createdAt': _stamp(store),
+    };
+    store.put(Col.assetRequisitions, rec);
+    return rec;
+  }
+
   static Json? _site(String? id) {
     if (id == null) return null;
     final s = sites.where((x) => x['id'] == id).toList();

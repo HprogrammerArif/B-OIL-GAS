@@ -283,6 +283,12 @@ abstract class AppL10n {
   /// **'Approvals'**
   String get navApprovals;
 
+  /// No description provided for @navChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navChat;
+
   /// No description provided for @homeSeeAll.
   ///
   /// In en, this message translates to:
@@ -366,6 +372,240 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Open incidents'**
   String get homeActIncidents;
+
+  /// No description provided for @homeFilesWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Files waiting for you'**
+  String get homeFilesWaiting;
+
+  /// No description provided for @homeFilesClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting. You are clear.'**
+  String get homeFilesClear;
+
+  /// No description provided for @homeLeadersOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership rooms'**
+  String get homeLeadersOnline;
+
+  /// No description provided for @homeRoomQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'No new messages'**
+  String get homeRoomQuiet;
+
+  /// No description provided for @homeUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new'**
+  String homeUnread(int count);
+
+  /// No description provided for @homeReturnReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you sending this back?'**
+  String get homeReturnReason;
+
+  /// No description provided for @homePlayBriefing.
+  ///
+  /// In en, this message translates to:
+  /// **'Play briefing'**
+  String get homePlayBriefing;
+
+  /// No description provided for @homeBriefingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String homeBriefingLeft(int seconds);
+
+  /// No description provided for @homeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get homeToday;
+
+  /// No description provided for @homeNotPunched.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not punched in yet.'**
+  String get homeNotPunched;
+
+  /// No description provided for @homePunchedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Punched in at {time}'**
+  String homePunchedAt(String time);
+
+  /// No description provided for @homeLeaveLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String homeLeaveLeft(String days);
+
+  /// No description provided for @homeGatePass.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a gate pass'**
+  String get homeGatePass;
+
+  /// No description provided for @homeLocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Locks still on'**
+  String get homeLocks;
+
+  /// No description provided for @homeLocksClear.
+  ///
+  /// In en, this message translates to:
+  /// **'No machine is locked out.'**
+  String get homeLocksClear;
+
+  /// No description provided for @homeReleaseBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get homeReleaseBatch;
+
+  /// No description provided for @homeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get homeOpen;
+
+  /// No description provided for @busRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a bus'**
+  String get busRegister;
+
+  /// No description provided for @busReassign.
+  ///
+  /// In en, this message translates to:
+  /// **'Move a bus'**
+  String get busReassign;
+
+  /// No description provided for @busSeatMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat map'**
+  String get busSeatMap;
+
+  /// No description provided for @busFieldCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Route code'**
+  String get busFieldCode;
+
+  /// No description provided for @busFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Route name'**
+  String get busFieldName;
+
+  /// No description provided for @busFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus number'**
+  String get busFieldPlate;
+
+  /// No description provided for @busSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get busSaved;
+
+  /// No description provided for @busSeatsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} seats free'**
+  String busSeatsFree(int count);
+
+  /// No description provided for @flRegisterCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a car'**
+  String get flRegisterCar;
+
+  /// No description provided for @flEnrolDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrol a driver'**
+  String get flEnrolDriver;
+
+  /// No description provided for @flFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate'**
+  String get flFieldPlate;
+
+  /// No description provided for @flFieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip type'**
+  String get flFieldType;
+
+  /// No description provided for @flFieldEmp.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee code'**
+  String get flFieldEmp;
+
+  /// No description provided for @flFieldDriverCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver code'**
+  String get flFieldDriverCode;
+
+  /// No description provided for @flSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get flSaved;
+
+  /// No description provided for @asAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for equipment'**
+  String get asAsk;
+
+  /// No description provided for @asAskName.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need?'**
+  String get asAskName;
+
+  /// No description provided for @asAskWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get asAskWhy;
+
+  /// No description provided for @asAskDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get asAskDone;
+
+  /// No description provided for @chConfirmAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this directive'**
+  String get chConfirmAck;
+
+  /// No description provided for @chConfirmDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this directive done'**
+  String get chConfirmDone;
+
+  /// No description provided for @chConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is recorded on the directive. You cannot undo it here.'**
+  String get chConfirmBody;
 
   /// No description provided for @moreMyWork.
   ///
@@ -3678,12 +3918,6 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'You are already on a waitlist.'**
   String get busErrAlreadyWaiting;
-
-  /// No description provided for @busSeatMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Seat map'**
-  String get busSeatMap;
 
   /// No description provided for @busLegendTaken.
   ///
@@ -7350,12 +7584,6 @@ abstract class AppL10n {
   /// **'Where you are going'**
   String get flFieldDest;
 
-  /// No description provided for @flFieldType.
-  ///
-  /// In en, this message translates to:
-  /// **'Trip type'**
-  String get flFieldType;
-
   /// No description provided for @flFieldPax.
   ///
   /// In en, this message translates to:
@@ -10146,10 +10374,16 @@ abstract class AppL10n {
   /// **'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.'**
   String get chIntro;
 
+  /// No description provided for @chEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No rooms yet'**
+  String get chEmptyTitle;
+
   /// No description provided for @chEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No conversations.'**
+  /// **'Message a colleague to start one.'**
   String get chEmpty;
 
   /// No description provided for @chNoMessages.
@@ -10181,6 +10415,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Send'**
   String get chSend;
+
+  /// No description provided for @chReact.
+  ///
+  /// In en, this message translates to:
+  /// **'React'**
+  String get chReact;
 
   /// No description provided for @chDeleted.
   ///

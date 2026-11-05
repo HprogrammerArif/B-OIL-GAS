@@ -109,6 +109,9 @@ class AppL10nBn extends AppL10n {
   String get navApprovals => 'অনুমোদন';
 
   @override
+  String get navChat => 'চ্যাট';
+
+  @override
   String get homeSeeAll => 'সব দেখুন';
 
   @override
@@ -149,6 +152,134 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get homeActIncidents => 'দুর্ঘটনা খুলুন';
+
+  @override
+  String get homeFilesWaiting => 'আপনার অপেক্ষায় ফাইল';
+
+  @override
+  String get homeFilesClear => 'কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।';
+
+  @override
+  String get homeLeadersOnline => 'নেতৃত্বের ঘর';
+
+  @override
+  String get homeRoomQuiet => 'নতুন বার্তা নেই';
+
+  @override
+  String homeUnread(int count) {
+    return '$count নতুন';
+  }
+
+  @override
+  String get homeReturnReason => 'কেন ফেরত পাঠাচ্ছেন?';
+
+  @override
+  String get homePlayBriefing => 'ব্রিফিং শুনুন';
+
+  @override
+  String homeBriefingLeft(int seconds) {
+    return '$secondsসে';
+  }
+
+  @override
+  String get homeToday => 'আজ';
+
+  @override
+  String get homeNotPunched => 'আপনি এখনও পাঞ্চ করেননি।';
+
+  @override
+  String homePunchedAt(String time) {
+    return '$time-এ পাঞ্চ হয়েছে';
+  }
+
+  @override
+  String homeLeaveLeft(String days) {
+    return '$days দিন বাকি';
+  }
+
+  @override
+  String get homeGatePass => 'গেট পাস চান';
+
+  @override
+  String get homeLocks => 'লক এখনও চালু';
+
+  @override
+  String get homeLocksClear => 'কোনো মেশিন লক-আউট নেই।';
+
+  @override
+  String get homeReleaseBatch => 'মুক্ত করুন';
+
+  @override
+  String get homeOpen => 'খুলুন';
+
+  @override
+  String get busRegister => 'বাস নিবন্ধন';
+
+  @override
+  String get busReassign => 'বাস সরিয়ে দিন';
+
+  @override
+  String get busSeatMap => 'আসনের নকশা';
+
+  @override
+  String get busFieldCode => 'রুট কোড';
+
+  @override
+  String get busFieldName => 'রুটের নাম';
+
+  @override
+  String get busFieldPlate => 'বাসের নম্বর';
+
+  @override
+  String get busSaved => 'সেভ হয়েছে';
+
+  @override
+  String busSeatsFree(int count) {
+    return '$count আসন খালি';
+  }
+
+  @override
+  String get flRegisterCar => 'গাড়ি নিবন্ধন';
+
+  @override
+  String get flEnrolDriver => 'চালক যোগ করুন';
+
+  @override
+  String get flFieldPlate => 'নম্বর প্লেট';
+
+  @override
+  String get flFieldType => 'ট্রিপের ধরন';
+
+  @override
+  String get flFieldEmp => 'কর্মচারী কোড';
+
+  @override
+  String get flFieldDriverCode => 'চালক কোড';
+
+  @override
+  String get flSaved => 'সেভ হয়েছে';
+
+  @override
+  String get asAsk => 'যন্ত্রপাতি চান';
+
+  @override
+  String get asAskName => 'কী দরকার?';
+
+  @override
+  String get asAskWhy => 'কেন';
+
+  @override
+  String get asAskDone => 'অনুরোধ গেছে';
+
+  @override
+  String get chConfirmAck => 'এই নির্দেশ নিশ্চিত করুন';
+
+  @override
+  String get chConfirmDone => 'নির্দেশ শেষ হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get chConfirmBody =>
+      'এটি নির্দেশে লেখা থাকবে। এখান থেকে ফেরানো যাবে না।';
 
   @override
   String get moreMyWork => 'আমার কাজ';
@@ -2033,9 +2164,6 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get busErrAlreadyWaiting => 'আপনি ইতিমধ্যে একটি তালিকায় আছেন।';
-
-  @override
-  String get busSeatMap => 'আসনের নকশা';
 
   @override
   String get busLegendTaken => 'দখলে';
@@ -4055,9 +4183,6 @@ class AppL10nBn extends AppL10n {
   String get flFieldDest => 'কোথায় যাবেন';
 
   @override
-  String get flFieldType => 'ট্রিপের ধরন';
-
-  @override
   String get flFieldPax => 'কতজন যাবেন';
 
   @override
@@ -5560,7 +5685,10 @@ class AppL10nBn extends AppL10n {
       'নেতৃত্বের ঘর। বার্তা এই ডিভাইসে থাকে। এন্ড-টু-এন্ড নয়।';
 
   @override
-  String get chEmpty => 'কোনো আলাপ নেই।';
+  String get chEmptyTitle => 'এখনও কোনো ঘর নেই';
+
+  @override
+  String get chEmpty => 'শুরু করতে একজন সহকর্মীকে বার্তা পাঠান।';
 
   @override
   String get chNoMessages => 'এখনও কোনো বার্তা নেই।';
@@ -5576,6 +5704,9 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get chSend => 'পাঠান';
+
+  @override
+  String get chReact => 'প্রতিক্রিয়া';
 
   @override
   String get chDeleted => 'বার্তা সরানো হয়েছে।';

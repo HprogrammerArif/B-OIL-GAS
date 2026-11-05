@@ -4,8 +4,10 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
+import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/chat/data/chat_repository.dart';
+import 'package:bogcl_oneops/features/chat/domain/chat_models.dart';
 import 'package:bogcl_oneops/features/chat/presentation/chat_providers.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -93,14 +95,32 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Space.lg,
-                Space.sm,
-                Space.lg,
-                0,
+            Material(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Space.lg,
+                  vertical: Space.sm,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Expanded(
+                      child: Text(
+                        l10n.chSecureNote,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text(l10n.chSecureNote),
             ),
             Expanded(
               child: msgs.when(
@@ -118,160 +138,72 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                     unawaited(_repo.read(widget.id, last));
                   });
                   return ListView.builder(
-                    padding: const EdgeInsets.all(Space.lg),
+                    reverse: true,
+                    padding: const EdgeInsets.fromLTRB(
+                      Space.md,
+                      Space.md,
+                      Space.md,
+                      Space.sm,
+                    ),
                     itemCount: list.length,
                     itemBuilder: (ctx, i) {
-                      final m = list[i];
+                      final m = list[list.length - 1 - i];
                       if (m.deleted) {
-                        return Text(l10n.chDeleted);
-                      }
-                      final align = m.mine
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft;
-                      return Align(
-                        alignment: align,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 320),
-                          child: Card(
-                            color: m.type == 'DIRECTIVE'
-                                ? Theme.of(ctx).colorScheme.tertiaryContainer
-                                : null,
-                            child: Padding(
-                              padding: const EdgeInsets.all(Space.md),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (!m.mine)
-                                    Text(
-                                      m.sender?.display(bangla: bangla) ?? '',
-                                      style: Theme.of(ctx)
-                                          .textTheme
-                                          .labelMedium,
-                                    ),
-                                  if (m.type == 'VOICE' ||
-                                      (m.body ?? '').startsWith('VOICE:'))
-                                    _VoiceBubble(body: m.body ?? 'VOICE:8')
-                                  else
-                                    Text(m.body ?? ''),
-                                  if (m.directive != null) ...[
-                                    const SizedBox(height: Space.sm),
-                                    Text(m.directive!.body),
-                                    Text(
-                                      l10n.chAckCount(
-                                        m.directive!.acks,
-                                        m.directive!.needed,
-                                      ),
-                                    ),
-                                    if (m.directive!.executedAt == null &&
-                                        !m.mine)
-                                      TextButton(
-                                        onPressed: _busy
-                                            ? null
-                                            : () async {
-                                                await _repo.ack(
-                                                  m.directive!.id,
-                                                );
-                                                ref.invalidate(
-                                                  chatMessagesProvider(
-                                                    widget.id,
-                                                  ),
-                                                );
-                                              },
-                                        child: Text(l10n.chActAck),
-                                      ),
-                                    if (canDir &&
-                                        m.directive!.executedAt == null)
-                                      TextButton(
-                                        onPressed: _busy
-                                            ? null
-                                            : () async {
-                                                await _repo.execute(
-                                                  m.directive!.id,
-                                                );
-                                                ref.invalidate(
-                                                  chatMessagesProvider(
-                                                    widget.id,
-                                                  ),
-                                                );
-                                              },
-                                        child: Text(l10n.chActDone),
-                                      ),
-                                  ],
-                                  if (m.reactions.isNotEmpty)
-                                    Text(m.reactions.join(' ')),
-                                  Wrap(
-                                    children: [
-                                      for (final e in const [
-                                        '👍',
-                                        '✅',
-                                        '⚠️',
-                                        '🙏',
-                                      ])
-                                        TextButton(
-                                          onPressed: () async {
-                                            await _repo.react(m.id, e);
-                                            ref.invalidate(
-                                              chatMessagesProvider(widget.id),
-                                            );
-                                          },
-                                          child: Text(e),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: Space.sm,
+                          ),
+                          child: Center(
+                            child: Text(
+                              l10n.chDeleted,
+                              style: Theme.of(ctx).textTheme.labelSmall,
                             ),
                           ),
-                        ),
+                        );
+                      }
+                      return _Bubble(
+                        message: m,
+                        bangla: bangla,
+                        busy: _busy,
+                        canDirect: canDir,
+                        onAck: m.directive == null
+                            ? null
+                            : () async {
+                                await _repo.ack(m.directive!.id);
+                                ref.invalidate(chatMessagesProvider(widget.id));
+                              },
+                        onDone: m.directive == null
+                            ? null
+                            : () async {
+                                await _repo.execute(m.directive!.id);
+                                ref.invalidate(chatMessagesProvider(widget.id));
+                              },
+                        onReact: (emoji) async {
+                          await _repo.react(m.id, emoji);
+                          ref.invalidate(chatMessagesProvider(widget.id));
+                        },
                       );
                     },
                   );
                 },
               ),
             ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  Space.lg,
-                  0,
-                  Space.lg,
-                  Space.md,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _text,
-                        decoration: InputDecoration(hintText: l10n.chHint),
-                        minLines: 1,
-                        maxLines: 4,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: l10n.chVoice,
-                      onPressed: _busy
-                          ? null
-                          : () async {
-                              setState(() => _busy = true);
-                              try {
-                                await _repo.sendVoice(widget.id, 8);
-                                ref
-                                  ..invalidate(chatMessagesProvider(widget.id))
-                                  ..invalidate(chatChannelsProvider);
-                              } finally {
-                                if (mounted) setState(() => _busy = false);
-                              }
-                            },
-                      icon: const Icon(Icons.mic_none),
-                    ),
-                    IconButton(
-                      tooltip: l10n.chSend,
-                      onPressed: _busy ? null : _send,
-                      icon: const Icon(Icons.send),
-                    ),
-                  ],
-                ),
-              ),
+            _Composer(
+              controller: _text,
+              busy: _busy,
+              hint: l10n.chHint,
+              onSend: _send,
+              onVoice: () async {
+                setState(() => _busy = true);
+                try {
+                  await _repo.sendVoice(widget.id, 8);
+                  ref
+                    ..invalidate(chatMessagesProvider(widget.id))
+                    ..invalidate(chatChannelsProvider);
+                } finally {
+                  if (mounted) setState(() => _busy = false);
+                }
+              },
             ),
           ],
         ),
@@ -338,6 +270,265 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   }
 }
 
+class _Bubble extends StatelessWidget {
+  const _Bubble({
+    required this.message,
+    required this.bangla,
+    required this.busy,
+    required this.canDirect,
+    required this.onReact,
+    this.onAck,
+    this.onDone,
+  });
+
+  final ChatMessage message;
+  final bool bangla;
+  final bool busy;
+  final bool canDirect;
+  final Future<void> Function(String emoji) onReact;
+  final Future<void> Function()? onAck;
+  final Future<void> Function()? onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final mine = message.mine;
+    final lang = Localizations.localeOf(context).languageCode;
+    final time = message.createdAt == null
+        ? null
+        : DateFmt.time(message.createdAt!, lang);
+    final bg = mine ? scheme.primary.withValues(alpha: 0.12) : scheme.surface;
+    final radius = BorderRadius.only(
+      topLeft: const Radius.circular(Corner.lg),
+      topRight: const Radius.circular(Corner.lg),
+      bottomLeft: Radius.circular(mine ? Corner.lg : Corner.sm),
+      bottomRight: Radius.circular(mine ? Corner.sm : Corner.lg),
+    );
+
+    return Align(
+      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: Space.sm),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: radius,
+              border: Border.all(color: scheme.outlineVariant),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                Space.sm,
+                Space.md,
+                Space.sm,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!mine && message.sender != null)
+                    Text(
+                      message.sender!.display(bangla: bangla),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: scheme.primary,
+                      ),
+                    ),
+                  if (message.type == 'VOICE' ||
+                      (message.body ?? '').startsWith('VOICE:'))
+                    _VoiceBubble(body: message.body ?? 'VOICE:8')
+                  else
+                    Text(message.body ?? '', style: theme.textTheme.bodyMedium),
+                  if (message.directive != null) ...[
+                    const SizedBox(height: Space.sm),
+                    Text(
+                      message.directive!.title,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    Text(
+                      message.directive!.body,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Text(
+                      l10n.chAckCount(
+                        message.directive!.acks,
+                        message.directive!.needed,
+                      ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (message.directive!.executedAt == null && !mine)
+                      TextButton(
+                        onPressed: busy || onAck == null
+                            ? null
+                            : () async {
+                                final ok = await _confirmDirective(
+                                  context,
+                                  l10n.chConfirmAck,
+                                );
+                                if (ok) await onAck!();
+                              },
+                        child: Text(l10n.chActAck),
+                      ),
+                    if (canDirect && message.directive!.executedAt == null)
+                      TextButton(
+                        onPressed: busy || onDone == null
+                            ? null
+                            : () async {
+                                final ok = await _confirmDirective(
+                                  context,
+                                  l10n.chConfirmDone,
+                                );
+                                if (ok) await onDone!();
+                              },
+                        child: Text(l10n.chActDone),
+                      ),
+                  ],
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (message.reactions.isNotEmpty)
+                        Text(
+                          message.reactions.join(' '),
+                          style: theme.textTheme.labelSmall,
+                        ),
+                      if (time != null) ...[
+                        if (message.reactions.isNotEmpty)
+                          const SizedBox(width: Space.sm),
+                        Text(
+                          time,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        tooltip: l10n.chReact,
+                        onPressed: () => unawaited(_react(context)),
+                        icon: Icon(
+                          Icons.add_reaction_outlined,
+                          size: 16,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _react(BuildContext context) async {
+    final emoji = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (final e in const ['👍', '✅', '⚠️', '🙏'])
+                IconButton(
+                  onPressed: () => Navigator.pop(ctx, e),
+                  icon: Text(e, style: const TextStyle(fontSize: 28)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (emoji != null) await onReact(emoji);
+  }
+}
+
+class _Composer extends StatelessWidget {
+  const _Composer({
+    required this.controller,
+    required this.busy,
+    required this.hint,
+    required this.onSend,
+    required this.onVoice,
+  });
+
+  final TextEditingController controller;
+  final bool busy;
+  final String hint;
+  final VoidCallback onSend;
+  final VoidCallback onVoice;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    return Material(
+      color: scheme.surface,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            Space.sm,
+            Space.sm,
+            Space.sm,
+            Space.sm,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                tooltip: l10n.chVoice,
+                onPressed: busy ? null : onVoice,
+                icon: const Icon(Icons.mic_none),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  minLines: 1,
+                  maxLines: 4,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => onSend(),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    isDense: true,
+                    filled: true,
+                    fillColor: scheme.surfaceContainerLow,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: Space.lg,
+                      vertical: Space.md,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(Corner.xl),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(Corner.xl),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: Space.xs),
+              IconButton.filled(
+                tooltip: l10n.chSend,
+                onPressed: busy ? null : onSend,
+                icon: const Icon(Icons.send, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _VoiceBubble extends StatefulWidget {
   const _VoiceBubble({required this.body});
 
@@ -357,18 +548,53 @@ class _VoiceBubbleState extends State<_VoiceBubble> {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton.icon(
-      onPressed: () async {
+    final l10n = context.l10n;
+    return InkWell(
+      onTap: () async {
         setState(() => _playing = true);
         await Future<void>.delayed(Duration(seconds: _secs.clamp(1, 8)));
         if (mounted) setState(() => _playing = false);
       },
-      icon: Icon(_playing ? Icons.stop : Icons.play_arrow),
-      label: Text(
-        _playing
-            ? context.l10n.chVoicePlay
-            : '${context.l10n.chVoice} · ${_secs}s',
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _playing ? Icons.stop_circle_outlined : Icons.play_circle_outline,
+          ),
+          const SizedBox(width: Space.sm),
+          Text(_playing ? l10n.chVoicePlay : '${l10n.chVoice} · ${_secs}s'),
+        ],
       ),
     );
   }
+}
+
+Future<bool> _confirmDirective(BuildContext context, String title) async {
+  final ok = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(Space.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: Theme.of(ctx).textTheme.titleMedium),
+          const SizedBox(height: Space.md),
+          Text(ctx.l10n.chConfirmBody),
+          const SizedBox(height: Space.lg),
+          PrimaryButton(
+            label: ctx.l10n.commonSave,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+          const SizedBox(height: Space.sm),
+          PrimaryButton.secondary(
+            label: ctx.l10n.commonCancel,
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
+        ],
+      ),
+    ),
+  );
+  return ok == true;
 }

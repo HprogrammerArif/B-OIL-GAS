@@ -50,6 +50,14 @@ class AssetRepository {
     }
   }
 
+  Future<void> requisition(Map<String, Object?> body) async {
+    try {
+      await _dio.post<Object?>('/assets/requisitions', data: body);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<Equipment> create(Map<String, Object?> body) async {
     try {
       final res = await _dio.post<Object?>('/assets', data: body);

@@ -1039,6 +1039,64 @@ abstract final class FleetEngine {
     };
   }
 
+  static Json registerVehicle(MockStore store, AuthContext auth, Json body) {
+    final plate = (body['plateNo'] as String? ?? '').trim();
+    if (plate.length < 4) {
+      throw validationError('plateNo', 'Enter the plate');
+    }
+    final type = (body['type'] as String? ?? 'SEDAN').trim();
+    final rec = <String, Object?>{
+      'id': 'veh_${store.nowMs()}',
+      'plateNo': plate,
+      'type': type,
+      'capacity': (body['capacity'] as num?)?.toInt() ?? 4,
+      'status': 'AVAILABLE',
+      'siteId': auth.employee.obj('site')['id'],
+      'odometerKm': (body['odometerKm'] as num?)?.toInt() ?? 0,
+      'isHazmat': false,
+      'tankLiters': 60,
+      'reservedTripId': null,
+      'documents': const <Object?>[],
+    };
+    store.put(Col.fleetVehicles, rec);
+    return vehicleWire(rec);
+  }
+
+  static Json enrolDriver(MockStore store, AuthContext auth, Json body) {
+    final code = (body['empCode'] as String? ?? '').trim();
+    Json? emp;
+    for (final e in store.all(Col.employees)) {
+      if (e.str('empCode') == code) emp = e;
+    }
+    if (emp == null) throw validationError('empCode', 'Unknown employee');
+    final uid = emp.strOrNull('userId');
+    if (uid == null) {
+      throw validationError('empCode', 'That person has no login');
+    }
+    final rawCode = body['driverCode'];
+    final driverCode = rawCode is String && rawCode.trim().isNotEmpty
+        ? rawCode.trim()
+        : 'DRV-${store.nowMs() % 1000}';
+    final rec = <String, Object?>{
+      'id': 'drv_${store.nowMs()}',
+      'userId': uid,
+      'employeeId': emp['id'],
+      'driverCode': driverCode,
+      'status': 'AVAILABLE',
+      'licenceClass': (body['licenceClass'] as String?) ?? 'LIGHT',
+      'licenceExpiresAt': DateTime.parse(store.nowIso())
+          .add(const Duration(days: 365))
+          .toIso8601String(),
+      'dutyHoursToday': 0,
+      'totalTrips': 0,
+      'lastBreathalyzerResult': 'PASSED',
+      'lastBreathalyzerAt': store.nowIso(),
+      'reservedTripId': null,
+    };
+    store.put(Col.fleetDrivers, rec);
+    return driverWire(store, rec);
+  }
+
   static Json vehicleWire(Json v) => {
     'id': v['id'],
     'plateNo': v['plateNo'],

@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/fleet/data/fleet_repository.dart';
 import 'package:bogcl_oneops/features/fleet/domain/fleet_models.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_providers.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_ui.dart';
@@ -12,6 +14,7 @@ import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
+import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,6 +83,18 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
       appBar: AppBar(
         title: Text(l10n.moduleFleet),
         actions: [
+          if (canDispatch)
+            IconButton(
+              tooltip: l10n.flRegisterCar,
+              onPressed: () => unawaited(_fleetForm(context, ref, car: true)),
+              icon: const Icon(Icons.directions_car_outlined),
+            ),
+          if (canDispatch)
+            IconButton(
+              tooltip: l10n.flEnrolDriver,
+              onPressed: () => unawaited(_fleetForm(context, ref, car: false)),
+              icon: const Icon(Icons.person_add_alt_1_outlined),
+            ),
           if (canSos)
             IconButton(
               tooltip: l10n.flSos,
@@ -249,5 +264,74 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
       }
     }
     return const [];
+  }
+}
+
+Future<void> _fleetForm(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool car,
+}) async {
+  final l10n = context.l10n;
+  final a = TextEditingController();
+  final b = TextEditingController();
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(car ? l10n.flRegisterCar : l10n.flEnrolDriver),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: a,
+            decoration: InputDecoration(
+              labelText: car ? l10n.flFieldPlate : l10n.flFieldEmp,
+            ),
+          ),
+          TextField(
+            controller: b,
+            decoration: InputDecoration(
+              labelText: car ? l10n.flFieldType : l10n.flFieldDriverCode,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(l10n.commonCancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(l10n.commonSave),
+        ),
+      ],
+    ),
+  );
+  final plate = a.text.trim();
+  final extra = b.text.trim();
+  a.dispose();
+  b.dispose();
+  if (ok != true || !context.mounted) return;
+  try {
+    final repo = ref.read(fleetRepositoryProvider);
+    if (car) {
+      await repo.registerVehicle({
+        'plateNo': plate,
+        'type': extra.isEmpty ? 'SEDAN' : extra,
+      });
+    } else {
+      await repo.enrolDriver({
+        'empCode': plate,
+        if (extra.isNotEmpty) 'driverCode': extra,
+      });
+    }
+    if (context.mounted) {
+      AppToast.show(context, l10n.flSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
   }
 }

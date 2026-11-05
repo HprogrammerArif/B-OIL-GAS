@@ -203,11 +203,6 @@ export default function ApprovalsView({ lang }: ViewProps) {
 
   return (
     <div className="apv-page">
-      <PageHeader
-        title={t(cfg.title[0], cfg.title[1], lang)}
-        description={t(cfg.description[0], cfg.description[1], lang)}
-      />
-
       {/* One-sentence verdict: what is waiting and how urgent */}
       <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : ''}`} role="status">
         <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Clock size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>

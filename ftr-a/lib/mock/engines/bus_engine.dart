@@ -718,4 +718,58 @@ abstract final class BusEngine {
       ..put(Col.busSwaps, rec);
     return rec;
   }
+
+  /// Transport adds a bus and a short route in one step.
+  static Json registerBus(MockStore store, AuthContext auth, Json body) {
+    final plate = (body['busNo'] as String? ?? '').trim();
+    if (plate.length < 4) {
+      throw validationError('busNo', 'Enter the bus number');
+    }
+    final name = (body['name'] as String? ?? '').trim();
+    if (name.length < 3) throw validationError('name', 'Name the route');
+    final code = (body['code'] as String? ?? '').trim();
+    if (code.isEmpty) throw validationError('code', 'Enter a route code');
+    final rawBn = body['nameBn'];
+    final nameBn = rawBn is String && rawBn.trim().isNotEmpty
+        ? rawBn.trim()
+        : name;
+    final rec = <String, Object?>{
+      'id': 'rt_${store.nowMs()}',
+      'code': code.toUpperCase(),
+      'name': name,
+      'nameBn': nameBn,
+      'distanceKm': (body['distanceKm'] as num?)?.toDouble() ?? 12,
+      'capacity': (body['capacity'] as num?)?.toInt() ?? 40,
+      'busNo': plate,
+      'stops': [
+        {
+          'id': 'st_${store.nowMs()}',
+          'name': 'Plant gate',
+          'nameBn': 'প্ল্যান্ট গেট',
+          'morning': '07:00',
+          'evening': '18:00',
+        },
+      ],
+    };
+    store.put(Col.busRoutes, rec);
+    return routeWire(store, rec, auth.employeeId);
+  }
+
+  /// Moves the named bus onto an existing route.
+  static Json reassign(
+    MockStore store,
+    AuthContext auth,
+    String id,
+    Json body,
+  ) {
+    final r = route(store, id);
+    if (r == null) throw notFound('Route');
+    final plate = (body['busNo'] as String? ?? '').trim();
+    if (plate.length < 4) {
+      throw validationError('busNo', 'Enter the bus number');
+    }
+    r['busNo'] = plate;
+    store.put(Col.busRoutes, r);
+    return routeWire(store, r, auth.employeeId);
+  }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/modules.dart';
 import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
@@ -11,6 +12,7 @@ import 'package:bogcl_oneops/features/dashboards/data/dashboard_repository.dart'
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_providers.dart';
 import 'package:bogcl_oneops/features/files/presentation/profile_avatar.dart';
+import 'package:bogcl_oneops/features/home/presentation/home_role_panel.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
@@ -102,8 +104,40 @@ class _HomeBody extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.navHome),
-        actions: const [AppBarActions()],
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _greeting(l10n, emp.shortDisplayName(bangla: bangla)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: executive ? context.bogcl.executiveGold : null,
+              ),
+            ),
+            Text(
+              emp.designationTitle(bangla: bangla),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          const AppBarActions(),
+          IconButton(
+            tooltip: l10n.moreProfile,
+            onPressed: () => openAppRoute(context, AppRoutes.more),
+            icon: ProfileAvatar(
+              name: emp.fullName,
+              photoFileId: emp.photoFileId,
+              size: 32,
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -113,45 +147,6 @@ class _HomeBody extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: Space.xxxl),
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Space.lg,
-                Space.md,
-                Space.lg,
-                Space.sm,
-              ),
-              child: Row(
-                children: [
-                  ProfileAvatar(
-                    name: emp.fullName,
-                    photoFileId: emp.photoFileId,
-                    size: 52,
-                  ),
-                  const SizedBox(width: Space.lg),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _greeting(l10n, emp.shortDisplayName(bangla: bangla)),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: executive
-                                ? context.bogcl.executiveGold
-                                : null,
-                          ),
-                        ),
-                        Text(
-                          emp.designationTitle(bangla: bangla),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             dash.when(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(horizontal: Space.lg),
@@ -201,6 +196,7 @@ class _DashboardBlock extends ConsumerWidget {
       children: [
         if (d.broadcast != null) _Banner(broadcast: d.broadcast!),
         _RoleCard(dashboard: d, session: session),
+        HomeRolePanel(dashboard: d),
         SectionHeader(title: l10n.dbNeedsTitle),
         if (needs.isNotEmpty)
           GroupCard(
@@ -223,9 +219,12 @@ class _DashboardBlock extends ConsumerWidget {
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton(
-              onPressed: () => session.can('workflow:inbox')
-                  ? context.go(AppRoutes.approvals)
-                  : context.go(AppRoutes.more),
+              onPressed: () => openAppRoute(
+                context,
+                session.can('workflow:inbox')
+                    ? AppRoutes.approvals
+                    : AppRoutes.more,
+              ),
               child: Text(l10n.homeSeeAll),
             ),
           ),
@@ -304,7 +303,10 @@ class _RoleCard extends StatelessWidget {
                 ),
             ],
             const SizedBox(height: Space.md),
-            PrimaryButton(label: action, onPressed: () => context.go(route)),
+            PrimaryButton(
+              label: action,
+              onPressed: () => openAppRoute(context, route),
+            ),
           ],
         ),
       ),

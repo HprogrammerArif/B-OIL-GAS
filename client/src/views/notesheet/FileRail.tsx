@@ -27,10 +27,13 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const startScrollLeftRef = useRef(0);
-  const hasMovedRef = useRef(false);
+  const dragRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    startScroll: 0,
+    moved: false,
+    active: false,
+  });
 
   const counts = useMemo(() => {
     const c: Record<FileState, number> = { mine: 0, waiting: 0, returned: 0, approved: 0 };
@@ -46,11 +49,18 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
     { key: 'approved', label: t('Approved', 'অনুমোদিত', lang), count: counts.approved },
   ];
 
-  const visible = files.filter((f) => {
+  const visible = useMemo(() => files.filter((f) => {
     if (filter !== 'all' && stateOf(f) !== filter) return false;
     if (!q) return true;
     return [f.fileNo, f.title, f.dept, f.initiatorName ?? ''].some((v) => v.toLowerCase().includes(q));
-  });
+  }), [files, filter, q, stateOf]);
+
+  const visibleIds = visible.map((f) => f.id).join('|');
+  useEffect(() => {
+    if (!visibleIds) return;
+    const ids = visibleIds.split('|');
+    if (!ids.includes(activeId)) onSelect(ids[0]);
+  }, [visibleIds, activeId, onSelect]);
 
   const updateScrollState = useCallback(() => {
     const el = listRef.current;
@@ -75,7 +85,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
       el.removeEventListener('scroll', handleScroll);
       ro.disconnect();
     };
-  }, [updateScrollState, visible]);
+  }, [updateScrollState, visibleIds]);
 
   // Translate vertical mouse wheel over horizontal carousel to smooth horizontal scroll
   useEffect(() => {
@@ -109,37 +119,49 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
     });
   };
 
-  // Mouse drag-to-scroll gesture
-  const handleMouseDown = (e: React.MouseEvent<HTMLUListElement>) => {
-    if (e.button !== 0) return;
+  const listOverflows = () => {
     const el = listRef.current;
-    if (!el || el.scrollWidth <= el.clientWidth) return;
-    isDraggingRef.current = true;
-    setIsDragging(true);
-    startXRef.current = e.pageX;
-    startScrollLeftRef.current = el.scrollLeft;
-    hasMovedRef.current = false;
+    return !!el && el.scrollWidth > el.clientWidth + 2;
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLUListElement>) => {
-    if (!isDraggingRef.current || !listRef.current) return;
-    const dx = e.pageX - startXRef.current;
-    if (Math.abs(dx) > 4) {
-      hasMovedRef.current = true;
+  // Drag-to-scroll only after a real swipe, so a click still selects the file.
+  const handlePointerDown = (e: React.PointerEvent<HTMLUListElement>) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    if (!listOverflows() || !listRef.current) return;
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startScroll: listRef.current.scrollLeft,
+      moved: false,
+      active: true,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLUListElement>) => {
+    const drag = dragRef.current;
+    if (!drag.active || drag.pointerId !== e.pointerId || !listRef.current) return;
+    const dx = e.clientX - drag.startX;
+    if (!drag.moved && Math.abs(dx) < 12) return;
+    if (!drag.moved) {
+      drag.moved = true;
+      setIsDragging(true);
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* capture optional */ }
     }
-    listRef.current.scrollLeft = startScrollLeftRef.current - dx;
+    listRef.current.scrollLeft = drag.startScroll - dx;
   };
 
-  const handleMouseUp = () => {
-    if (isDraggingRef.current) {
-      isDraggingRef.current = false;
-      setIsDragging(false);
-    }
+  const handlePointerUp = (e: React.PointerEvent<HTMLUListElement>) => {
+    const drag = dragRef.current;
+    if (!drag.active || (drag.pointerId !== e.pointerId && drag.pointerId !== -1)) return;
+    drag.active = false;
+    setIsDragging(false);
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* already released */ }
   };
 
-  const handleCardClick = (fileId: string) => {
-    if (hasMovedRef.current) {
-      hasMovedRef.current = false;
+  const handleCardClick = (fileId: string, e: React.MouseEvent) => {
+    if (dragRef.current.moved) {
+      e.preventDefault();
+      dragRef.current.moved = false;
       return;
     }
     onSelect(fileId);
@@ -215,10 +237,10 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
         <ul
           ref={listRef}
           className={`ns-file-list ${isDragging ? 'is-dragging' : ''}`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
           onKeyDown={handleKeyDown}
           tabIndex={0}
           role="list"
@@ -233,7 +255,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
                   type="button"
                   className={`ns-file state-${state} ${active ? 'active' : ''}`}
                   aria-current={active ? 'true' : undefined}
-                  onClick={() => handleCardClick(file.id)}
+                  onClick={(e) => handleCardClick(file.id, e)}
                 >
                   <span className="ns-file-title">{file.title}</span>
                   <span className="ns-file-meta">
