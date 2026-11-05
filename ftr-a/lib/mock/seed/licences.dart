@@ -148,4 +148,18 @@ void seedLicences(MockStore store) {
     risk: 960000,
     criticality: 'CRITICAL_A',
   );
+
+  add(
+    id: 'lic_factory',
+    typeId: 'lt_fire',
+    title: 'Factory licence, Keraniganj',
+    titleBn: 'কারখানা লাইসেন্স, কেরানীগঞ্জ',
+    licenceNo: 'DIFE-KER-2025-14',
+    siteId: 'site_plant',
+    owner: harun,
+    days: 9,
+    fee: 40000,
+    risk: 220000,
+    criticality: 'CRITICAL_A',
+  );
 }

@@ -8,9 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Search + notification bell for every root tab.
+/// Notification bell for every root tab. Search is on by default;
+/// Home turns it off.
 class AppBarActions extends ConsumerWidget {
-  const AppBarActions({super.key});
+  const AppBarActions({this.showSearch = true, super.key});
+
+  final bool showSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,11 +22,12 @@ class AppBarActions extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          tooltip: l10n.searchTitle,
-          onPressed: () => unawaited(showGlobalSearch(context)),
-          icon: const Icon(Icons.search),
-        ),
+        if (showSearch)
+          IconButton(
+            tooltip: l10n.searchTitle,
+            onPressed: () => unawaited(showGlobalSearch(context)),
+            icon: const Icon(Icons.search),
+          ),
         IconButton(
           tooltip: l10n.inboxTitle,
           onPressed: () => context.push(AppRoutes.inbox),

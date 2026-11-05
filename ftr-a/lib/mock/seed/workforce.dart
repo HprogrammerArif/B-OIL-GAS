@@ -91,6 +91,25 @@ void seedWorkforce(MockStore store) {
       });
   }
 
+  _openExit(
+    store,
+    code: 'EMP-1088',
+    id: 'ex_tariqul',
+    reason:
+        'Taking a maintenance role at the Mongla terminal. '
+        'Workshop tools and the radio are still with him.',
+    last: '2026-11-28',
+  );
+  _openExit(
+    store,
+    code: 'EMP-0914',
+    id: 'ex_mizanur',
+    reason:
+        'Retiring at the end of the month. Gate keys and the night '
+        'roster need a named replacement.',
+    last: '2026-11-30',
+  );
+
   _closed(
     store,
     id: 'ex_shakil',
@@ -113,6 +132,76 @@ void seedWorkforce(MockStore store) {
     note: 'Lab locker keys and gate pass returned.',
     voucher: 'FS-2026-074',
   );
+}
+
+void _openExit(
+  MockStore store, {
+  required String code,
+  required String id,
+  required String reason,
+  required String last,
+}) {
+  final person = store.get(Col.employees, empId(code));
+  if (person == null) return;
+  person['status'] = 'OFFBOARDING';
+  store
+    ..put(Col.employees, person)
+    ..put(Col.exitClearances, {
+      'id': id,
+      'employeeId': person['id'],
+      'status': 'OPEN',
+      'reason': reason,
+      'lastWorkingDay': last,
+      'voucherNo': null,
+      'initiatedByUserId': userIdFor('EMP-0028'),
+      'initiatedByName': 'Sayeda Afroza Sultana',
+      'initiatedAt': '2026-11-02T09:30:00.000Z',
+      'completedAt': null,
+      'items': [
+        _item(
+          'IT_ACCESS',
+          'SUPER_ADMIN',
+          'IT access and accounts',
+          'আইটি অ্যাকসেস ও অ্যাকাউন্ট',
+        ),
+        _item(
+          'RFID_BADGE',
+          'SECURITY_GATE',
+          'Gate badge and RFID',
+          'গেট ব্যাজ ও আরএফআইডি',
+        ),
+        _item(
+          'ASSETS_RETURNED',
+          'PLANT_GM',
+          'Company equipment',
+          'কোম্পানির যন্ত্রপাতি',
+        ),
+        _item(
+          'VEHICLE_FUEL_CARD',
+          'TRANSPORT_ADMIN',
+          'Fuel card and open trips',
+          'জ্বালানি কার্ড ও খোলা যাত্রা',
+        ),
+        _item(
+          'BUS_SEAT',
+          'TRANSPORT_ADMIN',
+          'Staff-bus seat',
+          'স্টাফ বাসের আসন',
+        ),
+        _item(
+          'FINANCE_SETTLEMENT',
+          'FINANCE',
+          'Pay, claims and advances',
+          'বেতন, দাবি ও অগ্রিম',
+        ),
+        _item(
+          'HR_EXIT_INTERVIEW',
+          'HR_ADMIN',
+          'Exit interview',
+          'প্রস্থান সাক্ষাৎকার',
+        ),
+      ],
+    });
 }
 
 void _closed(

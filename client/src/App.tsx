@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import './index.css';
 import Sidebar from './components/Sidebar';
-import Topbar from './components/Topbar';
+import Topbar, { SHOW_TOPBAR_SEARCH } from './components/Topbar';
 import CommandPalette from './components/CommandPalette';
 import AnnouncementBanner from './components/AnnouncementBanner';
 import MobileBottomNav from './components/MobileBottomNav';
@@ -79,7 +79,7 @@ export default function App() {
   // Global keyboard shortcuts (Ctrl+K search, Escape)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
+      if (SHOW_TOPBAR_SEARCH && (e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setShowCommandPalette((prev) => !prev);
       } else if (e.key === 'Escape') {

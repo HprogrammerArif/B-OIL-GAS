@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/modules.dart';
-import 'package:bogcl_oneops/app/routes.dart';
-import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
@@ -11,18 +9,16 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/dashboards/data/dashboard_repository.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_providers.dart';
-import 'package:bogcl_oneops/features/files/presentation/profile_avatar.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_role_panel.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Role landing: who I am, what needs me, one next action.
+/// Role landing: one status line, the next items, three shortcuts.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -54,7 +50,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       loading: () => const SkeletonList(),
       error: (_, _) =>
           ErrorState(onRetry: () => ref.invalidate(sessionControllerProvider)),
-      data: (s) => s == null ? const SizedBox.shrink() : _HomeBody(session: s),
+      data: (s) =>
+          s == null ? const SizedBox.shrink() : _HomeScaffold(session: s),
     );
   }
 }
@@ -87,58 +84,70 @@ List<AppModule> _shortcuts(Session session) {
   ];
 }
 
-class _HomeBody extends ConsumerWidget {
-  const _HomeBody({required this.session});
+/// Greeting stays still while the work list refreshes.
+class _HomeBar extends ConsumerWidget implements PreferredSizeWidget {
+  const _HomeBar();
 
-  final Session session;
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final theme = Theme.of(context);
-    final emp = session.profile.employee;
-    final executive = session.homeVariant == HomeVariant.executive;
-    final dash = ref.watch(dashboardMeProvider);
-    final shortcuts = _shortcuts(session);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _greeting(l10n, emp.shortDisplayName(bangla: bangla)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: executive ? context.bogcl.executiveGold : null,
-              ),
+    final identity = ref.watch(
+      sessionControllerProvider.select((async) {
+        final session = async.value;
+        final emp = session?.profile.employee;
+        if (session == null || emp == null) return null;
+        return (
+          name: emp.shortDisplayName(bangla: bangla),
+          title: emp.designationTitle(bangla: bangla),
+          executive: session.homeVariant == HomeVariant.executive,
+        );
+      }),
+    );
+    if (identity == null) return const SizedBox.shrink();
+    return AppBar(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _greeting(l10n, identity.name),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: identity.executive ? context.bogcl.executiveGold : null,
             ),
-            Text(
-              emp.designationTitle(bangla: bangla),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          const AppBarActions(),
-          IconButton(
-            tooltip: l10n.moreProfile,
-            onPressed: () => openAppRoute(context, AppRoutes.more),
-            icon: ProfileAvatar(
-              name: emp.fullName,
-              photoFileId: emp.photoFileId,
-              size: 32,
+          ),
+          Text(
+            identity.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
       ),
+      actions: const [AppBarActions(showSearch: false)],
+    );
+  }
+}
+
+class _HomeScaffold extends ConsumerWidget {
+  const _HomeScaffold({required this.session});
+
+  final Session session;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final shortcuts = _shortcuts(session);
+    return Scaffold(
+      appBar: const _HomeBar(),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(dashboardMeProvider);
@@ -147,29 +156,10 @@ class _HomeBody extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: Space.xxxl),
           children: [
-            dash.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(horizontal: Space.lg),
-                child: SkeletonList(itemCount: 3),
-              ),
-              error: (_, _) => ErrorState(
-                onRetry: () => ref.invalidate(dashboardMeProvider),
-              ),
-              data: (d) => _DashboardBlock(dashboard: d, session: session),
-            ),
+            _HomeWork(session: session),
             if (shortcuts.isNotEmpty) ...[
               SectionHeader(title: l10n.homeQuickActions),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: Space.lg),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < shortcuts.length; i++) ...[
-                      if (i > 0) const SizedBox(width: Space.md),
-                      Expanded(child: _ShortcutTile(module: shortcuts[i])),
-                    ],
-                  ],
-                ),
-              ),
+              _ShortcutRow(shortcuts: shortcuts),
             ],
           ],
         ),
@@ -178,137 +168,27 @@ class _HomeBody extends ConsumerWidget {
   }
 }
 
-class _DashboardBlock extends ConsumerWidget {
-  const _DashboardBlock({required this.dashboard, required this.session});
+class _HomeWork extends ConsumerWidget {
+  const _HomeWork({required this.session});
 
-  final Dashboard dashboard;
   final Session session;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final bangla = context.isBangla;
-    final d = dashboard;
-    final needs = d.needs.take(3).toList();
-    final moreNeeds = d.needs.length > 3;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (d.broadcast != null) _Banner(broadcast: d.broadcast!),
-        _RoleCard(dashboard: d, session: session),
-        HomeRolePanel(dashboard: d),
-        SectionHeader(title: l10n.dbNeedsTitle),
-        if (needs.isNotEmpty)
-          GroupCard(
-            margin: const EdgeInsets.symmetric(horizontal: Space.lg),
-            children: [
-              for (final n in needs)
-                ListRow(
-                  inset: true,
-                  title: n.text(bangla: bangla),
-                  trailing: n.route == '/home'
-                      ? null
-                      : const Icon(Icons.chevron_right),
-                  onTap: n.route == '/home'
-                      ? null
-                      : () => unawaited(context.push(n.route)),
-                ),
-            ],
-          ),
-        if (moreNeeds)
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton(
-              onPressed: () => openAppRoute(
-                context,
-                session.can('workflow:inbox')
-                    ? AppRoutes.approvals
-                    : AppRoutes.more,
-              ),
-              child: Text(l10n.homeSeeAll),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({required this.dashboard, required this.session});
-
-  final Dashboard dashboard;
-  final Session session;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final bangla = context.isBangla;
-    final theme = Theme.of(context);
-    final variant = session.homeVariant;
-    final kpis = dashboard.kpis.take(2).toList();
-    final (title, action, route) = switch (variant) {
-      HomeVariant.employee => (
-        l10n.homePrimaryEmployee,
-        l10n.homeActPunch,
-        AppRoutes.attendance,
+    final dash = ref.watch(dashboardMeProvider);
+    return dash.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(horizontal: Space.lg),
+        child: SkeletonList(itemCount: 3),
       ),
-      HomeVariant.driver => (
-        l10n.homePrimaryDriver,
-        l10n.homeActTrip,
-        AppRoutes.fleet,
-      ),
-      HomeVariant.operations =>
-        session.hasRole('MAILROOM')
-            ? (
-                l10n.homePrimaryMail,
-                l10n.homeActScanParcel,
-                AppRoutes.parcelNew,
-              )
-            : session.hasRole('HSE_OFFICER')
-            ? (l10n.homePrimaryHse, l10n.homeActIncidents, AppRoutes.incidents)
-            : session.hasRole('TRANSPORT_ADMIN')
-            ? (l10n.homePrimaryDriver, l10n.homeActTrip, AppRoutes.fleet)
-            : (l10n.homePrimaryGate, l10n.homeActScanGuest, AppRoutes.visitNew),
-      HomeVariant.approver => (
-        l10n.homePrimaryApprover,
-        l10n.homeActApprovals,
-        AppRoutes.approvals,
-      ),
-      HomeVariant.executive => (
-        l10n.homePrimaryApprover,
-        dashboard.canBroadcast ? l10n.homeActAnnounce : l10n.homeActApprovals,
-        dashboard.canBroadcast ? AppRoutes.noticeNew : AppRoutes.approvals,
-      ),
-    };
-
-    return Card(
-      margin: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
-      child: Padding(
-        padding: const EdgeInsets.all(Space.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: theme.textTheme.titleMedium),
-            if (kpis.isNotEmpty) ...[
-              const SizedBox(height: Space.md),
-              for (final k in kpis)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: Space.xs),
-                  child: Text(
-                    '${k.label(bangla: bangla)} · ${k.display()}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-            ],
-            const SizedBox(height: Space.md),
-            PrimaryButton(
-              label: action,
-              onPressed: () => openAppRoute(context, route),
-            ),
-          ],
-        ),
+      error: (_, _) =>
+          ErrorState(onRetry: () => ref.invalidate(dashboardMeProvider)),
+      data: (d) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (d.broadcast != null) _Banner(broadcast: d.broadcast!),
+          HomeRolePanel(dashboard: d, session: session),
+        ],
       ),
     );
   }
@@ -323,23 +203,80 @@ class _Banner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bangla = context.isBangla;
     final theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
-      color: theme.colorScheme.tertiaryContainer,
-      child: ListTile(
-        leading: const Icon(Icons.campaign_outlined),
-        title: Text(broadcast.title(bangla: bangla)),
-        subtitle: Text(broadcast.body(bangla: bangla)),
-        trailing: IconButton(
-          tooltip: context.l10n.commonClose,
-          onPressed: () async {
-            await ref
-                .read(dashboardRepositoryProvider)
-                .dismissBroadcast(broadcast.id);
-            ref.invalidate(dashboardMeProvider);
-          },
-          icon: const Icon(Icons.close),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+      child: Material(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(Corner.md),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            Space.lg,
+            Space.sm,
+            Space.xs,
+            Space.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.campaign_outlined,
+                size: 20,
+                color: theme.colorScheme.onTertiaryContainer,
+              ),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      broadcast.title(bangla: bangla),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    Text(
+                      broadcast.body(bangla: bangla),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: context.l10n.commonClose,
+                onPressed: () async {
+                  await ref
+                      .read(dashboardRepositoryProvider)
+                      .dismissBroadcast(broadcast.id);
+                  ref.invalidate(dashboardMeProvider);
+                },
+                icon: const Icon(Icons.close),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _ShortcutRow extends StatelessWidget {
+  const _ShortcutRow({required this.shortcuts});
+
+  final List<AppModule> shortcuts;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final module in shortcuts)
+            Expanded(child: _ShortcutTile(module: module)),
+        ],
       ),
     );
   }
@@ -360,14 +297,8 @@ class _ShortcutTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(Corner.lg),
         onTap: () => unawaited(context.push(module.route)),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(Corner.lg),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.85),
-            ),
-          ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: kMinTouchTarget),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: Space.sm,

@@ -121,6 +121,30 @@ const List<_Seed> _seeds = [
     reviewer: null,
     comment: null,
   ),
+  (
+    ref: 'LV-2026-0094',
+    emp: 'EMP-1042',
+    type: 'sl',
+    startOffset: 14,
+    days: 1,
+    reason: 'Fever. The clinic asked for one day of rest.',
+    createdDaysAgo: 0,
+    status: null,
+    reviewer: null,
+    comment: null,
+  ),
+  (
+    ref: 'LV-2026-0095',
+    emp: 'EMP-0821',
+    type: 'cl',
+    startOffset: 5,
+    days: 1,
+    reason: 'Daughter’s school admission interview in Savar.',
+    createdDaysAgo: 0,
+    status: null,
+    reviewer: null,
+    comment: null,
+  ),
 ];
 
 /// Leave types, this year's balances and a few requests. Pending requests go

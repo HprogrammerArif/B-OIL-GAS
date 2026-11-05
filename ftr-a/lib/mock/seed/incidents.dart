@@ -216,5 +216,33 @@ void seedIncidents(MockStore store) {
     anonymous: true,
   );
 
+  // 7–8. Still open, so the plant list and the home count are not a single case.
+  at(const Duration(hours: 10));
+  report(
+    who: emp,
+    id: 'inc_hose',
+    type: 'NEAR_MISS',
+    title: 'Steam hose parted at the drum heater',
+    description: 'The steam hose on drum heater 2 blew off the clip while an operator was standing beside it. Nobody was scalded. The clip is the original one from commissioning.',
+    siteId: 'site_plant',
+    zone: 'Drum filling bay',
+    when: wall().subtract(const Duration(hours: 11)),
+    severity: 3,
+    likelihood: 3,
+  );
+  at(const Duration(hours: 2));
+  report(
+    who: drv,
+    id: 'inc_gate',
+    type: 'HAZARD',
+    title: 'Weighbridge barrier stays down after a truck passes',
+    description: 'The exit barrier at the weighbridge did not lift after two tankers. Drivers are walking around it. The loop sensor looks flooded.',
+    siteId: 'site_plant',
+    zone: 'Weighbridge',
+    when: wall().subtract(const Duration(hours: 3)),
+    severity: 2,
+    likelihood: 4,
+  );
+
   IncidentEngine.seedClock = null;
 }

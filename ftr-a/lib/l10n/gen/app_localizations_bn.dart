@@ -160,6 +160,30 @@ class AppL10nBn extends AppL10n {
   String get homeFilesClear => 'কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।';
 
   @override
+  String homeFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি ফাইল আপনার অপেক্ষায়।',
+      one: '১টি ফাইল আপনার অপেক্ষায়।',
+      zero: 'কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeLocksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি মেশিন লক-আউট।',
+      one: '১টি মেশিন লক-আউট।',
+      zero: 'কোনো মেশিন লক-আউট নেই।',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get homeLeadersOnline => 'নেতৃত্বের ঘর';
 
   @override

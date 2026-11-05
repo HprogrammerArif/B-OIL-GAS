@@ -322,4 +322,88 @@ void seedNotifications(MockStore store) {
       'আপনার ট্রিপ ও ডিউটির সময় এখানে দেখা যাবে।',
     ),
   );
+
+  add(
+    'EMP-0001',
+    type: 'NOTE_SHEET_TO_SIGN',
+    priority: 'HIGH',
+    module: 'note-sheets',
+    agoMs: 40 * _minute,
+    title: const Bi(
+      'Four files are waiting for you',
+      'চারটি ফাইল আপনার অপেক্ষায়',
+    ),
+    body: const Bi(
+      'Tank, fire main, laboratory and generator files need your signature.',
+      'ট্যাংক, ফায়ার মেইন, ল্যাবরেটরি ও জেনারেটরের ফাইলে আপনার স্বাক্ষর লাগবে।',
+    ),
+  );
+  add(
+    'EMP-0012',
+    type: 'PERMIT_LOCKED',
+    priority: 'HIGH',
+    module: 'home',
+    agoMs: 90 * _minute,
+    title: const Bi('Three machines are locked out', 'তিনটি মেশিন লক-আউট'),
+    body: const Bi(
+      'Pump A, pump B and filling line 2 are still locked.',
+      'পাম্প ক, পাম্প খ এবং ফিলিং লাইন ২ এখনও লক।',
+    ),
+  );
+  add(
+    'EMP-0028',
+    type: 'EXIT_OPENED',
+    module: 'people',
+    agoMs: 3 * _hour,
+    title: const Bi('Two more people are leaving', 'আরও দুজন যাচ্ছেন'),
+    body: const Bi(
+      'Tariqul Islam and Mizanur Rahman have open exit files.',
+      'তরিকুল ইসলাম ও মিজানুর রহমানের প্রস্থান ফাইল খোলা।',
+    ),
+  );
+  add(
+    'EMP-0045',
+    type: 'FLEET_REQ_ENDORSE',
+    module: 'fleet',
+    agoMs: 2 * _hour,
+    title: const Bi('More cars need a driver', 'আরও গাড়িতে চালক লাগবে'),
+    body: const Bi(
+      'Mongla and Narayanganj are approved and still unassigned.',
+      'মোংলা ও নারায়ণগঞ্জ অনুমোদিত, এখনও চালক হয়নি।',
+    ),
+  );
+  add(
+    'EMP-0062',
+    type: 'NOTE_SHEET_TO_SIGN',
+    priority: 'HIGH',
+    module: 'note-sheets',
+    agoMs: 25 * _minute,
+    title: const Bi('New files from Sales', 'বিক্রয় থেকে নতুন ফাইল'),
+    body: const Bi(
+      'Stationery, uniforms and printers are waiting for your decision.',
+      'স্টেশনারি, ইউনিফর্ম ও প্রিন্টার আপনার সিদ্ধান্তের অপেক্ষায়।',
+    ),
+  );
+  add(
+    'EMP-1042',
+    type: 'LEAVE_SUBMITTED',
+    module: 'leave',
+    agoMs: 15 * _minute,
+    title: const Bi('Sick leave is with Finance', 'অসুস্থতার ছুটি অর্থ বিভাগে'),
+    body: const Bi(
+      'Farida Begum still has your one-day sick leave.',
+      'আপনার এক দিনের অসুস্থতার ছুটি এখনও ফরিদা বেগমের কাছে।',
+    ),
+  );
+  add(
+    'EMP-0821',
+    type: 'LEAVE_SUBMITTED',
+    module: 'leave',
+    agoMs: 50 * _minute,
+    title: const Bi('Casual leave sent', 'নৈমিত্তিক ছুটি পাঠানো হয়েছে'),
+    body: const Bi(
+      'Transport has your Savar leave for the school interview.',
+      'স্কুলের সাক্ষাৎকারের সাভার ছুটি পরিবহনের কাছে।',
+    ),
+  );
 }

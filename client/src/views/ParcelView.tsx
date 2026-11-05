@@ -407,7 +407,7 @@ export default function ParcelView({ lang }: ViewProps) {
   const confirmReturnSubmission = async () => {
     if (!selectedParcel || !user) return;
     if (!canIssue) {
-      showToast(t('Only the recipient, the mail desk, or the driver carrying this pouch can send it back.', 'শুধু প্রাপক, মেইল ডেস্ক, বা এই পাউচ বহনকারী চালক এটি ফেরত পাঠাতে পারেন।', lang), 'warn');
+      showToast(t('Only the recipient or the mail desk can send this pouch back. You are the driver.', 'শুধু প্রাপক বা মেইল ডেস্ক এই পাউচ ফেরত পাঠাতে পারেন। আপনি চালক।', lang), 'warn');
       return;
     }
     if (returnNotes.trim().length < 10) {
@@ -1101,7 +1101,7 @@ export default function ParcelView({ lang }: ViewProps) {
                       {t('Report Issue / Return', 'সমস্যা / ফেরত পাঠান', lang)}
                     </button>
                   )}
-                  {(canIssue || selectedAction !== 'none') && selectedParcel.tamperStatus !== 'flagged' && selectedParcel.currentStage < 5 && (
+                  {canIssue && selectedParcel.tamperStatus !== 'flagged' && selectedParcel.currentStage < 5 && (
                     <button
                       type="button"
                       className="btn-outline-danger"
@@ -1630,6 +1630,10 @@ export default function ParcelView({ lang }: ViewProps) {
                   className="btn-primary"
                   style={{ background: 'var(--status-danger-solid)', justifyContent: 'center' }}
                   onClick={() => {
+                    if (!canIssue) {
+                      showToast(t('Only the recipient or the mail desk can send this pouch back.', 'শুধু প্রাপক বা মেইল ডেস্ক এই পাউচ ফেরত পাঠাতে পারেন।', lang), 'warn');
+                      return;
+                    }
                     setShowTamperModal(false);
                     setReturnReason('tamper_broken');
                     setShowReturnModal(true);

@@ -48,6 +48,8 @@
   "homeActIncidents": "দুর্ঘটনা খুলুন",
   "homeFilesWaiting": "আপনার অপেক্ষায় ফাইল",
   "homeFilesClear": "কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।",
+  "homeFilesCount": "{count, plural, =0{কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।} =1{১টি ফাইল আপনার অপেক্ষায়।} other{{count}টি ফাইল আপনার অপেক্ষায়।}}",
+  "homeLocksCount": "{count, plural, =0{কোনো মেশিন লক-আউট নেই।} =1{১টি মেশিন লক-আউট।} other{{count}টি মেশিন লক-আউট।}}",
   "homeLeadersOnline": "নেতৃত্বের ঘর",
   "homeRoomQuiet": "নতুন বার্তা নেই",
   "homeUnread": "{count} নতুন",

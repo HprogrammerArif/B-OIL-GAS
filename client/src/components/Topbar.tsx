@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
-  Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
+  Globe, Megaphone, ChevronDown, LogOut, Lock, User,
   Search, Moon, Sun, Clock, ChevronRight, Menu, Key, UserCheck,
   Check, RefreshCw
 } from 'lucide-react';
@@ -29,6 +29,10 @@ const PAGE_META: Record<string, { section: string; sectionBn: string; en: string
   approvals:       { section: 'Approvals',     sectionBn: 'অনুমোদন',       en: 'Pending Approvals Center',         bn: 'অপেক্ষমাণ অনুমোদন কেন্দ্র',           sub: 'Review and approve purchases, expense claims, car bookings & leave', subBn: 'ক্রয় প্রস্তাব, ব্যয় বিল, গাড়ি বুকিং ও ছুটি অনুমোদন' },
   vehicle_request: { section: 'Transport',     sectionBn: 'পরিবহন',        en: 'Book Company Car',                 bn: 'অফিসিয়াল গাড়ি বুকিং',               sub: 'Request an office vehicle for client meetings or plant visits',      subBn: 'দাপ্তরিক কাজের জন্য অফিসের গাড়ির আবেদন' },
 };
+
+/** Hidden for now — set true to bring back the command palette trigger and clock pill. */
+export const SHOW_TOPBAR_SEARCH = false;
+export const SHOW_TOPBAR_CLOCK = false;
 
 const DEFAULT_PAGE_META = {
   section: 'Operations',
@@ -92,8 +96,8 @@ export default function Topbar({
   const canBroadcast = useCan('notices:broadcast');
   const canSeeSync = useCan('settings:sync_status');
 
-  // Real-time ticking clock
   useEffect(() => {
+    if (!SHOW_TOPBAR_CLOCK) return;
     const updateTime = () => {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('en-US', {
@@ -167,30 +171,31 @@ export default function Topbar({
       </div>
 
       <div className="topbar-right">
-        {/* 1. Global Search Trigger */}
-        <button
-          className="topbar-search-trigger"
-          onClick={onOpenSearch}
-          title={t('Quick Search across pages & records (Ctrl+K)', 'পেইজ ও রেকর্ড দ্রুত অনুসন্ধান করুন (Ctrl+K)', lang)}
-        >
-          <Search size={13} className="search-icon" />
-          <span className="search-placeholder">{t('Search pages & files...', 'অনুসন্ধান...', lang)}</span>
-          <span className="search-kbd">Ctrl+K</span>
-        </button>
+        {SHOW_TOPBAR_SEARCH && (
+          <button
+            className="topbar-search-trigger"
+            onClick={onOpenSearch}
+            title={t('Quick Search across pages & records (Ctrl+K)', 'পেইজ ও রেকর্ড দ্রুত অনুসন্ধান করুন (Ctrl+K)', lang)}
+          >
+            <Search size={13} className="search-icon" />
+            <span className="search-placeholder">{t('Search pages & files...', 'অনুসন্ধান...', lang)}</span>
+            <span className="search-kbd">Ctrl+K</span>
+          </button>
+        )}
 
-        {/* 2. Integrations & Clock Capsule */}
-        <div
-          className={`topbar-telemetry-capsule${canSeeSync ? '' : ' telemetry-hide-mobile'}`}
-          onClick={() => canSeeSync && setShowSapModal(true)}
-          style={canSeeSync ? undefined : { cursor: 'default' }}
-          title={canSeeSync ? t('View integration status', 'ইন্টিগ্রেশন স্ট্যাটাস দেখুন', lang) : undefined}
-        >
-          
-          <div className="telemetry-clock telemetry-hide-mobile">
-            <Clock size={11} className="clock-icon" />
-            <span className="clock-time">{currentTime}</span>
+        {SHOW_TOPBAR_CLOCK && (
+          <div
+            className={`topbar-telemetry-capsule${canSeeSync ? '' : ' telemetry-hide-mobile'}`}
+            onClick={() => canSeeSync && setShowSapModal(true)}
+            style={canSeeSync ? undefined : { cursor: 'default' }}
+            title={canSeeSync ? t('View integration status', 'ইন্টিগ্রেশন স্ট্যাটাস দেখুন', lang) : undefined}
+          >
+            <div className="telemetry-clock telemetry-hide-mobile">
+              <Clock size={11} className="clock-icon" />
+              <span className="clock-time">{currentTime}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 3. Quick Utilities Dock (Notifications, Dark Mode, Language) */}
         <div className="topbar-utility-dock">
@@ -267,7 +272,6 @@ export default function Topbar({
               <span className="user-avatar-initials">{meta.initials}</span>
               <span className="avatar-status-dot" title={t('Active Session', 'সক্রিয় সেশন', lang)} />
             </div>
-            <ChevronDown size={11} className={`chevron-indicator ${showDropdown ? 'open' : ''}`} />
           </button>
 
           {/* User Profile Hover Tooltip */}
@@ -289,15 +293,14 @@ export default function Topbar({
 
           {/* Profile Dropdown Menu */}
           {showDropdown && (
-            <div className="user-dropdown-menu" role="menu" aria-label="User Account Menu">
-              {/* Pinned Header */}
+            <div className="user-dropdown-menu" role="menu" aria-label={t('Account menu', 'অ্যাকাউন্ট মেনু', lang)}>
               <div className="user-dropdown-hd">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                  <div className="user-avatar" style={{ background: meta.avatarColor, width: '38px', height: '38px', fontSize: '13px' }}>
+                <div className="user-dropdown-who">
+                  <div className="user-avatar user-dropdown-avatar" style={{ background: meta.avatarColor }}>
                     {meta.avatarUrl ? (
                       <img
                         src={meta.avatarUrl}
-                        alt={meta.shortName}
+                        alt=""
                         className="user-avatar-img"
                         onError={(e) => {
                           (e.currentTarget as HTMLElement).style.display = 'none';
@@ -307,31 +310,23 @@ export default function Topbar({
                     <span className="user-avatar-initials">{meta.initials}</span>
                     <span className="avatar-status-dot" />
                   </div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div className="name" style={{ fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(meta.name, meta.nameBn, lang)}</span>
-                    </div>
-                    <div className="role" style={{ fontSize: '10.5px', color: 'var(--brand-gold)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {t(meta.label, meta.labelBn, lang)}
-                    </div>
-                    <div style={{ fontSize: '9.5px', color: 'rgba(255,255,255,0.7)', marginTop: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {meta.email}
-                    </div>
+                  <div className="user-dropdown-who-text">
+                    <div className="user-dd-name">{t(meta.name, meta.nameBn, lang)}</div>
+                    <div className="user-dd-role">{t(meta.label, meta.labelBn, lang)}</div>
+                    <div className="user-dd-email">{meta.email}</div>
                   </div>
                 </div>
-
-                <div className="user-dropdown-meta-strip">
-                  <span className="strip-access-level">
-                    <Shield size={11} color="var(--brand-gold)" />
-                    {t(accessLevel.en, accessLevel.bn, lang)}
-                  </span>
-                  <span className="strip-emp-id">{meta.empId}</span>
+                <div className="user-dropdown-pills">
+                  <span className="user-dd-pill gold">{meta.empId}</span>
+                  <span className="user-dd-pill">{t(accessLevel.en, accessLevel.bn, lang)}</span>
                 </div>
               </div>
 
-              {/* Scrollable Body (Actions & Quick Switcher) */}
               <div className="user-dropdown-body">
-                <div
+                <p className="user-dd-group">{t('Account', 'অ্যাকাউন্ট', lang)}</p>
+                <button
+                  type="button"
+                  role="menuitem"
                   className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
@@ -339,19 +334,16 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <div className="user-dropdown-icon-box slate">
-                    <User size={15} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600 }}>{t('My Employee Profile', 'আমার কর্মী প্রোফাইল', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-                      {t(`${meta.empId} • ${meta.siteLabel}`, `${meta.empId} • ${meta.siteLabelBn}`, lang)}
-                    </div>
-                  </div>
-                  <ChevronRight size={13} color="var(--brand-slate-300)" />
-                </div>
-
-                <div
+                  <span className="user-dropdown-icon"><User size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('My profile', 'আমার প্রোফাইল', lang)}</span>
+                    <span className="user-dd-hint">{t(meta.siteLabel, meta.siteLabelBn, lang)}</span>
+                  </span>
+                  <ChevronRight size={14} className="user-dd-chevron" />
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
                   className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
@@ -359,19 +351,18 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <div className="user-dropdown-icon-box success">
-                    <Key size={15} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Password & Login Security', 'পাসওয়ার্ড ও নিরাপত্তা', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--status-success)' }}>
-                      ✓ {t('2-Step Verification Active', '২-ধাপ নিরাপত্তা যাচাই চালু', lang)}
-                    </div>
-                  </div>
-                  <ChevronRight size={13} color="var(--brand-slate-300)" />
-                </div>
+                  <span className="user-dropdown-icon"><Key size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('Password & security', 'পাসওয়ার্ড ও নিরাপত্তা', lang)}</span>
+                    <span className="user-dd-hint ok">{t('Two-step sign-in is on', 'দুই ধাপের সাইন-ইন চালু', lang)}</span>
+                  </span>
+                  <ChevronRight size={14} className="user-dd-chevron" />
+                </button>
 
-                <div
+                <p className="user-dd-group">{t('Work', 'কাজ', lang)}</p>
+                <button
+                  type="button"
+                  role="menuitem"
                   className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
@@ -379,19 +370,16 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <div className="user-dropdown-icon-box warning">
-                    <UserCheck size={15} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-                      {t('Assign an acting colleague during leave or travel', 'ছুটি বা ভ্রমণে বিকল্প দায়িত্বপ্রাপ্ত কর্মকর্তা নির্ধারণ', lang)}
-                    </div>
-                  </div>
-                  <ChevronRight size={13} color="var(--brand-slate-300)" />
-                </div>
-
-                <div
+                  <span className="user-dropdown-icon"><UserCheck size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('Out of office', 'ছুটিকালীন দায়িত্ব', lang)}</span>
+                    <span className="user-dd-hint">{t('Name a colleague while you are away', 'আপনি না থাকলে সহকর্মীর নাম দিন', lang)}</span>
+                  </span>
+                  <ChevronRight size={14} className="user-dd-chevron" />
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
                   className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
@@ -399,37 +387,27 @@ export default function Topbar({
                     setShowProfileModal(true);
                   }}
                 >
-                  <div className="user-dropdown-icon-box info">
-                    <Clock size={15} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Active Devices & Sign-In Log', 'সক্রিয় ডিভাইস ও লগইন ইতিহাস', lang)}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-                      {t('Manage signed-in computers and mobile phones', 'লগইনকৃত কম্পিউটার ও মোবাইল পরিচালনা', lang)}
-                    </div>
-                  </div>
-                  <ChevronRight size={13} color="var(--brand-slate-300)" />
-                </div>
+                  <span className="user-dropdown-icon"><Clock size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('Signed-in devices', 'লগইনকৃত ডিভাইস', lang)}</span>
+                    <span className="user-dd-hint">{t('Computers and phones on this account', 'এই অ্যাকাউন্টে কম্পিউটার ও ফোন', lang)}</span>
+                  </span>
+                  <ChevronRight size={14} className="user-dd-chevron" />
+                </button>
 
-                {/* Quick Persona Switcher Accordion */}
                 <div className="user-dropdown-role-section">
                   <button
                     type="button"
                     className="user-dropdown-role-toggle"
                     onClick={() => setShowRoleSwitcher((prev) => !prev)}
+                    aria-expanded={showRoleSwitcher}
                   >
-                    <div className="user-dropdown-icon-box gold">
-                      <RefreshCw size={13} className={showRoleSwitcher ? 'rotating-slow' : ''} />
-                    </div>
-                    <div style={{ flex: 1, textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600, fontSize: '11.5px' }}>
-                        {t('Switch Demo Persona (7 Roles)', 'ডেমো রোল পরিবর্তন করুন', lang)}
-                      </div>
-                      <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>
-                        {t(`Current: ${meta.shortName}`, `বর্তমান: ${meta.shortName}`, lang)}
-                      </div>
-                    </div>
-                    <ChevronDown size={13} className={`chevron-indicator ${showRoleSwitcher ? 'open' : ''}`} />
+                    <span className="user-dropdown-icon gold"><RefreshCw size={14} /></span>
+                    <span className="user-dd-copy">
+                      <span className="user-dd-title">{t('Switch demo person', 'ডেমো ব্যক্তি বদলান', lang)}</span>
+                      <span className="user-dd-hint">{t(meta.shortName, meta.shortName, lang)}</span>
+                    </span>
+                    <ChevronDown size={14} className={`chevron-indicator ${showRoleSwitcher ? 'open' : ''}`} />
                   </button>
 
                   {showRoleSwitcher && (
@@ -447,27 +425,21 @@ export default function Topbar({
                               setShowDropdown(false);
                               showToast(
                                 t(
-                                  `Switched persona to ${rMeta.name} (${rMeta.label})`,
-                                  `${rMeta.nameBn} হিসেবে পরিবর্তন করা হয়েছে`,
-                                  lang
-                                )
+                                  `Now signed in as ${rMeta.name}`,
+                                  `এখন ${rMeta.nameBn} হিসেবে সাইন ইন`,
+                                  lang,
+                                ),
                               );
                             }}
                           >
-                            <div
-                              className="role-mini-emoji-box"
-                              style={{
-                                background: `${rMeta.avatarColor}1A`,
-                                borderColor: `${rMeta.avatarColor}40`,
-                              }}
-                            >
-                              <span className="role-mini-emoji" style={{ fontSize: '11px', fontWeight: 700 }}>{rMeta.initials}</span>
-                            </div>
-                            <div className="role-item-meta">
-                              <div className="role-item-name">{t(rMeta.name, rMeta.nameBn, lang)}</div>
-                              <div className="role-item-title">{t(rMeta.label, rMeta.labelBn, lang)}</div>
-                            </div>
-                            {isCurrent && <Check size={13} color="var(--status-success)" />}
+                            <span className="role-mini-avatar" style={{ background: rMeta.avatarColor }}>
+                              {rMeta.initials}
+                            </span>
+                            <span className="role-item-meta">
+                              <span className="role-item-name">{t(rMeta.name, rMeta.nameBn, lang)}</span>
+                              <span className="role-item-title">{t(rMeta.label, rMeta.labelBn, lang)}</span>
+                            </span>
+                            {isCurrent && <Check size={14} className="user-dd-check" />}
                           </button>
                         );
                       })}
@@ -476,44 +448,38 @@ export default function Topbar({
                 </div>
               </div>
 
-              {/* Pinned Footer (Lock Screen & Sign Out are NEVER hidden!) */}
               <div className="user-dropdown-footer">
-                <div
-                  className="user-dropdown-item lock-item"
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="user-dropdown-item"
                   onClick={() => {
                     setShowDropdown(false);
                     setShowLockScreen(true);
                   }}
                 >
-                  <div className="user-dropdown-icon-box slate">
-                    <Lock size={14} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{t('Lock Screen', 'স্ক্রিন লক করুন', lang)}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--brand-slate-400)' }}>
-                      {t('Temporarily lock with 4-digit PIN', '৪-সংখ্যার পিন দিয়ে স্ক্রিন লক করুন', lang)}
-                    </div>
-                  </div>
+                  <span className="user-dropdown-icon"><Lock size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('Lock screen', 'স্ক্রিন লক', lang)}</span>
+                    <span className="user-dd-hint">{t('Lock with a 4-digit PIN', '৪ সংখ্যার পিন দিয়ে লক করুন', lang)}</span>
+                  </span>
                   <kbd className="lock-kbd">PIN</kbd>
-                </div>
-
-                <div
-                  className="user-dropdown-item danger logout-item"
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="user-dropdown-item danger"
                   onClick={() => {
                     setShowDropdown(false);
                     onLogout();
                   }}
                 >
-                  <div className="user-dropdown-icon-box danger">
-                    <LogOut size={15} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: 'var(--status-danger)' }}>{t('Sign Out', 'সাইন আউট করুন', lang)}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--status-danger)', opacity: 0.85 }}>
-                      {t('Close session and return to sign-in screen', 'সেশন শেষ করে লগইন পেইজে ফিরে যান', lang)}
-                    </div>
-                  </div>
-                </div>
+                  <span className="user-dropdown-icon danger"><LogOut size={15} /></span>
+                  <span className="user-dd-copy">
+                    <span className="user-dd-title">{t('Sign out', 'সাইন আউট', lang)}</span>
+                    <span className="user-dd-hint">{t('Return to the sign-in screen', 'সাইন-ইন পাতায় ফিরুন', lang)}</span>
+                  </span>
+                </button>
               </div>
             </div>
           )}

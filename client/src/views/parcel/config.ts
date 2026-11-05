@@ -60,9 +60,9 @@ export function parcelActionFor(p: ParcelItem, user: CurrentUser, mode: ParcelMo
   return p.currentStage === 4 ? 'verify_delivery' : 'scan';
 }
 
-/** Who may raise a return / flag a broken seal: the recipient, the desk, or the driver carrying it. */
+/** Who may raise a return / flag a broken seal: the recipient or the mail desk — not the driver. */
 export const canRaiseIssue = (p: ParcelItem, user: CurrentUser, mode: ParcelMode) =>
-  mode === 'desk' || isRecipient(p, user) || isCourierOf(p, user);
+  mode === 'desk' || isRecipient(p, user);
 
 /** 4-digit PIN from the platform CSPRNG. */
 export function newPin(): string {

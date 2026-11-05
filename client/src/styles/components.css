@@ -3024,71 +3024,105 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 
 .user-dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 292px;
+  width: 320px;
   max-width: calc(100vw - 20px);
-  max-height: min(580px, calc(100vh - 75px));
+  max-height: min(620px, calc(100vh - 72px));
   background: var(--surface-1);
-  border: 1px solid var(--brand-slate-200);
-  border-radius: var(--radius-lg, 12px);
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--border-1);
+  border-radius: 14px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(165, 28, 48, 0.06);
   z-index: 1000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.user-dropdown-menu::before {
+  content: '';
+  display: block;
+  height: 3px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--brand-crimson) 0%, var(--brand-gold) 100%);
+}
 
 .user-dropdown-hd {
   flex-shrink: 0;
-  padding: 12px 14px 10px;
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-  color: var(--text-inverse);
-  border-bottom: 2px solid var(--brand-gold);
+  padding: 14px 14px 12px;
+  background: var(--surface-inverse);
+  color: var(--text-on-brand);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
 }
 
-.active-pill-badge {
-  font-size: 9px;
-  font-weight: 700;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.15);
-  padding: 1px 6px;
-  border-radius: 10px;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  letter-spacing: 0.2px;
-}
-
-.user-dropdown-meta-strip {
+.user-dropdown-who {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 9.5px;
+  gap: 12px;
 }
-
-.strip-access-level {
-  color: var(--brand-gold-light, #FDE047);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.user-dropdown-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  font-size: 13px !important;
+}
+.user-dropdown-who-text {
+  min-width: 0;
+  flex: 1;
+}
+.user-dd-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-on-brand);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-dd-role {
+  font-size: 11.5px;
   font-weight: 600;
+  color: var(--brand-gold);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-.strip-emp-id {
-  font-family: monospace;
-  color: #38BDF8;
+.user-dd-email {
+  font-size: 11px;
+  color: var(--text-inverse-2, rgba(255, 255, 255, 0.65));
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-dropdown-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.user-dd-pill {
+  font-size: 10.5px;
   font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.user-dd-pill.gold {
+  color: var(--brand-gold);
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.35);
+  font-family: var(--font-mono, ui-monospace, monospace);
 }
 
 .user-dropdown-body {
   flex: 1 1 auto;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 4px 0;
-  min-height: 100px;
+  padding: 6px 0 8px;
+  min-height: 80px;
 }
 
 .user-dropdown-body::-webkit-scrollbar {
@@ -3108,78 +3142,97 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   background: #334155;
 }
 
+.user-dd-group {
+  margin: 8px 14px 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
 .user-dropdown-item {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 8px 12px;
-  font-size: 11.5px;
-  color: var(--brand-slate-700);
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-1);
   cursor: pointer;
-  transition: all var(--transition-fast);
-  user-select: none;
+  text-align: left;
+  transition: background var(--transition-fast);
 }
-
-.user-dropdown-item:hover {
-  background: var(--brand-slate-100);
-  color: var(--brand-slate-900);
+.user-dropdown-item:hover,
+.user-dropdown-item:focus-visible {
+  background: var(--brand-crimson-soft, rgba(165, 28, 48, 0.06));
+  outline: none;
 }
 
 [data-theme="dark"] .user-dropdown-item {
-  color: #CBD5E1;
+  color: #E2E8F0;
 }
 
-[data-theme="dark"] .user-dropdown-item:hover {
-  background: #16254C;
-  color: #FFFFFF;
+[data-theme="dark"] .user-dropdown-item:hover,
+[data-theme="dark"] .user-dropdown-item:focus-visible {
+  background: rgba(165, 28, 48, 0.18);
 }
 
-.user-dropdown-icon-box {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+.user-dd-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.user-dd-title {
+  font-weight: 700;
+  font-size: 12.5px;
+  color: inherit;
+  line-height: 1.3;
+}
+.user-dd-hint {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  line-height: 1.3;
+}
+.user-dd-hint.ok {
+  color: var(--status-success-text, var(--status-success));
+}
+.user-dd-chevron {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+
+.user-dropdown-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  background: var(--brand-crimson-soft, rgba(165, 28, 48, 0.08));
+  color: var(--brand-crimson);
 }
-
-.user-dropdown-icon-box.slate {
-  background: rgba(100, 116, 139, 0.12);
-  color: var(--brand-slate-600);
+.user-dropdown-icon.gold {
+  background: rgba(212, 175, 55, 0.16);
+  color: var(--brand-gold-dark, var(--brand-gold));
 }
-
-.user-dropdown-icon-box.success {
-  background: rgba(16, 185, 129, 0.12);
-  color: var(--status-success);
-}
-
-.user-dropdown-icon-box.warning {
-  background: rgba(245, 158, 11, 0.12);
-  color: var(--status-warning);
-}
-
-.user-dropdown-icon-box.info {
-  background: rgba(14, 165, 233, 0.12);
-  color: var(--status-info);
-}
-
-.user-dropdown-icon-box.gold {
-  background: rgba(212, 175, 55, 0.15);
-  color: var(--brand-gold);
-}
-
-.user-dropdown-icon-box.danger {
-  background: rgba(239, 68, 68, 0.12);
+.user-dropdown-icon.danger {
+  background: var(--status-danger-bg, rgba(220, 38, 38, 0.1));
   color: var(--status-danger);
 }
 
-/* Quick Role Switcher section */
 .user-dropdown-role-section {
-  margin: 6px 10px;
-  border: 1px solid var(--brand-slate-200);
-  border-radius: 8px;
-  background: var(--surface-2, rgba(0, 0, 0, 0.02));
+  margin: 8px 10px 4px;
+  border: 1px solid var(--border-1);
+  border-radius: 10px;
+  background: var(--surface-0, var(--surface-2));
   overflow: hidden;
 }
 
@@ -3197,39 +3250,31 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--brand-slate-700);
-  transition: background var(--transition-fast);
+  color: var(--text-1);
+  text-align: left;
+  font: inherit;
+}
+
+.user-dropdown-role-toggle:hover {
+  background: var(--brand-crimson-soft, rgba(165, 28, 48, 0.06));
 }
 
 [data-theme="dark"] .user-dropdown-role-toggle {
   color: #E2E8F0;
 }
 
-.user-dropdown-role-toggle:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
 [data-theme="dark"] .user-dropdown-role-toggle:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.rotating-slow {
-  animation: spin 3s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  background: rgba(165, 28, 48, 0.18);
 }
 
 .user-dropdown-role-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 4px 6px 6px;
-  max-height: 180px;
+  padding: 6px;
+  max-height: 220px;
   overflow-y: auto;
-  border-top: 1px solid var(--brand-slate-200);
+  border-top: 1px solid var(--border-1);
 }
 
 [data-theme="dark"] .user-dropdown-role-list {
@@ -3260,7 +3305,11 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 
 .user-role-item.active {
   background: rgba(212, 175, 55, 0.12);
-  border-color: rgba(212, 175, 55, 0.35);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+.user-dd-check {
+  color: var(--brand-gold-dark, var(--brand-gold));
+  flex-shrink: 0;
 }
 
 .role-mini-emoji-box {
@@ -3312,9 +3361,10 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 .role-item-name {
-  font-size: 11px;
+  display: block;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--brand-slate-900);
+  color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3325,24 +3375,24 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 .role-item-title {
-  font-size: 9.5px;
-  color: var(--brand-slate-400);
+  display: block;
+  font-size: 11px;
+  color: var(--text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Pinned Footer at Bottom — NEVER cut off by viewport */
 .user-dropdown-footer {
   flex-shrink: 0;
-  padding: 6px 0 6px;
-  border-top: 1px solid var(--brand-slate-200);
-  background: var(--surface-1);
+  padding: 6px 0 8px;
+  border-top: 1px solid var(--border-1);
+  background: var(--surface-0, var(--surface-1));
 }
 
 [data-theme="dark"] .user-dropdown-footer {
   border-top-color: #1E293B;
-  background: #0B132B;
+  background: #080E21;
 }
 
 .lock-kbd {
@@ -3362,17 +3412,12 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   border-color: #334155;
 }
 
-.user-dropdown-item.logout-item {
-  border-top: 1px dashed rgba(239, 68, 68, 0.2);
-  margin-top: 4px;
-  padding-top: 8px;
-}
-
-.user-dropdown-item.danger {
+.user-dropdown-item.danger .user-dd-title,
+.user-dropdown-item.danger .user-dd-hint {
   color: var(--status-danger);
 }
-
-.user-dropdown-item.danger:hover {
+.user-dropdown-item.danger:hover,
+.user-dropdown-item.danger:focus-visible {
   background: var(--status-danger-bg);
 }
 

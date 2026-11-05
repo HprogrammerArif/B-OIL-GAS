@@ -1,6 +1,8 @@
 import 'package:bogcl_oneops/mock/engines/note_sheet_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
+import 'package:bogcl_oneops/mock/router.dart';
+import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
@@ -84,4 +86,161 @@ void seedNoteSheets(MockStore store) {
     type: 'RETURN',
     comment: 'Please add the failure dates and the part numbers.',
   );
+
+  final gm = seedAuthFor(store, 'EMP-0012');
+  _queueForHod(store, emp);
+  _queueForGm(store, emp, hod);
+  _queueForChairman(store, emp, hod, gm);
+}
+
+void _queueForHod(MockStore store, AuthContext emp) {
+  void file(String title, String subject, int amount, String why) {
+    final sheet = NoteSheetEngine.create(store, emp, {
+      'title': title,
+      'subject': subject,
+      'amount': amount,
+      'justification': why,
+      if (amount >= 200000)
+        'quotes': [
+          _quote('City Office Supply', amount, 5, 6, rec: true),
+          _quote('Delta Traders', amount + 40000, 8, 6),
+          _quote('Meghna Stationers', amount + 75000, 12, 3),
+        ],
+    });
+    NoteSheetEngine.submit(store, emp, sheet);
+  }
+
+  file(
+    'Toner and paper for the finance floor',
+    'Quarterly stationery for Finance',
+    75000,
+    'The finance floor runs out of toner before month-end close. '
+        'This covers one quarter for the shared printers.',
+  );
+  file(
+    'Winter uniforms for the depot staff',
+    'Jackets and shoes, 40 sets',
+    240000,
+    'Depot staff still use last year’s jackets. Stores asked for '
+        'one winter issue before the night shift starts.',
+  );
+  file(
+    'Two network printers for the sales pit',
+    'Replacement printers, sales floor',
+    410000,
+    'Both sales printers jam on every long run. Dispatch is '
+        'printing bills on a borrowed machine.',
+  );
+}
+
+void _queueForGm(MockStore store, AuthContext emp, AuthContext hod) {
+  void file(String title, String subject, int amount, String why) {
+    final sheet = NoteSheetEngine.create(store, emp, {
+      'title': title,
+      'subject': subject,
+      'amount': amount,
+      'urgency': 'HIGH',
+      'justification': why,
+      'quotes': [
+        _quote('Energypac Engineering', amount, 14, 12, rec: true),
+        _quote('Walton Industrial', amount + 120000, 21, 12),
+        _quote('Rangs Services', amount + 180000, 28, 6),
+      ],
+    });
+    NoteSheetEngine.submit(store, emp, sheet);
+    _signUntil(store, sheet, [hod]);
+  }
+
+  file(
+    'Overhaul the cooling-tower fans',
+    'Fan motors and blades, cooling tower 2',
+    900000,
+    'Two fans are vibrating above the trip limit. The plant '
+        'cannot hold summer throughput without the overhaul.',
+  );
+  file(
+    'Replace the weighbridge load cells',
+    'Load cells and calibration, truck weighbridge',
+    1800000,
+    'The weighbridge drifts by more than the customs tolerance. '
+        'Every outbound tanker is being reweighed by hand.',
+  );
+}
+
+void _queueForChairman(
+  MockStore store,
+  AuthContext emp,
+  AuthContext hod,
+  AuthContext gm,
+) {
+  void file(String title, String subject, int amount, String why) {
+    final sheet = NoteSheetEngine.create(store, emp, {
+      'title': title,
+      'subject': subject,
+      'amount': amount,
+      'urgency': 'HIGH',
+      'justification': why,
+      'quotes': [
+        _quote('Bashundhara Infrastructure', amount, 45, 24, rec: true),
+        _quote('Max Group Projects', amount + 350000, 60, 18),
+        _quote('Abdul Monem Ltd', amount + 520000, 75, 12),
+      ],
+    });
+    NoteSheetEngine.submit(store, emp, sheet);
+    _signUntil(store, sheet, [hod, gm]);
+  }
+
+  file(
+    'New bitumen storage tank TK-109',
+    'Tank, foundation and piping for 5,000 MT',
+    3200000,
+    'TK-102 cannot be taken offline for repair while the '
+        'terminal is full. A spare tank is the only way to keep '
+        'imports moving through the shutdown.',
+  );
+  file(
+    'Fire-water ring main for the tank farm',
+    'Ring main, hydrants and a jockey pump',
+    4100000,
+    'The fire licence renewal will fail unless the tank farm '
+        'has a closed ring main. The inspector’s letter is on file.',
+  );
+  file(
+    'Laboratory building extension',
+    'Two extra test bays and a fume hood',
+    2750000,
+    'Bitumen samples queue for two days. The offtake contract '
+        'requires same-day certificates from December.',
+  );
+  file(
+    'Backup generator for the loading gantry',
+    '750 kVA set and an automatic transfer switch',
+    3600000,
+    'A grid trip last month stopped four tankers on the gantry. '
+        'The product set in the arms and took a day to clear.',
+  );
+}
+
+/// Signs every step these people can sign, and stops before the Chairman.
+void _signUntil(MockStore store, Json sheet, List<AuthContext> signers) {
+  for (final who in signers) {
+    for (var i = 0; i < 6 && sheet['status'] == 'IN_REVIEW'; i++) {
+      final inst = store.get(
+        Col.workflowInstances,
+        sheet.str('workflowInstanceId'),
+      );
+      if (inst == null) return;
+      final step = WorkflowEngine.actionableStep(
+        store,
+        inst,
+        who.user.str('id'),
+      );
+      if (step == null) break;
+      if (step['key'] == 'CHAIRMAN') return;
+      NoteSheetEngine.sign(store, who, sheet, {
+        'method': 'TYPED',
+        'typedName': who.employee.str('fullName'),
+      }, skipOtp: true);
+    }
+  }
 }
