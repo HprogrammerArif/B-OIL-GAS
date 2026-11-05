@@ -383,6 +383,82 @@ class Regularisation {
   final String? workflowInstanceId;
 }
 
+@immutable
+class TeamRosterRow {
+  const TeamRosterRow({
+    required this.employeeId,
+    required this.empCode,
+    required this.name,
+    required this.nameBn,
+    required this.status,
+    required this.needsReview,
+    this.firstInAt,
+    this.lateMinutes = 0,
+    this.workflowInstanceId,
+  });
+
+  factory TeamRosterRow.fromJson(Map<String, Object?> j) => TeamRosterRow(
+    employeeId: j['employeeId'] as String? ?? '',
+    empCode: j['empCode'] as String? ?? '',
+    name: j['name'] as String? ?? '',
+    nameBn: j['nameBn'] as String? ?? '',
+    status: j['status'] as String? ?? '',
+    needsReview: j['needsReview'] == true,
+    firstInAt: j['firstInAt'] as String?,
+    lateMinutes: (j['lateMinutes'] as num?)?.toInt() ?? 0,
+    workflowInstanceId: j['workflowInstanceId'] as String?,
+  );
+
+  final String employeeId;
+  final String empCode;
+  final String name;
+  final String nameBn;
+  final String status;
+  final bool needsReview;
+  final String? firstInAt;
+  final int lateMinutes;
+  final String? workflowInstanceId;
+}
+
+@immutable
+class TeamRoster {
+  const TeamRoster({
+    required this.date,
+    required this.present,
+    required this.late,
+    required this.onLeave,
+    required this.toReview,
+    required this.headcount,
+    required this.roster,
+  });
+
+  factory TeamRoster.fromJson(Map<String, Object?> j) {
+    final k = j['kpis'] is Map
+        ? Map<String, Object?>.from(j['kpis']! as Map)
+        : const <String, Object?>{};
+    return TeamRoster(
+      date: j['date'] as String? ?? '',
+      present: (k['present'] as num?)?.toInt() ?? 0,
+      late: (k['late'] as num?)?.toInt() ?? 0,
+      onLeave: (k['onLeave'] as num?)?.toInt() ?? 0,
+      toReview: (k['toReview'] as num?)?.toInt() ?? 0,
+      headcount: (k['headcount'] as num?)?.toInt() ?? 0,
+      roster: [
+        for (final e in j['roster'] as List? ?? const [])
+          if (e is Map) TeamRosterRow.fromJson(Map<String, Object?>.from(e)),
+      ],
+    );
+  }
+
+  final String date;
+  final int present;
+  final int late;
+  final int onLeave;
+  final int toReview;
+  final int headcount;
+  final List<TeamRosterRow> roster;
+}
+
 /// A device position fix used for a punch.
 @immutable
 class LocationFix {

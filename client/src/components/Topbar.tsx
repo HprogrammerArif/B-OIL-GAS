@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award,
-  Check, RefreshCw, Sparkles
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, UserCheck,
+  Check, RefreshCw
 } from 'lucide-react';
 import { useCan, sessionStore } from '../auth/session';
 import SapGatewayModal from './SapGatewayModal';
@@ -266,21 +266,6 @@ export default function Topbar({
               ) : null}
               <span className="user-avatar-initials">{meta.initials}</span>
               <span className="avatar-status-dot" title={t('Active Session', 'সক্রিয় সেশন', lang)} />
-              {role === 'chairman' && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
-                    fontSize: '10px',
-                    lineHeight: 1,
-                    pointerEvents: 'none',
-                  }}
-                  title="Chairman & Managing Director"
-                >
-                  👑
-                </span>
-              )}
             </div>
             <ChevronDown size={11} className={`chevron-indicator ${showDropdown ? 'open' : ''}`} />
           </button>
@@ -297,7 +282,6 @@ export default function Topbar({
                 {t(meta.dept, meta.deptBn, lang)} • {t(meta.siteLabel, meta.siteLabelBn, lang)}
               </div>
               <div className="tooltip-footer-hint">
-                <Sparkles size={11} color="var(--brand-gold)" />
                 <span>{t('Click for profile & settings', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}</span>
               </div>
             </div>
@@ -326,7 +310,6 @@ export default function Topbar({
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div className="name" style={{ fontSize: '12.5px', fontWeight: 800, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '5px' }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(meta.name, meta.nameBn, lang)}</span>
-                      <span className="active-pill-badge">🟢 {t('Online', 'অনলাইন', lang)}</span>
                     </div>
                     <div className="role" style={{ fontSize: '10.5px', color: 'var(--brand-gold)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t(meta.label, meta.labelBn, lang)}
@@ -397,7 +380,7 @@ export default function Topbar({
                   }}
                 >
                   <div className="user-dropdown-icon-box warning">
-                    <Award size={15} />
+                    <UserCheck size={15} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>
@@ -478,7 +461,7 @@ export default function Topbar({
                                 borderColor: `${rMeta.avatarColor}40`,
                               }}
                             >
-                              <span className="role-mini-emoji">{rMeta.roleEmoji || '👤'}</span>
+                              <span className="role-mini-emoji" style={{ fontSize: '11px', fontWeight: 700 }}>{rMeta.initials}</span>
                             </div>
                             <div className="role-item-meta">
                               <div className="role-item-name">{t(rMeta.name, rMeta.nameBn, lang)}</div>

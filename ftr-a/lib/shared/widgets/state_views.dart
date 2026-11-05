@@ -26,7 +26,20 @@ class _CenteredMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(Space.xl),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
             const SizedBox(height: Space.lg),
             Text(
               title,

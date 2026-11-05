@@ -66,6 +66,7 @@ Json _instanceWire(MockStore store, Json i) => {
   'initiator': WorkflowEngine.personRef(store, i.str('initiatorId')),
   'submittedAt': i['submittedAt'],
   'completedAt': i['completedAt'],
+  'rejectionExplanation': i['rejectionExplanation'],
 };
 
 /// Active steps the caller can decide, as inbox rows.

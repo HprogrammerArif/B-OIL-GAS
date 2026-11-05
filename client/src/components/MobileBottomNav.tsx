@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppRole, AppView, Lang, t } from '../types';
 import {
-  Crown, MessageSquare, ClipboardCheck, FileSignature, Menu,
+  LayoutDashboard, MessageSquare, ClipboardCheck, FileSignature, Menu,
   Gauge, Wrench, AlertTriangle, Truck, Bus, Users,
   MapPin, Receipt, Car, Briefcase
 } from 'lucide-react';
@@ -24,7 +24,7 @@ interface MobileBottomNavProps {
 
 const ROLE_BOTTOM_TABS: Record<AppRole, BottomTab[]> = {
   chairman: [
-    { view: 'dashboard',    label: 'Overview',   labelBn: 'ড্যাশবোর্ড', icon: <Crown size={19} /> },
+    { view: 'dashboard',    label: 'Overview',   labelBn: 'ড্যাশবোর্ড', icon: <LayoutDashboard size={19} /> },
     { view: 'inner_circle', label: 'Messages',   labelBn: 'বার্তালাপ',  icon: <MessageSquare size={19} /> },
     { view: 'approvals',    label: 'Approvals',  labelBn: 'অনুমোদন',    icon: <ClipboardCheck size={19} /> },
     { view: 'notesheet',    label: 'Documents',  labelBn: 'নথিপত্র',    icon: <FileSignature size={19} /> },

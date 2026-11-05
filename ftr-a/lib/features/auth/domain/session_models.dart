@@ -147,4 +147,13 @@ class Session {
     }
     return HomeVariant.employee;
   }
+
+  /// Chat sits on the tab bar for leadership only (not Employee or Driver).
+  bool get showChatTab {
+    if (homeVariant == HomeVariant.employee ||
+        homeVariant == HomeVariant.driver) {
+      return false;
+    }
+    return can('chat:use');
+  }
 }

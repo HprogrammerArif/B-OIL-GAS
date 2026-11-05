@@ -465,6 +465,24 @@
 }
 
 /* ─── KANBAN BOARD ────────────────────────────────────────────────────────── */
+[data-theme="dark"] .pipe-work,
+[data-theme="dark"] .pipe-step,
+[data-theme="dark"] .pipe-work-row {
+  background: var(--surface-1);
+  border-color: var(--border-1);
+}
+[data-theme="dark"] .pipe-work-title,
+[data-theme="dark"] .pipe-step-title,
+[data-theme="dark"] .pipe-work-row strong {
+  color: var(--text-1);
+}
+[data-theme="dark"] .k-next.is-yours { color: var(--text-1); }
+[data-theme="dark"] .pipe-nav {
+  background: var(--surface-1);
+  color: var(--text-1);
+  border-color: var(--border-1);
+}
+
 [data-theme="dark"] .kanban-col {
   background: #080E21 !important;
   border-color: #1E293B !important;

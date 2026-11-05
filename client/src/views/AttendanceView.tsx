@@ -2,16 +2,30 @@ import { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert, Building2, Factory, LocateFixed,
+  Clock, MapPin, Users, LogIn, LogOut, CalendarDays, Plus, AlertTriangle, Navigation, ShieldAlert, Building2, Factory, LocateFixed, Search, X, SearchX,
 } from 'lucide-react';
 import { useOperationsStore, type ShiftWorker, type LeaveRequestItem } from '../store/operationsStore';
 import { approvalStore } from '../store/approvalStore';
 import { useCan } from '../auth/session';
-import { today } from '../lib/clock';
 import { Button, Card, EmptyState, FormField, Modal, PageHeader, StatusPill, type StatusTone } from '../components/ui';
+import Pagination from '../components/Pagination';
 import {
   SITES, SITE_LIST, type SiteId, type GeoFix, requestPosition, nearestSite, isLateFor, formatDistance, useAttendanceScope,
 } from './attendance/config';
+
+type RosterKind = 'all' | 'review' | 'late' | 'leave' | 'on_site';
+const ROSTER_PAGE = 8;
+const KIND_RANK: Record<Exclude<RosterKind, 'all'> | 'out', number> = {
+  review: 0, late: 1, leave: 2, on_site: 3, out: 4,
+};
+
+function rowKind(w: ShiftWorker): Exclude<RosterKind, 'all'> | 'out' {
+  if (w.locationStatus === 'manual_review') return 'review';
+  if (w.locationStatus === 'late') return 'late';
+  if (w.locationStatus === 'absent') return 'leave';
+  if (w.outTime !== '-' && w.outTime !== 'On Duty') return 'out';
+  return 'on_site';
+}
 
 /** Annual entitlements (days) — see docs/platform/06 BR-LV. */
 const LEAVE_ENTITLEMENT: Record<LeaveRequestItem['leaveType'], number> = {
@@ -359,6 +373,11 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
   const [toDate, setToDate] = useState('');
   const [reason, setReason] = useState('');
   const [leaveError, setLeaveError] = useState<string | null>(null);
+  const [rosterQuery, setRosterQuery] = useState('');
+  const [rosterKind, setRosterKind] = useState<RosterKind>('all');
+  const [rosterSite, setRosterSite] = useState<SiteId | 'all'>('all');
+  const [rosterPage, setRosterPage] = useState(1);
+  const canApplyLeave = role !== 'chairman';
 
   const myLeaves = useMemo(
     () => (user ? leaveRequests.filter((l) => l.empId === user.empId) : []),
@@ -385,8 +404,39 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       late: visible.filter((w) => w.locationStatus === 'late').length,
       review: visible.filter((w) => w.locationStatus === 'manual_review').length,
       onLeave: visible.filter((w) => w.locationStatus === 'absent').length,
+      onSite: visible.filter((w) => rowKind(w) === 'on_site').length,
     };
   }, [visible]);
+
+  const rosterSites = useMemo(() => {
+    const ids = new Set(visible.map((w) => w.site));
+    return SITE_LIST.filter((s) => ids.has(s.id));
+  }, [visible]);
+
+  const filteredRoster = useMemo(() => {
+    const q = rosterQuery.trim().toLowerCase();
+    const rows = visible.filter((w) => {
+      if (rosterSite !== 'all' && w.site !== rosterSite) return false;
+      if (rosterKind !== 'all' && rowKind(w) !== rosterKind) return false;
+      if (!q) return true;
+      return [w.name, w.roleTitle, w.dept, w.id, w.shift].some((v) => v.toLowerCase().includes(q));
+    });
+    return [...rows].sort((a, b) => {
+      const rank = KIND_RANK[rowKind(a)] - KIND_RANK[rowKind(b)];
+      return rank !== 0 ? rank : a.name.localeCompare(b.name);
+    });
+  }, [visible, rosterQuery, rosterKind, rosterSite]);
+
+  const rosterPages = Math.max(1, Math.ceil(filteredRoster.length / ROSTER_PAGE));
+  const safeRosterPage = Math.min(rosterPage, rosterPages);
+  const pagedRoster = filteredRoster.slice((safeRosterPage - 1) * ROSTER_PAGE, safeRosterPage * ROSTER_PAGE);
+
+  const setRosterFilter = (next: Partial<{ query: string; kind: RosterKind; site: SiteId | 'all' }>) => {
+    if (next.query !== undefined) setRosterQuery(next.query);
+    if (next.kind !== undefined) setRosterKind(next.kind);
+    if (next.site !== undefined) setRosterSite(next.site);
+    setRosterPage(1);
+  };
 
   const recordPunchIn = (siteId: SiteId, status: ShiftWorker['locationStatus'], distanceM: number) => {
     punchAttendance(role, 'in', siteId, { locationStatus: status, distanceMeters: distanceM });
@@ -487,26 +537,22 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       : punchedOutToday && myRecord
         ? t(`You worked ${myRecord.inTime} to ${myRecord.outTime} today. Nothing more to do.`, `আজ আপনি ${myRecord.inTime} থেকে ${myRecord.outTime} পর্যন্ত কাজ করেছেন। আর কিছু করার নেই।`, lang)
         : t(`You have not punched in yet. Be at ${siteLabel(defaultSite)} and tap Punch in.`, `আপনি এখনও পাঞ্চ-ইন করেননি। ${siteLabel(defaultSite)}-এ পৌঁছে পাঞ্চ-ইন চাপুন।`, lang);
-  const leaveStatus = pendingMine > 0
+  const leaveStatus = canApplyLeave && pendingMine > 0
     ? t(` ${pendingMine} leave ${pendingMine === 1 ? 'request is' : 'requests are'} waiting for your manager.`, ` ${bn(pendingMine)}টি ছুটির আবেদন ম্যানেজারের অপেক্ষায়।`, lang)
     : '';
 
   return (
     <div className="view-container">
-      <PageHeader
-        title={t('Attendance & leave', 'উপস্থিতি ও ছুটি', lang)}
-        description={
-          seesOthers
-            ? t('Your punch console, leave requests, and the attendance roster for your team.', 'আপনার পাঞ্চ কনসোল, ছুটির আবেদন এবং আপনার দলের উপস্থিতি রোস্টার।', lang)
-            : t('Punch in at a company site, track your hours and apply for leave.', 'কোম্পানির সাইটে পাঞ্চ-ইন করুন, কর্মঘণ্টা দেখুন ও ছুটির আবেদন করুন।', lang)
-        }
-        meta={<span style={{ fontSize: 12, color: 'var(--text-3)' }}>{today()}</span>}
-        actions={
-          <Button variant="secondary" icon={<Plus size={14} />} onClick={() => setShowLeaveModal(true)} disabled={onLeaveToday}>
-            {t('Request leave', 'ছুটির আবেদন', lang)}
-          </Button>
-        }
-      />
+      {canApplyLeave && (
+        <PageHeader
+          title={t('Attendance & leave', 'উপস্থিতি ও ছুটি', lang)}
+          actions={
+            <Button variant="secondary" icon={<Plus size={14} />} onClick={() => setShowLeaveModal(true)} disabled={onLeaveToday}>
+              {t('Request leave', 'ছুটির আবেদন', lang)}
+            </Button>
+          }
+        />
+      )}
 
       <p className={`lv-status ${onDuty ? 'ok' : ''}`} role="status">
         {onLeaveToday ? <CalendarDays size={16} /> : onDuty ? <LogIn size={16} /> : <Clock size={16} />}
@@ -599,7 +645,11 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         {/* My leave */}
         <Card
           title={t('My leave', 'আমার ছুটি', lang)}
-          subtitle={t(`Days you can still take in ${new Date().getFullYear()}, and where your requests stand`, `${new Date().getFullYear()} সালে আর কত দিন ছুটি নিতে পারবেন, এবং আবেদনের অবস্থা`, lang)}
+          subtitle={
+            canApplyLeave
+              ? t(`Days you can still take in ${new Date().getFullYear()}, and where your requests stand`, `${new Date().getFullYear()} সালে আর কত দিন ছুটি নিতে পারবেন, এবং আবেদনের অবস্থা`, lang)
+              : t(`Leave balances for ${new Date().getFullYear()}. HR records any leave taken.`, `${new Date().getFullYear()} সালের ছুটির হিসাব। ছুটি এইচআর রেকর্ড করে।`, lang)
+          }
         >
           <div className="lv-balances">
             {balances.map((b) => (
@@ -617,7 +667,11 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
               compact
               icon={<CalendarDays size={20} />}
               title={t('No leave requests yet', 'এখনও কোনো ছুটির আবেদন নেই', lang)}
-              description={t('Requests you submit will be tracked here with their approval status.', 'আপনার জমা দেওয়া আবেদন ও অনুমোদনের অবস্থা এখানে দেখা যাবে।', lang)}
+              description={
+                canApplyLeave
+                  ? t('Requests you submit will be tracked here with their approval status.', 'আপনার জমা দেওয়া আবেদন ও অনুমোদনের অবস্থা এখানে দেখা যাবে।', lang)
+                  : t('The Chairman does not submit leave requests. HR records any absence.', 'চেয়ারম্যান ছুটির আবেদন করেন না। অনুপস্থিতি এইচআর রেকর্ড করে।', lang)
+              }
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -659,50 +713,133 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
 
           <Card
             title={t('Team roster', 'দলের রোস্টার', lang)}
-            subtitle={t('Today\'s punches and site verification for people in your scope', 'আপনার আওতাধীন কর্মীদের আজকের পাঞ্চ ও সাইট যাচাই', lang)}
+            subtitle={t(
+              `${teamStats.present} of ${teamStats.total} on site or at work. ${teamStats.late} late, ${teamStats.onLeave} on leave${teamStats.review ? `, ${teamStats.review} to review` : ''}.`,
+              `${bn(teamStats.total)} জনের মধ্যে ${bn(teamStats.present)} জন কাজে। ${bn(teamStats.late)} জন বিলম্বে, ${bn(teamStats.onLeave)} জন ছুটিতে${teamStats.review ? `, ${bn(teamStats.review)} জন পর্যালোচনায়` : ''}।`,
+              lang,
+            )}
             padded={false}
             className="mb-5"
           >
-            <div className="table-responsive">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>{t('Employee', 'কর্মী', lang)}</th>
-                    <th>{t('Role & department', 'পদ ও বিভাগ', lang)}</th>
-                    <th>{t('Site · shift', 'সাইট · শিফট', lang)}</th>
-                    <th>{t('Punch in', 'পাঞ্চ-ইন', lang)}</th>
-                    <th>{t('Status', 'অবস্থা', lang)}</th>
-                    <th>{t('Overtime', 'ওভারটাইম', lang)}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visible.map((r) => (
-                    <tr key={r.id}>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{r.name}{r.id === user.empId ? ` (${t('you', 'আপনি', lang)})` : ''}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: 12 }}>{r.roleTitle}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.dept}</div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: 12 }}>{siteLabel(r.site)}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.shift}</div>
-                      </td>
-                      <td><strong>{r.locationStatus === 'absent' ? '—' : r.inTime}</strong></td>
-                      <td>{statusPill(r, lang)}</td>
-                      <td>
-                        {r.overtimeHours > 0 ? (
-                          <StatusPill tone="gold">+{r.overtimeHours} h</StatusPill>
-                        ) : (
-                          <span style={{ fontSize: 11, color: 'var(--text-3)' }}>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="cn-toolbar" style={{ padding: '12px 16px 8px' }}>
+              <div className="psf-filters" role="group" aria-label={t('Filter roster', 'রোস্টার ফিল্টার', lang)}>
+                {([
+                  { key: 'all' as const, label: t('All', 'সব', lang), count: visible.length },
+                  { key: 'review' as const, label: t('To review', 'পর্যালোচনা', lang), count: teamStats.review },
+                  { key: 'late' as const, label: t('Late', 'বিলম্বে', lang), count: teamStats.late },
+                  { key: 'leave' as const, label: t('On leave', 'ছুটিতে', lang), count: teamStats.onLeave },
+                  { key: 'on_site' as const, label: t('On site', 'সাইটে', lang), count: teamStats.onSite },
+                ]).filter((f) => f.key === 'all' || f.count > 0).map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    className={`psf-filter ${rosterKind === f.key ? 'active' : ''}`}
+                    aria-pressed={rosterKind === f.key}
+                    onClick={() => setRosterFilter({ kind: f.key })}
+                  >
+                    {f.label} <b>{f.count}</b>
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                {rosterSites.length > 1 && (
+                  <select
+                    className="form-input"
+                    style={{ height: 36, fontSize: 12, minWidth: 160, padding: '0 10px' }}
+                    value={rosterSite}
+                    aria-label={t('Site', 'সাইট', lang)}
+                    onChange={(e) => setRosterFilter({ site: e.target.value as SiteId | 'all' })}
+                  >
+                    <option value="all">{t('All sites', 'সব সাইট', lang)}</option>
+                    {rosterSites.map((s) => (
+                      <option key={s.id} value={s.id}>{t(...s.label, lang)}</option>
+                    ))}
+                  </select>
+                )}
+                <label className="dash-search">
+                  <Search size={14} aria-hidden />
+                  <input
+                    type="search"
+                    value={rosterQuery}
+                    onChange={(e) => setRosterFilter({ query: e.target.value })}
+                    placeholder={t('Search name, role or department', 'নাম, পদ বা বিভাগ খুঁজুন', lang)}
+                    aria-label={t('Search roster', 'রোস্টার খুঁজুন', lang)}
+                  />
+                  {rosterQuery && (
+                    <button type="button" onClick={() => setRosterFilter({ query: '' })} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                      <X size={13} />
+                    </button>
+                  )}
+                </label>
+              </div>
             </div>
+            {pagedRoster.length === 0 ? (
+              <div style={{ padding: '8px 16px 20px' }}>
+                <EmptyState
+                  compact
+                  icon={<SearchX size={20} />}
+                  title={t('No one matches', 'কেউ মেলেনি', lang)}
+                  description={t('Try another name, site or status.', 'অন্য নাম, সাইট বা অবস্থা চেষ্টা করুন।', lang)}
+                  action={
+                    <Button variant="secondary" size="sm" onClick={() => setRosterFilter({ query: '', kind: 'all', site: 'all' })}>
+                      {t('Show everyone', 'সবাই দেখুন', lang)}
+                    </Button>
+                  }
+                />
+              </div>
+            ) : (
+              <>
+                <div className="table-responsive">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>{t('Employee', 'কর্মী', lang)}</th>
+                        <th>{t('Role & department', 'পদ ও বিভাগ', lang)}</th>
+                        <th>{t('Site · shift', 'সাইট · শিফট', lang)}</th>
+                        <th>{t('Punch in', 'পাঞ্চ-ইন', lang)}</th>
+                        <th>{t('Status', 'অবস্থা', lang)}</th>
+                        <th>{t('Overtime', 'ওভারটাইম', lang)}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pagedRoster.map((r) => (
+                        <tr key={r.id}>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{r.name}{r.id === user.empId ? ` (${t('you', 'আপনি', lang)})` : ''}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: 12 }}>{r.roleTitle}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.dept}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: 12 }}>{siteLabel(r.site)}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.shift}</div>
+                          </td>
+                          <td><strong>{r.locationStatus === 'absent' ? '—' : r.inTime}</strong></td>
+                          <td>{statusPill(r, lang)}</td>
+                          <td>
+                            {r.overtimeHours > 0 ? (
+                              <StatusPill tone="gold">+{r.overtimeHours} h</StatusPill>
+                            ) : (
+                              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ padding: '4px 16px 12px' }}>
+                  <Pagination
+                    currentPage={safeRosterPage}
+                    totalItems={filteredRoster.length}
+                    pageSize={ROSTER_PAGE}
+                    onPageChange={setRosterPage}
+                    lang={lang}
+                  />
+                </div>
+              </>
+            )}
           </Card>
 
           {teamLeaves.length > 0 && (
@@ -807,9 +944,9 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         )}
       </Modal>
 
-      {/* Apply for leave */}
+      {/* Apply for leave — not shown for Chairman (BR-10-12: informational / HR-recorded). */}
       <Modal
-        open={showLeaveModal}
+        open={canApplyLeave && showLeaveModal}
         onClose={() => { setShowLeaveModal(false); setLeaveError(null); }}
         title={t('Request leave', 'ছুটির আবেদন', lang)}
         icon={<CalendarDays size={16} />}

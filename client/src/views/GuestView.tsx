@@ -8,12 +8,12 @@ import { nowStamp, nowTime, today } from '../lib/clock';
 import { type GuestMode, guestModeFor, visitorsVisibleTo, isMyGuest } from './guest/config';
 import {
   Users, User, UserCheck, ShieldAlert, QrCode, Plus, Search,
-  CheckCircle, Clock, AlertTriangle, Building2, Crown,
+  CheckCircle, Clock, AlertTriangle, Building2,
   Download, Car, Shield, Phone, FileText, Check, X,
-  Printer, Smartphone, ShieldCheck, Send, Sparkles,
+  Printer, Smartphone, ShieldCheck, Send,
   HardHat, Eye, MapPin, Compass, AlertCircle, Share2,
   ExternalLink, Key, CheckSquare, RefreshCw, ChevronRight,
-  Flame, Radio, UserX, MessageSquare, Scan, Camera, Coffee,
+  Radio, UserX, MessageSquare, Scan, Camera, Coffee,
   FileCheck, CheckCircle2, Navigation, Mail, MessageCircle
 } from 'lucide-react';
 
@@ -579,7 +579,7 @@ export default function GuestView({ lang }: ViewProps) {
                 style={{ fontSize: '12px', padding: '7px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => setShowMusterModal(true)}
               >
-                <Flame size={14} />
+                <Users size={14} />
                 {t('Evacuation roll-call', 'ইভাকুয়েশন রোল-কল', lang)} ({stats.totalInside})
               </button>
               <button
@@ -1472,15 +1472,14 @@ export default function GuestView({ lang }: ViewProps) {
                 {/* Quick Fill Presets */}
                 <div style={{ background: 'var(--surface-0)', border: '1px solid var(--brand-slate-200)', borderRadius: '8px', padding: '9px 12px', marginBottom: '14px' }}>
                   <div style={{ fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--brand-slate-500)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <Sparkles size={12} color="var(--brand-crimson)" />
                     <span>{t('Fill with an example', 'উদাহরণ দিয়ে পূরণ করুন', lang)}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="btn-outline"
-                      style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '999px' }}
-                      onClick={() => {
+                  <select
+                    className="form-input"
+                    value=""
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === 'rhd') {
                         setFormName('Engr. Kamrul Hasan');
                         setFormOrg('Roads & Highways Department (RHD)');
                         setFormDesignation('Superintending Engineer');
@@ -1489,15 +1488,7 @@ export default function GuestView({ lang }: ViewProps) {
                         setFormVehicle('DHAKA-METRO-GHA-15-4410');
                         setFormPhone('+880 1711-224488');
                         setFormPurpose('Bitumen 60/70 batch quality verification and laboratory witness test.');
-                      }}
-                    >
-                      {t('RHD Govt Engineer', 'সড়ক ও জনপথ প্রকৌশলী', lang)}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-outline"
-                      style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '999px' }}
-                      onClick={() => {
+                      } else if (v === 'vip') {
                         setFormName('Syed Mahbubur Rahman');
                         setFormOrg('Eastern Infrastructure & Asphalt Ltd.');
                         setFormDesignation('Managing Director');
@@ -1506,15 +1497,7 @@ export default function GuestView({ lang }: ViewProps) {
                         setFormVehicle('DHAKA-METRO-GA-39-8801');
                         setFormPhone('+880 1713-009911');
                         setFormPurpose('Annual bulk bitumen supply contract review with commercial leadership.');
-                      }}
-                    >
-                      {t('VIP Commercial Client', 'ভিআইপি গ্রাহক', lang)}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-outline"
-                      style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '999px' }}
-                      onClick={() => {
+                      } else if (v === 'vendor') {
                         setFormName('Tariqul Alam');
                         setFormOrg('Siemens Bangladesh Ltd.');
                         setFormDesignation('Lead Automation Specialist');
@@ -1523,11 +1506,14 @@ export default function GuestView({ lang }: ViewProps) {
                         setFormVehicle('DHAKA-METRO-CHA-51-2109');
                         setFormPhone('+880 1819-554433');
                         setFormPurpose('PLC control panel diagnostics and scheduled instrumentation service.');
-                      }}
-                    >
-                      {t('Service Vendor', 'সার্ভিস ভেন্ডর', lang)}
-                    </button>
-                  </div>
+                      }
+                    }}
+                  >
+                    <option value="">{t('Choose an example guest…', 'একটি উদাহরণ বেছে নিন…', lang)}</option>
+                    <option value="rhd">{t('RHD Govt Engineer', 'সড়ক ও জনপথ প্রকৌশলী', lang)}</option>
+                    <option value="vip">{t('VIP Commercial Client', 'ভিআইপি গ্রাহক', lang)}</option>
+                    <option value="vendor">{t('Service Vendor', 'সার্ভিস ভেন্ডর', lang)}</option>
+                  </select>
                 </div>
 
                 <div className="form-row">
@@ -1724,7 +1710,7 @@ export default function GuestView({ lang }: ViewProps) {
             <div className="modal" style={{ maxWidth: '820px' }} onClick={(e) => e.stopPropagation()}>
               <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Flame size={22} color="var(--status-danger-bright)" />
+                  <Users size={22} color="var(--text-on-brand)" />
                   <div>
                     <h3 style={{ color: 'var(--text-on-brand)', margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {t('Emergency Evacuation Muster List (HSE Roll-Call)', 'জরুরি ইভাকুয়েশন মাস্টার রোল-কল তালিকা', lang)}

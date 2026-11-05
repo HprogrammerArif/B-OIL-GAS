@@ -1,225 +1,229 @@
+import 'package:bogcl_oneops/mock/engines/fleet_engine.dart';
+import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
+import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
-Future<void> seedFleet(MockStore store, int version) async {
-  if (version >= 11) return;
+void _vehicle(
+  MockStore store, {
+  required String id,
+  required String plate,
+  required String type,
+  required int capacity,
+  required String site,
+  int odo = 42000,
+  bool hazmat = false,
+  int tank = 75,
+}) {
+  store.put(Col.fleetVehicles, {
+    'id': id,
+    'plateNo': plate,
+    'type': type,
+    'capacity': capacity,
+    'status': 'AVAILABLE',
+    'siteId': site,
+    'odometerKm': odo,
+    'isHazmat': hazmat,
+    'tankLiters': tank,
+    'reservedTripId': null,
+    'documents': [
+      {
+        'kind': 'FITNESS',
+        'expiresAt': DateTime.parse(store.nowIso())
+            .add(const Duration(days: 200))
+            .toIso8601String(),
+      },
+      {
+        'kind': 'INSURANCE',
+        'expiresAt': DateTime.parse(store.nowIso())
+            .add(const Duration(days: 120))
+            .toIso8601String(),
+      },
+      if (hazmat)
+        {
+          'kind': 'HAZMAT_PERMIT',
+          'expiresAt': DateTime.parse(store.nowIso())
+              .add(const Duration(days: 90))
+              .toIso8601String(),
+        },
+    ],
+  });
+}
 
-  final now = store.nowIso();
-  final today = now.substring(0, 10);
+void seedFleet(MockStore store) {
+  FleetEngine.registerHooks();
+  final emp = seedAuthFor(store, 'EMP-1042');
+  final hod = seedAuthFor(store, 'EMP-0062');
+  final desk = seedAuthFor(store, 'EMP-0045');
+  final driver = seedAuthFor(store, 'EMP-0821');
 
-  final vehicles = <Json>[
-    {
-      'id': 'vehicle_001',
-      'plate': 'DHA-GA-11-1234',
-      'type': 'sedan_4',
-      'make': 'Toyota',
-      'model': 'Corolla Altis',
-      'year': 2022,
-      'color': 'White',
-      'status': 'available',
-      'odometer': 42150,
-      'lastFueled': '${today}T07:00:00+06:00',
-      'siteId': 'site_hq',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'vehicle_002',
-      'plate': 'DHA-GA-11-5678',
-      'type': 'microbus_7',
-      'make': 'Toyota',
-      'model': 'HiAce GL',
-      'year': 2021,
-      'color': 'White',
-      'status': 'available',
-      'odometer': 87300,
-      'lastFueled': '${today}T06:30:00+06:00',
-      'siteId': 'site_hq',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'vehicle_003',
-      'plate': 'KRN-GA-71-4411',
-      'type': 'pickup_4x4',
-      'make': 'Toyota',
-      'model': 'Hilux Double Cab',
-      'year': 2020,
-      'color': 'Silver',
-      'status': 'in_transit',
-      'odometer': 63900,
-      'lastFueled': '2026-10-31T08:00:00+06:00',
-      'siteId': 'site_plant',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'vehicle_004',
-      'plate': 'DHA-GA-14-9900',
-      'type': 'sedan_4',
-      'make': 'Toyota',
-      'model': 'Camry Executive',
-      'year': 2023,
-      'color': 'Black',
-      'status': 'available',
-      'odometer': 18400,
-      'lastFueled': '2026-11-01T07:00:00+06:00',
-      'siteId': 'site_hq',
-      'isExecutive': true,
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'vehicle_005',
-      'plate': 'DHA-GA-14-0012',
-      'type': 'sedan_4',
-      'make': 'Toyota',
-      'model': 'Corolla XLi',
-      'year': 2019,
-      'color': 'Silver',
-      'status': 'maintenance',
-      'odometer': 112000,
-      'lastFueled': '2026-10-28T07:00:00+06:00',
-      'siteId': 'site_hq',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-  ];
+  _vehicle(
+    store,
+    id: 'veh_sedan',
+    plate: 'DHAKA METRO-12-4401',
+    type: 'SEDAN',
+    capacity: 4,
+    site: 'site_hq',
+  );
+  _vehicle(
+    store,
+    id: 'veh_van',
+    plate: 'DHAKA METRO-18-2208',
+    type: 'MICROBUS',
+    capacity: 7,
+    site: 'site_hq',
+    odo: 61000,
+  );
+  _vehicle(
+    store,
+    id: 'veh_pickup',
+    plate: 'DHAKA METRO-22-1190',
+    type: 'PICKUP',
+    capacity: 4,
+    site: 'site_plant',
+    odo: 88000,
+  );
+  _vehicle(
+    store,
+    id: 'veh_tanker',
+    plate: 'DHAKA METRO-31-0092',
+    type: 'TANKER',
+    capacity: 2,
+    site: 'site_plant',
+    odo: 112000,
+    hazmat: true,
+    tank: 250,
+  );
 
-  final drivers = <Json>[
-    {
-      'id': 'driver_001',
-      'employeeId': 'emp_driver',
-      'name': 'Rakibul Islam',
-      'licenseNo': 'DH-1234567',
-      'licenseExpiry': '2027-06-30',
-      'status': 'on_trip',
-      'phone': '01711-001122',
-      'rating': 4.8,
-      'tripsCompleted': 312,
-      'siteId': 'site_hq',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'driver_002',
-      'employeeId': 'emp_driver_2',
-      'name': 'Shafiqul Alam',
-      'licenseNo': 'DH-7654321',
-      'licenseExpiry': '2026-12-31',
-      'status': 'available',
-      'phone': '01811-334455',
-      'rating': 4.6,
-      'tripsCompleted': 198,
-      'siteId': 'site_hq',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'driver_003',
-      'employeeId': 'emp_driver_3',
-      'name': 'Nasir Uddin',
-      'licenseNo': 'KJ-9988776',
-      'licenseExpiry': '2028-03-31',
-      'status': 'available',
-      'phone': '01611-889900',
-      'rating': 4.9,
-      'tripsCompleted': 445,
-      'siteId': 'site_plant',
-      'createdAt': '2024-01-01T00:00:00+06:00',
-      'updatedAt': now,
-    },
-  ];
+  store.put(Col.fleetDrivers, {
+    'id': 'drv_0821',
+    'userId': driver.user.str('id'),
+    'employeeId': driver.employee.str('id'),
+    'driverCode': 'DRV-01',
+    'status': 'AVAILABLE',
+    'licenceClass': 'LIGHT',
+    'licenceExpiresAt': DateTime.parse(store.nowIso())
+        .add(const Duration(days: 400))
+        .toIso8601String(),
+    'dutyHoursToday': 2.0,
+    'totalTrips': 86,
+    'lastBreathalyzerResult': 'PASSED',
+    'lastBreathalyzerAt': store.nowIso(),
+    'reservedTripId': null,
+  });
 
-  final requisitions = <Json>[
-    {
-      'id': 'fleet_req_001',
-      'refNo': 'VR-2026-0001',
-      'status': 'in_transit',
-      'requesterEmployeeId': 'emp_hod_finance',
-      'requesterName': 'Md. Rafiqul Islam',
-      'dept': 'Finance & Accounts',
-      'from': 'Bashundhara Corporate HQ, Baridhara',
-      'to': 'Keraniganj Bitumen Refinery',
-      'tripType': 'round_trip',
-      'departureTime': '${today}T09:00:00+06:00',
-      'returnTime': '${today}T18:00:00+06:00',
-      'requiredCapacity': 'sedan_4',
-      'passengersCount': 2,
-      'passengerNames': 'Md. Rafiqul Islam, Tanvir Ahmed',
-      'purpose': 'Quarterly accounts reconciliation at plant site.',
-      'costCenter': 'CC-FIN-HQ-001',
-      'assignedVehicleId': 'vehicle_003',
-      'assignedVehiclePlate': 'KRN-GA-71-4411',
-      'assignedDriverId': 'driver_001',
-      'assignedDriverName': 'Rakibul Islam',
-      'assignedAt': '${today}T08:15:00+06:00',
-      'tripStartedAt': '${today}T09:02:00+06:00',
-      'intermediateStops': <Object?>[],
-      'createdAt': '${today}T07:30:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'fleet_req_002',
-      'refNo': 'VR-2026-0002',
-      'status': 'pending',
-      'requesterEmployeeId': 'emp_hse',
-      'requesterName': 'Tanvir Ahmed',
-      'dept': 'HSE',
-      'from': 'Bashundhara Corporate HQ, Baridhara',
-      'to': 'Chattogram Terminal',
-      'tripType': 'one_way',
-      'departureTime': '${today}T14:00:00+06:00',
-      'requiredCapacity': 'sedan_4',
-      'passengersCount': 1,
-      'passengerNames': 'Tanvir Ahmed',
-      'purpose': 'HSE audit at terminal storage tanks.',
-      'costCenter': 'CC-HSE-HQ-002',
-      'intermediateStops': <Object?>[],
-      'createdAt': '${today}T10:00:00+06:00',
-      'updatedAt': now,
-    },
-    {
-      'id': 'fleet_req_003',
-      'refNo': 'VR-2026-0003',
-      'status': 'completed',
-      'requesterEmployeeId': 'emp_hod_finance',
-      'requesterName': 'Md. Rafiqul Islam',
-      'dept': 'Finance & Accounts',
-      'from': 'Bashundhara Corporate HQ, Baridhara',
-      'to': 'DNCC Market, Gulshan-2',
-      'tripType': 'round_trip',
-      'departureTime': '2026-11-03T11:00:00+06:00',
-      'returnTime': '2026-11-03T14:00:00+06:00',
-      'requiredCapacity': 'sedan_4',
-      'passengersCount': 1,
-      'passengerNames': 'Md. Rafiqul Islam',
-      'purpose': 'Meeting with external auditors at client office.',
-      'costCenter': 'CC-FIN-HQ-001',
-      'assignedVehicleId': 'vehicle_001',
-      'assignedVehiclePlate': 'DHA-GA-11-1234',
-      'assignedDriverId': 'driver_002',
-      'assignedDriverName': 'Shafiqul Alam',
-      'assignedAt': '2026-11-03T10:20:00+06:00',
-      'tripStartedAt': '2026-11-03T11:05:00+06:00',
-      'tripCompletedAt': '2026-11-03T13:55:00+06:00',
-      'endOdometer': 42280,
-      'tripRating': 5,
-      'tripFeedback': 'Excellent driver, punctual and professional.',
-      'intermediateStops': <Object?>[],
-      'createdAt': '2026-11-03T09:00:00+06:00',
-      'updatedAt': '2026-11-03T13:55:00+06:00',
-    },
-  ];
+  DateTime wall() => DateTime.parse(store.nowIso());
+  void at(Duration ago) =>
+      FleetEngine.seedClock = wall().subtract(ago).toIso8601String();
 
-  for (final v in vehicles) {
-    store.put(Col.fleetVehicles, v.str('id'), v);
+  Json make({
+    required String dest,
+    required String purpose,
+    required DateTime depart,
+    int pax = 2,
+    String tripType = 'ONE_WAY',
+    String priority = 'NORMAL',
+  }) => FleetEngine.create(store, emp, {
+    'purpose': purpose,
+    'destination': dest,
+    'origin': 'Head Office, Baridhara',
+    'departAt': depart.toIso8601String(),
+    'passengerCount': pax,
+    'tripType': tripType,
+    'priority': priority,
+  });
+
+  void endorse(Json r) {
+    FleetEngine.submit(store, emp, r);
+    WorkflowEngine.act(
+      store,
+      instanceId: r.str('workflowInstanceId'),
+      actorUserId: hod.user.str('id'),
+      type: 'APPROVE',
+      comment: 'Approved for official travel',
+    );
   }
-  for (final d in drivers) {
-    store.put(Col.fleetDrivers, d.str('id'), d);
-  }
-  for (final r in requisitions) {
-    store.put(Col.fleetRequisitions, r.str('id'), r);
-  }
+
+  Json tripOf(Json r) => store.get(Col.fleetTrips, r.str('tripId'))!;
+
+  // Finished last week — Tanvir can rate it.
+  at(const Duration(hours: 50));
+  final done = make(
+    dest: 'Keraniganj Plant',
+    purpose: 'Took the signed offtake minutes back to the plant registry',
+    depart: wall().subtract(const Duration(hours: 48)),
+  );
+  endorse(done);
+  FleetEngine.assign(store, desk, done, {
+    'vehicleId': 'veh_sedan',
+    'driverId': 'drv_0821',
+    'dispatchNote': 'Same-day return after the registry stamp.',
+  });
+  FleetEngine.seedClock = DateTime.parse(done.str('departAt'))
+      .toIso8601String();
+  FleetEngine.gateOut(store, driver, tripOf(done), {'odometerKm': 42040});
+  FleetEngine.seedClock = DateTime.parse(done.str('departAt'))
+      .add(const Duration(hours: 2))
+      .toIso8601String();
+  FleetEngine.complete(store, driver, tripOf(done), {'endKm': 42120});
+
+  // Waiting for Farida (HOD) to endorse.
+  at(const Duration(hours: 2));
+  FleetEngine.submit(
+    store,
+    emp,
+    make(
+      dest: 'Keraniganj Plant',
+      purpose: 'Site visit with the sales team for the monthly offtake review',
+      depart: wall().add(const Duration(hours: 6)),
+    ),
+  );
+
+  // Approved — Kamruzzaman assigns a car.
+  at(const Duration(hours: 5));
+  endorse(
+    make(
+      dest: 'Chattogram Terminal',
+      purpose: 'Collect signed bills of lading from the terminal office',
+      depart: wall().add(const Duration(hours: 8)),
+      tripType: 'ROUND_TRIP',
+    ),
+  );
+
+  // On the road — the loginable driver can record stops, SOS and finish.
+  at(const Duration(hours: 3));
+  final live = make(
+    dest: 'Keraniganj Plant',
+    purpose: 'Carry the sealed tender file to the plant GM',
+    depart: wall().subtract(const Duration(minutes: 40)),
+    priority: 'HIGH',
+  );
+  endorse(live);
+  FleetEngine.assign(store, desk, live, {
+    'vehicleId': 'veh_van',
+    'driverId': 'drv_0821',
+    'dispatchNote': 'Do not open the envelope. Call Tanvir on arrival.',
+  });
+  FleetEngine.seedClock = DateTime.parse(live.str('departAt'))
+      .toIso8601String();
+  FleetEngine.gateOut(store, driver, tripOf(live), {'odometerKm': 61040});
+  FleetEngine.addToll(store, driver, tripOf(live), {
+    'plaza': 'Babubazar',
+    'amount': 150,
+  });
+  FleetEngine.issueFuel(store, desk, {
+    'vehicleId': 'veh_van',
+    'tripId': live['tripId'],
+    'station': 'Depot pump',
+    'liters': 20,
+    'amount': 2300,
+  });
+  FleetEngine.standaloneSos(store, driver, {
+    'note': 'Need a second car — the approach road is flooded near the flyover',
+    'requisitionId': live['id'],
+    'tripId': live['tripId'],
+  });
+
+  FleetEngine.seedClock = null;
 }

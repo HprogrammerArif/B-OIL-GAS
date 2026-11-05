@@ -14,9 +14,28 @@ class Bi {
 
 /// Doc 03 §4.2 category chips, derived from the notification `type`.
 String notificationCategory(String type) {
-  const approvals = ['APPROVAL_', 'NOTE_SHEET_', 'DELEGATION_', 'LEAVE_REQ'];
-  const safety = ['INCIDENT_', 'CAPA_', 'FLEET_SOS', 'VISIT_MUSTER'];
-  const transport = ['FLEET_', 'BUS_', 'PARCEL_', 'VISIT_'];
+  const approvals = [
+    'APPROVAL_',
+    'NOTE_SHEET_',
+    'DELEGATION_',
+    'LEAVE_REQ',
+    'EXIT_',
+    'CLEARANCE_',
+    'BRIEFING_',
+    'DIRECTIVE_',
+    'CHAT_',
+  ];
+  const safety = [
+    'INCIDENT_',
+    'CAPA_',
+    'FLEET_SOS',
+    'VISIT_MUSTER',
+    'ASSET_LOTO',
+    'ASSET_CALIBRATION',
+    'LICENCE_',
+    'CUSTODY_',
+  ];
+  const transport = ['FLEET_', 'BUS_', 'PARCEL_', 'VISIT_', 'GUEST_', 'TRIP_'];
   bool any(List<String> prefixes) => prefixes.any(type.startsWith);
   if (any(approvals) || type == 'CLAIM_SUBMITTED') return 'APPROVALS';
   if (any(safety)) return 'SAFETY';
@@ -42,6 +61,7 @@ abstract final class NotificationEngine {
     bool ackRequired = false,
     int? createdAtMs,
     bool read = false,
+    String? id,
   }) {
     assert(priorities.contains(priority), 'Unknown priority $priority');
     final ms = createdAtMs ?? store.nowMs();
@@ -49,9 +69,9 @@ abstract final class NotificationEngine {
       ms,
       isUtc: true,
     ).toIso8601String();
-    final id = 'ntf_${ms}_${store.collection(Col.notifications).length}';
+    final nid = id ?? 'ntf_${ms}_${store.collection(Col.notifications).length}';
     final record = <String, Object?>{
-      'id': id,
+      'id': nid,
       'userId': userId,
       'type': type,
       'priority': priority,
@@ -97,15 +117,40 @@ abstract final class NotificationEngine {
   }
 
   /// Wire shape of [record] in the recipient's language.
+  static String? _route(Json record) {
+    final data = record['data'];
+    if (data is! Map) return null;
+    final given = data['route'];
+    if (given is String && given.isNotEmpty) return given;
+    final wf = data['workflowInstanceId'];
+    if (wf is String && wf.isNotEmpty) return '/approvals/$wf';
+    final id = data['objectId'];
+    if (id is! String || id.isEmpty) return null;
+    return switch (data['objectType']) {
+      'LeaveRequest' => '/home/leave/$id',
+      'Claim' => '/home/claims/$id',
+      'VehicleRequisition' => '/home/fleet/$id',
+      'NoteSheet' => '/home/note-sheets/$id',
+      'Regularisation' => '/attendance',
+      _ => null,
+    };
+  }
+
   static Json toWire(Json record, String lang) {
     final bn = lang == 'BN';
+    final data = record['data'];
+    final map = data is Map
+        ? Map<String, Object?>.from(data)
+        : <String, Object?>{};
+    final route = _route(record);
+    if (route != null) map['route'] = route;
     return {
       'id': record['id'],
       'type': record['type'],
       'priority': record['priority'],
       'title': bn ? record['titleBn'] : record['title'],
       'body': bn ? record['bodyBn'] : record['body'],
-      'data': record['data'],
+      'data': map.isEmpty ? null : map,
       'readAt': record['readAt'],
       'ackRequired': record['ackRequired'],
       'ackedAt': record['ackedAt'],

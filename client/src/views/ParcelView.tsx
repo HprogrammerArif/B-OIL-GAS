@@ -405,7 +405,15 @@ export default function ParcelView({ lang }: ViewProps) {
   };
 
   const confirmReturnSubmission = async () => {
-    if (!selectedParcel || !user || !canIssue) return;
+    if (!selectedParcel || !user) return;
+    if (!canIssue) {
+      showToast(t('Only the recipient, the mail desk, or the driver carrying this pouch can send it back.', 'শুধু প্রাপক, মেইল ডেস্ক, বা এই পাউচ বহনকারী চালক এটি ফেরত পাঠাতে পারেন।', lang), 'warn');
+      return;
+    }
+    if (returnNotes.trim().length < 10) {
+      showToast(t('Write what is wrong with the pouch (at least a short sentence). That note is printed on the return waybill.', 'পাউচে কী সমস্যা তা এক লাইনে লিখুন। এই মন্তব্য ফেরত চালানে যাবে।', lang), 'warn');
+      return;
+    }
     const p = selectedParcel;
     const stamp = custodyStamp();
     const rtoTrackingNo = nextRef('RET');
@@ -424,13 +432,18 @@ export default function ParcelView({ lang }: ViewProps) {
       initiatedBy: user.name,
       reason: returnReason,
       reasonText: reasonLabels[returnReason],
-      notes: returnNotes.trim() || 'Returned under the chain-of-custody discrepancy policy.',
+      notes: returnNotes.trim(),
       returnStage: 1,
       returnOtp: newPin(),
       courierName: returnCourierOption === 'immediate_courier' ? p.courier.name : 'Security quarantine store',
     };
 
-    const hash = await custodyHash(p, ['return_initiated', stamp, user.name, returnReason]);
+    let hash = 'unhashed';
+    try {
+      hash = await custodyHash(p, ['return_initiated', stamp, user.name, returnReason]);
+    } catch {
+      hash = `local:${rtoTrackingNo}`;
+    }
     const newLog: CustodyLogEntry = {
       stage: p.currentStage,
       stageName: 'Return to Origin (RTO) Initiated',
@@ -1563,8 +1576,9 @@ export default function ParcelView({ lang }: ViewProps) {
             </div>
 
             <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setShowReturnModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button type="button" className="btn-sm-ghost" onClick={() => setShowReturnModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
               <button
+                type="button"
                 className="btn-primary"
                 style={{ background: 'var(--status-danger-solid-dark)' }}
                 onClick={confirmReturnSubmission}

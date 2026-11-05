@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
+import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
@@ -122,19 +123,21 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final detail = ref.watch(claimDetailProvider(widget.id));
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.claimDetailTitle)),
-      body: detail.when(
-        loading: () => const SkeletonList(itemCount: 4),
-        error: (_, _) => ErrorState(
-          onRetry: () => ref.invalidate(claimDetailProvider(widget.id)),
-        ),
-        data: (c) => _Body(
-          claim: c,
-          busy: _busy,
-          onSubmit: () => unawaited(_submit(c)),
-          onCancel: () => unawaited(_cancel(c)),
-          onPay: () => unawaited(_pay(c)),
+    return SecureFlag(
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.claimDetailTitle)),
+        body: detail.when(
+          loading: () => const SkeletonList(itemCount: 4),
+          error: (_, _) => ErrorState(
+            onRetry: () => ref.invalidate(claimDetailProvider(widget.id)),
+          ),
+          data: (c) => _Body(
+            claim: c,
+            busy: _busy,
+            onSubmit: () => unawaited(_submit(c)),
+            onCancel: () => unawaited(_cancel(c)),
+            onPay: () => unawaited(_pay(c)),
+          ),
         ),
       ),
     );

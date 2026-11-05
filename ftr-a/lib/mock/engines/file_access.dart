@@ -45,6 +45,54 @@ abstract final class FileAccess {
           _inRoute(store, user, s) ||
           _widerThanSelf(user, 'note-sheets:read');
     });
+    FileEngine.registerOwnerAccess('Visit', (store, user, id) {
+      final v = store.get(Col.visits, id);
+      if (v == null) return false;
+      final me = user['id'];
+      return v['hostUserId'] == me ||
+          v['escortUserId'] == me ||
+          _widerThanSelf(user, 'visitors:read') ||
+          _widerThanSelf(user, 'visitors:gate');
+    });
+    FileEngine.registerOwnerAccess('Licence', (store, user, id) {
+      final lic = store.get(Col.compliance, id);
+      if (lic == null) return false;
+      return lic['ownerUserId'] == user['id'] ||
+          _widerThanSelf(user, 'compliance:read') ||
+          _widerThanSelf(user, 'compliance:manage');
+    });
+    FileEngine.registerOwnerAccess('Asset', (store, user, id) {
+      final a = store.get(Col.assets, id);
+      if (a == null) return false;
+      final me = user['id'];
+      final open = store
+          .all(Col.assetCustody)
+          .where((c) => c['assetId'] == id && c['releasedAt'] == null);
+      if (open.any((c) => c['employeeUserId'] == me)) return true;
+      return _widerThanSelf(user, 'assets:read') ||
+          _widerThanSelf(user, 'assets:maintain') ||
+          _widerThanSelf(user, 'assets:loto');
+    });
+    FileEngine.registerOwnerAccess('Incident', (store, user, id) {
+      final i = store.get(Col.incidents, id);
+      if (i == null) return false;
+      final me = user['id'];
+      return i['reporterUserId'] == me ||
+          i['investigatorUserId'] == me ||
+          _widerThanSelf(user, 'incidents:read') ||
+          _widerThanSelf(user, 'incidents:triage');
+    });
+    FileEngine.registerOwnerAccess('Trip', (store, user, id) {
+      final t = store.get(Col.fleetTrips, id);
+      if (t == null) return false;
+      final r = store.get(Col.fleetRequisitions, t.str('requisitionId'));
+      final me = user['id'];
+      return t['driverUserId'] == me ||
+          r?['requesterUserId'] == me ||
+          _widerThanSelf(user, 'fleet:dispatch') ||
+          _widerThanSelf(user, 'fleet:gate') ||
+          _widerThanSelf(user, 'fleet:read');
+    });
     FileEngine.registerOwnerAccess('Parcel', (store, user, id) {
       final p = store.get(Col.parcels, id);
       if (p == null) return false;

@@ -3,7 +3,7 @@ import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   LayoutDashboard, FileSignature, ShieldCheck, Truck, Bus,
   Package, MapPin, AlertTriangle, ChevronLeft, ChevronRight,
-  MessageSquare, Crown, Gauge, ClipboardCheck, Users,
+  MessageSquare, Gauge, ClipboardCheck, Users,
   Wrench, CalendarClock, UserCheck, Receipt, Car,
   Briefcase, BarChart3, X
 } from 'lucide-react';
@@ -55,7 +55,7 @@ const CHAIRMAN_NAV: NavSection[] = [
     title: 'Leadership & Approvals',
     titleBn: 'নেতৃত্ব ও অনুমোদন',
     items: [
-      { view: 'dashboard',    icon: <Crown size={16} />,          label: 'Executive Overview',    labelBn: 'এক্সিকিউটিভ ড্যাশবোর্ড' },
+      { view: 'dashboard',    icon: <LayoutDashboard size={16} />, label: 'Executive Overview',    labelBn: 'এক্সিকিউটিভ ড্যাশবোর্ড' },
       { view: 'inner_circle', icon: <MessageSquare size={16} />,  label: 'Leadership Messages',   labelBn: 'নেতৃত্বের বার্তালাপ' },
       { view: 'approvals',    icon: <ClipboardCheck size={16} />, label: 'Pending Approvals',     labelBn: 'অপেক্ষমাণ অনুমোদন' },
       { view: 'notesheet',    icon: <FileSignature size={16} />,  label: 'Official Documents',    labelBn: 'দাপ্তরিক নথিপত্র' },
@@ -406,23 +406,6 @@ export default function Sidebar({
           </button>
         )}
       </div>
-
-      {/* Role Badge */}
-      {!isCollapsed ? (
-        <div className={`role-badge${role === 'chairman' ? ' chairman' : ''}`}>
-          <div className="role-badge-dot" />
-          <div className="role-badge-text">
-            <div className="label">
-              {role === 'chairman' ? '👑 ' : ''}{t('Signed In As', 'সক্রিয় পদবি', lang)} • {meta.empId}
-            </div>
-            <div className="value">{t(meta.label, meta.labelBn, lang)}</div>
-          </div>
-        </div>
-      ) : (
-        <div className={`role-badge-mini${role === 'chairman' ? ' chairman' : ''}`} title={`${meta.name} (${meta.empId}) — ${t(meta.label, meta.labelBn, lang)}`}>
-          <div className="role-badge-dot" />
-        </div>
-      )}
 
       {/* Role-Specific Navigation */}
       <nav className="sidebar-nav">

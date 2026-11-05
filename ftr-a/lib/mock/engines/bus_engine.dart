@@ -612,6 +612,12 @@ abstract final class BusEngine {
             ? 'OFFERED'
             : 'EMPTY',
         'allocationId': a?['id'],
+        'category': a == null
+            ? null
+            : (a['category'] as String?) ?? _seatKind(n),
+        'boarded':
+            a != null &&
+            (a['boarded'] == true || (a['boarded'] == null && n.isEven)),
         'occupant': a == null
             ? null
             : {
@@ -646,4 +652,159 @@ abstract final class BusEngine {
     }
     return {'seats': seats, 'queue': queue};
   }
+
+  static Json verify(MockStore store, String routeId, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) throw validationError('query', 'Enter an ID or seat');
+    final admin = adminDetail(store, route(store, routeId)!);
+    for (final s in admin.objList('seats')) {
+      final emp = s.objOrNull('occupant');
+      final code = (emp?['empCode'] as String? ?? '').toLowerCase();
+      final seat = '${s['seatNo']}';
+      if (code == q || seat == q || 's$seat' == q) {
+        return {
+          'ok': true,
+          'seatNo': s['seatNo'],
+          'name': emp?['name'] ?? '',
+          'nameBn': emp?['nameBn'] ?? emp?['name'],
+          'empCode': emp?['empCode'],
+        };
+      }
+    }
+    return {'ok': false};
+  }
+
+  static Json requestSwap(
+    MockStore store,
+    AuthContext auth,
+    String routeId,
+    int targetSeat,
+  ) {
+    final mine = activeAllocation(store, auth.employeeId);
+    if (mine == null || mine['routeId'] != routeId) {
+      throw policyViolation('NO_SEAT', 'You do not have a seat on this bus.');
+    }
+    final other = allocationsOf(store, routeId)
+        .where((a) => a['seatNo'] == targetSeat && a['status'] == 'ACTIVE')
+        .firstOrNull;
+    if (other == null) {
+      throw validationError('seatNo', 'That seat is empty');
+    }
+    final rec = <String, Object?>{
+      'id': 'swap_${store.nowMs()}',
+      'routeId': routeId,
+      'fromAllocationId': mine['id'],
+      'toAllocationId': other['id'],
+      'fromEmployeeId': mine['employeeId'],
+      'toEmployeeId': other['employeeId'],
+      'status': 'PENDING',
+      'createdAt': store.nowIso(),
+    };
+    store.put(Col.busSwaps, rec);
+    return rec;
+  }
+
+  static Json acceptSwap(MockStore store, AuthContext auth, String id) {
+    final rec = store.get(Col.busSwaps, id);
+    if (rec == null) throw notFound('Swap');
+    if (rec['toEmployeeId'] != auth.employeeId) throw forbidden();
+    if (rec['status'] != 'PENDING') {
+      throw invalidTransition('This swap is already decided.');
+    }
+    final a = store.get(Col.busAllocations, rec.str('fromAllocationId'));
+    final b = store.get(Col.busAllocations, rec.str('toAllocationId'));
+    if (a == null || b == null) throw notFound('Seat');
+    final tmp = a['seatNo'];
+    a['seatNo'] = b['seatNo'];
+    b['seatNo'] = tmp;
+    rec['status'] = 'ACCEPTED';
+    store
+      ..put(Col.busAllocations, a)
+      ..put(Col.busAllocations, b)
+      ..put(Col.busSwaps, rec);
+    return rec;
+  }
+
+  /// Transport adds a bus and a short route in one step.
+  static Json registerBus(MockStore store, AuthContext auth, Json body) {
+    final plate = (body['busNo'] as String? ?? '').trim();
+    if (plate.length < 4) {
+      throw validationError('busNo', 'Enter the bus number');
+    }
+    final name = (body['name'] as String? ?? '').trim();
+    if (name.length < 3) throw validationError('name', 'Name the route');
+    final code = (body['code'] as String? ?? '').trim();
+    if (code.isEmpty) throw validationError('code', 'Enter a route code');
+    final rawBn = body['nameBn'];
+    final nameBn = rawBn is String && rawBn.trim().isNotEmpty
+        ? rawBn.trim()
+        : name;
+    final rec = <String, Object?>{
+      'id': 'rt_${store.nowMs()}',
+      'code': code.toUpperCase(),
+      'name': name,
+      'nameBn': nameBn,
+      'distanceKm': (body['distanceKm'] as num?)?.toDouble() ?? 12,
+      'capacity': (body['capacity'] as num?)?.toInt() ?? 40,
+      'busNo': plate,
+      'stops': [
+        {
+          'id': 'st_${store.nowMs()}',
+          'name': 'Plant gate',
+          'nameBn': 'প্ল্যান্ট গেট',
+          'morning': '07:00',
+          'evening': '18:00',
+        },
+      ],
+    };
+    store.put(Col.busRoutes, rec);
+    return routeWire(store, rec, auth.employeeId);
+  }
+
+  /// Moves the named bus onto an existing route.
+  static Json reassign(
+    MockStore store,
+    AuthContext auth,
+    String id,
+    Json body,
+  ) {
+    final r = route(store, id);
+    if (r == null) throw notFound('Route');
+    final plate = (body['busNo'] as String? ?? '').trim();
+    if (plate.length < 4) {
+      throw validationError('busNo', 'Enter the bus number');
+    }
+    r['busNo'] = plate;
+    store.put(Col.busRoutes, r);
+    return routeWire(store, r, auth.employeeId);
+  }
+
+  /// Lady, executive, senior or regular, and whether they boarded today.
+  static Json setSeat(MockStore store, String routeId, int seatNo, Json body) {
+    Json? alloc;
+    for (final a in allocationsOf(store, routeId)) {
+      if (a.intVal('seatNo') == seatNo) alloc = a;
+    }
+    if (alloc == null) throw notFound('Seat');
+    final cat = body['category'];
+    if (cat is String) {
+      const allowed = {'REGULAR', 'LADY', 'EXECUTIVE', 'SENIOR'};
+      if (!allowed.contains(cat)) {
+        throw validationError('category', 'Unknown seat type');
+      }
+      alloc['category'] = cat;
+    }
+    if (body['boarded'] is bool) alloc['boarded'] = body['boarded'];
+    store.put(Col.busAllocations, alloc);
+    final r = route(store, routeId);
+    if (r == null) throw notFound('Route');
+    return adminDetail(store, r);
+  }
+
+  static String _seatKind(int seat) => switch (seat % 7) {
+    1 => 'EXECUTIVE',
+    2 => 'LADY',
+    3 => 'SENIOR',
+    _ => 'REGULAR',
+  };
 }

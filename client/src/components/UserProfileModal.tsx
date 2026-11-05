@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import {
-  Shield, Key, CheckCircle, Clock, User, Award, Lock, X, LogOut
+  Shield, Key, CheckCircle, Clock, User, UserCheck, Lock, X, LogOut
 } from 'lucide-react';
 import { showToast } from './ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
@@ -179,7 +179,7 @@ export default function UserProfileModal({
                 </h3>
                 <span className="badge gold" style={{ fontSize: '10px', fontFamily: 'monospace' }}>{meta.empId}</span>
                 <span className="badge success" style={{ fontSize: '10px' }}>
-                  🟢 {t('Active Staff', 'সক্রিয় কর্মী', lang)}
+                  {t('Active Staff', 'সক্রিয় কর্মী', lang)}
                 </span>
               </div>
               <div style={{ fontSize: '12px', color: 'var(--brand-gold)', fontWeight: 600, marginTop: '2px' }}>
@@ -196,7 +196,7 @@ export default function UserProfileModal({
             {[
               { id: 'profile',    label: 'Employee Info',         labelBn: 'কর্মী তথ্য',           icon: <User size={13} /> },
               { id: 'security',   label: 'Password & Security',   labelBn: 'পাসওয়ার্ড ও নিরাপত্তা', icon: <Shield size={13} /> },
-              { id: 'delegation', label: 'Leave Handover',        labelBn: 'দায়িত্ব হস্তান্তর',     icon: <Award size={13} /> },
+              { id: 'delegation', label: 'Leave Handover',        labelBn: 'দায়িত্ব হস্তান্তর',     icon: <UserCheck size={13} /> },
               { id: 'audit',      label: 'Devices & Sign-In Log', labelBn: 'ডিভাইস ও লগইন লগ',     icon: <Clock size={13} /> },
             ].map((tab) => (
               <button
@@ -383,7 +383,7 @@ export default function UserProfileModal({
             <div>
               <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-bright)', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: 'var(--status-warning-text)', fontSize: '13px' }}>
-                  <Award size={16} />
+                  <UserCheck size={16} />
                   <span>{t('Leave & Travel Duty Handover', 'ছুটি বা সফরকালীন দায়িত্ব হস্তান্তর', lang)}</span>
                 </div>
                 <p style={{ margin: '4px 0 0', fontSize: '11.5px', color: 'var(--status-warning-text)' }}>

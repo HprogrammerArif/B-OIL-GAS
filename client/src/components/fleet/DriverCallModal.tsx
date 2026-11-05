@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Grid, Shield, Sparkles } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Grid, Shield } from 'lucide-react';
 import { t } from '../../types';
 import { showToast } from '../ToastManager';
 
@@ -10,6 +10,7 @@ interface DriverCallModalProps {
   calleeRole: string;
   calleePhone: string;
   lang: 'en' | 'bn';
+  onEnded?: (durationSec: number, connected: boolean) => void;
 }
 
 export default function DriverCallModal({
@@ -19,6 +20,7 @@ export default function DriverCallModal({
   calleeRole,
   calleePhone,
   lang,
+  onEnded,
 }: DriverCallModalProps) {
   const [callState, setCallState] = useState<'connecting' | 'ringing' | 'connected' | 'ended'>('connecting');
   const [callDuration, setCallDuration] = useState(0);
@@ -73,12 +75,18 @@ export default function DriverCallModal({
   };
 
   const handleEndCall = () => {
+    const connected = callState === 'connected';
     setCallState('ended');
     const durStr = formatTimer(callDuration);
+    onEnded?.(callDuration, connected);
     showToast(
       lang === 'en'
-        ? `Call disconnected with ${calleeName} (${durStr})`
-        : `${calleeName}-এর সাথে কল সমাপ্ত হয়েছে (${durStr})`,
+        ? connected
+          ? `Call with ${calleeName} ended (${durStr}).`
+          : `${calleeName} did not pick up.`
+        : connected
+          ? `${calleeName}-এর সাথে কল শেষ (${durStr})।`
+          : `${calleeName} ফোন ধরেননি।`,
       'info'
     );
     setTimeout(() => {

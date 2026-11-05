@@ -263,7 +263,19 @@ class _NotificationTile extends ConsumerWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(Corner.lg),
-          onTap: () => unawaited(_openDetail(context, ref)),
+          onTap: () {
+            if (item.route != null && !item.needsAck) {
+              unawaited(
+                ref
+                    .read(inboxControllerProvider.notifier)
+                    .markRead(item.id, label: l10n.inboxReadLabel)
+                    .catchError((Object _) {}),
+              );
+              unawaited(context.push(item.route!));
+              return;
+            }
+            unawaited(_openDetail(context, ref));
+          },
           child: Padding(
             padding: const EdgeInsets.all(Space.lg),
             child: Row(

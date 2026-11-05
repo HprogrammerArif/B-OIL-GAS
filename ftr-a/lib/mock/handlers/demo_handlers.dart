@@ -1,3 +1,4 @@
+import 'package:bogcl_oneops/mock/engines/event_simulator.dart';
 import 'package:bogcl_oneops/mock/handlers/auth_handlers.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -22,5 +23,11 @@ List<RouteDef> demoRoutes() => [
     );
     await ctx.store.commit();
     return ok(response);
+  }),
+  RouteDef('POST', '/demo/events/next', (ctx) async {
+    final a = ctx.requireAuth();
+    final rec = EventSimulator.play(ctx.store, notifyUserId: a.user.str('id'));
+    await ctx.store.commit();
+    return ok(rec);
   }),
 ];

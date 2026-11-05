@@ -56,6 +56,33 @@ export interface LicenseCard {
   certificateValidity: string;
   auditChecklist: AuditItem[];
   documents: DocVaultItem[];
+  focalEmpId: string;
+  site: 'HQ_BARIDHARA' | 'PLANT_KERANIGANJ' | 'TERMINAL_CTG';
+  fundStatus: 'not_required' | 'pending' | 'approved';
+  doLetterStatus: 'none' | 'awaiting_signature' | 'dispatched';
+  doLetterMemo?: string;
+  doLetterChannel?: 'enothi' | 'courier' | 'liaison';
+  doLetterAt?: string;
+  doLetterBy?: string;
+  doLetterParcelRef?: string;
+  inspectionFindings?: string;
+  events: LicenseEvent[];
+}
+
+export interface LicenseEvent {
+  id: string;
+  at: string;
+  actor: string;
+  text: string;
+  textBn: string;
+}
+
+export function normalizeLicense(lic: LicenseCard): LicenseCard {
+  return {
+    ...lic,
+    doLetterStatus: lic.doLetterStatus ?? 'none',
+    events: lic.events ?? [],
+  };
 }
 
 const INITIAL_LICENSES: LicenseCard[] = [
@@ -94,6 +121,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Ministry_Quota_Application_Copy.pdf', size: '1.8 MB', date: '15 Oct 2026', type: 'Official Letter' },
       { name: 'Bangladesh_Bank_Clearance_Slip.pdf', size: '940 KB', date: '12 Oct 2026', type: 'Bank Clearance' },
     ],
+    focalEmpId: 'EMP-0001',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'EXP-KER-01',
@@ -131,6 +163,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Safety_Valve_Test_Certificate.pdf', size: '1.5 MB', date: '18 Oct 2026', type: 'Safety Certificate' },
       { name: 'Govt_Fee_Payment_Receipt.pdf', size: '820 KB', date: '14 Oct 2026', type: 'Bank Receipt' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'CAL-VALVE-08',
@@ -142,7 +179,7 @@ const INITIAL_LICENSES: LicenseCard[] = [
     titleBn: 'প্ল্যান্ট স্টিম বয়লার ও সেফটি ভালভ বার্ষিক ফিটনেস সনদ',
     refNo: 'BOILER/DHAKA/KER-662',
     daysLeft: 22,
-    stage: 2,
+    stage: 1,
     focalPerson: 'Engr. Tariqul Islam',
     focalDesignation: 'Senior Plant Maintenance Engineer',
     lastInspection: '24 Oct 2026',
@@ -164,6 +201,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
     documents: [
       { name: 'Boiler_Pressure_Test_Sheet_Oct2026.pdf', size: '1.4 MB', date: '24 Oct 2026', type: 'Test Sheet' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'pending',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'DOE-ECC-04',
@@ -200,6 +242,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Water_Treatment_Lab_Report_Oct2026.pdf', size: '2.1 MB', date: '15 Oct 2026', type: 'Lab Report' },
       { name: 'Clean_Air_Monitoring_Summary.pdf', size: '1.8 MB', date: '12 Oct 2026', type: 'Air Quality Log' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'FSCD-FIRE-09',
@@ -236,6 +283,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
       { name: 'Fire_Hydrant_Pressure_Check_2026.pdf', size: '2.0 MB', date: '05 Oct 2026', type: 'Safety Log' },
       { name: 'Quarterly_Fire_Drill_Attendance.pdf', size: '1.1 MB', date: '01 Oct 2026', type: 'Drill Report' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
   {
     id: 'BSTI-BIT-60',
@@ -271,6 +323,11 @@ const INITIAL_LICENSES: LicenseCard[] = [
     documents: [
       { name: 'BSTI_Lab_Quality_Certificate_Oct2026.pdf', size: '2.4 MB', date: '25 Oct 2026', type: 'BSTI Certificate' },
     ],
+    focalEmpId: 'EMP-0012',
+    site: 'PLANT_KERANIGANJ',
+    fundStatus: 'approved',
+    doLetterStatus: 'none',
+    events: [],
   },
 ];
 
@@ -328,6 +385,14 @@ export interface FishboneFactors {
   environment: string[];
 }
 
+export interface IncidentSpotFile {
+  id: string;
+  name: string;
+  mime: string;
+  dataUrl: string;
+  sizeBytes: number;
+}
+
 export interface IncidentItem {
   id: string;
   incNo: string;
@@ -368,6 +433,7 @@ export interface IncidentItem {
   statutoryAgency?: string;
   statutoryNoticeHours?: number;
   evidenceAttached?: boolean;
+  spotFiles?: IncidentSpotFile[];
   closureSignOff?: {
     safetyOfficerName: string;
     safetySignedAt: string;
@@ -1706,6 +1772,8 @@ export interface ChatMessage {
   directiveAcknowledged?: boolean;
   fileName?: string;
   fileSize?: string;
+  fileUrl?: string;
+  fileMime?: string;
   voiceDuration?: string;
   reactions?: Record<string, number>;
   /** emoji → ids of members who added it in this session, so a second tap removes it. */
@@ -1721,12 +1789,12 @@ const INITIAL_CHANNELS: ChatChannel[] = [
 ];
 
 const INITIAL_CHAT_MEMBERS: ChatMember[] = [
-  { id: 'hr', name: 'Engr. Md. Harunur Rashid', role: 'Plant General Manager', initials: 'HR', color: '#0369A1', status: 'online', statusLabel: 'At Plant Control Office', location: 'Keraniganj Plant', phone: '+880 1713-441199', unread: 1 },
-  { id: 'fb', name: 'Farida Begum', role: 'Head of Finance & Approver', initials: 'FB', color: '#7C3AED', status: 'in-meeting', statusLabel: 'In Monthly Budget Review', location: 'Head Office, Level 9', phone: '+880 1819-223344' },
-  { id: 'sas', name: 'Sayeda Afroza Sultana', role: 'GM, HR & Administration', initials: 'SAS', color: '#BE185D', status: 'online', statusLabel: 'Available at HR Office', location: 'Head Office, Level 6', phone: '+880 1714-882200' },
-  { id: 'kz', name: 'Md. Kamruzzaman', role: 'Transport & Admin Supervisor', initials: 'KZ', color: '#059669', status: 'online', statusLabel: 'At Dispatch Yard', location: 'Keraniganj Plant', phone: '+880 1712-990011' },
-  { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Permits', initials: 'KM', color: '#0891B2', status: 'away', statusLabel: 'Visiting Energy Ministry', location: 'Secretariat, Dhaka', phone: '+880 1711-002103', unread: 1 },
-  { id: 'si', name: 'Md. Shafiqul Islam', role: 'Head of Sales & Marketing', initials: 'SI', color: '#D97706', status: 'online', statusLabel: 'Available at Head Office', location: 'Head Office, Level 4', phone: '+880 1711-002104' },
+  { id: 'hr', name: 'Engr. Md. Harunur Rashid', role: 'Plant General Manager', initials: 'HR', color: '#334155', status: 'online', statusLabel: 'At Plant Control Office', location: 'Keraniganj Plant', phone: '+880 1713-441199', unread: 1 },
+  { id: 'fb', name: 'Farida Begum', role: 'Head of Finance & Approver', initials: 'FB', color: '#475569', status: 'in-meeting', statusLabel: 'In Monthly Budget Review', location: 'Head Office, Level 9', phone: '+880 1819-223344' },
+  { id: 'sas', name: 'Sayeda Afroza Sultana', role: 'GM, HR & Administration', initials: 'SAS', color: '#334155', status: 'online', statusLabel: 'Available at HR Office', location: 'Head Office, Level 6', phone: '+880 1714-882200' },
+  { id: 'kz', name: 'Md. Kamruzzaman', role: 'Transport & Admin Supervisor', initials: 'KZ', color: '#475569', status: 'online', statusLabel: 'At Dispatch Yard', location: 'Keraniganj Plant', phone: '+880 1712-990011' },
+  { id: 'km', name: 'Adv. Karim Molla', role: 'Head of Legal & Permits', initials: 'KM', color: '#334155', status: 'away', statusLabel: 'Visiting Energy Ministry', location: 'Secretariat, Dhaka', phone: '+880 1711-002103', unread: 1 },
+  { id: 'si', name: 'Md. Shafiqul Islam', role: 'Head of Sales & Marketing', initials: 'SI', color: '#475569', status: 'online', statusLabel: 'Available at Head Office', location: 'Head Office, Level 4', phone: '+880 1711-002104' },
 ];
 
 const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
@@ -1737,7 +1805,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. Md. Harunur Rashid',
       senderRole: 'Plant General Manager',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: '#334155',
       content: 'Assalamu Alaikum Chairman Sir. Keraniganj Plant produced 520 Metric Tons of Grade 60/70 road bitumen yesterday — 8% above our daily target. All 4 main storage tanks are operating smoothly.',
       timestamp: '09:14 AM',
       type: 'text',
@@ -1750,7 +1818,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. Md. Harunur Rashid',
       senderRole: 'Plant General Manager',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: '#334155',
       content: 'Daily_Plant_Production_Summary_29Oct2026.pdf',
       timestamp: '09:15 AM',
       type: 'document',
@@ -1783,7 +1851,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Farida Begum',
       senderRole: 'Head of Finance & Approver',
       senderInitials: 'FB',
-      senderColor: '#7C3AED',
+      senderColor: '#475569',
       content: 'Noted Chairman Sir. Funds are reserved in the Factory Maintenance Account and Energypac Purchase Order draft is ready for immediate release.',
       timestamp: '09:28 AM',
       type: 'text',
@@ -1796,7 +1864,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Sayeda Afroza Sultana',
       senderRole: 'GM, HR & Administration',
       senderInitials: 'SAS',
-      senderColor: '#BE185D',
+      senderColor: '#334155',
       content: 'Morning Attendance & Shuttle Bus Arrival Summary (94.2% On-Time)',
       timestamp: '10:05 AM',
       type: 'voice',
@@ -1811,7 +1879,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. Md. Harunur Rashid',
       senderRole: 'Plant General Manager',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: '#334155',
       content: 'Morning check complete: Storage Tank TK-102 small drain valve seal is being replaced today by our maintenance team. Zero impact on truck loading.',
       timestamp: '08:20 AM',
       type: 'text',
@@ -1824,7 +1892,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Md. Kamruzzaman',
       senderRole: 'Transport & Admin Supervisor',
       senderInitials: 'KZ',
-      senderColor: '#059669',
+      senderColor: '#475569',
       content: '3 bulk bitumen tankers loaded this morning for Mongla Port and Narayanganj road contractors. All drivers passed morning safety check.',
       timestamp: '09:40 AM',
       type: 'text',
@@ -1838,7 +1906,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Farida Begum',
       senderRole: 'Head of Finance & Approver',
       senderInitials: 'FB',
-      senderColor: '#7C3AED',
+      senderColor: '#475569',
       content: 'October Expense Summary: ৳48.50 Lakh pending for Plant Backup Generator service, and ৳85,000 pending for Q4 Head Office paper & printer toner.',
       timestamp: '10:15 AM',
       type: 'text',
@@ -1852,7 +1920,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Adv. Karim Molla',
       senderRole: 'Head of Legal & Permits',
       senderInitials: 'KM',
-      senderColor: '#0891B2',
+      senderColor: '#334155',
       content: 'Energy Division raw material import permit (7 days remaining) is on the Additional Secretary’s desk today. Official reminder letter ready for dispatch.',
       timestamp: '10:50 AM',
       type: 'text',
@@ -1867,7 +1935,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Engr. Md. Harunur Rashid',
       senderRole: 'Plant General Manager',
       senderInitials: 'HR',
-      senderColor: '#0369A1',
+      senderColor: '#334155',
       content: 'Sir, Chief Inspector Dr. Shahabuddin from the Dept. of Explosives arrived at 10:28 AM for our annual tank storage license renewal check. Everything is going smoothly.',
       timestamp: '10:35 AM',
       type: 'text',
@@ -1894,7 +1962,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Farida Begum',
       senderRole: 'Head of Finance & Approver',
       senderInitials: 'FB',
-      senderColor: '#7C3AED',
+      senderColor: '#475569',
       content: 'Assalamu Alaikum Sir. Tomorrow at 10:00 AM I have a meeting at Bangladesh Bank Motijheel regarding our raw material import L/C.',
       timestamp: '09:50 AM',
       type: 'text',
@@ -1908,7 +1976,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Sayeda Afroza Sultana',
       senderRole: 'GM, HR & Administration',
       senderInitials: 'SAS',
-      senderColor: '#BE185D',
+      senderColor: '#334155',
       content: 'All 10 active staff shuttle bus routes arrived on time at Keraniganj Plant before 8:05 AM today.',
       timestamp: '08:30 AM',
       type: 'text',
@@ -1922,7 +1990,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Md. Kamruzzaman',
       senderRole: 'Transport & Admin Supervisor',
       senderInitials: 'KZ',
-      senderColor: '#059669',
+      senderColor: '#475569',
       content: 'Executive Prado (GHA-13-8821) and Senior Driver Md. Rafiqul Islam are on standby at Head Office Gate-1.',
       timestamp: '09:00 AM',
       type: 'text',
@@ -1936,7 +2004,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Adv. Karim Molla',
       senderRole: 'Head of Legal & Permits',
       senderInitials: 'KM',
-      senderColor: '#0891B2',
+      senderColor: '#334155',
       content: 'Sir, I am at the Bangladesh Secretariat following up on the Annual Import Quota renewal file (EMRD/BOGCL/2026/09). Expecting clearance signature by Thursday.',
       timestamp: '11:10 AM',
       type: 'text',
@@ -1950,7 +2018,7 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       senderName: 'Md. Shafiqul Islam',
       senderRole: 'Head of Sales & Marketing',
       senderInitials: 'SI',
-      senderColor: '#D97706',
+      senderColor: '#475569',
       content: 'Roads & Highways (RHD) Executive Engineer is visiting Level 4 at 3:15 PM today to finalize the ৳14.5 Crore bitumen supply schedule.',
       timestamp: '10:20 AM',
       type: 'text',
@@ -2003,7 +2071,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 4;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
@@ -2021,6 +2089,7 @@ class OperationsStore {
   constructor() {
     const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
     if (saved) Object.assign(this, saved);
+    this.licenses = this.licenses.map(normalizeLicense);
   }
 
   subscribe(listener: () => void): () => void {
@@ -2061,16 +2130,17 @@ class OperationsStore {
     const next = typeof updater === 'function' ? updater(this.licenses) : updater;
     // Automatically normalize Stage 5 (Renewed & Active) permits so they never show urgent expiring alerts!
     this.licenses = next.map((lic) => {
-      if (lic.stage === 5 && lic.daysLeft < 60) {
+      const n = normalizeLicense(lic);
+      if (n.stage === 5 && n.daysLeft < 60) {
         return {
-          ...lic,
+          ...n,
           daysLeft: 365,
           lastInspection: SYSTEM_TODAY,
           certificateValidity: '29 Oct 2026 – 28 Oct 2027 (Renewed)',
-          auditChecklist: lic.auditChecklist.map((c) => ({ ...c, passed: true })),
+          auditChecklist: n.auditChecklist.map((c) => ({ ...c, passed: true })),
         };
       }
-      return lic;
+      return n;
     });
     this.notify();
   }

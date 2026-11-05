@@ -134,7 +134,14 @@ export interface VehicleRequisition {
   odometerStart?: number;
   odometerEnd?: number;
   gateOutTime?: string;
+  gateOutEpoch?: number;
   gateInTime?: string;
+  pickupArrivedAt?: string;
+  destinationArrivedAt?: string;
+  passengerAck?: string;
+  sosActive?: boolean;
+  sosRaisedAt?: string;
+  lastCallNote?: string;
   rating?: number;
   feedback?: string;
   rejectionReason?: string;
@@ -688,7 +695,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
     requisitionId: 'broadcast',
     senderRole: 'admin',
     senderName: 'Transport Dispatch Desk',
-    text: '📢 Traffic Notice: Road repair work on Mayor Hanif Flyover east ramp today 2:00 PM – 6:00 PM. Drivers may use Postogola or Demra road.',
+    text: 'Traffic notice: Road repair on Mayor Hanif Flyover east ramp today 2:00 PM – 6:00 PM. Drivers may use Postogola or Demra road.',
     timestamp: '08:00 AM',
     messageType: 'text',
   },
@@ -697,7 +704,7 @@ export const INITIAL_CHAT_MESSAGES: TripChatMessage[] = [
     requisitionId: 'emergency_sos',
     senderRole: 'admin',
     senderName: '24/7 Roadside Support Desk',
-    text: '🚨 Emergency Breakdown & Tire Support Team is on standby. Post here immediately if any vehicle needs highway help.',
+    text: 'Emergency breakdown and tire support is on standby. Post here immediately if any vehicle needs highway help.',
     timestamp: '07:30 AM',
     messageType: 'text',
   },
@@ -860,7 +867,7 @@ class FleetStore {
   startTrip(reqId: string, startKm: number, gateOutTime: string): void {
     const targetReq = this.requisitions.find((r) => r.id === reqId);
     this.requisitions = this.requisitions.map((r) =>
-      r.id === reqId ? { ...r, status: 'in_transit', odometerStart: startKm, gateOutTime } : r
+      r.id === reqId ? { ...r, status: 'in_transit', odometerStart: startKm, gateOutTime, gateOutEpoch: Date.now(), sosActive: false } : r
     );
 
     if (targetReq?.assignedDriverId) {
@@ -898,6 +905,7 @@ class FleetStore {
             status: 'completed',
             odometerEnd: endKm,
             gateInTime,
+            sosActive: false,
             rating: rating || 5,
             feedback: feedback || 'Trip completed safely.',
           }
@@ -1292,6 +1300,121 @@ class FleetStore {
     this.notify();
   }
 
+  markPickupArrived(reqId: string, driverName: string): void {
+    const req = this.requisitions.find((r) => r.id === reqId);
+    if (!req || req.pickupArrivedAt) return;
+    const at = nowTime();
+    this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, pickupArrivedAt: at } : r));
+    this.sendChatMessage(
+      reqId,
+      'driver',
+      `${driverName} (Driver)`,
+      `Arrived at the pickup (${req.from}). The vehicle is parked and waiting.`,
+    );
+    this.addNotification({
+      type: 'driver_status',
+      title: 'Driver is at the pickup',
+      message: `${driverName} is waiting at ${req.from} for ${req.requesterName}.`,
+      time: at,
+      targetRole: 'employee',
+      requisitionId: reqId,
+      unread: true,
+    });
+    window.setTimeout(() => {
+      const live = this.requisitions.find((r) => r.id === reqId);
+      if (!live || live.passengerAck || live.status !== 'assigned') return;
+      const first = live.requesterName.split(' ')[0];
+      const note = `${first} replied: coming down now.`;
+      this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, passengerAck: note } : r));
+      this.sendChatMessage(
+        reqId,
+        'employee',
+        live.requesterName,
+        'I am coming down with the papers. Please keep the engine running.',
+      );
+    }, 2200);
+  }
+
+  markDestinationArrived(reqId: string, driverName: string): void {
+    const req = this.requisitions.find((r) => r.id === reqId);
+    if (!req || req.status !== 'in_transit' || req.destinationArrivedAt) return;
+    const at = nowTime();
+    this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, destinationArrivedAt: at } : r));
+    if (req.assignedVehiclePlate) {
+      this.vehicles = this.vehicles.map((v) => (v.plate === req.assignedVehiclePlate ? { ...v, speed: 0 } : v));
+    }
+    this.sendChatMessage(
+      reqId,
+      'driver',
+      `${driverName} (Driver)`,
+      `Reached ${req.to}. Ready to close the return gate pass.`,
+    );
+    this.notify();
+  }
+
+  raiseTripSos(reqId: string, driverName: string): void {
+    const req = this.requisitions.find((r) => r.id === reqId);
+    if (!req || req.sosActive) return;
+    const at = nowTime();
+    this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, sosActive: true, sosRaisedAt: at } : r));
+    this.sendChatMessage(
+      reqId,
+      'driver',
+      `${driverName} (Driver)`,
+      `EMERGENCY SOS toward ${req.to}. Help requested for ${req.assignedVehiclePlate || 'the vehicle'}.`,
+    );
+    this.addNotification({
+      type: 'driver_status',
+      title: 'Highway SOS',
+      message: `${driverName} raised an SOS on ${reqId} toward ${req.to}.`,
+      time: at,
+      targetRole: 'all',
+      requisitionId: reqId,
+      unread: true,
+    });
+  }
+
+  clearTripSos(reqId: string, driverName: string): void {
+    const req = this.requisitions.find((r) => r.id === reqId);
+    if (!req?.sosActive) return;
+    this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, sosActive: false } : r));
+    this.sendChatMessage(
+      reqId,
+      'driver',
+      `${driverName} (Driver)`,
+      'SOS stood down. Driver reports the vehicle and passengers are safe.',
+    );
+    this.notify();
+  }
+
+  logDriverCall(reqId: string, callee: string, durationSec: number, connected: boolean): void {
+    const mins = Math.floor(durationSec / 60);
+    const secs = durationSec % 60;
+    const clock = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const note = connected
+      ? `Spoke with ${callee} at ${nowTime()} for ${clock}.`
+      : `Called ${callee} at ${nowTime()}. They did not pick up.`;
+    this.requisitions = this.requisitions.map((r) => (r.id === reqId ? { ...r, lastCallNote: note } : r));
+    this.notify();
+  }
+
+  reviewDriverTollSlip(slipId: string, status: 'Approved' | 'Paid'): void {
+    const slip = this.driverTollSlips.find((s) => s.id === slipId);
+    if (!slip || slip.status === 'Paid' || slip.status === status) return;
+    this.driverTollSlips = this.driverTollSlips.map((s) => (s.id === slipId ? { ...s, status } : s));
+    if (status === 'Approved') {
+      this.sendChatMessage(
+        slip.reqId,
+        'system',
+        'Transport Desk',
+        `Toll slip ${slip.id} for ${slip.plaza} (৳${slip.amount}) approved. It will be paid with this month's conveyance.`,
+        { messageType: 'system_event', actionType: 'toll_approved', actionLabel: `Toll approved ৳${slip.amount}` },
+      );
+      return;
+    }
+    this.notify();
+  }
+
   recordBreathalyzer(driverId: string, result: '0.00% BAC (PASSED)' | 'FAILED'): void {
     this.drivers = this.drivers.map((d) => (d.id === driverId ? { ...d, breathalyzerToday: result } : d));
     this.notify();
@@ -1355,6 +1478,12 @@ export function useFleetStore() {
     poolRequisitions: fleetStore.poolRequisitions.bind(fleetStore),
     issueFuelVoucher: fleetStore.issueFuelVoucher.bind(fleetStore),
     submitDriverTollClaim: fleetStore.submitDriverTollClaim.bind(fleetStore),
+    reviewDriverTollSlip: fleetStore.reviewDriverTollSlip.bind(fleetStore),
+    markPickupArrived: fleetStore.markPickupArrived.bind(fleetStore),
+    markDestinationArrived: fleetStore.markDestinationArrived.bind(fleetStore),
+    raiseTripSos: fleetStore.raiseTripSos.bind(fleetStore),
+    clearTripSos: fleetStore.clearTripSos.bind(fleetStore),
+    logDriverCall: fleetStore.logDriverCall.bind(fleetStore),
     recordBreathalyzer: fleetStore.recordBreathalyzer.bind(fleetStore),
     addVehicle: fleetStore.addVehicle.bind(fleetStore),
     addDriver: fleetStore.addDriver.bind(fleetStore),

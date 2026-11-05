@@ -135,6 +135,7 @@ abstract final class WorkflowEngine {
       'name': emp['fullName'],
       'nameBn': emp['fullNameBn'],
       'title': emp.obj('designation')['title'],
+      'phone': emp['phone'],
     };
   }
 
@@ -589,6 +590,8 @@ abstract final class WorkflowEngine {
         _record(store, instance, step, actorUserId, type, comment: text);
         _closeOpenSteps(store, instance);
         _complete(store, instance, 'REJECTED');
+        instance['rejectionExplanation'] = text;
+        store.put(Col.workflowInstances, instance);
         WorkflowHooks.fire(store, instance, WorkflowEvent.rejected);
         _notifyInitiator(store, instance, actorUserId, 'REJECTED', text);
       case 'RETURN':

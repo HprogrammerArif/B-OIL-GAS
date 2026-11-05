@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  ClipboardCheck, Check, Search, Inbox, X, Flame, History, ArrowUpDown, SearchX, ListChecks,
+  ClipboardCheck, Check, Search, Inbox, X, Clock, History, ArrowUpDown, SearchX, ListChecks,
 } from 'lucide-react';
 
 import { useApprovalStore } from '../store/approvalStore';
 import { useCan } from '../auth/session';
 import { CATEGORY_LABELS, useMyApprovalQueue } from './approvals/config';
-import { formatTaka, formatTakaCompact, type SortKey } from './approvals/format';
+import { formatTaka, formatTakaCompact, parseApprovalDate, type SortKey } from './approvals/format';
 import { SLA_URGENT_MINUTES, slaLabel, slaMinutesLeft, useNow } from '../lib/sla';
 import { useApprovalDecisions } from './approvals/useApprovalDecisions';
 import ApprovalCard from './approvals/ApprovalCard';
@@ -50,15 +50,55 @@ export default function ApprovalsView({ lang }: ViewProps) {
       return [item.title, item.requester, item.id, item.dept, item.details, item.sapDocRef, item.amount ?? '']
         .some((field) => field.toLowerCase().includes(query));
     });
-    if (isPending) {
-      out.sort((a, b) => {
-        if (sortKey === 'amount') return (b.costTk ?? 0) - (a.costTk ?? 0);
-        if (sortKey === 'requester') return a.requester.localeCompare(b.requester);
+
+    out.sort((a, b) => {
+      if (sortKey === 'amount' || sortKey === 'amount_desc') {
+        return (b.costTk ?? 0) - (a.costTk ?? 0);
+      }
+      if (sortKey === 'amount_asc') {
+        return (a.costTk ?? 0) - (b.costTk ?? 0);
+      }
+      if (sortKey === 'requester' || sortKey === 'requester_asc') {
+        return a.requester.localeCompare(b.requester);
+      }
+      if (sortKey === 'requester_desc') {
+        return b.requester.localeCompare(a.requester);
+      }
+      if (sortKey === 'date_desc') {
+        return parseApprovalDate(b.date) - parseApprovalDate(a.date);
+      }
+      if (sortKey === 'date_asc') {
+        return parseApprovalDate(a.date) - parseApprovalDate(b.date);
+      }
+      if (sortKey === 'sla_desc') {
+        return slaMinutesLeft(b, now) - slaMinutesLeft(a, now);
+      }
+      // Default: sla / sla_asc (most urgent first)
+      if (isPending) {
         return slaMinutesLeft(a, now) - slaMinutesLeft(b, now);
-      });
-    }
+      }
+      return parseApprovalDate(b.date) - parseApprovalDate(a.date);
+    });
+
     return out;
   }, [listToDisplay, selectedCategory, outcome, dueSoonOnly, query, sortKey, isPending, now]);
+
+  const toggleSortDirection = () => {
+    const map: Record<SortKey, SortKey> = {
+      sla: 'sla_desc',
+      sla_asc: 'sla_desc',
+      sla_desc: 'sla',
+      amount: 'amount_asc',
+      amount_desc: 'amount_asc',
+      amount_asc: 'amount',
+      date_desc: 'date_asc',
+      date_asc: 'date_desc',
+      requester: 'requester_desc',
+      requester_asc: 'requester_desc',
+      requester_desc: 'requester',
+    };
+    setSortKey((prev) => map[prev] ?? 'sla_desc');
+  };
 
   // Only act on what is visible: a selection hidden by a filter is never approved by accident.
   const selectedVisible = useMemo(
@@ -163,14 +203,9 @@ export default function ApprovalsView({ lang }: ViewProps) {
 
   return (
     <div className="apv-page">
-      <PageHeader
-        title={t(cfg.title[0], cfg.title[1], lang)}
-        description={t(cfg.description[0], cfg.description[1], lang)}
-      />
-
       {/* One-sentence verdict: what is waiting and how urgent */}
       <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : ''}`} role="status">
-        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Flame size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
+        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Clock size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
         <p>{verdict}</p>
         {isPending && dueSoonItems.length > 0 && (
           <Button variant="secondary" size="sm" onClick={() => setDueSoonOnly((v) => !v)}>
@@ -211,17 +246,23 @@ export default function ApprovalsView({ lang }: ViewProps) {
       {/* Filters */}
       <div className="apv-filters">
         <div className="apv-chips">
-          <button type="button" className={`apv-filter ${selectedCategory === 'all' ? 'active' : ''}`} onClick={() => setSelectedCategory('all')}>
-            {t('All', 'সব', lang)} <b>{listToDisplay.length}</b>
-          </button>
-          {categories.map((cat) => {
-            const count = listToDisplay.filter((i) => i.category === cat).length;
-            return (
-              <button key={cat} type="button" className={`apv-filter ${selectedCategory === cat ? 'active' : ''}`} onClick={() => setSelectedCategory(cat)}>
-                {t(CATEGORY_LABELS[cat][0], CATEGORY_LABELS[cat][1], lang)} <b>{count}</b>
-              </button>
-            );
-          })}
+          <select
+            className="form-input"
+            style={{ minWidth: 220, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            aria-label={t('Category', 'বিভাগ', lang)}
+          >
+            <option value="all">{t('All categories', 'সব বিভাগ', lang)} ({listToDisplay.length})</option>
+            {categories.map((cat) => {
+              const count = listToDisplay.filter((i) => i.category === cat).length;
+              return (
+                <option key={cat} value={cat}>
+                  {t(CATEGORY_LABELS[cat][0], CATEGORY_LABELS[cat][1], lang)} ({count})
+                </option>
+              );
+            })}
+          </select>
           {!isPending && (
             (['approved', 'rejected'] as const).map((o) => (
               <button key={o} type="button" className={`apv-filter ${outcome === o ? 'active' : ''}`} onClick={() => setOutcome(outcome === o ? 'all' : o)} aria-pressed={outcome === o}>
@@ -232,17 +273,32 @@ export default function ApprovalsView({ lang }: ViewProps) {
           )}
         </div>
 
-        {isPending && (
-          <label className="apv-sort">
+        <div className="apv-sort">
+          <button
+            type="button"
+            className="apv-sort-toggle-btn"
+            onClick={toggleSortDirection}
+            title={t('Click to reverse sort direction', 'সাজানোর দিক পরিবর্তন করতে ক্লিক করুন', lang)}
+            aria-label={t('Toggle sort direction', 'সাজানোর দিক উল্টান', lang)}
+          >
             <ArrowUpDown size={13} />
             <span>{t('Sort', 'সাজান', lang)}</span>
-            <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)}>
-              <option value="sla">{t('Most urgent first', 'সবচেয়ে জরুরি আগে', lang)}</option>
-              <option value="amount">{t('Highest amount', 'সর্বোচ্চ পরিমাণ', lang)}</option>
-              <option value="requester">{t('Requester A–Z', 'আবেদনকারী A–Z', lang)}</option>
-            </select>
-          </label>
-        )}
+          </button>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            aria-label={t('Sort approvals', 'অনুমোদন সাজান', lang)}
+          >
+            {isPending && <option value="sla">{t('Most urgent first', 'সবচেয়ে জরুরি আগে', lang)}</option>}
+            {isPending && <option value="sla_desc">{t('Least urgent first', 'কম জরুরি আগে', lang)}</option>}
+            <option value="amount">{t('Highest amount', 'সর্বোচ্চ পরিমাণ', lang)}</option>
+            <option value="amount_asc">{t('Lowest amount', 'সর্বনিম্ন পরিমাণ', lang)}</option>
+            <option value="date_desc">{t('Newest first', 'নতুন আগে', lang)}</option>
+            <option value="date_asc">{t('Oldest first', 'পুরনো আগে', lang)}</option>
+            <option value="requester">{t('Requester A–Z', 'আবেদনকারী A–Z', lang)}</option>
+            <option value="requester_desc">{t('Requester Z–A', 'আবেদনকারী Z–A', lang)}</option>
+          </select>
+        </div>
       </div>
 
       {/* List */}

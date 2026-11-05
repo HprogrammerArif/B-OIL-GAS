@@ -169,7 +169,7 @@ export default function TripChatModal({
       requisition.id,
       personaRole,
       personaName,
-      `🎙️ Audio dispatch voice note (${durationStr})`,
+      `Voice note (${durationStr})`,
       {
         messageType: 'voice_note',
         voiceData: { duration: durationStr }
@@ -182,20 +182,20 @@ export default function TripChatModal({
     ? [
         t('📍 Waiting at Gate-1 porch with documents', '📍 গেট-১ এ নথিপত্র নিয়ে প্রস্তুত আছি', lang),
         t('⏳ Coming down in 5 mins from 4th floor', '⏳ ৫ মিনিটের মধ্যে নিচে নামছি', lang),
-        t('❄️ Please keep AC cooling at nominal temp', '❄️ এসির তাপমাত্রা স্বাভাবিক রাখবেন', lang),
-        t('🛑 Need to pick up 1 colleague at Mohakhali', '🛑 মহাখালীতে ১ জন সহকর্মীকে তুলতে হবে', lang),
+        t('Please keep AC cooling at nominal temp', 'এসির তাপমাত্রা স্বাভাবিক রাখবেন', lang),
+        t('Need to pick up 1 colleague at Mohakhali', 'মহাখালীতে ১ জন সহকর্মীকে তুলতে হবে', lang),
       ]
     : activePersona === 'driver'
     ? [
-        t('🚗 Stationed at porch canopy, car ready', '🚗 গেট-১ পোর্চে গাড়ি প্রস্তুত', lang),
-        t('🛣️ Started highway transit via expressway', '🛣️ যাত্রা শুরু করেছি', lang),
-        t('🧾 Uploaded flyover toll slip (৳260)', '🧾 টোল স্লিপ আপলোড করেছি', lang),
-        t('✅ Arrived safely at destination terminal', '✅ গন্তব্যে পৌঁছেছি', lang),
+        t('Stationed at porch canopy, car ready', 'গেট-১ পোর্চে গাড়ি প্রস্তুত', lang),
+        t('Started highway transit via expressway', 'যাত্রা শুরু করেছি', lang),
+        t('Uploaded flyover toll slip (৳260)', 'টোল স্লিপ আপলোড করেছি', lang),
+        t('Arrived safely at destination terminal', 'গন্তব্যে পৌঁছেছি', lang),
       ]
     : [
-        t('🟢 Gate clearance BOG-7729 authorized', '🟢 গেট পাস BOG-7729 অনুমোদিত', lang),
-        t('⚠️ Heavy congestion on flyover, take outer bypass', '⚠️ ফ্লাইওভারে জ্যাম, আউটার বাইপাস ব্যবহার করুন', lang),
-        t('⛽ Fuel voucher approved for 60L Octane', '⛽ ৬০ লিটার ফুয়েল স্লিপ অনুমোদিত', lang),
+        t('Gate clearance BOG-7729 authorized', 'গেট পাস BOG-7729 অনুমোদিত', lang),
+        t('Heavy congestion on flyover, take outer bypass', 'ফ্লাইওভারে জ্যাম, আউটার বাইপাস ব্যবহার করুন', lang),
+        t('Fuel voucher approved for 60L octane', '৬০ লিটার ফুয়েল স্লিপ অনুমোদিত', lang),
       ];
 
   return (

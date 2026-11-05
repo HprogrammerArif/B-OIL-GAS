@@ -10,12 +10,14 @@ class PersonPick {
     required this.departmentBn,
     required this.site,
     required this.siteBn,
+    this.siteId,
   });
 
   factory PersonPick.fromJson(Map<String, Object?> j) => PersonPick(
     person: Person.fromJson(j),
     department: (j['department'] as String?) ?? '',
     departmentBn: (j['departmentBn'] as String?) ?? '',
+    siteId: j['siteId'] as String?,
     site: (j['site'] as String?) ?? '',
     siteBn: (j['siteBn'] as String?) ?? '',
   );
@@ -23,6 +25,7 @@ class PersonPick {
   final Person person;
   final String department;
   final String departmentBn;
+  final String? siteId;
   final String site;
   final String siteBn;
 

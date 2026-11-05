@@ -202,7 +202,7 @@ abstract class AppL10n {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use your company email, phone number or employee ID.'**
+  /// **'Tap a demo role to open the app. Company sign-in is off for now.'**
   String get loginSubtitle;
 
   /// No description provided for @loginIdentifierLabel.
@@ -270,6 +270,432 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'More'**
   String get navMore;
+
+  /// No description provided for @navAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get navAttendance;
+
+  /// No description provided for @navApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get navApprovals;
+
+  /// No description provided for @navChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get navChat;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeSeeAll;
+
+  /// No description provided for @homePrimaryEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day at work'**
+  String get homePrimaryEmployee;
+
+  /// No description provided for @homePrimaryDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trip'**
+  String get homePrimaryDriver;
+
+  /// No description provided for @homePrimaryGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests at the gate'**
+  String get homePrimaryGate;
+
+  /// No description provided for @homePrimaryMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels waiting'**
+  String get homePrimaryMail;
+
+  /// No description provided for @homePrimaryHse.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety today'**
+  String get homePrimaryHse;
+
+  /// No description provided for @homePrimaryApprover.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your decision'**
+  String get homePrimaryApprover;
+
+  /// No description provided for @homeActPunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to attendance'**
+  String get homeActPunch;
+
+  /// No description provided for @homeActTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open trips'**
+  String get homeActTrip;
+
+  /// No description provided for @homeActScanGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a guest'**
+  String get homeActScanGuest;
+
+  /// No description provided for @homeActScanParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Log a parcel'**
+  String get homeActScanParcel;
+
+  /// No description provided for @homeActApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Open approvals'**
+  String get homeActApprovals;
+
+  /// No description provided for @homeActAnnounce.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a notice'**
+  String get homeActAnnounce;
+
+  /// No description provided for @homeActIncidents.
+  ///
+  /// In en, this message translates to:
+  /// **'Open incidents'**
+  String get homeActIncidents;
+
+  /// No description provided for @homeFilesWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Files waiting for you'**
+  String get homeFilesWaiting;
+
+  /// No description provided for @homeFilesClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting. You are clear.'**
+  String get homeFilesClear;
+
+  /// No description provided for @homeLeadersOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership rooms'**
+  String get homeLeadersOnline;
+
+  /// No description provided for @homeRoomQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'No new messages'**
+  String get homeRoomQuiet;
+
+  /// No description provided for @homeUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new'**
+  String homeUnread(int count);
+
+  /// No description provided for @homeReturnReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you sending this back?'**
+  String get homeReturnReason;
+
+  /// No description provided for @homePlayBriefing.
+  ///
+  /// In en, this message translates to:
+  /// **'Play briefing'**
+  String get homePlayBriefing;
+
+  /// No description provided for @homeBriefingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String homeBriefingLeft(int seconds);
+
+  /// No description provided for @homeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get homeToday;
+
+  /// No description provided for @homeNotPunched.
+  ///
+  /// In en, this message translates to:
+  /// **'You have not punched in yet.'**
+  String get homeNotPunched;
+
+  /// No description provided for @homePunchedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Punched in at {time}'**
+  String homePunchedAt(String time);
+
+  /// No description provided for @homeLeaveLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String homeLeaveLeft(String days);
+
+  /// No description provided for @homeGatePass.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a gate pass'**
+  String get homeGatePass;
+
+  /// No description provided for @homeLocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Locks still on'**
+  String get homeLocks;
+
+  /// No description provided for @homeLocksClear.
+  ///
+  /// In en, this message translates to:
+  /// **'No machine is locked out.'**
+  String get homeLocksClear;
+
+  /// No description provided for @homeReleaseBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get homeReleaseBatch;
+
+  /// No description provided for @homeOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get homeOpen;
+
+  /// No description provided for @homeOutputTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s output'**
+  String get homeOutputTitle;
+
+  /// No description provided for @homeOutputLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday made 5,320 MT. The daily target is 5,000.'**
+  String get homeOutputLine;
+
+  /// No description provided for @homeWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get homeWeekTitle;
+
+  /// No description provided for @homeBatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitumen batch ready'**
+  String get homeBatchTitle;
+
+  /// No description provided for @homeBatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'BOGCL-BIT-2026-B88 · Bitumen 60/70 · 2,400 metric tons. Lab tests passed.'**
+  String get homeBatchBody;
+
+  /// No description provided for @homeBatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Released. Loading gates are open.'**
+  String get homeBatchDone;
+
+  /// No description provided for @busRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a bus'**
+  String get busRegister;
+
+  /// No description provided for @busReassign.
+  ///
+  /// In en, this message translates to:
+  /// **'Move a bus'**
+  String get busReassign;
+
+  /// No description provided for @busSeatMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat map'**
+  String get busSeatMap;
+
+  /// No description provided for @busFieldCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Route code'**
+  String get busFieldCode;
+
+  /// No description provided for @busFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Route name'**
+  String get busFieldName;
+
+  /// No description provided for @busFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus number'**
+  String get busFieldPlate;
+
+  /// No description provided for @busSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get busSaved;
+
+  /// No description provided for @busSeatRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular'**
+  String get busSeatRegular;
+
+  /// No description provided for @busSeatLady.
+  ///
+  /// In en, this message translates to:
+  /// **'Lady priority'**
+  String get busSeatLady;
+
+  /// No description provided for @busSeatExecutive.
+  ///
+  /// In en, this message translates to:
+  /// **'Executive'**
+  String get busSeatExecutive;
+
+  /// No description provided for @busSeatSenior.
+  ///
+  /// In en, this message translates to:
+  /// **'Senior staff'**
+  String get busSeatSenior;
+
+  /// No description provided for @busMarkBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark boarded'**
+  String get busMarkBoarded;
+
+  /// No description provided for @busBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarded'**
+  String get busBoarded;
+
+  /// No description provided for @busSeatsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} seats free'**
+  String busSeatsFree(int count);
+
+  /// No description provided for @flRegisterCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a car'**
+  String get flRegisterCar;
+
+  /// No description provided for @flEnrolDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrol a driver'**
+  String get flEnrolDriver;
+
+  /// No description provided for @flFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate'**
+  String get flFieldPlate;
+
+  /// No description provided for @flFieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip type'**
+  String get flFieldType;
+
+  /// No description provided for @flFieldEmp.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee code'**
+  String get flFieldEmp;
+
+  /// No description provided for @flFieldDriverCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver code'**
+  String get flFieldDriverCode;
+
+  /// No description provided for @flSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get flSaved;
+
+  /// No description provided for @asAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for equipment'**
+  String get asAsk;
+
+  /// No description provided for @asAskName.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need?'**
+  String get asAskName;
+
+  /// No description provided for @asAskWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get asAskWhy;
+
+  /// No description provided for @asAskDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get asAskDone;
+
+  /// No description provided for @chConfirmAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this directive'**
+  String get chConfirmAck;
+
+  /// No description provided for @chConfirmDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark this directive done'**
+  String get chConfirmDone;
+
+  /// No description provided for @chConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is recorded on the directive. You cannot undo it here.'**
+  String get chConfirmBody;
+
+  /// No description provided for @moreMyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'My work'**
+  String get moreMyWork;
+
+  /// No description provided for @moreOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get moreOperations;
+
+  /// No description provided for @moreCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get moreCompany;
 
   /// No description provided for @homeGoodMorning.
   ///
@@ -3013,6 +3439,30 @@ abstract class AppL10n {
   /// **'Mark as paid'**
   String get claimPay;
 
+  /// No description provided for @claimBankFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank file'**
+  String get claimBankFile;
+
+  /// No description provided for @claimBankReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s bank transfer'**
+  String get claimBankReady;
+
+  /// No description provided for @claimBankEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting to be paid.'**
+  String get claimBankEmpty;
+
+  /// No description provided for @claimBankCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank file is copied.'**
+  String get claimBankCopied;
+
   /// No description provided for @claimPayConfirm.
   ///
   /// In en, this message translates to:
@@ -3564,12 +4014,6 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'You are already on a waitlist.'**
   String get busErrAlreadyWaiting;
-
-  /// No description provided for @busSeatMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Seat map'**
-  String get busSeatMap;
 
   /// No description provided for @busLegendTaken.
   ///
@@ -4331,6 +4775,54 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Quotations'**
   String get nsQuotesTitle;
+
+  /// No description provided for @nsBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there budget?'**
+  String get nsBudgetTitle;
+
+  /// No description provided for @nsBudgetWithin.
+  ///
+  /// In en, this message translates to:
+  /// **'Within budget'**
+  String get nsBudgetWithin;
+
+  /// No description provided for @nsBudgetOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get nsBudgetOver;
+
+  /// No description provided for @nsBudgetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'This file has no fixed amount to check against the budget.'**
+  String get nsBudgetNone;
+
+  /// No description provided for @nsBudgetAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {amount}'**
+  String nsBudgetAvailable(String amount);
+
+  /// No description provided for @nsBudgetRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'This request {amount}'**
+  String nsBudgetRequest(String amount);
+
+  /// No description provided for @nsBudgetLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left after this {amount}'**
+  String nsBudgetLeft(String amount);
+
+  /// No description provided for @nsBudgetShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short by {amount}'**
+  String nsBudgetShort(String amount);
 
   /// No description provided for @nsQuoteMeta.
   ///
@@ -6113,6 +6605,4344 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'No one found.'**
   String get peopleNone;
+
+  /// No description provided for @moduleVisitors.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests'**
+  String get moduleVisitors;
+
+  /// No description provided for @visNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a guest'**
+  String get visNew;
+
+  /// No description provided for @visIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'People coming to see you, waiting at the gate, or still inside.'**
+  String get visIntro;
+
+  /// No description provided for @visSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, VIS-2026-0001 or plate'**
+  String get visSearchHint;
+
+  /// No description provided for @visNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No visit with that number, or you cannot see it.'**
+  String get visNotFound;
+
+  /// No description provided for @visScanNeedGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the gate can scan a pass.'**
+  String get visScanNeedGate;
+
+  /// No description provided for @visTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get visTabMine;
+
+  /// No description provided for @visTabExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected today'**
+  String get visTabExpected;
+
+  /// No description provided for @visTabInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside now'**
+  String get visTabInside;
+
+  /// No description provided for @visTabOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed too long'**
+  String get visTabOverdue;
+
+  /// No description provided for @visTabApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get visTabApprove;
+
+  /// No description provided for @visTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything I can see'**
+  String get visTabAll;
+
+  /// No description provided for @visEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No guests yet.'**
+  String get visEmpty;
+
+  /// No description provided for @visEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No guests match.'**
+  String get visEmptyFiltered;
+
+  /// No description provided for @visVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs you right now.'**
+  String get visVerdictNone;
+
+  /// No description provided for @visVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you: {count}'**
+  String visVerdictNeed(int count);
+
+  /// No description provided for @visStatusWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get visStatusWaiting;
+
+  /// No description provided for @visStatusExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass ready'**
+  String get visStatusExpected;
+
+  /// No description provided for @visStatusInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside'**
+  String get visStatusInside;
+
+  /// No description provided for @visStatusOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stayed too long'**
+  String get visStatusOverdue;
+
+  /// No description provided for @visStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get visStatusDone;
+
+  /// No description provided for @visStatusDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get visStatusDenied;
+
+  /// No description provided for @visStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get visStatusCancelled;
+
+  /// No description provided for @visCatVip.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get visCatVip;
+
+  /// No description provided for @visCatGovt.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get visCatGovt;
+
+  /// No description provided for @visCatVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor'**
+  String get visCatVendor;
+
+  /// No description provided for @visCatClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get visCatClient;
+
+  /// No description provided for @visCatContractor.
+  ///
+  /// In en, this message translates to:
+  /// **'Contractor'**
+  String get visCatContractor;
+
+  /// No description provided for @visCatRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get visCatRegular;
+
+  /// No description provided for @visNextWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'A name matched the watchlist. Clear it or deny the visit.'**
+  String get visNextWatchlist;
+
+  /// No description provided for @visNextWatchlistWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Held for a watchlist check. Nothing for you to do.'**
+  String get visNextWatchlistWait;
+
+  /// No description provided for @visNextApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the visit for {name}.'**
+  String visNextApprove(String name);
+
+  /// No description provided for @visNextHostWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the site head to approve. Nothing for you to do.'**
+  String get visNextHostWait;
+
+  /// No description provided for @visNextWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval.'**
+  String get visNextWaiting;
+
+  /// No description provided for @visNextPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Check their PPE, then receive them at the gate.'**
+  String get visNextPpe;
+
+  /// No description provided for @visNextEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign someone to stay with them in the red area.'**
+  String get visNextEscort;
+
+  /// No description provided for @visNextCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive {name} at the gate. Take a photo.'**
+  String visNextCheckIn(String name);
+
+  /// No description provided for @visNextHostReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass is ready. They are expected {when}. Nothing for you to do.'**
+  String visNextHostReady(String when);
+
+  /// No description provided for @visNextReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass is ready. Expected {when}.'**
+  String visNextReady(String when);
+
+  /// No description provided for @visNextCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Check {name} out and take the badge back.'**
+  String visNextCheckOut(String name);
+
+  /// No description provided for @visNextInsideHost.
+  ///
+  /// In en, this message translates to:
+  /// **'They are inside. Stay reachable until they leave.'**
+  String get visNextInsideHost;
+
+  /// No description provided for @visNextInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside the site.'**
+  String get visNextInside;
+
+  /// No description provided for @visNextOverdueAct.
+  ///
+  /// In en, this message translates to:
+  /// **'They have stayed too long. Extend the time or check them out.'**
+  String get visNextOverdueAct;
+
+  /// No description provided for @visNextOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'They have stayed past the agreed time.'**
+  String get visNextOverdue;
+
+  /// No description provided for @visNextDone.
+  ///
+  /// In en, this message translates to:
+  /// **'They have left.'**
+  String get visNextDone;
+
+  /// No description provided for @visNextDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'This visit was not approved.'**
+  String get visNextDenied;
+
+  /// No description provided for @visNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Nothing more to do.'**
+  String get visNextCancelled;
+
+  /// No description provided for @visWatchPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist'**
+  String get visWatchPill;
+
+  /// No description provided for @visHostLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Host: {name} at {site}'**
+  String visHostLine(String name, String site);
+
+  /// No description provided for @visWhenLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected {start} to {end}'**
+  String visWhenLine(String start, String end);
+
+  /// No description provided for @visEscortLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Escort: {name}'**
+  String visEscortLine(String name);
+
+  /// No description provided for @visBadgeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge {no}'**
+  String visBadgeLine(String no);
+
+  /// No description provided for @visZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas they may enter'**
+  String get visZones;
+
+  /// No description provided for @visEscortNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs escort'**
+  String get visEscortNeed;
+
+  /// No description provided for @visFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'What was seen'**
+  String get visFindings;
+
+  /// No description provided for @visDetPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get visDetPhone;
+
+  /// No description provided for @visDetId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get visDetId;
+
+  /// No description provided for @visDetPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get visDetPlate;
+
+  /// No description provided for @visPpeOk.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE was cleared at the gate.'**
+  String get visPpeOk;
+
+  /// No description provided for @visPpeNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE must be cleared before they enter.'**
+  String get visPpeNeeded;
+
+  /// No description provided for @visPpeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No special PPE for these areas.'**
+  String get visPpeNone;
+
+  /// No description provided for @visActApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve visit'**
+  String get visActApprove;
+
+  /// No description provided for @visActDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not approve'**
+  String get visActDeny;
+
+  /// No description provided for @visActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel visit'**
+  String get visActCancel;
+
+  /// No description provided for @visActCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at gate'**
+  String get visActCheckIn;
+
+  /// No description provided for @visActCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out'**
+  String get visActCheckOut;
+
+  /// No description provided for @visActPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear PPE'**
+  String get visActPpe;
+
+  /// No description provided for @visActEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign escort'**
+  String get visActEscort;
+
+  /// No description provided for @visActExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Give two more hours'**
+  String get visActExtend;
+
+  /// No description provided for @visActFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a finding'**
+  String get visActFinding;
+
+  /// No description provided for @visActClearWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear watchlist'**
+  String get visActClearWatch;
+
+  /// No description provided for @visActSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as safe'**
+  String get visActSafe;
+
+  /// No description provided for @visActPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Show pass'**
+  String get visActPass;
+
+  /// No description provided for @visApproveMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'They will get a pass and can be received at the gate.'**
+  String get visApproveMsg;
+
+  /// No description provided for @visCheckOutMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm only if they have left and the badge is back.'**
+  String get visCheckOutMsg;
+
+  /// No description provided for @visFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get visFieldReason;
+
+  /// No description provided for @visSheetCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive at the gate'**
+  String get visSheetCheckIn;
+
+  /// No description provided for @visSheetCheckInHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo. The badge number is issued automatically.'**
+  String get visSheetCheckInHelp;
+
+  /// No description provided for @visPhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo (required)'**
+  String get visPhotoRequired;
+
+  /// No description provided for @visPhotoAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo added'**
+  String get visPhotoAdded;
+
+  /// No description provided for @visFieldNda.
+  ///
+  /// In en, this message translates to:
+  /// **'NDA signed'**
+  String get visFieldNda;
+
+  /// No description provided for @visFieldBriefing.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety briefing done'**
+  String get visFieldBriefing;
+
+  /// No description provided for @visSheetPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal protective equipment'**
+  String get visSheetPpe;
+
+  /// No description provided for @visSheetPpeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick only what they are wearing and have been briefed on.'**
+  String get visSheetPpeHelp;
+
+  /// No description provided for @visPpeHat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard hat'**
+  String get visPpeHat;
+
+  /// No description provided for @visPpeShoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety shoes'**
+  String get visPpeShoes;
+
+  /// No description provided for @visPpeVest.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi-vis vest'**
+  String get visPpeVest;
+
+  /// No description provided for @visPpeGoggles.
+  ///
+  /// In en, this message translates to:
+  /// **'Goggles'**
+  String get visPpeGoggles;
+
+  /// No description provided for @visPpeH2s.
+  ///
+  /// In en, this message translates to:
+  /// **'H2S briefing'**
+  String get visPpeH2s;
+
+  /// No description provided for @visFieldEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Who stays with them'**
+  String get visFieldEscort;
+
+  /// No description provided for @visSheetFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you see'**
+  String get visSheetFinding;
+
+  /// No description provided for @visFieldArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Where'**
+  String get visFieldArea;
+
+  /// No description provided for @visFieldFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get visFieldFinding;
+
+  /// No description provided for @visFindObs.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get visFindObs;
+
+  /// No description provided for @visFindCrit.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get visFindCrit;
+
+  /// No description provided for @visDoneCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at the gate.'**
+  String get visDoneCheckIn;
+
+  /// No description provided for @visDoneCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked out.'**
+  String get visDoneCheckOut;
+
+  /// No description provided for @visDonePpe.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE recorded.'**
+  String get visDonePpe;
+
+  /// No description provided for @visDoneEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'Escort assigned.'**
+  String get visDoneEscort;
+
+  /// No description provided for @visDoneExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Two more hours given.'**
+  String get visDoneExtend;
+
+  /// No description provided for @visDoneFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding recorded.'**
+  String get visDoneFinding;
+
+  /// No description provided for @visDoneWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchlist cleared.'**
+  String get visDoneWatch;
+
+  /// No description provided for @visDoneSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked safe.'**
+  String get visDoneSafe;
+
+  /// No description provided for @visDoneApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit approved. The pass is ready.'**
+  String get visDoneApprove;
+
+  /// No description provided for @visDoneDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit was not approved.'**
+  String get visDoneDeny;
+
+  /// No description provided for @visDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit cancelled.'**
+  String get visDoneCancel;
+
+  /// No description provided for @visDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest registered.'**
+  String get visDoneCreate;
+
+  /// No description provided for @visErrPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear PPE before they enter.'**
+  String get visErrPpe;
+
+  /// No description provided for @visErrEscort.
+  ///
+  /// In en, this message translates to:
+  /// **'A red area needs an escort.'**
+  String get visErrEscort;
+
+  /// No description provided for @visErrWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Security must clear the watchlist first.'**
+  String get visErrWatchlist;
+
+  /// No description provided for @visErrBlacklist.
+  ///
+  /// In en, this message translates to:
+  /// **'This person cannot be registered or let in.'**
+  String get visErrBlacklist;
+
+  /// No description provided for @visErrFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many guests inside. Ask a security lead.'**
+  String get visErrFull;
+
+  /// No description provided for @visErrExtend.
+  ///
+  /// In en, this message translates to:
+  /// **'Already extended twice today.'**
+  String get visErrExtend;
+
+  /// No description provided for @visErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get visErrFailed;
+
+  /// No description provided for @visErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the guest name.'**
+  String get visErrName;
+
+  /// No description provided for @visErrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a phone number.'**
+  String get visErrPhone;
+
+  /// No description provided for @visErrPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why they are coming.'**
+  String get visErrPurpose;
+
+  /// No description provided for @visErrId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number is required for this kind of guest.'**
+  String get visErrId;
+
+  /// No description provided for @visFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say who is coming, why, and which areas they may enter. Regular guests get a pass at once. VIP, government and red-area visits wait for the site head.'**
+  String get visFormIntro;
+
+  /// No description provided for @visFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest name'**
+  String get visFieldName;
+
+  /// No description provided for @visFieldOrg.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation (optional)'**
+  String get visFieldOrg;
+
+  /// No description provided for @visFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get visFieldPhone;
+
+  /// No description provided for @visFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Who they are'**
+  String get visFieldCategory;
+
+  /// No description provided for @visFieldPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Why they are coming'**
+  String get visFieldPurpose;
+
+  /// No description provided for @visFieldWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When they arrive'**
+  String get visFieldWhen;
+
+  /// No description provided for @visFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Which site'**
+  String get visFieldSite;
+
+  /// No description provided for @visSiteHq.
+  ///
+  /// In en, this message translates to:
+  /// **'Head Office, Baridhara'**
+  String get visSiteHq;
+
+  /// No description provided for @visSitePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Keraniganj Plant'**
+  String get visSitePlant;
+
+  /// No description provided for @visSiteCtg.
+  ///
+  /// In en, this message translates to:
+  /// **'Chattogram Terminal'**
+  String get visSiteCtg;
+
+  /// No description provided for @visFieldZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas they may enter'**
+  String get visFieldZones;
+
+  /// No description provided for @visFieldIdType.
+  ///
+  /// In en, this message translates to:
+  /// **'ID type'**
+  String get visFieldIdType;
+
+  /// No description provided for @visIdNid.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get visIdNid;
+
+  /// No description provided for @visIdPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Passport'**
+  String get visIdPass;
+
+  /// No description provided for @visIdGovt.
+  ///
+  /// In en, this message translates to:
+  /// **'Government badge'**
+  String get visIdGovt;
+
+  /// No description provided for @visIdCo.
+  ///
+  /// In en, this message translates to:
+  /// **'Company ID'**
+  String get visIdCo;
+
+  /// No description provided for @visFieldIdNo.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number'**
+  String get visFieldIdNo;
+
+  /// No description provided for @visFieldPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle plate (optional)'**
+  String get visFieldPlate;
+
+  /// No description provided for @visCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Register guest'**
+  String get visCreate;
+
+  /// No description provided for @visMuster.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is inside'**
+  String get visMuster;
+
+  /// No description provided for @visMusterIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} guests are inside. Start a roll-call if you need to account for them.'**
+  String visMusterIdle(int count);
+
+  /// No description provided for @visMusterActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll-call on: {safe} of {inside} marked safe.'**
+  String visMusterActive(int safe, int inside);
+
+  /// No description provided for @visMusterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start roll-call'**
+  String get visMusterStart;
+
+  /// No description provided for @visMusterEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End roll-call'**
+  String get visMusterEnd;
+
+  /// No description provided for @visMusterMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet safe'**
+  String get visMusterMissing;
+
+  /// No description provided for @visMusterSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get visMusterSafe;
+
+  /// No description provided for @moduleFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get moduleFleet;
+
+  /// No description provided for @flIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a car, assign one, or drive the trip. The next step is on each row.'**
+  String get flIntro;
+
+  /// No description provided for @flNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a car'**
+  String get flNew;
+
+  /// No description provided for @flSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search destination or purpose'**
+  String get flSearchHint;
+
+  /// No description provided for @flSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver help'**
+  String get flSos;
+
+  /// No description provided for @flTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get flTabMine;
+
+  /// No description provided for @flTabDriving.
+  ///
+  /// In en, this message translates to:
+  /// **'My trips'**
+  String get flTabDriving;
+
+  /// No description provided for @flTabEndorse.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get flTabEndorse;
+
+  /// No description provided for @flTabDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To assign'**
+  String get flTabDispatch;
+
+  /// No description provided for @flTabLive.
+  ///
+  /// In en, this message translates to:
+  /// **'On the road'**
+  String get flTabLive;
+
+  /// No description provided for @flTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get flTabAll;
+
+  /// No description provided for @flEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vehicle requests here.'**
+  String get flEmpty;
+
+  /// No description provided for @flEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get flEmptyFiltered;
+
+  /// No description provided for @flVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting on you.'**
+  String get flVerdictNone;
+
+  /// No description provided for @flVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting on you'**
+  String flVerdictNeed(int count);
+
+  /// No description provided for @flStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get flStatusDraft;
+
+  /// No description provided for @flStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your head of department'**
+  String get flStatusPending;
+
+  /// No description provided for @flStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a car'**
+  String get flStatusApproved;
+
+  /// No description provided for @flStatusAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Car assigned'**
+  String get flStatusAssigned;
+
+  /// No description provided for @flStatusLive.
+  ///
+  /// In en, this message translates to:
+  /// **'On the road'**
+  String get flStatusLive;
+
+  /// No description provided for @flStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished'**
+  String get flStatusDone;
+
+  /// No description provided for @flStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get flStatusRejected;
+
+  /// No description provided for @flStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get flStatusCancelled;
+
+  /// No description provided for @flNextSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send this request to your head of department.'**
+  String get flNextSubmit;
+
+  /// No description provided for @flNextWaitHod.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Farida Begum. Nothing for you to do.'**
+  String get flNextWaitHod;
+
+  /// No description provided for @flNextEndorse.
+  ///
+  /// In en, this message translates to:
+  /// **'Endorse {name}’s request, or send it back from Approvals.'**
+  String flNextEndorse(String name);
+
+  /// No description provided for @flNextAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a free car and a driver.'**
+  String get flNextAssign;
+
+  /// No description provided for @flNextWaitCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport will assign a car. Nothing for you to do.'**
+  String get flNextWaitCar;
+
+  /// No description provided for @flNextGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave through the gate after {when}.'**
+  String flNextGateOut(String when);
+
+  /// No description provided for @flNextAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} is waiting at the gate.'**
+  String flNextAssigned(String plate);
+
+  /// No description provided for @flNextFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the last odometer when you return.'**
+  String get flNextFinish;
+
+  /// No description provided for @flNextLive.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} is on the way.'**
+  String flNextLive(String plate);
+
+  /// No description provided for @flNextRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this trip.'**
+  String get flNextRate;
+
+  /// No description provided for @flNextDone.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip is finished.'**
+  String get flNextDone;
+
+  /// No description provided for @flNextFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the request and send it again.'**
+  String get flNextFix;
+
+  /// No description provided for @flNextRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This request was not approved.'**
+  String get flNextRejected;
+
+  /// No description provided for @flNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This request was cancelled.'**
+  String get flNextCancelled;
+
+  /// No description provided for @flTypeOne.
+  ///
+  /// In en, this message translates to:
+  /// **'One way'**
+  String get flTypeOne;
+
+  /// No description provided for @flTypeRound.
+  ///
+  /// In en, this message translates to:
+  /// **'There and back'**
+  String get flTypeRound;
+
+  /// No description provided for @flFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say where you are going, why, and when. Your head of department endorses it. Transport then gives you a car.'**
+  String get flFormIntro;
+
+  /// No description provided for @flFieldPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Why you need a car'**
+  String get flFieldPurpose;
+
+  /// No description provided for @flFieldDest.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you are going'**
+  String get flFieldDest;
+
+  /// No description provided for @flFieldPax.
+  ///
+  /// In en, this message translates to:
+  /// **'How many people'**
+  String get flFieldPax;
+
+  /// No description provided for @flFieldWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When you leave'**
+  String get flFieldWhen;
+
+  /// No description provided for @flFieldNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get flFieldNote;
+
+  /// No description provided for @flFieldNoteOpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get flFieldNoteOpt;
+
+  /// No description provided for @flFieldOdo.
+  ///
+  /// In en, this message translates to:
+  /// **'Odometer (km)'**
+  String get flFieldOdo;
+
+  /// No description provided for @flFieldSos.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong'**
+  String get flFieldSos;
+
+  /// No description provided for @flFieldPlaza.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll plaza'**
+  String get flFieldPlaza;
+
+  /// No description provided for @flFieldAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (৳)'**
+  String get flFieldAmount;
+
+  /// No description provided for @flFieldFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'How was the trip (optional)'**
+  String get flFieldFeedback;
+
+  /// No description provided for @flFieldRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars (1 to 5)'**
+  String get flFieldRating;
+
+  /// No description provided for @flFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get flFieldReason;
+
+  /// No description provided for @flCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get flCreate;
+
+  /// No description provided for @flEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'About {km} km, {minutes} minutes, {cost}. Suggested: {cls}.'**
+  String flEstimate(String km, int minutes, String cost, String cls);
+
+  /// No description provided for @flWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this'**
+  String get flWhat;
+
+  /// No description provided for @flWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked by {name} on {when}.'**
+  String flWho(String name, String when);
+
+  /// No description provided for @flMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaves {when}. {pax} people. {cls}. About {cost}.'**
+  String flMeta(String when, String pax, String cls, String cost);
+
+  /// No description provided for @flAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Car {plate} with {driver}.'**
+  String flAssigned(String plate, String driver);
+
+  /// No description provided for @flPassNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate pass {pass}'**
+  String flPassNo(String pass);
+
+  /// No description provided for @flActAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a car'**
+  String get flActAssign;
+
+  /// No description provided for @flActGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the gate'**
+  String get flActGateOut;
+
+  /// No description provided for @flActCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a stop'**
+  String get flActCheckpoint;
+
+  /// No description provided for @flActComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the trip'**
+  String get flActComplete;
+
+  /// No description provided for @flActSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help'**
+  String get flActSos;
+
+  /// No description provided for @flActToll.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a toll'**
+  String get flActToll;
+
+  /// No description provided for @flActRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate the trip'**
+  String get flActRate;
+
+  /// No description provided for @flActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get flActCancel;
+
+  /// No description provided for @flActPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Show gate pass'**
+  String get flActPass;
+
+  /// No description provided for @flActTollOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get flActTollOk;
+
+  /// No description provided for @flActTollPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark paid'**
+  String get flActTollPay;
+
+  /// No description provided for @flActAck.
+  ///
+  /// In en, this message translates to:
+  /// **'We are coming'**
+  String get flActAck;
+
+  /// No description provided for @flSheetAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign a car and a driver'**
+  String get flSheetAssign;
+
+  /// No description provided for @flSheetAssignHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only free cars with valid papers are listed.'**
+  String get flSheetAssignHelp;
+
+  /// No description provided for @flDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to your head of department.'**
+  String get flDoneCreate;
+
+  /// No description provided for @flDoneAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Car assigned. The driver has been told.'**
+  String get flDoneAssign;
+
+  /// No description provided for @flDoneGateOut.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip has started.'**
+  String get flDoneGateOut;
+
+  /// No description provided for @flDoneCheckpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recorded.'**
+  String get flDoneCheckpoint;
+
+  /// No description provided for @flDoneComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip finished.'**
+  String get flDoneComplete;
+
+  /// No description provided for @flDoneSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Help request sent.'**
+  String get flDoneSos;
+
+  /// No description provided for @flDoneToll.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll sent for review.'**
+  String get flDoneToll;
+
+  /// No description provided for @flDoneRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for the rating.'**
+  String get flDoneRate;
+
+  /// No description provided for @flDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled.'**
+  String get flDoneCancel;
+
+  /// No description provided for @flDoneTollOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll approved.'**
+  String get flDoneTollOk;
+
+  /// No description provided for @flDoneTollPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Toll marked paid.'**
+  String get flDoneTollPay;
+
+  /// No description provided for @flDoneAck.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver has been told help is coming.'**
+  String get flDoneAck;
+
+  /// No description provided for @flErrPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Say why you need the car.'**
+  String get flErrPurpose;
+
+  /// No description provided for @flErrLead.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask at least one hour ahead, unless it is critical.'**
+  String get flErrLead;
+
+  /// No description provided for @flErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get flErrFailed;
+
+  /// No description provided for @flErrWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Too early or too late. Ask transport to override.'**
+  String get flErrWindow;
+
+  /// No description provided for @flErrVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'That car is not free or its papers have expired.'**
+  String get flErrVehicle;
+
+  /// No description provided for @flErrDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'That driver cannot take this trip.'**
+  String get flErrDriver;
+
+  /// No description provided for @flErrNoneFree.
+  ///
+  /// In en, this message translates to:
+  /// **'No free car and driver fit this trip.'**
+  String get flErrNoneFree;
+
+  /// No description provided for @flTolls.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolls'**
+  String get flTolls;
+
+  /// No description provided for @flTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get flTimeline;
+
+  /// No description provided for @flSosIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Open calls from drivers. Transport and the gate acknowledge them.'**
+  String get flSosIntro;
+
+  /// No description provided for @flSosEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No help requests.'**
+  String get flSosEmpty;
+
+  /// No description provided for @flSosHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Say where you are and what is wrong. Transport and the gate will see this at once.'**
+  String get flSosHelp;
+
+  /// No description provided for @flSosOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get flSosOpen;
+
+  /// No description provided for @flSosAcked.
+  ///
+  /// In en, this message translates to:
+  /// **'Help is coming'**
+  String get flSosAcked;
+
+  /// No description provided for @moduleIncidents.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety'**
+  String get moduleIncidents;
+
+  /// No description provided for @inIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Report what you saw. The safety team triages it, finds the cause, and tracks the fix.'**
+  String get inIntro;
+
+  /// No description provided for @inNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Report what happened'**
+  String get inNew;
+
+  /// No description provided for @inSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title or place'**
+  String get inSearchHint;
+
+  /// No description provided for @inTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get inTabMine;
+
+  /// No description provided for @inTabTriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get inTabTriage;
+
+  /// No description provided for @inTabOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Still open'**
+  String get inTabOpen;
+
+  /// No description provided for @inTabSerious.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious'**
+  String get inTabSerious;
+
+  /// No description provided for @inTabStatutory.
+  ///
+  /// In en, this message translates to:
+  /// **'Government report'**
+  String get inTabStatutory;
+
+  /// No description provided for @inTabCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'My fixes'**
+  String get inTabCapa;
+
+  /// No description provided for @inTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get inTabAll;
+
+  /// No description provided for @inEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No safety reports here.'**
+  String get inEmpty;
+
+  /// No description provided for @inEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get inEmptyFiltered;
+
+  /// No description provided for @inVerdictNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting on you.'**
+  String get inVerdictNone;
+
+  /// No description provided for @inVerdictNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting on you'**
+  String inVerdictNeed(int count);
+
+  /// No description provided for @inTypeNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Near miss'**
+  String get inTypeNear;
+
+  /// No description provided for @inTypeHazard.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsafe condition'**
+  String get inTypeHazard;
+
+  /// No description provided for @inTypeMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical treatment'**
+  String get inTypeMedical;
+
+  /// No description provided for @inTypeLost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost-time injury'**
+  String get inTypeLost;
+
+  /// No description provided for @inTypeSpill.
+  ///
+  /// In en, this message translates to:
+  /// **'Spill or leak'**
+  String get inTypeSpill;
+
+  /// No description provided for @inTypeFire.
+  ///
+  /// In en, this message translates to:
+  /// **'Fire or heat'**
+  String get inTypeFire;
+
+  /// No description provided for @inTypeEquip.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment damaged'**
+  String get inTypeEquip;
+
+  /// No description provided for @inTypeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle accident'**
+  String get inTypeVehicle;
+
+  /// No description provided for @inTypeEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Environmental'**
+  String get inTypeEnv;
+
+  /// No description provided for @inTypePipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure or piping'**
+  String get inTypePipe;
+
+  /// No description provided for @inTypeFatal.
+  ///
+  /// In en, this message translates to:
+  /// **'Fatality'**
+  String get inTypeFatal;
+
+  /// No description provided for @inStageReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for safety'**
+  String get inStageReported;
+
+  /// No description provided for @inStageTriaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get inStageTriaged;
+
+  /// No description provided for @inStageInvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the cause'**
+  String get inStageInvest;
+
+  /// No description provided for @inStageCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix in progress'**
+  String get inStageCapa;
+
+  /// No description provided for @inStageReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to close'**
+  String get inStageReview;
+
+  /// No description provided for @inStageClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get inStageClosed;
+
+  /// No description provided for @inRiskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low risk'**
+  String get inRiskLow;
+
+  /// No description provided for @inRiskMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium risk'**
+  String get inRiskMedium;
+
+  /// No description provided for @inRiskHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High risk'**
+  String get inRiskHigh;
+
+  /// No description provided for @inRiskExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme risk'**
+  String get inRiskExtreme;
+
+  /// No description provided for @inRiskLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Score {score} · {label}'**
+  String inRiskLine(int score, String label);
+
+  /// No description provided for @inAnonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone who asked not to be named'**
+  String get inAnonymous;
+
+  /// No description provided for @inNextTriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide how serious {name}’s report is and name an investigator.'**
+  String inNextTriage(String name);
+
+  /// No description provided for @inNextWaitHse.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the plant safety lead. Nothing for you to do.'**
+  String get inNextWaitHse;
+
+  /// No description provided for @inNextReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the safety team.'**
+  String get inNextReported;
+
+  /// No description provided for @inNextStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the investigation.'**
+  String get inNextStart;
+
+  /// No description provided for @inNextTriaged.
+  ///
+  /// In en, this message translates to:
+  /// **'An investigator has been named.'**
+  String get inNextTriaged;
+
+  /// No description provided for @inNextRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the three whys and the root cause.'**
+  String get inNextRca;
+
+  /// No description provided for @inNextInvest.
+  ///
+  /// In en, this message translates to:
+  /// **'The cause is being found.'**
+  String get inNextInvest;
+
+  /// No description provided for @inNextMyCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Do the fix assigned to you.'**
+  String get inNextMyCapa;
+
+  /// No description provided for @inNextVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm a finished fix.'**
+  String get inNextVerify;
+
+  /// No description provided for @inNextReview.
+  ///
+  /// In en, this message translates to:
+  /// **'All fixes are done. Send it for close.'**
+  String get inNextReview;
+
+  /// No description provided for @inNextCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes are still open.'**
+  String get inNextCapa;
+
+  /// No description provided for @inNextSignSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign as the safety lead.'**
+  String get inNextSignSafety;
+
+  /// No description provided for @inNextSignGm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign as the plant head to close it.'**
+  String get inNextSignGm;
+
+  /// No description provided for @inNextReviewWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the plant head to close it.'**
+  String get inNextReviewWait;
+
+  /// No description provided for @inNextClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This report is closed.'**
+  String get inNextClosed;
+
+  /// No description provided for @inFormIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what happened, where, and how bad it could have been. Safety sees it at once. You may hide your name.'**
+  String get inFormIntro;
+
+  /// No description provided for @inFieldType.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of event'**
+  String get inFieldType;
+
+  /// No description provided for @inFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Short title'**
+  String get inFieldTitle;
+
+  /// No description provided for @inFieldDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'What you saw'**
+  String get inFieldDesc;
+
+  /// No description provided for @inFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Which site'**
+  String get inFieldSite;
+
+  /// No description provided for @inFieldZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Which area'**
+  String get inFieldZone;
+
+  /// No description provided for @inFieldWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When it happened'**
+  String get inFieldWhen;
+
+  /// No description provided for @inFieldSev.
+  ///
+  /// In en, this message translates to:
+  /// **'How bad if it happens again: {n}'**
+  String inFieldSev(int n);
+
+  /// No description provided for @inFieldLike.
+  ///
+  /// In en, this message translates to:
+  /// **'How likely it happens again: {n}'**
+  String inFieldLike(int n);
+
+  /// No description provided for @inFieldAnon.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide my name'**
+  String get inFieldAnon;
+
+  /// No description provided for @inFieldAnonHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety still sees the report. Your name is not shown to others.'**
+  String get inFieldAnonHelp;
+
+  /// No description provided for @inCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get inCreate;
+
+  /// No description provided for @inConfirmSerious.
+  ///
+  /// In en, this message translates to:
+  /// **'This will page the plant head now'**
+  String get inConfirmSerious;
+
+  /// No description provided for @inConfirmSeriousMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'High or extreme scores notify the safety lead and the chairman at once.'**
+  String get inConfirmSeriousMsg;
+
+  /// No description provided for @inWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this'**
+  String get inWhat;
+
+  /// No description provided for @inWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported by {name} on {when}.'**
+  String inWho(String name, String when);
+
+  /// No description provided for @inMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Happened {when} at {site}, {zone}. Risk score {score}.'**
+  String inMeta(String when, String site, String zone, String score);
+
+  /// No description provided for @inInvestigator.
+  ///
+  /// In en, this message translates to:
+  /// **'Investigator: {name}'**
+  String inInvestigator(String name);
+
+  /// No description provided for @inStatutoryDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Must tell {body} by {when}.'**
+  String inStatutoryDue(String body, String when);
+
+  /// No description provided for @inStatutoryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed as {receipt}.'**
+  String inStatutoryDone(String receipt);
+
+  /// No description provided for @inActTriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Triage'**
+  String get inActTriage;
+
+  /// No description provided for @inActInvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Start investigation'**
+  String get inActInvest;
+
+  /// No description provided for @inActRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the cause'**
+  String get inActRca;
+
+  /// No description provided for @inActCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a fix'**
+  String get inActCapa;
+
+  /// No description provided for @inActStatutory.
+  ///
+  /// In en, this message translates to:
+  /// **'Record government filing'**
+  String get inActStatutory;
+
+  /// No description provided for @inActSignSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign as safety'**
+  String get inActSignSafety;
+
+  /// No description provided for @inActSignGm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close as plant head'**
+  String get inActSignGm;
+
+  /// No description provided for @inActStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get inActStart;
+
+  /// No description provided for @inActComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get inActComplete;
+
+  /// No description provided for @inActVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get inActVerify;
+
+  /// No description provided for @inFieldInvestigator.
+  ///
+  /// In en, this message translates to:
+  /// **'Who will investigate'**
+  String get inFieldInvestigator;
+
+  /// No description provided for @inFieldOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Who will do the fix'**
+  String get inFieldOwner;
+
+  /// No description provided for @inFieldWhy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Why 1'**
+  String get inFieldWhy1;
+
+  /// No description provided for @inFieldWhy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Why 2'**
+  String get inFieldWhy2;
+
+  /// No description provided for @inFieldWhy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Why 3'**
+  String get inFieldWhy3;
+
+  /// No description provided for @inFieldRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Root cause'**
+  String get inFieldRoot;
+
+  /// No description provided for @inFieldCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'What must be fixed'**
+  String get inFieldCapa;
+
+  /// No description provided for @inFieldReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt or diary number'**
+  String get inFieldReceipt;
+
+  /// No description provided for @inFieldEvidence.
+  ///
+  /// In en, this message translates to:
+  /// **'What you did'**
+  String get inFieldEvidence;
+
+  /// No description provided for @inRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Root cause'**
+  String get inRca;
+
+  /// No description provided for @inFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes'**
+  String get inFixes;
+
+  /// No description provided for @inDoneCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Report sent to the safety team.'**
+  String get inDoneCreate;
+
+  /// No description provided for @inDoneTriage.
+  ///
+  /// In en, this message translates to:
+  /// **'Investigator named.'**
+  String get inDoneTriage;
+
+  /// No description provided for @inDoneInvest.
+  ///
+  /// In en, this message translates to:
+  /// **'Investigation started.'**
+  String get inDoneInvest;
+
+  /// No description provided for @inDoneRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Root cause recorded.'**
+  String get inDoneRca;
+
+  /// No description provided for @inDoneCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix assigned.'**
+  String get inDoneCapa;
+
+  /// No description provided for @inDoneStatutory.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing recorded.'**
+  String get inDoneStatutory;
+
+  /// No description provided for @inDoneSignSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety signature recorded.'**
+  String get inDoneSignSafety;
+
+  /// No description provided for @inDoneSignGm.
+  ///
+  /// In en, this message translates to:
+  /// **'Report closed.'**
+  String get inDoneSignGm;
+
+  /// No description provided for @inDoneStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix started.'**
+  String get inDoneStart;
+
+  /// No description provided for @inDoneComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix marked done.'**
+  String get inDoneComplete;
+
+  /// No description provided for @inDoneVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix confirmed.'**
+  String get inDoneVerify;
+
+  /// No description provided for @inErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a short title.'**
+  String get inErrTitle;
+
+  /// No description provided for @inErrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what you saw in a few sentences.'**
+  String get inErrDesc;
+
+  /// No description provided for @inErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get inErrFailed;
+
+  /// No description provided for @inErrRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the root cause before adding a fix.'**
+  String get inErrRca;
+
+  /// No description provided for @inErrCapaOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Every fix must be confirmed first.'**
+  String get inErrCapaOpen;
+
+  /// No description provided for @inErrCapaSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone else must confirm your own fix.'**
+  String get inErrCapaSelf;
+
+  /// No description provided for @inErrNotStat.
+  ///
+  /// In en, this message translates to:
+  /// **'This report does not need a government filing.'**
+  String get inErrNotStat;
+
+  /// No description provided for @moduleAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment'**
+  String get moduleAssets;
+
+  /// No description provided for @asIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Machines, cars and kits in your care. Those that need a signature, a repair or a safety lock sit first.'**
+  String get asIntro;
+
+  /// No description provided for @asSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or serial'**
+  String get asSearchHint;
+
+  /// No description provided for @asNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add equipment'**
+  String get asNew;
+
+  /// No description provided for @asNewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Register something the company already bought.'**
+  String get asNewIntro;
+
+  /// No description provided for @asTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get asTabMine;
+
+  /// No description provided for @asTabAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs you'**
+  String get asTabAttention;
+
+  /// No description provided for @asTabSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to sign'**
+  String get asTabSign;
+
+  /// No description provided for @asTabRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'In repair'**
+  String get asTabRepair;
+
+  /// No description provided for @asTabCal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration'**
+  String get asTabCal;
+
+  /// No description provided for @asTabRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to retire'**
+  String get asTabRetire;
+
+  /// No description provided for @asTabStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In store'**
+  String get asTabStock;
+
+  /// No description provided for @asTabCars.
+  ///
+  /// In en, this message translates to:
+  /// **'Cars'**
+  String get asTabCars;
+
+  /// No description provided for @asTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get asTabAll;
+
+  /// No description provided for @asEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this list.'**
+  String get asEmpty;
+
+  /// No description provided for @asEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get asEmptyFiltered;
+
+  /// No description provided for @asSummaryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting for you in this list.'**
+  String get asSummaryNone;
+
+  /// No description provided for @asSummaryNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item needs you.} other{{count} items need you.}}'**
+  String asSummaryNeed(int count);
+
+  /// No description provided for @asWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this, and where is it?'**
+  String get asWhat;
+
+  /// No description provided for @asWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept so we know who holds it, what it is worth and when it needs service. {category}.'**
+  String asWhy(String category);
+
+  /// No description provided for @asLifeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage {stage} of 8 · planned life {years} years'**
+  String asLifeLine(String stage, String years);
+
+  /// No description provided for @asBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book value {nbv} · health {health}/100'**
+  String asBook(String nbv, String health);
+
+  /// No description provided for @asLotoOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked out. Permit {permit}. Do not operate.'**
+  String asLotoOn(String permit);
+
+  /// No description provided for @asStageStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In store'**
+  String get asStageStock;
+
+  /// No description provided for @asStageWork.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get asStageWork;
+
+  /// No description provided for @asStageMove.
+  ///
+  /// In en, this message translates to:
+  /// **'On the move'**
+  String get asStageMove;
+
+  /// No description provided for @asStageRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'In repair'**
+  String get asStageRepair;
+
+  /// No description provided for @asStageCal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration due'**
+  String get asStageCal;
+
+  /// No description provided for @asStageLoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked out'**
+  String get asStageLoto;
+
+  /// No description provided for @asStageRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired'**
+  String get asStageRetire;
+
+  /// No description provided for @asStageGone.
+  ///
+  /// In en, this message translates to:
+  /// **'Disposed'**
+  String get asStageGone;
+
+  /// No description provided for @asNextCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Put it into service and, if needed, name who holds it.'**
+  String get asNextCommission;
+
+  /// No description provided for @asNextStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting in the store. Plant can put it into service.'**
+  String get asNextStock;
+
+  /// No description provided for @asNextReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'It is arriving. Confirm you received it.'**
+  String get asNextReceive;
+
+  /// No description provided for @asNextMoving.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way to another site.'**
+  String get asNextMoving;
+
+  /// No description provided for @asNextLotoRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Release the lock-out when the job is safe to restart.'**
+  String get asNextLotoRelease;
+
+  /// No description provided for @asNextLotoWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked out. Waiting for the safety officer.'**
+  String get asNextLotoWait;
+
+  /// No description provided for @asNextFinishJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the open job and write what it cost.'**
+  String get asNextFinishJob;
+
+  /// No description provided for @asNextRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'A repair is under way.'**
+  String get asNextRepair;
+
+  /// No description provided for @asNextCal.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the calibration certificate.'**
+  String get asNextCal;
+
+  /// No description provided for @asNextCalWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration is due.'**
+  String get asNextCalWait;
+
+  /// No description provided for @asNextDispose.
+  ///
+  /// In en, this message translates to:
+  /// **'All boxes are ready. Close the books.'**
+  String get asNextDispose;
+
+  /// No description provided for @asNextWriteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the write-off, then finance can close it.'**
+  String get asNextWriteOff;
+
+  /// No description provided for @asNextRetireWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for finance to finish the retirement file.'**
+  String get asNextRetireWait;
+
+  /// No description provided for @asNextGone.
+  ///
+  /// In en, this message translates to:
+  /// **'Gone from the books. Nothing left to do.'**
+  String get asNextGone;
+
+  /// No description provided for @asNextAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign to confirm you received this.'**
+  String get asNextAck;
+
+  /// No description provided for @asNextOk.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} holds it. Nothing for you to do.'**
+  String asNextOk(String who);
+
+  /// No description provided for @asNextIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'In use. Report a fault if something is wrong.'**
+  String get asNextIdle;
+
+  /// No description provided for @asFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it called?'**
+  String get asFieldName;
+
+  /// No description provided for @asFieldCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get asFieldCategory;
+
+  /// No description provided for @asFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Site'**
+  String get asFieldSite;
+
+  /// No description provided for @asFieldCost.
+  ///
+  /// In en, this message translates to:
+  /// **'What did it cost? (taka)'**
+  String get asFieldCost;
+
+  /// No description provided for @asFieldLife.
+  ///
+  /// In en, this message translates to:
+  /// **'How many years will it last?'**
+  String get asFieldLife;
+
+  /// No description provided for @asFieldLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where will it sit?'**
+  String get asFieldLocation;
+
+  /// No description provided for @asFieldCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'How critical?'**
+  String get asFieldCritical;
+
+  /// No description provided for @asFieldCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Put into service now'**
+  String get asFieldCommission;
+
+  /// No description provided for @asFieldHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Who will hold it?'**
+  String get asFieldHolder;
+
+  /// No description provided for @asFieldHolderNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No one yet'**
+  String get asFieldHolderNone;
+
+  /// No description provided for @asFieldDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong?'**
+  String get asFieldDefect;
+
+  /// No description provided for @asFieldPermit.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock-out permit (LOTO-YYYY-NNNN)'**
+  String get asFieldPermit;
+
+  /// No description provided for @asFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why?'**
+  String get asFieldReason;
+
+  /// No description provided for @asFieldSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey notes'**
+  String get asFieldSurvey;
+
+  /// No description provided for @asFieldCert.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate number'**
+  String get asFieldCert;
+
+  /// No description provided for @asFieldProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale proceeds (taka, 0 if scrap)'**
+  String get asFieldProceeds;
+
+  /// No description provided for @asFieldToSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving site'**
+  String get asFieldToSite;
+
+  /// No description provided for @asSiteHq.
+  ///
+  /// In en, this message translates to:
+  /// **'Head office'**
+  String get asSiteHq;
+
+  /// No description provided for @asSitePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Keraniganj plant'**
+  String get asSitePlant;
+
+  /// No description provided for @asSiteCtg.
+  ///
+  /// In en, this message translates to:
+  /// **'Chattogram terminal'**
+  String get asSiteCtg;
+
+  /// No description provided for @asCritA.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant-critical'**
+  String get asCritA;
+
+  /// No description provided for @asCritB.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential'**
+  String get asCritB;
+
+  /// No description provided for @asCritC.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get asCritC;
+
+  /// No description provided for @asActAck.
+  ///
+  /// In en, this message translates to:
+  /// **'I have it'**
+  String get asActAck;
+
+  /// No description provided for @asActCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'Put into service'**
+  String get asActCommission;
+
+  /// No description provided for @asActAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over'**
+  String get asActAssign;
+
+  /// No description provided for @asActFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Something is wrong'**
+  String get asActFlag;
+
+  /// No description provided for @asActLotoOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock out'**
+  String get asActLotoOn;
+
+  /// No description provided for @asActLotoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Release lock-out'**
+  String get asActLotoOff;
+
+  /// No description provided for @asActMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to another site'**
+  String get asActMove;
+
+  /// No description provided for @asActReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Received here'**
+  String get asActReceive;
+
+  /// No description provided for @asActCertify.
+  ///
+  /// In en, this message translates to:
+  /// **'Record certificate'**
+  String get asActCertify;
+
+  /// No description provided for @asActRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Retire'**
+  String get asActRetire;
+
+  /// No description provided for @asActWriteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve write-off'**
+  String get asActWriteOff;
+
+  /// No description provided for @asActDispose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the books'**
+  String get asActDispose;
+
+  /// No description provided for @asActStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start job'**
+  String get asActStart;
+
+  /// No description provided for @asActFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish job'**
+  String get asActFinish;
+
+  /// No description provided for @asJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'Open jobs'**
+  String get asJobs;
+
+  /// No description provided for @asRetireFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Retirement file'**
+  String get asRetireFile;
+
+  /// No description provided for @asBoxSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical survey signed'**
+  String get asBoxSurvey;
+
+  /// No description provided for @asBoxClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaned / decontaminated'**
+  String get asBoxClean;
+
+  /// No description provided for @asBoxSpares.
+  ///
+  /// In en, this message translates to:
+  /// **'Spares taken off'**
+  String get asBoxSpares;
+
+  /// No description provided for @asBoxFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance checked'**
+  String get asBoxFinance;
+
+  /// No description provided for @asDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get asDetails;
+
+  /// No description provided for @asFieldBookFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost and depreciation'**
+  String get asFieldBookFull;
+
+  /// No description provided for @asBookFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Gross {gross} · already written down {accum} · book {nbv} · method {method}'**
+  String asBookFull(String gross, String accum, String nbv, String method);
+
+  /// No description provided for @asYearCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'This year {amount}'**
+  String asYearCharge(String amount);
+
+  /// No description provided for @asPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag, serial and maker'**
+  String get asPassport;
+
+  /// No description provided for @asDoneAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed.'**
+  String get asDoneAck;
+
+  /// No description provided for @asDoneCommission.
+  ///
+  /// In en, this message translates to:
+  /// **'In service.'**
+  String get asDoneCommission;
+
+  /// No description provided for @asDoneAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over. They have three days to sign.'**
+  String get asDoneAssign;
+
+  /// No description provided for @asDoneFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Fault logged. A repair job was opened.'**
+  String get asDoneFlag;
+
+  /// No description provided for @asDoneLotoOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked out.'**
+  String get asDoneLotoOn;
+
+  /// No description provided for @asDoneLotoOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock-out released.'**
+  String get asDoneLotoOff;
+
+  /// No description provided for @asDoneMove.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way.'**
+  String get asDoneMove;
+
+  /// No description provided for @asDoneReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Received.'**
+  String get asDoneReceive;
+
+  /// No description provided for @asDoneCertify.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate recorded.'**
+  String get asDoneCertify;
+
+  /// No description provided for @asDoneRetire.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired. Finance still has boxes to tick.'**
+  String get asDoneRetire;
+
+  /// No description provided for @asDoneWriteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Write-off approved.'**
+  String get asDoneWriteOff;
+
+  /// No description provided for @asDoneDispose.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed on the books.'**
+  String get asDoneDispose;
+
+  /// No description provided for @asDoneStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Job started.'**
+  String get asDoneStart;
+
+  /// No description provided for @asDoneFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Job finished.'**
+  String get asDoneFinish;
+
+  /// No description provided for @asDoneTick.
+  ///
+  /// In en, this message translates to:
+  /// **'Box ticked.'**
+  String get asDoneTick;
+
+  /// No description provided for @asErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a short name.'**
+  String get asErrName;
+
+  /// No description provided for @asErrCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the purchase cost.'**
+  String get asErrCost;
+
+  /// No description provided for @asErrLife.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the life in years.'**
+  String get asErrLife;
+
+  /// No description provided for @asErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get asErrFailed;
+
+  /// No description provided for @asErrLoto.
+  ///
+  /// In en, this message translates to:
+  /// **'This machine is locked out.'**
+  String get asErrLoto;
+
+  /// No description provided for @asErrLotoNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock this machine out before work starts.'**
+  String get asErrLotoNeed;
+
+  /// No description provided for @asErrAck.
+  ///
+  /// In en, this message translates to:
+  /// **'The current holder must sign first.'**
+  String get asErrAck;
+
+  /// No description provided for @asErrList.
+  ///
+  /// In en, this message translates to:
+  /// **'Every retirement box must be ticked.'**
+  String get asErrList;
+
+  /// No description provided for @asErrWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Write-off is not approved yet.'**
+  String get asErrWrite;
+
+  /// No description provided for @asErrCal.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate this first.'**
+  String get asErrCal;
+
+  /// No description provided for @moduleCompliance.
+  ///
+  /// In en, this message translates to:
+  /// **'Licences'**
+  String get moduleCompliance;
+
+  /// No description provided for @cpIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Permits the plant needs to stay open. Those that run out first sit at the top.'**
+  String get cpIntro;
+
+  /// No description provided for @cpSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or number'**
+  String get cpSearchHint;
+
+  /// No description provided for @cpNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a licence'**
+  String get cpNew;
+
+  /// No description provided for @cpNewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a permit the company already holds.'**
+  String get cpNewIntro;
+
+  /// No description provided for @cpTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get cpTabMine;
+
+  /// No description provided for @cpTabCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get cpTabCritical;
+
+  /// No description provided for @cpTabWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This quarter'**
+  String get cpTabWarning;
+
+  /// No description provided for @cpTabRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewing'**
+  String get cpTabRenew;
+
+  /// No description provided for @cpTabExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Lapsed'**
+  String get cpTabExpired;
+
+  /// No description provided for @cpTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get cpTabAll;
+
+  /// No description provided for @cpEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this list.'**
+  String get cpEmpty;
+
+  /// No description provided for @cpEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that search.'**
+  String get cpEmptyFiltered;
+
+  /// No description provided for @cpSummaryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting for you in this list.'**
+  String get cpSummaryNone;
+
+  /// No description provided for @cpSummaryNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 licence needs you.} other{{count} licences need you.}}'**
+  String cpSummaryNeed(int count);
+
+  /// No description provided for @cpDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day left} other{{days} days left}}'**
+  String cpDays(int days);
+
+  /// No description provided for @cpWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What permit is this?'**
+  String get cpWhat;
+
+  /// No description provided for @cpWho.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} looks after it. {days}.'**
+  String cpWho(String who, String days);
+
+  /// No description provided for @cpWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Without it the plant cannot legally run that activity.'**
+  String get cpWhy;
+
+  /// No description provided for @cpExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs out on {date}.'**
+  String cpExpires(String date);
+
+  /// No description provided for @cpRenewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal: {stage} · checklist {pct}%'**
+  String cpRenewLine(String stage, String pct);
+
+  /// No description provided for @cpUrgExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Lapsed'**
+  String get cpUrgExpired;
+
+  /// No description provided for @cpUrgCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get cpUrgCritical;
+
+  /// No description provided for @cpUrgWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This quarter'**
+  String get cpUrgWarning;
+
+  /// No description provided for @cpUrgOk.
+  ///
+  /// In en, this message translates to:
+  /// **'In date'**
+  String get cpUrgOk;
+
+  /// No description provided for @cpStageReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the file ready'**
+  String get cpStageReview;
+
+  /// No description provided for @cpStageFiled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filed with the office'**
+  String get cpStageFiled;
+
+  /// No description provided for @cpStageInspect.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection booked'**
+  String get cpStageInspect;
+
+  /// No description provided for @cpStageVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on the ministry'**
+  String get cpStageVet;
+
+  /// No description provided for @cpStageDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewed'**
+  String get cpStageDone;
+
+  /// No description provided for @cpNextStartExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This has lapsed. Open a renewal file.'**
+  String get cpNextStartExpired;
+
+  /// No description provided for @cpNextExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This has lapsed. Plant will open a renewal.'**
+  String get cpNextExpired;
+
+  /// No description provided for @cpNextStartSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'It runs out soon. Open a renewal file.'**
+  String get cpNextStartSoon;
+
+  /// No description provided for @cpNextOk.
+  ///
+  /// In en, this message translates to:
+  /// **'In date until {date}. Nothing for you to do.'**
+  String cpNextOk(String date);
+
+  /// No description provided for @cpNextFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance must approve the {fee} fee before you can file.'**
+  String cpNextFund(String fee);
+
+  /// No description provided for @cpNextTicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick every box on the checklist, then file it.'**
+  String get cpNextTicks;
+
+  /// No description provided for @cpNextFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File the application with the regulator.'**
+  String get cpNextFile;
+
+  /// No description provided for @cpNextWaitFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the plant to file the application.'**
+  String get cpNextWaitFile;
+
+  /// No description provided for @cpNextBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Book the inspection and name the inspector.'**
+  String get cpNextBook;
+
+  /// No description provided for @cpNextWaitInspect.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for an inspection date.'**
+  String get cpNextWaitInspect;
+
+  /// No description provided for @cpNextFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Write what the inspector found.'**
+  String get cpNextFindings;
+
+  /// No description provided for @cpNextWaitFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection is booked.'**
+  String get cpNextWaitFindings;
+
+  /// No description provided for @cpNextCert.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the new certificate and the new expiry date.'**
+  String get cpNextCert;
+
+  /// No description provided for @cpNextWaitCert.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the new certificate.'**
+  String get cpNextWaitCert;
+
+  /// No description provided for @cpNextRenewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewed. Nothing left to do.'**
+  String get cpNextRenewed;
+
+  /// No description provided for @cpFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it called?'**
+  String get cpFieldTitle;
+
+  /// No description provided for @cpFieldNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Licence number on the paper'**
+  String get cpFieldNo;
+
+  /// No description provided for @cpFieldKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get cpFieldKind;
+
+  /// No description provided for @cpFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Site'**
+  String get cpFieldSite;
+
+  /// No description provided for @cpFieldExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'When does it run out?'**
+  String get cpFieldExpiry;
+
+  /// No description provided for @cpFieldFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal fee (taka)'**
+  String get cpFieldFee;
+
+  /// No description provided for @cpFieldOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Who looks after it?'**
+  String get cpFieldOwner;
+
+  /// No description provided for @cpFieldOwnerMe.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get cpFieldOwnerMe;
+
+  /// No description provided for @cpFieldInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspector name'**
+  String get cpFieldInspector;
+
+  /// No description provided for @cpFieldFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'What did they find?'**
+  String get cpFieldFindings;
+
+  /// No description provided for @cpFieldCert.
+  ///
+  /// In en, this message translates to:
+  /// **'New certificate number'**
+  String get cpFieldCert;
+
+  /// No description provided for @cpFieldNewExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'New expiry (YYYY-MM-DD)'**
+  String get cpFieldNewExpiry;
+
+  /// No description provided for @cpFieldChalan.
+  ///
+  /// In en, this message translates to:
+  /// **'Challan number'**
+  String get cpFieldChalan;
+
+  /// No description provided for @cpFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why send it back?'**
+  String get cpFieldReason;
+
+  /// No description provided for @cpFieldSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter subject'**
+  String get cpFieldSubject;
+
+  /// No description provided for @cpFieldLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter body'**
+  String get cpFieldLetter;
+
+  /// No description provided for @cpSiteHq.
+  ///
+  /// In en, this message translates to:
+  /// **'Head office'**
+  String get cpSiteHq;
+
+  /// No description provided for @cpSitePlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Keraniganj plant'**
+  String get cpSitePlant;
+
+  /// No description provided for @cpActRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a renewal'**
+  String get cpActRenew;
+
+  /// No description provided for @cpActFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve the fee'**
+  String get cpActFund;
+
+  /// No description provided for @cpActFile.
+  ///
+  /// In en, this message translates to:
+  /// **'File the application'**
+  String get cpActFile;
+
+  /// No description provided for @cpActInspect.
+  ///
+  /// In en, this message translates to:
+  /// **'Book inspection'**
+  String get cpActInspect;
+
+  /// No description provided for @cpActFindings.
+  ///
+  /// In en, this message translates to:
+  /// **'Record findings'**
+  String get cpActFindings;
+
+  /// No description provided for @cpActComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the new certificate'**
+  String get cpActComplete;
+
+  /// No description provided for @cpActAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Move forward'**
+  String get cpActAdvance;
+
+  /// No description provided for @cpActBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back one step'**
+  String get cpActBack;
+
+  /// No description provided for @cpActLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a chairman letter'**
+  String get cpActLetter;
+
+  /// No description provided for @cpChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Before we file'**
+  String get cpChecklist;
+
+  /// No description provided for @cpDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get cpDetails;
+
+  /// No description provided for @cpPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers'**
+  String get cpPassport;
+
+  /// No description provided for @cpDoneRenew.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal file opened.'**
+  String get cpDoneRenew;
+
+  /// No description provided for @cpDoneFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee approved. The plant can file now.'**
+  String get cpDoneFund;
+
+  /// No description provided for @cpDoneAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved forward.'**
+  String get cpDoneAdvance;
+
+  /// No description provided for @cpDoneBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back one step.'**
+  String get cpDoneBack;
+
+  /// No description provided for @cpDoneLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter sent.'**
+  String get cpDoneLetter;
+
+  /// No description provided for @cpDoneTick.
+  ///
+  /// In en, this message translates to:
+  /// **'Box ticked.'**
+  String get cpDoneTick;
+
+  /// No description provided for @cpErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a short name.'**
+  String get cpErrTitle;
+
+  /// No description provided for @cpErrNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the number on the paper.'**
+  String get cpErrNo;
+
+  /// No description provided for @cpErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get cpErrFailed;
+
+  /// No description provided for @cpErrFund.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance must approve the fee first.'**
+  String get cpErrFund;
+
+  /// No description provided for @cpErrTicks.
+  ///
+  /// In en, this message translates to:
+  /// **'Every box must be marked first.'**
+  String get cpErrTicks;
+
+  /// No description provided for @cpErrFail.
+  ///
+  /// In en, this message translates to:
+  /// **'A failed box is still open.'**
+  String get cpErrFail;
+
+  /// No description provided for @cpErrLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'A chairman letter is only for licences inside 30 days or already with the ministry.'**
+  String get cpErrLetter;
+
+  /// No description provided for @cpErrOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'A renewal is already open.'**
+  String get cpErrOpen;
+
+  /// No description provided for @cpErrValidity.
+  ///
+  /// In en, this message translates to:
+  /// **'The new expiry must match the usual life of this permit.'**
+  String get cpErrValidity;
+
+  /// No description provided for @moduleEmployees.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get moduleEmployees;
+
+  /// No description provided for @emIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Who works here, who they report to, and who is leaving.'**
+  String get emIntro;
+
+  /// No description provided for @emSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name, title or phone'**
+  String get emSearchHint;
+
+  /// No description provided for @emNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a colleague'**
+  String get emNew;
+
+  /// No description provided for @emNewIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'HR records someone who has already joined.'**
+  String get emNewIntro;
+
+  /// No description provided for @emTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'At work'**
+  String get emTabAll;
+
+  /// No description provided for @emTabTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'My team'**
+  String get emTabTeam;
+
+  /// No description provided for @emTabLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get emTabLeaving;
+
+  /// No description provided for @emTabFormer.
+  ///
+  /// In en, this message translates to:
+  /// **'Former'**
+  String get emTabFormer;
+
+  /// No description provided for @emEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody in this list.'**
+  String get emEmpty;
+
+  /// No description provided for @emEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody matches that search.'**
+  String get emEmptyFiltered;
+
+  /// No description provided for @emSummaryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting for you in this list.'**
+  String get emSummaryNone;
+
+  /// No description provided for @emSummaryNeed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 person needs you.} other{{count} people need you.}}'**
+  String emSummaryNeed(int count);
+
+  /// No description provided for @emStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'At work'**
+  String get emStatusActive;
+
+  /// No description provided for @emStatusLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get emStatusLeave;
+
+  /// No description provided for @emStatusLeaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving'**
+  String get emStatusLeaving;
+
+  /// No description provided for @emStatusFormer.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get emStatusFormer;
+
+  /// No description provided for @emWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is this?'**
+  String get emWhat;
+
+  /// No description provided for @emWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports to {who}.'**
+  String emWho(String who);
+
+  /// No description provided for @emWhoNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No line manager on file.'**
+  String get emWhoNone;
+
+  /// No description provided for @emWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'The directory is so colleagues can find each other. Sensitive details stay with HR.'**
+  String get emWhy;
+
+  /// No description provided for @emExitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving — desks that must sign off'**
+  String get emExitTitle;
+
+  /// No description provided for @emLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Last day {date}.'**
+  String emLastDay(String date);
+
+  /// No description provided for @emActExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Start leaving'**
+  String get emActExit;
+
+  /// No description provided for @emActClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this desk'**
+  String get emActClear;
+
+  /// No description provided for @emActWaive.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this desk'**
+  String get emActWaive;
+
+  /// No description provided for @emActReclaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Take equipment back'**
+  String get emActReclaim;
+
+  /// No description provided for @emActClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the file'**
+  String get emActClose;
+
+  /// No description provided for @emActCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep them'**
+  String get emActCancel;
+
+  /// No description provided for @emActRehire.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring them back'**
+  String get emActRehire;
+
+  /// No description provided for @emFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get emFieldName;
+
+  /// No description provided for @emFieldNameBn.
+  ///
+  /// In en, this message translates to:
+  /// **'Name in Bangla'**
+  String get emFieldNameBn;
+
+  /// No description provided for @emFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Job title'**
+  String get emFieldTitle;
+
+  /// No description provided for @emFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get emFieldPhone;
+
+  /// No description provided for @emFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Work email'**
+  String get emFieldEmail;
+
+  /// No description provided for @emFieldDept.
+  ///
+  /// In en, this message translates to:
+  /// **'Department'**
+  String get emFieldDept;
+
+  /// No description provided for @emFieldSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Workplace'**
+  String get emFieldSite;
+
+  /// No description provided for @emFieldManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Line manager'**
+  String get emFieldManager;
+
+  /// No description provided for @emFieldManagerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get emFieldManagerHint;
+
+  /// No description provided for @emFieldLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Last working day (YYYY-MM-DD)'**
+  String get emFieldLastDay;
+
+  /// No description provided for @emFieldExitReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why they are leaving'**
+  String get emFieldExitReason;
+
+  /// No description provided for @emFieldNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What you checked'**
+  String get emFieldNote;
+
+  /// No description provided for @emFieldWaive.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this desk can be skipped'**
+  String get emFieldWaive;
+
+  /// No description provided for @emFieldVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Final-pay voucher number'**
+  String get emFieldVoucher;
+
+  /// No description provided for @emFieldCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why you are keeping them'**
+  String get emFieldCancel;
+
+  /// No description provided for @emFieldJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get emFieldJoined;
+
+  /// No description provided for @emFieldGrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get emFieldGrade;
+
+  /// No description provided for @emFieldNid.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID (10, 13 or 17 digits)'**
+  String get emFieldNid;
+
+  /// No description provided for @emFieldEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get emFieldEmergency;
+
+  /// No description provided for @emFieldReports.
+  ///
+  /// In en, this message translates to:
+  /// **'People who report to them'**
+  String get emFieldReports;
+
+  /// No description provided for @emPassport.
+  ///
+  /// In en, this message translates to:
+  /// **'Staff number'**
+  String get emPassport;
+
+  /// No description provided for @emDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get emDetails;
+
+  /// No description provided for @emItemPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get emItemPending;
+
+  /// No description provided for @emItemCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get emItemCleared;
+
+  /// No description provided for @emItemWaived.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get emItemWaived;
+
+  /// No description provided for @emDoneExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit file opened. Each desk will get a note.'**
+  String get emDoneExit;
+
+  /// No description provided for @emDoneClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Desk signed off.'**
+  String get emDoneClear;
+
+  /// No description provided for @emDoneWaive.
+  ///
+  /// In en, this message translates to:
+  /// **'Desk skipped.'**
+  String get emDoneWaive;
+
+  /// No description provided for @emDoneReclaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment taken back.'**
+  String get emDoneReclaim;
+
+  /// No description provided for @emDoneClose.
+  ///
+  /// In en, this message translates to:
+  /// **'They have left. Login is closed.'**
+  String get emDoneClose;
+
+  /// No description provided for @emDoneCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'They stay. Exit file cancelled.'**
+  String get emDoneCancel;
+
+  /// No description provided for @emDoneRehire.
+  ///
+  /// In en, this message translates to:
+  /// **'They are back on the books.'**
+  String get emDoneRehire;
+
+  /// No description provided for @emErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Give their name.'**
+  String get emErrName;
+
+  /// No description provided for @emErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Give their job title.'**
+  String get emErrTitle;
+
+  /// No description provided for @emErrPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Give a phone number.'**
+  String get emErrPhone;
+
+  /// No description provided for @emErrFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Try again.'**
+  String get emErrFailed;
+
+  /// No description provided for @emErrProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'The Chairman cannot be taken off the books this way.'**
+  String get emErrProtected;
+
+  /// No description provided for @emErrSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Another HR colleague must start your own exit.'**
+  String get emErrSelf;
+
+  /// No description provided for @emErrAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the equipment back first, then tick this desk.'**
+  String get emErrAssets;
+
+  /// No description provided for @emErrBus.
+  ///
+  /// In en, this message translates to:
+  /// **'End the staff-bus seat first.'**
+  String get emErrBus;
+
+  /// No description provided for @emErrTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish their open car trips first.'**
+  String get emErrTrips;
+
+  /// No description provided for @emErrFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Settle claims and advances first.'**
+  String get emErrFinance;
+
+  /// No description provided for @emErrPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Every desk must be cleared or skipped first.'**
+  String get emErrPending;
+
+  /// No description provided for @emErrOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'An exit file is already open.'**
+  String get emErrOpen;
+
+  /// No description provided for @moduleDashboards.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get moduleDashboards;
+
+  /// No description provided for @dbWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs you, and the few numbers that change a decision.'**
+  String get dbWhat;
+
+  /// No description provided for @dbWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'These figures are counted from the live files, not typed in.'**
+  String get dbWhy;
+
+  /// No description provided for @dbNeedsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs you today'**
+  String get dbNeedsTitle;
+
+  /// No description provided for @dbActBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a short briefing'**
+  String get dbActBrief;
+
+  /// No description provided for @dbFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get dbFieldTitle;
+
+  /// No description provided for @dbFieldBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What should they hear (20+ characters)'**
+  String get dbFieldBody;
+
+  /// No description provided for @dbDoneBrief.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefing sent.'**
+  String get dbDoneBrief;
+
+  /// No description provided for @dbRoiLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Declared: fleet ৳{fleet}, vendors ৳{vendor}. Not a live calculation.'**
+  String dbRoiLine(String fleet, String vendor);
+
+  /// No description provided for @moduleChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership chat'**
+  String get moduleChat;
+
+  /// No description provided for @chIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.'**
+  String get chIntro;
+
+  /// No description provided for @chEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No rooms yet'**
+  String get chEmptyTitle;
+
+  /// No description provided for @chEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Message a colleague to start one.'**
+  String get chEmpty;
+
+  /// No description provided for @chNoMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet.'**
+  String get chNoMessages;
+
+  /// No description provided for @chLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite only'**
+  String get chLocked;
+
+  /// No description provided for @chDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Message one person'**
+  String get chDirect;
+
+  /// No description provided for @chHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a message'**
+  String get chHint;
+
+  /// No description provided for @chSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chSend;
+
+  /// No description provided for @chReact.
+  ///
+  /// In en, this message translates to:
+  /// **'React'**
+  String get chReact;
+
+  /// No description provided for @chDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Message removed.'**
+  String get chDeleted;
+
+  /// No description provided for @chSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted in transit and at rest. Not end-to-end.'**
+  String get chSecureNote;
+
+  /// No description provided for @chActDirective.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue a directive'**
+  String get chActDirective;
+
+  /// No description provided for @chActAck.
+  ///
+  /// In en, this message translates to:
+  /// **'I have it'**
+  String get chActAck;
+
+  /// No description provided for @chActDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark done'**
+  String get chActDone;
+
+  /// No description provided for @chFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Directive title'**
+  String get chFieldTitle;
+
+  /// No description provided for @chFieldBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What must happen'**
+  String get chFieldBody;
+
+  /// No description provided for @chAckCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{acks} of {needed} have acknowledged.'**
+  String chAckCount(int acks, int needed);
+
+  /// No description provided for @demoPlayEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Play next live event'**
+  String get demoPlayEvent;
+
+  /// No description provided for @demoPlayEventHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drops a leadership message and an inbox ping.'**
+  String get demoPlayEventHint;
+
+  /// No description provided for @demoPlayEventDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Event played.'**
+  String get demoPlayEventDone;
+
+  /// No description provided for @homeWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs you now.'**
+  String get homeWhat;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a person or a file'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a name, employee ID or a reference such as LV-, INC- or PASS-.'**
+  String get searchHint;
+
+  /// No description provided for @searchField.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchField;
+
+  /// No description provided for @searchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that.'**
+  String get searchEmpty;
+
+  /// No description provided for @lockMessagePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with your account password. Five wrong tries sign you out.'**
+  String get lockMessagePassword;
+
+  /// No description provided for @lockPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get lockPassword;
+
+  /// No description provided for @lockUnlockPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with password'**
+  String get lockUnlockPassword;
+
+  /// No description provided for @lockFailedLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'That password did not match. {left} tries left.'**
+  String lockFailedLeft(int left);
+
+  /// No description provided for @dbListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get dbListen;
+
+  /// No description provided for @dbListenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as heard.'**
+  String get dbListenDone;
+
+  /// No description provided for @dbActRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get dbActRestore;
+
+  /// No description provided for @dbPermitRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'The lock-out is released.'**
+  String get dbPermitRestored;
+
+  /// No description provided for @dbActSignHandover.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign handover'**
+  String get dbActSignHandover;
+
+  /// No description provided for @dbHandoverSigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover signed. You own this shift.'**
+  String get dbHandoverSigned;
+
+  /// No description provided for @attTeamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your team today'**
+  String get attTeamTitle;
+
+  /// No description provided for @attTeamWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is in, late, on leave, or needs a check.'**
+  String get attTeamWhy;
+
+  /// No description provided for @attTeamPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get attTeamPresent;
+
+  /// No description provided for @attTeamLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attTeamLate;
+
+  /// No description provided for @attTeamLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get attTeamLeave;
+
+  /// No description provided for @attTeamReview.
+  ///
+  /// In en, this message translates to:
+  /// **'To review'**
+  String get attTeamReview;
+
+  /// No description provided for @attTeamEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody in this scope today.'**
+  String get attTeamEmpty;
+
+  /// No description provided for @attTeamNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for you to do.'**
+  String get attTeamNothing;
+
+  /// No description provided for @attTeamReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open regularisation or leave it.'**
+  String get attTeamReviewHint;
+
+  /// No description provided for @approvalRejectExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Write one sentence the requester will see on the file and in Inbox.'**
+  String get approvalRejectExplain;
+
+  /// No description provided for @approvalRejectionSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Why it was turned down'**
+  String get approvalRejectionSeen;
+
+  /// No description provided for @flChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip chat'**
+  String get flChat;
+
+  /// No description provided for @flChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages on this trip yet.'**
+  String get flChatEmpty;
+
+  /// No description provided for @flChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to the driver or requester'**
+  String get flChatHint;
+
+  /// No description provided for @flPoolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These two trips can share a car'**
+  String get flPoolTitle;
+
+  /// No description provided for @flPoolBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} and {b} go the same way. Assign one car if both agree.'**
+  String flPoolBody(String a, String b);
+
+  /// No description provided for @flCallDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call driver'**
+  String get flCallDriver;
+
+  /// No description provided for @flOdoStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start odometer (km)'**
+  String get flOdoStart;
+
+  /// No description provided for @flOdoEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish odometer (km)'**
+  String get flOdoEnd;
+
+  /// No description provided for @busConductor.
+  ///
+  /// In en, this message translates to:
+  /// **'Check a passenger'**
+  String get busConductor;
+
+  /// No description provided for @busConductorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee ID or seat number'**
+  String get busConductorHint;
+
+  /// No description provided for @busConductorOk.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is in seat {seat}.'**
+  String busConductorOk(String name, String seat);
+
+  /// No description provided for @busConductorMiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody on this bus matches that.'**
+  String get busConductorMiss;
+
+  /// No description provided for @busSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to swap seats'**
+  String get busSwap;
+
+  /// No description provided for @busSwapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The other person must accept.'**
+  String get busSwapHint;
+
+  /// No description provided for @busSwapDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap request sent.'**
+  String get busSwapDone;
+
+  /// No description provided for @busSwapAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept seat swap'**
+  String get busSwapAccept;
+
+  /// No description provided for @chVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note'**
+  String get chVoice;
+
+  /// No description provided for @chVoiceRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to record'**
+  String get chVoiceRecord;
+
+  /// No description provided for @chVoiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and send'**
+  String get chVoiceStop;
+
+  /// No description provided for @chVoicePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play voice note'**
+  String get chVoicePlay;
+
+  /// No description provided for @inGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Add where this happened'**
+  String get inGps;
+
+  /// No description provided for @inGpsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Location attached'**
+  String get inGpsOn;
+
+  /// No description provided for @inCloseBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Every fix must be confirmed before this file can close.'**
+  String get inCloseBlocked;
+
+  /// No description provided for @asScanTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a tag'**
+  String get asScanTag;
+
+  /// No description provided for @emErrNid.
+  ///
+  /// In en, this message translates to:
+  /// **'NID must be 10, 13 or 17 digits.'**
+  String get emErrNid;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

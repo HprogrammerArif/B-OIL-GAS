@@ -14,6 +14,7 @@ import 'package:bogcl_oneops/features/attendance/domain/attendance_models.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_providers.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_ui.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
+import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -52,7 +53,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     ref
       ..invalidate(todayAttendanceProvider)
       ..invalidate(attendanceMonthProvider(_month))
-      ..invalidate(myRegularisationsProvider);
+      ..invalidate(myRegularisationsProvider)
+      ..invalidate(teamAttendanceProvider);
     await ref.read(todayAttendanceProvider.future);
   }
 
@@ -149,7 +151,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final l10n = context.l10n;
     final today = ref.watch(todayAttendanceProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.attTitle)),
+      appBar: AppBar(
+        title: Text(l10n.attTitle),
+        actions: const [AppBarActions()],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () =>
             unawaited(context.push(AppRoutes.attendanceRegularise)),
@@ -170,6 +175,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 phase: _phase,
                 onPunch: () => unawaited(_punch(t)),
               ),
+              const _TeamRosterCard(),
               _MonthSection(
                 month: _month,
                 canGoNext: _month.compareTo(_thisMonth) < 0,
@@ -177,6 +183,85 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 onNext: () => _shiftMonth(1),
               ),
               const _RegularisationList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamRosterCard extends ConsumerWidget {
+  const _TeamRosterCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final async = ref.watch(teamAttendanceProvider);
+    final team = async.asData?.value;
+    if (team == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.attTeamTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text(l10n.attTeamWhy),
+              const SizedBox(height: Space.sm),
+              Wrap(
+                spacing: Space.sm,
+                children: [
+                  StatusPill(
+                    label: '${l10n.attTeamPresent} ${team.present}',
+                    tone: StatusTone.success,
+                  ),
+                  StatusPill(
+                    label: '${l10n.attTeamLate} ${team.late}',
+                    tone: StatusTone.warning,
+                  ),
+                  StatusPill(
+                    label: '${l10n.attTeamLeave} ${team.onLeave}',
+                    tone: StatusTone.info,
+                  ),
+                  StatusPill(
+                    label: '${l10n.attTeamReview} ${team.toReview}',
+                    tone: StatusTone.danger,
+                  ),
+                ],
+              ),
+              if (team.roster.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.md),
+                  child: Text(l10n.attTeamEmpty),
+                ),
+              for (final r in team.roster)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(bangla ? r.nameBn : r.name),
+                  subtitle: Text(
+                    r.needsReview
+                        ? l10n.attTeamReviewHint
+                        : '${r.empCode} · ${r.status}',
+                  ),
+                  onTap: () {
+                    if (r.workflowInstanceId != null) {
+                      unawaited(
+                        context.push(
+                          AppRoutes.approvalDetail(r.workflowInstanceId!),
+                        ),
+                      );
+                    } else {
+                      AppToast.show(context, l10n.attTeamNothing);
+                    }
+                  },
+                ),
             ],
           ),
         ),

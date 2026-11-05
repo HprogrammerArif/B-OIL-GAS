@@ -9,9 +9,9 @@ import {
   Bus, Users, MapPin, CheckCircle, Clock, AlertTriangle,
   QrCode, UserMinus, UserPlus, Phone, Compass, BellRing,
   Navigation, CheckCheck, X, Shield, Smartphone, RefreshCw,
-  Search, Filter, Calendar, Award, ChevronRight, FileText,
-  Printer, ArrowUpRight, Zap, CheckCircle2, UserCheck, Info,
-  Fuel, Activity, Gauge, AlertCircle, Share2, Lock, Sparkles,
+  Search, Filter, Calendar, ChevronRight, FileText,
+  Printer, ArrowUpRight, CheckCircle2, UserCheck, Info,
+  Fuel, Activity, Gauge, AlertCircle, Share2, Lock,
   ArrowUpDown, Send, Check, RotateCcw, Download, Tag, Radio,
   HelpCircle, AlertOctagon, Sun, Sunset, User, Ticket, DoorOpen, Flame
 } from 'lucide-react';
@@ -487,8 +487,8 @@ export default function BusView({ role, lang }: ViewProps) {
 
     showToast(
       t(
-        `⚡ Transport Cell: Promoted ${toPromote} FIFO candidates to available seats. SMS passes dispatched!`,
-        `⚡ পরিবহন সেল: ফিফো ক্রমানুসারে ${toPromote} জন প্রার্থীকে আসন বরাদ্দ দেওয়া হয়েছে।`,
+        `Promoted ${toPromote} standby passengers to available seats. SMS passes sent.`,
+        `ফিফো ক্রমানুসারে ${toPromote} জন প্রার্থীকে আসন বরাদ্দ দেওয়া হয়েছে।`,
         lang
       ),
       'gold'
@@ -1096,7 +1096,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 gap: '5px'
               }}
             >
-              <Award size={13} />
+              <UserCheck size={13} />
               <span>{t('Assign Seat', 'সিট বরাদ্দ', lang)}</span>
             </button>
 
@@ -1164,7 +1164,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 whiteSpace: 'nowrap',
               }}
             >
-              <Sparkles size={12} />
+              <UserPlus size={12} />
               <span>{t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}</span>
             </button>
           </div>
@@ -1764,7 +1764,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 whiteSpace: 'nowrap'
               }}
             >
-              <Award size={13} />
+              <User size={13} />
               <span>{t('Seat & Passenger', 'আসন ও যাত্রী', lang)} {selectedSeat ? `(#${String(selectedSeat.num).padStart(2, '0')})` : ''}</span>
             </button>
 
@@ -1818,7 +1818,7 @@ export default function BusView({ role, lang }: ViewProps) {
               <div className="card-hd">
                 <div className="card-hd-left">
                   <div className="card-hd-icon" style={{ background: 'rgba(225, 29, 72, 0.1)', color: 'var(--brand-crimson)' }}>
-                    <Award size={18} />
+                    <User size={18} />
                   </div>
                   <div>
                     <div className="card-title">
@@ -1944,7 +1944,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       style={{ width: '100%', justifyContent: 'center', fontSize: '12px' }}
                       onClick={() => handleOpenBookModal(selectedSeat)}
                     >
-                      <Sparkles size={14} /> {t(`Book & Reserve Seat #${selectedSeat.num}`, `সিট #${selectedSeat.num} বুক করুন`, lang)}
+                      <Ticket size={14} /> {t(`Book & Reserve Seat #${selectedSeat.num}`, `সিট #${selectedSeat.num} বুক করুন`, lang)}
                     </button>
                   )}
 
@@ -2003,7 +2003,7 @@ export default function BusView({ role, lang }: ViewProps) {
                             style={{ flex: 1, justifyContent: 'center' }}
                             onClick={() => handleSupervisorManualAllocate(waitlist[0], selectedSeat.num)}
                           >
-                            <Zap size={13} /> {t(`Assign to #1 ${waitlist[0].name}`, `বরাদ্দ দিন #${waitlist[0].name}-কে`, lang)}
+                            <UserPlus size={13} /> {t(`Assign to #1 ${waitlist[0].name}`, `বরাদ্দ দিন #${waitlist[0].name}-কে`, lang)}
                           </button>
                         ) : (
                           <button
@@ -2110,7 +2110,7 @@ export default function BusView({ role, lang }: ViewProps) {
                       style={{ fontSize: '11px', padding: '4px 10px' }}
                       onClick={handleSupervisorAutoFIFO}
                     >
-                      <Sparkles size={13} /> {t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}
+                      <UserPlus size={13} /> {t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}
                     </button>
                   )}
                 </div>

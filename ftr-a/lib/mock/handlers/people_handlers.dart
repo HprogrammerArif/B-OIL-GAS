@@ -26,6 +26,7 @@ List<RouteDef> peopleRoutes() => [
         ...?WorkflowEngine.personRef(ctx.store, u.str('id')),
         'department': e.obj('department')['name'],
         'departmentBn': e.obj('department')['nameBn'],
+        'siteId': e.obj('site')['id'],
         'site': e.obj('site')['name'],
         'siteBn': e.obj('site')['nameBn'],
       });

@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/mock/bootstrap.dart';
+import 'package:bogcl_oneops/mock/engines/event_simulator.dart';
 import 'package:bogcl_oneops/mock/mock_config.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -155,6 +156,19 @@ class _DemoMenu extends ConsumerWidget {
                   ),
               ],
             ),
+          ),
+          ListTile(
+            title: Text(l10n.demoPlayEvent),
+            subtitle: Text(l10n.demoPlayEventHint),
+            leading: const Icon(Icons.bolt_outlined),
+            onTap: () async {
+              final store = ref.read(mockStoreProvider);
+              final uid = ref.read(sessionControllerProvider).value?.profile.id;
+              EventSimulator.play(store, notifyUserId: uid);
+              await store.commit();
+              if (!context.mounted) return;
+              AppToast.show(context, l10n.demoPlayEventDone);
+            },
           ),
           SectionHeader(title: l10n.demoData),
           Padding(

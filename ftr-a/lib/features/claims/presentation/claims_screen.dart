@@ -15,6 +15,7 @@ import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -516,7 +517,20 @@ class _Payables extends ConsumerWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 96),
       children: [
-        if (c.isNotEmpty) SectionHeader(title: l10n.payClaims),
+        if (c.isNotEmpty) ...[
+          SectionHeader(title: l10n.payClaims),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Space.sm),
+              child: TextButton.icon(
+                onPressed: () => unawaited(_bankFile(context, c)),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: Text(l10n.claimBankFile),
+              ),
+            ),
+          ),
+        ],
         for (final x in c)
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -540,5 +554,53 @@ class _Payables extends ConsumerWidget {
           ),
       ],
     );
+  }
+}
+
+Future<void> _bankFile(BuildContext context, List<Claim> claims) async {
+  final l10n = context.l10n;
+  final bangla = context.isBangla;
+  if (claims.isEmpty) {
+    AppToast.show(context, l10n.claimBankEmpty);
+    return;
+  }
+  final lines = [
+    for (final x in claims)
+      '${x.claimNo} · ${x.displayEmployee(bangla: bangla)} · ${bdt(x.netSettlement ?? x.policyAmount, bangla: bangla)}',
+  ];
+  final copied = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Space.lg,
+        Space.sm,
+        Space.lg,
+        Space.xl,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.claimBankReady, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          for (final line in lines)
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.xs),
+              child: Text(line),
+            ),
+          const SizedBox(height: Space.lg),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.claimBankFile),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (copied != true || !context.mounted) return;
+  await Clipboard.setData(ClipboardData(text: lines.join('\n')));
+  if (context.mounted) {
+    AppToast.show(context, l10n.claimBankCopied, tone: StatusTone.success);
   }
 }

@@ -10,6 +10,7 @@ import {
   Lock,
   Bookmark,
   Building,
+  Pin,
 } from 'lucide-react';
 import { NoticeItem } from './types';
 import { t } from '../../types';
@@ -19,6 +20,8 @@ interface NoticeDetailModalProps {
   notice: NoticeItem | null;
   onClose: () => void;
   lang: 'en' | 'bn';
+  /** Recipients acknowledge. Issuers (Chairman) only read and track staff receipts. */
+  canAcknowledge?: boolean;
   onAcknowledge?: (noticeId?: string) => void;
 }
 
@@ -26,6 +29,7 @@ export default function NoticeDetailModal({
   notice,
   onClose,
   lang,
+  canAcknowledge = true,
   onAcknowledge,
 }: NoticeDetailModalProps) {
   if (!notice) return null;
@@ -110,7 +114,7 @@ export default function NoticeDetailModal({
                 gap: '4px',
               }}
             >
-              {notice.pinned ? '📌 Pinned Directive' : 'Standard Circular'}
+              {notice.pinned ? <><Pin size={11} /> {t('Pinned notice', 'পিন করা নোটিশ', lang)}</> : t('Standard circular', 'সাধারণ সার্কুলার', lang)}
             </span>
           </div>
 
@@ -655,15 +659,15 @@ export default function NoticeDetailModal({
             {t('Close', 'বন্ধ করুন', lang)}
           </button>
 
-          {!notice.read ? (
+          {canAcknowledge && !notice.read ? (
             <button
               type="button"
               onClick={() => {
                 onAcknowledge?.(notice.id);
                 showToast(
                   t(
-                    '✓ Notice acknowledged and logged in HR attendance ledger.',
-                    '✓ নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।',
+                    'Notice acknowledged and logged in HR attendance ledger.',
+                    'নোটিশ স্বীকৃতি সংরক্ষিত হয়েছে।',
                     lang
                   ),
                   'success'
@@ -697,7 +701,7 @@ export default function NoticeDetailModal({
               <Check size={16} />
               <span>{t('Mark as Acknowledged', 'স্বীকৃতি প্রদান করুন', lang)}</span>
             </button>
-          ) : (
+          ) : canAcknowledge ? (
             <span
               style={{
                 fontSize: '12.5px',
@@ -715,7 +719,7 @@ export default function NoticeDetailModal({
               <CheckCircle2 size={15} color="var(--status-success)" />
               <span>{t('Already Acknowledged', 'স্বীকৃতি দেওয়া হয়েছে', lang)}</span>
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

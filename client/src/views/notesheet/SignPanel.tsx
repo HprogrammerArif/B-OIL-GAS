@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
-import { CheckCheck, Crown, Eraser, PenTool, RotateCcw, ShieldCheck, Stamp } from 'lucide-react';
+import { CheckCheck, Eraser, PenTool, RotateCcw, ShieldCheck, Stamp } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { readToken } from '../../lib/theme';
 import { Button, Modal } from '../../components/ui';
@@ -136,7 +136,7 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
   return (
     <section className={`ns-card ns-sign ${isFinal ? 'final' : ''}`} id="ns-sign-panel" aria-labelledby="ns-sign-title">
       <header className="ns-card-head">
-        <span className="ns-card-icon">{isFinal ? <Crown size={16} /> : <Stamp size={16} />}</span>
+        <span className="ns-card-icon"><Stamp size={16} /></span>
         <div>
           <h3 id="ns-sign-title">{isFinal ? t('Final approval', 'চূড়ান্ত অনুমোদন', lang) : t('Review & sign', 'পর্যালোচনা ও স্বাক্ষর', lang)}</h3>
           <p>
@@ -219,7 +219,7 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         size="sm"
-        icon={<Crown size={16} />}
+        icon={<Stamp size={16} />}
         title={t('Approve and close this file?', 'ফাইলটি অনুমোদন ও বন্ধ করবেন?', lang)}
         footer={(
           <>

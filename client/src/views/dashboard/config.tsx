@@ -9,9 +9,9 @@
  */
 import React from 'react';
 import {
-  Users, FileCheck, Crown, Gauge, Truck, Car, Briefcase, BarChart3, Navigation,
+  Users, FileCheck, Gauge, Truck, Car, Briefcase, BarChart3, Navigation,
   Bell, UserCheck, Activity, Lock, Receipt, AlertTriangle, ShieldAlert, Wrench,
-  CalendarCheck, Building2, Clock, Star,
+  CalendarCheck, Building2, Clock, LayoutDashboard,
 } from 'lucide-react';
 import type { AppRole, AppView } from '../../types';
 import type { DashboardLiveData } from './useDashboardData';
@@ -109,20 +109,13 @@ const chairman: DashboardRoleConfig = {
         cta: ['View', 'দেখুন'], view: 'incident',
       });
     }
-    if (d.notices.unread > 0) {
-      items.push({
-        id: 'notices', tone: 'info',
-        text: [`${d.notices.unread} unread ${plural(d.notices.unread, 'notice', 'notices')} on the board.`, `নোটিশ বোর্ডে ${bn(d.notices.unread)}টি অপঠিত নোটিশ।`],
-        cta: ['Read', 'পড়ুন'], tab: 'notices',
-      });
-    }
     return items;
   },
   tabs: (d) => [
-    { id: 'overview', label: ['Executive Overview', 'এক্সিকিউটিভ ওভারভিউ'], icon: <Crown size={15} /> },
+    { id: 'overview', label: ['Executive Overview', 'এক্সিকিউটিভ ওভারভিউ'], icon: <LayoutDashboard size={15} /> },
     { id: 'approvals', label: ['Priority Approvals', 'জরুরি অনুমোদন'], icon: <FileCheck size={15} />, badge: d.approvals.pending.length || undefined, badgeType: 'danger' },
     { id: 'inner_circle', label: ['Leadership Team', 'নেতৃত্বের তালিকা'], icon: <Users size={15} />, badge: INNER_CIRCLE.length, badgeType: 'info' },
-    { id: 'notices', label: ['Company Notices', 'নোটিশ বোর্ড'], icon: <Bell size={15} />, badge: d.notices.unread || undefined, badgeType: 'warn' },
+    { id: 'notices', label: ['Company Notices', 'নোটিশ বোর্ড'], icon: <Bell size={15} /> },
   ],
   stats: (d) => [
     { label: ['Present today', 'আজকের উপস্থিতি'], value: String(d.workforce.present), sub: [`of ${d.workforce.roster.length} on roster · ${d.workforce.late} late`, `${bn(d.workforce.roster.length)} জনের মধ্যে · ${bn(d.workforce.late)} জন বিলম্বে`], type: 'green', icon: <Users size={16} /> },
@@ -380,7 +373,7 @@ const driver: DashboardRoleConfig = {
       { label: ['Assigned vehicle', 'বরাদ্দকৃত গাড়ি'], value: me?.assignedVehiclePlate ?? d.fleet.myMission?.assignedVehiclePlate ?? '—', sub: [d.fleet.myMission?.assignedVehicleModel ?? 'No vehicle assigned', d.fleet.myMission?.assignedVehicleModel ?? 'কোনো গাড়ি বরাদ্দ নেই'], type: 'blue', icon: <Truck size={16} /> },
       { label: ['Duty hours today', 'আজকের ডিউটি ঘণ্টা'], value: `${me?.dutyHoursToday ?? 0}h`, sub: ['Limit 8 hours before rest', 'বিশ্রামের আগে সর্বোচ্চ ৮ ঘণ্টা'], type: (me?.dutyHoursToday ?? 0) >= 7 ? 'warn' : 'green', icon: <Clock size={16} /> },
       { label: ['Trips completed', 'সম্পন্ন ট্রিপ'], value: String(me?.totalTrips ?? 0), sub: ['Career total', 'মোট'], type: 'green', icon: <Navigation size={16} /> },
-      { label: ['Pre-trip fitness check', 'ট্রিপ-পূর্ব ফিটনেস পরীক্ষা'], value: me?.breathalyzerToday === 'PENDING' ? 'Pending' : me?.breathalyzerToday === 'FAILED' ? 'Failed' : 'Passed', sub: ['Recorded at dispatch yard', 'ডিসপ্যাচ ইয়ার্ডে রেকর্ডকৃত'], type: me?.breathalyzerToday === 'FAILED' ? 'red' : me?.breathalyzerToday === 'PENDING' ? 'warn' : 'green', icon: <Star size={16} /> },
+      { label: ['Pre-trip fitness check', 'ট্রিপ-পূর্ব ফিটনেস পরীক্ষা'], value: me?.breathalyzerToday === 'PENDING' ? 'Pending' : me?.breathalyzerToday === 'FAILED' ? 'Failed' : 'Passed', sub: ['Recorded at dispatch yard', 'ডিসপ্যাচ ইয়ার্ডে রেকর্ডকৃত'], type: me?.breathalyzerToday === 'FAILED' ? 'red' : me?.breathalyzerToday === 'PENDING' ? 'warn' : 'green', icon: <Activity size={16} /> },
     ];
   },
 };

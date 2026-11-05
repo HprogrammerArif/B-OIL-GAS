@@ -64,7 +64,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get loginSubtitle =>
-      'Use your company email, phone number or employee ID.';
+      'Tap a demo role to open the app. Company sign-in is off for now.';
 
   @override
   String get loginIdentifierLabel => 'Email, phone or employee ID';
@@ -100,6 +100,232 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get navMore => 'More';
+
+  @override
+  String get navAttendance => 'Attendance';
+
+  @override
+  String get navApprovals => 'Approvals';
+
+  @override
+  String get navChat => 'Chat';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homePrimaryEmployee => 'Your day at work';
+
+  @override
+  String get homePrimaryDriver => 'Your trip';
+
+  @override
+  String get homePrimaryGate => 'Guests at the gate';
+
+  @override
+  String get homePrimaryMail => 'Parcels waiting';
+
+  @override
+  String get homePrimaryHse => 'Safety today';
+
+  @override
+  String get homePrimaryApprover => 'Waiting for your decision';
+
+  @override
+  String get homeActPunch => 'Go to attendance';
+
+  @override
+  String get homeActTrip => 'Open trips';
+
+  @override
+  String get homeActScanGuest => 'Register a guest';
+
+  @override
+  String get homeActScanParcel => 'Log a parcel';
+
+  @override
+  String get homeActApprovals => 'Open approvals';
+
+  @override
+  String get homeActAnnounce => 'Send a notice';
+
+  @override
+  String get homeActIncidents => 'Open incidents';
+
+  @override
+  String get homeFilesWaiting => 'Files waiting for you';
+
+  @override
+  String get homeFilesClear => 'Nothing is waiting. You are clear.';
+
+  @override
+  String get homeLeadersOnline => 'Leadership rooms';
+
+  @override
+  String get homeRoomQuiet => 'No new messages';
+
+  @override
+  String homeUnread(int count) {
+    return '$count new';
+  }
+
+  @override
+  String get homeReturnReason => 'Why are you sending this back?';
+
+  @override
+  String get homePlayBriefing => 'Play briefing';
+
+  @override
+  String homeBriefingLeft(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String get homeToday => 'Today';
+
+  @override
+  String get homeNotPunched => 'You have not punched in yet.';
+
+  @override
+  String homePunchedAt(String time) {
+    return 'Punched in at $time';
+  }
+
+  @override
+  String homeLeaveLeft(String days) {
+    return '$days days left';
+  }
+
+  @override
+  String get homeGatePass => 'Ask for a gate pass';
+
+  @override
+  String get homeLocks => 'Locks still on';
+
+  @override
+  String get homeLocksClear => 'No machine is locked out.';
+
+  @override
+  String get homeReleaseBatch => 'Release';
+
+  @override
+  String get homeOpen => 'Open';
+
+  @override
+  String get homeOutputTitle => 'Today\'s output';
+
+  @override
+  String get homeOutputLine =>
+      'Sunday made 5,320 MT. The daily target is 5,000.';
+
+  @override
+  String get homeWeekTitle => 'This week';
+
+  @override
+  String get homeBatchTitle => 'Bitumen batch ready';
+
+  @override
+  String get homeBatchBody =>
+      'BOGCL-BIT-2026-B88 · Bitumen 60/70 · 2,400 metric tons. Lab tests passed.';
+
+  @override
+  String get homeBatchDone => 'Released. Loading gates are open.';
+
+  @override
+  String get busRegister => 'Register a bus';
+
+  @override
+  String get busReassign => 'Move a bus';
+
+  @override
+  String get busSeatMap => 'Seat map';
+
+  @override
+  String get busFieldCode => 'Route code';
+
+  @override
+  String get busFieldName => 'Route name';
+
+  @override
+  String get busFieldPlate => 'Bus number';
+
+  @override
+  String get busSaved => 'Saved';
+
+  @override
+  String get busSeatRegular => 'Regular';
+
+  @override
+  String get busSeatLady => 'Lady priority';
+
+  @override
+  String get busSeatExecutive => 'Executive';
+
+  @override
+  String get busSeatSenior => 'Senior staff';
+
+  @override
+  String get busMarkBoarded => 'Mark boarded';
+
+  @override
+  String get busBoarded => 'Boarded';
+
+  @override
+  String busSeatsFree(int count) {
+    return '$count seats free';
+  }
+
+  @override
+  String get flRegisterCar => 'Register a car';
+
+  @override
+  String get flEnrolDriver => 'Enrol a driver';
+
+  @override
+  String get flFieldPlate => 'Plate';
+
+  @override
+  String get flFieldType => 'Trip type';
+
+  @override
+  String get flFieldEmp => 'Employee code';
+
+  @override
+  String get flFieldDriverCode => 'Driver code';
+
+  @override
+  String get flSaved => 'Saved';
+
+  @override
+  String get asAsk => 'Ask for equipment';
+
+  @override
+  String get asAskName => 'What do you need?';
+
+  @override
+  String get asAskWhy => 'Why';
+
+  @override
+  String get asAskDone => 'Request sent';
+
+  @override
+  String get chConfirmAck => 'Confirm this directive';
+
+  @override
+  String get chConfirmDone => 'Mark this directive done';
+
+  @override
+  String get chConfirmBody =>
+      'This is recorded on the directive. You cannot undo it here.';
+
+  @override
+  String get moreMyWork => 'My work';
+
+  @override
+  String get moreOperations => 'Operations';
+
+  @override
+  String get moreCompany => 'Company';
 
   @override
   String homeGoodMorning(String name) {
@@ -1664,6 +1890,18 @@ class AppL10nEn extends AppL10n {
   String get claimPay => 'Mark as paid';
 
   @override
+  String get claimBankFile => 'Bank file';
+
+  @override
+  String get claimBankReady => 'Today\'s bank transfer';
+
+  @override
+  String get claimBankEmpty => 'Nothing is waiting to be paid.';
+
+  @override
+  String get claimBankCopied => 'The bank file is copied.';
+
+  @override
   String claimPayConfirm(String amount) {
     return 'Pay $amount?';
   }
@@ -1980,9 +2218,6 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get busErrAlreadyWaiting => 'You are already on a waitlist.';
-
-  @override
-  String get busSeatMap => 'Seat map';
 
   @override
   String get busLegendTaken => 'Taken';
@@ -2434,6 +2669,39 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsQuotesTitle => 'Quotations';
+
+  @override
+  String get nsBudgetTitle => 'Is there budget?';
+
+  @override
+  String get nsBudgetWithin => 'Within budget';
+
+  @override
+  String get nsBudgetOver => 'Over budget';
+
+  @override
+  String get nsBudgetNone =>
+      'This file has no fixed amount to check against the budget.';
+
+  @override
+  String nsBudgetAvailable(String amount) {
+    return 'Available $amount';
+  }
+
+  @override
+  String nsBudgetRequest(String amount) {
+    return 'This request $amount';
+  }
+
+  @override
+  String nsBudgetLeft(String amount) {
+    return 'Left after this $amount';
+  }
+
+  @override
+  String nsBudgetShort(String amount) {
+    return 'Short by $amount';
+  }
 
   @override
   String nsQuoteMeta(int days, int months) {
@@ -3402,4 +3670,2353 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get peopleNone => 'No one found.';
+
+  @override
+  String get moduleVisitors => 'Guests';
+
+  @override
+  String get visNew => 'Register a guest';
+
+  @override
+  String get visIntro =>
+      'People coming to see you, waiting at the gate, or still inside.';
+
+  @override
+  String get visSearchHint => 'Search by name, VIS-2026-0001 or plate';
+
+  @override
+  String get visNotFound => 'No visit with that number, or you cannot see it.';
+
+  @override
+  String get visScanNeedGate => 'Only the gate can scan a pass.';
+
+  @override
+  String get visTabMine => 'Mine';
+
+  @override
+  String get visTabExpected => 'Expected today';
+
+  @override
+  String get visTabInside => 'Inside now';
+
+  @override
+  String get visTabOverdue => 'Stayed too long';
+
+  @override
+  String get visTabApprove => 'Waiting for you';
+
+  @override
+  String get visTabAll => 'Everything I can see';
+
+  @override
+  String get visEmpty => 'No guests yet.';
+
+  @override
+  String get visEmptyFiltered => 'No guests match.';
+
+  @override
+  String get visVerdictNone => 'Nothing needs you right now.';
+
+  @override
+  String visVerdictNeed(int count) {
+    return 'Waiting for you: $count';
+  }
+
+  @override
+  String get visStatusWaiting => 'Waiting for approval';
+
+  @override
+  String get visStatusExpected => 'Pass ready';
+
+  @override
+  String get visStatusInside => 'Inside';
+
+  @override
+  String get visStatusOverdue => 'Stayed too long';
+
+  @override
+  String get visStatusDone => 'Left';
+
+  @override
+  String get visStatusDenied => 'Not approved';
+
+  @override
+  String get visStatusCancelled => 'Cancelled';
+
+  @override
+  String get visCatVip => 'VIP';
+
+  @override
+  String get visCatGovt => 'Government';
+
+  @override
+  String get visCatVendor => 'Vendor';
+
+  @override
+  String get visCatClient => 'Client';
+
+  @override
+  String get visCatContractor => 'Contractor';
+
+  @override
+  String get visCatRegular => 'Guest';
+
+  @override
+  String get visNextWatchlist =>
+      'A name matched the watchlist. Clear it or deny the visit.';
+
+  @override
+  String get visNextWatchlistWait =>
+      'Held for a watchlist check. Nothing for you to do.';
+
+  @override
+  String visNextApprove(String name) {
+    return 'Approve the visit for $name.';
+  }
+
+  @override
+  String get visNextHostWait =>
+      'Waiting for the site head to approve. Nothing for you to do.';
+
+  @override
+  String get visNextWaiting => 'Waiting for approval.';
+
+  @override
+  String get visNextPpe => 'Check their PPE, then receive them at the gate.';
+
+  @override
+  String get visNextEscort =>
+      'Assign someone to stay with them in the red area.';
+
+  @override
+  String visNextCheckIn(String name) {
+    return 'Receive $name at the gate. Take a photo.';
+  }
+
+  @override
+  String visNextHostReady(String when) {
+    return 'Pass is ready. They are expected $when. Nothing for you to do.';
+  }
+
+  @override
+  String visNextReady(String when) {
+    return 'Pass is ready. Expected $when.';
+  }
+
+  @override
+  String visNextCheckOut(String name) {
+    return 'Check $name out and take the badge back.';
+  }
+
+  @override
+  String get visNextInsideHost =>
+      'They are inside. Stay reachable until they leave.';
+
+  @override
+  String get visNextInside => 'Inside the site.';
+
+  @override
+  String get visNextOverdueAct =>
+      'They have stayed too long. Extend the time or check them out.';
+
+  @override
+  String get visNextOverdue => 'They have stayed past the agreed time.';
+
+  @override
+  String get visNextDone => 'They have left.';
+
+  @override
+  String get visNextDenied => 'This visit was not approved.';
+
+  @override
+  String get visNextCancelled => 'Cancelled. Nothing more to do.';
+
+  @override
+  String get visWatchPill => 'Watchlist';
+
+  @override
+  String visHostLine(String name, String site) {
+    return 'Host: $name at $site';
+  }
+
+  @override
+  String visWhenLine(String start, String end) {
+    return 'Expected $start to $end';
+  }
+
+  @override
+  String visEscortLine(String name) {
+    return 'Escort: $name';
+  }
+
+  @override
+  String visBadgeLine(String no) {
+    return 'Badge $no';
+  }
+
+  @override
+  String get visZones => 'Areas they may enter';
+
+  @override
+  String get visEscortNeed => 'Needs escort';
+
+  @override
+  String get visFindings => 'What was seen';
+
+  @override
+  String get visDetPhone => 'Phone';
+
+  @override
+  String get visDetId => 'ID';
+
+  @override
+  String get visDetPlate => 'Vehicle';
+
+  @override
+  String get visPpeOk => 'PPE was cleared at the gate.';
+
+  @override
+  String get visPpeNeeded => 'PPE must be cleared before they enter.';
+
+  @override
+  String get visPpeNone => 'No special PPE for these areas.';
+
+  @override
+  String get visActApprove => 'Approve visit';
+
+  @override
+  String get visActDeny => 'Do not approve';
+
+  @override
+  String get visActCancel => 'Cancel visit';
+
+  @override
+  String get visActCheckIn => 'Receive at gate';
+
+  @override
+  String get visActCheckOut => 'Check out';
+
+  @override
+  String get visActPpe => 'Clear PPE';
+
+  @override
+  String get visActEscort => 'Assign escort';
+
+  @override
+  String get visActExtend => 'Give two more hours';
+
+  @override
+  String get visActFinding => 'Add a finding';
+
+  @override
+  String get visActClearWatch => 'Clear watchlist';
+
+  @override
+  String get visActSafe => 'Mark as safe';
+
+  @override
+  String get visActPass => 'Show pass';
+
+  @override
+  String get visApproveMsg =>
+      'They will get a pass and can be received at the gate.';
+
+  @override
+  String get visCheckOutMsg =>
+      'Confirm only if they have left and the badge is back.';
+
+  @override
+  String get visFieldReason => 'Reason';
+
+  @override
+  String get visSheetCheckIn => 'Receive at the gate';
+
+  @override
+  String get visSheetCheckInHelp =>
+      'Take a photo. The badge number is issued automatically.';
+
+  @override
+  String get visPhotoRequired => 'Take a photo (required)';
+
+  @override
+  String get visPhotoAdded => 'Photo added';
+
+  @override
+  String get visFieldNda => 'NDA signed';
+
+  @override
+  String get visFieldBriefing => 'Safety briefing done';
+
+  @override
+  String get visSheetPpe => 'Personal protective equipment';
+
+  @override
+  String get visSheetPpeHelp =>
+      'Tick only what they are wearing and have been briefed on.';
+
+  @override
+  String get visPpeHat => 'Hard hat';
+
+  @override
+  String get visPpeShoes => 'Safety shoes';
+
+  @override
+  String get visPpeVest => 'Hi-vis vest';
+
+  @override
+  String get visPpeGoggles => 'Goggles';
+
+  @override
+  String get visPpeH2s => 'H2S briefing';
+
+  @override
+  String get visFieldEscort => 'Who stays with them';
+
+  @override
+  String get visSheetFinding => 'What did you see';
+
+  @override
+  String get visFieldArea => 'Where';
+
+  @override
+  String get visFieldFinding => 'What happened';
+
+  @override
+  String get visFindObs => 'Note';
+
+  @override
+  String get visFindCrit => 'Critical';
+
+  @override
+  String get visDoneCheckIn => 'Received at the gate.';
+
+  @override
+  String get visDoneCheckOut => 'Checked out.';
+
+  @override
+  String get visDonePpe => 'PPE recorded.';
+
+  @override
+  String get visDoneEscort => 'Escort assigned.';
+
+  @override
+  String get visDoneExtend => 'Two more hours given.';
+
+  @override
+  String get visDoneFinding => 'Finding recorded.';
+
+  @override
+  String get visDoneWatch => 'Watchlist cleared.';
+
+  @override
+  String get visDoneSafe => 'Marked safe.';
+
+  @override
+  String get visDoneApprove => 'Visit approved. The pass is ready.';
+
+  @override
+  String get visDoneDeny => 'Visit was not approved.';
+
+  @override
+  String get visDoneCancel => 'Visit cancelled.';
+
+  @override
+  String get visDoneCreate => 'Guest registered.';
+
+  @override
+  String get visErrPpe => 'Clear PPE before they enter.';
+
+  @override
+  String get visErrEscort => 'A red area needs an escort.';
+
+  @override
+  String get visErrWatchlist => 'Security must clear the watchlist first.';
+
+  @override
+  String get visErrBlacklist => 'This person cannot be registered or let in.';
+
+  @override
+  String get visErrFull => 'Too many guests inside. Ask a security lead.';
+
+  @override
+  String get visErrExtend => 'Already extended twice today.';
+
+  @override
+  String get visErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get visErrName => 'Enter the guest name.';
+
+  @override
+  String get visErrPhone => 'Enter a phone number.';
+
+  @override
+  String get visErrPurpose => 'Say why they are coming.';
+
+  @override
+  String get visErrId => 'ID number is required for this kind of guest.';
+
+  @override
+  String get visFormIntro =>
+      'Say who is coming, why, and which areas they may enter. Regular guests get a pass at once. VIP, government and red-area visits wait for the site head.';
+
+  @override
+  String get visFieldName => 'Guest name';
+
+  @override
+  String get visFieldOrg => 'Organisation (optional)';
+
+  @override
+  String get visFieldPhone => 'Phone';
+
+  @override
+  String get visFieldCategory => 'Who they are';
+
+  @override
+  String get visFieldPurpose => 'Why they are coming';
+
+  @override
+  String get visFieldWhen => 'When they arrive';
+
+  @override
+  String get visFieldSite => 'Which site';
+
+  @override
+  String get visSiteHq => 'Head Office, Baridhara';
+
+  @override
+  String get visSitePlant => 'Keraniganj Plant';
+
+  @override
+  String get visSiteCtg => 'Chattogram Terminal';
+
+  @override
+  String get visFieldZones => 'Areas they may enter';
+
+  @override
+  String get visFieldIdType => 'ID type';
+
+  @override
+  String get visIdNid => 'National ID';
+
+  @override
+  String get visIdPass => 'Passport';
+
+  @override
+  String get visIdGovt => 'Government badge';
+
+  @override
+  String get visIdCo => 'Company ID';
+
+  @override
+  String get visFieldIdNo => 'ID number';
+
+  @override
+  String get visFieldPlate => 'Vehicle plate (optional)';
+
+  @override
+  String get visCreate => 'Register guest';
+
+  @override
+  String get visMuster => 'Who is inside';
+
+  @override
+  String visMusterIdle(int count) {
+    return '$count guests are inside. Start a roll-call if you need to account for them.';
+  }
+
+  @override
+  String visMusterActive(int safe, int inside) {
+    return 'Roll-call on: $safe of $inside marked safe.';
+  }
+
+  @override
+  String get visMusterStart => 'Start roll-call';
+
+  @override
+  String get visMusterEnd => 'End roll-call';
+
+  @override
+  String get visMusterMissing => 'Not yet safe';
+
+  @override
+  String get visMusterSafe => 'Safe';
+
+  @override
+  String get moduleFleet => 'Cars';
+
+  @override
+  String get flIntro =>
+      'Ask for a car, assign one, or drive the trip. The next step is on each row.';
+
+  @override
+  String get flNew => 'Ask for a car';
+
+  @override
+  String get flSearchHint => 'Search destination or purpose';
+
+  @override
+  String get flSos => 'Driver help';
+
+  @override
+  String get flTabMine => 'Mine';
+
+  @override
+  String get flTabDriving => 'My trips';
+
+  @override
+  String get flTabEndorse => 'Waiting for you';
+
+  @override
+  String get flTabDispatch => 'To assign';
+
+  @override
+  String get flTabLive => 'On the road';
+
+  @override
+  String get flTabAll => 'All';
+
+  @override
+  String get flEmpty => 'No vehicle requests here.';
+
+  @override
+  String get flEmptyFiltered => 'Nothing matches that search.';
+
+  @override
+  String get flVerdictNone => 'Nothing waiting on you.';
+
+  @override
+  String flVerdictNeed(int count) {
+    return '$count waiting on you';
+  }
+
+  @override
+  String get flStatusDraft => 'Draft';
+
+  @override
+  String get flStatusPending => 'Waiting for your head of department';
+
+  @override
+  String get flStatusApproved => 'Waiting for a car';
+
+  @override
+  String get flStatusAssigned => 'Car assigned';
+
+  @override
+  String get flStatusLive => 'On the road';
+
+  @override
+  String get flStatusDone => 'Finished';
+
+  @override
+  String get flStatusRejected => 'Not approved';
+
+  @override
+  String get flStatusCancelled => 'Cancelled';
+
+  @override
+  String get flNextSubmit => 'Send this request to your head of department.';
+
+  @override
+  String get flNextWaitHod =>
+      'Waiting for Farida Begum. Nothing for you to do.';
+
+  @override
+  String flNextEndorse(String name) {
+    return 'Endorse $name’s request, or send it back from Approvals.';
+  }
+
+  @override
+  String get flNextAssign => 'Choose a free car and a driver.';
+
+  @override
+  String get flNextWaitCar =>
+      'Transport will assign a car. Nothing for you to do.';
+
+  @override
+  String flNextGateOut(String when) {
+    return 'Leave through the gate after $when.';
+  }
+
+  @override
+  String flNextAssigned(String plate) {
+    return '$plate is waiting at the gate.';
+  }
+
+  @override
+  String get flNextFinish => 'Record the last odometer when you return.';
+
+  @override
+  String flNextLive(String plate) {
+    return '$plate is on the way.';
+  }
+
+  @override
+  String get flNextRate => 'Rate this trip.';
+
+  @override
+  String get flNextDone => 'This trip is finished.';
+
+  @override
+  String get flNextFix => 'Fix the request and send it again.';
+
+  @override
+  String get flNextRejected => 'This request was not approved.';
+
+  @override
+  String get flNextCancelled => 'This request was cancelled.';
+
+  @override
+  String get flTypeOne => 'One way';
+
+  @override
+  String get flTypeRound => 'There and back';
+
+  @override
+  String get flFormIntro =>
+      'Say where you are going, why, and when. Your head of department endorses it. Transport then gives you a car.';
+
+  @override
+  String get flFieldPurpose => 'Why you need a car';
+
+  @override
+  String get flFieldDest => 'Where you are going';
+
+  @override
+  String get flFieldPax => 'How many people';
+
+  @override
+  String get flFieldWhen => 'When you leave';
+
+  @override
+  String get flFieldNote => 'What happened';
+
+  @override
+  String get flFieldNoteOpt => 'Note (optional)';
+
+  @override
+  String get flFieldOdo => 'Odometer (km)';
+
+  @override
+  String get flFieldSos => 'What is wrong';
+
+  @override
+  String get flFieldPlaza => 'Toll plaza';
+
+  @override
+  String get flFieldAmount => 'Amount (৳)';
+
+  @override
+  String get flFieldFeedback => 'How was the trip (optional)';
+
+  @override
+  String get flFieldRating => 'Stars (1 to 5)';
+
+  @override
+  String get flFieldReason => 'Reason';
+
+  @override
+  String get flCreate => 'Send request';
+
+  @override
+  String flEstimate(String km, int minutes, String cost, String cls) {
+    return 'About $km km, $minutes minutes, $cost. Suggested: $cls.';
+  }
+
+  @override
+  String get flWhat => 'What is this';
+
+  @override
+  String flWho(String name, String when) {
+    return 'Asked by $name on $when.';
+  }
+
+  @override
+  String flMeta(String when, String pax, String cls, String cost) {
+    return 'Leaves $when. $pax people. $cls. About $cost.';
+  }
+
+  @override
+  String flAssigned(String plate, String driver) {
+    return 'Car $plate with $driver.';
+  }
+
+  @override
+  String flPassNo(String pass) {
+    return 'Gate pass $pass';
+  }
+
+  @override
+  String get flActAssign => 'Assign a car';
+
+  @override
+  String get flActGateOut => 'Leave the gate';
+
+  @override
+  String get flActCheckpoint => 'Record a stop';
+
+  @override
+  String get flActComplete => 'Finish the trip';
+
+  @override
+  String get flActSos => 'Need help';
+
+  @override
+  String get flActToll => 'Add a toll';
+
+  @override
+  String get flActRate => 'Rate the trip';
+
+  @override
+  String get flActCancel => 'Cancel';
+
+  @override
+  String get flActPass => 'Show gate pass';
+
+  @override
+  String get flActTollOk => 'Approve';
+
+  @override
+  String get flActTollPay => 'Mark paid';
+
+  @override
+  String get flActAck => 'We are coming';
+
+  @override
+  String get flSheetAssign => 'Assign a car and a driver';
+
+  @override
+  String get flSheetAssignHelp =>
+      'Only free cars with valid papers are listed.';
+
+  @override
+  String get flDoneCreate => 'Request sent to your head of department.';
+
+  @override
+  String get flDoneAssign => 'Car assigned. The driver has been told.';
+
+  @override
+  String get flDoneGateOut => 'The trip has started.';
+
+  @override
+  String get flDoneCheckpoint => 'Stop recorded.';
+
+  @override
+  String get flDoneComplete => 'Trip finished.';
+
+  @override
+  String get flDoneSos => 'Help request sent.';
+
+  @override
+  String get flDoneToll => 'Toll sent for review.';
+
+  @override
+  String get flDoneRate => 'Thank you for the rating.';
+
+  @override
+  String get flDoneCancel => 'Request cancelled.';
+
+  @override
+  String get flDoneTollOk => 'Toll approved.';
+
+  @override
+  String get flDoneTollPay => 'Toll marked paid.';
+
+  @override
+  String get flDoneAck => 'The driver has been told help is coming.';
+
+  @override
+  String get flErrPurpose => 'Say why you need the car.';
+
+  @override
+  String get flErrLead => 'Ask at least one hour ahead, unless it is critical.';
+
+  @override
+  String get flErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get flErrWindow => 'Too early or too late. Ask transport to override.';
+
+  @override
+  String get flErrVehicle => 'That car is not free or its papers have expired.';
+
+  @override
+  String get flErrDriver => 'That driver cannot take this trip.';
+
+  @override
+  String get flErrNoneFree => 'No free car and driver fit this trip.';
+
+  @override
+  String get flTolls => 'Tolls';
+
+  @override
+  String get flTimeline => 'What happened';
+
+  @override
+  String get flSosIntro =>
+      'Open calls from drivers. Transport and the gate acknowledge them.';
+
+  @override
+  String get flSosEmpty => 'No help requests.';
+
+  @override
+  String get flSosHelp =>
+      'Say where you are and what is wrong. Transport and the gate will see this at once.';
+
+  @override
+  String get flSosOpen => 'Open';
+
+  @override
+  String get flSosAcked => 'Help is coming';
+
+  @override
+  String get moduleIncidents => 'Safety';
+
+  @override
+  String get inIntro =>
+      'Report what you saw. The safety team triages it, finds the cause, and tracks the fix.';
+
+  @override
+  String get inNew => 'Report what happened';
+
+  @override
+  String get inSearchHint => 'Search title or place';
+
+  @override
+  String get inTabMine => 'Mine';
+
+  @override
+  String get inTabTriage => 'Waiting for you';
+
+  @override
+  String get inTabOpen => 'Still open';
+
+  @override
+  String get inTabSerious => 'Serious';
+
+  @override
+  String get inTabStatutory => 'Government report';
+
+  @override
+  String get inTabCapa => 'My fixes';
+
+  @override
+  String get inTabAll => 'All';
+
+  @override
+  String get inEmpty => 'No safety reports here.';
+
+  @override
+  String get inEmptyFiltered => 'Nothing matches that search.';
+
+  @override
+  String get inVerdictNone => 'Nothing waiting on you.';
+
+  @override
+  String inVerdictNeed(int count) {
+    return '$count waiting on you';
+  }
+
+  @override
+  String get inTypeNear => 'Near miss';
+
+  @override
+  String get inTypeHazard => 'Unsafe condition';
+
+  @override
+  String get inTypeMedical => 'Medical treatment';
+
+  @override
+  String get inTypeLost => 'Lost-time injury';
+
+  @override
+  String get inTypeSpill => 'Spill or leak';
+
+  @override
+  String get inTypeFire => 'Fire or heat';
+
+  @override
+  String get inTypeEquip => 'Equipment damaged';
+
+  @override
+  String get inTypeVehicle => 'Vehicle accident';
+
+  @override
+  String get inTypeEnv => 'Environmental';
+
+  @override
+  String get inTypePipe => 'Pressure or piping';
+
+  @override
+  String get inTypeFatal => 'Fatality';
+
+  @override
+  String get inStageReported => 'Waiting for safety';
+
+  @override
+  String get inStageTriaged => 'Assigned';
+
+  @override
+  String get inStageInvest => 'Finding the cause';
+
+  @override
+  String get inStageCapa => 'Fix in progress';
+
+  @override
+  String get inStageReview => 'Waiting to close';
+
+  @override
+  String get inStageClosed => 'Closed';
+
+  @override
+  String get inRiskLow => 'Low risk';
+
+  @override
+  String get inRiskMedium => 'Medium risk';
+
+  @override
+  String get inRiskHigh => 'High risk';
+
+  @override
+  String get inRiskExtreme => 'Extreme risk';
+
+  @override
+  String inRiskLine(int score, String label) {
+    return 'Score $score · $label';
+  }
+
+  @override
+  String get inAnonymous => 'Someone who asked not to be named';
+
+  @override
+  String inNextTriage(String name) {
+    return 'Decide how serious $name’s report is and name an investigator.';
+  }
+
+  @override
+  String get inNextWaitHse =>
+      'Waiting for the plant safety lead. Nothing for you to do.';
+
+  @override
+  String get inNextReported => 'Waiting for the safety team.';
+
+  @override
+  String get inNextStart => 'Start the investigation.';
+
+  @override
+  String get inNextTriaged => 'An investigator has been named.';
+
+  @override
+  String get inNextRca => 'Write the three whys and the root cause.';
+
+  @override
+  String get inNextInvest => 'The cause is being found.';
+
+  @override
+  String get inNextMyCapa => 'Do the fix assigned to you.';
+
+  @override
+  String get inNextVerify => 'Confirm a finished fix.';
+
+  @override
+  String get inNextReview => 'All fixes are done. Send it for close.';
+
+  @override
+  String get inNextCapa => 'Fixes are still open.';
+
+  @override
+  String get inNextSignSafety => 'Sign as the safety lead.';
+
+  @override
+  String get inNextSignGm => 'Sign as the plant head to close it.';
+
+  @override
+  String get inNextReviewWait => 'Waiting for the plant head to close it.';
+
+  @override
+  String get inNextClosed => 'This report is closed.';
+
+  @override
+  String get inFormIntro =>
+      'Say what happened, where, and how bad it could have been. Safety sees it at once. You may hide your name.';
+
+  @override
+  String get inFieldType => 'What kind of event';
+
+  @override
+  String get inFieldTitle => 'Short title';
+
+  @override
+  String get inFieldDesc => 'What you saw';
+
+  @override
+  String get inFieldSite => 'Which site';
+
+  @override
+  String get inFieldZone => 'Which area';
+
+  @override
+  String get inFieldWhen => 'When it happened';
+
+  @override
+  String inFieldSev(int n) {
+    return 'How bad if it happens again: $n';
+  }
+
+  @override
+  String inFieldLike(int n) {
+    return 'How likely it happens again: $n';
+  }
+
+  @override
+  String get inFieldAnon => 'Hide my name';
+
+  @override
+  String get inFieldAnonHelp =>
+      'Safety still sees the report. Your name is not shown to others.';
+
+  @override
+  String get inCreate => 'Send report';
+
+  @override
+  String get inConfirmSerious => 'This will page the plant head now';
+
+  @override
+  String get inConfirmSeriousMsg =>
+      'High or extreme scores notify the safety lead and the chairman at once.';
+
+  @override
+  String get inWhat => 'What is this';
+
+  @override
+  String inWho(String name, String when) {
+    return 'Reported by $name on $when.';
+  }
+
+  @override
+  String inMeta(String when, String site, String zone, String score) {
+    return 'Happened $when at $site, $zone. Risk score $score.';
+  }
+
+  @override
+  String inInvestigator(String name) {
+    return 'Investigator: $name';
+  }
+
+  @override
+  String inStatutoryDue(String body, String when) {
+    return 'Must tell $body by $when.';
+  }
+
+  @override
+  String inStatutoryDone(String receipt) {
+    return 'Filed as $receipt.';
+  }
+
+  @override
+  String get inActTriage => 'Triage';
+
+  @override
+  String get inActInvest => 'Start investigation';
+
+  @override
+  String get inActRca => 'Write the cause';
+
+  @override
+  String get inActCapa => 'Add a fix';
+
+  @override
+  String get inActStatutory => 'Record government filing';
+
+  @override
+  String get inActSignSafety => 'Sign as safety';
+
+  @override
+  String get inActSignGm => 'Close as plant head';
+
+  @override
+  String get inActStart => 'Start';
+
+  @override
+  String get inActComplete => 'Done';
+
+  @override
+  String get inActVerify => 'Confirm';
+
+  @override
+  String get inFieldInvestigator => 'Who will investigate';
+
+  @override
+  String get inFieldOwner => 'Who will do the fix';
+
+  @override
+  String get inFieldWhy1 => 'Why 1';
+
+  @override
+  String get inFieldWhy2 => 'Why 2';
+
+  @override
+  String get inFieldWhy3 => 'Why 3';
+
+  @override
+  String get inFieldRoot => 'Root cause';
+
+  @override
+  String get inFieldCapa => 'What must be fixed';
+
+  @override
+  String get inFieldReceipt => 'Receipt or diary number';
+
+  @override
+  String get inFieldEvidence => 'What you did';
+
+  @override
+  String get inRca => 'Root cause';
+
+  @override
+  String get inFixes => 'Fixes';
+
+  @override
+  String get inDoneCreate => 'Report sent to the safety team.';
+
+  @override
+  String get inDoneTriage => 'Investigator named.';
+
+  @override
+  String get inDoneInvest => 'Investigation started.';
+
+  @override
+  String get inDoneRca => 'Root cause recorded.';
+
+  @override
+  String get inDoneCapa => 'Fix assigned.';
+
+  @override
+  String get inDoneStatutory => 'Filing recorded.';
+
+  @override
+  String get inDoneSignSafety => 'Safety signature recorded.';
+
+  @override
+  String get inDoneSignGm => 'Report closed.';
+
+  @override
+  String get inDoneStart => 'Fix started.';
+
+  @override
+  String get inDoneComplete => 'Fix marked done.';
+
+  @override
+  String get inDoneVerify => 'Fix confirmed.';
+
+  @override
+  String get inErrTitle => 'Write a short title.';
+
+  @override
+  String get inErrDesc => 'Describe what you saw in a few sentences.';
+
+  @override
+  String get inErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get inErrRca => 'Find the root cause before adding a fix.';
+
+  @override
+  String get inErrCapaOpen => 'Every fix must be confirmed first.';
+
+  @override
+  String get inErrCapaSelf => 'Someone else must confirm your own fix.';
+
+  @override
+  String get inErrNotStat => 'This report does not need a government filing.';
+
+  @override
+  String get moduleAssets => 'Equipment';
+
+  @override
+  String get asIntro =>
+      'Machines, cars and kits in your care. Those that need a signature, a repair or a safety lock sit first.';
+
+  @override
+  String get asSearchHint => 'Search by name or serial';
+
+  @override
+  String get asNew => 'Add equipment';
+
+  @override
+  String get asNewIntro => 'Register something the company already bought.';
+
+  @override
+  String get asTabMine => 'Mine';
+
+  @override
+  String get asTabAttention => 'Needs you';
+
+  @override
+  String get asTabSign => 'Waiting to sign';
+
+  @override
+  String get asTabRepair => 'In repair';
+
+  @override
+  String get asTabCal => 'Calibration';
+
+  @override
+  String get asTabRetire => 'Ready to retire';
+
+  @override
+  String get asTabStock => 'In store';
+
+  @override
+  String get asTabCars => 'Cars';
+
+  @override
+  String get asTabAll => 'All';
+
+  @override
+  String get asEmpty => 'Nothing in this list.';
+
+  @override
+  String get asEmptyFiltered => 'Nothing matches that search.';
+
+  @override
+  String get asSummaryNone => 'Nothing waiting for you in this list.';
+
+  @override
+  String asSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items need you.',
+      one: '1 item needs you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get asWhat => 'What is this, and where is it?';
+
+  @override
+  String asWhy(String category) {
+    return 'Kept so we know who holds it, what it is worth and when it needs service. $category.';
+  }
+
+  @override
+  String asLifeLine(String stage, String years) {
+    return 'Stage $stage of 8 · planned life $years years';
+  }
+
+  @override
+  String asBook(String nbv, String health) {
+    return 'Book value $nbv · health $health/100';
+  }
+
+  @override
+  String asLotoOn(String permit) {
+    return 'Locked out. Permit $permit. Do not operate.';
+  }
+
+  @override
+  String get asStageStock => 'In store';
+
+  @override
+  String get asStageWork => 'In use';
+
+  @override
+  String get asStageMove => 'On the move';
+
+  @override
+  String get asStageRepair => 'In repair';
+
+  @override
+  String get asStageCal => 'Calibration due';
+
+  @override
+  String get asStageLoto => 'Locked out';
+
+  @override
+  String get asStageRetire => 'Retired';
+
+  @override
+  String get asStageGone => 'Disposed';
+
+  @override
+  String get asNextCommission =>
+      'Put it into service and, if needed, name who holds it.';
+
+  @override
+  String get asNextStock =>
+      'Waiting in the store. Plant can put it into service.';
+
+  @override
+  String get asNextReceive => 'It is arriving. Confirm you received it.';
+
+  @override
+  String get asNextMoving => 'On the way to another site.';
+
+  @override
+  String get asNextLotoRelease =>
+      'Release the lock-out when the job is safe to restart.';
+
+  @override
+  String get asNextLotoWait => 'Locked out. Waiting for the safety officer.';
+
+  @override
+  String get asNextFinishJob => 'Finish the open job and write what it cost.';
+
+  @override
+  String get asNextRepair => 'A repair is under way.';
+
+  @override
+  String get asNextCal => 'Record the calibration certificate.';
+
+  @override
+  String get asNextCalWait => 'Calibration is due.';
+
+  @override
+  String get asNextDispose => 'All boxes are ready. Close the books.';
+
+  @override
+  String get asNextWriteOff =>
+      'Approve the write-off, then finance can close it.';
+
+  @override
+  String get asNextRetireWait =>
+      'Waiting for finance to finish the retirement file.';
+
+  @override
+  String get asNextGone => 'Gone from the books. Nothing left to do.';
+
+  @override
+  String get asNextAck => 'Sign to confirm you received this.';
+
+  @override
+  String asNextOk(String who) {
+    return '$who holds it. Nothing for you to do.';
+  }
+
+  @override
+  String get asNextIdle => 'In use. Report a fault if something is wrong.';
+
+  @override
+  String get asFieldName => 'What is it called?';
+
+  @override
+  String get asFieldCategory => 'Kind';
+
+  @override
+  String get asFieldSite => 'Site';
+
+  @override
+  String get asFieldCost => 'What did it cost? (taka)';
+
+  @override
+  String get asFieldLife => 'How many years will it last?';
+
+  @override
+  String get asFieldLocation => 'Where will it sit?';
+
+  @override
+  String get asFieldCritical => 'How critical?';
+
+  @override
+  String get asFieldCommission => 'Put into service now';
+
+  @override
+  String get asFieldHolder => 'Who will hold it?';
+
+  @override
+  String get asFieldHolderNone => 'No one yet';
+
+  @override
+  String get asFieldDefect => 'What is wrong?';
+
+  @override
+  String get asFieldPermit => 'Lock-out permit (LOTO-YYYY-NNNN)';
+
+  @override
+  String get asFieldReason => 'Why?';
+
+  @override
+  String get asFieldSurvey => 'Survey notes';
+
+  @override
+  String get asFieldCert => 'Certificate number';
+
+  @override
+  String get asFieldProceeds => 'Sale proceeds (taka, 0 if scrap)';
+
+  @override
+  String get asFieldToSite => 'Receiving site';
+
+  @override
+  String get asSiteHq => 'Head office';
+
+  @override
+  String get asSitePlant => 'Keraniganj plant';
+
+  @override
+  String get asSiteCtg => 'Chattogram terminal';
+
+  @override
+  String get asCritA => 'Plant-critical';
+
+  @override
+  String get asCritB => 'Essential';
+
+  @override
+  String get asCritC => 'General';
+
+  @override
+  String get asActAck => 'I have it';
+
+  @override
+  String get asActCommission => 'Put into service';
+
+  @override
+  String get asActAssign => 'Hand over';
+
+  @override
+  String get asActFlag => 'Something is wrong';
+
+  @override
+  String get asActLotoOn => 'Lock out';
+
+  @override
+  String get asActLotoOff => 'Release lock-out';
+
+  @override
+  String get asActMove => 'Send to another site';
+
+  @override
+  String get asActReceive => 'Received here';
+
+  @override
+  String get asActCertify => 'Record certificate';
+
+  @override
+  String get asActRetire => 'Retire';
+
+  @override
+  String get asActWriteOff => 'Approve write-off';
+
+  @override
+  String get asActDispose => 'Close the books';
+
+  @override
+  String get asActStart => 'Start job';
+
+  @override
+  String get asActFinish => 'Finish job';
+
+  @override
+  String get asJobs => 'Open jobs';
+
+  @override
+  String get asRetireFile => 'Retirement file';
+
+  @override
+  String get asBoxSurvey => 'Technical survey signed';
+
+  @override
+  String get asBoxClean => 'Cleaned / decontaminated';
+
+  @override
+  String get asBoxSpares => 'Spares taken off';
+
+  @override
+  String get asBoxFinance => 'Finance checked';
+
+  @override
+  String get asDetails => 'Details';
+
+  @override
+  String get asFieldBookFull => 'Cost and depreciation';
+
+  @override
+  String asBookFull(String gross, String accum, String nbv, String method) {
+    return 'Gross $gross · already written down $accum · book $nbv · method $method';
+  }
+
+  @override
+  String asYearCharge(String amount) {
+    return 'This year $amount';
+  }
+
+  @override
+  String get asPassport => 'Tag, serial and maker';
+
+  @override
+  String get asDoneAck => 'Signed.';
+
+  @override
+  String get asDoneCommission => 'In service.';
+
+  @override
+  String get asDoneAssign => 'Handed over. They have three days to sign.';
+
+  @override
+  String get asDoneFlag => 'Fault logged. A repair job was opened.';
+
+  @override
+  String get asDoneLotoOn => 'Locked out.';
+
+  @override
+  String get asDoneLotoOff => 'Lock-out released.';
+
+  @override
+  String get asDoneMove => 'On the way.';
+
+  @override
+  String get asDoneReceive => 'Received.';
+
+  @override
+  String get asDoneCertify => 'Certificate recorded.';
+
+  @override
+  String get asDoneRetire => 'Retired. Finance still has boxes to tick.';
+
+  @override
+  String get asDoneWriteOff => 'Write-off approved.';
+
+  @override
+  String get asDoneDispose => 'Closed on the books.';
+
+  @override
+  String get asDoneStart => 'Job started.';
+
+  @override
+  String get asDoneFinish => 'Job finished.';
+
+  @override
+  String get asDoneTick => 'Box ticked.';
+
+  @override
+  String get asErrName => 'Give it a short name.';
+
+  @override
+  String get asErrCost => 'Enter the purchase cost.';
+
+  @override
+  String get asErrLife => 'Enter the life in years.';
+
+  @override
+  String get asErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get asErrLoto => 'This machine is locked out.';
+
+  @override
+  String get asErrLotoNeed => 'Lock this machine out before work starts.';
+
+  @override
+  String get asErrAck => 'The current holder must sign first.';
+
+  @override
+  String get asErrList => 'Every retirement box must be ticked.';
+
+  @override
+  String get asErrWrite => 'Write-off is not approved yet.';
+
+  @override
+  String get asErrCal => 'Calibrate this first.';
+
+  @override
+  String get moduleCompliance => 'Licences';
+
+  @override
+  String get cpIntro =>
+      'Permits the plant needs to stay open. Those that run out first sit at the top.';
+
+  @override
+  String get cpSearchHint => 'Search by name or number';
+
+  @override
+  String get cpNew => 'Add a licence';
+
+  @override
+  String get cpNewIntro => 'Register a permit the company already holds.';
+
+  @override
+  String get cpTabMine => 'Mine';
+
+  @override
+  String get cpTabCritical => 'This month';
+
+  @override
+  String get cpTabWarning => 'This quarter';
+
+  @override
+  String get cpTabRenew => 'Renewing';
+
+  @override
+  String get cpTabExpired => 'Lapsed';
+
+  @override
+  String get cpTabAll => 'All';
+
+  @override
+  String get cpEmpty => 'Nothing in this list.';
+
+  @override
+  String get cpEmptyFiltered => 'Nothing matches that search.';
+
+  @override
+  String get cpSummaryNone => 'Nothing waiting for you in this list.';
+
+  @override
+  String cpSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count licences need you.',
+      one: '1 licence needs you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cpDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days left',
+      one: '1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cpWhat => 'What permit is this?';
+
+  @override
+  String cpWho(String who, String days) {
+    return '$who looks after it. $days.';
+  }
+
+  @override
+  String get cpWhy => 'Without it the plant cannot legally run that activity.';
+
+  @override
+  String cpExpires(String date) {
+    return 'Runs out on $date.';
+  }
+
+  @override
+  String cpRenewLine(String stage, String pct) {
+    return 'Renewal: $stage · checklist $pct%';
+  }
+
+  @override
+  String get cpUrgExpired => 'Lapsed';
+
+  @override
+  String get cpUrgCritical => 'This month';
+
+  @override
+  String get cpUrgWarning => 'This quarter';
+
+  @override
+  String get cpUrgOk => 'In date';
+
+  @override
+  String get cpStageReview => 'Getting the file ready';
+
+  @override
+  String get cpStageFiled => 'Filed with the office';
+
+  @override
+  String get cpStageInspect => 'Inspection booked';
+
+  @override
+  String get cpStageVet => 'Waiting on the ministry';
+
+  @override
+  String get cpStageDone => 'Renewed';
+
+  @override
+  String get cpNextStartExpired => 'This has lapsed. Open a renewal file.';
+
+  @override
+  String get cpNextExpired => 'This has lapsed. Plant will open a renewal.';
+
+  @override
+  String get cpNextStartSoon => 'It runs out soon. Open a renewal file.';
+
+  @override
+  String cpNextOk(String date) {
+    return 'In date until $date. Nothing for you to do.';
+  }
+
+  @override
+  String cpNextFund(String fee) {
+    return 'Finance must approve the $fee fee before you can file.';
+  }
+
+  @override
+  String get cpNextTicks => 'Tick every box on the checklist, then file it.';
+
+  @override
+  String get cpNextFile => 'File the application with the regulator.';
+
+  @override
+  String get cpNextWaitFile => 'Waiting for the plant to file the application.';
+
+  @override
+  String get cpNextBook => 'Book the inspection and name the inspector.';
+
+  @override
+  String get cpNextWaitInspect => 'Waiting for an inspection date.';
+
+  @override
+  String get cpNextFindings => 'Write what the inspector found.';
+
+  @override
+  String get cpNextWaitFindings => 'Inspection is booked.';
+
+  @override
+  String get cpNextCert => 'Enter the new certificate and the new expiry date.';
+
+  @override
+  String get cpNextWaitCert => 'Waiting for the new certificate.';
+
+  @override
+  String get cpNextRenewed => 'Renewed. Nothing left to do.';
+
+  @override
+  String get cpFieldTitle => 'What is it called?';
+
+  @override
+  String get cpFieldNo => 'Licence number on the paper';
+
+  @override
+  String get cpFieldKind => 'Kind';
+
+  @override
+  String get cpFieldSite => 'Site';
+
+  @override
+  String get cpFieldExpiry => 'When does it run out?';
+
+  @override
+  String get cpFieldFee => 'Renewal fee (taka)';
+
+  @override
+  String get cpFieldOwner => 'Who looks after it?';
+
+  @override
+  String get cpFieldOwnerMe => 'You';
+
+  @override
+  String get cpFieldInspector => 'Inspector name';
+
+  @override
+  String get cpFieldFindings => 'What did they find?';
+
+  @override
+  String get cpFieldCert => 'New certificate number';
+
+  @override
+  String get cpFieldNewExpiry => 'New expiry (YYYY-MM-DD)';
+
+  @override
+  String get cpFieldChalan => 'Challan number';
+
+  @override
+  String get cpFieldReason => 'Why send it back?';
+
+  @override
+  String get cpFieldSubject => 'Letter subject';
+
+  @override
+  String get cpFieldLetter => 'Letter body';
+
+  @override
+  String get cpSiteHq => 'Head office';
+
+  @override
+  String get cpSitePlant => 'Keraniganj plant';
+
+  @override
+  String get cpActRenew => 'Open a renewal';
+
+  @override
+  String get cpActFund => 'Approve the fee';
+
+  @override
+  String get cpActFile => 'File the application';
+
+  @override
+  String get cpActInspect => 'Book inspection';
+
+  @override
+  String get cpActFindings => 'Record findings';
+
+  @override
+  String get cpActComplete => 'Record the new certificate';
+
+  @override
+  String get cpActAdvance => 'Move forward';
+
+  @override
+  String get cpActBack => 'Send back one step';
+
+  @override
+  String get cpActLetter => 'Send a chairman letter';
+
+  @override
+  String get cpChecklist => 'Before we file';
+
+  @override
+  String get cpDetails => 'Details';
+
+  @override
+  String get cpPassport => 'Numbers';
+
+  @override
+  String get cpDoneRenew => 'Renewal file opened.';
+
+  @override
+  String get cpDoneFund => 'Fee approved. The plant can file now.';
+
+  @override
+  String get cpDoneAdvance => 'Moved forward.';
+
+  @override
+  String get cpDoneBack => 'Sent back one step.';
+
+  @override
+  String get cpDoneLetter => 'Letter sent.';
+
+  @override
+  String get cpDoneTick => 'Box ticked.';
+
+  @override
+  String get cpErrTitle => 'Give it a short name.';
+
+  @override
+  String get cpErrNo => 'Enter the number on the paper.';
+
+  @override
+  String get cpErrFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get cpErrFund => 'Finance must approve the fee first.';
+
+  @override
+  String get cpErrTicks => 'Every box must be marked first.';
+
+  @override
+  String get cpErrFail => 'A failed box is still open.';
+
+  @override
+  String get cpErrLetter =>
+      'A chairman letter is only for licences inside 30 days or already with the ministry.';
+
+  @override
+  String get cpErrOpen => 'A renewal is already open.';
+
+  @override
+  String get cpErrValidity =>
+      'The new expiry must match the usual life of this permit.';
+
+  @override
+  String get moduleEmployees => 'People';
+
+  @override
+  String get emIntro =>
+      'Who works here, who they report to, and who is leaving.';
+
+  @override
+  String get emSearchHint => 'Search by name, title or phone';
+
+  @override
+  String get emNew => 'Add a colleague';
+
+  @override
+  String get emNewIntro => 'HR records someone who has already joined.';
+
+  @override
+  String get emTabAll => 'At work';
+
+  @override
+  String get emTabTeam => 'My team';
+
+  @override
+  String get emTabLeaving => 'Leaving';
+
+  @override
+  String get emTabFormer => 'Former';
+
+  @override
+  String get emEmpty => 'Nobody in this list.';
+
+  @override
+  String get emEmptyFiltered => 'Nobody matches that search.';
+
+  @override
+  String get emSummaryNone => 'Nothing waiting for you in this list.';
+
+  @override
+  String emSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people need you.',
+      one: '1 person needs you.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emStatusActive => 'At work';
+
+  @override
+  String get emStatusLeave => 'On leave';
+
+  @override
+  String get emStatusLeaving => 'Leaving';
+
+  @override
+  String get emStatusFormer => 'Left';
+
+  @override
+  String get emWhat => 'Who is this?';
+
+  @override
+  String emWho(String who) {
+    return 'Reports to $who.';
+  }
+
+  @override
+  String get emWhoNone => 'No line manager on file.';
+
+  @override
+  String get emWhy =>
+      'The directory is so colleagues can find each other. Sensitive details stay with HR.';
+
+  @override
+  String get emExitTitle => 'Leaving — desks that must sign off';
+
+  @override
+  String emLastDay(String date) {
+    return 'Last day $date.';
+  }
+
+  @override
+  String get emActExit => 'Start leaving';
+
+  @override
+  String get emActClear => 'Clear this desk';
+
+  @override
+  String get emActWaive => 'Skip this desk';
+
+  @override
+  String get emActReclaim => 'Take equipment back';
+
+  @override
+  String get emActClose => 'Close the file';
+
+  @override
+  String get emActCancel => 'Keep them';
+
+  @override
+  String get emActRehire => 'Bring them back';
+
+  @override
+  String get emFieldName => 'Full name';
+
+  @override
+  String get emFieldNameBn => 'Name in Bangla';
+
+  @override
+  String get emFieldTitle => 'Job title';
+
+  @override
+  String get emFieldPhone => 'Phone';
+
+  @override
+  String get emFieldEmail => 'Work email';
+
+  @override
+  String get emFieldDept => 'Department';
+
+  @override
+  String get emFieldSite => 'Workplace';
+
+  @override
+  String get emFieldManager => 'Line manager';
+
+  @override
+  String get emFieldManagerHint => 'Optional';
+
+  @override
+  String get emFieldLastDay => 'Last working day (YYYY-MM-DD)';
+
+  @override
+  String get emFieldExitReason => 'Why they are leaving';
+
+  @override
+  String get emFieldNote => 'What you checked';
+
+  @override
+  String get emFieldWaive => 'Why this desk can be skipped';
+
+  @override
+  String get emFieldVoucher => 'Final-pay voucher number';
+
+  @override
+  String get emFieldCancel => 'Why you are keeping them';
+
+  @override
+  String get emFieldJoined => 'Joined';
+
+  @override
+  String get emFieldGrade => 'Grade';
+
+  @override
+  String get emFieldNid => 'National ID (10, 13 or 17 digits)';
+
+  @override
+  String get emFieldEmergency => 'Emergency contact';
+
+  @override
+  String get emFieldReports => 'People who report to them';
+
+  @override
+  String get emPassport => 'Staff number';
+
+  @override
+  String get emDetails => 'Details';
+
+  @override
+  String get emItemPending => 'Waiting';
+
+  @override
+  String get emItemCleared => 'Done';
+
+  @override
+  String get emItemWaived => 'Skipped';
+
+  @override
+  String get emDoneExit => 'Exit file opened. Each desk will get a note.';
+
+  @override
+  String get emDoneClear => 'Desk signed off.';
+
+  @override
+  String get emDoneWaive => 'Desk skipped.';
+
+  @override
+  String get emDoneReclaim => 'Equipment taken back.';
+
+  @override
+  String get emDoneClose => 'They have left. Login is closed.';
+
+  @override
+  String get emDoneCancel => 'They stay. Exit file cancelled.';
+
+  @override
+  String get emDoneRehire => 'They are back on the books.';
+
+  @override
+  String get emErrName => 'Give their name.';
+
+  @override
+  String get emErrTitle => 'Give their job title.';
+
+  @override
+  String get emErrPhone => 'Give a phone number.';
+
+  @override
+  String get emErrFailed => 'Something went wrong. Try again.';
+
+  @override
+  String get emErrProtected =>
+      'The Chairman cannot be taken off the books this way.';
+
+  @override
+  String get emErrSelf => 'Another HR colleague must start your own exit.';
+
+  @override
+  String get emErrAssets =>
+      'Take the equipment back first, then tick this desk.';
+
+  @override
+  String get emErrBus => 'End the staff-bus seat first.';
+
+  @override
+  String get emErrTrips => 'Finish their open car trips first.';
+
+  @override
+  String get emErrFinance => 'Settle claims and advances first.';
+
+  @override
+  String get emErrPending => 'Every desk must be cleared or skipped first.';
+
+  @override
+  String get emErrOpen => 'An exit file is already open.';
+
+  @override
+  String get moduleDashboards => 'Today';
+
+  @override
+  String get dbWhat =>
+      'What needs you, and the few numbers that change a decision.';
+
+  @override
+  String get dbWhy =>
+      'These figures are counted from the live files, not typed in.';
+
+  @override
+  String get dbNeedsTitle => 'Needs you today';
+
+  @override
+  String get dbActBrief => 'Send a short briefing';
+
+  @override
+  String get dbFieldTitle => 'Title';
+
+  @override
+  String get dbFieldBody => 'What should they hear (20+ characters)';
+
+  @override
+  String get dbDoneBrief => 'Briefing sent.';
+
+  @override
+  String dbRoiLine(String fleet, String vendor) {
+    return 'Declared: fleet ৳$fleet, vendors ৳$vendor. Not a live calculation.';
+  }
+
+  @override
+  String get moduleChat => 'Leadership chat';
+
+  @override
+  String get chIntro =>
+      'Leadership rooms. Messages are stored on this device. Not end-to-end encrypted.';
+
+  @override
+  String get chEmptyTitle => 'No rooms yet';
+
+  @override
+  String get chEmpty => 'Message a colleague to start one.';
+
+  @override
+  String get chNoMessages => 'No messages yet.';
+
+  @override
+  String get chLocked => 'Invite only';
+
+  @override
+  String get chDirect => 'Message one person';
+
+  @override
+  String get chHint => 'Write a message';
+
+  @override
+  String get chSend => 'Send';
+
+  @override
+  String get chReact => 'React';
+
+  @override
+  String get chDeleted => 'Message removed.';
+
+  @override
+  String get chSecureNote =>
+      'Encrypted in transit and at rest. Not end-to-end.';
+
+  @override
+  String get chActDirective => 'Issue a directive';
+
+  @override
+  String get chActAck => 'I have it';
+
+  @override
+  String get chActDone => 'Mark done';
+
+  @override
+  String get chFieldTitle => 'Directive title';
+
+  @override
+  String get chFieldBody => 'What must happen';
+
+  @override
+  String chAckCount(int acks, int needed) {
+    return '$acks of $needed have acknowledged.';
+  }
+
+  @override
+  String get demoPlayEvent => 'Play next live event';
+
+  @override
+  String get demoPlayEventHint =>
+      'Drops a leadership message and an inbox ping.';
+
+  @override
+  String get demoPlayEventDone => 'Event played.';
+
+  @override
+  String get homeWhat => 'What needs you now.';
+
+  @override
+  String get searchTitle => 'Find a person or a file';
+
+  @override
+  String get searchHint =>
+      'Type a name, employee ID or a reference such as LV-, INC- or PASS-.';
+
+  @override
+  String get searchField => 'Search';
+
+  @override
+  String get searchEmpty => 'Nothing matches that.';
+
+  @override
+  String get lockMessagePassword =>
+      'Unlock with your account password. Five wrong tries sign you out.';
+
+  @override
+  String get lockPassword => 'Password';
+
+  @override
+  String get lockUnlockPassword => 'Unlock with password';
+
+  @override
+  String lockFailedLeft(int left) {
+    return 'That password did not match. $left tries left.';
+  }
+
+  @override
+  String get dbListen => 'Listen';
+
+  @override
+  String get dbListenDone => 'Marked as heard.';
+
+  @override
+  String get dbActRestore => 'Restore';
+
+  @override
+  String get dbPermitRestored => 'The lock-out is released.';
+
+  @override
+  String get dbActSignHandover => 'Sign handover';
+
+  @override
+  String get dbHandoverSigned => 'Handover signed. You own this shift.';
+
+  @override
+  String get attTeamTitle => 'Your team today';
+
+  @override
+  String get attTeamWhy => 'Who is in, late, on leave, or needs a check.';
+
+  @override
+  String get attTeamPresent => 'In';
+
+  @override
+  String get attTeamLate => 'Late';
+
+  @override
+  String get attTeamLeave => 'On leave';
+
+  @override
+  String get attTeamReview => 'To review';
+
+  @override
+  String get attTeamEmpty => 'Nobody in this scope today.';
+
+  @override
+  String get attTeamNothing => 'Nothing for you to do.';
+
+  @override
+  String get attTeamReviewHint => 'Open regularisation or leave it.';
+
+  @override
+  String get approvalRejectExplain =>
+      'Write one sentence the requester will see on the file and in Inbox.';
+
+  @override
+  String get approvalRejectionSeen => 'Why it was turned down';
+
+  @override
+  String get flChat => 'Trip chat';
+
+  @override
+  String get flChatEmpty => 'No messages on this trip yet.';
+
+  @override
+  String get flChatHint => 'Write to the driver or requester';
+
+  @override
+  String get flPoolTitle => 'These two trips can share a car';
+
+  @override
+  String flPoolBody(String a, String b) {
+    return '$a and $b go the same way. Assign one car if both agree.';
+  }
+
+  @override
+  String get flCallDriver => 'Call driver';
+
+  @override
+  String get flOdoStart => 'Start odometer (km)';
+
+  @override
+  String get flOdoEnd => 'Finish odometer (km)';
+
+  @override
+  String get busConductor => 'Check a passenger';
+
+  @override
+  String get busConductorHint => 'Employee ID or seat number';
+
+  @override
+  String busConductorOk(String name, String seat) {
+    return '$name is in seat $seat.';
+  }
+
+  @override
+  String get busConductorMiss => 'Nobody on this bus matches that.';
+
+  @override
+  String get busSwap => 'Ask to swap seats';
+
+  @override
+  String get busSwapHint => 'The other person must accept.';
+
+  @override
+  String get busSwapDone => 'Swap request sent.';
+
+  @override
+  String get busSwapAccept => 'Accept seat swap';
+
+  @override
+  String get chVoice => 'Voice note';
+
+  @override
+  String get chVoiceRecord => 'Hold to record';
+
+  @override
+  String get chVoiceStop => 'Stop and send';
+
+  @override
+  String get chVoicePlay => 'Play voice note';
+
+  @override
+  String get inGps => 'Add where this happened';
+
+  @override
+  String get inGpsOn => 'Location attached';
+
+  @override
+  String get inCloseBlocked =>
+      'Every fix must be confirmed before this file can close.';
+
+  @override
+  String get asScanTag => 'Scan a tag';
+
+  @override
+  String get emErrNid => 'NID must be 10, 13 or 17 digits.';
 }

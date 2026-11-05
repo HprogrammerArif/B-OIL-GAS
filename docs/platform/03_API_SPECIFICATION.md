@@ -581,6 +581,18 @@ Module dirs `dashboards`, `briefings`. Models `VoiceBriefing`, `VoiceBriefingLis
 
 `GET /dashboards/widgets/inner-circle.roster` (permission `dashboards:inner-circle`) returns, for each member of channel `executive-leadership` (or `Setting dashboards.innerCircleUserIds`): `{ user, presence (from `/presence`), todayStatus: "PRESENT"|"ON_APPROVED_LEAVE"|"SICK"|"UNINFORMED_ABSENT"|"IN_MEETING"|"FIELD_DUTY"|"OFF", leave: { refNo, leaveType, isInformed } | null, location?: string }`. `UNINFORMED_ABSENT` = no punch today, no approved/pending `LeaveRequest`, shift started > grace; `SICK` = approved leave of type `SL`; `IN_MEETING` from presence.
 
+### 8.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/dashboard_engine.dart`) implements a subset with these differences:
+
+- `GET /dashboards/me` returns `{ layout, needs[], kpis[], extras[], canBrief, canBroadcast, badges, broadcast }` computed from live collections (BR-02-04/09). Layout is the highest role: CHAIRMAN → PLANT_GM → HR_ADMIN → TRANSPORT_ADMIN → HOD → DRIVER → EMPLOYEE. ROI figures are the declared `DashboardPolicy.roi` constants (BR-02-07). Briefings are transcript-only (`POST /briefings` publishes immediately). Plant extras include work-permit LOTO restore and shift-handover sign (`POST /work-permits/:id/restore`, `POST /shift-handovers/:id/sign`). No SCADA / DCS adapter widgets.
+- `GET /search?q=` finds people, notices and refs. `POST /broadcasts` / `POST /broadcasts/:id/dismiss` pin one company announcement on Home.
+- `GET /attendance/team` is the manager roster (scope from `attendance:read`). Inbox `GET /notifications` upserts derived rows (expiring permit, unsigned custody, guest today, assigned trip).
+- `GET/POST /fleet/chat/{REQ:id}/messages` is trip chat. `GET /fleet/pooling` suggests two same-route pending trips.
+- `POST /bus/routes/:id/verify` (EMP or seat), `POST /bus/routes/:id/swap`, `POST /bus/swaps/:id/accept`.
+- `POST /auth/unlock` checks the account password (5 failures revoke the session).
+- Demo menu **Play next live event** (`POST /demo/events/next`) writes a leadership chat line and an inbox ping.
+
 ---
 
 ## 9. MOD-03 — Note-Sheets & E-Sign
@@ -808,6 +820,15 @@ Validation: `name` 3–160; `purchaseCost ≥ 0`; `salvageValue ≤ 50 % of (pur
 
 Financial formulas (implemented in SQL view + TS service, single source `server/src/modules/assets/depreciation.ts`): gross = purchaseCost + capexAdditions; **SLM** annual = (gross − salvage)/life; **WDV** rate = clamp(1 − (salvage/gross)^(1/life), 0.12, 0.35); **UOP** accumulated = (gross − salvage) × min(1, runtimeHours/ratedLifeHours); NBV floored at salvage, 0 when DISPOSED; `isEolCandidate` = repairRatio ≥ 0.5 ∨ (remainingLife ≤ 0.5 ∧ health < 55) ∨ DECOMMISSIONED. `DepreciationSnapshot` written by a yearly job (fiscal year July–June) and on method change.
 
+### 11.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/asset_engine.dart`) implements a subset with these differences:
+
+- Register (`POST /assets`) creates `IN_STOCK` (or commissions immediately). Custody assign / ack / release, defect → CM work order, WO start/complete, LOTO apply/release, calibration certify, transfer initiate/complete, decommission + checklist + write-off approve + dispose. Events are SHA-256 chained (BR-05-01). Financials (SLM / WDV / UOP, NBV floor, EOL flag) are computed on read (BR-05-03–06).
+- Write-off is two permissions on the record (`POST /assets/{id}/write-off` then `dispose`), not an `ASSET_WRITE_OFF` workflow. LOTO uses `assets:loto` (Plant GM also holds HSE). Transport `assets:read` is company-wide but vehicle-class only, unless the person currently holds the kit.
+- `GET /assets?view=mine|attention|custody-pending|maintenance|calibration|eol|vehicles|stock|all`. Each asset carries a `me` block and `nextAction`. Notifications use `data.route` `/home/assets/{id}`. Calibration-due is applied lazily (BR-05-08). Vehicles `veh_sedan` / `veh_tanker` stay linked (BR-05-15).
+- Deferred: asset requisition workflow, spares consume/restock UI, depreciation-method change, FI-AA CSV, QR scan screen, monthly snapshot job, exit reclaim UI (engine method `reclaimEmployeeAssets` is ready for MOD-16).
+
 ---
 
 ## 12. MOD-06 — Licence & Compliance
@@ -837,6 +858,14 @@ Module dir `compliance`. Models `RegulatoryBody`, `LicenceType`, `Licence`, `Lic
 | GET/POST/PATCH | `/regulatory-bodies[/{id}]`, `/licence-types[/{id}]` | `admin:compliance-master` ; read `compliance:read` | — | Master data; `LicenceType.checklistTemplate` = `[{ label }]`. |
 
 Errors on `advance`: `INVALID_STATE_TRANSITION` (skipping stages), `POLICY_VIOLATION` as listed, `FORBIDDEN` (owner without `compliance:manage` may only update checklist/documents).
+
+### 12.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/licence_engine.dart`) implements a subset with these differences:
+
+- Register, lazy auto-renewal at `leadTimeDays` (BR-06-03), checklist ticks, stage advance/back, fund approve on the record (`POST /licences/{id}/fund`) instead of a `LICENCE_FUND_APPROVAL` workflow, chairman DO letter (memo number, no e-Nothi). Complete requires `certificateNo` + `newExpiresAt` (BR-06-05/11), not a file upload.
+- `GET /licences?view=mine|critical|warning|expired|renewing|all`. Each licence carries a `me` block. Notifications use `data.route` `/home/licences/{id}`. Plant GM (`EMP-0012`) runs site renewals; Finance (`EMP-0062`) approves fees; Chairman sends letters. Urgency bands follow BR-06-01.
+- Deferred: certificate file upload, fund workflow, regulator sync, dashboard KPIs, vehicle/driver documents (BR-06-12 stay on MOD-09).
 
 ---
 
@@ -885,6 +914,16 @@ Module dir `incidents`. Models `Incident`, `IncidentPerson`, `IncidentRca`, `Cap
 ```
 
 Validation: `type ∈ IncidentType`; `title` 5–160; `description` 20–10 000 (Quick Spotter: ≥ 10 with `quick=true`); `occurredAt ≤ now` and ≥ now − 30 days; `severity/likelihood` int 1–5; `people ≤ 20`; `isAnonymous=true` nulls `reporterId` but keeps `AuditLog.actorUserId` (sealed, `admin:audit-read` only). Side-effects: notifications `INCIDENT_REPORTED` to `HSE_OFFICER` + site `PLANT_GM`; `riskCategory ∈ {HIGH, EXTREME}` → `INCIDENT_CRITICAL` (CRITICAL, ack) + socket `incident:critical` to CHAIRMAN too; statutory due item. Offline: `Idempotency-Key` honoured; attachments uploaded after reconnect via `/incidents/{id}/attachments`.
+
+### 13.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/incident_engine.dart`) implements a subset with these differences:
+
+- Risk uses BR-07-01 (`EXTREME ≥ 16`). Statutory bodies follow BR-07-03 (DIFE / DOENV / FSCD / DOEXP / BRTA). RCA needs why1–why3 and a root cause. CAPA overdue is applied lazily. The last VERIFIED CAPA moves the incident to `MANAGEMENT_REVIEW`.
+- Closure is two signatures on the record (`POST /incidents/{id}/close`), not an `INCIDENT_CLOSURE` workflow. The Plant GM persona also holds `HSE_OFFICER`, so the same login signs as safety then as plant head.
+- `GET /incidents?view=mine|open|serious|statutory|to-triage|my-capa|all`. Each incident carries a `me` block. Anonymous reports hide the reporter except from `incidents:manage`. Notifications use `data.route` `/home/incidents/{id}`.
+- One plant safety lead (`EMP-0012`). Employees report from any site; HSE/GM see plant-scope records. A CAPA on the gantry fire is owned by Tanvir so he can start and finish it; Harunur confirms other people's fixes.
+- Deferred: 5×5 matrix UI, Form B-12 PDF, incident workflow template, auto work-order from equipment damage, hourly statutory reminders, GPS on report.
 
 ---
 
@@ -944,6 +983,18 @@ Validation: `visitor.fullName` 2–120; `phone` E.164; `idProofType ∈ NID|PASS
 ```
 
 Rules: status must be `APPROVED` (`INVALID_STATE_TRANSITION`; `PRE_REGISTERED` with pending VIP approval → `POLICY_VIOLATION` `APPROVAL_PENDING`); `expectedAt − 2 h ≤ now ≤ expectedEndAt` else `POLICY_VIOLATION` `OUTSIDE_WINDOW` (gate supervisor override with `overrideReason`); PPE rule (14.2); RED zone requires escort check-in presence (escort must be punched-in today per MOD-10 else `ESCORT_ABSENT`); `badgeNo` unique among currently inside visits per site. Notifications `VISIT_ARRIVED` to host (+ escort); socket `visit:status`; pass due item created.
+
+### 14.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/visitor_engine.dart`) implements a subset with these differences:
+
+- Visitor master is reused by normalised phone. ID numbers are stored hashed with last-4 only; the wire never returns the full number. There is no public `/gate-pass/{token}` or SMS: the 6-digit-style QR is the `qrToken` on the in-app pass PDF.
+- Regular / vendor / client / contractor visits auto-approve unless any selected zone is RED. VIP, GOVT and any RED-zone visit stay `PRE_REGISTERED` until `POST /visits/{id}/approve` (`visitors:approve`). There is no `VISIT_VIP_APPROVAL` workflow instance.
+- Watchlist is an exact name or phone match. A hit blocks approve and check-in until `POST /visits/{id}/watchlist { action: clear|deny }` (`visitors:watchlist`). Blacklist throws `VISITOR_BLACKLISTED`.
+- Check-in always needs a `PHOTO` file. YELLOW/RED zones need PPE cleared in the last 12 hours; RED also needs an escort who works at the site. Badge numbers are `BDG-{HQ|PLT|CTG}-NN`, `VIP-NN` or `GOVT-NN`. Overstay (`OVERDUE`) is applied lazily at `expectedEndAt + 30 min`. Hosts may extend twice, up to 8 hours.
+- `GET /visits?view=mine|expected|inside|overdue|to-approve|all`. Each visit carries a `me` block of booleans. `POST /visits/scan { q }` matches visit number, token, plate or badge. Muster is a per-site flag (`/visits/muster/start|end`, `/visits/{id}/muster-safe`).
+- HQ reception is the HR Admin persona (`visitors:gate` at site). Plant gate and HSE (on the Plant GM account) share `visitors:gate`. Chairman holds `visitors:approve` at company scope.
+- Deferred: Levenshtein watchlist, public pass link, ANPR/barrier, hospitality JSON, incident auto-create from CRITICAL findings, escort punch-in check, site-capacity override UI, WhatsApp/SMS.
 
 ---
 
@@ -1029,6 +1080,18 @@ Module dir `fleet`. Models `Driver`, `Vehicle`, `VehicleDocument`, `VehicleRequi
 ```
 
 Validation: `purpose` 5–300; `origin/destination` 2–160; `stops ≤ 6`, each `label` 2–120, `waitMinutes 0–240`; `departAt ≥ now + 30 min` (admins may backdate ≤ 24 h with `priority=CRITICAL`); `returnAt > departAt` and required for ROUND_TRIP; `passengers 1–7` (> 4 forces `MICROBUS_7` or higher else `POLICY_VIOLATION` `CAPACITY_CLASS`); `passengerCount` = `passengers.length`; `departmentId` = requester's; `phone` zPhoneBd. Estimate fields computed server-side (15.2 `/estimate`). Submit side-effects: workflow instance, `FLEET_REQ_ENDORSE` to HOD, `inbox:changed`.
+
+### 15.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/fleet_engine.dart`) implements a subset with these differences:
+
+- Create is always a `DRAFT`; `POST /vehicle-requisitions` with `submit: true` (or `POST …/submit`) starts `VEHICLE_REQUISITION`. There is no Finance step, pooling, GPS stream, fleet chat, maps adapter, or vehicle/driver CRUD UI.
+- Estimate is `GET /fleet/estimate` (destination presets: Keraniganj Plant, Chattogram Terminal, Head Office). Cost is the flat fare + stops + round-trip surcharge; km × rate is applied only when the trip completes.
+- Assign reserves the vehicle and driver (`reservedTripId`) without changing their status. Gate-out (±120 min of `departAt`, transport may override) sets IN_TRANSIT. One loginable driver (`EMP-0821`, LIGHT, breathalyzer PASSED).
+- `GET /vehicle-requisitions?view=mine|driving|to-endorse|dispatch|live|all`. Each requisition carries a `me` block. Notifications use `data.route` `/home/fleet/{id}`.
+- SOS: `POST /trips/{id}/sos` (CRITICAL `FLEET_SOS`, ack required) and standalone `POST /fleet/sos` (list at `/home/fleet/sos`). Tolls over ৳200 need a photo. Fuel vouchers are issued from the engine (`/fuel-vouchers`) without a dedicated screen.
+- HOD endorsement uses the existing template: same-department head, else the line manager (Farida Begum endorses Tanvir Rahman). HQ reception / plant gate is the Transport persona (`fleet:gate`). Chairman and Plant GM have `fleet:read`.
+- Deferred: pooling, live GPS, fleet chat, breathalyzer capture UI, parcel-linked trips (BR-04-10), vehicle/driver master screens.
 
 ---
 
@@ -1287,6 +1350,13 @@ Module dir `chat`. Models `ChatChannel`, `ChatMember`, `ChatMessage`, `ChatReadR
 
 Retention job deletes messages older than `retentionDays` (hard delete + file objects). Chat is excluded from `AuditLog` (doc 02 §1) but channel membership and directive actions are audited.
 
+### 19.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/chat_engine.dart`) implements a subset with these differences:
+
+- Four seeded rooms: Leadership (locked), Plant operations, Finance, Permits (locked). Members are Chairman, Plant GM, HR and Finance HOD only. Employee, driver and transport personas have no `chat:use`. Copy never claims end-to-end encryption (BR-15-05/17).
+- Send, read, react, DM, issue/ack/execute directive. A send in Plant operations gets a scripted Plant GM reply. Voice, files, calls, retention job and channel admin UI are deferred.
+
 ---
 
 ## 20. MOD-16 — Workforce Directory & Exit Clearance
@@ -1309,6 +1379,15 @@ Module dir `employees`. Models `Employee` (+ `User`), `ExitClearance`, `ExitClea
 | POST | `/employees/{id}/reactivate` | `employees:offboard` | — | OFFBOARDED → ACTIVE (re-hire): new `joinDate`, roles must be re-granted; audit `EMPLOYEE_REACTIVATED`. |
 | GET | `/employees/kpis` | `employees:read` | scope | `{ active, bySite{}, byDepartment{}, former, onboardingMonth }`. |
 | GET | `/employees/{id}/org-chart` | `employees:read` | — | Manager chain + direct reports. |
+
+### 20.x Pitch-app mock mapping
+
+The in-app mock (`ftr-a/lib/mock/engines/workforce_engine.dart`) implements a subset with these differences:
+
+- `GET /people` remains the lightweight picker (no PII). The directory is `GET /employees?view=all|team|leaving|former`. Every signed-in role holds limited `employees:read` COMPANY so Home shows People. `nid` / emergency / grade / joinDate only for HR, self, or the manager chain (`employees:pii` / `read-full`).
+- Exit is a record with seven items, not an `EXIT_CLEARANCE` workflow. HR (`EMP-0028`) starts, cancels, waives and finalises. Item owners: Plant GM assets, Transport bus/fuel, Gate RFID, Finance settlement, HR interview. `IT_ACCESS` has no SUPER_ADMIN persona — HR waives. `POST /exit-clearances/{id}/reclaim-assets` calls `AssetEngine.reclaimEmployeeAssets`. Chairman cannot be offboarded (BR-16-10). Notifications use `data.route` `/home/people/{id}`.
+- Seed: Nazmul Huda (`EMP-1104`, plant HSE, no login) is mid-exit with every desk pending; Shakil and Khadija stay former. Tariqul stays on leave. Demo logins are never offboarded.
+- Deferred: org-chart screen, set-password mail, session revoke on IT clear, bus auto-release, SAP PERNR sync.
 
 ```json
 // POST /employees

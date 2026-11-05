@@ -62,6 +62,7 @@ const SEED_START: Counters = {
   DIR: 1040,  // chairman directives
   GP: 1180,   // asset gate passes
   CERT: 100,  // calibration / maintenance certificates
+  DO: 88,     // demi-official letters (CMD)
   NTC: 310,   // notice reference numbers
 };
 

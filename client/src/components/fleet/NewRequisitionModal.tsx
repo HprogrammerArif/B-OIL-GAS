@@ -11,7 +11,6 @@ import {
   X,
   Check,
   Plus,
-  Sparkles,
   ChevronDown,
   Search,
   ArrowRight,
@@ -20,11 +19,6 @@ import {
   Fuel,
   Navigation,
   Gauge,
-  Factory,
-  Anchor,
-  Ship,
-  Plane,
-  Landmark,
   RotateCcw,
 } from 'lucide-react';
 
@@ -128,23 +122,6 @@ export const MISSION_PRESETS: MissionPreset[] = [
     icon: 'landmark',
   },
 ];
-
-function renderPresetIcon(icon: string) {
-  switch (icon) {
-    case 'factory':
-      return <Factory size={12} />;
-    case 'anchor':
-      return <Anchor size={12} />;
-    case 'ship':
-      return <Ship size={12} />;
-    case 'plane':
-      return <Plane size={12} />;
-    case 'landmark':
-      return <Landmark size={12} />;
-    default:
-      return <MapPin size={12} />;
-  }
-}
 
 export default function NewRequisitionModal({
   isOpen,
@@ -493,9 +470,8 @@ export default function NewRequisitionModal({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '10.5px', fontWeight: 800 }}>
-                  <Sparkles size={12} color="var(--status-warning)" />
                   <span style={{ textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    {t('Quick Destination Presets', 'দ্রুত গন্তব্য প্রিসেট', lang)}
+                    {t('Destination', 'গন্তব্য', lang)}
                   </span>
                 </div>
                 <span style={{ fontSize: '10px', opacity: 0.7 }}>
@@ -503,29 +479,21 @@ export default function NewRequisitionModal({
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {MISSION_PRESETS.map((preset) => {
-                  const isActive = selectedPresetId === preset.id && toLoc === preset.destination;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => handleApplyPreset(preset)}
-                      className="fleet-preset-chip"
-                      style={{
-                        borderColor: isActive ? 'var(--brand-crimson)' : undefined,
-                        backgroundColor: isActive ? 'rgba(165, 28, 48, 0.08)' : undefined,
-                        color: isActive ? 'var(--brand-crimson)' : undefined,
-                        fontWeight: isActive ? 700 : 600,
-                      }}
-                    >
-                      {renderPresetIcon(preset.icon)}
-                      <span>{lang === 'bn' ? preset.nameBn : preset.nameEn}</span>
-                      <span style={{ opacity: 0.65, fontSize: '9.5px' }}>({preset.distanceKm} km)</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <select
+                className="notice-select"
+                value={selectedPresetId && toLoc === MISSION_PRESETS.find((p) => p.id === selectedPresetId)?.destination ? selectedPresetId : ''}
+                onChange={(e) => {
+                  const preset = MISSION_PRESETS.find((p) => p.id === e.target.value);
+                  if (preset) handleApplyPreset(preset);
+                }}
+              >
+                <option value="">{t('Choose a destination…', 'একটি গন্তব্য বেছে নিন…', lang)}</option>
+                {MISSION_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {lang === 'bn' ? preset.nameBn : preset.nameEn} ({preset.distanceKm} km)
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* 3B. COMPACT ROUTE ESTIMATE & VEHICLE RECOMMENDATION */}

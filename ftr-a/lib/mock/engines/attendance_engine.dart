@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
 import 'package:bogcl_oneops/mock/engines/work_calendar.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
+import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
@@ -600,5 +601,74 @@ abstract final class AttendanceEngine {
       entityId: reg.str('id'),
       after: {'refNo': reg['refNo']},
     );
+  }
+
+  static Json team(HandlerContext ctx, String date) {
+    final store = ctx.store;
+    final rows = <Json>[];
+    for (final e in store.all(Col.employees)) {
+      if (e['status'] == 'OFFBOARDED') continue;
+      if (!ctx.inScope(
+        'attendance:read',
+        ownerEmployeeId: e.str('id'),
+        departmentId: e.obj('department').str('id'),
+        siteId: e.obj('site').str('id'),
+        teamManagerId: e.objOrNull('lineManager')?.strOrNull('id'),
+      )) {
+        continue;
+      }
+      final day = computeDay(store, e, date);
+      final pending = store
+          .all(Col.regularisations)
+          .where(
+            (r) =>
+                r['employeeId'] == e['id'] &&
+                r['date'] == date &&
+                r['status'] == 'PENDING',
+          )
+          .firstOrNull;
+      rows.add({
+        'employeeId': e['id'],
+        'empCode': e['empCode'],
+        'name': e['fullName'],
+        'nameBn': e['fullNameBn'] ?? e['fullName'],
+        'status': day['status'],
+        'firstInAt': day['firstInAt'],
+        'lateMinutes': day['lateMinutes'],
+        'needsReview': day.obj('flags')['pendingReview'] == true,
+        'regularisationId': pending?['id'],
+        'workflowInstanceId': pending?['workflowInstanceId'],
+      });
+    }
+    var present = 0;
+    var late = 0;
+    var onLeave = 0;
+    var review = 0;
+    for (final r in rows) {
+      final st = r['status'];
+      if (st == 'LATE') late++;
+      if (st == 'ON_LEAVE') onLeave++;
+      if (const {
+        'PRESENT',
+        'LATE',
+        'EARLY_LEAVE',
+        'HALF_DAY',
+        'FIELD_DUTY',
+      }.contains(st)) {
+        present++;
+      }
+      if (r['needsReview'] == true) review++;
+    }
+    return {
+      'date': date,
+      'kpis': {
+        'present': present,
+        'late': late,
+        'onLeave': onLeave,
+        'toReview': review,
+        'headcount': rows.length,
+      },
+      'roster': rows,
+    };
   }
 }

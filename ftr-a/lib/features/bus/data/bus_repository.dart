@@ -100,6 +100,56 @@ class BusRepository {
 
   Future<void> broadcast({required String message, String? routeId}) =>
       _adminPost('/bus/broadcasts', {'message': message, 'routeId': ?routeId});
+
+  Future<Map<String, Object?>> verify(String routeId, String query) async {
+    try {
+      final res = await _dio.post<Object?>(
+        '/bus/routes/$routeId/verify',
+        data: {'query': query},
+      );
+      return Envelope.object(res.data);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> registerBus(Map<String, Object?> body) =>
+      _adminPost('/bus/routes', body);
+
+  Future<void> reassignBus(String routeId, String busNo) =>
+      _adminPost('/bus/routes/$routeId/bus', {'busNo': busNo});
+
+  Future<void> setSeat(
+    String routeId,
+    int seatNo, {
+    String? category,
+    bool? boarded,
+  }) => _adminPost('/bus/routes/$routeId/seats/$seatNo', {
+    'category': ?category,
+    'boarded': ?boarded,
+  });
+
+  Future<Map<String, Object?>> seatMap(String routeId) async {
+    try {
+      final res = await _dio.get<Object?>('/bus/routes/$routeId');
+      final admin = Envelope.object(res.data)['admin'];
+      if (admin is Map) return Map<String, Object?>.from(admin);
+      return const {};
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> requestSwap(String routeId, int seatNo) async {
+    try {
+      await _dio.post<Object?>(
+        '/bus/routes/$routeId/swap',
+        data: {'seatNo': seatNo},
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

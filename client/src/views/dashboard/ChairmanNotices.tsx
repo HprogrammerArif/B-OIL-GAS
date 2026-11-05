@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Megaphone, Pin, Plus, Search, X } from 'lucide-react';
+import { Megaphone, Pin, Plus, Search, X } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { showToast } from '../../components/ToastManager';
 import { Button, EmptyState, StatusPill, type StatusTone } from '../../components/ui';
@@ -42,9 +42,9 @@ function matches(n: NoticeItem, kind: Kind): boolean {
   }
 }
 
-/** Company notice board for the Chairman: read, acknowledge, pin and publish. */
+/** Company notice board for the Chairman: publish, pin and watch staff receipts — they do not acknowledge. */
 export default function ChairmanNotices({ lang }: { lang: Lang }) {
-  const { notices, addNotice, acknowledgeNotice, togglePin } = useNoticeStore();
+  const { notices, addNotice, markNoticeRead, togglePin } = useNoticeStore();
   const [kind, setKind] = useState<Kind>('all');
   const [query, setQuery] = useState('');
   const [shown, setShown] = useState(PAGE);
@@ -64,9 +64,9 @@ export default function ChairmanNotices({ lang }: { lang: Lang }) {
   const hasFilter = kind !== 'all' || query.trim() !== '';
   const clear = () => { setKind('all'); setQuery(''); setShown(PAGE); };
 
-  const acknowledge = (n: NoticeItem) => {
-    acknowledgeNotice(n.id || n.title);
-    showToast(t('Marked as read.', 'পড়া হয়েছে হিসেবে চিহ্নিত।', lang), 'success');
+  const openNotice = (n: NoticeItem) => {
+    markNoticeRead(n.id || n.title);
+    setDetail(n);
   };
 
   const pin = (n: NoticeItem) => {
@@ -141,7 +141,7 @@ export default function ChairmanNotices({ lang }: { lang: Lang }) {
               return (
                 <li key={n.id ?? n.title} className={`cn-item ${n.pinned ? 'is-pinned' : ''} ${n.read ? '' : 'is-unread'}`}>
                   <div className="cn-top">
-                    <button type="button" className="cn-title" onClick={() => setDetail(n)}>
+                    <button type="button" className="cn-title" onClick={() => openNotice(n)}>
                       {!n.read && <span className="cn-dot" aria-label={t('Unread', 'অপঠিত', lang)} />}
                       {t(n.title, n.title_bn, lang)}
                     </button>
@@ -155,14 +155,7 @@ export default function ChairmanNotices({ lang }: { lang: Lang }) {
                   <div className="cn-foot">
                     <span className="cn-reach">{reach}</span>
                     <div className="cn-actions">
-                      <Button variant="ghost" size="sm" onClick={() => setDetail(n)}>{t('Read full notice', 'পুরো নোটিশ পড়ুন', lang)}</Button>
-                      {n.read ? (
-                        <span className="cn-done"><CheckCircle2 size={13} /> {t('Read', 'পড়া হয়েছে', lang)}</span>
-                      ) : (
-                        <Button variant="secondary" size="sm" icon={<CheckCircle2 size={13} />} onClick={() => acknowledge(n)}>
-                          {n.requiresAck ? t('Acknowledge', 'স্বীকার করুন', lang) : t('Mark as read', 'পড়েছি', lang)}
-                        </Button>
-                      )}
+                      <Button variant="ghost" size="sm" onClick={() => openNotice(n)}>{t('Read full notice', 'পুরো নোটিশ পড়ুন', lang)}</Button>
                       <button
                         type="button"
                         className={`cn-pin ${n.pinned ? 'on' : ''}`}
@@ -199,7 +192,7 @@ export default function ChairmanNotices({ lang }: { lang: Lang }) {
         notice={detail}
         onClose={() => setDetail(null)}
         lang={lang}
-        onAcknowledge={(id) => { if (id) acknowledgeNotice(id); }}
+        canAcknowledge={false}
       />
     </section>
   );

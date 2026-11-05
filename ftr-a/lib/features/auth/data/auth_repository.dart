@@ -122,6 +122,14 @@ class AuthRepository {
     }
   }
 
+  Future<void> unlockWithPassword(String password) async {
+    try {
+      await _dio.post<Object?>('/auth/unlock', data: {'password': password});
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> setPreferredLanguage(String lang) async {
     try {
       await _dio.patch<Object?>('/me', data: {'preferredLang': lang});

@@ -1,207 +1,287 @@
+import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
+import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
 import 'package:flutter/foundation.dart';
 
 @immutable
-class PermittedZone {
-  const PermittedZone({
-    required this.zoneId,
+class VisitZone {
+  const VisitZone({
+    required this.id,
     required this.name,
     required this.nameBn,
     required this.level,
     required this.escortRequired,
+    this.siteId,
   });
 
-  factory PermittedZone.fromJson(Map<String, Object?> j) => PermittedZone(
-    zoneId: j['zoneId']! as String,
+  factory VisitZone.fromJson(Map<String, Object?> j) => VisitZone(
+    id: (j['id'] ?? j['zoneId'])! as String,
     name: j['name']! as String,
     nameBn: (j['nameBn'] as String?) ?? j['name']! as String,
     level: j['level']! as String,
-    escortRequired: j['escortRequired'] as bool? ?? false,
-  );
-
-  final String zoneId;
-  final String name;
-  final String nameBn;
-  final String level; // green | yellow | red
-  final bool escortRequired;
-
-  String displayName({required bool bangla}) => bangla ? nameBn : name;
-}
-
-@immutable
-class PpeClearance {
-  const PpeClearance({
-    required this.hardHat,
-    required this.safetyGoggles,
-    required this.safetyShoes,
-    required this.hiVisVest,
-    required this.h2sBriefing,
-  });
-
-  factory PpeClearance.fromJson(Map<String, Object?> j) => PpeClearance(
-    hardHat: j['hardHat'] as bool? ?? false,
-    safetyGoggles: j['safetyGoggles'] as bool? ?? false,
-    safetyShoes: j['safetyShoes'] as bool? ?? false,
-    hiVisVest: j['hiVisVest'] as bool? ?? false,
-    h2sBriefing: j['h2sBriefing'] as bool? ?? false,
-  );
-
-  final bool hardHat;
-  final bool safetyGoggles;
-  final bool safetyShoes;
-  final bool hiVisVest;
-  final bool h2sBriefing;
-
-  bool get allCleared =>
-      hardHat && safetyGoggles && safetyShoes && hiVisVest && h2sBriefing;
-}
-
-enum VisitorStatus {
-  preRegistered,
-  checkedIn,
-  checkedOut,
-  overdue,
-  cancelled;
-
-  static VisitorStatus parse(String wire) => switch (wire) {
-    'PRE_REGISTERED' => preRegistered,
-    'CHECKED_IN' => checkedIn,
-    'CHECKED_OUT' => checkedOut,
-    'OVERDUE' => overdue,
-    'CANCELLED' => cancelled,
-    _ => preRegistered,
-  };
-}
-
-enum VisitorCategory {
-  vip,
-  govt,
-  vendor,
-  client,
-  regular;
-
-  static VisitorCategory parse(String wire) => switch (wire) {
-    'VIP' => vip,
-    'GOVT' => govt,
-    'VENDOR' => vendor,
-    'CLIENT' => client,
-    _ => regular,
-  };
-
-  String get wire => name.toUpperCase();
-}
-
-@immutable
-class Visitor {
-  const Visitor({
-    required this.id,
-    required this.refNo,
-    required this.status,
-    required this.name,
-    required this.organization,
-    required this.designation,
-    required this.category,
-    required this.hostEmployeeId,
-    required this.hostName,
-    required this.hostDept,
-    required this.siteId,
-    required this.purpose,
-    required this.expectedDate,
-    required this.expectedTime,
-    required this.permittedZones,
-    required this.vipProtocol,
-    required this.safetyBriefingCompleted,
-    required this.ndaSigned,
-    required this.ppeCleared,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.createdBy,
-    this.checkInTime,
-    this.checkOutTime,
-    this.durationMinutes,
-    this.vehiclePlate,
-    this.phone,
-    this.email,
-    this.idProofType,
-    this.idProofNumber,
-    this.badgeNo,
-  });
-
-  factory Visitor.fromJson(Map<String, Object?> j) => Visitor(
-    id: j['id']! as String,
-    refNo: j['refNo']! as String,
-    status: VisitorStatus.parse(j['status']! as String),
-    name: j['name']! as String,
-    organization: (j['organization'] as String?) ?? '',
-    designation: (j['designation'] as String?) ?? '',
-    category: VisitorCategory.parse(j['category']! as String),
-    hostEmployeeId: j['hostEmployeeId']! as String,
-    hostName: (j['hostName'] as String?) ?? '',
-    hostDept: (j['hostDept'] as String?) ?? '',
-    siteId: j['siteId']! as String,
-    purpose: j['purpose']! as String,
-    expectedDate: j['expectedDate']! as String,
-    expectedTime: j['expectedTime']! as String,
-    checkInTime: j['checkInTime'] != null
-        ? DateTime.parse(j['checkInTime']! as String)
-        : null,
-    checkOutTime: j['checkOutTime'] != null
-        ? DateTime.parse(j['checkOutTime']! as String)
-        : null,
-    durationMinutes: j['durationMinutes'] as int?,
-    vehiclePlate: j['vehiclePlate'] as String?,
-    phone: j['phone'] as String?,
-    email: j['email'] as String?,
-    idProofType: j['idProofType'] as String?,
-    idProofNumber: j['idProofNumber'] as String?,
-    badgeNo: j['badgeNo'] as String?,
-    permittedZones: (j['permittedZones'] as List?)
-            ?.map((e) => PermittedZone.fromJson(
-                  Map<String, Object?>.from(e as Map),
-                ))
-            .toList() ??
-        [],
-    vipProtocol: j['vipProtocol'] as bool? ?? false,
-    safetyBriefingCompleted: j['safetyBriefingCompleted'] as bool? ?? false,
-    ndaSigned: j['ndaSigned'] as bool? ?? false,
-    ppeCleared: PpeClearance.fromJson(
-      j['ppeCleared'] is Map
-          ? Map<String, Object?>.from(j['ppeCleared']! as Map)
-          : {},
-    ),
-    createdAt: DateTime.parse(j['createdAt']! as String),
-    updatedAt: DateTime.parse(j['updatedAt']! as String),
-    createdBy: j['createdBy']! as String,
+    escortRequired: j['escortRequired'] == true || j['level'] == 'RED',
+    siteId: j['siteId'] as String?,
   );
 
   final String id;
-  final String refNo;
-  final VisitorStatus status;
   final String name;
-  final String organization;
-  final String designation;
-  final VisitorCategory category;
-  final String hostEmployeeId;
-  final String hostName;
-  final String hostDept;
-  final String siteId;
-  final String purpose;
-  final String expectedDate;
-  final String expectedTime;
-  final DateTime? checkInTime;
-  final DateTime? checkOutTime;
-  final int? durationMinutes;
-  final String? vehiclePlate;
-  final String? phone;
-  final String? email;
+  final String nameBn;
+  final String level;
+  final bool escortRequired;
+  final String? siteId;
+
+  String label({required bool bangla}) => bangla ? nameBn : name;
+}
+
+@immutable
+class VisitGuest {
+  const VisitGuest({
+    required this.id,
+    required this.fullName,
+    this.organisation,
+    this.phoneMasked,
+    this.idProofType,
+    this.idProofLast4,
+  });
+
+  factory VisitGuest.fromJson(Map<String, Object?> j) => VisitGuest(
+    id: (j['id'] as String?) ?? '',
+    fullName: j['fullName']! as String,
+    organisation: j['organisation'] as String?,
+    phoneMasked: j['phoneMasked'] as String?,
+    idProofType: j['idProofType'] as String?,
+    idProofLast4: j['idProofLast4'] as String?,
+  );
+
+  final String id;
+  final String fullName;
+  final String? organisation;
+  final String? phoneMasked;
   final String? idProofType;
-  final String? idProofNumber;
+  final String? idProofLast4;
+}
+
+@immutable
+class VisitFinding {
+  const VisitFinding({
+    required this.area,
+    required this.finding,
+    required this.status,
+    required this.at,
+    this.by,
+  });
+
+  factory VisitFinding.fromJson(Map<String, Object?> j) => VisitFinding(
+    area: j['area']! as String,
+    finding: j['finding']! as String,
+    status: j['status']! as String,
+    at: DateTime.parse(j['at']! as String),
+    by: j['by'] == null
+        ? null
+        : Person.fromJson(Map<String, Object?>.from(j['by']! as Map)),
+  );
+
+  final String area;
+  final String finding;
+  final String status;
+  final DateTime at;
+  final Person? by;
+}
+
+@immutable
+class VisitAccess {
+  const VisitAccess({
+    required this.isHost,
+    required this.isEscort,
+    required this.canApprove,
+    required this.canDeny,
+    required this.canCancel,
+    required this.canCheckIn,
+    required this.canCheckOut,
+    required this.canPpe,
+    required this.canExtend,
+    required this.canClearWatchlist,
+    required this.canFinding,
+    required this.canEscort,
+    required this.canMusterSafe,
+    required this.photoRequired,
+  });
+
+  factory VisitAccess.fromJson(Map<String, Object?> j) {
+    bool b(String k) => j[k] == true;
+    return VisitAccess(
+      isHost: b('isHost'),
+      isEscort: b('isEscort'),
+      canApprove: b('canApprove'),
+      canDeny: b('canDeny'),
+      canCancel: b('canCancel'),
+      canCheckIn: b('canCheckIn'),
+      canCheckOut: b('canCheckOut'),
+      canPpe: b('canPpe'),
+      canExtend: b('canExtend'),
+      canClearWatchlist: b('canClearWatchlist'),
+      canFinding: b('canFinding'),
+      canEscort: b('canEscort'),
+      canMusterSafe: b('canMusterSafe'),
+      photoRequired: b('photoRequired'),
+    );
+  }
+
+  final bool isHost;
+  final bool isEscort;
+  final bool canApprove;
+  final bool canDeny;
+  final bool canCancel;
+  final bool canCheckIn;
+  final bool canCheckOut;
+  final bool canPpe;
+  final bool canExtend;
+  final bool canClearWatchlist;
+  final bool canFinding;
+  final bool canEscort;
+  final bool canMusterSafe;
+  final bool photoRequired;
+}
+
+@immutable
+class Visit {
+  const Visit({
+    required this.id,
+    required this.visitNo,
+    required this.status,
+    required this.category,
+    required this.purpose,
+    required this.expectedAt,
+    required this.expectedEndAt,
+    required this.guest,
+    required this.host,
+    required this.site,
+    required this.zones,
+    required this.ppeRequired,
+    required this.ppeCleared,
+    required this.escortRequired,
+    required this.watchlistHit,
+    required this.me,
+    required this.createdAt,
+    this.vipTier,
+    this.escort,
+    this.vehiclePlate,
+    this.parkingSlot,
+    this.badgeNo,
+    this.checkedInAt,
+    this.checkedOutAt,
+    this.photoFileId,
+    this.qrToken,
+    this.findings = const [],
+    this.notes,
+    this.musterSafeAt,
+    this.extensions = 0,
+  });
+
+  factory Visit.fromJson(Map<String, Object?> j) => Visit(
+    id: j['id']! as String,
+    visitNo: j['visitNo']! as String,
+    status: j['status']! as String,
+    category: j['category']! as String,
+    vipTier: j['vipTier'] as String?,
+    purpose: j['purpose']! as String,
+    expectedAt: DateTime.parse(j['expectedAt']! as String),
+    expectedEndAt: DateTime.parse(j['expectedEndAt']! as String),
+    guest: VisitGuest.fromJson(Map<String, Object?>.from(j['visitor']! as Map)),
+    host: Person.fromJson(Map<String, Object?>.from(j['host']! as Map)),
+    escort: j['escort'] == null
+        ? null
+        : Person.fromJson(Map<String, Object?>.from(j['escort']! as Map)),
+    site: SiteRef.fromJson(Map<String, Object?>.from(j['site']! as Map)),
+    vehiclePlate: j['vehiclePlate'] as String?,
+    parkingSlot: j['parkingSlot'] as String?,
+    badgeNo: j['badgeNo'] as String?,
+    checkedInAt: j['checkedInAt'] == null
+        ? null
+        : DateTime.parse(j['checkedInAt']! as String),
+    checkedOutAt: j['checkedOutAt'] == null
+        ? null
+        : DateTime.parse(j['checkedOutAt']! as String),
+    photoFileId: j['photoFileId'] as String?,
+    qrToken: j['qrToken'] as String?,
+    ppeRequired: j['ppeRequired'] == true,
+    ppeCleared: j['ppeCleared'] == true,
+    escortRequired: j['escortRequired'] == true,
+    watchlistHit: j['watchlistHit'] == true,
+    zones: [
+      for (final z in (j['zones'] as List<Object?>? ?? const []))
+        VisitZone.fromJson(Map<String, Object?>.from(z! as Map)),
+    ],
+    findings: [
+      for (final f in (j['findings'] as List<Object?>? ?? const []))
+        VisitFinding.fromJson(Map<String, Object?>.from(f! as Map)),
+    ],
+    notes: j['notes'] as String?,
+    musterSafeAt: j['musterSafeAt'] == null
+        ? null
+        : DateTime.parse(j['musterSafeAt']! as String),
+    extensions: (j['extensions'] as num?)?.toInt() ?? 0,
+    createdAt: DateTime.parse(j['createdAt']! as String),
+    me: VisitAccess.fromJson(Map<String, Object?>.from(j['me']! as Map)),
+  );
+
+  final String id;
+  final String visitNo;
+  final String status;
+  final String category;
+  final String? vipTier;
+  final String purpose;
+  final DateTime expectedAt;
+  final DateTime expectedEndAt;
+  final VisitGuest guest;
+  final Person host;
+  final Person? escort;
+  final SiteRef site;
+  final String? vehiclePlate;
+  final String? parkingSlot;
   final String? badgeNo;
-  final List<PermittedZone> permittedZones;
-  final bool vipProtocol;
-  final bool safetyBriefingCompleted;
-  final bool ndaSigned;
-  final PpeClearance ppeCleared;
+  final DateTime? checkedInAt;
+  final DateTime? checkedOutAt;
+  final String? photoFileId;
+  final String? qrToken;
+  final bool ppeRequired;
+  final bool ppeCleared;
+  final bool escortRequired;
+  final bool watchlistHit;
+  final List<VisitZone> zones;
+  final List<VisitFinding> findings;
+  final String? notes;
+  final DateTime? musterSafeAt;
+  final int extensions;
   final DateTime createdAt;
-  final DateTime updatedAt;
-  final String createdBy;
+  final VisitAccess me;
+}
+
+@immutable
+class VisitMuster {
+  const VisitMuster({
+    required this.active,
+    required this.inside,
+    required this.safe,
+    required this.visits,
+    this.startedAt,
+  });
+
+  factory VisitMuster.fromJson(Map<String, Object?> j) => VisitMuster(
+    active: j['active'] == true,
+    inside: (j['inside'] as num?)?.toInt() ?? 0,
+    safe: (j['safe'] as num?)?.toInt() ?? 0,
+    startedAt: j['startedAt'] == null
+        ? null
+        : DateTime.parse(j['startedAt']! as String),
+    visits: [
+      for (final e in (j['visits'] as List<Object?>? ?? const []))
+        Map<String, Object?>.from(e! as Map),
+    ],
+  );
+
+  final bool active;
+  final int inside;
+  final int safe;
+  final DateTime? startedAt;
+  final List<Map<String, Object?>> visits;
 }

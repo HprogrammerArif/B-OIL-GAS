@@ -273,7 +273,7 @@ export default function WorkforceView({ lang }: ViewProps) {
                         📞 {emp.phone}
                       </div>
                       <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-400)' }}>
-                        ✉️ {emp.email}
+                        {emp.email}
                       </div>
                     </td>
 

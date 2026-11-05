@@ -11,6 +11,7 @@ import 'package:bogcl_oneops/features/bus/domain/bus_models.dart';
 import 'package:bogcl_oneops/features/bus/presentation/bus_providers.dart';
 import 'package:bogcl_oneops/features/bus/presentation/bus_ui.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -101,6 +102,8 @@ class _RoutesTab extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final bangla = context.isBangla;
+    final canManage =
+        ref.watch(sessionControllerProvider).value?.can('bus:manage') ?? false;
     final routes = ref.watch(busRoutesProvider);
     return routes.when(
       loading: () => const SkeletonList(),
@@ -115,6 +118,30 @@ class _RoutesTab extends ConsumerWidget {
           Space.xxxl,
         ),
         children: [
+          if (canManage) ...[
+            Wrap(
+              spacing: Space.sm,
+              children: [
+                TextButton(
+                  onPressed: () => unawaited(_registerBus(context, ref)),
+                  child: Text(l10n.busRegister),
+                ),
+                TextButton(
+                  onPressed: items.isEmpty
+                      ? null
+                      : () => unawaited(_reassignBus(context, ref, items)),
+                  child: Text(l10n.busReassign),
+                ),
+                TextButton(
+                  onPressed: items.isEmpty
+                      ? null
+                      : () => unawaited(_seatMap(context, ref, items.first.id)),
+                  child: Text(l10n.busSeatMap),
+                ),
+              ],
+            ),
+            const SizedBox(height: Space.sm),
+          ],
           for (final r in items)
             Card(
               child: InkWell(
@@ -685,5 +712,223 @@ class _ReleaseSheetState extends State<_ReleaseSheet> {
         ),
       ),
     );
+  }
+}
+
+Future<Map<String, String>?> _ask(
+  BuildContext context, {
+  required String title,
+  required List<(String, String)> fields,
+}) async {
+  final cs = {for (final f in fields) f.$1: TextEditingController()};
+  final body = await showModalBottomSheet<Map<String, String>>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.fromLTRB(
+        Space.lg,
+        0,
+        Space.lg,
+        MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          for (final f in fields) ...[
+            AppTextField(label: f.$2, controller: cs[f.$1]),
+            const SizedBox(height: Space.sm),
+          ],
+          PrimaryButton(
+            label: title,
+            onPressed: () => Navigator.pop(ctx, {
+              for (final e in cs.entries) e.key: e.value.text.trim(),
+            }),
+          ),
+        ],
+      ),
+    ),
+  );
+  for (final c in cs.values) {
+    c.dispose();
+  }
+  return body;
+}
+
+Future<void> _registerBus(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final body = await _ask(
+    context,
+    title: l10n.busRegister,
+    fields: [
+      ('code', l10n.busFieldCode),
+      ('name', l10n.busFieldName),
+      ('busNo', l10n.busFieldPlate),
+    ],
+  );
+  if (body == null || !context.mounted) return;
+  try {
+    await ref.read(busRepositoryProvider).registerBus(body);
+    ref.invalidate(busRoutesProvider);
+    if (context.mounted) {
+      AppToast.show(context, l10n.busSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
+}
+
+Future<void> _reassignBus(
+  BuildContext context,
+  WidgetRef ref,
+  List<BusRoute> routes,
+) async {
+  final l10n = context.l10n;
+  final body = await _ask(
+    context,
+    title: l10n.busReassign,
+    fields: [('busNo', l10n.busFieldPlate)],
+  );
+  if (body == null || !context.mounted) return;
+  try {
+    await ref
+        .read(busRepositoryProvider)
+        .reassignBus(routes.first.id, body['busNo'] ?? '');
+    ref.invalidate(busRoutesProvider);
+    if (context.mounted) {
+      AppToast.show(context, l10n.busSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
+}
+
+Future<void> _seatMap(
+  BuildContext context,
+  WidgetRef ref,
+  String routeId,
+) async {
+  final l10n = context.l10n;
+  try {
+    final map = await ref.read(busRepositoryProvider).seatMap(routeId);
+    if (!context.mounted) return;
+    final seats = map['seats'];
+    final taken = <Map<String, Object?>>[];
+    var empty = 0;
+    if (seats is List) {
+      for (final s in seats) {
+        if (s is! Map) continue;
+        final row = Map<String, Object?>.from(s);
+        if (row['status'] == 'EMPTY') {
+          empty++;
+        } else {
+          taken.add(row);
+        }
+      }
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        builder: (_, scroll) => ListView(
+          controller: scroll,
+          padding: const EdgeInsets.all(Space.lg),
+          children: [
+            Text(l10n.busSeatMap, style: Theme.of(ctx).textTheme.titleLarge),
+            const SizedBox(height: Space.sm),
+            Text(l10n.busSeatsFree(empty)),
+            for (final s in taken)
+              ListTile(
+                title: Text(
+                  '${s['seatNo']} · ${(s['occupant'] as Map?)?['name'] ?? s['status']}',
+                ),
+                subtitle: Text(
+                  s['boarded'] == true
+                      ? '${_seatLabel(l10n, '${s['category']}')} · ${l10n.busBoarded}'
+                      : _seatLabel(l10n, '${s['category']}'),
+                ),
+                trailing: PopupMenuButton<String>(
+                  onSelected: (value) async {
+                    final seat = s['seatNo'];
+                    if (seat is! num) return;
+                    Navigator.pop(ctx);
+                    await _setSeat(
+                      context,
+                      ref,
+                      routeId,
+                      seat.toInt(),
+                      category: value == 'board' ? null : value,
+                      boarded: value == 'board' ? true : null,
+                    );
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: 'REGULAR',
+                      child: Text(l10n.busSeatRegular),
+                    ),
+                    PopupMenuItem(value: 'LADY', child: Text(l10n.busSeatLady)),
+                    PopupMenuItem(
+                      value: 'EXECUTIVE',
+                      child: Text(l10n.busSeatExecutive),
+                    ),
+                    PopupMenuItem(
+                      value: 'SENIOR',
+                      child: Text(l10n.busSeatSenior),
+                    ),
+                    if (s['boarded'] != true)
+                      PopupMenuItem(
+                        value: 'board',
+                        child: Text(l10n.busMarkBoarded),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
+}
+
+String _seatLabel(AppL10n l10n, String category) => switch (category) {
+  'LADY' => l10n.busSeatLady,
+  'EXECUTIVE' => l10n.busSeatExecutive,
+  'SENIOR' => l10n.busSeatSenior,
+  _ => l10n.busSeatRegular,
+};
+
+Future<void> _setSeat(
+  BuildContext context,
+  WidgetRef ref,
+  String routeId,
+  int seatNo, {
+  String? category,
+  bool? boarded,
+}) async {
+  try {
+    await ref
+        .read(busRepositoryProvider)
+        .setSeat(routeId, seatNo, category: category, boarded: boarded);
+    if (context.mounted) {
+      AppToast.show(context, context.l10n.busSaved, tone: StatusTone.success);
+    }
+  } on ApiException catch (e) {
+    if (context.mounted) {
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
   }
 }

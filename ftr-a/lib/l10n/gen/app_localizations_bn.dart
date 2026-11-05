@@ -64,7 +64,7 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get loginSubtitle =>
-      'আপনার কোম্পানির ইমেইল, ফোন নম্বর অথবা কর্মচারী আইডি ব্যবহার করুন।';
+      'অ্যাপ খুলতে একটি ডেমো ভূমিকা চাপুন। কোম্পানি সাইন ইন এখন বন্ধ।';
 
   @override
   String get loginIdentifierLabel => 'ইমেইল, ফোন অথবা কর্মচারী আইডি';
@@ -101,6 +101,231 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get navMore => 'আরও';
+
+  @override
+  String get navAttendance => 'হাজিরা';
+
+  @override
+  String get navApprovals => 'অনুমোদন';
+
+  @override
+  String get navChat => 'চ্যাট';
+
+  @override
+  String get homeSeeAll => 'সব দেখুন';
+
+  @override
+  String get homePrimaryEmployee => 'আজকের কাজ';
+
+  @override
+  String get homePrimaryDriver => 'আপনার যাত্রা';
+
+  @override
+  String get homePrimaryGate => 'গেটে অতিথি';
+
+  @override
+  String get homePrimaryMail => 'পার্সেল অপেক্ষায়';
+
+  @override
+  String get homePrimaryHse => 'আজকের নিরাপত্তা';
+
+  @override
+  String get homePrimaryApprover => 'আপনার সিদ্ধান্তের অপেক্ষায়';
+
+  @override
+  String get homeActPunch => 'হাজিরায় যান';
+
+  @override
+  String get homeActTrip => 'যাত্রা খুলুন';
+
+  @override
+  String get homeActScanGuest => 'অতিথি নিবন্ধন';
+
+  @override
+  String get homeActScanParcel => 'পার্সেল নথি';
+
+  @override
+  String get homeActApprovals => 'অনুমোদন খুলুন';
+
+  @override
+  String get homeActAnnounce => 'নোটিশ পাঠান';
+
+  @override
+  String get homeActIncidents => 'দুর্ঘটনা খুলুন';
+
+  @override
+  String get homeFilesWaiting => 'আপনার অপেক্ষায় ফাইল';
+
+  @override
+  String get homeFilesClear => 'কিছু অপেক্ষায় নেই। আপনি পরিষ্কার।';
+
+  @override
+  String get homeLeadersOnline => 'নেতৃত্বের ঘর';
+
+  @override
+  String get homeRoomQuiet => 'নতুন বার্তা নেই';
+
+  @override
+  String homeUnread(int count) {
+    return '$count নতুন';
+  }
+
+  @override
+  String get homeReturnReason => 'কেন ফেরত পাঠাচ্ছেন?';
+
+  @override
+  String get homePlayBriefing => 'ব্রিফিং শুনুন';
+
+  @override
+  String homeBriefingLeft(int seconds) {
+    return '$secondsসে';
+  }
+
+  @override
+  String get homeToday => 'আজ';
+
+  @override
+  String get homeNotPunched => 'আপনি এখনও পাঞ্চ করেননি।';
+
+  @override
+  String homePunchedAt(String time) {
+    return '$time-এ পাঞ্চ হয়েছে';
+  }
+
+  @override
+  String homeLeaveLeft(String days) {
+    return '$days দিন বাকি';
+  }
+
+  @override
+  String get homeGatePass => 'গেট পাস চান';
+
+  @override
+  String get homeLocks => 'লক এখনও চালু';
+
+  @override
+  String get homeLocksClear => 'কোনো মেশিন লক-আউট নেই।';
+
+  @override
+  String get homeReleaseBatch => 'মুক্ত করুন';
+
+  @override
+  String get homeOpen => 'খুলুন';
+
+  @override
+  String get homeOutputTitle => 'আজকের উৎপাদন';
+
+  @override
+  String get homeOutputLine => 'রবিবার ৫,৩২০ মে.টন হয়েছে। দৈনিক লক্ষ্য ৫,০০০।';
+
+  @override
+  String get homeWeekTitle => 'এই সপ্তাহ';
+
+  @override
+  String get homeBatchTitle => 'বিটুমিন ব্যাচ প্রস্তুত';
+
+  @override
+  String get homeBatchBody =>
+      'BOGCL-BIT-2026-B88 · বিটুমিন ৬০/৭০ · ২,৪০০ মেট্রিক টন। ল্যাব পরীক্ষা উত্তীর্ণ।';
+
+  @override
+  String get homeBatchDone => 'রিলিজ হয়েছে। লোডিং গেট খোলা।';
+
+  @override
+  String get busRegister => 'বাস নিবন্ধন';
+
+  @override
+  String get busReassign => 'বাস সরিয়ে দিন';
+
+  @override
+  String get busSeatMap => 'আসনের নকশা';
+
+  @override
+  String get busFieldCode => 'রুট কোড';
+
+  @override
+  String get busFieldName => 'রুটের নাম';
+
+  @override
+  String get busFieldPlate => 'বাসের নম্বর';
+
+  @override
+  String get busSaved => 'সেভ হয়েছে';
+
+  @override
+  String get busSeatRegular => 'সাধারণ';
+
+  @override
+  String get busSeatLady => 'মহিলা অগ্রাধিকার';
+
+  @override
+  String get busSeatExecutive => 'এক্সিকিউটিভ';
+
+  @override
+  String get busSeatSenior => 'সিনিয়র স্টাফ';
+
+  @override
+  String get busMarkBoarded => 'উঠেছেন চিহ্নিত করুন';
+
+  @override
+  String get busBoarded => 'উঠেছেন';
+
+  @override
+  String busSeatsFree(int count) {
+    return '$count আসন খালি';
+  }
+
+  @override
+  String get flRegisterCar => 'গাড়ি নিবন্ধন';
+
+  @override
+  String get flEnrolDriver => 'চালক যোগ করুন';
+
+  @override
+  String get flFieldPlate => 'নম্বর প্লেট';
+
+  @override
+  String get flFieldType => 'ট্রিপের ধরন';
+
+  @override
+  String get flFieldEmp => 'কর্মচারী কোড';
+
+  @override
+  String get flFieldDriverCode => 'চালক কোড';
+
+  @override
+  String get flSaved => 'সেভ হয়েছে';
+
+  @override
+  String get asAsk => 'যন্ত্রপাতি চান';
+
+  @override
+  String get asAskName => 'কী দরকার?';
+
+  @override
+  String get asAskWhy => 'কেন';
+
+  @override
+  String get asAskDone => 'অনুরোধ গেছে';
+
+  @override
+  String get chConfirmAck => 'এই নির্দেশ নিশ্চিত করুন';
+
+  @override
+  String get chConfirmDone => 'নির্দেশ শেষ হিসেবে চিহ্নিত করুন';
+
+  @override
+  String get chConfirmBody =>
+      'এটি নির্দেশে লেখা থাকবে। এখান থেকে ফেরানো যাবে না।';
+
+  @override
+  String get moreMyWork => 'আমার কাজ';
+
+  @override
+  String get moreOperations => 'অপারেশন';
+
+  @override
+  String get moreCompany => 'কোম্পানি';
 
   @override
   String homeGoodMorning(String name) {
@@ -1661,6 +1886,18 @@ class AppL10nBn extends AppL10n {
   String get claimPay => 'পরিশোধিত চিহ্নিত করুন';
 
   @override
+  String get claimBankFile => 'ব্যাংক ফাইল';
+
+  @override
+  String get claimBankReady => 'আজকের ব্যাংক ট্রান্সফার';
+
+  @override
+  String get claimBankEmpty => 'পরিশোধের জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String get claimBankCopied => 'ব্যাংক ফাইল কপি হয়েছে।';
+
+  @override
   String claimPayConfirm(String amount) {
     return '$amount পরিশোধ করবেন?';
   }
@@ -1976,9 +2213,6 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get busErrAlreadyWaiting => 'আপনি ইতিমধ্যে একটি তালিকায় আছেন।';
-
-  @override
-  String get busSeatMap => 'আসনের নকশা';
 
   @override
   String get busLegendTaken => 'দখলে';
@@ -2427,6 +2661,39 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsQuotesTitle => 'কোটেশন';
+
+  @override
+  String get nsBudgetTitle => 'বাজেট আছে কি?';
+
+  @override
+  String get nsBudgetWithin => 'বাজেটের মধ্যে';
+
+  @override
+  String get nsBudgetOver => 'বাজেটের বেশি';
+
+  @override
+  String get nsBudgetNone =>
+      'এই ফাইলে বাজেটের সঙ্গে মেলানোর মতো নির্দিষ্ট অঙ্ক নেই।';
+
+  @override
+  String nsBudgetAvailable(String amount) {
+    return 'প্রাপ্য $amount';
+  }
+
+  @override
+  String nsBudgetRequest(String amount) {
+    return 'এই আবেদন $amount';
+  }
+
+  @override
+  String nsBudgetLeft(String amount) {
+    return 'এরপর অবশিষ্ট $amount';
+  }
+
+  @override
+  String nsBudgetShort(String amount) {
+    return 'ঘাটতি $amount';
+  }
 
   @override
   String nsQuoteMeta(int days, int months) {
@@ -3389,4 +3656,2341 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get peopleNone => 'কাউকে পাওয়া যায়নি।';
+
+  @override
+  String get moduleVisitors => 'অতিথি';
+
+  @override
+  String get visNew => 'অতিথি নিবন্ধন';
+
+  @override
+  String get visIntro =>
+      'যাঁরা আপনার সাথে দেখা করতে আসছেন, গেটে আছেন, অথবা এখনো ভিতরে আছেন।';
+
+  @override
+  String get visSearchHint => 'নাম, VIS-2026-0001 বা নম্বরপ্লেট দিয়ে খুঁজুন';
+
+  @override
+  String get visNotFound => 'এই নম্বরে কোনো সফর নেই, অথবা আপনি দেখতে পারেন না।';
+
+  @override
+  String get visScanNeedGate => 'শুধু গেট পাস স্ক্যান করতে পারে।';
+
+  @override
+  String get visTabMine => 'আমার';
+
+  @override
+  String get visTabExpected => 'আজকের প্রত্যাশিত';
+
+  @override
+  String get visTabInside => 'এখন ভিতরে';
+
+  @override
+  String get visTabOverdue => 'সময় পেরিয়ে গেছে';
+
+  @override
+  String get visTabApprove => 'আপনার অনুমোদন';
+
+  @override
+  String get visTabAll => 'আমি যা দেখতে পারি';
+
+  @override
+  String get visEmpty => 'এখনো কোনো অতিথি নেই।';
+
+  @override
+  String get visEmptyFiltered => 'কোনো অতিথি মেলেনি।';
+
+  @override
+  String get visVerdictNone => 'এখন আপনার কিছু করার নেই।';
+
+  @override
+  String visVerdictNeed(int count) {
+    return 'আপনার অপেক্ষায়: $count';
+  }
+
+  @override
+  String get visStatusWaiting => 'অনুমোদনের অপেক্ষায়';
+
+  @override
+  String get visStatusExpected => 'পাস প্রস্তুত';
+
+  @override
+  String get visStatusInside => 'ভিতরে আছেন';
+
+  @override
+  String get visStatusOverdue => 'সময় পেরিয়ে গেছে';
+
+  @override
+  String get visStatusDone => 'চলে গেছেন';
+
+  @override
+  String get visStatusDenied => 'অনুমোদিত হয়নি';
+
+  @override
+  String get visStatusCancelled => 'বাতিল';
+
+  @override
+  String get visCatVip => 'ভিআইপি';
+
+  @override
+  String get visCatGovt => 'সরকারি';
+
+  @override
+  String get visCatVendor => 'ভেন্ডর';
+
+  @override
+  String get visCatClient => 'ক্লায়েন্ট';
+
+  @override
+  String get visCatContractor => 'কন্ট্রাক্টর';
+
+  @override
+  String get visCatRegular => 'অতিথি';
+
+  @override
+  String get visNextWatchlist =>
+      'নামটি নজরতালিকায় মিলেছে। খালাস করুন অথবা সফর বাতিল করুন।';
+
+  @override
+  String get visNextWatchlistWait =>
+      'নজরতালিকা যাচাইয়ের জন্য আটকানো। আপনার করণীয় নেই।';
+
+  @override
+  String visNextApprove(String name) {
+    return '$name-এর সফর অনুমোদন করুন।';
+  }
+
+  @override
+  String get visNextHostWait =>
+      'সাইট প্রধানের অনুমোদনের অপেক্ষায়। আপনার করণীয় নেই।';
+
+  @override
+  String get visNextWaiting => 'অনুমোদনের অপেক্ষায়।';
+
+  @override
+  String get visNextPpe => 'পিপিই দেখে তারপর গেটে গ্রহণ করুন।';
+
+  @override
+  String get visNextEscort => 'লাল এলাকায় সঙ্গে থাকার জন্য কাউকে নিয়োগ করুন।';
+
+  @override
+  String visNextCheckIn(String name) {
+    return 'গেটে $name-কে গ্রহণ করুন। একটি ছবি তুলুন।';
+  }
+
+  @override
+  String visNextHostReady(String when) {
+    return 'পাস প্রস্তুত। তাঁরা $when আসবেন। আপনার করণীয় নেই।';
+  }
+
+  @override
+  String visNextReady(String when) {
+    return 'পাস প্রস্তুত। প্রত্যাশিত সময় $when।';
+  }
+
+  @override
+  String visNextCheckOut(String name) {
+    return '$name-কে বের করে ব্যাজ ফেরত নিন।';
+  }
+
+  @override
+  String get visNextInsideHost =>
+      'তাঁরা ভিতরে আছেন। তাঁরা না যাওয়া পর্যন্ত যোগাযোগ রাখুন।';
+
+  @override
+  String get visNextInside => 'সাইটের ভিতরে আছেন।';
+
+  @override
+  String get visNextOverdueAct =>
+      'তাঁরা অতিরিক্ত সময় ধরে আছেন। সময় বাড়ান অথবা বের করে দিন।';
+
+  @override
+  String get visNextOverdue => 'সম্মত সময় পেরিয়ে গেছে।';
+
+  @override
+  String get visNextDone => 'তাঁরা চলে গেছেন।';
+
+  @override
+  String get visNextDenied => 'এই সফর অনুমোদিত হয়নি।';
+
+  @override
+  String get visNextCancelled => 'বাতিল। আর কিছু করার নেই।';
+
+  @override
+  String get visWatchPill => 'নজরতালিকা';
+
+  @override
+  String visHostLine(String name, String site) {
+    return 'আয়োজক: $name, $site';
+  }
+
+  @override
+  String visWhenLine(String start, String end) {
+    return 'প্রত্যাশিত $start থেকে $end';
+  }
+
+  @override
+  String visEscortLine(String name) {
+    return 'সঙ্গী: $name';
+  }
+
+  @override
+  String visBadgeLine(String no) {
+    return 'ব্যাজ $no';
+  }
+
+  @override
+  String get visZones => 'যে এলাকায় যেতে পারবেন';
+
+  @override
+  String get visEscortNeed => 'সঙ্গী দরকার';
+
+  @override
+  String get visFindings => 'যা দেখা গেছে';
+
+  @override
+  String get visDetPhone => 'ফোন';
+
+  @override
+  String get visDetId => 'পরিচয়পত্র';
+
+  @override
+  String get visDetPlate => 'গাড়ি';
+
+  @override
+  String get visPpeOk => 'গেটে পিপিই যাচাই হয়েছে।';
+
+  @override
+  String get visPpeNeeded => 'প্রবেশের আগে পিপিই যাচাই করতে হবে।';
+
+  @override
+  String get visPpeNone => 'এই এলাকায় বিশেষ পিপিই লাগবে না।';
+
+  @override
+  String get visActApprove => 'সফর অনুমোদন করুন';
+
+  @override
+  String get visActDeny => 'অনুমোদন করবেন না';
+
+  @override
+  String get visActCancel => 'সফর বাতিল করুন';
+
+  @override
+  String get visActCheckIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get visActCheckOut => 'বের করে দিন';
+
+  @override
+  String get visActPpe => 'পিপিই যাচাই করুন';
+
+  @override
+  String get visActEscort => 'সঙ্গী নিয়োগ করুন';
+
+  @override
+  String get visActExtend => 'আরও দুই ঘণ্টা দিন';
+
+  @override
+  String get visActFinding => 'পর্যবেক্ষণ যোগ করুন';
+
+  @override
+  String get visActClearWatch => 'নজরতালিকা খালাস করুন';
+
+  @override
+  String get visActSafe => 'নিরাপদ চিহ্নিত করুন';
+
+  @override
+  String get visActPass => 'পাস দেখুন';
+
+  @override
+  String get visApproveMsg => 'তাঁরা একটি পাস পাবেন এবং গেটে গ্রহণ করা যাবে।';
+
+  @override
+  String get visCheckOutMsg =>
+      'তাঁরা চলে গেলে এবং ব্যাজ ফেরত এলেই নিশ্চিত করুন।';
+
+  @override
+  String get visFieldReason => 'কারণ';
+
+  @override
+  String get visSheetCheckIn => 'গেটে গ্রহণ করুন';
+
+  @override
+  String get visSheetCheckInHelp =>
+      'একটি ছবি তুলুন। ব্যাজ নম্বর আপনাআপনি দেওয়া হবে।';
+
+  @override
+  String get visPhotoRequired => 'ছবি তুলুন (বাধ্যতামূলক)';
+
+  @override
+  String get visPhotoAdded => 'ছবি যোগ হয়েছে';
+
+  @override
+  String get visFieldNda => 'এনডিএ স্বাক্ষরিত';
+
+  @override
+  String get visFieldBriefing => 'নিরাপত্তা ব্রিফিং হয়েছে';
+
+  @override
+  String get visSheetPpe => 'ব্যক্তিগত সুরক্ষা সরঞ্জাম';
+
+  @override
+  String get visSheetPpeHelp =>
+      'যা পরছেন এবং যা বলা হয়েছে শুধু সেগুলোতে টিক দিন।';
+
+  @override
+  String get visPpeHat => 'হেলমেট';
+
+  @override
+  String get visPpeShoes => 'সেফটি জুতা';
+
+  @override
+  String get visPpeVest => 'হাই-ভিজ ভেস্ট';
+
+  @override
+  String get visPpeGoggles => 'গগলস';
+
+  @override
+  String get visPpeH2s => 'এইচটুএস ব্রিফিং';
+
+  @override
+  String get visFieldEscort => 'কে সঙ্গে থাকবেন';
+
+  @override
+  String get visSheetFinding => 'কী দেখেছেন';
+
+  @override
+  String get visFieldArea => 'কোথায়';
+
+  @override
+  String get visFieldFinding => 'কী ঘটেছে';
+
+  @override
+  String get visFindObs => 'মন্তব্য';
+
+  @override
+  String get visFindCrit => 'গুরুতর';
+
+  @override
+  String get visDoneCheckIn => 'গেটে গ্রহণ করা হয়েছে।';
+
+  @override
+  String get visDoneCheckOut => 'বের করে দেওয়া হয়েছে।';
+
+  @override
+  String get visDonePpe => 'পিপিই নথিভুক্ত হয়েছে।';
+
+  @override
+  String get visDoneEscort => 'সঙ্গী নিয়োগ হয়েছে।';
+
+  @override
+  String get visDoneExtend => 'আরও দুই ঘণ্টা দেওয়া হয়েছে।';
+
+  @override
+  String get visDoneFinding => 'পর্যবেক্ষণ নথিভুক্ত হয়েছে।';
+
+  @override
+  String get visDoneWatch => 'নজরতালিকা খালাস হয়েছে।';
+
+  @override
+  String get visDoneSafe => 'নিরাপদ চিহ্নিত হয়েছে।';
+
+  @override
+  String get visDoneApprove => 'সফর অনুমোদিত। পাস প্রস্তুত।';
+
+  @override
+  String get visDoneDeny => 'সফর অনুমোদিত হয়নি।';
+
+  @override
+  String get visDoneCancel => 'সফর বাতিল হয়েছে।';
+
+  @override
+  String get visDoneCreate => 'অতিথি নিবন্ধিত হয়েছে।';
+
+  @override
+  String get visErrPpe => 'প্রবেশের আগে পিপিই যাচাই করুন।';
+
+  @override
+  String get visErrEscort => 'লাল এলাকায় একজন সঙ্গী দরকার।';
+
+  @override
+  String get visErrWatchlist => 'আগে নিরাপত্তাকে নজরতালিকা খালাস করতে হবে।';
+
+  @override
+  String get visErrBlacklist => 'এই ব্যক্তিকে নিবন্ধন বা প্রবেশ করানো যাবে না।';
+
+  @override
+  String get visErrFull => 'ভিতরে অতিথি বেশি। নিরাপত্তা প্রধানকে বলুন।';
+
+  @override
+  String get visErrExtend => 'আজ ইতিমধ্যে দুবার সময় বাড়ানো হয়েছে।';
+
+  @override
+  String get visErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get visErrName => 'অতিথির নাম লিখুন।';
+
+  @override
+  String get visErrPhone => 'ফোন নম্বর লিখুন।';
+
+  @override
+  String get visErrPurpose => 'কেন আসছেন তা লিখুন।';
+
+  @override
+  String get visErrId => 'এই ধরনের অতিথির পরিচয়পত্র নম্বর দরকার।';
+
+  @override
+  String get visFormIntro =>
+      'কে আসছেন, কেন, এবং কোন এলাকায় যেতে পারবেন তা লিখুন। সাধারণ অতিথি সাথে সাথে পাস পান। ভিআইপি, সরকারি এবং লাল এলাকার সফর সাইট প্রধানের অপেক্ষায় থাকে।';
+
+  @override
+  String get visFieldName => 'অতিথির নাম';
+
+  @override
+  String get visFieldOrg => 'প্রতিষ্ঠান (ঐচ্ছিক)';
+
+  @override
+  String get visFieldPhone => 'ফোন';
+
+  @override
+  String get visFieldCategory => 'তাঁরা কে';
+
+  @override
+  String get visFieldPurpose => 'কেন আসছেন';
+
+  @override
+  String get visFieldWhen => 'কখন আসবেন';
+
+  @override
+  String get visFieldSite => 'কোন সাইট';
+
+  @override
+  String get visSiteHq => 'প্রধান কার্যালয়, বারিধারা';
+
+  @override
+  String get visSitePlant => 'কেরানীগঞ্জ প্ল্যান্ট';
+
+  @override
+  String get visSiteCtg => 'চট্টগ্রাম টার্মিনাল';
+
+  @override
+  String get visFieldZones => 'যে এলাকায় যেতে পারবেন';
+
+  @override
+  String get visFieldIdType => 'পরিচয়পত্রের ধরন';
+
+  @override
+  String get visIdNid => 'জাতীয় পরিচয়পত্র';
+
+  @override
+  String get visIdPass => 'পাসপোর্ট';
+
+  @override
+  String get visIdGovt => 'সরকারি ব্যাজ';
+
+  @override
+  String get visIdCo => 'কোম্পানি আইডি';
+
+  @override
+  String get visFieldIdNo => 'পরিচয়পত্র নম্বর';
+
+  @override
+  String get visFieldPlate => 'গাড়ির নম্বর (ঐচ্ছিক)';
+
+  @override
+  String get visCreate => 'অতিথি নিবন্ধন করুন';
+
+  @override
+  String get visMuster => 'কে কে ভিতরে আছেন';
+
+  @override
+  String visMusterIdle(int count) {
+    return '$count জন অতিথি ভিতরে আছেন। হিসাব করতে হলে হাজিরা শুরু করুন।';
+  }
+
+  @override
+  String visMusterActive(int safe, int inside) {
+    return 'হাজিরা চলছে: $inside-এর মধ্যে $safe জন নিরাপদ।';
+  }
+
+  @override
+  String get visMusterStart => 'হাজিরা শুরু করুন';
+
+  @override
+  String get visMusterEnd => 'হাজিরা শেষ করুন';
+
+  @override
+  String get visMusterMissing => 'এখনো নিরাপদ নন';
+
+  @override
+  String get visMusterSafe => 'নিরাপদ';
+
+  @override
+  String get moduleFleet => 'গাড়ি';
+
+  @override
+  String get flIntro =>
+      'গাড়ি চান, একটি বরাদ্দ করুন, অথবা ট্রিপ চালান। পরবর্তী কাজ প্রতিটি সারিতে আছে।';
+
+  @override
+  String get flNew => 'গাড়ি চান';
+
+  @override
+  String get flSearchHint => 'গন্তব্য বা কারণ খুঁজুন';
+
+  @override
+  String get flSos => 'চালকের সাহায্য';
+
+  @override
+  String get flTabMine => 'আমার';
+
+  @override
+  String get flTabDriving => 'আমার ট্রিপ';
+
+  @override
+  String get flTabEndorse => 'আপনার অপেক্ষায়';
+
+  @override
+  String get flTabDispatch => 'বরাদ্দ করতে';
+
+  @override
+  String get flTabLive => 'পথে';
+
+  @override
+  String get flTabAll => 'সব';
+
+  @override
+  String get flEmpty => 'এখানে কোনো গাড়ির আবেদন নেই।';
+
+  @override
+  String get flEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get flVerdictNone => 'আপনার করার কিছু নেই।';
+
+  @override
+  String flVerdictNeed(int count) {
+    return 'আপনার জন্য $countটি অপেক্ষা করছে';
+  }
+
+  @override
+  String get flStatusDraft => 'খসড়া';
+
+  @override
+  String get flStatusPending => 'বিভাগীয় প্রধানের অপেক্ষায়';
+
+  @override
+  String get flStatusApproved => 'গাড়ির অপেক্ষায়';
+
+  @override
+  String get flStatusAssigned => 'গাড়ি বরাদ্দ';
+
+  @override
+  String get flStatusLive => 'পথে';
+
+  @override
+  String get flStatusDone => 'শেষ';
+
+  @override
+  String get flStatusRejected => 'অনুমোদিত হয়নি';
+
+  @override
+  String get flStatusCancelled => 'বাতিল';
+
+  @override
+  String get flNextSubmit => 'এই আবেদন বিভাগীয় প্রধানের কাছে পাঠান।';
+
+  @override
+  String get flNextWaitHod => 'ফরিদা বেগমের অপেক্ষায়। আপনার করার কিছু নেই।';
+
+  @override
+  String flNextEndorse(String name) {
+    return '$name-এর আবেদন অনুমোদন করুন, অথবা অনুমোদন কেন্দ্র থেকে ফেরত পাঠান।';
+  }
+
+  @override
+  String get flNextAssign => 'একটি খালি গাড়ি ও চালক বেছে নিন।';
+
+  @override
+  String get flNextWaitCar => 'পরিবহন একটি গাড়ি দেবে। আপনার করার কিছু নেই।';
+
+  @override
+  String flNextGateOut(String when) {
+    return '$when এর পর গেট দিয়ে বেরোন।';
+  }
+
+  @override
+  String flNextAssigned(String plate) {
+    return '$plate গেটে অপেক্ষা করছে।';
+  }
+
+  @override
+  String get flNextFinish => 'ফিরে এসে শেষ ওডোমিটার লিখুন।';
+
+  @override
+  String flNextLive(String plate) {
+    return '$plate পথে আছে।';
+  }
+
+  @override
+  String get flNextRate => 'এই ট্রিপ রেটিং দিন।';
+
+  @override
+  String get flNextDone => 'এই ট্রিপ শেষ।';
+
+  @override
+  String get flNextFix => 'আবেদন ঠিক করে আবার পাঠান।';
+
+  @override
+  String get flNextRejected => 'এই আবেদন অনুমোদিত হয়নি।';
+
+  @override
+  String get flNextCancelled => 'এই আবেদন বাতিল হয়েছে।';
+
+  @override
+  String get flTypeOne => 'একমুখী';
+
+  @override
+  String get flTypeRound => 'যাতায়াত';
+
+  @override
+  String get flFormIntro =>
+      'কোথায় যাবেন, কেন, এবং কখন তা লিখুন। বিভাগীয় প্রধান অনুমোদন করবেন। তারপর পরিবহন একটি গাড়ি দেবে।';
+
+  @override
+  String get flFieldPurpose => 'কেন গাড়ি দরকার';
+
+  @override
+  String get flFieldDest => 'কোথায় যাবেন';
+
+  @override
+  String get flFieldPax => 'কতজন যাবেন';
+
+  @override
+  String get flFieldWhen => 'কখন বেরোবেন';
+
+  @override
+  String get flFieldNote => 'কী হয়েছে';
+
+  @override
+  String get flFieldNoteOpt => 'নোট (ঐচ্ছিক)';
+
+  @override
+  String get flFieldOdo => 'ওডোমিটার (কিমি)';
+
+  @override
+  String get flFieldSos => 'কী সমস্যা';
+
+  @override
+  String get flFieldPlaza => 'টোল প্লাজা';
+
+  @override
+  String get flFieldAmount => 'পরিমাণ (৳)';
+
+  @override
+  String get flFieldFeedback => 'ট্রিপ কেমন ছিল (ঐচ্ছিক)';
+
+  @override
+  String get flFieldRating => 'স্টার (১ থেকে ৫)';
+
+  @override
+  String get flFieldReason => 'কারণ';
+
+  @override
+  String get flCreate => 'আবেদন পাঠান';
+
+  @override
+  String flEstimate(String km, int minutes, String cost, String cls) {
+    return 'প্রায় $km কিমি, $minutes মিনিট, $cost। পরামর্শ: $cls।';
+  }
+
+  @override
+  String get flWhat => 'এটি কী';
+
+  @override
+  String flWho(String name, String when) {
+    return '$when-এ $name চেয়েছেন।';
+  }
+
+  @override
+  String flMeta(String when, String pax, String cls, String cost) {
+    return '$when-এ বেরোবে। $pax জন। $cls। প্রায় $cost।';
+  }
+
+  @override
+  String flAssigned(String plate, String driver) {
+    return 'গাড়ি $plate, চালক $driver।';
+  }
+
+  @override
+  String flPassNo(String pass) {
+    return 'গেট পাস $pass';
+  }
+
+  @override
+  String get flActAssign => 'গাড়ি বরাদ্দ করুন';
+
+  @override
+  String get flActGateOut => 'গেট দিয়ে বেরোন';
+
+  @override
+  String get flActCheckpoint => 'একটি স্টপ লিখুন';
+
+  @override
+  String get flActComplete => 'ট্রিপ শেষ করুন';
+
+  @override
+  String get flActSos => 'সাহায্য লাগবে';
+
+  @override
+  String get flActToll => 'টোল যোগ করুন';
+
+  @override
+  String get flActRate => 'ট্রিপ রেটিং দিন';
+
+  @override
+  String get flActCancel => 'বাতিল';
+
+  @override
+  String get flActPass => 'গেট পাস দেখুন';
+
+  @override
+  String get flActTollOk => 'অনুমোদন';
+
+  @override
+  String get flActTollPay => 'পরিশোধ চিহ্নিত করুন';
+
+  @override
+  String get flActAck => 'আমরা আসছি';
+
+  @override
+  String get flSheetAssign => 'গাড়ি ও চালক বরাদ্দ করুন';
+
+  @override
+  String get flSheetAssignHelp =>
+      'শুধু খালি এবং বৈধ কাগজপত্রের গাড়ি দেখানো হয়েছে।';
+
+  @override
+  String get flDoneCreate => 'আবেদন বিভাগীয় প্রধানের কাছে পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneAssign => 'গাড়ি বরাদ্দ হয়েছে। চালককে জানানো হয়েছে।';
+
+  @override
+  String get flDoneGateOut => 'ট্রিপ শুরু হয়েছে।';
+
+  @override
+  String get flDoneCheckpoint => 'স্টপ নথিভুক্ত হয়েছে।';
+
+  @override
+  String get flDoneComplete => 'ট্রিপ শেষ।';
+
+  @override
+  String get flDoneSos => 'সাহায্যের অনুরোধ পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneToll => 'টোল পর্যালোচনার জন্য পাঠানো হয়েছে।';
+
+  @override
+  String get flDoneRate => 'রেটিং দেওয়ার জন্য ধন্যবাদ।';
+
+  @override
+  String get flDoneCancel => 'আবেদন বাতিল হয়েছে।';
+
+  @override
+  String get flDoneTollOk => 'টোল অনুমোদিত।';
+
+  @override
+  String get flDoneTollPay => 'টোল পরিশোধ চিহ্নিত।';
+
+  @override
+  String get flDoneAck => 'চালককে জানানো হয়েছে সাহায্য আসছে।';
+
+  @override
+  String get flErrPurpose => 'কেন গাড়ি দরকার তা লিখুন।';
+
+  @override
+  String get flErrLead => 'কমপক্ষে এক ঘণ্টা আগে চান, জরুরি না হলে।';
+
+  @override
+  String get flErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get flErrWindow => 'খুব তাড়াতাড়ি বা দেরি। পরিবহনকে বলুন।';
+
+  @override
+  String get flErrVehicle => 'সেই গাড়ি খালি নয় বা কাগজপত্র মেয়াদোত্তীর্ণ।';
+
+  @override
+  String get flErrDriver => 'সেই চালক এই ট্রিপ নিতে পারবেন না।';
+
+  @override
+  String get flErrNoneFree => 'এই ট্রিপের জন্য কোনো খালি গাড়ি ও চালক নেই।';
+
+  @override
+  String get flTolls => 'টোল';
+
+  @override
+  String get flTimeline => 'কী হয়েছে';
+
+  @override
+  String get flSosIntro =>
+      'চালকদের খোলা অনুরোধ। পরিবহন ও গেট সেগুলো স্বীকার করে।';
+
+  @override
+  String get flSosEmpty => 'কোনো সাহায্যের অনুরোধ নেই।';
+
+  @override
+  String get flSosHelp =>
+      'আপনি কোথায় এবং কী সমস্যা তা লিখুন। পরিবহন ও গেট সাথে সাথে দেখবে।';
+
+  @override
+  String get flSosOpen => 'খোলা';
+
+  @override
+  String get flSosAcked => 'সাহায্য আসছে';
+
+  @override
+  String get moduleIncidents => 'নিরাপত্তা';
+
+  @override
+  String get inIntro =>
+      'যা দেখেছেন রিপোর্ট করুন। নিরাপত্তা দল যাচাই করবে, কারণ খুঁজবে এবং সংশোধন ধরবে।';
+
+  @override
+  String get inNew => 'কী হয়েছে রিপোর্ট করুন';
+
+  @override
+  String get inSearchHint => 'শিরোনাম বা জায়গা খুঁজুন';
+
+  @override
+  String get inTabMine => 'আমার';
+
+  @override
+  String get inTabTriage => 'আপনার অপেক্ষায়';
+
+  @override
+  String get inTabOpen => 'এখনো খোলা';
+
+  @override
+  String get inTabSerious => 'গুরুতর';
+
+  @override
+  String get inTabStatutory => 'সরকারি রিপোর্ট';
+
+  @override
+  String get inTabCapa => 'আমার সংশোধন';
+
+  @override
+  String get inTabAll => 'সব';
+
+  @override
+  String get inEmpty => 'এখানে কোনো নিরাপত্তা রিপোর্ট নেই।';
+
+  @override
+  String get inEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get inVerdictNone => 'আপনার করার কিছু নেই।';
+
+  @override
+  String inVerdictNeed(int count) {
+    return 'আপনার জন্য $countটি অপেক্ষা করছে';
+  }
+
+  @override
+  String get inTypeNear => 'নিয়ার মিস';
+
+  @override
+  String get inTypeHazard => 'অনিরাপদ অবস্থা';
+
+  @override
+  String get inTypeMedical => 'চিকিৎসা';
+
+  @override
+  String get inTypeLost => 'কর্মবিরতি আঘাত';
+
+  @override
+  String get inTypeSpill => 'নিঃসরণ বা লিক';
+
+  @override
+  String get inTypeFire => 'আগুন বা তাপ';
+
+  @override
+  String get inTypeEquip => 'যন্ত্রের ক্ষতি';
+
+  @override
+  String get inTypeVehicle => 'গাড়ি দুর্ঘটনা';
+
+  @override
+  String get inTypeEnv => 'পরিবেশগত';
+
+  @override
+  String get inTypePipe => 'চাপ বা পাইপ';
+
+  @override
+  String get inTypeFatal => 'মৃত্যু';
+
+  @override
+  String get inStageReported => 'নিরাপত্তার অপেক্ষায়';
+
+  @override
+  String get inStageTriaged => 'বরাদ্দ';
+
+  @override
+  String get inStageInvest => 'কারণ খোঁজা হচ্ছে';
+
+  @override
+  String get inStageCapa => 'সংশোধন চলছে';
+
+  @override
+  String get inStageReview => 'বন্ধের অপেক্ষায়';
+
+  @override
+  String get inStageClosed => 'বন্ধ';
+
+  @override
+  String get inRiskLow => 'কম ঝুঁকি';
+
+  @override
+  String get inRiskMedium => 'মাঝারি ঝুঁকি';
+
+  @override
+  String get inRiskHigh => 'উচ্চ ঝুঁকি';
+
+  @override
+  String get inRiskExtreme => 'চরম ঝুঁকি';
+
+  @override
+  String inRiskLine(int score, String label) {
+    return 'স্কোর $score · $label';
+  }
+
+  @override
+  String get inAnonymous => 'যিনি নাম না দিতে চেয়েছেন';
+
+  @override
+  String inNextTriage(String name) {
+    return '$name-এর রিপোর্ট কতটা গুরুতর তা ঠিক করুন এবং তদন্তকারী নাম করুন।';
+  }
+
+  @override
+  String get inNextWaitHse =>
+      'প্ল্যান্ট নিরাপত্তা প্রধানের অপেক্ষায়। আপনার করার কিছু নেই।';
+
+  @override
+  String get inNextReported => 'নিরাপত্তা দলের অপেক্ষায়।';
+
+  @override
+  String get inNextStart => 'তদন্ত শুরু করুন।';
+
+  @override
+  String get inNextTriaged => 'একজন তদন্তকারী নাম করা হয়েছে।';
+
+  @override
+  String get inNextRca => 'তিনটি কেন এবং মূল কারণ লিখুন।';
+
+  @override
+  String get inNextInvest => 'কারণ খোঁজা হচ্ছে।';
+
+  @override
+  String get inNextMyCapa => 'আপনাকে দেওয়া সংশোধন করুন।';
+
+  @override
+  String get inNextVerify => 'একটি শেষ সংশোধন নিশ্চিত করুন।';
+
+  @override
+  String get inNextReview => 'সব সংশোধন শেষ। বন্ধের জন্য পাঠান।';
+
+  @override
+  String get inNextCapa => 'সংশোধন এখনো খোলা।';
+
+  @override
+  String get inNextSignSafety => 'নিরাপত্তা প্রধান হিসেবে স্বাক্ষর করুন।';
+
+  @override
+  String get inNextSignGm => 'প্ল্যান্ট প্রধান হিসেবে স্বাক্ষর করে বন্ধ করুন।';
+
+  @override
+  String get inNextReviewWait => 'প্ল্যান্ট প্রধানের বন্ধের অপেক্ষায়।';
+
+  @override
+  String get inNextClosed => 'এই রিপোর্ট বন্ধ।';
+
+  @override
+  String get inFormIntro =>
+      'কী হয়েছে, কোথায়, এবং কতটা খারাপ হতে পারত তা লিখুন। নিরাপত্তা সাথে সাথে দেখবে। আপনি নাম লুকাতে পারেন।';
+
+  @override
+  String get inFieldType => 'কী ধরনের ঘটনা';
+
+  @override
+  String get inFieldTitle => 'ছোট শিরোনাম';
+
+  @override
+  String get inFieldDesc => 'যা দেখেছেন';
+
+  @override
+  String get inFieldSite => 'কোন সাইট';
+
+  @override
+  String get inFieldZone => 'কোন এলাকা';
+
+  @override
+  String get inFieldWhen => 'কখন হয়েছে';
+
+  @override
+  String inFieldSev(int n) {
+    return 'আবার হলে কতটা খারাপ: $n';
+  }
+
+  @override
+  String inFieldLike(int n) {
+    return 'আবার হওয়ার সম্ভাবনা: $n';
+  }
+
+  @override
+  String get inFieldAnon => 'আমার নাম লুকান';
+
+  @override
+  String get inFieldAnonHelp =>
+      'নিরাপত্তা রিপোর্ট দেখবে। অন্যরা আপনার নাম দেখবে না।';
+
+  @override
+  String get inCreate => 'রিপোর্ট পাঠান';
+
+  @override
+  String get inConfirmSerious => 'এতে প্ল্যান্ট প্রধানকে এখনই জানানো হবে';
+
+  @override
+  String get inConfirmSeriousMsg =>
+      'উচ্চ বা চরম স্কোর নিরাপত্তা প্রধান ও চেয়ারম্যানকে সাথে সাথে জানায়।';
+
+  @override
+  String get inWhat => 'এটি কী';
+
+  @override
+  String inWho(String name, String when) {
+    return '$when-এ $name রিপোর্ট করেছেন।';
+  }
+
+  @override
+  String inMeta(String when, String site, String zone, String score) {
+    return '$when-এ $site, $zone-এ হয়েছে। ঝুঁকি স্কোর $score।';
+  }
+
+  @override
+  String inInvestigator(String name) {
+    return 'তদন্তকারী: $name';
+  }
+
+  @override
+  String inStatutoryDue(String body, String when) {
+    return '$when-এর মধ্যে $body-কে জানাতে হবে।';
+  }
+
+  @override
+  String inStatutoryDone(String receipt) {
+    return '$receipt হিসেবে দাখিল হয়েছে।';
+  }
+
+  @override
+  String get inActTriage => 'যাচাই করুন';
+
+  @override
+  String get inActInvest => 'তদন্ত শুরু করুন';
+
+  @override
+  String get inActRca => 'কারণ লিখুন';
+
+  @override
+  String get inActCapa => 'সংশোধন যোগ করুন';
+
+  @override
+  String get inActStatutory => 'সরকারি দাখিল নথিভুক্ত করুন';
+
+  @override
+  String get inActSignSafety => 'নিরাপত্তা হিসেবে স্বাক্ষর';
+
+  @override
+  String get inActSignGm => 'প্ল্যান্ট প্রধান হিসেবে বন্ধ করুন';
+
+  @override
+  String get inActStart => 'শুরু';
+
+  @override
+  String get inActComplete => 'শেষ';
+
+  @override
+  String get inActVerify => 'নিশ্চিত';
+
+  @override
+  String get inFieldInvestigator => 'কে তদন্ত করবেন';
+
+  @override
+  String get inFieldOwner => 'কে সংশোধন করবেন';
+
+  @override
+  String get inFieldWhy1 => 'কেন ১';
+
+  @override
+  String get inFieldWhy2 => 'কেন ২';
+
+  @override
+  String get inFieldWhy3 => 'কেন ৩';
+
+  @override
+  String get inFieldRoot => 'মূল কারণ';
+
+  @override
+  String get inFieldCapa => 'কী ঠিক করতে হবে';
+
+  @override
+  String get inFieldReceipt => 'রসিদ বা ডায়েরি নম্বর';
+
+  @override
+  String get inFieldEvidence => 'আপনি কী করেছেন';
+
+  @override
+  String get inRca => 'মূল কারণ';
+
+  @override
+  String get inFixes => 'সংশোধন';
+
+  @override
+  String get inDoneCreate => 'রিপোর্ট নিরাপত্তা দলের কাছে পাঠানো হয়েছে।';
+
+  @override
+  String get inDoneTriage => 'তদন্তকারী নাম করা হয়েছে।';
+
+  @override
+  String get inDoneInvest => 'তদন্ত শুরু হয়েছে।';
+
+  @override
+  String get inDoneRca => 'মূল কারণ নথিভুক্ত হয়েছে।';
+
+  @override
+  String get inDoneCapa => 'সংশোধন বরাদ্দ হয়েছে।';
+
+  @override
+  String get inDoneStatutory => 'দাখিল নথিভুক্ত হয়েছে।';
+
+  @override
+  String get inDoneSignSafety => 'নিরাপত্তা স্বাক্ষর নথিভুক্ত হয়েছে।';
+
+  @override
+  String get inDoneSignGm => 'রিপোর্ট বন্ধ হয়েছে।';
+
+  @override
+  String get inDoneStart => 'সংশোধন শুরু হয়েছে।';
+
+  @override
+  String get inDoneComplete => 'সংশোধন শেষ চিহ্নিত।';
+
+  @override
+  String get inDoneVerify => 'সংশোধন নিশ্চিত হয়েছে।';
+
+  @override
+  String get inErrTitle => 'একটি ছোট শিরোনাম লিখুন।';
+
+  @override
+  String get inErrDesc => 'কয়েক বাক্যে যা দেখেছেন লিখুন।';
+
+  @override
+  String get inErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get inErrRca => 'সংশোধন যোগ করার আগে মূল কারণ খুঁজুন।';
+
+  @override
+  String get inErrCapaOpen => 'প্রতিটি সংশোধন আগে নিশ্চিত করতে হবে।';
+
+  @override
+  String get inErrCapaSelf => 'অন্য কাউকে আপনার সংশোধন নিশ্চিত করতে হবে।';
+
+  @override
+  String get inErrNotStat => 'এই রিপোর্টে সরকারি দাখিল লাগে না।';
+
+  @override
+  String get moduleAssets => 'যন্ত্রপাতি';
+
+  @override
+  String get asIntro =>
+      'আপনার হাতে থাকা যন্ত্র, গাড়ি ও কিট। স্বাক্ষর, মেরামত বা সেফটি লক যাদের দরকার তারা আগে।';
+
+  @override
+  String get asSearchHint => 'নাম বা সিরিয়াল দিয়ে খুঁজুন';
+
+  @override
+  String get asNew => 'যন্ত্র যোগ করুন';
+
+  @override
+  String get asNewIntro => 'কোম্পানি ইতিমধ্যে কেনা কিছু নিবন্ধন করুন।';
+
+  @override
+  String get asTabMine => 'আমার';
+
+  @override
+  String get asTabAttention => 'আপনার দরকার';
+
+  @override
+  String get asTabSign => 'স্বাক্ষর বাকি';
+
+  @override
+  String get asTabRepair => 'মেরামতে';
+
+  @override
+  String get asTabCal => 'ক্যালিব্রেশন';
+
+  @override
+  String get asTabRetire => 'অবসরের জন্য';
+
+  @override
+  String get asTabStock => 'স্টোরে';
+
+  @override
+  String get asTabCars => 'গাড়ি';
+
+  @override
+  String get asTabAll => 'সব';
+
+  @override
+  String get asEmpty => 'এই তালিকায় কিছু নেই।';
+
+  @override
+  String get asEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get asSummaryNone => 'এই তালিকায় আপনার জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String asSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি জিনিসে আপনার দরকার।',
+      one: '১টি জিনিসে আপনার দরকার।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get asWhat => 'এটি কী, এবং কোথায়?';
+
+  @override
+  String asWhy(String category) {
+    return 'কে ধরে আছে, দাম কত এবং কখন সার্ভিস লাগবে — সেটা জানতে রাখা। $category।';
+  }
+
+  @override
+  String asLifeLine(String stage, String years) {
+    return 'ধাপ $stage / ৮ · পরিকল্পিত আয়ু $years বছর';
+  }
+
+  @override
+  String asBook(String nbv, String health) {
+    return 'বইয়ের মূল্য $nbv · স্বাস্থ্য $health/১০০';
+  }
+
+  @override
+  String asLotoOn(String permit) {
+    return 'লকআউট। পারমিট $permit। চালাবেন না।';
+  }
+
+  @override
+  String get asStageStock => 'স্টোরে';
+
+  @override
+  String get asStageWork => 'ব্যবহারে';
+
+  @override
+  String get asStageMove => 'যাচ্ছে';
+
+  @override
+  String get asStageRepair => 'মেরামতে';
+
+  @override
+  String get asStageCal => 'ক্যালিব্রেশন বাকি';
+
+  @override
+  String get asStageLoto => 'লকআউট';
+
+  @override
+  String get asStageRetire => 'অবসর';
+
+  @override
+  String get asStageGone => 'বাতিল';
+
+  @override
+  String get asNextCommission => 'কাজে লাগান এবং প্রয়োজনে ধারক নাম লিখুন।';
+
+  @override
+  String get asNextStock => 'স্টোরে অপেক্ষা। প্ল্যান্ট কাজে লাগাতে পারে।';
+
+  @override
+  String get asNextReceive => 'আসছে। পেয়েছেন নিশ্চিত করুন।';
+
+  @override
+  String get asNextMoving => 'অন্য সাইটে যাচ্ছে।';
+
+  @override
+  String get asNextLotoRelease => 'কাজ নিরাপদ হলে লকআউট খুলুন।';
+
+  @override
+  String get asNextLotoWait => 'লকআউট। সেফটি অফিসারের অপেক্ষা।';
+
+  @override
+  String get asNextFinishJob => 'খোলা কাজ শেষ করুন এবং খরচ লিখুন।';
+
+  @override
+  String get asNextRepair => 'মেরামত চলছে।';
+
+  @override
+  String get asNextCal => 'ক্যালিব্রেশন সনদ লিখুন।';
+
+  @override
+  String get asNextCalWait => 'ক্যালিব্রেশন বাকি।';
+
+  @override
+  String get asNextDispose => 'সব ঘর টিক হয়েছে। হিসাব বন্ধ করুন।';
+
+  @override
+  String get asNextWriteOff =>
+      'রাইট-অফ অনুমোদন করুন, তারপর অর্থ বিভাগ বন্ধ করবে।';
+
+  @override
+  String get asNextRetireWait => 'অর্থ বিভাগ অবসর ফাইল শেষ করার অপেক্ষা।';
+
+  @override
+  String get asNextGone => 'হিসাব থেকে নামানো হয়েছে। আর কিছু করার নেই।';
+
+  @override
+  String get asNextAck => 'পেয়েছেন বলে স্বাক্ষর করুন।';
+
+  @override
+  String asNextOk(String who) {
+    return '$who ধরে আছেন। আপনার কিছু করার নেই।';
+  }
+
+  @override
+  String get asNextIdle => 'ব্যবহারে আছে। কিছু খারাপ হলে জানান।';
+
+  @override
+  String get asFieldName => 'নাম কী?';
+
+  @override
+  String get asFieldCategory => 'ধরন';
+
+  @override
+  String get asFieldSite => 'সাইট';
+
+  @override
+  String get asFieldCost => 'কেনা হয়েছিল কত টাকায়?';
+
+  @override
+  String get asFieldLife => 'কত বছর চলবে?';
+
+  @override
+  String get asFieldLocation => 'কোথায় থাকবে?';
+
+  @override
+  String get asFieldCritical => 'কতটা জরুরি?';
+
+  @override
+  String get asFieldCommission => 'এখনই কাজে লাগান';
+
+  @override
+  String get asFieldHolder => 'কে ধরে থাকবেন?';
+
+  @override
+  String get asFieldHolderNone => 'এখনও কেউ না';
+
+  @override
+  String get asFieldDefect => 'কী সমস্যা?';
+
+  @override
+  String get asFieldPermit => 'লকআউট পারমিট (LOTO-YYYY-NNNN)';
+
+  @override
+  String get asFieldReason => 'কেন?';
+
+  @override
+  String get asFieldSurvey => 'জরিপ নোট';
+
+  @override
+  String get asFieldCert => 'সনদ নম্বর';
+
+  @override
+  String get asFieldProceeds => 'বিক্রির টাকা (স্ক্র্যাপ হলে ০)';
+
+  @override
+  String get asFieldToSite => 'যে সাইটে যাবে';
+
+  @override
+  String get asSiteHq => 'প্রধান কার্যালয়';
+
+  @override
+  String get asSitePlant => 'কেরানীগঞ্জ প্ল্যান্ট';
+
+  @override
+  String get asSiteCtg => 'চট্টগ্রাম টার্মিনাল';
+
+  @override
+  String get asCritA => 'প্ল্যান্ট-জরুরি';
+
+  @override
+  String get asCritB => 'অপরিহার্য';
+
+  @override
+  String get asCritC => 'সাধারণ';
+
+  @override
+  String get asActAck => 'আমার কাছে আছে';
+
+  @override
+  String get asActCommission => 'কাজে লাগান';
+
+  @override
+  String get asActAssign => 'হস্তান্তর';
+
+  @override
+  String get asActFlag => 'সমস্যা আছে';
+
+  @override
+  String get asActLotoOn => 'লকআউট';
+
+  @override
+  String get asActLotoOff => 'লকআউট খুলুন';
+
+  @override
+  String get asActMove => 'অন্য সাইটে পাঠান';
+
+  @override
+  String get asActReceive => 'এখানে পেয়েছি';
+
+  @override
+  String get asActCertify => 'সনদ লিখুন';
+
+  @override
+  String get asActRetire => 'অবসর';
+
+  @override
+  String get asActWriteOff => 'রাইট-অফ অনুমোদন';
+
+  @override
+  String get asActDispose => 'হিসাব বন্ধ';
+
+  @override
+  String get asActStart => 'কাজ শুরু';
+
+  @override
+  String get asActFinish => 'কাজ শেষ';
+
+  @override
+  String get asJobs => 'খোলা কাজ';
+
+  @override
+  String get asRetireFile => 'অবসর ফাইল';
+
+  @override
+  String get asBoxSurvey => 'কারিগরি জরিপ স্বাক্ষরিত';
+
+  @override
+  String get asBoxClean => 'পরিষ্কার / ডিওয়ার্ক';
+
+  @override
+  String get asBoxSpares => 'স্পেয়ার নামানো';
+
+  @override
+  String get asBoxFinance => 'অর্থ পরীক্ষা';
+
+  @override
+  String get asDetails => 'বিস্তারিত';
+
+  @override
+  String get asFieldBookFull => 'খরচ ও অবচয়';
+
+  @override
+  String asBookFull(String gross, String accum, String nbv, String method) {
+    return 'মোট $gross · লেখা হয়েছে $accum · বই $nbv · পদ্ধতি $method';
+  }
+
+  @override
+  String asYearCharge(String amount) {
+    return 'এই বছর $amount';
+  }
+
+  @override
+  String get asPassport => 'ট্যাগ, সিরিয়াল ও প্রস্তুতকারক';
+
+  @override
+  String get asDoneAck => 'স্বাক্ষর হয়েছে।';
+
+  @override
+  String get asDoneCommission => 'কাজে আছে।';
+
+  @override
+  String get asDoneAssign => 'হস্তান্তর হয়েছে। স্বাক্ষরের তিন দিন আছে।';
+
+  @override
+  String get asDoneFlag => 'সমস্যা নথিভুক্ত। মেরামত খোলা হয়েছে।';
+
+  @override
+  String get asDoneLotoOn => 'লকআউট হয়েছে।';
+
+  @override
+  String get asDoneLotoOff => 'লকআউট খোলা হয়েছে।';
+
+  @override
+  String get asDoneMove => 'যাত্রা শুরু।';
+
+  @override
+  String get asDoneReceive => 'গ্রহণ হয়েছে।';
+
+  @override
+  String get asDoneCertify => 'সনদ নথিভুক্ত।';
+
+  @override
+  String get asDoneRetire => 'অবসর। অর্থ বিভাগের ঘর বাকি।';
+
+  @override
+  String get asDoneWriteOff => 'রাইট-অফ অনুমোদিত।';
+
+  @override
+  String get asDoneDispose => 'হিসাব বন্ধ।';
+
+  @override
+  String get asDoneStart => 'কাজ শুরু।';
+
+  @override
+  String get asDoneFinish => 'কাজ শেষ।';
+
+  @override
+  String get asDoneTick => 'ঘর টিক হয়েছে।';
+
+  @override
+  String get asErrName => 'একটি ছোট নাম দিন।';
+
+  @override
+  String get asErrCost => 'কেনার মূল্য লিখুন।';
+
+  @override
+  String get asErrLife => 'আয়ু বছরে লিখুন।';
+
+  @override
+  String get asErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get asErrLoto => 'এই যন্ত্র লকআউট।';
+
+  @override
+  String get asErrLotoNeed => 'কাজ শুরুর আগে লকআউট করুন।';
+
+  @override
+  String get asErrAck => 'বর্তমান ধারককে আগে স্বাক্ষর করতে হবে।';
+
+  @override
+  String get asErrList => 'অবসরের প্রতিটি ঘর টিক করতে হবে।';
+
+  @override
+  String get asErrWrite => 'রাইট-অফ এখনও অনুমোদিত নয়।';
+
+  @override
+  String get asErrCal => 'আগে ক্যালিব্রেশন করুন।';
+
+  @override
+  String get moduleCompliance => 'লাইসেন্স';
+
+  @override
+  String get cpIntro =>
+      'প্ল্যান্ট খোলা রাখতে যে অনুমতিগুলো লাগে। যেগুলো আগে শেষ হবে সেগুলো উপরে।';
+
+  @override
+  String get cpSearchHint => 'নাম বা নম্বর দিয়ে খুঁজুন';
+
+  @override
+  String get cpNew => 'লাইসেন্স যোগ করুন';
+
+  @override
+  String get cpNewIntro => 'কোম্পানির কাছে ইতিমধ্যে থাকা অনুমতি নিবন্ধন করুন।';
+
+  @override
+  String get cpTabMine => 'আমার';
+
+  @override
+  String get cpTabCritical => 'এই মাস';
+
+  @override
+  String get cpTabWarning => 'এই তিন মাস';
+
+  @override
+  String get cpTabRenew => 'নবায়নে';
+
+  @override
+  String get cpTabExpired => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get cpTabAll => 'সব';
+
+  @override
+  String get cpEmpty => 'এই তালিকায় কিছু নেই।';
+
+  @override
+  String get cpEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get cpSummaryNone => 'এই তালিকায় আপনার জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String cpSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি লাইসেন্সে আপনার দরকার।',
+      one: '১টি লাইসেন্সে আপনার দরকার।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String cpDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days দিন বাকি',
+      one: '১ দিন বাকি',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cpWhat => 'এটি কোন অনুমতি?';
+
+  @override
+  String cpWho(String who, String days) {
+    return '$who দেখাশোনা করেন। $days।';
+  }
+
+  @override
+  String get cpWhy => 'এটি ছাড়া সেই কাজ আইনত চালানো যায় না।';
+
+  @override
+  String cpExpires(String date) {
+    return '$date তারিখে শেষ।';
+  }
+
+  @override
+  String cpRenewLine(String stage, String pct) {
+    return 'নবায়ন: $stage · চেকলিস্ট $pct%';
+  }
+
+  @override
+  String get cpUrgExpired => 'মেয়াদোত্তীর্ণ';
+
+  @override
+  String get cpUrgCritical => 'এই মাস';
+
+  @override
+  String get cpUrgWarning => 'এই তিন মাস';
+
+  @override
+  String get cpUrgOk => 'সচল';
+
+  @override
+  String get cpStageReview => 'ফাইল তৈরি';
+
+  @override
+  String get cpStageFiled => 'দাপ্তরিক দাখিল';
+
+  @override
+  String get cpStageInspect => 'পরিদর্শন নির্ধারিত';
+
+  @override
+  String get cpStageVet => 'মন্ত্রণালয়ের অপেক্ষা';
+
+  @override
+  String get cpStageDone => 'নবায়ন হয়েছে';
+
+  @override
+  String get cpNextStartExpired => 'মেয়াদ শেষ। নবায়ন ফাইল খুলুন।';
+
+  @override
+  String get cpNextExpired => 'মেয়াদ শেষ। প্ল্যান্ট নবায়ন খুলবে।';
+
+  @override
+  String get cpNextStartSoon => 'শীঘ্রই শেষ। নবায়ন ফাইল খুলুন।';
+
+  @override
+  String cpNextOk(String date) {
+    return '$date পর্যন্ত সচল। আপনার কিছু করার নেই।';
+  }
+
+  @override
+  String cpNextFund(String fee) {
+    return 'দাখিলের আগে অর্থ বিভাগকে $fee ফি অনুমোদন করতে হবে।';
+  }
+
+  @override
+  String get cpNextTicks => 'চেকলিস্টের প্রতিটি ঘর টিক করে দাখিল করুন।';
+
+  @override
+  String get cpNextFile => 'নিয়ন্ত্রকের কাছে আবেদন দাখিল করুন।';
+
+  @override
+  String get cpNextWaitFile => 'প্ল্যান্ট আবেদন দাখিলের অপেক্ষা।';
+
+  @override
+  String get cpNextBook => 'পরিদর্শন তারিখ ও পরিদর্শকের নাম লিখুন।';
+
+  @override
+  String get cpNextWaitInspect => 'পরিদর্শন তারিখের অপেক্ষা।';
+
+  @override
+  String get cpNextFindings => 'পরিদর্শক কী পেয়েছেন লিখুন।';
+
+  @override
+  String get cpNextWaitFindings => 'পরিদর্শন নির্ধারিত।';
+
+  @override
+  String get cpNextCert => 'নতুন সনদ ও নতুন মেয়াদ লিখুন।';
+
+  @override
+  String get cpNextWaitCert => 'নতুন সনদের অপেক্ষা।';
+
+  @override
+  String get cpNextRenewed => 'নবায়ন হয়েছে। আর কিছু করার নেই।';
+
+  @override
+  String get cpFieldTitle => 'নাম কী?';
+
+  @override
+  String get cpFieldNo => 'কাগজের লাইসেন্স নম্বর';
+
+  @override
+  String get cpFieldKind => 'ধরন';
+
+  @override
+  String get cpFieldSite => 'সাইট';
+
+  @override
+  String get cpFieldExpiry => 'কবে শেষ?';
+
+  @override
+  String get cpFieldFee => 'নবায়ন ফি (টাকা)';
+
+  @override
+  String get cpFieldOwner => 'কে দেখাশোনা করবেন?';
+
+  @override
+  String get cpFieldOwnerMe => 'আপনি';
+
+  @override
+  String get cpFieldInspector => 'পরিদর্শকের নাম';
+
+  @override
+  String get cpFieldFindings => 'কী পেয়েছেন?';
+
+  @override
+  String get cpFieldCert => 'নতুন সনদ নম্বর';
+
+  @override
+  String get cpFieldNewExpiry => 'নতুন মেয়াদ (YYYY-MM-DD)';
+
+  @override
+  String get cpFieldChalan => 'চালান নম্বর';
+
+  @override
+  String get cpFieldReason => 'কেন ফেরত?';
+
+  @override
+  String get cpFieldSubject => 'চিঠির বিষয়';
+
+  @override
+  String get cpFieldLetter => 'চিঠির লেখা';
+
+  @override
+  String get cpSiteHq => 'প্রধান কার্যালয়';
+
+  @override
+  String get cpSitePlant => 'কেরানীগঞ্জ প্ল্যান্ট';
+
+  @override
+  String get cpActRenew => 'নবায়ন খুলুন';
+
+  @override
+  String get cpActFund => 'ফি অনুমোদন';
+
+  @override
+  String get cpActFile => 'আবেদন দাখিল';
+
+  @override
+  String get cpActInspect => 'পরিদর্শন বুক';
+
+  @override
+  String get cpActFindings => 'ফলাফল লিখুন';
+
+  @override
+  String get cpActComplete => 'নতুন সনদ লিখুন';
+
+  @override
+  String get cpActAdvance => 'এগিয়ে যান';
+
+  @override
+  String get cpActBack => 'এক ধাপ ফেরত';
+
+  @override
+  String get cpActLetter => 'চেয়ারম্যানের চিঠি';
+
+  @override
+  String get cpChecklist => 'দাখিলের আগে';
+
+  @override
+  String get cpDetails => 'বিস্তারিত';
+
+  @override
+  String get cpPassport => 'নম্বর';
+
+  @override
+  String get cpDoneRenew => 'নবায়ন ফাইল খোলা হয়েছে।';
+
+  @override
+  String get cpDoneFund => 'ফি অনুমোদিত। প্ল্যান্ট এখন দাখিল করতে পারে।';
+
+  @override
+  String get cpDoneAdvance => 'এগিয়েছে।';
+
+  @override
+  String get cpDoneBack => 'এক ধাপ ফেরত গেছে।';
+
+  @override
+  String get cpDoneLetter => 'চিঠি পাঠানো হয়েছে।';
+
+  @override
+  String get cpDoneTick => 'ঘর টিক হয়েছে।';
+
+  @override
+  String get cpErrTitle => 'একটি ছোট নাম দিন।';
+
+  @override
+  String get cpErrNo => 'কাগজের নম্বর লিখুন।';
+
+  @override
+  String get cpErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get cpErrFund => 'আগে অর্থ বিভাগকে ফি অনুমোদন করতে হবে।';
+
+  @override
+  String get cpErrTicks => 'প্রতিটি ঘর আগে চিহ্নিত করতে হবে।';
+
+  @override
+  String get cpErrFail => 'একটি ব্যর্থ ঘর এখনও খোলা।';
+
+  @override
+  String get cpErrLetter =>
+      'চেয়ারম্যানের চিঠি কেবল ৩০ দিনের ভিতরে বা মন্ত্রণালয়ে থাকা লাইসেন্সের জন্য।';
+
+  @override
+  String get cpErrOpen => 'একটি নবায়ন ইতিমধ্যে খোলা।';
+
+  @override
+  String get cpErrValidity =>
+      'নতুন মেয়াদ এই অনুমতির স্বাভাবিক আয়ুর সাথে মিলতে হবে।';
+
+  @override
+  String get moduleEmployees => 'মানুষ';
+
+  @override
+  String get emIntro => 'কে কাজ করেন, কার কাছে রিপোর্ট করেন, কে যাচ্ছেন।';
+
+  @override
+  String get emSearchHint => 'নাম, পদ বা ফোন দিয়ে খুঁজুন';
+
+  @override
+  String get emNew => 'সহকর্মী যোগ করুন';
+
+  @override
+  String get emNewIntro => 'ইতিমধ্যে যোগ দেওয়া কাউকে এইচআর নথিভুক্ত করেন।';
+
+  @override
+  String get emTabAll => 'কাজে আছেন';
+
+  @override
+  String get emTabTeam => 'আমার দল';
+
+  @override
+  String get emTabLeaving => 'যাচ্ছেন';
+
+  @override
+  String get emTabFormer => 'আগে ছিলেন';
+
+  @override
+  String get emEmpty => 'এই তালিকায় কেউ নেই।';
+
+  @override
+  String get emEmptyFiltered => 'এই খোঁজার সাথে কেউ মেলেনি।';
+
+  @override
+  String get emSummaryNone => 'এই তালিকায় আপনার জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String emSummaryNeed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count জনের আপনার দরকার।',
+      one: '১ জনের আপনার দরকার।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get emStatusActive => 'কাজে আছেন';
+
+  @override
+  String get emStatusLeave => 'ছুটিতে';
+
+  @override
+  String get emStatusLeaving => 'যাচ্ছেন';
+
+  @override
+  String get emStatusFormer => 'চলে গেছেন';
+
+  @override
+  String get emWhat => 'ইনি কে?';
+
+  @override
+  String emWho(String who) {
+    return '$who-এর কাছে রিপোর্ট করেন।';
+  }
+
+  @override
+  String get emWhoNone => 'লাইন ম্যানেজার নথিতে নেই।';
+
+  @override
+  String get emWhy =>
+      'সহকর্মীরা যেন একে অপরকে খুঁজে পান। সংবেদনশীল তথ্য এইচআর-এ থাকে।';
+
+  @override
+  String get emExitTitle => 'যাচ্ছেন — যে ঘরগুলো সই করতে হবে';
+
+  @override
+  String emLastDay(String date) {
+    return 'শেষ দিন $date।';
+  }
+
+  @override
+  String get emActExit => 'প্রস্থান শুরু';
+
+  @override
+  String get emActClear => 'এই ঘর মিটান';
+
+  @override
+  String get emActWaive => 'এই ঘর বাদ দিন';
+
+  @override
+  String get emActReclaim => 'যন্ত্র ফেরত নিন';
+
+  @override
+  String get emActClose => 'ফাইল বন্ধ করুন';
+
+  @override
+  String get emActCancel => 'তাঁকে রাখুন';
+
+  @override
+  String get emActRehire => 'ফিরে আনুন';
+
+  @override
+  String get emFieldName => 'পুরো নাম';
+
+  @override
+  String get emFieldNameBn => 'বাংলা নাম';
+
+  @override
+  String get emFieldTitle => 'পদবি';
+
+  @override
+  String get emFieldPhone => 'ফোন';
+
+  @override
+  String get emFieldEmail => 'অফিস ইমেইল';
+
+  @override
+  String get emFieldDept => 'বিভাগ';
+
+  @override
+  String get emFieldSite => 'কর্মস্থল';
+
+  @override
+  String get emFieldManager => 'লাইন ম্যানেজার';
+
+  @override
+  String get emFieldManagerHint => 'ঐচ্ছিক';
+
+  @override
+  String get emFieldLastDay => 'শেষ কর্মদিবস (YYYY-MM-DD)';
+
+  @override
+  String get emFieldExitReason => 'কেন যাচ্ছেন';
+
+  @override
+  String get emFieldNote => 'কী দেখেছেন';
+
+  @override
+  String get emFieldWaive => 'কেন এই ঘর বাদ';
+
+  @override
+  String get emFieldVoucher => 'শেষ বেতনের ভাউচার নম্বর';
+
+  @override
+  String get emFieldCancel => 'কেন তাঁকে রাখছেন';
+
+  @override
+  String get emFieldJoined => 'যোগদান';
+
+  @override
+  String get emFieldGrade => 'গ্রেড';
+
+  @override
+  String get emFieldNid => 'জাতীয় পরিচয়পত্র (১০, ১৩ বা ১৭ অঙ্ক)';
+
+  @override
+  String get emFieldEmergency => 'জরুরি যোগাযোগ';
+
+  @override
+  String get emFieldReports => 'যাঁরা তাঁর কাছে রিপোর্ট করেন';
+
+  @override
+  String get emPassport => 'কর্মী নম্বর';
+
+  @override
+  String get emDetails => 'বিস্তারিত';
+
+  @override
+  String get emItemPending => 'অপেক্ষায়';
+
+  @override
+  String get emItemCleared => 'মিটেছে';
+
+  @override
+  String get emItemWaived => 'বাদ';
+
+  @override
+  String get emDoneExit => 'প্রস্থান ফাইল খোলা। প্রতিটি ঘরে নোট যাবে।';
+
+  @override
+  String get emDoneClear => 'ঘর সই হয়েছে।';
+
+  @override
+  String get emDoneWaive => 'ঘর বাদ দেওয়া হয়েছে।';
+
+  @override
+  String get emDoneReclaim => 'যন্ত্র ফেরত নেওয়া হয়েছে।';
+
+  @override
+  String get emDoneClose => 'তিনি চলে গেছেন। লগইন বন্ধ।';
+
+  @override
+  String get emDoneCancel => 'তিনি থাকছেন। প্রস্থান বাতিল।';
+
+  @override
+  String get emDoneRehire => 'তিনি আবার খাতায় আছেন।';
+
+  @override
+  String get emErrName => 'নাম লিখুন।';
+
+  @override
+  String get emErrTitle => 'পদবি লিখুন।';
+
+  @override
+  String get emErrPhone => 'ফোন নম্বর দিন।';
+
+  @override
+  String get emErrFailed => 'কিছু ভুল হয়েছে। আবার চেষ্টা করুন।';
+
+  @override
+  String get emErrProtected => 'চেয়ারম্যানকে এভাবে খাতা থেকে নামানো যায় না।';
+
+  @override
+  String get emErrSelf =>
+      'আরেকজন এইচআর সহকর্মীকে আপনার প্রস্থান শুরু করতে হবে।';
+
+  @override
+  String get emErrAssets => 'আগে যন্ত্র ফেরত নিন, তারপর এই ঘর টিক করুন।';
+
+  @override
+  String get emErrBus => 'আগে স্টাফ বাসের আসন শেষ করুন।';
+
+  @override
+  String get emErrTrips => 'আগে খোলা গাড়ি যাত্রা শেষ করুন।';
+
+  @override
+  String get emErrFinance => 'আগে দাবি ও অগ্রিম মিটান।';
+
+  @override
+  String get emErrPending => 'প্রতিটি ঘর আগে মিটাতে বা বাদ দিতে হবে।';
+
+  @override
+  String get emErrOpen => 'একটি প্রস্থান ফাইল ইতিমধ্যে খোলা।';
+
+  @override
+  String get moduleDashboards => 'আজ';
+
+  @override
+  String get dbWhat =>
+      'আপনার কী করতে হবে, এবং যে কয়েকটি সংখ্যা সিদ্ধান্ত বদলায়।';
+
+  @override
+  String get dbWhy => 'এই সংখ্যাগুলো লাইভ ফাইল থেকে গোনা, টাইপ করা নয়।';
+
+  @override
+  String get dbNeedsTitle => 'আজ আপনার দরকার';
+
+  @override
+  String get dbActBrief => 'সংক্ষিপ্ত ব্রিফিং পাঠান';
+
+  @override
+  String get dbFieldTitle => 'শিরোনাম';
+
+  @override
+  String get dbFieldBody => 'কী শোনাবেন (২০+ অক্ষর)';
+
+  @override
+  String get dbDoneBrief => 'ব্রিফিং পাঠানো হয়েছে।';
+
+  @override
+  String dbRoiLine(String fleet, String vendor) {
+    return 'ঘোষিত: বহর ৳$fleet, বিক্রেতা ৳$vendor। লাইভ হিসাব নয়।';
+  }
+
+  @override
+  String get moduleChat => 'নেতৃত্ব চ্যাট';
+
+  @override
+  String get chIntro =>
+      'নেতৃত্বের ঘর। বার্তা এই ডিভাইসে থাকে। এন্ড-টু-এন্ড নয়।';
+
+  @override
+  String get chEmptyTitle => 'এখনও কোনো ঘর নেই';
+
+  @override
+  String get chEmpty => 'শুরু করতে একজন সহকর্মীকে বার্তা পাঠান।';
+
+  @override
+  String get chNoMessages => 'এখনও কোনো বার্তা নেই।';
+
+  @override
+  String get chLocked => 'নিমন্ত্রণে';
+
+  @override
+  String get chDirect => 'একজনকে লিখুন';
+
+  @override
+  String get chHint => 'বার্তা লিখুন';
+
+  @override
+  String get chSend => 'পাঠান';
+
+  @override
+  String get chReact => 'প্রতিক্রিয়া';
+
+  @override
+  String get chDeleted => 'বার্তা সরানো হয়েছে।';
+
+  @override
+  String get chSecureNote => 'পথে ও সংরক্ষণে এনক্রিপ্টেড। এন্ড-টু-এন্ড নয়।';
+
+  @override
+  String get chActDirective => 'নির্দেশ দিন';
+
+  @override
+  String get chActAck => 'পেয়েছি';
+
+  @override
+  String get chActDone => 'শেষ হয়েছে';
+
+  @override
+  String get chFieldTitle => 'নির্দেশের শিরোনাম';
+
+  @override
+  String get chFieldBody => 'কী করতে হবে';
+
+  @override
+  String chAckCount(int acks, int needed) {
+    return '$needed জনের মধ্যে $acks জন স্বীকার করেছেন।';
+  }
+
+  @override
+  String get demoPlayEvent => 'পরের লাইভ ঘটনা চালান';
+
+  @override
+  String get demoPlayEventHint =>
+      'নেতৃত্বে একটি বার্তা ও ইনবক্সে একটি নোট পড়ে।';
+
+  @override
+  String get demoPlayEventDone => 'ঘটনা চালানো হয়েছে।';
+
+  @override
+  String get homeWhat => 'এখন কী করতে হবে।';
+
+  @override
+  String get searchTitle => 'মানুষ বা ফাইল খুঁজুন';
+
+  @override
+  String get searchHint =>
+      'নাম, কর্মচারী আইডি বা LV-, INC-, PASS- এর মতো রেফারেন্স লিখুন।';
+
+  @override
+  String get searchField => 'খুঁজুন';
+
+  @override
+  String get searchEmpty => 'কিছু মেলেনি।';
+
+  @override
+  String get lockMessagePassword =>
+      'অ্যাকাউন্টের পাসওয়ার্ড দিয়ে খুলুন। পাঁচবার ভুল হলে সাইন আউট।';
+
+  @override
+  String get lockPassword => 'পাসওয়ার্ড';
+
+  @override
+  String get lockUnlockPassword => 'পাসওয়ার্ড দিয়ে খুলুন';
+
+  @override
+  String lockFailedLeft(int left) {
+    return 'পাসওয়ার্ড মেলেনি। $leftবার বাকি।';
+  }
+
+  @override
+  String get dbListen => 'শুনুন';
+
+  @override
+  String get dbListenDone => 'শোনা হয়েছে বলে চিহ্নিত।';
+
+  @override
+  String get dbActRestore => 'চালু করুন';
+
+  @override
+  String get dbPermitRestored => 'লক-আউট খুলে দেওয়া হয়েছে।';
+
+  @override
+  String get dbActSignHandover => 'হস্তান্তরে স্বাক্ষর';
+
+  @override
+  String get dbHandoverSigned => 'হস্তান্তর স্বাক্ষরিত। এই শিফট আপনার।';
+
+  @override
+  String get attTeamTitle => 'আজ আপনার দল';
+
+  @override
+  String get attTeamWhy => 'কে এসেছেন, কে দেরি, কে ছুটিতে, কার খতিয়ান লাগবে।';
+
+  @override
+  String get attTeamPresent => 'হাজির';
+
+  @override
+  String get attTeamLate => 'দেরি';
+
+  @override
+  String get attTeamLeave => 'ছুটিতে';
+
+  @override
+  String get attTeamReview => 'দেখতে হবে';
+
+  @override
+  String get attTeamEmpty => 'এই পরিসরে আজ কেউ নেই।';
+
+  @override
+  String get attTeamNothing => 'আপনার করার কিছু নেই।';
+
+  @override
+  String get attTeamReviewHint => 'নিয়মিতকরণ খুলুন, অথবা কিছু করবেন না।';
+
+  @override
+  String get approvalRejectExplain =>
+      'এক বাক্য লিখুন যা আবেদনকারী ফাইল ও ইনবক্সে দেখবেন।';
+
+  @override
+  String get approvalRejectionSeen => 'কেন ফিরিয়ে দেওয়া হয়েছে';
+
+  @override
+  String get flChat => 'যাত্রার চ্যাট';
+
+  @override
+  String get flChatEmpty => 'এই যাত্রায় এখনও কোনো বার্তা নেই।';
+
+  @override
+  String get flChatHint => 'চালক বা আবেদনকারীকে লিখুন';
+
+  @override
+  String get flPoolTitle => 'এই দুই যাত্রা এক গাড়ি নিতে পারে';
+
+  @override
+  String flPoolBody(String a, String b) {
+    return '$a ও $b একই পথে। দুজনে রাজি হলে এক গাড়ি দিন।';
+  }
+
+  @override
+  String get flCallDriver => 'চালককে ফোন';
+
+  @override
+  String get flOdoStart => 'শুরুর ওডোমিটার (কিমি)';
+
+  @override
+  String get flOdoEnd => 'শেষ ওডোমিটার (কিমি)';
+
+  @override
+  String get busConductor => 'যাত্রী যাচাই';
+
+  @override
+  String get busConductorHint => 'কর্মচারী আইডি বা আসন নম্বর';
+
+  @override
+  String busConductorOk(String name, String seat) {
+    return '$name আসন $seat-এ আছেন।';
+  }
+
+  @override
+  String get busConductorMiss => 'এই বাসে কেউ মেলেনি।';
+
+  @override
+  String get busSwap => 'আসন বদল চান';
+
+  @override
+  String get busSwapHint => 'অন্যজনকে মানতে হবে।';
+
+  @override
+  String get busSwapDone => 'বদলের অনুরোধ পাঠানো হয়েছে।';
+
+  @override
+  String get busSwapAccept => 'আসন বদল মানুন';
+
+  @override
+  String get chVoice => 'ভয়েস নোট';
+
+  @override
+  String get chVoiceRecord => 'ধরতে ধরে রাখুন';
+
+  @override
+  String get chVoiceStop => 'থামান ও পাঠান';
+
+  @override
+  String get chVoicePlay => 'ভয়েস নোট চালান';
+
+  @override
+  String get inGps => 'কোথায় হয়েছে যোগ করুন';
+
+  @override
+  String get inGpsOn => 'অবস্থান যোগ হয়েছে';
+
+  @override
+  String get inCloseBlocked =>
+      'প্রতিটি সংশোধন নিশ্চিত হলেই ফাইল বন্ধ করা যাবে।';
+
+  @override
+  String get asScanTag => 'ট্যাগ স্ক্যান';
+
+  @override
+  String get emErrNid => 'এনআইডি ১০, ১৩ বা ১৭ অঙ্কের হতে হবে।';
 }

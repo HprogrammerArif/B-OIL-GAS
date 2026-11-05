@@ -12,7 +12,6 @@ import {
   Radio,
   Users,
   CheckCircle2,
-  Sparkles,
   ShieldAlert,
   Clock,
   Layers,
@@ -31,8 +30,8 @@ interface SendVoiceBriefingModalProps {
 const PRESET_VOICE_MEMOS = [
   {
     key: 'factory_run',
-    label: '🏭 Factory Run & Generator Overhaul',
-    labelBn: '🏭 কারখানা উৎপাদন ও জেনারেটর মেরামত',
+    label: 'Factory run & generator overhaul',
+    labelBn: 'কারখানা উৎপাদন ও জেনারেটর মেরামত',
     duration: 42,
     title: "Chairman's Morning Strategic Direction",
     titleBn: 'চেয়ারম্যান মহোদয়ের সকালের দিকনির্দেশনা',
@@ -42,8 +41,8 @@ const PRESET_VOICE_MEMOS = [
   },
   {
     key: 'hse_safety',
-    label: '⚠️ HSE Critical Steam Line Protocol',
-    labelBn: '⚠️ এইচএসই হাই-প্রেসার স্টিম লাইন ব্রিফিং',
+    label: 'HSE critical steam line protocol',
+    labelBn: 'এইচএসই হাই-প্রেসার স্টিম লাইন ব্রিফিং',
     duration: 35,
     title: 'HSE Safety Priority Mandate',
     titleBn: 'জরুরি নিরাপত্তা ব্রিফিং ও নির্দেশনা',
@@ -53,8 +52,8 @@ const PRESET_VOICE_MEMOS = [
   },
   {
     key: 'finance_release',
-    label: '💼 Finance & Vendor Disbursement',
-    labelBn: '💼 অর্থ বিভাগ ও সরবরাহকারী বিল পরিশোধ',
+    label: 'Finance & vendor disbursement',
+    labelBn: 'অর্থ বিভাগ ও সরবরাহকারী বিল পরিশোধ',
     duration: 28,
     title: 'Vendor Payment & Statutory VAT Clearance',
     titleBn: 'ভ্যাট যাচাই ও ভেন্ডর পেমেন্ট ক্লিয়ারেন্স',
@@ -201,8 +200,8 @@ export default function SendVoiceBriefingModal({
 
     showToast(
       lang === 'en'
-        ? `🎙️ Chairman's 60-Sec Voice Memo broadcasted to ${audiences.length} target channels via Mobile & Radio!`
-        : `🎙️ চেয়ারম্যান মহোদয়ের ভয়েস মেমো মোবাইল অ্যাপ ও পুশ অ্যালার্টের মাধ্যমে সম্প্রচারিত হয়েছে!`,
+        ? `Chairman's 60-second voice memo sent to ${audiences.length} channels.`
+          : `চেয়ারম্যান মহোদয়ের ভয়েস মেমো ${audiences.length}টি চ্যানেলে পাঠানো হয়েছে।`,
       'gold'
     );
 
@@ -271,12 +270,11 @@ export default function SendVoiceBriefingModal({
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: 'rgba(212, 175, 55, 0.25)',
-                border: '1.5px solid rgba(212, 175, 55, 0.6)',
+                background: 'rgba(255, 255, 255, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--status-warning-bright)',
+                color: 'var(--text-on-brand)',
               }}
             >
               <Mic size={20} />
@@ -340,7 +338,7 @@ export default function SendVoiceBriefingModal({
                   />
                   <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--text-inverse-2)' }}>
                     {recordingState === 'recording'
-                      ? '🔴 RECORDING LIVE (MAX 60s)'
+                      ? 'Recording (max 60s)'
                       : recordingState === 'playing'
                       ? '▶ PLAYING PREVIEW'
                       : recordingState === 'recorded'
@@ -486,9 +484,8 @@ export default function SendVoiceBriefingModal({
             {/* 1-Click Executive Presets */}
             <div style={{ marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Sparkles size={14} color="var(--status-warning)" />
                 <label style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-1)' }}>
-                  {t('1-Click Pre-Recorded Executive Briefings:', 'দ্রুত এক-ক্লিক ব্রিফিং নির্বাচন:', lang)}
+                  {t('Pre-recorded briefing', 'রেকর্ড করা ব্রিফিং', lang)}
                 </label>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
@@ -524,7 +521,7 @@ export default function SendVoiceBriefingModal({
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-1)' }}>
                   {t('Live Speech-to-Text Transcript (Dispatched with Audio Alert):', 'লাইভ অডিও ট্রান্সক্রিপ্ট ও বিবরণ:', lang)}
                 </label>
-                <span className="badge green" style={{ fontSize: '10px' }}>✓ AI Transcribed</span>
+                <span className="badge green" style={{ fontSize: '10px' }}>{t('Transcript ready', 'ট্রান্সক্রিপ্ট প্রস্তুত', lang)}</span>
               </div>
               <textarea
                 rows={3}
@@ -639,7 +636,7 @@ export default function SendVoiceBriefingModal({
                     fontWeight: priority === 'urgent' ? 800 : 500,
                   }}
                 >
-                  ⚡ Urgent Mandate
+                  Urgent
                 </button>
               </div>
             </div>

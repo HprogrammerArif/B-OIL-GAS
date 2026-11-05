@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import {
   X,
   Receipt,
-  Plane,
-  Car,
-  Trophy,
   Calendar,
   MapPin,
   FileText,
@@ -17,7 +14,7 @@ import {
   Building,
   CreditCard,
   Send,
-  Sparkles,
+  Calculator,
 } from 'lucide-react';
 import { t, AppRole, ROLE_META } from '../../types';
 import { showToast } from '../ToastManager';
@@ -358,87 +355,42 @@ export default function SubmitClaimModal({
             <label className="form-label" style={{ fontWeight: 800, fontSize: '12px', marginBottom: '8px', display: 'block' }}>
               {t('1. Select Expense Category', '১. খরচের ক্যাটাগরি নির্বাচন করুন', lang)}
             </label>
-            <div className="claims-type-cards">
-              {/* Option 1: TA/DA */}
-              <div
-                className={`claims-type-card ${claimType === 'tada' ? 'active' : ''}`}
-                onClick={() => setClaimType('tada')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tada' ? 'var(--brand-crimson)' : undefined }}>
-                    <Plane size={18} style={{ color: 'var(--status-info)' }} />
-                    <span>TA / DA Tour Expense</span>
-                  </div>
-                  {claimType === 'tada' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
-                </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
-                  Outstation official travel, daily allowances, hotel lodging bills & inter-district bus/rail transport.
-                </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-info)', background: 'var(--status-info-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
-                  Statutory DA: ৳1,500 – ৳2,000/day
-                </span>
-              </div>
-
-              {/* Option 2: Conveyance */}
-              <div
-                className={`claims-type-card ${claimType === 'conveyance' ? 'active' : ''}`}
-                onClick={() => setClaimType('conveyance')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'conveyance' ? 'var(--brand-crimson)' : undefined }}>
-                    <Car size={18} style={{ color: 'var(--status-success)' }} />
-                    <span>Monthly Local Conveyance</span>
-                  </div>
-                  {claimType === 'conveyance' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
-                </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
-                  Intra-city official movement: Uber, CNG, rickshaw fares, plant courier & factory shuttles.
-                </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-success)', background: 'var(--status-success-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
-                  Monthly Ceiling: ৳8,000 (Grade 8)
-                </span>
-              </div>
-
-              {/* Option 3: Tour & Event */}
-              <div
-                className={`claims-type-card ${claimType === 'tour_event' ? 'active' : ''}`}
-                onClick={() => setClaimType('tour_event')}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, fontSize: '13px', color: claimType === 'tour_event' ? 'var(--brand-crimson)' : undefined }}>
-                    <Trophy size={18} style={{ color: 'var(--status-warning)' }} />
-                    <span>Tour & Event Advance Settlement</span>
-                  </div>
-                  {claimType === 'tour_event' && <CheckCircle2 size={16} color="var(--brand-crimson)" />}
-                </div>
-                <p style={{ margin: 0, fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.4 }}>
-                  Corporate events, sports tournament delegation, and plant shutdown advance reconciliation.
-                </p>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--status-warning)', background: 'var(--status-warning-bg)', padding: '2px 8px', borderRadius: '6px', width: 'fit-content', marginTop: '4px' }}>
-                  Treasury Balance Settlement
-                </span>
-              </div>
-            </div>
+            <select
+              className="form-input"
+              value={claimType}
+              onChange={(e) => setClaimType(e.target.value as 'tada' | 'conveyance' | 'tour_event')}
+            >
+              <option value="tada">{t('TA / DA tour expense', 'টিএ/ডিএ সফর খরচ', lang)}</option>
+              <option value="conveyance">{t('Monthly local conveyance', 'মাসিক স্থানীয় যাতায়াত', lang)}</option>
+              <option value="tour_event">{t('Tour & event advance settlement', 'ট্যুর ও ইভেন্ট অগ্রিম সমন্বয়', lang)}</option>
+            </select>
+            <p style={{ margin: '8px 0 0', fontSize: '11.5px', color: 'var(--brand-slate-500)', lineHeight: 1.45 }}>
+              {claimType === 'tada'
+                ? t('Outstation travel, daily allowance and hotel bills. Statutory DA ৳1,500–৳2,000/day.', 'বহিঃস্থ সফর, দৈনিক ভাতা ও হোটেল বিল। নির্ধারিত ডিএ ৳১,৫০০–৳২,০০০/দিন।', lang)
+                : claimType === 'conveyance'
+                  ? t('Intra-city Uber, CNG and shuttle fares. Monthly ceiling ৳8,000 (Grade 8).', 'শহরের ভিতরে উবার, সিএনজি ও শাটল। মাসিক সীমা ৳৮,০০০ (গ্রেড ৮)।', lang)
+                  : t('Sports, events and plant shutdown advances. Treasury will settle the balance.', 'ক্রীড়া, ইভেন্ট ও শাটডাউন অগ্রিম। কোষাগার ব্যালেন্স সমন্বয় করবে।', lang)}
+            </p>
           </div>
 
           {/* Quick Preset Buttons */}
           <div className="claims-preset-bar">
             <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={13} style={{ color: 'var(--status-warning)' }} />
-              <span>{t('Quick Presets / Recent Tour Orders:', 'দ্রুত টেমপ্লেট ও সাম্প্রতিক সফর অর্ডার:', lang)}</span>
+              <span>{t('Recent tour orders', 'সাম্প্রতিক সফর অর্ডার', lang)}</span>
             </div>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <select
+              className="form-input"
+              value=""
+              onChange={(e) => {
+                const preset = PURPOSE_PRESETS[Number(e.target.value)];
+                if (preset) handleApplyPreset(preset);
+              }}
+            >
+              <option value="">{t('Choose a recent tour order…', 'সাম্প্রতিক সফর অর্ডার বেছে নিন…', lang)}</option>
               {PURPOSE_PRESETS.map((p, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleApplyPreset(p)}
-                  className="claims-preset-chip"
-                >
-                  {p.label.split('—')[0].slice(0, 36)}...
-                </button>
+                <option key={idx} value={idx}>{p.label}</option>
               ))}
-            </div>
+            </select>
           </div>
 
           {/* Section B: Purpose & Tour Details */}
@@ -569,7 +521,7 @@ export default function SubmitClaimModal({
                       gap: '4px',
                     }}
                   >
-                    <Sparkles size={13} />
+                    <Calculator size={13} />
                     <span>Auto-Calculate DA</span>
                   </button>
                 )}

@@ -547,7 +547,7 @@
 }
 
 /* ─── PAGE CONTENT & CHAT VIEWPORT LOCKING ─────────────────────────────────── */
-.page-content { padding:26px 28px 60px; flex:1; }
+.page-content { padding: 18px 24px 48px; flex: 1; }
 
 /* Dedicated Full Viewport Shell for Inner Circle Enterprise Chat */
 .app-shell.chat-view-shell {

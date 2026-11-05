@@ -172,3 +172,42 @@ final class MyRegularisationsProvider
 }
 
 String _$myRegularisationsHash() => r'64142d30acf2d3c5fb139bd4db8c2cd983324072';
+
+@ProviderFor(teamAttendance)
+final teamAttendanceProvider = TeamAttendanceProvider._();
+
+final class TeamAttendanceProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<TeamRoster?>,
+          TeamRoster?,
+          FutureOr<TeamRoster?>
+        >
+    with $FutureModifier<TeamRoster?>, $FutureProvider<TeamRoster?> {
+  TeamAttendanceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'teamAttendanceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$teamAttendanceHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<TeamRoster?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<TeamRoster?> create(Ref ref) {
+    return teamAttendance(ref);
+  }
+}
+
+String _$teamAttendanceHash() => r'cccccccccccccccccccccccccccccccccccccccc';
