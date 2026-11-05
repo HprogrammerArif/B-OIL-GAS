@@ -385,6 +385,14 @@ export interface FishboneFactors {
   environment: string[];
 }
 
+export interface IncidentSpotFile {
+  id: string;
+  name: string;
+  mime: string;
+  dataUrl: string;
+  sizeBytes: number;
+}
+
 export interface IncidentItem {
   id: string;
   incNo: string;
@@ -425,6 +433,7 @@ export interface IncidentItem {
   statutoryAgency?: string;
   statutoryNoticeHours?: number;
   evidenceAttached?: boolean;
+  spotFiles?: IncidentSpotFile[];
   closureSignOff?: {
     safetyOfficerName: string;
     safetySignedAt: string;

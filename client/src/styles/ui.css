@@ -229,6 +229,19 @@
 .inc-check { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .inc-check input { width: 16px; height: 16px; }
 .inc-injury-box { margin-bottom: 12px; padding: 12px; border-radius: 10px; background: var(--status-warning-bg); }
+.inc-spot-attach { margin-top: 4px; }
+.inc-spot-label { font-size: 12.5px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.inc-spot-hint { margin: 0 0 10px; font-size: 12px; color: var(--text-3); line-height: 1.4; }
+.inc-spot-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.inc-spot-block { margin-top: 10px; }
+.inc-spot-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.inc-spot-item { position: relative; width: 88px; }
+.inc-spot-item img,
+.inc-spot-thumb img { width: 88px; height: 88px; object-fit: cover; border-radius: 8px; display: block; border: 1px solid var(--border-1); background: var(--surface-2); }
+.inc-spot-thumb { display: block; }
+.inc-spot-pdf { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-1); background: var(--surface-2); font-size: 11.5px; font-weight: 600; color: var(--text-1); max-width: 220px; }
+.inc-spot-pdf span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inc-spot-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 99px; border: none; background: rgba(15, 23, 42, 0.75); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
 /* Assets & Equipment clarity layout */
 .ast-row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }

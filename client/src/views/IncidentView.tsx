@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ViewProps, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import Pagination from '../components/Pagination';
@@ -9,6 +9,7 @@ import { type IncidentMode, incidentModeFor, incidentsVisibleTo, daysSinceLostTi
 import {
   useOperationsStore,
   IncidentItem,
+  IncidentSpotFile,
   IncidentType,
   IncidentWorkflowStage,
   InvolvedPerson,
@@ -17,7 +18,7 @@ import {
 import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX,
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -51,6 +52,63 @@ export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: 
 
 const CAPA_PAGE = 4;
 const INCIDENT_PAGE = 6;
+const MAX_SPOT_FILES = 6;
+const MAX_SPOT_BYTES = 8 * 1024 * 1024;
+
+function isSpotFileAllowed(file: File): boolean {
+  const mime = file.type.toLowerCase();
+  const name = file.name.toLowerCase();
+  return mime.startsWith('image/') || mime === 'application/pdf' || /\.(jpe?g|png|webp|gif|heic|pdf)$/.test(name);
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function shrinkSpotImage(file: File): Promise<string> {
+  return readFileAsDataUrl(file).then((src) => new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 1280;
+      let width = img.width;
+      let height = img.height;
+      if (width > max || height > max) {
+        const scale = Math.min(max / width, max / height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, width);
+      canvas.height = Math.max(1, height);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(src);
+        return;
+      }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  }));
+}
+
+async function toSpotFile(file: File): Promise<IncidentSpotFile> {
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  const dataUrl = isPdf ? await readFileAsDataUrl(file) : await shrinkSpotImage(file);
+  return {
+    id: `spot-${crypto.randomUUID()}`,
+    name: file.name,
+    mime: isPdf ? 'application/pdf' : (file.type || 'image/jpeg'),
+    dataUrl,
+    sizeBytes: file.size,
+  };
+}
 
 export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const {
@@ -113,7 +171,9 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [wizardInjuryNature, setWizardInjuryNature] = useState('');
   const [wizardTreatmentGiven, setWizardTreatmentGiven] = useState('');
   const [wizardWitnessName, setWizardWitnessName] = useState('');
-  const [wizardSimulatePhoto, setWizardSimulatePhoto] = useState(false);
+  const [wizardSpotFiles, setWizardSpotFiles] = useState<IncidentSpotFile[]>([]);
+  const spotFileInputRef = useRef<HTMLInputElement>(null);
+  const spotCameraInputRef = useRef<HTMLInputElement>(null);
 
   // ── Quick Hazard State (Modal 2) ──
   const [quickHazardTitle, setQuickHazardTitle] = useState('');
@@ -322,6 +382,43 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
+  const addSpotFiles = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const room = MAX_SPOT_FILES - wizardSpotFiles.length;
+    if (room <= 0) {
+      showToast(t(`You can attach up to ${MAX_SPOT_FILES} files.`, `সর্বোচ্চ ${MAX_SPOT_FILES}টি ফাইল যুক্ত করা যায়।`, lang), 'warn');
+      return;
+    }
+    const picked = Array.from(list).slice(0, room);
+    const next: IncidentSpotFile[] = [];
+    for (const file of picked) {
+      if (!isSpotFileAllowed(file)) {
+        showToast(t(`${file.name} is not a photo or PDF.`, `${file.name} ছবি বা PDF নয়।`, lang), 'warn');
+        continue;
+      }
+      if (file.size > MAX_SPOT_BYTES) {
+        showToast(t(`${file.name} is larger than 8 MB.`, `${file.name} ৮ এমবির বেশি।`, lang), 'warn');
+        continue;
+      }
+      try {
+        next.push(await toSpotFile(file));
+      } catch {
+        showToast(t(`Could not read ${file.name}.`, `${file.name} পড়া যায়নি।`, lang), 'warn');
+      }
+    }
+    if (next.length > 0) {
+      setWizardSpotFiles((prev) => [...prev, ...next]);
+      showToast(
+        t(
+          next.length === 1 ? `${next[0].name} attached.` : `${next.length} files attached.`,
+          next.length === 1 ? `${next[0].name} যুক্ত হয়েছে।` : `${next.length}টি ফাইল যুক্ত হয়েছে।`,
+          lang,
+        ),
+        'success',
+      );
+    }
+  };
+
   // Wizard Submit Handler (Modal 1)
   // ─────────────────────────────────────────────────────────────────────────
   const handleWizardSubmit = () => {
@@ -414,7 +511,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       statutoryReportable: wizardSeverity >= 3,
       statutoryAgency: wizardSeverity >= 3 ? 'Department of Explosives (DoE)' : undefined,
       statutoryNoticeHours: wizardSeverity >= 3 ? 24 : undefined,
-      evidenceAttached: wizardSimulatePhoto,
+      evidenceAttached: wizardSpotFiles.length > 0,
+      spotFiles: wizardSpotFiles,
     };
 
     addIncident(newInc);
@@ -424,6 +522,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     setWizardImmediateActions('');
     setWizardHasInjury(false);
     setWizardInjuredEmpId('');
+    setWizardSpotFiles([]);
 
     showToast(
       t(
@@ -673,7 +772,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                   <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
                     {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
                   </Button>
-                  <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setShowLogWizard(true); }}>
+                  <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setWizardSpotFiles([]); setShowLogWizard(true); }}>
                     {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
                   </Button>
                 </>
@@ -904,6 +1003,25 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
                     {inc.immediateActionsTaken && (
                       <p className="inc-cause"><strong>{t('Done on the spot', 'তাৎক্ষণিক পদক্ষেপ', lang)}:</strong> {inc.immediateActionsTaken}</p>
+                    )}
+                    {(inc.spotFiles?.length ?? 0) > 0 && (
+                      <div className="inc-spot-block">
+                        <div className="inc-spot-label">{t('Photos of the spot', 'ঘটনাস্থলের ছবি', lang)}</div>
+                        <div className="inc-spot-grid">
+                          {inc.spotFiles!.map((file) => (
+                            file.mime === 'application/pdf' ? (
+                              <a key={file.id} className="inc-spot-pdf" href={file.dataUrl} target="_blank" rel="noreferrer">
+                                <Paperclip size={14} />
+                                <span>{file.name}</span>
+                              </a>
+                            ) : (
+                              <a key={file.id} className="inc-spot-thumb" href={file.dataUrl} target="_blank" rel="noreferrer" title={file.name}>
+                                <img src={file.dataUrl} alt={file.name} />
+                              </a>
+                            )
+                          ))}
+                        </div>
+                      </div>
                     )}
                     {inc.closureSignOff && (
                       <p className="inc-closed">
@@ -1169,13 +1287,60 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
               )}
             </FormField>
 
-            <Button
-              variant={wizardSimulatePhoto ? 'secondary' : 'ghost'}
-              icon={wizardSimulatePhoto ? <CheckCircle2 size={14} /> : <Camera size={14} />}
-              onClick={() => setWizardSimulatePhoto(!wizardSimulatePhoto)}
-            >
-              {wizardSimulatePhoto ? t('2 photos attached. Tap to remove.', '২টি ছবি যুক্ত। সরাতে চাপুন।', lang) : t('Add photos of the spot', 'জায়গার ছবি যুক্ত করুন', lang)}
-            </Button>
+            <div className="inc-spot-attach">
+              <div className="inc-spot-label">{t('Photos or files of the spot', 'ঘটনাস্থলের ছবি বা ফাইল', lang)}</div>
+              <p className="inc-spot-hint">
+                {t('Take a photo or attach a picture or PDF from this phone. Up to 6 files.', 'এই ফোন থেকে ছবি তুলুন, অথবা ছবি বা PDF যুক্ত করুন। সর্বোচ্চ ৬টি।', lang)}
+              </p>
+              <input
+                ref={spotCameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                onChange={(e) => { void addSpotFiles(e.target.files); e.target.value = ''; }}
+              />
+              <input
+                ref={spotFileInputRef}
+                type="file"
+                accept="image/*,application/pdf,.pdf"
+                multiple
+                hidden
+                onChange={(e) => { void addSpotFiles(e.target.files); e.target.value = ''; }}
+              />
+              <div className="inc-spot-actions">
+                <Button type="button" variant="secondary" icon={<Camera size={14} />} onClick={() => spotCameraInputRef.current?.click()}>
+                  {t('Take a photo', 'ছবি তুলুন', lang)}
+                </Button>
+                <Button type="button" variant="ghost" icon={<Paperclip size={14} />} onClick={() => spotFileInputRef.current?.click()}>
+                  {t('Choose files', 'ফাইল বেছে নিন', lang)}
+                </Button>
+              </div>
+              {wizardSpotFiles.length > 0 && (
+                <div className="inc-spot-grid">
+                  {wizardSpotFiles.map((file) => (
+                    <div key={file.id} className="inc-spot-item">
+                      {file.mime === 'application/pdf' ? (
+                        <div className="inc-spot-pdf">
+                          <Paperclip size={14} />
+                          <span>{file.name}</span>
+                        </div>
+                      ) : (
+                        <img src={file.dataUrl} alt={file.name} />
+                      )}
+                      <button
+                        type="button"
+                        className="inc-spot-remove"
+                        aria-label={t(`Remove ${file.name}`, `${file.name} সরান`, lang)}
+                        onClick={() => setWizardSpotFiles((prev) => prev.filter((f) => f.id !== file.id))}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </Modal>
