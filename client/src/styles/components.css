@@ -4415,6 +4415,47 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   color: var(--text-1);
   border: 1.5px solid var(--border-2);
 }
+.driver-progression-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.driver-step-done {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--status-success-text);
+  line-height: 1.35;
+}
+.driver-road {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+}
+.driver-road-track {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-3);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.driver-road-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--status-warning-solid);
+}
+.driver-sos-live {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--status-danger-bg);
+  border: 1px solid var(--status-danger-border);
+  color: var(--status-danger-text);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
 [data-theme="dark"] .driver-progression-btn.toll {
   background: var(--surface-inverse-2);
   color: var(--text-on-brand);

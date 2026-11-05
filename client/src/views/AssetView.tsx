@@ -63,6 +63,18 @@ type MainModuleTab = 'register' | 'maintenance' | 'financials' | 'transfers' | '
 type InspectorSubTab = 'overview' | 'timeline' | 'custody' | 'spares';
 type KpiQuickFilter = 'none' | 'pending_signoff' | 'cal_alerts' | 'eol_watch';
 
+const assetServiceDue = (a: AssetRecord) =>
+  a.lifecycleStage !== 'disposed'
+  && a.lifecycleStage !== 'decommissioned'
+  && (a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance' || (a.daysToService > 0 && a.daysToService <= 30));
+
+const assetIsPlantSide = (a: AssetRecord) =>
+  a.category === 'plant' || a.category === 'safety' || a.category === 'lab' || a.category === 'vehicle';
+
+const assetShowsSpares = (a: AssetRecord) => a.spares.length > 0;
+
+const assetShowsSafetyIncident = (a: AssetRecord) => a.category === 'plant' || a.category === 'safety';
+
 export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const {
     assets,
@@ -238,6 +250,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
       setSelectedAssetId(selectedAsset.id);
     }
   }, [selectedAsset, selectedAssetId]);
+
+  useEffect(() => {
+    const a = assets.find((x) => x.id === selectedAssetId);
+    if (!a) return;
+    setInspectorTab(!a.custodianAcknowledged ? 'custody' : 'overview');
+  }, [selectedAssetId]);
 
   // Cross-Tab Deep-Link Helper: Jump straight to any asset's 360° Dossier
   const inspectAssetInCockpit = (assetId: string) => {
@@ -550,33 +568,34 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         ),
       };
     }
-    if (a.lifecycleStage === 'calibration_due' || a.lifecycleStage === 'maintenance' || (a.daysToService > 0 && a.daysToService <= 30)) {
-      const canAct = roleConfig.canCertifyCalibration || roleConfig.canManageWorkOrders;
+    if (assetServiceDue(a)) {
       return {
         tone: 'warn',
         text: a.lifecycleStage === 'maintenance'
-          ? t(`Under repair. Next service date is ${a.nextServiceDate}.`, `মেরামতাধীন। পরবর্তী সার্ভিস তারিখ ${a.nextServiceDate}।`, lang)
+          ? t(`Under repair. Record the check when the work is finished.`, `মেরামতাধীন। কাজ শেষ হলে সার্ভিস নথিভুক্ত করুন।`, lang)
           : t(`Service or inspection is due in ${a.daysToService} days (${a.nextServiceDate}).`, `আগামী ${bn(a.daysToService)} দিনের মধ্যে (${a.nextServiceDate}) সার্ভিস বা পরীক্ষা বাকি।`, lang),
-        cta: canAct ? (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {roleConfig.canCertifyCalibration && (
-              <Button
-                size="sm"
-                icon={<CheckCircle size={13} />}
-                onClick={() => {
-                  certifyAssetDirect(a.id, currentPersona.name, currentPersona.label);
-                  showToast(t(`Service certified for ${a.name}.`, `${a.name}-এর সার্ভিস প্রত্যয়িত।`, lang), 'success');
-                }}
-              >
-                {t('Certify service', 'সার্ভিস প্রত্যয়ন', lang)}
-              </Button>
-            )}
-            {roleConfig.canManageWorkOrders && (
-              <Button size="sm" variant="secondary" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
-                {t('Create repair order', 'মেরামত আদেশ', lang)}
-              </Button>
-            )}
-          </div>
+        cta: roleConfig.canCertifyCalibration ? (
+          <Button
+            size="sm"
+            icon={<CheckCircle size={13} />}
+            onClick={() => {
+              certifyAssetDirect(a.id, currentPersona.name, currentPersona.label);
+              showToast(
+                t(
+                  `Check recorded for ${a.name}. Next service is in ${a.calibrationCycleDays} days.`,
+                  `${a.name}-এর সার্ভিস নথিভুক্ত। পরবর্তী সার্ভিস ${bn(a.calibrationCycleDays)} দিন পরে।`,
+                  lang,
+                ),
+                'success',
+              );
+            }}
+          >
+            {t('Record the check as done', 'সার্ভিস সম্পন্ন নথিভুক্ত করুন', lang)}
+          </Button>
+        ) : roleConfig.canManageWorkOrders ? (
+          <Button size="sm" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
+            {t('Create repair order', 'মেরামত আদেশ', lang)}
+          </Button>
         ) : undefined,
       };
     }
@@ -1018,16 +1037,14 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         <div>
                           <h3 className="ast-title">{selectedAsset.name}</h3>
                           <p className="ast-origin">
-                            {selectedAsset.facility} · {selectedAsset.functionalLocation} · {t('Operator:', 'দায়িত্বপ্রাপ্ত:', lang)}{' '}
-                            <strong>{selectedAsset.custodian}</strong> ({selectedAsset.department})
+                            {selectedAsset.facility} · {selectedAsset.functionalLocation} · {t('with', 'দায়িত্বে', lang)}{' '}
+                            <strong>{selectedAsset.custodian}</strong>
                           </p>
-                          <p className="ast-purpose">{selectedAsset.specs}</p>
                         </div>
                         {getStageBadge(selectedAsset.lifecycleStage, selectedAsset.daysToService)}
                       </div>
 
-                      {/* What happens next / what do I do */}
-                      <div className={`lv-status ${next.tone === 'warn' ? 'warn' : 'ok'}`} style={{ marginTop: 12, marginBottom: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                      <div className={`lv-status ${next.tone === 'warn' ? 'warn' : 'ok'}`} style={{ marginTop: 12, marginBottom: 8, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: '1 1 240px' }}>
                           {next.tone === 'warn' ? <AlertTriangle size={16} /> : <CheckCircle size={16} />}
                           <span>{next.text}</span>
@@ -1035,84 +1052,72 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         {next.cta}
                       </div>
 
-                      {/* Role-gated action bar right at the top */}
-                      <div className="ast-top-actions">
-                        {roleConfig.canCertifyCalibration &&
-                          selectedAsset.lifecycleStage !== 'disposed' &&
-                          selectedAsset.lifecycleStage !== 'decommissioned' && (
+                      {(() => {
+                        const ended = selectedAsset.lifecycleStage === 'disposed' || selectedAsset.lifecycleStage === 'decommissioned';
+                        const waitingSign = !selectedAsset.custodianAcknowledged;
+                        const extras: React.ReactNode[] = [];
+                        if (!ended && !waitingSign && roleConfig.canManageWorkOrders && !assetServiceDue(selectedAsset)) {
+                          extras.push(
+                            <Button key="wo" size="sm" variant="secondary" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
+                              {t('Create repair order', 'মেরামত আদেশ', lang)}
+                            </Button>,
+                          );
+                        }
+                        if (!ended && !waitingSign && roleConfig.canTransferCustody) {
+                          extras.push(
+                            <Button key="tr" size="sm" variant="secondary" icon={<ArrowRightLeft size={13} />} onClick={() => setShowTransferModal(true)}>
+                              {t('Transfer / gate pass', 'স্থানান্তর / গেট পাস', lang)}
+                            </Button>,
+                          );
+                        }
+                        if (!ended && !waitingSign) {
+                          extras.push(
+                            <Button key="def" size="sm" variant="ghost" icon={<RotateCcw size={13} />} onClick={() => setShowRejectModal(true)}>
+                              {t('Report defect', 'ত্রুটি জানান', lang)}
+                            </Button>,
+                          );
+                        }
+                        if (!ended && onNavigate && assetShowsSafetyIncident(selectedAsset)) {
+                          extras.push(
                             <Button
+                              key="saf"
                               size="sm"
-                              icon={<CheckCircle size={13} />}
+                              variant="ghost"
+                              icon={<AlertTriangle size={13} />}
                               onClick={() => {
-                                certifyAssetDirect(selectedAsset.id, currentPersona.name, currentPersona.label);
+                                onNavigate('incident');
                                 showToast(
-                                  t(
-                                    `Service certified for ${selectedAsset.name}. Next service in ${selectedAsset.calibrationCycleDays} days.`,
-                                    `${selectedAsset.name}-এর সার্ভিস প্রত্যয়ন সম্পন্ন।`,
-                                    lang,
-                                  ),
-                                  'success',
+                                  t(`Opening Safety & Incidents for ${selectedAsset.name}.`, `${selectedAsset.name}-এর জন্য নিরাপত্তা পাতা খোলা হচ্ছে।`, lang),
+                                  'gold',
                                 );
                               }}
                             >
-                              {t('Certify service', 'সার্ভিস প্রত্যয়ন', lang)}
-                            </Button>
-                          )}
-
-                        {roleConfig.canManageWorkOrders &&
-                          selectedAsset.lifecycleStage !== 'disposed' &&
-                          selectedAsset.lifecycleStage !== 'decommissioned' && (
-                            <Button size="sm" variant="secondary" icon={<Wrench size={13} />} onClick={() => setShowWorkOrderModal(true)}>
-                              {t('Create repair order', 'মেরামত আদেশ', lang)}
-                            </Button>
-                          )}
-
-                        {roleConfig.canTransferCustody &&
-                          selectedAsset.lifecycleStage !== 'disposed' &&
-                          selectedAsset.lifecycleStage !== 'decommissioned' && (
-                            <Button size="sm" variant="secondary" icon={<ArrowRightLeft size={13} />} onClick={() => setShowTransferModal(true)}>
-                              {t('Transfer / gate pass', 'স্থানান্তর / গেট পাস', lang)}
-                            </Button>
-                          )}
-
-                        {selectedAsset.lifecycleStage !== 'disposed' &&
-                          selectedAsset.lifecycleStage !== 'decommissioned' && (
-                            <Button size="sm" variant="outline-danger" icon={<RotateCcw size={13} />} onClick={() => setShowRejectModal(true)}>
-                              {t('Report defect', 'ত্রুটি জানান', lang)}
-                            </Button>
-                          )}
-
-                        {selectedAsset.lifecycleStage !== 'disposed' && onNavigate && (
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            icon={<AlertTriangle size={13} />}
-                            onClick={() => {
-                              onNavigate('incident');
-                              showToast(
-                                t(`Opening Safety & Incidents for ${selectedAsset.name}.`, `${selectedAsset.name}-এর জন্য নিরাপত্তা পাতা খোলা হচ্ছে।`, lang),
-                                'gold',
-                              );
-                            }}
-                          >
-                            {t('Report safety incident', 'নিরাপত্তা ঘটনা জানান', lang)}
-                          </Button>
-                        )}
-
-                        {roleConfig.canInitiateDecommission &&
-                          selectedAsset.lifecycleStage !== 'decommissioned' &&
-                          selectedAsset.lifecycleStage !== 'disposed' && (
-                            <Button size="sm" variant="ghost" icon={<Archive size={13} />} onClick={() => setShowDecommissionModal(true)}>
+                              {t('Report safety incident', 'নিরাপত্তা ঘটনা জানান', lang)}
+                            </Button>,
+                          );
+                        }
+                        if (!ended && roleConfig.canInitiateDecommission) {
+                          extras.push(
+                            <Button key="ret" size="sm" variant="ghost" icon={<Archive size={13} />} onClick={() => setShowDecommissionModal(true)}>
                               {t('Retire machine', 'অবসর ঘোষণা', lang)}
-                            </Button>
-                          )}
-
-                        {roleConfig.canAuthorizeWriteOff && selectedAsset.lifecycleStage === 'decommissioned' && (
-                          <Button size="sm" variant="gold" onClick={() => setDisposalTargetAsset(selectedAsset)}>
-                            {t('Approve sale or scrap', 'বিক্রয় বা স্ক্র্যাপ অনুমোদন', lang)}
-                          </Button>
-                        )}
-                      </div>
+                            </Button>,
+                          );
+                        }
+                        if (roleConfig.canAuthorizeWriteOff && selectedAsset.lifecycleStage === 'decommissioned' && !next.cta) {
+                          extras.push(
+                            <Button key="woff" size="sm" variant="gold" onClick={() => setDisposalTargetAsset(selectedAsset)}>
+                              {t('Approve sale or scrap', 'বিক্রয় বা স্ক্র্যাপ অনুমোদন', lang)}
+                            </Button>,
+                          );
+                        }
+                        if (extras.length === 0) return null;
+                        return (
+                          <details className="ast-more">
+                            <summary>{t('More actions', 'আরও কাজ', lang)}</summary>
+                            <div className="ast-top-actions">{extras}</div>
+                          </details>
+                        );
+                      })()}
                     </div>
 
                     <div className="eam-dossier-body">
@@ -1129,33 +1134,33 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </div>
                       )}
 
-                      {/* Compact 1-line stage bar */}
-                      <AssetLifecycleStepper asset={selectedAsset} lang={lang} />
+                      {(assetIsPlantSide(selectedAsset) || assetServiceDue(selectedAsset) || selectedAsset.lifecycleStage === 'decommissioned' || selectedFinancials.isEconomicEoLCandidate) && (
+                        <AssetLifecycleStepper asset={selectedAsset} lang={lang} />
+                      )}
 
-                      {/* Sub-tabs */}
                       <div className="eam-subtabs">
                         <button
                           type="button"
                           className={`eam-subtab ${inspectorTab === 'overview' ? 'active' : ''}`}
                           onClick={() => setInspectorTab('overview')}
                         >
-                          <Eye size={13} /> {t('Summary', 'সারসংক্ষেপ', lang)}
-                        </button>
-                        <button
-                          type="button"
-                          className={`eam-subtab ${inspectorTab === 'timeline' ? 'active' : ''}`}
-                          onClick={() => setInspectorTab('timeline')}
-                        >
-                          <History size={13} /> {t('History', 'ইতিহাস', lang)} ({selectedAsset.lifecycleEvents.length})
+                          <Eye size={13} /> {t('About', 'পরিচিতি', lang)}
                         </button>
                         <button
                           type="button"
                           className={`eam-subtab ${inspectorTab === 'custody' ? 'active' : ''}`}
                           onClick={() => setInspectorTab('custody')}
                         >
-                          <UserCheck size={13} /> {t('Custody', 'হস্তান্তর', lang)} ({selectedAsset.custodyHistory.length})
+                          <UserCheck size={13} /> {t('Who has it', 'কার কাছে', lang)}
                         </button>
-                        {!roleConfig.isSelfServiceOnly && (
+                        <button
+                          type="button"
+                          className={`eam-subtab ${inspectorTab === 'timeline' ? 'active' : ''}`}
+                          onClick={() => setInspectorTab('timeline')}
+                        >
+                          <History size={13} /> {t('History', 'ইতিহাস', lang)}
+                        </button>
+                        {!roleConfig.isSelfServiceOnly && assetShowsSpares(selectedAsset) && (
                           <button
                             type="button"
                             className={`eam-subtab ${inspectorTab === 'spares' ? 'active' : ''}`}
@@ -1350,7 +1355,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                       )}
 
                       {/* SUB-TAB D: SPARE PARTS */}
-                      {inspectorTab === 'spares' && (
+                      {inspectorTab === 'spares' && assetShowsSpares(selectedAsset) && (
                         <div>
                           {selectedAsset.spares.length === 0 ? (
                             <EmptyState

@@ -45,13 +45,9 @@ export default function AssetLifecycleStepper({ asset, lang }: AssetLifecycleSte
         </div>
 
         <div className="ast-life-badges">
-          {asset.isUnderWarranty ? (
+          {asset.isUnderWarranty && (
             <span className="badge success" style={{ fontSize: '11px' }}>
               <ShieldCheck size={11} /> {t(`Under warranty till ${asset.warrantyExpiry}`, `ওয়ারেন্টি ${asset.warrantyExpiry} পর্যন্ত`, lang)}
-            </span>
-          ) : (
-            <span className="badge" style={{ fontSize: '11px', background: 'var(--surface-2)', color: 'var(--text-3)' }}>
-              {t('Warranty ended', 'ওয়ারেন্টি শেষ', lang)}
             </span>
           )}
         </div>

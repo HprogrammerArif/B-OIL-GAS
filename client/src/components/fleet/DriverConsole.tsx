@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFleetStore, VehicleRequisition, Driver } from '../../store/fleetStore';
 import { t } from '../../types';
 import { showToast } from '../ToastManager';
@@ -6,7 +6,6 @@ import DriverCallModal from './DriverCallModal';
 import { EmptyState } from '../ui';
 import { useCurrentUser } from '../../auth/session';
 import { driverRecordFor, ENABLE_FLEET_CHAT_DESK } from '../../views/fleet/config';
-import { nextRef } from '../../lib/refs';
 import { nowTime } from '../../lib/clock';
 import {
   Car, UserCheck, ShieldCheck, Phone, MessageSquare, AlertTriangle,
@@ -36,13 +35,34 @@ export default function DriverConsole(props: DriverConsoleProps) {
   return <DriverConsoleBody {...props} currentDriver={currentDriver} />;
 }
 
+const TOLL_PLAZAS: { name: string; amount: number }[] = [
+  { name: 'Babubazar Second Buriganga Bridge', amount: 150 },
+  { name: 'Mayor Mohammad Hanif Flyover', amount: 260 },
+  { name: 'Dhaka Elevated Expressway (Kuril-Farmgate)', amount: 80 },
+  { name: 'Padma Multipurpose Bridge', amount: 800 },
+  { name: 'Kanchpur Second Meghna Bridge', amount: 120 },
+];
+
+function clock(totalSec: number): string {
+  const mins = Math.floor(totalSec / 60);
+  const secs = totalSec % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
 function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsoleProps & { currentDriver: Driver }) {
   const {
     requisitions,
+    driverTollSlips,
     startTrip,
     completeTrip,
     updateDriverStatus,
-    sendChatMessage,
+    submitDriverTollClaim,
+    reviewDriverTollSlip,
+    markPickupArrived,
+    markDestinationArrived,
+    raiseTripSos,
+    clearTripSos,
+    logDriverCall,
   } = useFleetStore();
 
   const assignedMissions = requisitions.filter(
@@ -54,51 +74,78 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
   const [showCallModal, setShowCallModal] = useState(false);
   const [calleeInfo, setCalleeInfo] = useState({ name: '', role: '', phone: '' });
 
-  // Toll Claim Modal State
   const [showTollModal, setShowTollModal] = useState(false);
-  const [tollAmount, setTollAmount] = useState('150');
-  const [tollPlaza, setTollPlaza] = useState('Babubazar Second Buriganga Bridge');
-  const [tollClaims, setTollClaims] = useState([
-    { id: 'TOL-901', plaza: 'Babubazar Buriganga Bridge', amount: 150, time: '09:40 AM', status: 'Approved' },
-    { id: 'TOL-884', plaza: 'Mayor Hanif Flyover (Dhaka Exit)', amount: 260, time: 'Yesterday', status: 'Reimbursed' },
-  ]);
+  const [tollPlaza, setTollPlaza] = useState(TOLL_PLAZAS[0].name);
+  const [tollAmount, setTollAmount] = useState(String(TOLL_PLAZAS[0].amount));
 
-  // Start Trip Dialog State
   const [showStartTripDialog, setShowStartTripDialog] = useState(false);
   const [startOdoInput, setStartOdoInput] = useState('42350');
 
-  // Complete Trip Dialog State
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
-  const [closingOdoInput, setClosingOdoInput] = useState('42435');
+  const [closingOdoInput, setClosingOdoInput] = useState('42392');
 
-  // Emergency SOS State
-  const [sosSent, setSosSent] = useState(false);
+  const [closedTrip, setClosedTrip] = useState<{ id: string; from: string; to: string; km: number; gateIn: string } | null>(null);
+  const [, setRoadTick] = useState(0);
 
-  // Helper to handle driver status changes
+  const onRest = currentDriver.status === 'rest_required';
+  const moving = activeMission?.status === 'in_transit';
+  const atPickup = !!activeMission?.pickupArrivedAt;
+  const atDestination = !!activeMission?.destinationArrivedAt;
+
+  useEffect(() => {
+    if (!moving || !activeMission?.gateOutEpoch) return;
+    const id = window.setInterval(() => setRoadTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [moving, activeMission?.gateOutEpoch, activeMission?.id]);
+
+  const mySlips = driverTollSlips.filter((slip) =>
+    requisitions.some((r) => r.id === slip.reqId && r.assignedDriverId === currentDriver.id),
+  );
+
   const handleStatusChange = (newStatus: Driver['status']) => {
+    if (newStatus === currentDriver.status && newStatus !== 'on_trip') return;
+    if (newStatus === 'on_trip') {
+      if (moving) return;
+      showToast(
+        t('You go en route when you start the journey from the mission card.', 'মিশন কার্ড থেকে যাত্রা শুরু করলেই আপনি পথে আছেন।', lang),
+        'info',
+      );
+      if (atPickup && !onRest) setShowStartTripDialog(true);
+      return;
+    }
+    if (newStatus === 'available' && moving) {
+      showToast(
+        t('This trip is still on the road. End it before marking yourself free.', 'ট্রিপ এখনো চলছে। ফ্রি হওয়ার আগে ট্রিপ শেষ করুন।', lang),
+        'warn',
+      );
+      return;
+    }
+    if (newStatus === 'rest_required' && moving) {
+      showToast(
+        t('You are on the road. Reach the destination before a rest break.', 'আপনি পথে আছেন। বিরতির আগে গন্তব্যে পৌঁছান।', lang),
+        'warn',
+      );
+      return;
+    }
     updateDriverStatus(currentDriver.id, newStatus);
     showToast(
-      lang === 'en'
-        ? `Driver status updated to: ${newStatus.replace('_', ' ').toUpperCase()}`
-        : `চালক স্ট্যাটাস আপডেট: ${newStatus}`,
-      'info'
+      newStatus === 'rest_required'
+        ? t('Rest break started. Dispatch will not give you a new trip until you are back on duty.', 'বিরতি শুরু। ডিউটিতে ফেরার আগে নতুন ট্রিপ দেওয়া হবে না।', lang)
+        : t('You are back on duty and ready for a trip.', 'আপনি আবার ডিউটিতে এবং ট্রিপের জন্য প্রস্তুত।', lang),
+      'info',
     );
   };
 
-  // 1. Notify Passenger of Arrival at Bay
   const handleNotifyArrival = () => {
-    if (!activeMission) return;
-    sendChatMessage(
-      activeMission.id,
-      'driver',
-      currentDriver.name,
-      `📍 Salam Sir, I have arrived at the designated pickup bay (${activeMission.from.split(',')[0]}). The vehicle (${activeMission.assignedVehiclePlate || 'Assigned Car'}) is parked, AC running at 21°C. Ready whenever you are.`
-    );
+    if (!activeMission || onRest) return;
+    markPickupArrived(activeMission.id, currentDriver.name);
     showToast(
-      lang === 'en'
-        ? `✓ Arrival alert dispatched to ${activeMission.requesterName}! Message broadcasted to Central Dispatch.`
-        : `✓ যাত্রী ${activeMission.requesterName}-কে গাড়ির আগমন বার্তা পাঠানো হয়েছে!`,
-      'success'
+      t(
+        `Told ${activeMission.requesterName} you are waiting at ${activeMission.from}.`,
+        `${activeMission.requesterName}-কে জানানো হয়েছে আপনি ${activeMission.from}-এ অপেক্ষা করছেন।`,
+        lang,
+      ),
+      'success',
     );
   };
 
@@ -107,32 +154,43 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
     if (!activeMission) return;
     const odo = parseInt(startOdoInput, 10) || 42350;
     startTrip(activeMission.id, odo, nowTime());
+    setClosingOdoInput(String(odo + 42));
     setShowStartTripDialog(false);
     showToast(
-      lang === 'en'
-        ? `Journey started for ${activeMission.id}. Gate-out recorded (odometer: ${odo.toLocaleString()} km).`
-        : `ট্রিপ শুরু হয়েছে। ওডোমিটার: ${odo.toLocaleString()} কিমি।`,
-      'success'
+      t(
+        `Gate-out recorded at ${odo.toLocaleString('en-IN')} km. You are on the road to ${activeMission.to}.`,
+        `গেট-আউট ${odo.toLocaleString('bn-BD')} কিমিতে নথিভুক্ত। আপনি ${activeMission.to}-এর পথে।`,
+        lang,
+      ),
+      'success',
     );
   };
 
-  // 3. Complete Trip Handler
   const handleConfirmCompleteJourney = () => {
     if (!activeMission) return;
-    const odo = parseInt(closingOdoInput, 10) || 42435;
-    completeTrip(
-      activeMission.id,
-      odo,
-      nowTime(),
-      5,
-      'Trip completed smoothly by duty driver.'
-    );
+    const startKm = activeMission.odometerStart ?? 42350;
+    const odo = parseInt(closingOdoInput, 10) || startKm + 42;
+    if (odo < startKm) {
+      showToast(t('The closing reading cannot be lower than the start reading.', 'শেষ রিডিং শুরুর রিডিংয়ের চেয়ে কম হতে পারে না।', lang), 'warn');
+      return;
+    }
+    const gateIn = nowTime();
+    setClosedTrip({
+      id: activeMission.id,
+      from: activeMission.from,
+      to: activeMission.to,
+      km: odo - startKm,
+      gateIn,
+    });
+    completeTrip(activeMission.id, odo, gateIn, 5, 'Trip completed smoothly by duty driver.');
     setShowCompleteDialog(false);
     showToast(
-      lang === 'en'
-        ? `✓ Mission ${activeMission.id} marked as COMPLETED! Inward security clearance logged & vehicle returned to pool.`
-        : `✓ ট্রিপ সম্পন্ন! গাড়ি পুলে ফেরত এসেছে।`,
-      'success'
+      t(
+        `Trip closed. ${odo - startKm} km recorded and the car is back in the pool.`,
+        `ট্রিপ শেষ। ${odo - startKm} কিমি নথিভুক্ত এবং গাড়ি পুলে ফিরেছে।`,
+        lang,
+      ),
+      'success',
     );
   };
 
@@ -145,51 +203,54 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
   // 5. Submit Toll Claim
   const handleAddTollClaim = () => {
     const amt = parseFloat(tollAmount) || 0;
-    if (amt <= 0) return;
-    const newClaim = {
-      id: nextRef('TOL'),
-      plaza: tollPlaza,
-      amount: amt,
-      time: nowTime(),
-      status: 'Pending Dispatch Review',
-    };
-    setTollClaims([newClaim, ...tollClaims]);
-    if (activeMission) {
-      sendChatMessage(
-        activeMission.id,
-        'driver',
-        currentDriver.name,
-        `Claimed official highway toll: ${tollPlaza} (৳${amt}). Receipt voucher: ${newClaim.id}`,
-        { messageType: 'toll_claim', tollData: { tollName: tollPlaza, amount: amt, receiptNo: newClaim.id, approved: false } }
-      );
-    }
+    if (amt <= 0 || !activeMission) return;
+    const slip = submitDriverTollClaim(activeMission.id, currentDriver.name, tollPlaza, amt);
     setShowTollModal(false);
     showToast(
-      lang === 'en'
-        ? `✓ Toll voucher of ৳${amt} submitted to Central Transport Desk!`
-        : `✓ ৳${amt} টাকার টোল স্লিপ জমা দেওয়া হয়েছে!`,
-      'success'
+      t(
+        `৳${amt.toLocaleString('en-IN')} toll sent to the transport desk. They review it next.`,
+        `৳${amt.toLocaleString('bn-BD')} টোল পরিবহন ডেস্কে গেছে। তারা এখন দেখবেন।`,
+        lang,
+      ),
+      'success',
+    );
+    window.setTimeout(() => {
+      reviewDriverTollSlip(slip.id, 'Approved');
+      showToast(
+        t(
+          `Transport desk approved ৳${amt.toLocaleString('en-IN')} for ${tollPlaza}. It will be paid with this month's conveyance.`,
+          `পরিবহন ডেস্ক ${tollPlaza}-এর ৳${amt.toLocaleString('bn-BD')} অনুমোদন করেছে। এ মাসের কনভেয়েন্সের সাথে পরিশোধ হবে।`,
+          lang,
+        ),
+        'success',
+      );
+    }, 2800);
+  };
+
+  const handleTriggerSos = () => {
+    if (!activeMission) return;
+    raiseTripSos(activeMission.id, currentDriver.name);
+    showToast(
+      t(
+        'SOS sent. Transport desk and the passenger were told. Stay with the vehicle.',
+        'এসওএস পাঠানো হয়েছে। পরিবহন ডেস্ক ও যাত্রীকে জানানো হয়েছে। গাড়ির কাছে থাকুন।',
+        lang,
+      ),
+      'danger',
     );
   };
 
-  // 6. Emergency SOS Trigger
-  const handleTriggerSos = () => {
-    setSosSent(true);
-    if (activeMission) {
-      sendChatMessage(
-        activeMission.id,
-        'driver',
-        currentDriver.name,
-        `EMERGENCY SOS: breakdown or route problem on the way to ${activeMission.to}. Immediate assistance requested.`
-      );
-    }
-    showToast(
-      lang === 'en'
-        ? 'Emergency SOS dispatched. Central Transport Command and highway patrol have been alerted.'
-        : 'জরুরী এসওএস পাঠানো হয়েছে। পরিবহন কন্ট্রোল রুমে সতর্কবার্তা প্রেরিত।',
-      'danger'
-    );
+  const handleClearSos = () => {
+    if (!activeMission) return;
+    clearTripSos(activeMission.id, currentDriver.name);
+    showToast(t('SOS cancelled. You reported that everyone is safe.', 'এসওএস বাতিল। সবাই নিরাপদ বলে জানিয়েছেন।', lang), 'success');
   };
+
+  const roadElapsed = activeMission?.gateOutEpoch
+    ? Math.max(0, Math.floor((Date.now() - activeMission.gateOutEpoch) / 1000))
+    : 0;
+  const roadKm = Math.min(42, Math.floor(roadElapsed / 3));
+  const roadPct = atDestination ? 100 : Math.min(82, roadElapsed * 2);
 
   return (
     <div className="driver-console-container">
@@ -264,7 +325,13 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <span style={{ padding: '4px 10px', borderRadius: '6px', background: 'var(--status-warning-solid)', color: 'var(--text-on-brand)', fontWeight: 800, fontSize: '11px', letterSpacing: '0.5px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                 <Navigation size={13} />
-                {activeMission.status === 'in_transit' ? t('IN TRANSIT', 'চলমান ট্রিপ', lang) : t('ASSIGNED MISSION', 'বরাদ্দকৃত মিশন', lang)}
+                {moving
+                  ? atDestination
+                    ? t('AT DESTINATION', 'গন্তব্যে পৌঁছেছেন', lang)
+                    : t('ON THE ROAD', 'পথে আছেন', lang)
+                  : atPickup
+                    ? t('AT PICKUP', 'পিকআপে আছেন', lang)
+                    : t('ASSIGNED MISSION', 'বরাদ্দকৃত মিশন', lang)}
               </span>
               <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
                 {t('Requisition Pass #', 'রিকুইজিশন পাস #', lang)}{activeMission.id}
@@ -358,8 +425,18 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
                     </span>
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '4px' }}>
-                    Lead: {activeMission.requesterName} ({activeMission.dept})
+                    {t('Lead:', 'প্রধান:', lang)} {activeMission.requesterName} ({activeMission.dept})
                   </div>
+                  {activeMission.passengerAck && (
+                    <div style={{ fontSize: '11.5px', color: 'var(--status-success-text)', fontWeight: 700, marginTop: '6px' }}>
+                      {activeMission.passengerAck}
+                    </div>
+                  )}
+                  {activeMission.lastCallNote && (
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-2)', marginTop: '4px' }}>
+                      {activeMission.lastCallNote}
+                    </div>
+                  )}
                 </div>
 
                 <div className="driver-manifest-card">
@@ -383,61 +460,120 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
                 </h4>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Step 1: Arrive at Bay */}
-                  <button
-                    onClick={handleNotifyArrival}
-                    className="driver-progression-btn bay"
-                  >
-                    <MapPin size={18} />
-                    <span>{t('1. Arrived at Pickup Bay', '১. পিকআপ পয়েন্টে পৌঁছেছি', lang)}</span>
-                  </button>
+                  {atPickup && (
+                    <div className="driver-step-done">
+                      <CheckCircle2 size={15} />
+                      <span>{t(`Waiting at pickup since ${activeMission.pickupArrivedAt}.`, `পিকআপে আছেন ${activeMission.pickupArrivedAt} থেকে।`, lang)}</span>
+                    </div>
+                  )}
+                  {moving && (
+                    <div className="driver-road">
+                      <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--text-1)' }}>
+                        {atDestination
+                          ? t(`Parked at ${activeMission.to} since ${activeMission.destinationArrivedAt}.`, `${activeMission.to}-এ দাঁড়িয়ে আছেন ${activeMission.destinationArrivedAt} থেকে।`, lang)
+                          : t(`On the road to ${activeMission.to} · ${clock(roadElapsed)} · about ${roadKm} km`, `${activeMission.to}-এর পথে · ${clock(roadElapsed)} · প্রায় ${roadKm} কিমি`, lang)}
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: 4 }}>
+                        {t(
+                          `Left at ${activeMission.gateOutTime} · meter ${activeMission.odometerStart?.toLocaleString('en-IN') ?? '—'} km`,
+                          `ছাড়ার সময় ${activeMission.gateOutTime} · মিটার ${activeMission.odometerStart?.toLocaleString('bn-BD') ?? '—'} কিমি`,
+                          lang,
+                        )}
+                      </div>
+                      <div className="driver-road-track" aria-hidden>
+                        <div className="driver-road-fill" style={{ width: `${roadPct}%` }} />
+                      </div>
+                    </div>
+                  )}
+                  {atDestination && (
+                    <div className="driver-step-done">
+                      <CheckCircle2 size={15} />
+                      <span>{t('Destination reached. Close the trip when the passenger is dropped.', 'গন্তব্যে পৌঁছেছেন। যাত্রী নামিয়ে ট্রিপ বন্ধ করুন।', lang)}</span>
+                    </div>
+                  )}
 
-                  {/* Step 2: Start Trip */}
-                  {activeMission.status === 'assigned' && (
-                    <button
-                      onClick={() => setShowStartTripDialog(true)}
-                      className="driver-progression-btn start"
-                    >
+                  {onRest ? (
+                    <button type="button" className="driver-progression-btn start" onClick={() => handleStatusChange('available')}>
+                      <Coffee size={18} />
+                      <span>{t('End rest and go back on duty', 'বিরতি শেষ করে ডিউটিতে ফিরুন', lang)}</span>
+                    </button>
+                  ) : !atPickup ? (
+                    <button type="button" className="driver-progression-btn bay" onClick={handleNotifyArrival}>
+                      <MapPin size={18} />
+                      <span>{t('I have arrived at the pickup', 'আমি পিকআপে পৌঁছেছি', lang)}</span>
+                    </button>
+                  ) : !moving ? (
+                    <button type="button" className="driver-progression-btn start" onClick={() => setShowStartTripDialog(true)}>
                       <Navigation size={18} />
-                      <span>{t('2. Start Journey (Gate-Out Pass)', '২. যাত্রা শুরু (গেট আউট)', lang)}</span>
+                      <span>{t('Start journey (gate-out)', 'যাত্রা শুরু (গেট-আউট)', lang)}</span>
                     </button>
-                  )}
-
-                  {/* Step 3: Complete Trip */}
-                  {activeMission.status === 'in_transit' && (
-                    <button
-                      onClick={() => setShowCompleteDialog(true)}
-                      className="driver-progression-btn complete"
-                    >
+                  ) : !atDestination ? (
+                    <button type="button" className="driver-progression-btn bay" onClick={() => markDestinationArrived(activeMission.id, currentDriver.name)}>
+                      <MapPin size={18} />
+                      <span>{t(`I have reached ${activeMission.to}`, `আমি ${activeMission.to}-এ পৌঁছেছি`, lang)}</span>
+                    </button>
+                  ) : (
+                    <button type="button" className="driver-progression-btn complete" onClick={() => setShowCompleteDialog(true)}>
                       <CheckCircle2 size={18} />
-                      <span>{t('3. Complete Journey (Gate-In Pass)', '৩. যাত্রা সমাপ্ত (গেট ইন)', lang)}</span>
+                      <span>{t('End trip and return the car', 'ট্রিপ শেষ করে গাড়ি ফেরত দিন', lang)}</span>
                     </button>
                   )}
 
-                  {/* Step 4: Quick Toll Claim */}
                   <button
-                    onClick={() => setShowTollModal(true)}
+                    type="button"
                     className="driver-progression-btn toll"
+                    disabled={!moving}
+                    onClick={() => moving && setShowTollModal(true)}
                   >
-                    <Receipt size={18} color="var(--status-warning)" />
-                    <span>{t('Log Highway Toll Voucher', 'হাইওয়ে টোল ভাউচার এন্ট্রি', lang)}</span>
+                    <Receipt size={18} />
+                    <span>
+                      {moving
+                        ? t('Log a highway toll', 'হাইওয়ে টোল লিখুন', lang)
+                        : t('Toll opens once you are on the road', 'পথে বেরোলে টোল লেখা যাবে', lang)}
+                    </span>
                   </button>
                 </div>
               </div>
 
-              {/* Highway SOS Button */}
               <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--brand-slate-200)' }}>
-                <button
-                  onClick={handleTriggerSos}
-                  disabled={sosSent}
-                  className="driver-sos-btn"
-                >
-                  <AlertOctagon size={18} />
-                  <span>{sosSent ? t('SOS Broadcast Active', 'জরুরী সতর্কবার্তা সচল', lang) : t('Emergency Highway SOS', 'জরুরী হাইওয়ে এসওএস', lang)}</span>
-                </button>
+                {activeMission.sosActive ? (
+                  <div className="driver-sos-live">
+                    <strong>{t(`SOS live since ${activeMission.sosRaisedAt}.`, `এসওএস চালু ${activeMission.sosRaisedAt} থেকে।`, lang)}</strong>
+                    <div style={{ marginTop: 4 }}>
+                      {t(
+                        'Transport desk and the passenger were told. Stay with the vehicle until you cancel this.',
+                        'পরিবহন ডেস্ক ও যাত্রীকে জানানো হয়েছে। বাতিল না করা পর্যন্ত গাড়ির কাছে থাকুন।',
+                        lang,
+                      )}
+                    </div>
+                    <button type="button" className="driver-progression-btn complete" style={{ marginTop: 10 }} onClick={handleClearSos}>
+                      <ShieldCheck size={16} />
+                      <span>{t('I am safe — cancel the SOS', 'আমি নিরাপদ — এসওএস বাতিল', lang)}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={handleTriggerSos} className="driver-sos-btn">
+                    <AlertOctagon size={18} />
+                    <span>{t('Emergency highway SOS', 'জরুরি হাইওয়ে এসওএস', lang)}</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
+        </div>
+      ) : closedTrip ? (
+        <div className="driver-mission-card" style={{ padding: '28px' }}>
+          <div className="driver-step-done" style={{ fontSize: '15px' }}>
+            <CheckCircle2 size={18} />
+            <span>{t(`Trip ${closedTrip.id} is closed.`, `ট্রিপ ${closedTrip.id} বন্ধ হয়েছে।`, lang)}</span>
+          </div>
+          <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.5 }}>
+            {t(
+              `${closedTrip.from} to ${closedTrip.to}. ${closedTrip.km} km. Gate-in at ${closedTrip.gateIn}. The car is back in the pool. Nothing else for you to do until dispatch assigns the next trip.`,
+              `${closedTrip.from} থেকে ${closedTrip.to}। ${closedTrip.km} কিমি। গেট-ইন ${closedTrip.gateIn}। গাড়ি পুলে ফিরেছে। পরের ট্রিপ না আসা পর্যন্ত আপনার কিছু করার নেই।`,
+              lang,
+            )}
+          </p>
         </div>
       ) : (
         <div className="driver-mission-card" style={{ padding: '36px', textAlign: 'center' }}>
@@ -463,26 +599,37 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
             </h3>
           </div>
           <button
-            onClick={() => setShowTollModal(true)}
-            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-warning)', background: 'none', border: 'none', cursor: 'pointer' }}
+            type="button"
+            onClick={() => moving && setShowTollModal(true)}
+            disabled={!moving}
+            style={{ fontSize: '12px', fontWeight: 700, color: moving ? 'var(--status-warning)' : 'var(--text-3)', background: 'none', border: 'none', cursor: moving ? 'pointer' : 'not-allowed' }}
           >
-            + {t('Submit New Voucher', 'নতুন ভাউচার', lang)}
+            + {t('Submit new slip', 'নতুন স্লিপ', lang)}
           </button>
         </div>
 
         <div>
-          {tollClaims.map((claim) => (
+          {mySlips.length === 0 && (
+            <div style={{ padding: '16px 18px', fontSize: '12.5px', color: 'var(--text-3)' }}>
+              {t('No toll slips yet. Log one after you leave the gate.', 'এখনো কোনো টোল স্লিপ নেই। গেট ছাড়ার পর একটি লিখুন।', lang)}
+            </div>
+          )}
+          {mySlips.map((claim) => (
             <div key={claim.id} className="driver-ledger-row">
               <div>
                 <div style={{ fontWeight: 800, color: 'var(--brand-slate-900)', fontSize: '12.5px' }}>{claim.plaza}</div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>ID: {claim.id} • {claim.time}</div>
+                <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '2px' }}>{claim.id} · {claim.time}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{ fontFamily: 'monospace', fontWeight: 800, color: 'var(--brand-slate-900)', fontSize: '13.5px' }}>
-                  ৳{claim.amount}
+                  ৳{claim.amount.toLocaleString('en-IN')}
                 </div>
-                <span className={`badge ${claim.status.includes('Approved') || claim.status.includes('Reimbursed') ? 'success' : 'warn'}`}>
-                  {claim.status}
+                <span className={`badge ${claim.status === 'Pending Review' ? 'warn' : 'success'}`}>
+                  {claim.status === 'Pending Review'
+                    ? t('Waiting for the desk', 'ডেস্কের অপেক্ষায়', lang)
+                    : claim.status === 'Approved'
+                      ? t('Approved', 'অনুমোদিত', lang)
+                      : t('Paid', 'পরিশোধিত', lang)}
                 </span>
               </div>
             </div>
@@ -625,7 +772,13 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
 
               <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', fontSize: '11.5px', color: 'var(--status-success-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
-                <span>Distance Traveled: ~{(parseInt(closingOdoInput, 10) || 42435) - 42350} km recorded in BOGCL fleet log.</span>
+                <span>
+                  {t(
+                    `Distance this trip: ${Math.max(0, (parseInt(closingOdoInput, 10) || 0) - (activeMission.odometerStart ?? 0))} km.`,
+                    `এই ট্রিপে দূরত্ব: ${Math.max(0, (parseInt(closingOdoInput, 10) || 0) - (activeMission.odometerStart ?? 0))} কিমি।`,
+                    lang,
+                  )}
+                </span>
               </div>
             </div>
 
@@ -677,15 +830,17 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
                 </label>
                 <select
                   value={tollPlaza}
-                  onChange={(e) => setTollPlaza(e.target.value)}
+                  onChange={(e) => {
+                    const plaza = TOLL_PLAZAS.find((p) => p.name === e.target.value) ?? TOLL_PLAZAS[0];
+                    setTollPlaza(plaza.name);
+                    setTollAmount(String(plaza.amount));
+                  }}
                   className="notice-select"
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid var(--brand-slate-300)', fontSize: '12px' }}
                 >
-                  <option value="Babubazar Second Buriganga Bridge">Babubazar Second Buriganga Bridge (৳150)</option>
-                  <option value="Mayor Mohammad Hanif Flyover">Mayor Mohammad Hanif Flyover (৳260)</option>
-                  <option value="Dhaka Elevated Expressway (Kuril-Farmgate)">Dhaka Elevated Expressway (৳80)</option>
-                  <option value="Padma Multipurpose Bridge">Padma Multipurpose Bridge (৳800)</option>
-                  <option value="Kanchpur Second Meghna Bridge">Kanchpur Second Meghna Bridge (৳120)</option>
+                  {TOLL_PLAZAS.map((plaza) => (
+                    <option key={plaza.name} value={plaza.name}>{plaza.name} (৳{plaza.amount})</option>
+                  ))}
                 </select>
               </div>
 
@@ -732,6 +887,10 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
         calleeRole={calleeInfo.role}
         calleePhone={calleeInfo.phone}
         lang={lang}
+        onEnded={(durationSec, connected) => {
+          if (!activeMission) return;
+          logDriverCall(activeMission.id, calleeInfo.name, durationSec, connected);
+        }}
       />
     </div>
   );
