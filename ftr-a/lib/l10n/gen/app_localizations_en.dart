@@ -159,6 +159,30 @@ class AppL10nEn extends AppL10n {
   String get homeFilesClear => 'Nothing is waiting. You are clear.';
 
   @override
+  String homeFilesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files are waiting for you.',
+      one: '1 file is waiting for you.',
+      zero: 'Nothing is waiting. You are clear.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeLocksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count machines are locked out.',
+      one: '1 machine is locked out.',
+      zero: 'No machine is locked out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get homeLeadersOnline => 'Leadership rooms';
 
   @override

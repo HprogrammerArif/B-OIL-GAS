@@ -51,6 +51,18 @@
   "homeActIncidents": "Open incidents",
   "homeFilesWaiting": "Files waiting for you",
   "homeFilesClear": "Nothing is waiting. You are clear.",
+  "homeFilesCount": "{count, plural, =0{Nothing is waiting. You are clear.} =1{1 file is waiting for you.} other{{count} files are waiting for you.}}",
+  "@homeFilesCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeLocksCount": "{count, plural, =0{No machine is locked out.} =1{1 machine is locked out.} other{{count} machines are locked out.}}",
+  "@homeLocksCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "homeLeadersOnline": "Leadership rooms",
   "homeRoomQuiet": "No new messages",
   "homeUnread": "{count} new",

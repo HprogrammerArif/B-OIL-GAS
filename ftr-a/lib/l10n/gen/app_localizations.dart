@@ -385,6 +385,18 @@ abstract class AppL10n {
   /// **'Nothing is waiting. You are clear.'**
   String get homeFilesClear;
 
+  /// No description provided for @homeFilesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing is waiting. You are clear.} =1{1 file is waiting for you.} other{{count} files are waiting for you.}}'**
+  String homeFilesCount(int count);
+
+  /// No description provided for @homeLocksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No machine is locked out.} =1{1 machine is locked out.} other{{count} machines are locked out.}}'**
+  String homeLocksCount(int count);
+
   /// No description provided for @homeLeadersOnline.
   ///
   /// In en, this message translates to:

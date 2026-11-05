@@ -195,7 +195,9 @@ void seedBus(MockStore store) {
     )
     ..put(Col.busWaitlist, _wait('R1', 'EMP-1088', 26))
     ..put(Col.busWaitlist, _wait('R1', 'EMP-1104', 19))
-    ..put(Col.busWaitlist, _wait('R1', 'EMP-1042', 8));
+    ..put(Col.busWaitlist, _wait('R1', 'EMP-1042', 8))
+    ..put(Col.busWaitlist, _wait('R1', 'EMP-1088', 3))
+    ..put(Col.busWaitlist, _wait('R1', 'EMP-0733', 2));
 
   // R2: one seat reserved by an open offer to the Driver.
   fill('R2', [

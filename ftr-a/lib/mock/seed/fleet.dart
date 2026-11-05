@@ -191,6 +191,30 @@ void seedFleet(MockStore store) {
     ),
   );
 
+  // Finished four days ago — shows in the driver's history.
+  // The clock sits four days back, so departure must still be an hour later.
+  at(const Duration(days: 4));
+  final older = make(
+    dest: 'Chattogram Terminal',
+    purpose: 'Returned the empty sample cans after the lab test',
+    depart: wall()
+        .subtract(const Duration(days: 4))
+        .add(const Duration(hours: 2)),
+  );
+  endorse(older);
+  FleetEngine.assign(store, desk, older, {
+    'vehicleId': 'veh_pickup',
+    'driverId': 'drv_0821',
+    'dispatchNote': 'Back before the evening shift.',
+  });
+  FleetEngine.seedClock = DateTime.parse(older.str('departAt'))
+      .toIso8601String();
+  FleetEngine.gateOut(store, driver, tripOf(older), {'odometerKm': 88110});
+  FleetEngine.seedClock = DateTime.parse(older.str('departAt'))
+      .add(const Duration(hours: 5))
+      .toIso8601String();
+  FleetEngine.complete(store, driver, tripOf(older), {'endKm': 88340});
+
   // On the road — the loginable driver can record stops, SOS and finish.
   at(const Duration(hours: 3));
   final live = make(
@@ -224,6 +248,37 @@ void seedFleet(MockStore store) {
     'requisitionId': live['id'],
     'tripId': live['tripId'],
   });
+
+  FleetEngine.seedClock = null;
+
+  at(const Duration(hours: 8));
+  endorse(
+    make(
+      dest: 'Mongla Depot',
+      purpose: 'Carry the signed offtake samples to the depot lab',
+      depart: wall().add(const Duration(hours: 20)),
+    ),
+  );
+  at(const Duration(hours: 6));
+  endorse(
+    make(
+      dest: 'Narayanganj Depot',
+      purpose: 'Pick up the customs file for the incoming bitumen cargo',
+      depart: wall().add(const Duration(hours: 26)),
+      pax: 1,
+    ),
+  );
+  at(const Duration(hours: 1));
+  FleetEngine.submit(
+    store,
+    emp,
+    make(
+      dest: 'Board secretariat',
+      purpose: 'Deliver the monthly sales pack for the chairman’s briefing',
+      depart: wall().add(const Duration(hours: 4)),
+      priority: 'HIGH',
+    ),
+  );
 
   FleetEngine.seedClock = null;
 }
