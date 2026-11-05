@@ -32,8 +32,10 @@ String notificationCategory(String type) {
     'VISIT_MUSTER',
     'ASSET_LOTO',
     'ASSET_CALIBRATION',
+    'LICENCE_',
+    'CUSTODY_',
   ];
-  const transport = ['FLEET_', 'BUS_', 'PARCEL_', 'VISIT_'];
+  const transport = ['FLEET_', 'BUS_', 'PARCEL_', 'VISIT_', 'GUEST_', 'TRIP_'];
   bool any(List<String> prefixes) => prefixes.any(type.startsWith);
   if (any(approvals) || type == 'CLAIM_SUBMITTED') return 'APPROVALS';
   if (any(safety)) return 'SAFETY';
@@ -59,6 +61,7 @@ abstract final class NotificationEngine {
     bool ackRequired = false,
     int? createdAtMs,
     bool read = false,
+    String? id,
   }) {
     assert(priorities.contains(priority), 'Unknown priority $priority');
     final ms = createdAtMs ?? store.nowMs();
@@ -66,9 +69,9 @@ abstract final class NotificationEngine {
       ms,
       isUtc: true,
     ).toIso8601String();
-    final id = 'ntf_${ms}_${store.collection(Col.notifications).length}';
+    final nid = id ?? 'ntf_${ms}_${store.collection(Col.notifications).length}';
     final record = <String, Object?>{
-      'id': id,
+      'id': nid,
       'userId': userId,
       'type': type,
       'priority': priority,

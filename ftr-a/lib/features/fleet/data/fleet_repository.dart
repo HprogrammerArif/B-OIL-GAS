@@ -134,6 +134,47 @@ class FleetRepository {
     }
   }
 
+  Future<Map<String, Object?>?> pooling() async {
+    try {
+      final res = await _dio.get<Object?>('/fleet/pooling');
+      final data = Envelope.data(res.data);
+      if (data is Map<String, Object?>) return data;
+      if (data is Map) return Map<String, Object?>.from(data);
+      return null;
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<({String channelId, List<Map<String, Object?>> messages})> tripChat(
+    String reqId,
+  ) async {
+    try {
+      final res = await _dio.get<Object?>('/fleet/chat/REQ:$reqId/messages');
+      final o = Envelope.object(res.data);
+      return (
+        channelId: o['channelId'] as String? ?? '',
+        messages: [
+          for (final e in o['messages'] as List? ?? const [])
+            if (e is Map) Map<String, Object?>.from(e),
+        ],
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> sendTripChat(String reqId, String body) async {
+    try {
+      await _dio.post<Object?>(
+        '/fleet/chat/REQ:$reqId/messages',
+        data: {'body': body},
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> ackSos(String id) async {
     try {
       await _dio.post<Object?>('/fleet/sos/$id/ack');

@@ -90,6 +90,39 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen> {
                   decoration: InputDecoration(
                     hintText: l10n.asSearchHint,
                     prefixIcon: const Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      tooltip: l10n.asScanTag,
+                      icon: const Icon(Icons.qr_code_scanner),
+                      onPressed: () async {
+                        final tag = await showModalBottomSheet<String>(
+                          context: context,
+                          showDragHandle: true,
+                          builder: (ctx) {
+                            final c = TextEditingController();
+                            return Padding(
+                              padding: const EdgeInsets.all(Space.lg),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(l10n.asScanTag),
+                                  TextField(
+                                    controller: c,
+                                    decoration: InputDecoration(
+                                      hintText: l10n.asSearchHint,
+                                    ),
+                                    autofocus: true,
+                                    onSubmitted: Navigator.of(ctx).pop,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                        if (tag != null && tag.trim().isNotEmpty && mounted) {
+                          setState(() => _query = tag.trim());
+                        }
+                      },
+                    ),
                   ),
                   onChanged: (v) {
                     _debounce?.cancel();

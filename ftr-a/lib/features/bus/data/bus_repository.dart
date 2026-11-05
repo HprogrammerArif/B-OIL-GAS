@@ -100,6 +100,29 @@ class BusRepository {
 
   Future<void> broadcast({required String message, String? routeId}) =>
       _adminPost('/bus/broadcasts', {'message': message, 'routeId': ?routeId});
+
+  Future<Map<String, Object?>> verify(String routeId, String query) async {
+    try {
+      final res = await _dio.post<Object?>(
+        '/bus/routes/$routeId/verify',
+        data: {'query': query},
+      );
+      return Envelope.object(res.data);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> requestSwap(String routeId, int seatNo) async {
+    try {
+      await _dio.post<Object?>(
+        '/bus/routes/$routeId/swap',
+        data: {'seatNo': seatNo},
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

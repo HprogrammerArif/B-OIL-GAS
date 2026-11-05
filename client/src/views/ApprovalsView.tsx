@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  ClipboardCheck, Check, Search, Inbox, X, Flame, History, ArrowUpDown, SearchX, ListChecks,
+  ClipboardCheck, Check, Search, Inbox, X, Clock, History, ArrowUpDown, SearchX, ListChecks,
 } from 'lucide-react';
 
 import { useApprovalStore } from '../store/approvalStore';
@@ -210,7 +210,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
 
       {/* One-sentence verdict: what is waiting and how urgent */}
       <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : ''}`} role="status">
-        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Flame size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
+        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Clock size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
         <p>{verdict}</p>
         {isPending && dueSoonItems.length > 0 && (
           <Button variant="secondary" size="sm" onClick={() => setDueSoonOnly((v) => !v)}>
@@ -251,17 +251,23 @@ export default function ApprovalsView({ lang }: ViewProps) {
       {/* Filters */}
       <div className="apv-filters">
         <div className="apv-chips">
-          <button type="button" className={`apv-filter ${selectedCategory === 'all' ? 'active' : ''}`} onClick={() => setSelectedCategory('all')}>
-            {t('All', 'সব', lang)} <b>{listToDisplay.length}</b>
-          </button>
-          {categories.map((cat) => {
-            const count = listToDisplay.filter((i) => i.category === cat).length;
-            return (
-              <button key={cat} type="button" className={`apv-filter ${selectedCategory === cat ? 'active' : ''}`} onClick={() => setSelectedCategory(cat)}>
-                {t(CATEGORY_LABELS[cat][0], CATEGORY_LABELS[cat][1], lang)} <b>{count}</b>
-              </button>
-            );
-          })}
+          <select
+            className="form-input"
+            style={{ minWidth: 220, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            aria-label={t('Category', 'বিভাগ', lang)}
+          >
+            <option value="all">{t('All categories', 'সব বিভাগ', lang)} ({listToDisplay.length})</option>
+            {categories.map((cat) => {
+              const count = listToDisplay.filter((i) => i.category === cat).length;
+              return (
+                <option key={cat} value={cat}>
+                  {t(CATEGORY_LABELS[cat][0], CATEGORY_LABELS[cat][1], lang)} ({count})
+                </option>
+              );
+            })}
+          </select>
           {!isPending && (
             (['approved', 'rejected'] as const).map((o) => (
               <button key={o} type="button" className={`apv-filter ${outcome === o ? 'active' : ''}`} onClick={() => setOutcome(outcome === o ? 'all' : o)} aria-pressed={outcome === o}>

@@ -44,6 +44,18 @@ class AttendanceRepository {
     }
   }
 
+  Future<TeamRoster> team({String? date}) async {
+    try {
+      final res = await _dio.get<Object?>(
+        '/attendance/team',
+        queryParameters: {'date': ?date},
+      );
+      return TeamRoster.fromJson(Envelope.object(res.data));
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<List<Regularisation>> regularisations() async {
     try {
       final res = await _dio.get<Object?>('/attendance/regularisations');

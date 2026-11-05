@@ -5,7 +5,7 @@ import {
   Send, Paperclip, Mic, Flag, Pin, PinOff, Search, Phone, Video,
   CheckCheck, Check, Clock, ChevronLeft, MessageSquare, Users, FileText, X, Hash,
   Lock, Eye, Smile, Copy, Download, ShieldCheck, CheckCircle,
-  ArrowDown, PanelRight, SearchX, Wrench, Banknote, Landmark, BarChart3,
+  ArrowDown, PanelRight, SearchX,
   FileCheck, SlidersHorizontal, Image as ImageIcon, ExternalLink,
 } from 'lucide-react';
 import { operationsStore, useOperationsStore, type ChatMessage, type ChatMember } from '../store/operationsStore';
@@ -32,25 +32,25 @@ const COUNTER_THRESHOLD = 4500;
 
 const DIRECTIVE_PRESETS = [
   {
-    id: 'valve', icon: Wrench,
+    id: 'valve',
     labelEn: 'Valve overhaul', labelBn: 'ভালভ ওভারহল',
     textEn: 'COMMENCE IMMEDIATE SAFETY VALVES OVERHAUL. AUTHORIZED 48-HR WINDOW.',
     textBn: 'অবিলম্বে সেফটি ভালভ ওভারহল শুরু করুন। ৪৮ ঘণ্টার সময়সীমা অনুমোদিত।',
   },
   {
-    id: 'lc', icon: Banknote,
+    id: 'lc',
     labelEn: 'Fast-track L/C', labelBn: 'দ্রুত এলসি অনুমোদন',
     textEn: 'APPROVE FAST-TRACK L/C DISBURSEMENT FOR CATALYST FEED REPLACEMENT.',
     textBn: 'ক্যাটালিস্ট ফিড প্রতিস্থাপনের জন্য দ্রুত এলসি বিতরণ অনুমোদন করুন।',
   },
   {
-    id: 'board', icon: Landmark,
+    id: 'board',
     labelEn: 'Emergency review meeting', labelBn: 'জরুরি পর্যালোচনা সভা',
     textEn: 'CONVENE EMERGENCY REFINERY RISK REVIEW MEETING TODAY AT 4:00 PM.',
     textBn: 'আজ বিকেল ৪:০০টায় জরুরি রিফাইনারি ঝুঁকি পর্যালোচনা সভা আহ্বান করুন।',
   },
   {
-    id: 'stock', icon: BarChart3,
+    id: 'stock',
     labelEn: 'Stock position report', labelBn: 'মজুদ অবস্থান প্রতিবেদন',
     textEn: "SUBMIT TODAY'S TANK FARM STOCK POSITION BY 5:00 PM.",
     textBn: 'আজকের ট্যাংক ফার্মের মজুদ অবস্থান বিকেল ৫:০০টার মধ্যে জমা দিন।',
@@ -1052,22 +1052,19 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 <X size={13} />
               </button>
             </div>
-            <div className="ic-quick-grid">
+            <select
+              className="form-input"
+              value=""
+              onChange={(e) => {
+                const preset = DIRECTIVE_PRESETS.find((p) => p.id === e.target.value);
+                if (preset) handlePreset(lang === 'bn' ? preset.textBn : preset.textEn);
+              }}
+            >
+              <option value="">{t('Insert a directive…', 'একটি নির্দেশ যুক্ত করুন…', lang)}</option>
               {DIRECTIVE_PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className="ic-quick-chip"
-                  onClick={() => handlePreset(lang === 'bn' ? p.textBn : p.textEn)}
-                >
-                  <span className="ic-quick-chip-icon"><p.icon size={14} /></span>
-                  <span className="ic-quick-chip-body">
-                    <span className="ic-quick-chip-title">{lang === 'bn' ? p.labelBn : p.labelEn}</span>
-                    <span className="ic-quick-chip-preview">{lang === 'bn' ? p.textBn : p.textEn}</span>
-                  </span>
-                </button>
+                <option key={p.id} value={p.id}>{lang === 'bn' ? p.labelBn : p.labelEn}</option>
               ))}
-            </div>
+            </select>
           </div>
         )}
 

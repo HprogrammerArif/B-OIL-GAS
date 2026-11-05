@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/mock/engines/dashboard_engine.dart';
+import 'package:bogcl_oneops/mock/engines/search_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
@@ -50,4 +51,45 @@ List<RouteDef> dashboardRoutes() => [
     await ctx.store.commit();
     return ok({'ok': true});
   }, permission: ['briefings:read']),
+  RouteDef('GET', '/search', (ctx) async {
+    ctx.requireAuth();
+    final q = ctx.query['q'] ?? '';
+    return ok(SearchEngine.search(ctx.store, q));
+  }),
+  RouteDef('POST', '/broadcasts/:id/dismiss', (ctx) async {
+    DashboardEngine.dismissBroadcast(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.params['id']!,
+    );
+    await ctx.store.commit();
+    return ok({'ok': true});
+  }),
+  RouteDef('POST', '/broadcasts', (ctx) async {
+    final rec = DashboardEngine.publishBroadcast(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.bodyObject(),
+    );
+    await ctx.store.commit();
+    return ok(rec, status: 201);
+  }, permission: ['notices:create', 'dashboards:hr']),
+  RouteDef('POST', '/work-permits/:id/restore', (ctx) async {
+    final rec = DashboardEngine.restorePermit(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.params['id']!,
+    );
+    await ctx.store.commit();
+    return ok(rec);
+  }, permission: ['dashboards:plant', 'assets:loto']),
+  RouteDef('POST', '/shift-handovers/:id/sign', (ctx) async {
+    final rec = DashboardEngine.signHandover(
+      ctx.store,
+      ctx.requireAuth(),
+      ctx.params['id']!,
+    );
+    await ctx.store.commit();
+    return ok(rec);
+  }, permission: ['dashboards:plant']),
 ];

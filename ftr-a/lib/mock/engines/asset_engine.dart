@@ -420,7 +420,9 @@ abstract final class AssetEngine {
     store.put(Col.assets, a);
     _setStage(store, auth, a, 'OPERATIONAL', 'COMMISSIONED', loc);
     final uid = body['custodianUserId'] as String?;
-    if (uid != null) assignCustody(store, auth, a, {'employeeUserId': uid});
+    if (uid != null && _can(auth, 'assets:custody-assign')) {
+      assignCustody(store, auth, a, {'employeeUserId': uid});
+    }
   }
 
   static void assignCustody(

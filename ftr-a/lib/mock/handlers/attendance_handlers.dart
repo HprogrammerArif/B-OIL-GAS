@@ -347,6 +347,14 @@ List<RouteDef> attendanceRoutes() => [
     await ctx.store.commit();
     return ok(AttendanceEngine.regWire(ctx.store, reg), status: 201);
   }, permission: ['attendance:punch']),
+  RouteDef('GET', '/attendance/team', (ctx) async {
+    ctx.requirePermission('attendance:read');
+    final date = ctx.query['date'] ?? WorkCalendar.today();
+    if (!WorkCalendar.isValidKey(date)) {
+      throw validationError('date', 'Invalid date');
+    }
+    return ok(AttendanceEngine.team(ctx, date));
+  }, permission: ['attendance:read']),
   RouteDef('GET', '/attendance/regularisations', (ctx) async {
     final a = ctx.requireAuth();
     final items = ctx.store

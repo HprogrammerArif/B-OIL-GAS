@@ -296,6 +296,40 @@ List<RouteDef> authRoutes() => [
     ctx.requireAuth();
     return noContent();
   }),
+  RouteDef('POST', '/auth/unlock', (ctx) async {
+    final a = ctx.requireAuth();
+    final password = ctx.bodyObject()['password'];
+    if (password is! String || password.isEmpty || password.length > 128) {
+      throw validationError('password', 'Enter your password');
+    }
+    final digest = Hash.sha256Hex(password);
+    final session = a.session;
+    if (!Hash.constantTimeEquals(digest, a.user.str('passwordDigest'))) {
+      final failed = (session['unlockFailures'] as num?)?.toInt() ?? 0;
+      final next = failed + 1;
+      session['unlockFailures'] = next;
+      if (next >= 5) {
+        session['revokedAt'] = ctx.store.nowIso();
+        ctx.store.touch(Col.sessions, session);
+        await ctx.store.commit();
+        throw unauthenticated(
+          'Too many unlock attempts',
+          reason: 'UNLOCK_LOCKED_OUT',
+        );
+      }
+      ctx.store.touch(Col.sessions, session);
+      await ctx.store.commit();
+      throw unauthenticated(
+        'Password is incorrect',
+        reason: 'UNLOCK_FAILED',
+        extra: {'attemptsLeft': 5 - next},
+      );
+    }
+    session['unlockFailures'] = 0;
+    ctx.store.touch(Col.sessions, session);
+    await ctx.store.commit();
+    return ok({'ok': true});
+  }),
 ];
 
 /// `details[0].reason` the client uses to trigger a token refresh.

@@ -88,7 +88,7 @@ Shared widgets (`shared/widgets`): `AppScaffold`, `AppBarX`, `PrimaryButton/Seco
 
 Motion: page transitions Material shared-axis, 150–300 ms; list item staggered entrance on first load only; skeleton shimmer; success checkmark animation on submit; respects reduce-motion. Haptics: success/error on decisions, punch, scan; heavy impact when SOS arms.
 
-UX standards: bottom navigation (Home, Inbox, Attendance, More) + FAB-free quick actions grid; pull-to-refresh; swipe actions only where undoable; confirmations via bottom sheets; no blocking spinners after first paint; edge-to-edge, safe areas, predictive back; dark mode; Bangla font verified on every screen.
+UX standards: bottom navigation (Home, Attendance, Approvals, More — Approvals hidden without `workflow:inbox`) plus a search icon and notification bell (unread badge) on every root app bar. Tapping the bell opens the notification centre as a full-screen route (`/inbox`), not a tab. Home is a slim role landing (greeting, one broadcast, one primary card, at most three “needs you” rows, three role shortcuts). Modules live in More. FAB-free; pull-to-refresh; swipe actions only where undoable; confirmations via bottom sheets; no blocking spinners after first paint; edge-to-edge, safe areas, predictive back; dark mode; Bangla font verified on every screen.
 
 ## 7. Security and privacy (prototype-appropriate)
 
@@ -110,7 +110,7 @@ Screens, routes, hooks and states are specified in doc 05 §9 (9.1 Approvals, 9.
 | Dashboards | Animated KPI cards and charts (`fl_chart`), voice briefing playback, ROI view |
 | Batch approve | Available only as multi-select with confirm sheet (pitch value), single approve remains primary |
 | Admin / web-only items | Still excluded, but every visible entry point must work; items not on mobile are simply not shown |
-| Role home | Doc 05 §10 variants: Driver, Gate, Mailroom, HSE, Approver (Chairman gold accent), Employee; persona switcher in the demo menu |
+| Role home | Doc 05 §10 card *intent* as a slim Flutter subset: one primary card per variant (Employee punch jump, Driver trip, Gate/Mail scan, HSE incidents, Approver/Chairman oldest decision + optional Announce). Full module grid and KPI galleries stay off Home. Persona switcher in the demo menu |
 | Demo menu | Hidden (7 taps on version or long-press logo): switch persona instantly, reset data, simulate offline, trigger events, toggle slow network/failures, change "today" anchor |
 
 Added/changed features to carry from the React Native build: claims with grade bands, hotel/conveyance caps, receipts, resubmit ≤ 3 (BR-11); leave balances and regularisation; notices compose + broadcast + acknowledgement; approvals history with correct decision badges; route registry rule "show only what is built".

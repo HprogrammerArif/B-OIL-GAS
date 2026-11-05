@@ -3,7 +3,7 @@ import { BusVehicle, RouteInfo, Seat } from './busTypes';
 import { t } from '../../types';
 import {
   Bus, MapPin, Users, Phone, Navigation, Shield, Plus,
-  RefreshCw, Edit3, ArrowRight, CheckCircle2, UserCheck, Clock, Award,
+  RefreshCw, Edit3, ArrowRight, CheckCircle2, UserCheck, Clock, UserPlus,
   Search, X, User, Ticket, Sun, Sunset
 } from 'lucide-react';
 
@@ -356,7 +356,7 @@ export default function BusFleetOverviewGrid({
                       gap: '4px',
                     }}
                   >
-                    <Award size={12} color="var(--brand-gold)" />
+                    <UserPlus size={12} />
                     <span>{t('Assign Seat', 'সিট বরাদ্দ', lang)}</span>
                   </button>
                 </div>

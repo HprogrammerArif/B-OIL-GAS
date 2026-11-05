@@ -64,7 +64,7 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get loginSubtitle =>
-      'আপনার কোম্পানির ইমেইল, ফোন নম্বর অথবা কর্মচারী আইডি ব্যবহার করুন।';
+      'অ্যাপ খুলতে একটি ডেমো ভূমিকা চাপুন। কোম্পানি সাইন ইন এখন বন্ধ।';
 
   @override
   String get loginIdentifierLabel => 'ইমেইল, ফোন অথবা কর্মচারী আইডি';
@@ -101,6 +101,63 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get navMore => 'আরও';
+
+  @override
+  String get navAttendance => 'হাজিরা';
+
+  @override
+  String get navApprovals => 'অনুমোদন';
+
+  @override
+  String get homeSeeAll => 'সব দেখুন';
+
+  @override
+  String get homePrimaryEmployee => 'আজকের কাজ';
+
+  @override
+  String get homePrimaryDriver => 'আপনার যাত্রা';
+
+  @override
+  String get homePrimaryGate => 'গেটে অতিথি';
+
+  @override
+  String get homePrimaryMail => 'পার্সেল অপেক্ষায়';
+
+  @override
+  String get homePrimaryHse => 'আজকের নিরাপত্তা';
+
+  @override
+  String get homePrimaryApprover => 'আপনার সিদ্ধান্তের অপেক্ষায়';
+
+  @override
+  String get homeActPunch => 'হাজিরায় যান';
+
+  @override
+  String get homeActTrip => 'যাত্রা খুলুন';
+
+  @override
+  String get homeActScanGuest => 'অতিথি নিবন্ধন';
+
+  @override
+  String get homeActScanParcel => 'পার্সেল নথি';
+
+  @override
+  String get homeActApprovals => 'অনুমোদন খুলুন';
+
+  @override
+  String get homeActAnnounce => 'নোটিশ পাঠান';
+
+  @override
+  String get homeActIncidents => 'দুর্ঘটনা খুলুন';
+
+  @override
+  String get moreMyWork => 'আমার কাজ';
+
+  @override
+  String get moreOperations => 'অপারেশন';
+
+  @override
+  String get moreCompany => 'কোম্পানি';
 
   @override
   String homeGoodMorning(String name) {
@@ -5384,7 +5441,7 @@ class AppL10nBn extends AppL10n {
   String get emFieldGrade => 'গ্রেড';
 
   @override
-  String get emFieldNid => 'জাতীয় পরিচয়পত্র';
+  String get emFieldNid => 'জাতীয় পরিচয়পত্র (১০, ১৩ বা ১৭ অঙ্ক)';
 
   @override
   String get emFieldEmergency => 'জরুরি যোগাযোগ';
@@ -5555,4 +5612,167 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get demoPlayEventDone => 'ঘটনা চালানো হয়েছে।';
+
+  @override
+  String get homeWhat => 'এখন কী করতে হবে।';
+
+  @override
+  String get searchTitle => 'মানুষ বা ফাইল খুঁজুন';
+
+  @override
+  String get searchHint =>
+      'নাম, কর্মচারী আইডি বা LV-, INC-, PASS- এর মতো রেফারেন্স লিখুন।';
+
+  @override
+  String get searchField => 'খুঁজুন';
+
+  @override
+  String get searchEmpty => 'কিছু মেলেনি।';
+
+  @override
+  String get lockMessagePassword =>
+      'অ্যাকাউন্টের পাসওয়ার্ড দিয়ে খুলুন। পাঁচবার ভুল হলে সাইন আউট।';
+
+  @override
+  String get lockPassword => 'পাসওয়ার্ড';
+
+  @override
+  String get lockUnlockPassword => 'পাসওয়ার্ড দিয়ে খুলুন';
+
+  @override
+  String lockFailedLeft(int left) {
+    return 'পাসওয়ার্ড মেলেনি। $leftবার বাকি।';
+  }
+
+  @override
+  String get dbListen => 'শুনুন';
+
+  @override
+  String get dbListenDone => 'শোনা হয়েছে বলে চিহ্নিত।';
+
+  @override
+  String get dbActRestore => 'চালু করুন';
+
+  @override
+  String get dbPermitRestored => 'লক-আউট খুলে দেওয়া হয়েছে।';
+
+  @override
+  String get dbActSignHandover => 'হস্তান্তরে স্বাক্ষর';
+
+  @override
+  String get dbHandoverSigned => 'হস্তান্তর স্বাক্ষরিত। এই শিফট আপনার।';
+
+  @override
+  String get attTeamTitle => 'আজ আপনার দল';
+
+  @override
+  String get attTeamWhy => 'কে এসেছেন, কে দেরি, কে ছুটিতে, কার খতিয়ান লাগবে।';
+
+  @override
+  String get attTeamPresent => 'হাজির';
+
+  @override
+  String get attTeamLate => 'দেরি';
+
+  @override
+  String get attTeamLeave => 'ছুটিতে';
+
+  @override
+  String get attTeamReview => 'দেখতে হবে';
+
+  @override
+  String get attTeamEmpty => 'এই পরিসরে আজ কেউ নেই।';
+
+  @override
+  String get attTeamNothing => 'আপনার করার কিছু নেই।';
+
+  @override
+  String get attTeamReviewHint => 'নিয়মিতকরণ খুলুন, অথবা কিছু করবেন না।';
+
+  @override
+  String get approvalRejectExplain =>
+      'এক বাক্য লিখুন যা আবেদনকারী ফাইল ও ইনবক্সে দেখবেন।';
+
+  @override
+  String get approvalRejectionSeen => 'কেন ফিরিয়ে দেওয়া হয়েছে';
+
+  @override
+  String get flChat => 'যাত্রার চ্যাট';
+
+  @override
+  String get flChatEmpty => 'এই যাত্রায় এখনও কোনো বার্তা নেই।';
+
+  @override
+  String get flChatHint => 'চালক বা আবেদনকারীকে লিখুন';
+
+  @override
+  String get flPoolTitle => 'এই দুই যাত্রা এক গাড়ি নিতে পারে';
+
+  @override
+  String flPoolBody(String a, String b) {
+    return '$a ও $b একই পথে। দুজনে রাজি হলে এক গাড়ি দিন।';
+  }
+
+  @override
+  String get flCallDriver => 'চালককে ফোন';
+
+  @override
+  String get flOdoStart => 'শুরুর ওডোমিটার (কিমি)';
+
+  @override
+  String get flOdoEnd => 'শেষ ওডোমিটার (কিমি)';
+
+  @override
+  String get busConductor => 'যাত্রী যাচাই';
+
+  @override
+  String get busConductorHint => 'কর্মচারী আইডি বা আসন নম্বর';
+
+  @override
+  String busConductorOk(String name, String seat) {
+    return '$name আসন $seat-এ আছেন।';
+  }
+
+  @override
+  String get busConductorMiss => 'এই বাসে কেউ মেলেনি।';
+
+  @override
+  String get busSwap => 'আসন বদল চান';
+
+  @override
+  String get busSwapHint => 'অন্যজনকে মানতে হবে।';
+
+  @override
+  String get busSwapDone => 'বদলের অনুরোধ পাঠানো হয়েছে।';
+
+  @override
+  String get busSwapAccept => 'আসন বদল মানুন';
+
+  @override
+  String get chVoice => 'ভয়েস নোট';
+
+  @override
+  String get chVoiceRecord => 'ধরতে ধরে রাখুন';
+
+  @override
+  String get chVoiceStop => 'থামান ও পাঠান';
+
+  @override
+  String get chVoicePlay => 'ভয়েস নোট চালান';
+
+  @override
+  String get inGps => 'কোথায় হয়েছে যোগ করুন';
+
+  @override
+  String get inGpsOn => 'অবস্থান যোগ হয়েছে';
+
+  @override
+  String get inCloseBlocked =>
+      'প্রতিটি সংশোধন নিশ্চিত হলেই ফাইল বন্ধ করা যাবে।';
+
+  @override
+  String get asScanTag => 'ট্যাগ স্ক্যান';
+
+  @override
+  String get emErrNid => 'এনআইডি ১০, ১৩ বা ১৭ অঙ্কের হতে হবে।';
 }

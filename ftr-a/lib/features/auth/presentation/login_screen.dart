@@ -5,9 +5,11 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
+import 'package:bogcl_oneops/mock/bootstrap.dart';
 import 'package:bogcl_oneops/mock/demo/demo_menu.dart';
-import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/mock/seed/org.dart';
+import 'package:bogcl_oneops/mock/store.dart';
+import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,18 +21,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _identifier = TextEditingController();
-  final _password = TextEditingController();
-  bool _submitting = false;
+  String? _busyCode;
   String? _error;
-
-  @override
-  void dispose() {
-    _identifier.dispose();
-    _password.dispose();
-    super.dispose();
-  }
 
   /// Generic messages only: never reveal whether the ID exists.
   String _messageFor(Object error, AppL10n l10n) {
@@ -46,24 +38,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     };
   }
 
-  Future<void> _submit() async {
-    if (_submitting || !(_formKey.currentState?.validate() ?? false)) return;
-    FocusScope.of(context).unfocus();
+  String _personaName(
+    MockStore store,
+    ({String code, String roleLabel, String roleLabelBn}) p,
+    bool bangla,
+  ) {
+    final emp = store.get(Col.employees, empId(p.code));
+    if (bangla) {
+      return (emp?['fullNameBn'] as String?) ?? p.roleLabelBn;
+    }
+    return (emp?['fullName'] as String?) ?? p.roleLabel;
+  }
+
+  Future<void> _enter(String empCode) async {
+    if (_busyCode != null) return;
     final l10n = context.l10n;
     setState(() {
-      _submitting = true;
+      _busyCode = empCode;
       _error = null;
     });
     try {
-      await ref
-          .read(sessionControllerProvider.notifier)
-          .login(_identifier.text, _password.text);
+      await ref.read(sessionControllerProvider.notifier).switchPersona(empCode);
       Haptics.success();
     } on Object catch (e) {
       Haptics.error();
       if (!mounted) return;
       setState(() {
-        _submitting = false;
+        _busyCode = null;
         _error = _messageFor(e, l10n);
       });
     }
@@ -73,6 +74,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final bangla = context.isBangla;
+    final store = ref.watch(mockStoreProvider);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -80,119 +83,140 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             padding: const EdgeInsets.all(Space.xxl),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: LanguageSwitch(),
-                    ),
-                    const SizedBox(height: Space.xxxl),
-                    // Long-press the logo to open the hidden demo menu.
-                    GestureDetector(
-                      onLongPress: () => showDemoMenu(context),
-                      child: Semantics(
-                        label: l10n.appName,
-                        child: Column(
-                          children: [
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(Corner.xl),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(Space.lg),
-                                child: Icon(
-                                  Icons.local_gas_station,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: LanguageSwitch(),
+                  ),
+                  const SizedBox(height: Space.xxxl),
+                  GestureDetector(
+                    onLongPress: () => showDemoMenu(context),
+                    child: Semantics(
+                      label: l10n.appName,
+                      child: Column(
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: cardShadow(theme.colorScheme.shadow),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(Space.xl),
+                              child: Icon(
+                                Icons.local_gas_station,
+                                color: theme.colorScheme.onPrimary,
+                                size: 36,
                               ),
                             ),
-                            const SizedBox(height: Space.lg),
-                            Text(
-                              l10n.appName,
-                              style: theme.textTheme.headlineSmall,
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: Space.lg),
+                          Text(
+                            l10n.appName,
+                            style: theme.textTheme.headlineSmall,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: Space.xxxl),
-                    Text(
-                      l10n.loginTitle,
-                      style: theme.textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: Space.xxxl),
+                  Text(l10n.loginTitle, style: theme.textTheme.headlineMedium),
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    l10n.loginSubtitle,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: Space.xs),
-                    Text(
-                      l10n.loginSubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: Space.xxl),
-                    AppTextField(
-                      label: l10n.loginIdentifierLabel,
-                      controller: _identifier,
-                      required: true,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.username],
-                      prefixIcon: Icons.person_outline,
-                      enabled: !_submitting,
-                    ),
+                  ),
+                  if (_error != null) ...[
                     const SizedBox(height: Space.lg),
-                    AppTextField(
-                      label: l10n.loginPasswordLabel,
-                      controller: _password,
-                      required: true,
-                      obscure: true,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      prefixIcon: Icons.lock_outline,
-                      enabled: !_submitting,
-                      onSubmitted: (_) => _submit(),
-                    ),
-                    if (_error != null) ...[
-                      const SizedBox(height: Space.lg),
-                      Semantics(
-                        liveRegion: true,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: context.bogcl.dangerContainer,
-                            borderRadius: BorderRadius.circular(Corner.md),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(Space.md),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: context.bogcl.danger,
-                                ),
-                                const SizedBox(width: Space.sm),
-                                Expanded(child: Text(_error!)),
-                              ],
-                            ),
+                    Semantics(
+                      liveRegion: true,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: context.bogcl.dangerContainer,
+                          borderRadius: BorderRadius.circular(Corner.md),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(Space.md),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: context.bogcl.danger,
+                              ),
+                              const SizedBox(width: Space.sm),
+                              Expanded(child: Text(_error!)),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                    const SizedBox(height: Space.xxl),
-                    PrimaryButton(
-                      label: l10n.loginSubmit,
-                      loading: _submitting,
-                      onPressed: _submit,
                     ),
                   ],
-                ),
+                  const SizedBox(height: Space.xl),
+                  GroupCard(
+                    children: [
+                      for (final p in personas)
+                        _PersonaRow(
+                          persona: p,
+                          name: _personaName(store, p, bangla),
+                          role: bangla ? p.roleLabelBn : p.roleLabel,
+                          busy: _busyCode == p.code,
+                          enabled: _busyCode == null,
+                          onTap: () => _enter(p.code),
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PersonaRow extends StatelessWidget {
+  const _PersonaRow({
+    required this.persona,
+    required this.name,
+    required this.role,
+    required this.busy,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final ({String code, String roleLabel, String roleLabelBn}) persona;
+  final String name;
+  final String role;
+  final bool busy;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListRow(
+      inset: true,
+      title: name,
+      subtitle: '$role · ${persona.code}',
+      leading: busy
+          ? const SizedBox(
+              width: 40,
+              height: 40,
+              child: Padding(
+                padding: EdgeInsets.all(Space.sm),
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          : Avatar(name: name),
+      trailing: enabled
+          ? Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant)
+          : null,
+      onTap: enabled ? onTap : null,
     );
   }
 }

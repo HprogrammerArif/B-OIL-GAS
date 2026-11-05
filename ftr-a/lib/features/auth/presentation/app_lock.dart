@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/storage/secure_store.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/logger.dart';
+import 'package:bogcl_oneops/features/auth/data/auth_repository.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,9 +97,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
         return;
       }
       final signedIn = ref.read(sessionControllerProvider).value != null;
-      final enabled = ref.read(biometricEnabledProvider).value ?? false;
-      final supported = ref.read(biometricSupportedProvider).value ?? false;
-      if (signedIn && enabled && supported) {
+      if (signedIn) {
         ref.read(appLockedProvider.notifier).lock();
       }
     }
@@ -127,14 +128,25 @@ class _LockScreen extends ConsumerStatefulWidget {
 }
 
 class _LockScreenState extends ConsumerState<_LockScreen> {
+  final _password = TextEditingController();
   bool _busy = false;
   bool _failed = false;
+  int _left = 5;
 
   @override
   void initState() {
     super.initState();
-    // Prompt right away; the button stays available if it is dismissed.
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_unlock()));
+    final enabled = ref.read(biometricEnabledProvider).value ?? false;
+    final supported = ref.read(biometricSupportedProvider).value ?? false;
+    if (enabled && supported) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_unlock()));
+    }
+  }
+
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
   }
 
   Future<void> _unlock() async {
@@ -161,15 +173,42 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
     }
   }
 
+  Future<void> _unlockPassword() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _failed = false;
+    });
+    try {
+      await ref.read(authRepositoryProvider).unlockWithPassword(_password.text);
+      if (!mounted) return;
+      ref.read(appLockedProvider.notifier).unlock();
+    } on ApiException catch (e) {
+      if (e.reason == 'UNLOCK_LOCKED_OUT') {
+        await ref.read(sessionControllerProvider.notifier).logout();
+        return;
+      }
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _failed = true;
+        _left =
+            (e.details.firstOrNull?['attemptsLeft'] as num?)?.toInt() ??
+            (_left - 1);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final supported = ref.watch(biometricSupportedProvider).value ?? false;
     return Material(
       color: theme.scaffoldBackgroundColor,
       child: SafeArea(
         child: Center(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(Space.xxl),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 360),
@@ -185,7 +224,7 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                   Text(l10n.lockTitle, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: Space.sm),
                   Text(
-                    l10n.lockMessage,
+                    l10n.lockMessagePassword,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -196,18 +235,32 @@ class _LockScreenState extends ConsumerState<_LockScreen> {
                     Semantics(
                       liveRegion: true,
                       child: Text(
-                        l10n.lockFailed,
+                        l10n.lockFailedLeft(_left),
                         style: TextStyle(color: theme.colorScheme.error),
                       ),
                     ),
                   ],
-                  const SizedBox(height: Space.xxl),
-                  PrimaryButton(
-                    label: l10n.lockUnlock,
-                    icon: Icons.fingerprint,
-                    loading: _busy,
-                    onPressed: _unlock,
+                  const SizedBox(height: Space.lg),
+                  AppTextField(
+                    label: l10n.lockPassword,
+                    controller: _password,
+                    obscure: true,
+                    onSubmitted: (_) => unawaited(_unlockPassword()),
                   ),
+                  const SizedBox(height: Space.md),
+                  PrimaryButton(
+                    label: l10n.lockUnlockPassword,
+                    loading: _busy,
+                    onPressed: _unlockPassword,
+                  ),
+                  if (supported) ...[
+                    const SizedBox(height: Space.sm),
+                    PrimaryButton.secondary(
+                      label: l10n.lockUnlock,
+                      icon: Icons.fingerprint,
+                      onPressed: _busy ? null : _unlock,
+                    ),
+                  ],
                   const SizedBox(height: Space.sm),
                   PrimaryButton.secondary(
                     label: l10n.signOut,

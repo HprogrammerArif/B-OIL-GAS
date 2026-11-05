@@ -451,6 +451,17 @@ abstract final class WorkforceEngine {
       if (m != null) manager = {'id': m['id'], 'fullName': m['fullName']};
     }
 
+    final nid = (body['nationalId'] as String? ?? '').replaceAll(
+      RegExp(r'\D'),
+      '',
+    );
+    if (nid.isNotEmpty &&
+        nid.length != 10 &&
+        nid.length != 13 &&
+        nid.length != 17) {
+      throw validationError('nationalId', 'NID must be 10, 13 or 17 digits');
+    }
+
     final email = (body['email'] as String? ?? '').trim();
     final uid = email.contains('@') ? userIdFor(code) : null;
     final join = (body['joinDate'] as String? ?? store.nowIso())
@@ -491,7 +502,7 @@ abstract final class WorkforceEngine {
       'status': 'ACTIVE',
       'bloodGroup': body['bloodGroup'],
       'avatarColor': '#334155',
-      'nationalId': body['nationalId'],
+      'nationalId': nid.isEmpty ? null : nid,
       'emergencyContact': body['emergencyContact'],
     };
     store.put(Col.employees, emp);

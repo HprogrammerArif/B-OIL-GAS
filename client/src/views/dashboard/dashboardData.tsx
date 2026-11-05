@@ -22,7 +22,7 @@ export const NOTICE_BOARD: NoticeItem[] = [
     id: 'NOT-2026-089',
     title: 'Mandatory Safety Briefing — Q4 Plant Operations',
     title_bn: 'বাধ্যতামূলক নিরাপত্তা ব্রিফিং — ৪র্থ প্রান্তিক প্ল্যান্ট অপারেশন',
-    tag: '⚠️ SAFETY CRITICAL',
+    tag: 'SAFETY CRITICAL',
     category: 'safety',
     priority: 'critical',
     date: 'Oct 15, 2026',

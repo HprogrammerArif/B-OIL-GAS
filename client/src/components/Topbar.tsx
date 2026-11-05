@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { AppRole, AppView, Lang, ROLE_META, t } from '../types';
 import {
   Globe, Megaphone, ChevronDown, LogOut, Shield, Lock, User,
-  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, Award,
-  Check, RefreshCw, Sparkles
+  Search, Moon, Sun, Clock, ChevronRight, Menu, Key, UserCheck,
+  Check, RefreshCw
 } from 'lucide-react';
 import { useCan, sessionStore } from '../auth/session';
 import SapGatewayModal from './SapGatewayModal';
@@ -282,7 +282,6 @@ export default function Topbar({
                 {t(meta.dept, meta.deptBn, lang)} • {t(meta.siteLabel, meta.siteLabelBn, lang)}
               </div>
               <div className="tooltip-footer-hint">
-                <Sparkles size={11} color="var(--brand-gold)" />
                 <span>{t('Click for profile & settings', 'প্রোফাইল ও সেটিংস দেখতে ক্লিক করুন', lang)}</span>
               </div>
             </div>
@@ -381,7 +380,7 @@ export default function Topbar({
                   }}
                 >
                   <div className="user-dropdown-icon-box warning">
-                    <Award size={15} />
+                    <UserCheck size={15} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600 }}>{t('Handover / Out of Office', 'ছুটিকালীন দায়িত্ব হস্তান্তর', lang)}</div>

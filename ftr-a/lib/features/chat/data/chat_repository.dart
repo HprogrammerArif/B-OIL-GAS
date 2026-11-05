@@ -45,6 +45,17 @@ class ChatRepository {
     }
   }
 
+  Future<void> sendVoice(String id, int durationSec) async {
+    try {
+      await _dio.post<Object?>(
+        '/chat/channels/$id/messages',
+        data: {'body': 'VOICE:$durationSec'},
+      );
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<void> send(String id, String body, {bool urgent = false}) async {
     try {
       await _dio.post<Object?>(

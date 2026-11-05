@@ -30,7 +30,6 @@ import {
   Download,
   ShieldAlert,
   ShieldCheck,
-  Sparkles,
   Search,
 } from 'lucide-react';
 
@@ -245,16 +244,22 @@ export function RegisterAssetModal({
             {/* 1-Click Quick-Fill Templates */}
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
-                <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
                 <span>{t('Fill with an example', 'দ্রুত পূরণের টেমপ্লেট নির্বাচন করুন', lang)}</span>
               </div>
-              <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('pump')}>{t('Refinery Pump', 'রিফাইনারি পাম্প', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('laptop')}>{t('Corporate Laptop', 'কর্পোরেট ল্যাপটপ', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('tanker')}>{t('30kL Bitumen Tanker', '৩০কেএল বিটুমিন ট্যাংকার', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('safety')}>{t('Gas Detector', 'গ্যাস ডিটেক্টর', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyPreset('lab')}>{t('Lab Rheometer', 'ল্যাব রিওমিটার', lang)}</button>
-              </div>
+              <select
+                className="eam-select"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) applyPreset(e.target.value as 'pump' | 'laptop' | 'tanker' | 'safety' | 'lab');
+                }}
+              >
+                <option value="">{t('Choose an example…', 'একটি উদাহরণ বেছে নিন…', lang)}</option>
+                <option value="pump">{t('Refinery Pump', 'রিফাইনারি পাম্প', lang)}</option>
+                <option value="laptop">{t('Corporate Laptop', 'কর্পোরেট ল্যাপটপ', lang)}</option>
+                <option value="tanker">{t('30kL Bitumen Tanker', '৩০কেএল বিটুমিন ট্যাংকার', lang)}</option>
+                <option value="safety">{t('Gas Detector', 'গ্যাস ডিটেক্টর', lang)}</option>
+                <option value="lab">{t('Lab Rheometer', 'ল্যাব রিওমিটার', lang)}</option>
+              </select>
             </div>
 
             <div className="eam-form-section-title">
@@ -539,41 +544,30 @@ export function TransferAssetModal({
 
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
-                <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
                 <span>{t('Fill with a common handover reason', 'স্থানান্তরের ধরন নির্বাচন করুন', lang)}</span>
               </div>
-              <div className="eam-preset-chips">
-                <button
-                  type="button"
-                  className="eam-preset-chip"
-                  onClick={() => {
+              <select
+                className="eam-select"
+                value=""
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === 'store') {
                     setToLocation('Active Field / Operational Bay');
                     setReason('Deployed from Central Store Pool to active custodian duty with signed handover.');
-                  }}
-                >
-                  {t('From Store Pool', 'স্টোর পুল থেকে বরাদ্দ', lang)}
-                </button>
-                <button
-                  type="button"
-                  className="eam-preset-chip"
-                  onClick={() => {
+                  } else if (v === 'sites') {
                     setToFacility('Chattogram Patenga Terminal');
                     setToLocation('Marine Terminal Jetty-2 Dispatch');
                     setReason('Inter-site operational transfer under Security Material Gate Pass.');
-                  }}
-                >
-                  {t('Between Sites (Gate Pass)', 'অন্য স্থাপনায় স্থানান্তর', lang)}
-                </button>
-                <button
-                  type="button"
-                  className="eam-preset-chip"
-                  onClick={() => {
+                  } else if (v === 'operator') {
                     setReason('Departmental custodian reassignment following role rotation.');
-                  }}
-                >
-                  {t('Change Operator', 'কর্মকর্তা পরিবর্তন', lang)}
-                </button>
-              </div>
+                  }
+                }}
+              >
+                <option value="">{t('Choose a handover type…', 'হস্তান্তরের ধরন বেছে নিন…', lang)}</option>
+                <option value="store">{t('From Store Pool', 'স্টোর পুল থেকে বরাদ্দ', lang)}</option>
+                <option value="sites">{t('Between Sites (Gate Pass)', 'অন্য স্থাপনায় স্থানান্তর', lang)}</option>
+                <option value="operator">{t('Change Operator', 'কর্মকর্তা পরিবর্তন', lang)}</option>
+              </select>
             </div>
 
             <div className="eam-field">
@@ -753,15 +747,21 @@ export function CreateWorkOrderModal({
           <div className="eam-modal-body">
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
-                <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
                 <span>{t('Fill with a common work order', 'দ্রুত কার্যাদেশ টেমপ্লেট', lang)}</span>
               </div>
-              <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cal')}>{t('Safety Calibration', 'নিরাপত্তা ক্যালিব্রেশন', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('pm')}>{t('Scheduled Service', 'নিয়মিত সার্ভিস', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('cm')}>{t('Breakdown Repair', 'ব্রেকডাউন মেরামত', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyWoPreset('capex')}>{t('Major Overhaul', 'বৃহৎ ওভারহল', lang)}</button>
-              </div>
+              <select
+                className="eam-select"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) applyWoPreset(e.target.value as 'cal' | 'pm' | 'cm' | 'capex');
+                }}
+              >
+                <option value="">{t('Choose a work-order example…', 'কার্যাদেশের উদাহরণ বেছে নিন…', lang)}</option>
+                <option value="cal">{t('Safety Calibration', 'নিরাপত্তা ক্যালিব্রেশন', lang)}</option>
+                <option value="pm">{t('Scheduled Service', 'নিয়মিত সার্ভিস', lang)}</option>
+                <option value="cm">{t('Breakdown Repair', 'ব্রেকডাউন মেরামত', lang)}</option>
+                <option value="capex">{t('Major Overhaul', 'বৃহৎ ওভারহল', lang)}</option>
+              </select>
             </div>
 
             <div className="eam-field">
@@ -1029,15 +1029,21 @@ export function SubmitAssetRequisitionModal({
           <div className="eam-modal-body">
             <div className="eam-preset-bar">
               <div className="eam-preset-lbl">
-                <Sparkles size={12} style={{ color: 'var(--brand-crimson)' }} />
                 <span>{t('Fill with an example', 'দ্রুত রিকুইজিশন টেমপ্লেট', lang)}</span>
               </div>
-              <div className="eam-preset-chips">
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('laptop')}>{t('Field Laptop', 'ফিল্ড ল্যাপটপ', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('thermal')}>{t('Thermal IR Camera', 'থার্মাল ক্যামেরা', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('lab')}>{t('Digital Penetrometer', 'ডিজিটাল পেনেট্রোমিটার', lang)}</button>
-                <button type="button" className="eam-preset-chip" onClick={() => applyReqPreset('pump')}>{t('Standby Pump Skid', 'স্ট্যান্ডবাই পাম্প স্কিড', lang)}</button>
-              </div>
+              <select
+                className="eam-select"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) applyReqPreset(e.target.value as 'laptop' | 'thermal' | 'lab' | 'pump');
+                }}
+              >
+                <option value="">{t('Choose an example…', 'একটি উদাহরণ বেছে নিন…', lang)}</option>
+                <option value="laptop">{t('Field Laptop', 'ফিল্ড ল্যাপটপ', lang)}</option>
+                <option value="thermal">{t('Thermal IR Camera', 'থার্মাল ক্যামেরা', lang)}</option>
+                <option value="lab">{t('Digital Penetrometer', 'ডিজিটাল পেনেট্রোমিটার', lang)}</option>
+                <option value="pump">{t('Standby Pump Skid', 'স্ট্যান্ডবাই পাম্প স্কিড', lang)}</option>
+              </select>
             </div>
 
             <div className="eam-field">
@@ -1744,38 +1750,36 @@ export function AssetScannerModal({
             <input
               type="text"
               className="eam-search-input"
-              placeholder={t('Search by equipment name, operator, or tag...', 'ট্যাগ বা নাম লিখে স্ক্যান করুন...', lang)}
+              placeholder={t('Type to narrow the list…', 'তালিকা ছোট করতে লিখুন…', lang)}
               value={scanQuery}
               onChange={(e) => setScanQuery(e.target.value)}
             />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', maxHeight: '220px', overflowY: 'auto' }}>
-            {filtered.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className="btn-outline"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '9px 12px',
-                  fontSize: '11.5px',
-                  width: '100%',
-                }}
-                onClick={() => {
-                  onSelectScanned(a);
-                  onClose();
-                  showToast(t(`Opened ${a.name}.`, `ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
-                }}
-              >
-                <span style={{ textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '8px' }}>
-                  <strong>{a.name}</strong> — <span style={{ color: 'var(--brand-slate-500)' }}>{a.facility}</span>
-                </span>
-                <span className="badge success" style={{ flexShrink: 0 }}>{t('Open', 'খুলুন', lang)}</span>
-              </button>
-            ))}
+          <div className="eam-field" style={{ marginBottom: 0 }}>
+            <label className="eam-label">{t('Choose the tagged machine', 'ট্যাগ করা মেশিন বেছে নিন', lang)}</label>
+            <select
+              className="eam-select"
+              value=""
+              onChange={(e) => {
+                const a = assets.find((item) => item.id === e.target.value);
+                if (!a) return;
+                onSelectScanned(a);
+                onClose();
+                showToast(t(`Opened ${a.name}.`, `ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
+              }}
+            >
+              <option value="">
+                {filtered.length === 0
+                  ? t('No machine matches that search', 'এই খোঁজে কোনো মেশিন নেই', lang)
+                  : t(`Select from ${filtered.length} machines…`, `${filtered.length}টি মেশিন থেকে বেছে নিন…`, lang)}
+              </option>
+              {filtered.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} — {a.facility} ({a.tag})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

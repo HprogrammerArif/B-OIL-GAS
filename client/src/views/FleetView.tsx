@@ -8,11 +8,11 @@ import { nowTime } from '../lib/clock';
 import { fleetModeFor, fleetPartyFor, requisitionsVisibleTo, notificationsVisibleTo, findPoolingSuggestion, fleetStatusLabel, ENABLE_FLEET_CHAT_DESK } from './fleet/config';
 import {
   Truck, Car, Fuel, MapPin, CheckCircle, Clock, AlertCircle,
-  Plus, Users, Navigation, QrCode, FileText, Sparkles, Award,
+  Plus, Users, Navigation, QrCode, FileText,
   Gauge, Radio, ShieldCheck, AlertTriangle, ArrowRight, Eye,
-  Maximize2, Activity, Cpu, Check, Compass, PhoneCall, Zap,
+  Maximize2, Activity, Check, Compass, PhoneCall,
   UserCheck, Shield, Key, Calendar, Printer, Search, RotateCcw,
-  UserPlus, Star, ThumbsUp, X, ChevronRight, Share2, Phone,
+  UserPlus, ThumbsUp, X, ChevronRight, Share2, Phone,
   AlertOctagon, RefreshCw, Filter, Layers, Download, CheckCircle2,
   MessageSquare, Bell, Send, MessageCircle, CheckCheck, Wrench
 } from 'lucide-react';
@@ -1100,7 +1100,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                                       style={{ fontSize: '10.5px', padding: '4px 8px' }}
                                       onClick={() => handleStartTripAction(r)}
                                     >
-                                      <Zap size={11} /> {t('Gate Out', 'যাত্রা শুরু', lang)}
+                                      <ArrowRight size={11} /> {t('Gate Out', 'যাত্রা শুরু', lang)}
                                     </button>
                                   )}
                                 </>
@@ -1204,7 +1204,7 @@ export default function FleetView({ role, lang }: ViewProps) {
               )}
               {onLeaveDriversCount > 0 && (
                 <span className="badge" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)' }}>
-                  ✈️ {onLeaveDriversCount} On Leave
+                  {onLeaveDriversCount} on leave
                 </span>
               )}
             </div>
@@ -1286,7 +1286,7 @@ export default function FleetView({ role, lang }: ViewProps) {
                         )}
                         {isOnLeave && (
                           <span className="badge" style={{ background: 'var(--status-purple-bg)', color: 'var(--status-purple-text)', fontWeight: 800 }}>
-                            ✈️ ON LEAVE
+                            On leave
                           </span>
                         )}
                         {isRest && <span className="badge warn">REST REQUIRED</span>}

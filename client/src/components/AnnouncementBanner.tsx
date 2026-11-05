@@ -1,6 +1,7 @@
 import React from 'react';
 import { Lang, t } from '../types';
 import { useNoticeStore } from '../store/noticeStore';
+import { useCurrentUser } from '../auth/session';
 import { showToast } from './ToastManager';
 import { Megaphone, CheckCircle2, X } from 'lucide-react';
 
@@ -11,7 +12,9 @@ interface AnnouncementBannerProps {
 /** Company-wide live announcement strip shown under the topbar. */
 export default function AnnouncementBanner({ lang }: AnnouncementBannerProps) {
   const { activeBroadcast, dismissActiveBroadcast, acknowledgeNotice } = useNoticeStore();
+  const user = useCurrentUser();
   if (!activeBroadcast) return null;
+  const canAcknowledge = user?.role !== 'chairman';
 
   return (
     <div className="announcement-banner">
@@ -31,7 +34,7 @@ export default function AnnouncementBanner({ lang }: AnnouncementBannerProps) {
       </div>
 
       <div className="announcement-banner-actions">
-        {activeBroadcast.requireAck && (
+        {canAcknowledge && activeBroadcast.requireAck && (
           <button
             type="button"
             className="announcement-banner-ack"

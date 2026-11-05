@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
+import 'package:bogcl_oneops/mock/engines/derived_inbox.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -27,6 +28,7 @@ Json _owned(HandlerContext ctx) {
 
 List<RouteDef> notificationRoutes() => [
   RouteDef('GET', '/notifications', (ctx) async {
+    DerivedInbox.ensure(ctx.store, ctx.requireAuth());
     final q = ctx.query;
     final category = q['category'];
     if (category != null && !_categories.contains(category)) {
@@ -57,6 +59,7 @@ List<RouteDef> notificationRoutes() => [
     ], q);
   }),
   RouteDef('GET', '/notifications/unread-count', (ctx) async {
+    DerivedInbox.ensure(ctx.store, ctx.requireAuth());
     final unread = _mine(ctx).where((n) => n['readAt'] == null).toList();
     final byModule = <String, int>{};
     for (final n in unread) {

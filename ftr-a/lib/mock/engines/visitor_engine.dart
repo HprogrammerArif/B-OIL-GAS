@@ -956,7 +956,7 @@ abstract final class VisitEngine {
   }
 
   static void tick(MockStore store) {
-    final now = DateTime.parse(store.nowIso());
+    final now = DateTime.parse(_stamp(store));
     for (final v in store.all(Col.visits)) {
       if (v['status'] == 'CHECKED_IN') {
         final end = DateTime.parse(v.str('expectedEndAt'));

@@ -3,7 +3,7 @@ import { RouteInfo, RouteStop, BusVehicle } from './busTypes';
 import { t } from '../../types';
 import {
   MapPin, Plus, Trash2, CheckCircle, X, Navigation, Clock,
-  Bus, User, Phone, ArrowRight, ShieldCheck, Compass, Sparkles, ChevronRight, Sun, Sunset
+  Bus, User, Phone, ArrowRight, ShieldCheck, Compass, ChevronRight, Sun, Sunset
 } from 'lucide-react';
 
 interface RouteBuilderModalProps {

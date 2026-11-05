@@ -64,6 +64,11 @@ abstract final class Col {
   static const chatDirectives = 'chat_directives';
   static const briefings = 'briefings';
   static const briefingListens = 'briefing_listens';
+  static const broadcasts = 'broadcasts';
+  static const broadcastDismissals = 'broadcast_dismissals';
+  static const workPermits = 'work_permits';
+  static const shiftHandovers = 'shift_handovers';
+  static const busSwaps = 'bus_swaps';
   static const compliance = 'compliance';
   static const licenceRenewals = 'licence_renewals';
   static const licenceLetters = 'licence_letters';

@@ -20,7 +20,7 @@
   "languageEnglish": "English",
   "languageBangla": "বাংলা",
   "loginTitle": "Sign in",
-  "loginSubtitle": "Use your company email, phone number or employee ID.",
+  "loginSubtitle": "Tap a demo role to open the app. Company sign-in is off for now.",
   "loginIdentifierLabel": "Email, phone or employee ID",
   "loginPasswordLabel": "Password",
   "loginSubmit": "Sign in",
@@ -32,6 +32,25 @@
   "sessionRestoreError": "We could not restore your session.",
   "navHome": "Home",
   "navMore": "More",
+  "navAttendance": "Attendance",
+  "navApprovals": "Approvals",
+  "homeSeeAll": "See all",
+  "homePrimaryEmployee": "Your day at work",
+  "homePrimaryDriver": "Your trip",
+  "homePrimaryGate": "Guests at the gate",
+  "homePrimaryMail": "Parcels waiting",
+  "homePrimaryHse": "Safety today",
+  "homePrimaryApprover": "Waiting for your decision",
+  "homeActPunch": "Go to attendance",
+  "homeActTrip": "Open trips",
+  "homeActScanGuest": "Register a guest",
+  "homeActScanParcel": "Log a parcel",
+  "homeActApprovals": "Open approvals",
+  "homeActAnnounce": "Send a notice",
+  "homeActIncidents": "Open incidents",
+  "moreMyWork": "My work",
+  "moreOperations": "Operations",
+  "moreCompany": "Company",
   "homeGoodMorning": "Good morning, {name}",
   "@homeGoodMorning": {
     "placeholders": {
@@ -3015,5 +3034,76 @@
         "type": "int"
       }
     }
-  }
+  },
+  "homeWhat": "What needs you now.",
+  "searchTitle": "Find a person or a file",
+  "searchHint": "Type a name, employee ID or a reference such as LV-, INC- or PASS-.",
+  "searchField": "Search",
+  "searchEmpty": "Nothing matches that.",
+  "lockMessagePassword": "Unlock with your account password. Five wrong tries sign you out.",
+  "lockPassword": "Password",
+  "lockUnlockPassword": "Unlock with password",
+  "lockFailedLeft": "That password did not match. {left} tries left.",
+  "@lockFailedLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "dbListen": "Listen",
+  "dbListenDone": "Marked as heard.",
+  "dbActRestore": "Restore",
+  "dbPermitRestored": "The lock-out is released.",
+  "dbActSignHandover": "Sign handover",
+  "dbHandoverSigned": "Handover signed. You own this shift.",
+  "attTeamTitle": "Your team today",
+  "attTeamWhy": "Who is in, late, on leave, or needs a check.",
+  "attTeamPresent": "In",
+  "attTeamLate": "Late",
+  "attTeamLeave": "On leave",
+  "attTeamReview": "To review",
+  "attTeamEmpty": "Nobody in this scope today.",
+  "attTeamNothing": "Nothing for you to do.",
+  "attTeamReviewHint": "Open regularisation or leave it.",
+  "approvalRejectExplain": "Write one sentence the requester will see on the file and in Inbox.",
+  "approvalRejectionSeen": "Why it was turned down",
+  "flChat": "Trip chat",
+  "flChatEmpty": "No messages on this trip yet.",
+  "flChatHint": "Write to the driver or requester",
+  "flPoolTitle": "These two trips can share a car",
+  "flPoolBody": "{a} and {b} go the same way. Assign one car if both agree.",
+  "@flPoolBody": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "flCallDriver": "Call driver",
+  "flOdoStart": "Start odometer (km)",
+  "flOdoEnd": "Finish odometer (km)",
+  "busConductor": "Check a passenger",
+  "busConductorHint": "Employee ID or seat number",
+  "busConductorOk": "{name} is in seat {seat}.",
+  "@busConductorOk": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "seat": { "type": "String" }
+    }
+  },
+  "busConductorMiss": "Nobody on this bus matches that.",
+  "busSwap": "Ask to swap seats",
+  "busSwapHint": "The other person must accept.",
+  "busSwapDone": "Swap request sent.",
+  "busSwapAccept": "Accept seat swap",
+  "chVoice": "Voice note",
+  "chVoiceRecord": "Hold to record",
+  "chVoiceStop": "Stop and send",
+  "chVoicePlay": "Play voice note",
+  "inGps": "Add where this happened",
+  "inGpsOn": "Location attached",
+  "inCloseBlocked": "Every fix must be confirmed before this file can close.",
+  "asScanTag": "Scan a tag",
+  "emFieldNid": "National ID (10, 13 or 17 digits)",
+  "emErrNid": "NID must be 10, 13 or 17 digits."
 }

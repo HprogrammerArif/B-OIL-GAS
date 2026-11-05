@@ -5,8 +5,10 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const home = '/home';
   static const inbox = '/inbox';
-  static const attendance = '/home/attendance';
-  static const attendanceRegularise = '/home/attendance/regularise';
+  static const attendance = '/attendance';
+  static const attendanceRegularise = '/attendance/regularise';
+  static const attendanceLegacy = '/home/attendance';
+  static const approvalsLegacy = '/home/approvals';
   static const leave = '/home/leave';
   static const leaveNew = '/home/leave/new';
   static String leaveDetail(String id) => '/home/leave/$id';
@@ -51,9 +53,8 @@ abstract final class AppRoutes {
   static const people = '/home/people';
   static const peopleNew = '/home/people/new';
   static String peopleDetail(String id) => '/home/people/$id';
-  static const approvals = '/home/approvals';
-  static String approvalDetail(String instanceId) =>
-      '/home/approvals/$instanceId';
+  static const approvals = '/approvals';
+  static String approvalDetail(String instanceId) => '/approvals/$instanceId';
   static const more = '/more';
   static const outbox = '/more/outbox';
   static const activity = '/more/activity';

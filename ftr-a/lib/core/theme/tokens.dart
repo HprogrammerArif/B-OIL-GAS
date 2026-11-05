@@ -36,6 +36,15 @@ abstract final class Corner {
 /// Minimum touch target (a11y).
 const double kMinTouchTarget = 48;
 
+/// Soft card shadow used instead of a heavy wireframe border.
+List<BoxShadow> cardShadow(Color shadow) => [
+  BoxShadow(
+    color: shadow.withValues(alpha: 0.07),
+    blurRadius: 18,
+    offset: const Offset(0, 6),
+  ),
+];
+
 /// Semantic colours that are not part of [ColorScheme].
 @immutable
 class BogclColors extends ThemeExtension<BogclColors> {

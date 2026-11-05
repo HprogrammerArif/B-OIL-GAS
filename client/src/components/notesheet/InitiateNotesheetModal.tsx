@@ -1,9 +1,9 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
 import { deptCodeOf, nextNoteSheetRef, nextRef, peekNoteSheetRef, peekRef } from '../../lib/refs';
 import { Button, FormField, Modal } from '../ui';
 import {
-  ArrowDown, ArrowUp, Briefcase, Check, Crown, Factory, FileSignature, Layers, Plus, Send, Shield, Users, X,
+  ArrowDown, ArrowUp, FileSignature, Send, Shield, Stamp, X,
 } from 'lucide-react';
 
 export interface SignatoryStep {
@@ -155,13 +155,6 @@ const ROUTING_PRESETS: RoutingPreset[] = [
     suggestedCategory: 'Plant Operations & Engineering',
   },
 ];
-
-const PRESET_ICON: Record<string, ReactNode> = {
-  plant_internal: <Factory size={16} />,
-  dept_finance: <Briefcase size={16} />,
-  hr_policy: <Users size={16} />,
-  capex_boardroom: <Crown size={16} />,
-};
 
 const URGENCY_OPTIONS: { value: NewNotesheetData['urgency']; en: string; bn: string; descEn: string; descBn: string }[] = [
   { value: 'normal', en: 'Normal', bn: 'সাধারণ', descEn: 'Standard turnaround', descBn: 'স্বাভাবিক সময়' },
@@ -317,31 +310,34 @@ export default function InitiateNotesheetModal({
         {/* 1. Template */}
         <section className="nsf-section" aria-labelledby="nsf-s1">
           <h4 id="nsf-s1"><b>1</b> {t('Choose an approval route', 'অনুমোদনের ধারা বেছে নিন', lang)}</h4>
-          <div className="nsf-presets" role="radiogroup" aria-labelledby="nsf-s1">
-            {ROUTING_PRESETS.map((preset) => {
-              const active = presetId === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={active}
-                  className={`nsf-preset ${active ? 'active' : ''}`}
-                  onClick={() => applyPreset(preset)}
-                >
-                  <span className="nsf-preset-icon">{PRESET_ICON[preset.id]}</span>
-                  <span className="nsf-preset-body">
-                    <strong>{t(preset.titleEn, preset.titleBn, lang)}</strong>
-                    <small>{t(preset.descEn, preset.descBn, lang)}</small>
-                  </span>
-                  {active && <Check size={15} className="nsf-preset-check" />}
-                </button>
-              );
-            })}
-          </div>
-          {presetId === 'custom' && (
-            <p className="nsf-custom"><Layers size={13} /> {t('Custom route: you changed the template.', 'কাস্টম ধারা: আপনি টেমপ্লেট পরিবর্তন করেছেন।', lang)}</p>
-          )}
+          <FormField
+            label={t('Template', 'টেমপ্লেট', lang)}
+            hint={
+              presetId === 'custom'
+                ? t('Custom route: you changed the template.', 'কাস্টম ধারা: আপনি টেমপ্লেট পরিবর্তন করেছেন।', lang)
+                : t(ROUTING_PRESETS.find((p) => p.id === presetId)?.descEn ?? '', ROUTING_PRESETS.find((p) => p.id === presetId)?.descBn ?? '', lang)
+            }
+          >
+            {(id) => (
+              <select
+                id={id}
+                className="notice-select"
+                value={presetId === 'custom' ? 'custom' : presetId}
+                onChange={(e) => {
+                  if (e.target.value === 'custom') return;
+                  const preset = ROUTING_PRESETS.find((p) => p.id === e.target.value);
+                  if (preset) applyPreset(preset);
+                }}
+              >
+                {ROUTING_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.id}>{t(preset.titleEn, preset.titleBn, lang)}</option>
+                ))}
+                {presetId === 'custom' && (
+                  <option value="custom">{t('Custom route', 'কাস্টম ধারা', lang)}</option>
+                )}
+              </select>
+            )}
+          </FormField>
         </section>
 
         {/* 2. Route */}
@@ -356,7 +352,7 @@ export default function InitiateNotesheetModal({
                   <span className="nsf-step-body">
                     <strong>{step.officerName}</strong>
                     <small>{t(step.roleName, step.roleNameBn, lang)}</small>
-                    {isFinal && <em><Crown size={11} /> {t('Final approver', 'চূড়ান্ত অনুমোদনকারী', lang)}</em>}
+                    {isFinal && <em><Stamp size={11} /> {t('Final approver', 'চূড়ান্ত অনুমোদনকারী', lang)}</em>}
                   </span>
                   <span className="nsf-step-tools">
                     <button type="button" onClick={() => moveStep(idx, -1)} disabled={idx === 0} aria-label={t('Move earlier', 'আগে নিন', lang)}><ArrowUp size={13} /></button>
@@ -370,25 +366,23 @@ export default function InitiateNotesheetModal({
             })}
           </ol>
           <div className="nsf-add">
-            <span>{t('Add or remove signatories:', 'স্বাক্ষরকারী যোগ বা বাদ দিন:', lang)}</span>
-            {AVAILABLE_OFFICERS.map((officer) => {
-              const included = route.some((s) => s.roleId === officer.roleId);
-              const locked = included && route.length === 1;
-              return (
-                <button
-                  key={officer.roleId}
-                  type="button"
-                  className={`nsf-chip ${included ? 'on' : ''}`}
-                  aria-pressed={included}
-                  disabled={locked}
-                  title={locked ? t('At least one approver is required.', 'কমপক্ষে একজন অনুমোদনকারী আবশ্যক।', lang) : undefined}
-                  onClick={() => toggleOfficer(officer)}
-                >
-                  {included ? <Check size={12} /> : <Plus size={12} />}
-                  {t(officer.roleName, officer.roleNameBn, lang)}
-                </button>
-              );
-            })}
+            <label htmlFor="nsf-add-officer">{t('Add a signatory', 'স্বাক্ষরকারী যোগ করুন', lang)}</label>
+            <select
+              id="nsf-add-officer"
+              className="notice-select"
+              value=""
+              onChange={(e) => {
+                const officer = AVAILABLE_OFFICERS.find((o) => o.roleId === e.target.value);
+                if (officer) toggleOfficer(officer);
+              }}
+            >
+              <option value="">{t('Choose an officer to add…', 'যোগ করতে একজন কর্মকর্তা বেছে নিন…', lang)}</option>
+              {AVAILABLE_OFFICERS.filter((o) => !route.some((s) => s.roleId === o.roleId)).map((officer) => (
+                <option key={officer.roleId} value={officer.roleId}>
+                  {officer.officerName} — {t(officer.roleName, officer.roleNameBn, lang)}
+                </option>
+              ))}
+            </select>
           </div>
           <small className="nsf-hint">{t('Signatures are collected in this order. New signatories join at the end.', 'স্বাক্ষর এই ক্রমে নেওয়া হবে। নতুন স্বাক্ষরকারী শেষে যুক্ত হয়।', lang)}</small>
         </section>

@@ -3,7 +3,7 @@ import { Seat, RouteInfo } from './busTypes';
 import { t } from '../../types';
 import {
   Shield, X, CheckCircle, UserMinus, UserCheck, AlertTriangle,
-  UserPlus, Phone, Building, Award, Check, Sparkles, MapPin, Clock, Tag, User
+  UserPlus, Phone, Building, Check, MapPin, Clock, Tag, User
 } from 'lucide-react';
 
 interface SupervisorSeatModalProps {
@@ -170,7 +170,7 @@ export default function SupervisorSeatModal({
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <Award size={22} />
+              <UserPlus size={22} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -296,9 +296,8 @@ export default function SupervisorSeatModal({
               borderRadius: '10px',
               padding: '12px 14px'
             }}>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={13} color="var(--status-warning-text)" />
-                <span>{t('1-Click Quick-Fill Registered Employee:', 'কর্মচারী তালিকা থেকে সরাসরি অটোফিল:', lang)}</span>
+              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                <span>{t('Fill from a registered employee', 'নিবন্ধিত কর্মচারী থেকে পূরণ করুন', lang)}</span>
               </div>
               <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {EMPLOYEE_PRESETS.map(p => (

@@ -1062,4 +1062,33 @@ abstract final class FleetEngine {
     'dutyHoursToday': d['dutyHoursToday'],
     'person': WorkflowEngine.personRef(store, d.strOrNull('userId')),
   };
+
+  static Json? pooling(MockStore store) {
+    final pending = [
+      for (final r in store.all(Col.fleetRequisitions))
+        if (r['status'] == 'APPROVED' || r['status'] == 'PENDING_APPROVAL') r,
+    ];
+    for (var i = 0; i < pending.length; i++) {
+      for (var j = i + 1; j < pending.length; j++) {
+        final a = pending[i];
+        final b = pending[j];
+        final da = (a['destination'] as String? ?? '').toLowerCase();
+        final db = (b['destination'] as String? ?? '').toLowerCase();
+        if (da.isEmpty || db.isEmpty) continue;
+        if (da.contains(db) ||
+            db.contains(da) ||
+            da.split(' ').first == db.split(' ').first) {
+          return {
+            'aId': a['id'],
+            'bId': b['id'],
+            'aDest': a['destination'],
+            'bDest': b['destination'],
+            'aRef': a['reqNo'] ?? a['id'],
+            'bRef': b['reqNo'] ?? b['id'],
+          };
+        }
+      }
+    }
+    return null;
+  }
 }

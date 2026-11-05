@@ -646,4 +646,76 @@ abstract final class BusEngine {
     }
     return {'seats': seats, 'queue': queue};
   }
+
+  static Json verify(MockStore store, String routeId, String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) throw validationError('query', 'Enter an ID or seat');
+    final admin = adminDetail(store, route(store, routeId)!);
+    for (final s in admin.objList('seats')) {
+      final emp = s.objOrNull('occupant');
+      final code = (emp?['empCode'] as String? ?? '').toLowerCase();
+      final seat = '${s['seatNo']}';
+      if (code == q || seat == q || 's$seat' == q) {
+        return {
+          'ok': true,
+          'seatNo': s['seatNo'],
+          'name': emp?['name'] ?? '',
+          'nameBn': emp?['nameBn'] ?? emp?['name'],
+          'empCode': emp?['empCode'],
+        };
+      }
+    }
+    return {'ok': false};
+  }
+
+  static Json requestSwap(
+    MockStore store,
+    AuthContext auth,
+    String routeId,
+    int targetSeat,
+  ) {
+    final mine = activeAllocation(store, auth.employeeId);
+    if (mine == null || mine['routeId'] != routeId) {
+      throw policyViolation('NO_SEAT', 'You do not have a seat on this bus.');
+    }
+    final other = allocationsOf(store, routeId)
+        .where((a) => a['seatNo'] == targetSeat && a['status'] == 'ACTIVE')
+        .firstOrNull;
+    if (other == null) {
+      throw validationError('seatNo', 'That seat is empty');
+    }
+    final rec = <String, Object?>{
+      'id': 'swap_${store.nowMs()}',
+      'routeId': routeId,
+      'fromAllocationId': mine['id'],
+      'toAllocationId': other['id'],
+      'fromEmployeeId': mine['employeeId'],
+      'toEmployeeId': other['employeeId'],
+      'status': 'PENDING',
+      'createdAt': store.nowIso(),
+    };
+    store.put(Col.busSwaps, rec);
+    return rec;
+  }
+
+  static Json acceptSwap(MockStore store, AuthContext auth, String id) {
+    final rec = store.get(Col.busSwaps, id);
+    if (rec == null) throw notFound('Swap');
+    if (rec['toEmployeeId'] != auth.employeeId) throw forbidden();
+    if (rec['status'] != 'PENDING') {
+      throw invalidTransition('This swap is already decided.');
+    }
+    final a = store.get(Col.busAllocations, rec.str('fromAllocationId'));
+    final b = store.get(Col.busAllocations, rec.str('toAllocationId'));
+    if (a == null || b == null) throw notFound('Seat');
+    final tmp = a['seatNo'];
+    a['seatNo'] = b['seatNo'];
+    b['seatNo'] = tmp;
+    rec['status'] = 'ACCEPTED';
+    store
+      ..put(Col.busAllocations, a)
+      ..put(Col.busAllocations, b)
+      ..put(Col.busSwaps, rec);
+    return rec;
+  }
 }

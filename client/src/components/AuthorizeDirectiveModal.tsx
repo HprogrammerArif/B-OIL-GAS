@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Crown, CheckCircle2, ShieldCheck, Clock, Sparkles } from 'lucide-react';
+import { X, CheckCircle2, ShieldCheck, Clock } from 'lucide-react';
 import { AppRole, Lang, ROLE_META, t } from '../types';
 import { DepartmentApprovalStep } from '../store/approvalStore';
 import { signatureCode } from '../lib/hash';
@@ -172,15 +172,14 @@ export default function AuthorizeDirectiveModal({
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                background: 'rgba(212, 175, 55, 0.25)',
-                border: '1px solid rgba(212, 175, 55, 0.5)',
+                background: 'rgba(255, 255, 255, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--status-warning-bright)',
+                color: 'var(--text-on-brand)',
               }}
             >
-              <Crown size={20} />
+              <ShieldCheck size={20} />
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-on-brand)' }}>
@@ -316,37 +315,23 @@ export default function AuthorizeDirectiveModal({
             {/* Quick Presets */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Sparkles size={14} color="var(--status-warning)" />
                 <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-2)' }}>
-                  {t('Quick Approval Note Templates:', 'দ্রুত অনুমোদন নোট নির্বাচন করুন:', lang)}
+                  {t('Approval note template', 'অনুমোদন নোটের টেমপ্লেট', lang)}
                 </label>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {DIRECTIVE_PRESETS.map((p, idx) => {
-                  const isSelected = directive === p.text;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setDirective(p.text)}
-                      style={{
-                        fontSize: '11px',
-                        padding: '6px 11px',
-                        borderRadius: '6px',
-                        border: isSelected ? '1.5px solid var(--status-purple-solid-dark)' : '1px solid var(--border-2)',
-                        background: isSelected ? 'var(--status-purple-bg)' : 'var(--surface-1)',
-                        color: isSelected ? 'var(--status-purple-text)' : 'var(--text-2)',
-                        fontWeight: isSelected ? 800 : 500,
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {lang === 'bn' ? p.labelBn : p.label}
-                    </button>
-                  );
-                })}
-              </div>
+              <select
+                className="form-input"
+                value={DIRECTIVE_PRESETS.find((p) => p.text === directive)?.label ?? ''}
+                onChange={(e) => {
+                  const preset = DIRECTIVE_PRESETS.find((p) => p.label === e.target.value);
+                  if (preset) setDirective(preset.text);
+                }}
+              >
+                <option value="">{t('Choose a note template…', 'একটি নোট টেমপ্লেট বেছে নিন…', lang)}</option>
+                {DIRECTIVE_PRESETS.map((p) => (
+                  <option key={p.label} value={p.label}>{lang === 'bn' ? p.labelBn : p.label}</option>
+                ))}
+              </select>
             </div>
 
             {/* Approval Remarks */}

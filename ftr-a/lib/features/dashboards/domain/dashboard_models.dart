@@ -67,6 +67,7 @@ class DashExtra {
     this.bodyEn,
     this.bodyBn,
     this.route,
+    this.id,
     this.leaders = const [],
     this.items = const [],
     this.roi = const {},
@@ -79,6 +80,7 @@ class DashExtra {
     bodyEn: j['bodyEn'] as String?,
     bodyBn: j['bodyBn'] as String?,
     route: j['route'] as String?,
+    id: j['id'] as String?,
     leaders: [
       for (final e in j['leaders'] as List? ?? const [])
         if (e is Map) Map<String, Object?>.from(e),
@@ -96,6 +98,7 @@ class DashExtra {
   final String? bodyEn;
   final String? bodyBn;
   final String? route;
+  final String? id;
   final List<Map<String, Object?>> leaders;
   final List<Map<String, Object?>> items;
   final Map<String, Object?> roi;
@@ -106,6 +109,33 @@ class DashExtra {
 }
 
 @immutable
+class DashBroadcast {
+  const DashBroadcast({
+    required this.id,
+    required this.titleEn,
+    required this.titleBn,
+    required this.bodyEn,
+    required this.bodyBn,
+  });
+
+  factory DashBroadcast.fromJson(Map<String, Object?> j) => DashBroadcast(
+    id: j['id'] as String? ?? '',
+    titleEn: j['title'] as String? ?? '',
+    titleBn: j['titleBn'] as String? ?? '',
+    bodyEn: j['body'] as String? ?? '',
+    bodyBn: j['bodyBn'] as String? ?? '',
+  );
+
+  final String id;
+  final String titleEn;
+  final String titleBn;
+  final String bodyEn;
+  final String bodyBn;
+
+  String title({required bool bangla}) => bangla ? titleBn : titleEn;
+  String body({required bool bangla}) => bangla ? bodyBn : bodyEn;
+}
+
 class Dashboard {
   const Dashboard({
     required this.layout,
@@ -113,6 +143,9 @@ class Dashboard {
     required this.kpis,
     required this.extras,
     required this.canBrief,
+    required this.canBroadcast,
+    required this.badges,
+    this.broadcast,
   });
 
   factory Dashboard.fromJson(Map<String, Object?> j) => Dashboard(
@@ -130,6 +163,11 @@ class Dashboard {
         if (e is Map) DashExtra.fromJson(Map<String, Object?>.from(e)),
     ],
     canBrief: j['canBrief'] == true,
+    canBroadcast: j['canBroadcast'] == true,
+    badges: j['badges'] is Map ? _map(j['badges']) : const {},
+    broadcast: j['broadcast'] is Map
+        ? DashBroadcast.fromJson(_map(j['broadcast']))
+        : null,
   );
 
   final String layout;
@@ -137,4 +175,9 @@ class Dashboard {
   final List<DashKpi> kpis;
   final List<DashExtra> extras;
   final bool canBrief;
+  final bool canBroadcast;
+  final Map<String, Object?> badges;
+  final DashBroadcast? broadcast;
+
+  int badge(String key) => (badges[key] as num?)?.toInt() ?? 0;
 }

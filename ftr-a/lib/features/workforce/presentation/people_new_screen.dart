@@ -28,6 +28,7 @@ class _PeopleNewScreenState extends ConsumerState<PeopleNewScreen> {
   final _title = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
+  final _nid = TextEditingController();
   String _dept = 'dept_hr';
   String _site = 'site_hq';
   String? _mgrUser;
@@ -41,6 +42,7 @@ class _PeopleNewScreenState extends ConsumerState<PeopleNewScreen> {
     _title.dispose();
     _phone.dispose();
     _email.dispose();
+    _nid.dispose();
     super.dispose();
   }
 
@@ -58,6 +60,14 @@ class _PeopleNewScreenState extends ConsumerState<PeopleNewScreen> {
       AppToast.show(context, l10n.emErrPhone, tone: StatusTone.warning);
       return;
     }
+    final nid = _nid.text.replaceAll(RegExp(r'\D'), '');
+    if (nid.isNotEmpty &&
+        nid.length != 10 &&
+        nid.length != 13 &&
+        nid.length != 17) {
+      AppToast.show(context, l10n.emErrNid, tone: StatusTone.warning);
+      return;
+    }
     setState(() => _saving = true);
     try {
       final rec = await ref.read(workforceRepositoryProvider).create({
@@ -66,6 +76,7 @@ class _PeopleNewScreenState extends ConsumerState<PeopleNewScreen> {
         'title': _title.text.trim(),
         'phone': _phone.text.trim(),
         'email': _email.text.trim(),
+        if (nid.isNotEmpty) 'nationalId': nid,
         'departmentId': _dept,
         'siteId': _site,
         if (_mgrUser != null) 'lineManagerUserId': _mgrUser,
@@ -113,6 +124,12 @@ class _PeopleNewScreenState extends ConsumerState<PeopleNewScreen> {
             label: l10n.emFieldEmail,
             controller: _email,
             keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: Space.sm),
+          AppTextField(
+            label: l10n.emFieldNid,
+            controller: _nid,
+            keyboardType: TextInputType.number,
           ),
           const SizedBox(height: Space.md),
           Text(l10n.emFieldDept),

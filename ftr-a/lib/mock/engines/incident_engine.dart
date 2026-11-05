@@ -287,6 +287,8 @@ abstract final class IncidentEngine {
           : null,
       'statutoryReceiptNo': null,
       'lateReport': late,
+      'lat': body['lat'],
+      'lng': body['lng'],
       'closure': null,
       'photoFileIds': [
         for (final id in (body['attachmentFileIds'] as List?) ?? const [])

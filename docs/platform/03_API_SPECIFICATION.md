@@ -585,7 +585,12 @@ Module dirs `dashboards`, `briefings`. Models `VoiceBriefing`, `VoiceBriefingLis
 
 The in-app mock (`ftr-a/lib/mock/engines/dashboard_engine.dart`) implements a subset with these differences:
 
-- `GET /dashboards/me` returns `{ layout, needs[], kpis[], extras[], canBrief }` computed from live collections (BR-02-04/09). Layout is the highest role: CHAIRMAN → PLANT_GM → HR_ADMIN → TRANSPORT_ADMIN → HOD → DRIVER → EMPLOYEE. ROI figures are the declared `DashboardPolicy.roi` constants (BR-02-07). Briefings are transcript-only (`POST /briefings` publishes immediately). No SCADA / DCS / LOTO adapter widgets.
+- `GET /dashboards/me` returns `{ layout, needs[], kpis[], extras[], canBrief, canBroadcast, badges, broadcast }` computed from live collections (BR-02-04/09). Layout is the highest role: CHAIRMAN → PLANT_GM → HR_ADMIN → TRANSPORT_ADMIN → HOD → DRIVER → EMPLOYEE. ROI figures are the declared `DashboardPolicy.roi` constants (BR-02-07). Briefings are transcript-only (`POST /briefings` publishes immediately). Plant extras include work-permit LOTO restore and shift-handover sign (`POST /work-permits/:id/restore`, `POST /shift-handovers/:id/sign`). No SCADA / DCS adapter widgets.
+- `GET /search?q=` finds people, notices and refs. `POST /broadcasts` / `POST /broadcasts/:id/dismiss` pin one company announcement on Home.
+- `GET /attendance/team` is the manager roster (scope from `attendance:read`). Inbox `GET /notifications` upserts derived rows (expiring permit, unsigned custody, guest today, assigned trip).
+- `GET/POST /fleet/chat/{REQ:id}/messages` is trip chat. `GET /fleet/pooling` suggests two same-route pending trips.
+- `POST /bus/routes/:id/verify` (EMP or seat), `POST /bus/routes/:id/swap`, `POST /bus/swaps/:id/accept`.
+- `POST /auth/unlock` checks the account password (5 failures revoke the session).
 - Demo menu **Play next live event** (`POST /demo/events/next`) writes a leadership chat line and an inbox ping.
 
 ---

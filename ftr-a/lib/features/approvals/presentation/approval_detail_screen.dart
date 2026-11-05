@@ -104,7 +104,7 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
       builder: (_) => _DecisionSheet(
         title: reject ? l10n.approvalRejectTitle : l10n.approvalReturnTitle,
         message: reject
-            ? l10n.approvalRejectMessage
+            ? l10n.approvalRejectExplain
             : l10n.approvalReturnMessage,
         confirmLabel: reject ? l10n.approvalActReject : l10n.approvalActReturn,
         hint: l10n.approvalReasonHint,
@@ -310,6 +310,15 @@ class _Body extends ConsumerWidget {
                     ),
                     style: theme.textTheme.bodyMedium,
                   ),
+                  if (d.rejectionExplanation != null &&
+                      d.rejectionExplanation!.isNotEmpty) ...[
+                    const SizedBox(height: Space.md),
+                    Text(
+                      l10n.approvalRejectionSeen,
+                      style: theme.textTheme.labelLarge,
+                    ),
+                    Text(d.rejectionExplanation!),
+                  ],
                   if (s.displayDetails(bangla: bangla) != null) ...[
                     const SizedBox(height: Space.sm),
                     Text(

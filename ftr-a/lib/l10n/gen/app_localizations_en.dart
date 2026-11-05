@@ -64,7 +64,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get loginSubtitle =>
-      'Use your company email, phone number or employee ID.';
+      'Tap a demo role to open the app. Company sign-in is off for now.';
 
   @override
   String get loginIdentifierLabel => 'Email, phone or employee ID';
@@ -100,6 +100,63 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get navMore => 'More';
+
+  @override
+  String get navAttendance => 'Attendance';
+
+  @override
+  String get navApprovals => 'Approvals';
+
+  @override
+  String get homeSeeAll => 'See all';
+
+  @override
+  String get homePrimaryEmployee => 'Your day at work';
+
+  @override
+  String get homePrimaryDriver => 'Your trip';
+
+  @override
+  String get homePrimaryGate => 'Guests at the gate';
+
+  @override
+  String get homePrimaryMail => 'Parcels waiting';
+
+  @override
+  String get homePrimaryHse => 'Safety today';
+
+  @override
+  String get homePrimaryApprover => 'Waiting for your decision';
+
+  @override
+  String get homeActPunch => 'Go to attendance';
+
+  @override
+  String get homeActTrip => 'Open trips';
+
+  @override
+  String get homeActScanGuest => 'Register a guest';
+
+  @override
+  String get homeActScanParcel => 'Log a parcel';
+
+  @override
+  String get homeActApprovals => 'Open approvals';
+
+  @override
+  String get homeActAnnounce => 'Send a notice';
+
+  @override
+  String get homeActIncidents => 'Open incidents';
+
+  @override
+  String get moreMyWork => 'My work';
+
+  @override
+  String get moreOperations => 'Operations';
+
+  @override
+  String get moreCompany => 'Company';
 
   @override
   String homeGoodMorning(String name) {
@@ -5406,7 +5463,7 @@ class AppL10nEn extends AppL10n {
   String get emFieldGrade => 'Grade';
 
   @override
-  String get emFieldNid => 'National ID';
+  String get emFieldNid => 'National ID (10, 13 or 17 digits)';
 
   @override
   String get emFieldEmergency => 'Emergency contact';
@@ -5580,4 +5637,167 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get demoPlayEventDone => 'Event played.';
+
+  @override
+  String get homeWhat => 'What needs you now.';
+
+  @override
+  String get searchTitle => 'Find a person or a file';
+
+  @override
+  String get searchHint =>
+      'Type a name, employee ID or a reference such as LV-, INC- or PASS-.';
+
+  @override
+  String get searchField => 'Search';
+
+  @override
+  String get searchEmpty => 'Nothing matches that.';
+
+  @override
+  String get lockMessagePassword =>
+      'Unlock with your account password. Five wrong tries sign you out.';
+
+  @override
+  String get lockPassword => 'Password';
+
+  @override
+  String get lockUnlockPassword => 'Unlock with password';
+
+  @override
+  String lockFailedLeft(int left) {
+    return 'That password did not match. $left tries left.';
+  }
+
+  @override
+  String get dbListen => 'Listen';
+
+  @override
+  String get dbListenDone => 'Marked as heard.';
+
+  @override
+  String get dbActRestore => 'Restore';
+
+  @override
+  String get dbPermitRestored => 'The lock-out is released.';
+
+  @override
+  String get dbActSignHandover => 'Sign handover';
+
+  @override
+  String get dbHandoverSigned => 'Handover signed. You own this shift.';
+
+  @override
+  String get attTeamTitle => 'Your team today';
+
+  @override
+  String get attTeamWhy => 'Who is in, late, on leave, or needs a check.';
+
+  @override
+  String get attTeamPresent => 'In';
+
+  @override
+  String get attTeamLate => 'Late';
+
+  @override
+  String get attTeamLeave => 'On leave';
+
+  @override
+  String get attTeamReview => 'To review';
+
+  @override
+  String get attTeamEmpty => 'Nobody in this scope today.';
+
+  @override
+  String get attTeamNothing => 'Nothing for you to do.';
+
+  @override
+  String get attTeamReviewHint => 'Open regularisation or leave it.';
+
+  @override
+  String get approvalRejectExplain =>
+      'Write one sentence the requester will see on the file and in Inbox.';
+
+  @override
+  String get approvalRejectionSeen => 'Why it was turned down';
+
+  @override
+  String get flChat => 'Trip chat';
+
+  @override
+  String get flChatEmpty => 'No messages on this trip yet.';
+
+  @override
+  String get flChatHint => 'Write to the driver or requester';
+
+  @override
+  String get flPoolTitle => 'These two trips can share a car';
+
+  @override
+  String flPoolBody(String a, String b) {
+    return '$a and $b go the same way. Assign one car if both agree.';
+  }
+
+  @override
+  String get flCallDriver => 'Call driver';
+
+  @override
+  String get flOdoStart => 'Start odometer (km)';
+
+  @override
+  String get flOdoEnd => 'Finish odometer (km)';
+
+  @override
+  String get busConductor => 'Check a passenger';
+
+  @override
+  String get busConductorHint => 'Employee ID or seat number';
+
+  @override
+  String busConductorOk(String name, String seat) {
+    return '$name is in seat $seat.';
+  }
+
+  @override
+  String get busConductorMiss => 'Nobody on this bus matches that.';
+
+  @override
+  String get busSwap => 'Ask to swap seats';
+
+  @override
+  String get busSwapHint => 'The other person must accept.';
+
+  @override
+  String get busSwapDone => 'Swap request sent.';
+
+  @override
+  String get busSwapAccept => 'Accept seat swap';
+
+  @override
+  String get chVoice => 'Voice note';
+
+  @override
+  String get chVoiceRecord => 'Hold to record';
+
+  @override
+  String get chVoiceStop => 'Stop and send';
+
+  @override
+  String get chVoicePlay => 'Play voice note';
+
+  @override
+  String get inGps => 'Add where this happened';
+
+  @override
+  String get inGpsOn => 'Location attached';
+
+  @override
+  String get inCloseBlocked =>
+      'Every fix must be confirmed before this file can close.';
+
+  @override
+  String get asScanTag => 'Scan a tag';
+
+  @override
+  String get emErrNid => 'NID must be 10, 13 or 17 digits.';
 }

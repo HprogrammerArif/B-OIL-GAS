@@ -4,6 +4,7 @@
  *
  *  - asset:view_all        → whole register + financial ledger (otherwise own custody only)
  *  - asset:manage          → register, transfer, work orders, calibration, decommission
+ *  - asset:request         → raise a new/replacement equipment requisition (not Chairman/Finance)
  *  - asset:approve_disposal → write-off authority + depreciation policy
  */
 import type { CurrentUser } from '../../auth/session';
@@ -28,6 +29,8 @@ export function assetConfigFor(user: CurrentUser): AssetRoleConfig {
     canViewFinancialLedger: viewAll,
     canEditDepreciationPolicy: approveDisposal,
     canApproveRequisition: manage || approveDisposal,
+    canRequestEquipment: has('asset:request'),
+    canScanTag: has('asset:request') || manage,
     canInitiateDecommission: manage,
     canAuthorizeWriteOff: approveDisposal,
   };

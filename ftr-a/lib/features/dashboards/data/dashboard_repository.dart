@@ -36,6 +36,58 @@ class DashboardRepository {
       throwApi(e);
     }
   }
+
+  Future<void> dismissBroadcast(String id) async {
+    try {
+      await _dio.post<Object?>('/broadcasts/$id/dismiss');
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> publishBroadcast(Map<String, Object?> body) async {
+    try {
+      await _dio.post<Object?>('/broadcasts', data: body);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> listenBriefing(String id) async {
+    try {
+      await _dio.post<Object?>('/briefings/$id/listen');
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> restorePermit(String id) async {
+    try {
+      await _dio.post<Object?>('/work-permits/$id/restore');
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> signHandover(String id) async {
+    try {
+      await _dio.post<Object?>('/shift-handovers/$id/sign');
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<List<Map<String, Object?>>> search(String q) async {
+    try {
+      final res = await _dio.get<Object?>('/search', queryParameters: {'q': q});
+      return [
+        for (final e in Envelope.data(res.data)! as List)
+          Map<String, Object?>.from(e! as Map),
+      ];
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

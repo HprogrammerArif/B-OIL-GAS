@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
+import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
@@ -155,30 +156,32 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
     final l10n = context.l10n;
     final sheet = ref.watch(noteSheetDetailProvider(widget.id));
     final s = sheet.value;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(s?.fileNo ?? l10n.moduleNoteSheets),
-        actions: [
-          if (s != null && s.status != 'DRAFT')
-            IconButton(
-              icon: const Icon(Icons.print_outlined),
-              tooltip: l10n.nsPrint,
-              onPressed: () => unawaited(_print(s)),
-            ),
-        ],
-      ),
-      bottomNavigationBar: s == null ? null : _bar(context, s),
-      body: sheet.when(
-        loading: SkeletonList.new,
-        error: (_, _) => ErrorState(
-          onRetry: () => ref.invalidate(noteSheetDetailProvider(widget.id)),
+    return SecureFlag(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(s?.fileNo ?? l10n.moduleNoteSheets),
+          actions: [
+            if (s != null && s.status != 'DRAFT')
+              IconButton(
+                icon: const Icon(Icons.print_outlined),
+                tooltip: l10n.nsPrint,
+                onPressed: () => unawaited(_print(s)),
+              ),
+          ],
         ),
-        data: (s) => RefreshIndicator(
-          onRefresh: () async {
-            _refreshAll();
-            await ref.read(noteSheetDetailProvider(widget.id).future);
-          },
-          child: _Body(sheet: s),
+        bottomNavigationBar: s == null ? null : _bar(context, s),
+        body: sheet.when(
+          loading: SkeletonList.new,
+          error: (_, _) => ErrorState(
+            onRetry: () => ref.invalidate(noteSheetDetailProvider(widget.id)),
+          ),
+          data: (s) => RefreshIndicator(
+            onRefresh: () async {
+              _refreshAll();
+              await ref.read(noteSheetDetailProvider(widget.id).future);
+            },
+            child: _Body(sheet: s),
+          ),
         ),
       ),
     );

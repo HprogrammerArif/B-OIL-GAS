@@ -453,7 +453,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const verdictWarn = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0 || decommissionedAssets.length > 0;
   const verdict = roleConfig.isSelfServiceOnly
     ? activeOnlyCount === 0
-      ? t('No equipment is assigned to you right now. Use "Request equipment" if you need a machine or device.', 'আপনার নামে এখন কোনো সরঞ্জাম বরাদ্দ নেই। প্রয়োজন হলে "যন্ত্রপাতির আবেদন" চাপুন।', lang)
+      ? roleConfig.canRequestEquipment
+        ? t('No equipment is assigned to you right now. Use "Request equipment" if you need a machine or device.', 'আপনার নামে এখন কোনো সরঞ্জাম বরাদ্দ নেই। প্রয়োজন হলে "যন্ত্রপাতির আবেদন" চাপুন।', lang)
+        : t('No equipment is assigned to you.', 'আপনার নামে কোনো সরঞ্জাম বরাদ্দ নেই।', lang)
       : t(
         `${activeOnlyCount} ${activeOnlyCount === 1 ? 'item is' : 'items are'} in your custody${portfolioStats.pendingSignOffs > 0 ? `. ${portfolioStats.pendingSignOffs} ${portfolioStats.pendingSignOffs === 1 ? 'needs' : 'need'} your handover signature` : ''}${portfolioStats.calAlerts > 0 ? `. ${portfolioStats.calAlerts} due for service soon` : ''}.`,
         `আপনার হেফাজতে ${bn(activeOnlyCount)}টি সরঞ্জাম আছে${portfolioStats.pendingSignOffs > 0 ? `। ${bn(portfolioStats.pendingSignOffs)}টিতে আপনার গ্রহণ স্বাক্ষর বাকি` : ''}${portfolioStats.calAlerts > 0 ? `। ${bn(portfolioStats.calAlerts)}টির সার্ভিসিং আসন্ন` : ''}।`,
@@ -599,16 +601,22 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         description={
           roleConfig.isSelfServiceOnly
             ? t('Equipment in your custody, when it needs service, and your requests.', 'আপনার হেফাজতে থাকা সরঞ্জাম, সার্ভিসের সময়সূচী এবং আপনার আবেদন।', lang)
-            : t('Machines and equipment across our sites, sorted with the ones that need attention first.', 'সব সাইটের যন্ত্রপাতি ও সরঞ্জাম — যেগুলোতে আগে নজর দরকার সেগুলো শুরুতে দেখানো।', lang)
+            : roleConfig.canAuthorizeWriteOff && !roleConfig.canRequestEquipment
+              ? t('Company register, book value, and write-offs that need your authority. Departments raise purchase requests.', 'কোম্পানির সম্পদ তালিকা, বইমূল্য, এবং যে অবলোপন আপনার অনুমোদন চায়। ক্রয়ের আবেদন বিভাগগুলো করে।', lang)
+              : t('Machines and equipment across our sites, sorted with the ones that need attention first.', 'সব সাইটের যন্ত্রপাতি ও সরঞ্জাম — যেগুলোতে আগে নজর দরকার সেগুলো শুরুতে দেখানো।', lang)
         }
         actions={
           <>
-            <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
-              {t('Scan tag', 'ট্যাগ স্ক্যান', lang)}
-            </Button>
-            <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
-              {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
-            </Button>
+            {roleConfig.canScanTag && (
+              <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
+                {t('Scan tag', 'ট্যাগ স্ক্যান', lang)}
+              </Button>
+            )}
+            {roleConfig.canRequestEquipment && (
+              <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
+                {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
+              </Button>
+            )}
             {roleConfig.canRegisterAsset && (
               <Button icon={<Plus size={14} />} onClick={() => setShowRegisterModal(true)}>
                 {t('Add machine', 'নতুন মেশিন যুক্ত', lang)}
@@ -1785,9 +1793,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                   </div>
                 </div>
               </div>
-              <button type="button" className="btn-primary" onClick={() => setShowRequisitionModal(true)}>
-                <Plus size={14} /> {t('New Equipment Request', 'নতুন আবেদন দাখিল', lang)}
-              </button>
+              {roleConfig.canRequestEquipment && (
+                <button type="button" className="btn-primary" onClick={() => setShowRequisitionModal(true)}>
+                  <Plus size={14} /> {t('New Equipment Request', 'নতুন আবেদন দাখিল', lang)}
+                </button>
+              )}
             </div>
 
             <div className="card-body">
@@ -2358,8 +2368,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           setActiveTab('disposal');
           showToast(
             t(
-              `⚠️ Condemnation survey logged. Asset moved to Stage-7 Decommissioned Write-Off Queue.`,
-              `⚠️ অকেজো জরিপ সম্পন্ন। চূড়ান্ত অবলোপনের তালিকায় স্থানান্তরিত।`,
+              `Condemnation survey logged. Asset moved to the write-off queue.`,
+              `অকেজো জরিপ সম্পন্ন। চূড়ান্ত অবলোপনের তালিকায় স্থানান্তরিত।`,
               lang
             ),
             'warn'
@@ -2378,8 +2388,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
           if (res) {
             showToast(
               t(
-                `👑 Write-Off Sanctioned! Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} Gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} Loss`}). Locked in 10-Yr Archive.`,
-                `👑 অবলোপন অনুমোদিত! এসএপি ভাউচার ${res.sapVoucher} পোস্ট ও ১০-বছরের আর্কাইভে সংরক্ষিত।`,
+                `Write-off sanctioned. Voucher ${res.sapVoucher} posted (${res.gainOrLoss >= 0 ? `+৳${res.gainOrLoss.toLocaleString()} gain` : `-৳${Math.abs(res.gainOrLoss).toLocaleString()} loss`}). Locked in the 10-year archive.`,
+                `অবলোপন অনুমোদিত। এসএপি ভাউচার ${res.sapVoucher} পোস্ট ও ১০-বছরের আর্কাইভে সংরক্ষিত।`,
                 lang
               ),
               'gold'

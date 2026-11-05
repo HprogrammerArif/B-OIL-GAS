@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import {
   X,
   Megaphone,
-  Sparkles,
   ShieldCheck,
-  Crown,
   Pin,
   Users,
   BellRing,
@@ -30,7 +28,6 @@ interface PublishNoticeModalProps {
 
 interface NoticeTemplate {
   label: string;
-  icon: string;
   title: string;
   title_bn: string;
   tag: string;
@@ -46,10 +43,9 @@ interface NoticeTemplate {
 const TEMPLATES: NoticeTemplate[] = [
   {
     label: "Chairman's Directive",
-    icon: '👑',
     title: "Chairman's Special Directive — Operational Safety & Discipline Compliance",
     title_bn: "চেয়ারম্যানের বিশেষ নির্দেশনা — নিরাপত্তা ও শৃঙ্খলা বিধান",
-    tag: "👑 CHAIRMAN DIRECTIVE",
+    tag: "CHAIRMAN DIRECTIVE",
     category: "executive",
     priority: "high",
     targetAudience: "All Group Employees (1,240 Staff)",
@@ -60,10 +56,9 @@ const TEMPLATES: NoticeTemplate[] = [
   },
   {
     label: 'Safety & LOTO Protocol',
-    icon: '⚠️',
     title: 'Urgent Safety Circular — High-Pressure Steam & Bitumen Line Lockout Compliance',
     title_bn: 'জরুরি নিরাপত্তা সার্কুলার — হাই-প্রেসার স্টিম ও বিটুমিন লাইন এলওটিও মানদণ্ড',
-    tag: '⚠️ SAFETY CRITICAL',
+    tag: 'SAFETY CRITICAL',
     category: 'safety',
     priority: 'critical',
     targetAudience: 'Keraniganj Refinery & Field Engineering (218 Personnel)',
@@ -74,7 +69,6 @@ const TEMPLATES: NoticeTemplate[] = [
   },
   {
     label: 'Plant Maintenance Window',
-    icon: '🏭',
     title: 'Planned DCS Automation Upgrade & Scheduled Throughput Optimization',
     title_bn: 'পরিকল্পিত ডিসিএস অটোমেশন আপগ্রেড ও শিডিউল মেইনটেন্যান্স',
     tag: 'REFINERY OPERATIONS',
@@ -88,7 +82,6 @@ const TEMPLATES: NoticeTemplate[] = [
   },
   {
     label: 'HR Policy & Holiday Notice',
-    icon: '📋',
     title: 'Corporate Circular — Official Holiday Observation & Essential Operations Roster',
     title_bn: 'কর্পোরেট সার্কুলার — সরকারি ছুটির দিন ও জরুরি ডিউটি রোস্টার',
     tag: 'HR CIRCULAR',
@@ -110,7 +103,7 @@ export default function PublishNoticeModal({
 }: PublishNoticeModalProps) {
   const [title, setTitle] = useState('');
   const [titleBn, setTitleBn] = useState('');
-  const [tag, setTag] = useState('👑 CHAIRMAN DIRECTIVE');
+  const [tag, setTag] = useState('CHAIRMAN DIRECTIVE');
   const [category, setCategory] = useState<'safety' | 'operational' | 'hr' | 'executive' | 'urgent'>('executive');
   const [priority, setPriority] = useState<'critical' | 'high' | 'normal'>('high');
   const [targetAudience, setTargetAudience] = useState('All Group Employees (1,240 Staff)');
@@ -212,16 +205,15 @@ export default function PublishNoticeModal({
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, var(--status-warning-solid) 0%, var(--status-warning-solid) 100%)',
+                background: 'rgba(255, 255, 255, 0.12)',
                 color: 'var(--text-on-brand)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(217, 119, 6, 0.35)',
                 flexShrink: 0,
               }}
             >
-              <Crown size={22} color="var(--text-on-brand)" />
+              <Megaphone size={20} color="var(--text-on-brand)" />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -234,22 +226,8 @@ export default function PublishNoticeModal({
                     letterSpacing: '-0.2px',
                   }}
                 >
-                  {t('Publish Enterprise Notice & Board Circular', 'কর্পোরেট নোটিশ ও সার্কুলার প্রকাশনা ফর্ম', lang)}
+                  {t('Publish a company notice', 'কোম্পানির নোটিশ প্রকাশ করুন', lang)}
                 </h3>
-                <span
-                  style={{
-                    backgroundColor: 'var(--status-warning-solid)',
-                    color: 'var(--text-1)',
-                    fontSize: '10px',
-                    fontWeight: 900,
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  Directorate
-                </span>
               </div>
               <p
                 style={{
@@ -337,46 +315,22 @@ export default function PublishNoticeModal({
                 flexShrink: 0,
               }}
             >
-              <Sparkles size={13} color="var(--status-warning)" />
-              {t('Quick Presets:', 'টেমপ্লেট:', lang)}
+              {t('Template', 'টেমপ্লেট', lang)}
             </span>
-            {TEMPLATES.map((tmpl, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleApplyTemplate(tmpl)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  backgroundColor: 'var(--surface-1)',
-                  color: 'var(--text-2)',
-                  border: '1px solid var(--border-2)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--brand-crimson)';
-                  e.currentTarget.style.color = 'var(--brand-crimson)';
-                  e.currentTarget.style.backgroundColor = 'var(--brand-crimson-soft)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-2)';
-                  e.currentTarget.style.color = 'var(--text-2)';
-                  e.currentTarget.style.backgroundColor = 'var(--surface-1)';
-                }}
-              >
-                <span>{tmpl.icon}</span>
-                <span>{tmpl.label}</span>
-              </button>
-            ))}
+            <select
+              className="notice-select"
+              value=""
+              onChange={(e) => {
+                const tmpl = TEMPLATES[Number(e.target.value)];
+                if (tmpl) handleApplyTemplate(tmpl);
+              }}
+              style={{ minWidth: 220, fontSize: 12, padding: '6px 10px' }}
+            >
+              <option value="">{t('Fill with a template…', 'টেমপ্লেট দিয়ে পূরণ করুন…', lang)}</option>
+              {TEMPLATES.map((tmpl, idx) => (
+                <option key={idx} value={idx}>{tmpl.label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Form vs Preview Tab Toggle */}
@@ -543,8 +497,8 @@ export default function PublishNoticeModal({
                     boxSizing: 'border-box',
                   }}
                 >
-                  <option value="👑 CHAIRMAN DIRECTIVE">👑 CHAIRMAN DIRECTIVE</option>
-                  <option value="⚠️ SAFETY CRITICAL">⚠️ SAFETY CRITICAL</option>
+                  <option value="CHAIRMAN DIRECTIVE">Chairman directive</option>
+                  <option value="SAFETY CRITICAL">Safety critical</option>
                   <option value="HSE">HSE (Health & Environment)</option>
                   <option value="HR CIRCULAR">HR CIRCULAR</option>
                   <option value="REFINERY OPERATIONS">REFINERY OPERATIONS</option>
@@ -574,9 +528,9 @@ export default function PublishNoticeModal({
                     boxSizing: 'border-box',
                   }}
                 >
-                  <option value="critical">🔴 Critical Priority (Immediate Emergency Alert)</option>
-                  <option value="high">🟡 High Priority (Mandatory Staff Read)</option>
-                  <option value="normal">🔵 General Announcement (Informational)</option>
+                  <option value="critical">Critical — immediate alert</option>
+                  <option value="high">High — mandatory staff read</option>
+                  <option value="normal">Normal — informational</option>
                 </select>
               </div>
             </div>
@@ -612,16 +566,16 @@ export default function PublishNoticeModal({
                     boxSizing: 'border-box',
                   }}
                 >
-                  <option value="All Group Employees (1,240 Staff)">🌐 All Group Employees (1,240 Staff)</option>
+                  <option value="All Group Employees (1,240 Staff)">All group employees (1,240 staff)</option>
                   <option value="Keraniganj Refinery & Field Engineering (218 Personnel)">
-                    🏭 Keraniganj Refinery & Field Engineering (218)
+                    Keraniganj Refinery & Field Engineering (218)
                   </option>
-                  <option value="Baridhara Corporate HQ (520 Staff)">🏢 Baridhara Corporate HQ (520 Staff)</option>
+                  <option value="Baridhara Corporate HQ (520 Staff)">Baridhara Corporate HQ (520 staff)</option>
                   <option value="Central Logistics & Fleet Crew (142 Drivers & Marshals)">
-                    🚗 Central Logistics & Fleet Crew (142)
+                    Central Logistics & Fleet Crew (142)
                   </option>
                   <option value="Board of Directors & Department Heads (32 Leaders)">
-                    👥 Board of Directors & Department Heads (32)
+                    Board of Directors & Department Heads (32)
                   </option>
                 </select>
               </div>
@@ -696,8 +650,8 @@ export default function PublishNoticeModal({
             <div
               style={{
                 borderRadius: '12px',
-                border: '1.5px solid var(--status-warning-bright)',
-                background: 'linear-gradient(135deg, var(--status-warning-bg) 0%, var(--status-warning-bg) 100%)',
+                border: '1px solid var(--border-2)',
+                background: 'var(--surface-0)',
                 padding: '14px 18px',
                 display: 'flex',
                 alignItems: 'center',
@@ -712,25 +666,24 @@ export default function PublishNoticeModal({
                     width: '38px',
                     height: '38px',
                     borderRadius: '10px',
-                    backgroundColor: 'var(--status-warning-solid)',
-                    color: 'var(--text-on-brand)',
+                    backgroundColor: 'var(--surface-3)',
+                    color: 'var(--text-1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 800,
-                    fontSize: '16px',
-                    boxShadow: '0 2px 6px rgba(217, 119, 6, 0.25)',
+                    fontSize: '13px',
                     flexShrink: 0,
                   }}
                 >
-                  👑
+                  {(author || 'AA').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase()}
                 </div>
                 <div>
                   <div style={{ fontSize: '13.5px', fontWeight: 800, color: 'var(--text-1)' }}>
                     {author}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--status-warning-text)', marginTop: '1px' }}>
-                    {authorRole} • Bashundhara Group
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-3)', marginTop: '1px' }}>
+                    {authorRole}
                   </div>
                 </div>
               </div>
@@ -739,15 +692,13 @@ export default function PublishNoticeModal({
                   padding: '4px 10px',
                   borderRadius: '6px',
                   fontSize: '10.5px',
-                  fontWeight: 800,
-                  backgroundColor: 'var(--status-warning-bg)',
-                  color: 'var(--status-warning-text)',
-                  border: '1px solid var(--status-warning)',
-                  letterSpacing: '0.4px',
-                  textTransform: 'uppercase',
+                  fontWeight: 700,
+                  backgroundColor: 'var(--surface-2)',
+                  color: 'var(--text-2)',
+                  border: '1px solid var(--border-2)',
                 }}
               >
-                Authorized Signatory
+                {t('Signing as publisher', 'প্রকাশক হিসেবে স্বাক্ষর', lang)}
               </span>
             </div>
 
@@ -928,7 +879,6 @@ export default function PublishNoticeModal({
             >
               <div className="notice-hd" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-1)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>{tag.includes('CHAIRMAN') ? '👑' : tag.includes('SAFETY') ? '⚠️' : '📢'}</span>
                   <span>{title || 'Notice Headline'}</span>
                 </div>
                 <span className={`badge ${pinned ? 'danger' : 'info'}`}>{tag}</span>

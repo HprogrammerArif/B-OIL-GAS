@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/mock/engines/chat_engine.dart';
 import 'package:bogcl_oneops/mock/engines/licence_engine.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
@@ -572,44 +573,101 @@ abstract final class DashboardEngine {
       }
     }
     if (layout == 'HR_ADMIN') {
-      extras.add({
-        'kind': 'exits',
-        'titleEn': 'Open exit files',
-        'titleBn': 'খোলা প্রস্থান ফাইল',
-        'items': [
-          for (final c in store.all(Col.exitClearances))
-            if (c['status'] == 'OPEN')
+      extras
+        ..add({
+          'kind': 'exits',
+          'titleEn': 'Open exit files',
+          'titleBn': 'খোলা প্রস্থান ফাইল',
+          'items': [
+            for (final c in store.all(Col.exitClearances))
+              if (c['status'] == 'OPEN')
+                {
+                  'employeeId': c['employeeId'],
+                  'name': store.get(
+                    Col.employees,
+                    c.str('employeeId'),
+                  )?['fullName'],
+                  'lastWorkingDay': c['lastWorkingDay'],
+                  'pending': c
+                      .objList('items')
+                      .where((i) => i['status'] == 'PENDING')
+                      .length,
+                  'route': '/home/people/${c['employeeId']}',
+                },
+          ],
+        })
+        ..add({
+          'kind': 'sites',
+          'titleEn': 'People at each workplace',
+          'titleBn': 'প্রতি কর্মস্থলে মানুষ',
+          'items': [
+            for (final s in sites)
               {
-                'employeeId': c['employeeId'],
-                'name': store.get(
-                  Col.employees,
-                  c.str('employeeId'),
-                )?['fullName'],
-                'lastWorkingDay': c['lastWorkingDay'],
-                'pending': c
-                    .objList('items')
-                    .where((i) => i['status'] == 'PENDING')
-                    .length,
-                'route': '/home/people/${c['employeeId']}',
+                'name': s['name'],
+                'nameBn': s['nameBn'],
+                'body':
+                    '${_activeStaff(store, siteId: s.str('id'))} on the books',
+                'bodyBn':
+                    '${_activeStaff(store, siteId: s.str('id'))} জন খাতায়',
               },
-        ],
-      });
+          ],
+        });
     }
     if (layout == 'PLANT_GM') {
-      extras.add({
-        'kind': 'list',
-        'titleEn': 'Permits that run out first',
-        'titleBn': 'যে অনুমতি আগে শেষ',
-        'items': [
-          for (final l in store.all(Col.compliance))
-            if (LicenceEngine.daysToExpiry(store, l) <= 90)
-              {
-                'name': l['title'],
-                'body': '${LicenceEngine.daysToExpiry(store, l)} days',
-                'route': '/home/licences/${l['id']}',
-              },
-        ],
-      });
+      extras
+        ..add({
+          'kind': 'permits',
+          'titleEn': 'Work permits and lock-outs',
+          'titleBn': 'কাজের অনুমতি ও লক-আউট',
+          'items': [
+            for (final p in store.all(Col.workPermits))
+              if (p['siteId'] == a.employee.obj('site')['id'])
+                {
+                  'id': p['id'],
+                  'name': p['machine'],
+                  'nameBn': p['machineBn'] ?? p['machine'],
+                  'body': p['note'],
+                  'bodyBn': p['noteBn'] ?? p['note'],
+                  'status': p['status'],
+                  'kind': p['kind'],
+                  'canRestore': p['status'] == 'LOCKED',
+                },
+          ],
+        })
+        ..add({
+          'kind': 'handovers',
+          'titleEn': 'Shift handover',
+          'titleBn': 'শিফট হস্তান্তর',
+          'items': [
+            for (final h in store.all(Col.shiftHandovers))
+              if (h['siteId'] == a.employee.obj('site')['id'])
+                {
+                  'id': h['id'],
+                  'name': h['shiftLabel'],
+                  'nameBn': h['shiftLabelBn'] ?? h['shiftLabel'],
+                  'body': h['notes'],
+                  'bodyBn': h['notesBn'] ?? h['notes'],
+                  'status': h['status'],
+                  'canSign':
+                      h['status'] == 'WAITING_SIGNATURE' &&
+                      h['incomingUserId'] == a.user['id'],
+                },
+          ],
+        })
+        ..add({
+          'kind': 'list',
+          'titleEn': 'Permits that run out first',
+          'titleBn': 'যে অনুমতি আগে শেষ',
+          'items': [
+            for (final l in store.all(Col.compliance))
+              if (LicenceEngine.daysToExpiry(store, l) <= 90)
+                {
+                  'name': l['title'],
+                  'body': '${LicenceEngine.daysToExpiry(store, l)} days',
+                  'route': '/home/licences/${l['id']}',
+                },
+          ],
+        });
     }
     if (layout == 'EMPLOYEE') {
       extras.add({
@@ -629,6 +687,77 @@ abstract final class DashboardEngine {
         ],
       });
     }
+    if (layout == 'HOD') {
+      const ceiling = 12000000;
+      const committed = 3840000;
+      final pending = _pendingValue(store, a).round();
+      final left = ceiling - committed - pending;
+      final pct = ((left / ceiling) * 100).round();
+      extras.add({
+        'kind': 'budget',
+        'titleEn': 'This quarter’s department money',
+        'titleBn': 'এই ত্রৈমাসিকের বিভাগীয় টাকা',
+        'bodyEn': pct < 10
+            ? 'Less than 10% of the quarterly envelope is left (৳$left).'
+            : 'About $pct% of the quarterly envelope is still free (৳$left).',
+        'bodyBn': pct < 10
+            ? 'ত্রৈমাসিক বাজেটের ১০%-এর কম বাকি (৳$left)।'
+            : 'ত্রৈমাসিক বাজেটের প্রায় $pct% এখনও খালি (৳$left)।',
+        'route': '/home/approvals',
+      });
+    }
+    if (layout == 'TRANSPORT_ADMIN') {
+      extras.add({
+        'kind': 'transport',
+        'titleEn': 'Cars waiting for a driver',
+        'titleBn': 'চালকের অপেক্ষায় গাড়ি',
+        'items': [
+          for (final r in store.all(Col.fleetRequisitions))
+            if (r['status'] == 'APPROVED' || r['status'] == 'PENDING_APPROVAL')
+              {
+                'id': r['id'],
+                'name': r['destination'] ?? r['refNo'] ?? r['id'],
+                'body': r['purpose'] ?? r['status'],
+                'status': r['status'],
+                'route': '/home/fleet/${r['id']}',
+              },
+        ],
+      });
+    }
+    if (layout == 'DRIVER') {
+      Json? trip;
+      for (final t in store.all(Col.fleetTrips)) {
+        if (t['driverUserId'] == a.user['id'] && t['endedAt'] == null) {
+          trip = t;
+          break;
+        }
+      }
+      extras.add({
+        'kind': 'driverTrip',
+        'titleEn': trip == null ? 'No trip on the road' : 'Your current trip',
+        'titleBn': trip == null
+            ? 'রাস্তায় কোনো যাত্রা নেই'
+            : 'আপনার চলতি যাত্রা',
+        'bodyEn': trip == null
+            ? 'When Transport assigns you a car, start and finish odometer will show here.'
+            : 'Write the start and finish odometer on the trip before you move.',
+        'bodyBn': trip == null
+            ? 'পরিবহন গাড়ি দিলে শুরু ও শেষ ওডোমিটার এখানে দেখাবে।'
+            : 'যাওয়ার আগে যাত্রায় শুরু ও শেষ ওডোমিটার লিখুন।',
+        'route': trip == null
+            ? '/home/fleet'
+            : '/home/fleet/${trip['requisitionId'] ?? trip['id']}',
+        'items': [
+          if (trip != null)
+            {
+              'name': trip['destination'] ?? trip['id'],
+              'body':
+                  'Odo ${trip['startOdometer'] ?? '—'} → ${trip['endOdometer'] ?? '—'}',
+              'route': '/home/fleet/${trip['requisitionId'] ?? trip['id']}',
+            },
+        ],
+      });
+    }
     return extras;
   }
 
@@ -640,7 +769,129 @@ abstract final class DashboardEngine {
       'kpis': _kpis(store, a, layout),
       'extras': _extras(store, a, layout),
       'canBrief': _role(a, 'CHAIRMAN'),
+      'canBroadcast': _role(a, 'CHAIRMAN') || _role(a, 'HR_ADMIN'),
+      'badges': badges(store, a),
+      'broadcast': activeBroadcast(store, a),
     };
+  }
+
+  static Json badges(MockStore store, AuthContext a) {
+    final uid = a.user.str('id');
+    var unreadChat = 0;
+    for (final ch in store.all(Col.chatChannels)) {
+      if (!ChatEngine.isMember(ch, uid)) continue;
+      unreadChat += ChatEngine.unread(store, ch, uid);
+    }
+    var guestsInside = 0;
+    for (final v in store.all(Col.visits)) {
+      if (v['status'] == 'CHECKED_IN') guestsInside++;
+    }
+    var custody = 0;
+    for (final c in store.all(Col.assetCustody)) {
+      if (c['holderEmployeeId'] == a.employeeId && c['ackedAt'] == null) {
+        custody++;
+      }
+    }
+    return {
+      'approvals': _pendingApprovals(store, a),
+      'chat': unreadChat,
+      'incidents': _openIncidents(store),
+      'visitors': guestsInside,
+      'licences': _licencesAtRisk(store),
+      'fleet': _reqsPending(store),
+      'assets': custody,
+      'attendance': store
+          .all(Col.regularisations)
+          .where((r) => r['status'] == 'PENDING')
+          .length,
+    };
+  }
+
+  static Json? activeBroadcast(MockStore store, AuthContext a) {
+    Json? best;
+    for (final b in store.all(Col.broadcasts)) {
+      if (b['pinned'] != true) continue;
+      if (best == null ||
+          b.str('publishedAt').compareTo(best.str('publishedAt')) > 0) {
+        best = b;
+      }
+    }
+    if (best == null) return null;
+    final dismissed = store.get(
+      Col.broadcastDismissals,
+      'bd_${best['id']}_${a.user['id']}',
+    );
+    if (dismissed != null) return null;
+    return {
+      'id': best['id'],
+      'title': best['title'],
+      'titleBn': best['titleBn'] ?? best['title'],
+      'body': best['body'],
+      'bodyBn': best['bodyBn'] ?? best['body'],
+    };
+  }
+
+  static void dismissBroadcast(MockStore store, AuthContext a, String id) {
+    if (store.get(Col.broadcasts, id) == null) throw notFound('Announcement');
+    store.put(Col.broadcastDismissals, {
+      'id': 'bd_${id}_${a.user['id']}',
+      'broadcastId': id,
+      'userId': a.user['id'],
+      'at': store.nowIso(),
+    });
+  }
+
+  static Json publishBroadcast(MockStore store, AuthContext a, Json body) {
+    if (!_role(a, 'CHAIRMAN') && !_role(a, 'HR_ADMIN')) throw forbidden();
+    final title = (body['title'] as String? ?? '').trim();
+    final text = (body['body'] as String? ?? '').trim();
+    if (title.length < 3) throw validationError('title', 'Give a short title');
+    if (text.length < 10) throw validationError('body', 'Write the message');
+    for (final b in store.all(Col.broadcasts)) {
+      b['pinned'] = false;
+      store.put(Col.broadcasts, b);
+    }
+    final n = store.all(Col.broadcasts).length + 1;
+    final rec = <String, Object?>{
+      'id': 'bc_$n',
+      'title': title,
+      'titleBn': (body['titleBn'] as String? ?? title).trim(),
+      'body': text,
+      'bodyBn': (body['bodyBn'] as String? ?? text).trim(),
+      'authorUserId': a.user['id'],
+      'publishedAt': store.nowIso(),
+      'pinned': true,
+    };
+    store.put(Col.broadcasts, rec);
+    return rec;
+  }
+
+  static Json restorePermit(MockStore store, AuthContext a, String id) {
+    final p = store.get(Col.workPermits, id);
+    if (p == null) throw notFound('Work permit');
+    if (p['status'] != 'LOCKED') {
+      throw invalidTransition('This lock-out is not waiting to be restored.');
+    }
+    p
+      ..['status'] = 'RESTORED'
+      ..['restoredAt'] = store.nowIso()
+      ..['restoredBy'] = a.user['id'];
+    store.put(Col.workPermits, p);
+    return p;
+  }
+
+  static Json signHandover(MockStore store, AuthContext a, String id) {
+    final h = store.get(Col.shiftHandovers, id);
+    if (h == null) throw notFound('Handover');
+    if (h['incomingUserId'] != a.user['id']) throw forbidden();
+    if (h['status'] != 'WAITING_SIGNATURE') {
+      throw invalidTransition('Already signed.');
+    }
+    h
+      ..['status'] = 'SIGNED'
+      ..['signedAt'] = store.nowIso();
+    store.put(Col.shiftHandovers, h);
+    return h;
   }
 
   static Json publishBriefing(MockStore store, AuthContext a, Json body) {

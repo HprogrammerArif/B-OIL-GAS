@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/features/attendance/data/location_service.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/incidents/data/incident_repository.dart';
 import 'package:bogcl_oneops/features/incidents/presentation/incident_providers.dart';
@@ -35,6 +36,8 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
   bool _anon = false;
   late DateTime _when = DateTime.now().subtract(const Duration(minutes: 30));
   bool _saving = false;
+  double? _lat;
+  double? _lng;
 
   @override
   void initState() {
@@ -106,6 +109,8 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
         'severity': _sev,
         'likelihood': _like,
         'isAnonymous': _anon,
+        if (_lat != null) 'lat': _lat,
+        if (_lng != null) 'lng': _lng,
       });
       ref.invalidate(incidentsProvider);
       if (!mounted) return;
@@ -218,6 +223,25 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
               incidentRiskLabel(l10n, scored.$2),
             ),
             tone: incidentRiskTone(scored.$2),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.inGps),
+            subtitle: Text(_lat == null ? l10n.inGps : l10n.inGpsOn),
+            trailing: const Icon(Icons.my_location),
+            onTap: () async {
+              try {
+                final fix = await ref.read(locationServiceProvider).capture();
+                if (!mounted) return;
+                setState(() {
+                  _lat = fix.lat;
+                  _lng = fix.lng;
+                });
+              } on Object {
+                if (!context.mounted) return;
+                AppToast.show(context, l10n.attLocUnavailable);
+              }
+            },
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,

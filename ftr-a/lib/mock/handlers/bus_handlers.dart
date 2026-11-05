@@ -162,4 +162,46 @@ List<RouteDef> busRoutes() => [
     }),
     permission: ['bus:broadcast'],
   ),
+  RouteDef(
+    'POST',
+    '/bus/routes/:id/verify',
+    (ctx) => _swept(ctx, () async {
+      ctx.requireAuth();
+      final q = ctx.bodyObject()['query'];
+      if (q is! String) throw validationError('query', 'Enter an ID or seat');
+      return ok(BusEngine.verify(ctx.store, ctx.params['id']!, q));
+    }),
+    permission: ['bus:read', 'bus:manage', 'bus:allocate'],
+  ),
+  RouteDef(
+    'POST',
+    '/bus/routes/:id/swap',
+    (ctx) => _swept(ctx, () async {
+      final seat = ctx.bodyObject()['seatNo'];
+      if (seat is! num) throw validationError('seatNo', 'Pick a seat');
+      final rec = BusEngine.requestSwap(
+        ctx.store,
+        ctx.requireAuth(),
+        ctx.params['id']!,
+        seat.toInt(),
+      );
+      await ctx.store.commit();
+      return ok(rec, status: 201);
+    }),
+    permission: ['bus:seat-self'],
+  ),
+  RouteDef(
+    'POST',
+    '/bus/swaps/:id/accept',
+    (ctx) => _swept(ctx, () async {
+      final rec = BusEngine.acceptSwap(
+        ctx.store,
+        ctx.requireAuth(),
+        ctx.params['id']!,
+      );
+      await ctx.store.commit();
+      return ok(rec);
+    }),
+    permission: ['bus:seat-self'],
+  ),
 ];

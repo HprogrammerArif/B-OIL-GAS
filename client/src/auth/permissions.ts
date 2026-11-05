@@ -66,6 +66,7 @@ export type Permission =
   | 'asset:view_own'
   | 'asset:view_all'
   | 'asset:manage'
+  | 'asset:request'
   | 'asset:approve_disposal'
   // Admin
   | 'settings:sync_status';
@@ -96,7 +97,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'guest:invite', 'guest:view_all',
     'incident:investigate', 'incident:view_all',
     'attendance:team', 'leave:approve',
-    'asset:view_all', 'asset:manage',
+    'asset:view_all', 'asset:manage', 'asset:request',
     'parcel:dispatch',
     'settings:sync_status',
   ],
@@ -114,7 +115,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'attendance:all', 'leave:approve',
     'claims:view_all',
     'workforce:view', 'workforce:manage',
-    'asset:view_all', 'asset:manage',
+    'asset:view_all', 'asset:manage', 'asset:request',
     'parcel:dispatch',
     'settings:sync_status',
   ],
@@ -129,7 +130,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'incident:investigate', 'incident:view_all',
     'attendance:team',
     'claims:view_all',
-    'asset:view_all',
+    'asset:view_all', 'asset:request',
   ],
   hod: [
     ...EVERYONE,
@@ -153,12 +154,14 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'fleet:request',
     'bus:view',
     'guest:invite',
+    'asset:request',
   ],
   driver: [
     ...EVERYONE,
     'dashboard:driver',
     'fleet:drive',
     'parcel:deliver',
+    'asset:request',
   ],
 };
 

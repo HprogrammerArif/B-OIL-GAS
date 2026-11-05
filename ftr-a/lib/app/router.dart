@@ -20,7 +20,6 @@ import 'package:bogcl_oneops/features/claims/presentation/advance_request_screen
 import 'package:bogcl_oneops/features/claims/presentation/claim_detail_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_edit_screen.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claims_screen.dart';
-import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_detail_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_new_screen.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_screen.dart';
@@ -54,7 +53,7 @@ import 'package:bogcl_oneops/features/visitors/presentation/visitors_screen.dart
 import 'package:bogcl_oneops/features/workforce/presentation/people_detail_screen.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/people_new_screen.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/people_screen.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -69,7 +68,9 @@ GoRouter router(Ref ref) {
     ..onDispose(refresh.dispose)
     ..listen(sessionControllerProvider, (_, _) => refresh.value++);
 
-  String? guard(String location) {
+  String? guard(GoRouterState state) {
+    final location = state.matchedLocation;
+    final query = state.uri.hasQuery ? '?${state.uri.query}' : '';
     final session = ref.read(sessionControllerProvider);
     // Resolving the stored session (or failed to, e.g. offline at start).
     if (!session.hasValue) {
@@ -82,13 +83,29 @@ GoRouter router(Ref ref) {
     if (location == AppRoutes.login || location == AppRoutes.loading) {
       return AppRoutes.home;
     }
+    if (location.startsWith(AppRoutes.attendanceLegacy)) {
+      return AppRoutes.attendance +
+          location.substring(AppRoutes.attendanceLegacy.length) +
+          query;
+    }
+    if (location.startsWith(AppRoutes.approvalsLegacy)) {
+      return AppRoutes.approvals +
+          location.substring(AppRoutes.approvalsLegacy.length) +
+          query;
+    }
+    if (location.startsWith(AppRoutes.approvals) &&
+        session.value?.can('workflow:inbox') != true) {
+      return AppRoutes.home;
+    }
     return null;
   }
 
+  final rootKey = GlobalKey<NavigatorState>();
   return GoRouter(
+    navigatorKey: rootKey,
     initialLocation: AppRoutes.loading,
     refreshListenable: refresh,
-    redirect: (context, state) => guard(state.matchedLocation),
+    redirect: (context, state) => guard(state),
     routes: [
       GoRoute(
         path: AppRoutes.loading,
@@ -97,6 +114,11 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.inbox,
+        parentNavigatorKey: rootKey,
+        builder: (context, state) => const InboxScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => ShellScaffold(shell: shell),
@@ -107,31 +129,6 @@ GoRouter router(Ref ref) {
                 path: AppRoutes.home,
                 builder: (context, state) => const HomeScreen(),
                 routes: [
-                  GoRoute(
-                    path: 'attendance',
-                    builder: (context, state) => const AttendanceScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'regularise',
-                        builder: (context, state) => RegulariseScreen(
-                          initialDate: state.uri.queryParameters['date'],
-                          initialType: state.uri.queryParameters['type'],
-                        ),
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'approvals',
-                    builder: (context, state) => const ApprovalsScreen(),
-                    routes: [
-                      GoRoute(
-                        path: ':id',
-                        builder: (context, state) => ApprovalDetailScreen(
-                          instanceId: state.pathParameters['id']!,
-                        ),
-                      ),
-                    ],
-                  ),
                   GoRoute(
                     path: 'note-sheets',
                     builder: (context, state) => const NoteSheetsScreen(),
@@ -222,7 +219,7 @@ GoRouter router(Ref ref) {
                   ),
                   GoRoute(
                     path: 'dashboards',
-                    builder: (context, state) => const DashboardScreen(),
+                    redirect: (context, state) => AppRoutes.home,
                   ),
                   GoRoute(
                     path: 'chat',
@@ -377,8 +374,33 @@ GoRouter router(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.inbox,
-                builder: (context, state) => const InboxScreen(),
+                path: AppRoutes.attendance,
+                builder: (context, state) => const AttendanceScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'regularise',
+                    builder: (context, state) => RegulariseScreen(
+                      initialDate: state.uri.queryParameters['date'],
+                      initialType: state.uri.queryParameters['type'],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.approvals,
+                builder: (context, state) => const ApprovalsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    builder: (context, state) => ApprovalDetailScreen(
+                      instanceId: state.pathParameters['id']!,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -958,8 +958,9 @@ table.ns-quotes { width: 100%; border-collapse: collapse; font-size: 13px; }
 .nsf-step-tools button:hover:not(:disabled) { background: var(--nsf-hover); color: var(--text-1); }
 .nsf-step-tools button:disabled { opacity: 0.35; cursor: default; }
 
-.nsf-add { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-.nsf-add > span { font-size: 12.5px; font-weight: 600; color: var(--text-3); margin-right: 2px; }
+.nsf-add { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.nsf-add > label { font-size: 12.5px; font-weight: 600; color: var(--text-3); }
+.nsf-add select { width: 100%; }
 .nsf-chip {
   display: inline-flex;
   align-items: center;

@@ -16,7 +16,7 @@ import {
 import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, Zap, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, Award, ChevronDown, ChevronUp, SearchX,
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -34,18 +34,18 @@ export const PLANT_ZONES = [
   'Electrical Substation #3',
 ] as const;
 
-export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: string; color: string; icon: string }> = {
-  near_miss: { label: 'Near-Miss (Zero Injury)', labelBn: 'নিয়ার-মিস (ক্ষতিহীন)', color: 'var(--status-info)', icon: '⚡' },
-  hazard_observation: { label: 'Hazard / Unsafe Condition', labelBn: 'বিপদ পর্যবেক্ষণ', color: 'var(--status-purple)', icon: '👁️' },
-  first_aid: { label: 'First-Aid Case (FAC)', labelBn: 'প্রাথমিক চিকিৎসা ঘটনা', color: 'var(--status-success)', icon: '🩹' },
-  medical_treatment: { label: 'Medical Treatment (MTC)', labelBn: 'চিকিৎসাকেন্দ্রে চিকিৎসা', color: 'var(--status-warning)', icon: '🏥' },
-  lost_time: { label: 'Lost Time Injury (LTI)', labelBn: 'কর্মবিরতিজনিত আঘাত', color: 'var(--status-danger)', icon: '🛑' },
-  spill_leak: { label: 'Spill / Leak (LOPC)', labelBn: 'তেল / বিটুমিন নিঃসরণ', color: 'var(--status-warning)', icon: '🛢️' },
-  pressure_piping: { label: 'Pressure & Piping Alert', labelBn: 'পাইপলাইন ও চাপ ত্রুটি', color: 'var(--status-warning)', icon: '⚠️' },
-  fire_thermal: { label: 'Thermal / Flare Anomaly', labelBn: 'অগ্নিকাণ্ড বা অতিরিক্ত তাপ', color: 'var(--status-danger-text)', icon: '🔥' },
-  electrical_arc: { label: 'Electrical Arc / Fault', labelBn: 'বৈদ্যুতিক ত্রুটি', color: 'var(--status-purple)', icon: '⚡' },
-  equipment_damage: { label: 'Equipment / Asset Damage', labelBn: 'যন্ত্রাংশের ক্ষতি', color: 'var(--text-3)', icon: '⚙️' },
-  environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: 'var(--status-success)', icon: '🌱' },
+export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: string; color: string }> = {
+  near_miss: { label: 'Near-Miss (Zero Injury)', labelBn: 'নিয়ার-মিস (ক্ষতিহীন)', color: 'var(--status-info)' },
+  hazard_observation: { label: 'Hazard / Unsafe Condition', labelBn: 'বিপদ পর্যবেক্ষণ', color: 'var(--status-purple)' },
+  first_aid: { label: 'First-Aid Case (FAC)', labelBn: 'প্রাথমিক চিকিৎসা ঘটনা', color: 'var(--status-success)' },
+  medical_treatment: { label: 'Medical Treatment (MTC)', labelBn: 'চিকিৎসাকেন্দ্রে চিকিৎসা', color: 'var(--status-warning)' },
+  lost_time: { label: 'Lost Time Injury (LTI)', labelBn: 'কর্মবিরতিজনিত আঘাত', color: 'var(--status-danger)' },
+  spill_leak: { label: 'Spill / Leak (LOPC)', labelBn: 'তেল / বিটুমিন নিঃসরণ', color: 'var(--status-warning)' },
+  pressure_piping: { label: 'Pressure & Piping Alert', labelBn: 'পাইপলাইন ও চাপ ত্রুটি', color: 'var(--status-warning)' },
+  fire_thermal: { label: 'Thermal / Flare Anomaly', labelBn: 'অগ্নিকাণ্ড বা অতিরিক্ত তাপ', color: 'var(--status-danger-text)' },
+  electrical_arc: { label: 'Electrical Arc / Fault', labelBn: 'বৈদ্যুতিক ত্রুটি', color: 'var(--status-purple)' },
+  equipment_damage: { label: 'Equipment / Asset Damage', labelBn: 'যন্ত্রাংশের ক্ষতি', color: 'var(--text-3)' },
+  environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: 'var(--status-success)' },
 };
 
 export default function IncidentView({ lang, onNavigate }: ViewProps) {
@@ -591,7 +591,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 {t('Emergency alert', 'জরুরি সতর্কবার্তা', lang)}
               </Button>
             )}
-            <Button variant="secondary" icon={<Zap size={14} />} onClick={() => setShowQuickHazardModal(true)}>
+            <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
               {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
             </Button>
             <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setShowLogWizard(true); }}>
@@ -609,11 +609,17 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       {/* Find what you need: status chips, search, and the less-used filters */}
       <div className="card mb-4 inc-filters">
         <div className="inc-chips">
-          {QUICK.map((q) => (
-            <button key={q.id} type="button" className={`parcel-pill-tab ${quick === q.id ? 'active' : ''}`} onClick={() => setQuick(q.id)}>
-              {t(...q.label, lang)} ({q.count})
-            </button>
-          ))}
+          <select
+            className="form-input"
+            style={{ minWidth: 220, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+            value={quick}
+            onChange={(e) => setQuick(e.target.value as typeof quick)}
+            aria-label={t('Show incidents', 'ঘটনা দেখান', lang)}
+          >
+            {QUICK.map((q) => (
+              <option key={q.id} value={q.id}>{t(...q.label, lang)} ({q.count})</option>
+            ))}
+          </select>
         </div>
         <div className="inc-search">
           <Search size={15} />
@@ -818,7 +824,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
                 {inc.closureSignOff && (
                   <p className="inc-closed">
-                    <Award size={14} />
+                    <ShieldCheck size={14} />
                     <span>
                       {t('Closed and verified by', 'সমাপ্ত ও যাচাই করেছেন', lang)} {inc.closureSignOff.safetyOfficerName} {t('and', 'ও', lang)} {inc.closureSignOff.gmName}
                       {inc.closureSignOff.remarks ? `: ${inc.closureSignOff.remarks}` : ''}
@@ -1097,7 +1103,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'var(--status-purple-solid)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Zap size={18} color="var(--status-warning-bright)" />
+                <AlertTriangle size={18} color="var(--text-on-brand)" />
                 <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('1-Minute "Good Catch" / Hazard Observation', '১-মিনিট বিপদ ও নিয়ার-মিস পর্যবেক্ষণ রিপোর্ট', lang)}
                 </h3>
@@ -1331,7 +1337,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>👤 People (Training / Fatigue / Supervision)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>People (training / fatigue / supervision)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1342,7 +1348,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
 
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>⚙️ Machine (Equipment / Flanges / Valves)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>Machine (equipment / flanges / valves)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1353,7 +1359,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
 
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>📋 Method (Procedures / SOPs / Checklists)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>Method (procedures / SOPs / checklists)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1364,7 +1370,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
 
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>📦 Material (Chemicals / Gaskets / Spares)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>Material (chemicals / gaskets / spares)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1375,7 +1381,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
 
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>📐 Measurement (Sensors / Inspections)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>Measurement (sensors / inspections)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1386,7 +1392,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
 
                     <div className="form-group">
-                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>🌦️ Environment (Heat / Rain / Lighting)</label>
+                      <label style={{ fontSize: '11.5px', fontWeight: 700 }}>Environment (heat / rain / lighting)</label>
                       <input
                         type="text"
                         className="form-input"
@@ -1695,7 +1701,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
           <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'var(--status-success-solid-dark)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Award size={18} color="var(--status-warning-bright)" />
+                <ShieldCheck size={18} color="var(--text-on-brand)" />
                 <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
                   {t('Executive Review & Final Incident Closure Sign-Off', 'নির্বাহী মূল্যায়ন ও আনুষ্ঠানিক ইনসিডেন্ট সমাপ্তি অনুমোদন', lang)}
                 </h3>
@@ -1749,7 +1755,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 disabled={!signoffOfficer.trim()}
                 onClick={handleSignOffClosure}
               >
-                <Award size={14} />
+                <ShieldCheck size={14} />
                 {t('Sign off & close incident', 'অনুমোদন করে সমাপ্ত করুন', lang)}
               </button>
             </div>

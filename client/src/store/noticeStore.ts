@@ -82,7 +82,7 @@ class NoticeStore {
       id: `NOT-${id}`,
       title: `[ANNOUNCEMENT] ${data.title}`,
       title_bn: `[বিশেষ ঘোষণা] ${data.title}`,
-      tag: '📢 COMPANY ANNOUNCEMENT',
+      tag: 'COMPANY ANNOUNCEMENT',
       category: 'executive',
       priority: 'critical',
       date: timestamp,
@@ -108,6 +108,16 @@ class NoticeStore {
 
   dismissActiveBroadcast() {
     this.activeBroadcast = null;
+    this.notify();
+  }
+
+  markNoticeRead(id: string) {
+    this.notices = this.notices.map((n) => {
+      if ((n.id === id || n.title === id) && !n.read) {
+        return { ...n, read: true };
+      }
+      return n;
+    });
     this.notify();
   }
 
@@ -161,6 +171,7 @@ export function useNoticeStore() {
     addNotice: noticeStore.addNotice.bind(noticeStore),
     addBroadcast: noticeStore.addBroadcast.bind(noticeStore),
     dismissActiveBroadcast: noticeStore.dismissActiveBroadcast.bind(noticeStore),
+    markNoticeRead: noticeStore.markNoticeRead.bind(noticeStore),
     acknowledgeNotice: noticeStore.acknowledgeNotice.bind(noticeStore),
     togglePin: noticeStore.togglePin.bind(noticeStore),
   };

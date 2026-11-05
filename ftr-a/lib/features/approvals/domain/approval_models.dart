@@ -40,6 +40,7 @@ class Person {
     required this.name,
     required this.nameBn,
     this.title,
+    this.phone,
   });
 
   factory Person.fromJson(Map<String, Object?> j) => Person(
@@ -47,12 +48,14 @@ class Person {
     name: j['name']! as String,
     nameBn: (j['nameBn'] as String?) ?? j['name']! as String,
     title: j['title'] as String?,
+    phone: j['phone'] as String?,
   );
 
   final String userId;
   final String name;
   final String nameBn;
   final String? title;
+  final String? phone;
 
   String display({required bool bangla}) => bangla ? nameBn : name;
 }
@@ -233,6 +236,7 @@ class ApprovalDetail {
     required this.initiator,
     required this.submittedAt,
     required this.actions,
+    this.rejectionExplanation,
   });
 
   factory ApprovalDetail.fromJson(Map<String, Object?> j) => ApprovalDetail(
@@ -247,6 +251,7 @@ class ApprovalDetail {
       for (final a in (j['actions'] as List?) ?? const [])
         ActionEntry.fromJson(_map(a)),
     ],
+    rejectionExplanation: j['rejectionExplanation'] as String?,
   );
 
   final String id;
@@ -259,6 +264,7 @@ class ApprovalDetail {
   final Person initiator;
   final DateTime submittedAt;
   final List<ActionEntry> actions;
+  final String? rejectionExplanation;
 
   bool get open => status == 'IN_REVIEW';
 }

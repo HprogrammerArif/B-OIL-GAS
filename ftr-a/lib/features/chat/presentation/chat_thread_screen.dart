@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
+import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/chat/data/chat_repository.dart';
@@ -75,163 +76,205 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     final ch = ref.watch(chatChannelProvider(widget.id));
     final msgs = ref.watch(chatMessagesProvider(widget.id));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          ch.asData?.value.heading(bangla: bangla) ?? l10n.moduleChat,
-        ),
-        actions: [
-          if (canDir)
-            IconButton(
-              tooltip: l10n.chActDirective,
-              onPressed: () => unawaited(_directive()),
-              icon: const Icon(Icons.campaign_outlined),
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
-            child: Text(l10n.chSecureNote),
+    return SecureFlag(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            ch.asData?.value.heading(bangla: bangla) ?? l10n.moduleChat,
           ),
-          Expanded(
-            child: msgs.when(
-              loading: () => const SkeletonList(),
-              error: (_, _) => ErrorState(
-                onRetry: () => ref.invalidate(chatMessagesProvider(widget.id)),
+          actions: [
+            if (canDir)
+              IconButton(
+                tooltip: l10n.chActDirective,
+                onPressed: () => unawaited(_directive()),
+                icon: const Icon(Icons.campaign_outlined),
               ),
-              data: (list) {
-                if (list.isEmpty) return EmptyState(message: l10n.chNoMessages);
-                final last = list.last.id;
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  unawaited(_repo.read(widget.id, last));
-                });
-                return ListView.builder(
-                  padding: const EdgeInsets.all(Space.lg),
-                  itemCount: list.length,
-                  itemBuilder: (ctx, i) {
-                    final m = list[i];
-                    if (m.deleted) return Text(l10n.chDeleted);
-                    final align = m.mine
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft;
-                    return Align(
-                      alignment: align,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 320),
-                        child: Card(
-                          color: m.type == 'DIRECTIVE'
-                              ? Theme.of(ctx).colorScheme.tertiaryContainer
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(Space.md),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (!m.mine)
-                                  Text(
-                                    m.sender?.display(bangla: bangla) ?? '',
-                                    style: Theme.of(ctx).textTheme.labelMedium,
-                                  ),
-                                Text(m.body ?? ''),
-                                if (m.directive != null) ...[
-                                  const SizedBox(height: Space.sm),
-                                  Text(m.directive!.body),
-                                  Text(
-                                    l10n.chAckCount(
-                                      m.directive!.acks,
-                                      m.directive!.needed,
+          ],
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.sm,
+                Space.lg,
+                0,
+              ),
+              child: Text(l10n.chSecureNote),
+            ),
+            Expanded(
+              child: msgs.when(
+                loading: () => const SkeletonList(),
+                error: (_, _) => ErrorState(
+                  onRetry: () =>
+                      ref.invalidate(chatMessagesProvider(widget.id)),
+                ),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return EmptyState(message: l10n.chNoMessages);
+                  }
+                  final last = list.last.id;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    unawaited(_repo.read(widget.id, last));
+                  });
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(Space.lg),
+                    itemCount: list.length,
+                    itemBuilder: (ctx, i) {
+                      final m = list[i];
+                      if (m.deleted) {
+                        return Text(l10n.chDeleted);
+                      }
+                      final align = m.mine
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft;
+                      return Align(
+                        alignment: align,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 320),
+                          child: Card(
+                            color: m.type == 'DIRECTIVE'
+                                ? Theme.of(ctx).colorScheme.tertiaryContainer
+                                : null,
+                            child: Padding(
+                              padding: const EdgeInsets.all(Space.md),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (!m.mine)
+                                    Text(
+                                      m.sender?.display(bangla: bangla) ?? '',
+                                      style: Theme.of(ctx)
+                                          .textTheme
+                                          .labelMedium,
                                     ),
-                                  ),
-                                  if (m.directive!.executedAt == null &&
-                                      !m.mine)
-                                    TextButton(
-                                      onPressed: _busy
-                                          ? null
-                                          : () async {
-                                              await _repo.ack(m.directive!.id);
-                                              ref.invalidate(
-                                                chatMessagesProvider(widget.id),
-                                              );
-                                            },
-                                      child: Text(l10n.chActAck),
+                                  if (m.type == 'VOICE' ||
+                                      (m.body ?? '').startsWith('VOICE:'))
+                                    _VoiceBubble(body: m.body ?? 'VOICE:8')
+                                  else
+                                    Text(m.body ?? ''),
+                                  if (m.directive != null) ...[
+                                    const SizedBox(height: Space.sm),
+                                    Text(m.directive!.body),
+                                    Text(
+                                      l10n.chAckCount(
+                                        m.directive!.acks,
+                                        m.directive!.needed,
+                                      ),
                                     ),
-                                  if (canDir && m.directive!.executedAt == null)
-                                    TextButton(
-                                      onPressed: _busy
-                                          ? null
-                                          : () async {
-                                              await _repo.execute(
-                                                m.directive!.id,
-                                              );
-                                              ref.invalidate(
-                                                chatMessagesProvider(widget.id),
-                                              );
-                                            },
-                                      child: Text(l10n.chActDone),
-                                    ),
-                                ],
-                                if (m.reactions.isNotEmpty)
-                                  Text(m.reactions.join(' ')),
-                                Wrap(
-                                  children: [
-                                    for (final e in const [
-                                      '👍',
-                                      '✅',
-                                      '⚠️',
-                                      '🙏',
-                                    ])
+                                    if (m.directive!.executedAt == null &&
+                                        !m.mine)
                                       TextButton(
-                                        onPressed: () async {
-                                          await _repo.react(m.id, e);
-                                          ref.invalidate(
-                                            chatMessagesProvider(widget.id),
-                                          );
-                                        },
-                                        child: Text(e),
+                                        onPressed: _busy
+                                            ? null
+                                            : () async {
+                                                await _repo.ack(
+                                                  m.directive!.id,
+                                                );
+                                                ref.invalidate(
+                                                  chatMessagesProvider(
+                                                    widget.id,
+                                                  ),
+                                                );
+                                              },
+                                        child: Text(l10n.chActAck),
+                                      ),
+                                    if (canDir &&
+                                        m.directive!.executedAt == null)
+                                      TextButton(
+                                        onPressed: _busy
+                                            ? null
+                                            : () async {
+                                                await _repo.execute(
+                                                  m.directive!.id,
+                                                );
+                                                ref.invalidate(
+                                                  chatMessagesProvider(
+                                                    widget.id,
+                                                  ),
+                                                );
+                                              },
+                                        child: Text(l10n.chActDone),
                                       ),
                                   ],
-                                ),
-                              ],
+                                  if (m.reactions.isNotEmpty)
+                                    Text(m.reactions.join(' ')),
+                                  Wrap(
+                                    children: [
+                                      for (final e in const [
+                                        '👍',
+                                        '✅',
+                                        '⚠️',
+                                        '🙏',
+                                      ])
+                                        TextButton(
+                                          onPressed: () async {
+                                            await _repo.react(m.id, e);
+                                            ref.invalidate(
+                                              chatMessagesProvider(widget.id),
+                                            );
+                                          },
+                                          child: Text(e),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  Space.lg,
+                  0,
+                  Space.lg,
+                  Space.md,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _text,
+                        decoration: InputDecoration(hintText: l10n.chHint),
+                        minLines: 1,
+                        maxLines: 4,
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Space.lg,
-                0,
-                Space.lg,
-                Space.md,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _text,
-                      decoration: InputDecoration(hintText: l10n.chHint),
-                      minLines: 1,
-                      maxLines: 4,
                     ),
-                  ),
-                  IconButton(
-                    tooltip: l10n.chSend,
-                    onPressed: _busy ? null : _send,
-                    icon: const Icon(Icons.send),
-                  ),
-                ],
+                    IconButton(
+                      tooltip: l10n.chVoice,
+                      onPressed: _busy
+                          ? null
+                          : () async {
+                              setState(() => _busy = true);
+                              try {
+                                await _repo.sendVoice(widget.id, 8);
+                                ref
+                                  ..invalidate(chatMessagesProvider(widget.id))
+                                  ..invalidate(chatChannelsProvider);
+                              } finally {
+                                if (mounted) setState(() => _busy = false);
+                              }
+                            },
+                      icon: const Icon(Icons.mic_none),
+                    ),
+                    IconButton(
+                      tooltip: l10n.chSend,
+                      onPressed: _busy ? null : _send,
+                      icon: const Icon(Icons.send),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -292,5 +335,40 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
         tone: StatusTone.danger,
       );
     }
+  }
+}
+
+class _VoiceBubble extends StatefulWidget {
+  const _VoiceBubble({required this.body});
+
+  final String body;
+
+  @override
+  State<_VoiceBubble> createState() => _VoiceBubbleState();
+}
+
+class _VoiceBubbleState extends State<_VoiceBubble> {
+  bool _playing = false;
+
+  int get _secs {
+    final raw = widget.body.replaceFirst('VOICE:', '');
+    return int.tryParse(raw) ?? 8;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () async {
+        setState(() => _playing = true);
+        await Future<void>.delayed(Duration(seconds: _secs.clamp(1, 8)));
+        if (mounted) setState(() => _playing = false);
+      },
+      icon: Icon(_playing ? Icons.stop : Icons.play_arrow),
+      label: Text(
+        _playing
+            ? context.l10n.chVoicePlay
+            : '${context.l10n.chVoice} · ${_secs}s',
+      ),
+    );
   }
 }

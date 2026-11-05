@@ -1,3 +1,4 @@
+import 'package:bogcl_oneops/mock/engines/chat_engine.dart';
 import 'package:bogcl_oneops/mock/engines/fleet_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -256,6 +257,54 @@ List<RouteDef> fleetRoutes() => [
     await ctx.store.commit();
     return ok(f, status: 201);
   }, permission: ['fleet:fuel']),
+  RouteDef('GET', '/fleet/pooling', (ctx) async {
+    ctx.requireAuth();
+    return ok(FleetEngine.pooling(ctx.store));
+  }, permission: ['fleet:dispatch']),
+  RouteDef(
+    'GET',
+    '/fleet/chat/:channel/messages',
+    (ctx) async {
+      final a = ctx.requireAuth();
+      final raw = ctx.params['channel']!;
+      final reqId = raw.startsWith('REQ:') ? raw.substring(4) : raw;
+      final ch = ChatEngine.ensureReqChannel(ctx.store, reqId);
+      if (!ChatEngine.isMember(ch, a.user.str('id'))) {
+        ChatEngine.ensureReqChannel(ctx.store, reqId);
+      }
+      final fresh = ChatEngine.ensureReqChannel(ctx.store, reqId);
+      await ctx.store.commit();
+      return ok({
+        'channelId': fresh['id'],
+        'messages': ChatEngine.messages(ctx.store, fresh),
+      });
+    },
+    permission: [
+      'fleet:read',
+      'fleet:drive',
+      'fleet:request',
+      'fleet:dispatch',
+    ],
+  ),
+  RouteDef(
+    'POST',
+    '/fleet/chat/:channel/messages',
+    (ctx) async {
+      final a = ctx.requireAuth();
+      final raw = ctx.params['channel']!;
+      final reqId = raw.startsWith('REQ:') ? raw.substring(4) : raw;
+      final ch = ChatEngine.ensureReqChannel(ctx.store, reqId);
+      final rec = ChatEngine.send(ctx.store, a, ch, ctx.bodyObject());
+      await ctx.store.commit();
+      return ok(ChatEngine.messageWire(ctx.store, rec), status: 201);
+    },
+    permission: [
+      'fleet:read',
+      'fleet:drive',
+      'fleet:request',
+      'fleet:dispatch',
+    ],
+  ),
   RouteDef('POST', '/fuel-vouchers/:id/redeem', (ctx) async {
     final f = ctx.store.get(Col.fleetFuelLogs, ctx.params['id']!);
     if (f == null) throw notFound('Voucher');

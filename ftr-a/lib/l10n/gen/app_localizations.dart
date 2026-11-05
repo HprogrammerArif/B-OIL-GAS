@@ -202,7 +202,7 @@ abstract class AppL10n {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use your company email, phone number or employee ID.'**
+  /// **'Tap a demo role to open the app. Company sign-in is off for now.'**
   String get loginSubtitle;
 
   /// No description provided for @loginIdentifierLabel.
@@ -270,6 +270,120 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'More'**
   String get navMore;
+
+  /// No description provided for @navAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get navAttendance;
+
+  /// No description provided for @navApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals'**
+  String get navApprovals;
+
+  /// No description provided for @homeSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeSeeAll;
+
+  /// No description provided for @homePrimaryEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Your day at work'**
+  String get homePrimaryEmployee;
+
+  /// No description provided for @homePrimaryDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trip'**
+  String get homePrimaryDriver;
+
+  /// No description provided for @homePrimaryGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Guests at the gate'**
+  String get homePrimaryGate;
+
+  /// No description provided for @homePrimaryMail.
+  ///
+  /// In en, this message translates to:
+  /// **'Parcels waiting'**
+  String get homePrimaryMail;
+
+  /// No description provided for @homePrimaryHse.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety today'**
+  String get homePrimaryHse;
+
+  /// No description provided for @homePrimaryApprover.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your decision'**
+  String get homePrimaryApprover;
+
+  /// No description provided for @homeActPunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to attendance'**
+  String get homeActPunch;
+
+  /// No description provided for @homeActTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open trips'**
+  String get homeActTrip;
+
+  /// No description provided for @homeActScanGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Register a guest'**
+  String get homeActScanGuest;
+
+  /// No description provided for @homeActScanParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Log a parcel'**
+  String get homeActScanParcel;
+
+  /// No description provided for @homeActApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Open approvals'**
+  String get homeActApprovals;
+
+  /// No description provided for @homeActAnnounce.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a notice'**
+  String get homeActAnnounce;
+
+  /// No description provided for @homeActIncidents.
+  ///
+  /// In en, this message translates to:
+  /// **'Open incidents'**
+  String get homeActIncidents;
+
+  /// No description provided for @moreMyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'My work'**
+  String get moreMyWork;
+
+  /// No description provided for @moreOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get moreOperations;
+
+  /// No description provided for @moreCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get moreCompany;
 
   /// No description provided for @homeGoodMorning.
   ///
@@ -9807,7 +9921,7 @@ abstract class AppL10n {
   /// No description provided for @emFieldNid.
   ///
   /// In en, this message translates to:
-  /// **'National ID'**
+  /// **'National ID (10, 13 or 17 digits)'**
   String get emFieldNid;
 
   /// No description provided for @emFieldEmergency.
@@ -10133,6 +10247,312 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Event played.'**
   String get demoPlayEventDone;
+
+  /// No description provided for @homeWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What needs you now.'**
+  String get homeWhat;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a person or a file'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a name, employee ID or a reference such as LV-, INC- or PASS-.'**
+  String get searchHint;
+
+  /// No description provided for @searchField.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchField;
+
+  /// No description provided for @searchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches that.'**
+  String get searchEmpty;
+
+  /// No description provided for @lockMessagePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with your account password. Five wrong tries sign you out.'**
+  String get lockMessagePassword;
+
+  /// No description provided for @lockPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get lockPassword;
+
+  /// No description provided for @lockUnlockPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with password'**
+  String get lockUnlockPassword;
+
+  /// No description provided for @lockFailedLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'That password did not match. {left} tries left.'**
+  String lockFailedLeft(int left);
+
+  /// No description provided for @dbListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get dbListen;
+
+  /// No description provided for @dbListenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as heard.'**
+  String get dbListenDone;
+
+  /// No description provided for @dbActRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get dbActRestore;
+
+  /// No description provided for @dbPermitRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'The lock-out is released.'**
+  String get dbPermitRestored;
+
+  /// No description provided for @dbActSignHandover.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign handover'**
+  String get dbActSignHandover;
+
+  /// No description provided for @dbHandoverSigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover signed. You own this shift.'**
+  String get dbHandoverSigned;
+
+  /// No description provided for @attTeamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your team today'**
+  String get attTeamTitle;
+
+  /// No description provided for @attTeamWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is in, late, on leave, or needs a check.'**
+  String get attTeamWhy;
+
+  /// No description provided for @attTeamPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'In'**
+  String get attTeamPresent;
+
+  /// No description provided for @attTeamLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attTeamLate;
+
+  /// No description provided for @attTeamLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get attTeamLeave;
+
+  /// No description provided for @attTeamReview.
+  ///
+  /// In en, this message translates to:
+  /// **'To review'**
+  String get attTeamReview;
+
+  /// No description provided for @attTeamEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody in this scope today.'**
+  String get attTeamEmpty;
+
+  /// No description provided for @attTeamNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing for you to do.'**
+  String get attTeamNothing;
+
+  /// No description provided for @attTeamReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open regularisation or leave it.'**
+  String get attTeamReviewHint;
+
+  /// No description provided for @approvalRejectExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Write one sentence the requester will see on the file and in Inbox.'**
+  String get approvalRejectExplain;
+
+  /// No description provided for @approvalRejectionSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Why it was turned down'**
+  String get approvalRejectionSeen;
+
+  /// No description provided for @flChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip chat'**
+  String get flChat;
+
+  /// No description provided for @flChatEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages on this trip yet.'**
+  String get flChatEmpty;
+
+  /// No description provided for @flChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to the driver or requester'**
+  String get flChatHint;
+
+  /// No description provided for @flPoolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These two trips can share a car'**
+  String get flPoolTitle;
+
+  /// No description provided for @flPoolBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} and {b} go the same way. Assign one car if both agree.'**
+  String flPoolBody(String a, String b);
+
+  /// No description provided for @flCallDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call driver'**
+  String get flCallDriver;
+
+  /// No description provided for @flOdoStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start odometer (km)'**
+  String get flOdoStart;
+
+  /// No description provided for @flOdoEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish odometer (km)'**
+  String get flOdoEnd;
+
+  /// No description provided for @busConductor.
+  ///
+  /// In en, this message translates to:
+  /// **'Check a passenger'**
+  String get busConductor;
+
+  /// No description provided for @busConductorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee ID or seat number'**
+  String get busConductorHint;
+
+  /// No description provided for @busConductorOk.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is in seat {seat}.'**
+  String busConductorOk(String name, String seat);
+
+  /// No description provided for @busConductorMiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody on this bus matches that.'**
+  String get busConductorMiss;
+
+  /// No description provided for @busSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to swap seats'**
+  String get busSwap;
+
+  /// No description provided for @busSwapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The other person must accept.'**
+  String get busSwapHint;
+
+  /// No description provided for @busSwapDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap request sent.'**
+  String get busSwapDone;
+
+  /// No description provided for @busSwapAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept seat swap'**
+  String get busSwapAccept;
+
+  /// No description provided for @chVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note'**
+  String get chVoice;
+
+  /// No description provided for @chVoiceRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to record'**
+  String get chVoiceRecord;
+
+  /// No description provided for @chVoiceStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop and send'**
+  String get chVoiceStop;
+
+  /// No description provided for @chVoicePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play voice note'**
+  String get chVoicePlay;
+
+  /// No description provided for @inGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Add where this happened'**
+  String get inGps;
+
+  /// No description provided for @inGpsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Location attached'**
+  String get inGpsOn;
+
+  /// No description provided for @inCloseBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Every fix must be confirmed before this file can close.'**
+  String get inCloseBlocked;
+
+  /// No description provided for @asScanTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a tag'**
+  String get asScanTag;
+
+  /// No description provided for @emErrNid.
+  ///
+  /// In en, this message translates to:
+  /// **'NID must be 10, 13 or 17 digits.'**
+  String get emErrNid;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

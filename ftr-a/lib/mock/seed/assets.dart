@@ -44,30 +44,36 @@ void seedAssets(MockStore store) {
     bool commissionNow = false,
     String? departmentId,
     AuthContext? who,
-  }) => AssetEngine.register(store, who ?? gm, {
-    'id': id,
-    'categoryId': categoryId,
-    'name': name,
-    'nameBn': nameBn,
-    'siteId': siteId,
-    'departmentId': departmentId ?? 'dept_plant',
-    'purchaseCost': cost,
-    'usefulLifeYears': life,
-    'criticality': criticality,
-    'location': location,
-    'oem': oem,
-    'serialNo': serial,
-    'vehicleId': vehicleId,
-    'opexToDate': opex,
-    'runtimeHours': hours,
-    'healthScore': health,
-    'purchaseDate': ?purchaseDate,
-    'warrantyExpiresAt': warranty,
-    'nextCalibrationAt': ?nextCal,
-    'nextServiceAt': nextService,
-    'custodianUserId': ?custodian,
-    'commissionNow': commissionNow,
-  });
+  }) {
+    // Finance can register/commission; only Plant GM / HR can hand over.
+    final rec = AssetEngine.register(store, who ?? gm, {
+      'id': id,
+      'categoryId': categoryId,
+      'name': name,
+      'nameBn': nameBn,
+      'siteId': siteId,
+      'departmentId': departmentId ?? 'dept_plant',
+      'purchaseCost': cost,
+      'usefulLifeYears': life,
+      'criticality': criticality,
+      'location': location,
+      'oem': oem,
+      'serialNo': serial,
+      'vehicleId': vehicleId,
+      'opexToDate': opex,
+      'runtimeHours': hours,
+      'healthScore': health,
+      'purchaseDate': ?purchaseDate,
+      'warrantyExpiresAt': warranty,
+      'nextCalibrationAt': ?nextCal,
+      'nextServiceAt': nextService,
+      'commissionNow': commissionNow,
+    });
+    if (custodian != null) {
+      AssetEngine.assignCustody(store, gm, rec, {'employeeUserId': custodian});
+    }
+    return store.get(Col.assets, id)!;
+  }
 
   // 1. Working plant generator — Harunur holds it, signed.
   at(const Duration(days: 1220));

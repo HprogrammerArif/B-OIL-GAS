@@ -3,7 +3,7 @@ import { BusVehicle, RouteInfo } from './busTypes';
 import { t } from '../../types';
 import {
   RefreshCw, X, CheckCircle, Bus, ArrowRight, Shield,
-  Navigation, AlertCircle, Sparkles, Check, Sun
+  Navigation, AlertCircle, Check, Sun
 } from 'lucide-react';
 
 interface ReassignBusRouteModalProps {

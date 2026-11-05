@@ -9,6 +9,7 @@ import 'package:bogcl_oneops/features/fleet/data/fleet_repository.dart';
 import 'package:bogcl_oneops/features/fleet/domain/fleet_models.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_pass.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_providers.dart';
+import 'package:bogcl_oneops/features/fleet/presentation/fleet_trip_chat.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_ui.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
@@ -18,6 +19,7 @@ import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FleetDetailScreen extends ConsumerStatefulWidget {
   const FleetDetailScreen({required this.id, super.key});
@@ -282,12 +284,28 @@ class _FleetDetailScreenState extends ConsumerState<FleetDetailScreen> {
               if (r.trip != null) ...[
                 const SizedBox(height: Space.sm),
                 Text(l10n.flPassNo(r.trip!.passNo)),
+                Text(
+                  '${l10n.flOdoStart}: ${r.trip!.startKm ?? '—'}  ·  ${l10n.flOdoEnd}: ${r.trip!.endKm ?? '—'}',
+                ),
               ],
               const SizedBox(height: Space.lg),
               Wrap(
                 spacing: Space.sm,
                 runSpacing: Space.sm,
                 children: [
+                  PrimaryButton.secondary(
+                    expand: false,
+                    label: l10n.flChat,
+                    onPressed: () => unawaited(showTripChat(context, r.id)),
+                  ),
+                  if (r.driver?.person?.phone != null)
+                    PrimaryButton.secondary(
+                      expand: false,
+                      label: l10n.flCallDriver,
+                      onPressed: () => unawaited(
+                        launchUrl(Uri.parse('tel:${r.driver!.person!.phone}')),
+                      ),
+                    ),
                   if (m.canAssign)
                     PrimaryButton(
                       expand: false,

@@ -259,6 +259,7 @@ class _Body extends ConsumerWidget {
             leading: const Icon(Icons.place_outlined, size: 20),
           ),
         if (admin != null) ...[
+          _ConductorCard(routeId: r.id, canSwap: canSeat),
           SectionHeader(title: l10n.busSeatMap),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Space.lg),
@@ -529,6 +530,97 @@ class _BroadcastSheetState extends State<_BroadcastSheet> {
                   if (ok) Navigator.of(context).pop(_msg.text.trim());
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConductorCard extends ConsumerStatefulWidget {
+  const _ConductorCard({required this.routeId, required this.canSwap});
+
+  final String routeId;
+  final bool canSwap;
+
+  @override
+  ConsumerState<_ConductorCard> createState() => _ConductorCardState();
+}
+
+class _ConductorCardState extends ConsumerState<_ConductorCard> {
+  final _q = TextEditingController();
+  final _seat = TextEditingController();
+  String? _result;
+
+  @override
+  void dispose() {
+    _q.dispose();
+    _seat.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.busConductor,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              AppTextField(label: l10n.busConductorHint, controller: _q),
+              const SizedBox(height: Space.sm),
+              PrimaryButton(
+                label: l10n.busConductor,
+                onPressed: () async {
+                  final rec = await ref
+                      .read(busRepositoryProvider)
+                      .verify(widget.routeId, _q.text);
+                  if (!mounted) return;
+                  setState(() {
+                    _result = rec['ok'] == true
+                        ? l10n.busConductorOk(
+                            '${rec['name']}',
+                            '${rec['seatNo']}',
+                          )
+                        : l10n.busConductorMiss;
+                  });
+                },
+              ),
+              if (_result != null) Text(_result!),
+              if (widget.canSwap) ...[
+                const SizedBox(height: Space.md),
+                AppTextField(
+                  label: l10n.busSwap,
+                  controller: _seat,
+                  keyboardType: TextInputType.number,
+                  helper: l10n.busSwapHint,
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final n = int.tryParse(_seat.text.trim());
+                    if (n == null) return;
+                    await ref
+                        .read(busRepositoryProvider)
+                        .requestSwap(widget.routeId, n);
+                    if (context.mounted) {
+                      AppToast.show(
+                        context,
+                        l10n.busSwapDone,
+                        tone: StatusTone.success,
+                      );
+                    }
+                  },
+                  child: Text(l10n.busSwap),
+                ),
+              ],
             ],
           ),
         ),

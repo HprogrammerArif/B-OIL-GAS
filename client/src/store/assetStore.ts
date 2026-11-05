@@ -257,6 +257,8 @@ export interface AssetRoleConfig {
   canViewFinancialLedger: boolean;
   canEditDepreciationPolicy: boolean;
   canApproveRequisition: boolean;
+  canRequestEquipment: boolean;
+  canScanTag: boolean;
   canInitiateDecommission: boolean;
   canAuthorizeWriteOff: boolean;
 }
@@ -281,6 +283,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: true,
         canEditDepreciationPolicy: true,
         canApproveRequisition: true,
+        canRequestEquipment: false,
+        canScanTag: false,
         canInitiateDecommission: true,
         canAuthorizeWriteOff: true,
       };
@@ -301,6 +305,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: true,
         canEditDepreciationPolicy: false,
         canApproveRequisition: true,
+        canRequestEquipment: true,
+        canScanTag: true,
         canInitiateDecommission: true,
         canAuthorizeWriteOff: false,
       };
@@ -321,6 +327,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: true,
         canEditDepreciationPolicy: true,
         canApproveRequisition: true,
+        canRequestEquipment: false,
+        canScanTag: false,
         canInitiateDecommission: true,
         canAuthorizeWriteOff: true,
       };
@@ -341,6 +349,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: true,
         canEditDepreciationPolicy: false,
         canApproveRequisition: true,
+        canRequestEquipment: true,
+        canScanTag: true,
         canInitiateDecommission: true,
         canAuthorizeWriteOff: false,
       };
@@ -361,6 +371,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: true,
         canEditDepreciationPolicy: false,
         canApproveRequisition: false,
+        canRequestEquipment: true,
+        canScanTag: true,
         canInitiateDecommission: true,
         canAuthorizeWriteOff: false,
       };
@@ -381,6 +393,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: false,
         canEditDepreciationPolicy: false,
         canApproveRequisition: false,
+        canRequestEquipment: true,
+        canScanTag: true,
         canInitiateDecommission: false,
         canAuthorizeWriteOff: false,
       };
@@ -402,6 +416,8 @@ export function getAssetRoleConfig(role: AppRole): AssetRoleConfig {
         canViewFinancialLedger: false,
         canEditDepreciationPolicy: false,
         canApproveRequisition: false,
+        canRequestEquipment: true,
+        canScanTag: true,
         canInitiateDecommission: false,
         canAuthorizeWriteOff: false,
       };

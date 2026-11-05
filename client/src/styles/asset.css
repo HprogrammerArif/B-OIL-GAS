@@ -1269,6 +1269,10 @@
   flex-wrap: wrap;
 }
 
+.eam-preset-bar .eam-select {
+  width: 100%;
+}
+
 .eam-preset-chip {
   padding: 4.5px 10px;
   border-radius: var(--radius-full);

@@ -110,8 +110,8 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
     setShowStartTripDialog(false);
     showToast(
       lang === 'en'
-        ? `🚀 Journey started for ${activeMission.id}! Gate-out departure recorded (Odometer: ${odo.toLocaleString()} km).`
-        : `🚀 ট্রিপ শুরু হয়েছে! ওডোমিটার: ${odo.toLocaleString()} কিমি।`,
+        ? `Journey started for ${activeMission.id}. Gate-out recorded (odometer: ${odo.toLocaleString()} km).`
+        : `ট্রিপ শুরু হয়েছে। ওডোমিটার: ${odo.toLocaleString()} কিমি।`,
       'success'
     );
   };
@@ -180,13 +180,13 @@ function DriverConsoleBody({ lang, onOpenChat, currentDriver }: DriverConsolePro
         activeMission.id,
         'driver',
         currentDriver.name,
-        `🚨 EMERGENCY SOS: breakdown or route problem on the way to ${activeMission.to}. Immediate assistance requested.`
+        `EMERGENCY SOS: breakdown or route problem on the way to ${activeMission.to}. Immediate assistance requested.`
       );
     }
     showToast(
       lang === 'en'
-        ? '🚨 EMERGENCY SOS DISPATCHED: Central Transport Command & Highway Patrol alerted!'
-        : '🚨 জরুরী এসওএস বার্তা পাঠানো হয়েছে! পরিবহন কন্ট্রোল রুমে সতর্কবার্তা প্রেরিত।',
+        ? 'Emergency SOS dispatched. Central Transport Command and highway patrol have been alerted.'
+        : 'জরুরী এসওএস পাঠানো হয়েছে। পরিবহন কন্ট্রোল রুমে সতর্কবার্তা প্রেরিত।',
       'danger'
     );
   };

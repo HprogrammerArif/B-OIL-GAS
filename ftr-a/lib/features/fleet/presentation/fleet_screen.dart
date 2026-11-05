@@ -5,8 +5,10 @@ import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/fleet/domain/fleet_models.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_providers.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_ui.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
@@ -177,6 +179,7 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
+                      if (canDispatch) ..._poolCards(context, l10n, list),
                       for (final r in list)
                         ListRow(
                           leading: Icon(
@@ -206,5 +209,45 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
         ],
       ),
     );
+  }
+
+  List<Widget> _poolCards(
+    BuildContext context,
+    AppL10n l10n,
+    List<VehicleRequisition> list,
+  ) {
+    final pending = [
+      for (final r in list)
+        if (r.status == 'APPROVED' || r.status == 'PENDING_APPROVAL') r,
+    ];
+    for (var i = 0; i < pending.length; i++) {
+      for (var j = i + 1; j < pending.length; j++) {
+        final a = pending[i].destination.toLowerCase();
+        final b = pending[j].destination.toLowerCase();
+        if (a.isEmpty || b.isEmpty) continue;
+        if (a.contains(b) ||
+            b.contains(a) ||
+            a.split(' ').first == b.split(' ').first) {
+          return [
+            Card(
+              margin: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.sm,
+                Space.lg,
+                0,
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.groups_outlined),
+                title: Text(l10n.flPoolTitle),
+                subtitle: Text(
+                  l10n.flPoolBody(pending[i].reqNo, pending[j].reqNo),
+                ),
+              ),
+            ),
+          ];
+        }
+      }
+    }
+    return const [];
   }
 }

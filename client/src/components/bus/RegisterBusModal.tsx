@@ -4,7 +4,7 @@ import { t } from '../../types';
 import { nextRef } from '../../lib/refs';
 import {
   Bus, X, CheckCircle, Shield, Truck, Calendar, Phone,
-  User, Check, Sparkles, Navigation, Fuel, KeyRound, Sun, Sunset, MapPin
+  User, Check, Navigation, Fuel, KeyRound, Sun, Sunset, MapPin
 } from 'lucide-react';
 
 interface RegisterBusModalProps {
@@ -219,7 +219,7 @@ export default function RegisterBusModal({
                   {[
                     { cap: 52, title: '52 Seats', desc: 'Standard Commuter Cruiser', icon: <Bus size={16} /> },
                     { cap: 40, title: '40 Seats', desc: 'Medium Feeder Coach', icon: <Truck size={16} /> },
-                    { cap: 32, title: '32 Seats', desc: 'VIP Executive Shuttle', icon: <Sparkles size={16} /> },
+                    { cap: 32, title: '32 Seats', desc: 'VIP Executive Shuttle', icon: <User size={16} /> },
                   ].map(tier => {
                     const isSel = capacity === tier.cap;
                     return (

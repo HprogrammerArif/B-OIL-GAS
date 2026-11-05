@@ -159,7 +159,7 @@ abstract final class ChatEngine {
       'id': 'cm_$n',
       'channelId': ch['id'],
       'senderUserId': a.user['id'],
-      'type': 'TEXT',
+      'type': text.startsWith('VOICE:') ? 'VOICE' : 'TEXT',
       'body': text,
       'createdAt': store.nowIso(),
       'editedAt': null,
@@ -333,6 +333,58 @@ abstract final class ChatEngine {
     };
     store.put(Col.chatChannels, rec);
     return rec;
+  }
+
+  static Json ensureReqChannel(MockStore store, String requisitionId) {
+    final key = 'REQ:$requisitionId';
+    for (final ch in store.all(Col.chatChannels)) {
+      if (ch['key'] == key) return ch;
+    }
+    final r = store.get(Col.fleetRequisitions, requisitionId);
+    final members = <Json>[];
+    void add(String? uid) {
+      if (uid == null) return;
+      if (members.any((m) => m['userId'] == uid)) return;
+      members.add({'userId': uid, 'isAdmin': true, 'presence': 'AWAY'});
+    }
+
+    add(r?.strOrNull('requesterUserId'));
+    final trip = store
+        .all(Col.fleetTrips)
+        .where((t) => t['requisitionId'] == requisitionId)
+        .firstOrNull;
+    add(trip?.strOrNull('driverUserId'));
+    for (final u in store.all(Col.users)) {
+      if (u.strList('roles').contains('TRANSPORT_ADMIN')) {
+        add(u.str('id'));
+      }
+    }
+    final rec = <String, Object?>{
+      'id': 'ch_req_$requisitionId',
+      'key': key,
+      'name': 'Trip $requisitionId',
+      'nameBn': 'যাত্রা $requisitionId',
+      'isLocked': false,
+      'isDirect': false,
+      'members': members,
+    };
+    store.put(Col.chatChannels, rec);
+    return rec;
+  }
+
+  static Json sendVoice(
+    MockStore store,
+    AuthContext a,
+    Json ch,
+    int durationSec,
+  ) {
+    if (durationSec < 1 || durationSec > 120) {
+      throw validationError('durationSec', 'Voice notes are 1–120 seconds');
+    }
+    return send(store, a, ch, {
+      'body': 'VOICE:$durationSec',
+      'isUrgent': false,
+    });
   }
 
   /// Scripted plant-GM reply so a send in operations feels live.

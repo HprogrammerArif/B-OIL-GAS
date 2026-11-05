@@ -8,6 +8,7 @@ import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
 import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_ui.dart';
+import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -101,6 +102,7 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
                 onPressed: () => setState(_selected.clear),
               )
             : null,
+        actions: const [AppBarActions()],
       ),
       bottomNavigationBar: selecting
           ? SafeArea(

@@ -8,7 +8,7 @@ import {
   ShieldCheck, AlertTriangle, Clock, Building, ArrowRight, ArrowLeft,
   ChevronLeft, ChevronRight,
   FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Filter, Search,
-  Download, Printer, Send, Check, Flame, CircleDot,
+  Download, Printer, Send, Check, CircleDot,
 } from 'lucide-react';
 import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
 import {
@@ -493,26 +493,21 @@ export default function ComplianceView({ lang }: ViewProps) {
 
       <div className="card mb-4" style={{ padding: '12px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', display: 'flex', alignItems: 'center', gap: '4px', marginRight: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Filter size={13} /> {t('Agency', 'সংস্থা', lang)}
             </span>
-            {AGENCY_FILTERS.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setSelectedAgencyFilter(f.id)}
-                style={{
-                  fontSize: '11px', padding: '4px 10px', borderRadius: 'var(--radius-full)',
-                  border: selectedAgencyFilter === f.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                  background: selectedAgencyFilter === f.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
-                  color: selectedAgencyFilter === f.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
-                  fontWeight: selectedAgencyFilter === f.id ? 700 : 500, cursor: 'pointer',
-                }}
-              >
-                {t(f.label, f.labelBn, lang)}
-              </button>
-            ))}
+            <select
+              className="form-input"
+              style={{ minWidth: 200, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+              value={selectedAgencyFilter}
+              onChange={(e) => setSelectedAgencyFilter(e.target.value)}
+              aria-label={t('Agency', 'সংস্থা', lang)}
+            >
+              {AGENCY_FILTERS.map((f) => (
+                <option key={f.id} value={f.id}>{t(f.label, f.labelBn, lang)}</option>
+              ))}
+            </select>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             {[
@@ -751,7 +746,7 @@ export default function ComplianceView({ lang }: ViewProps) {
         <div className="card mb-4">
           <div className="card-hd">
             <div className="card-hd-left">
-              <div className="card-hd-icon"><Flame size={16} /></div>
+              <div className="card-hd-icon"><AlertTriangle size={16} /></div>
               <div>
                 <div className="card-title">{t('Storage tank inspection log (API 653)', 'স্টোরেজ ট্যাংক পরিদর্শন লগ (এপিআই ৬৫৩)', lang)}</div>
                 <div className="card-subtitle">{t('Wall thickness and relief-valve tests for the tank farm that sits under the Explosives storage permit.', 'বিস্ফোরক স্টোরেজ লাইসেন্সের আওতায় ট্যাংক ফার্মের ওয়াল পুরুত্ব ও রিলিফ ভালভ পরীক্ষা।', lang)}</div>
