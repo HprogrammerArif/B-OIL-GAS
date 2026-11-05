@@ -391,6 +391,7 @@ class _Body extends StatelessWidget {
               ),
             ),
         ],
+        _BudgetLine(sheet: s),
         SectionHeader(title: l10n.nsNotesTitle),
         if (s.paragraphs.isEmpty && s.justification != null)
           Padding(
@@ -613,6 +614,69 @@ class _TextSheetState extends State<_TextSheet> {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _BudgetLine extends StatelessWidget {
+  const _BudgetLine({required this.sheet});
+
+  final NoteSheet sheet;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final theme = Theme.of(context);
+    final s = sheet;
+    final available = s.budgetAvailable;
+    final request = s.amount;
+    final left = available != null && request != null
+        ? available - request
+        : null;
+    final within = left != null && left >= 0;
+    final head = [
+      s.budgetName(bangla: bangla),
+      if (s.budgetAccount != null) s.budgetAccount,
+    ].where((e) => e != null && e.isNotEmpty).join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(title: l10n.nsBudgetTitle),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (head.isNotEmpty)
+                Text(
+                  head,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              const SizedBox(height: Space.sm),
+              if (left == null || request == null)
+                Text(l10n.nsBudgetNone)
+              else ...[
+                StatusPill(
+                  label: within ? l10n.nsBudgetWithin : l10n.nsBudgetOver,
+                  tone: within ? StatusTone.success : StatusTone.danger,
+                ),
+                const SizedBox(height: Space.sm),
+                Text(l10n.nsBudgetAvailable(taka(available!, bangla: bangla))),
+                Text(l10n.nsBudgetRequest(taka(request, bangla: bangla))),
+                Text(
+                  within
+                      ? l10n.nsBudgetLeft(taka(left, bangla: bangla))
+                      : l10n.nsBudgetShort(taka(left.abs(), bangla: bangla)),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ViewProps, SYSTEM_TODAY, t } from '../types';
 import { showToast } from '../components/ToastManager';
+import Pagination from '../components/Pagination';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
 import { nowStamp, nowTime } from '../lib/clock';
@@ -17,7 +18,7 @@ import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
   AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX,
-  CheckCircle2, Users,
+  CheckCircle2,
 } from 'lucide-react';
 
 export const PLANT_ZONES = [
@@ -48,6 +49,9 @@ export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: 
   environmental: { label: 'Environmental Release', labelBn: 'পরিবেশগত নির্গমন', color: 'var(--status-success)' },
 };
 
+const CAPA_PAGE = 4;
+const INCIDENT_PAGE = 6;
+
 export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const {
     incidents,
@@ -73,7 +77,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'spill_leak' | 'near_miss' | 'first_aid' | 'pressure_piping' | 'electrical_arc' | 'statutory'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [wizardError, setWizardError] = useState<string | null>(null);
-  const [quick, setQuick] = useState<'all' | 'open' | 'serious' | 'statutory' | 'closed'>('all');
+  const [quick, setQuick] = useState<'all' | 'open' | 'serious' | 'statutory' | 'closed'>('open');
+  const [incListPage, setIncListPage] = useState(1);
   const [selectedZone, setSelectedZone] = useState<string>('All Plant Zones');
   const [selectedSeverity, setSelectedSeverity] = useState<number>(0); // 0 = all
   const [selectedStage, setSelectedStage] = useState<'all' | IncidentWorkflowStage>('all');
@@ -83,7 +88,11 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [showLogWizard, setShowLogWizard] = useState(false);
   const [showQuickHazardModal, setShowQuickHazardModal] = useState(false);
   const [selectedRcaIncident, setSelectedRcaIncident] = useState<IncidentItem | null>(null);
-  const [selectedCapaIncident, setSelectedCapaIncident] = useState<IncidentItem | null>(null);
+  const [selectedCapaIncidentId, setSelectedCapaIncidentId] = useState<string | null>(null);
+  const selectedCapaIncident = useMemo(
+    () => (selectedCapaIncidentId ? incidents.find((i) => i.id === selectedCapaIncidentId) ?? null : null),
+    [selectedCapaIncidentId, incidents],
+  );
   const [selectedDossierIncident, setSelectedDossierIncident] = useState<IncidentItem | null>(null);
   const [selectedSignoffIncident, setSelectedSignoffIncident] = useState<IncidentItem | null>(null);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -133,6 +142,40 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [newCapaOwner, setNewCapaOwner] = useState('Plant Maintenance Team');
   const [newCapaDueDate, setNewCapaDueDate] = useState('04 Nov 2026');
   const [newCapaPriority, setNewCapaPriority] = useState<'high' | 'medium' | 'low'>('high');
+  const [capaListFilter, setCapaListFilter] = useState<'open' | 'done' | 'all'>('open');
+  const [capaListQuery, setCapaListQuery] = useState('');
+  const [capaListPage, setCapaListPage] = useState(1);
+  const [capaAddOpen, setCapaAddOpen] = useState(false);
+  const [capaDescError, setCapaDescError] = useState(false);
+
+  useEffect(() => {
+    if (!selectedCapaIncidentId) return;
+    setCapaListFilter('open');
+    setCapaListQuery('');
+    setCapaListPage(1);
+    setCapaAddOpen(false);
+    setCapaDescError(false);
+    setNewCapaDesc('');
+  }, [selectedCapaIncidentId]);
+
+  useEffect(() => {
+    if (!capaAddOpen) return;
+    const form = document.getElementById('capa-add-form');
+    form?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    document.getElementById('capa-desc')?.focus();
+  }, [capaAddOpen]);
+
+  const capaItems = selectedCapaIncident?.capaItems;
+  const filteredCapaItems = useMemo(() => {
+    const list = capaItems ?? [];
+    const q = capaListQuery.trim().toLowerCase();
+    return list.filter((c) => {
+      if (capaListFilter === 'open' && c.status === 'completed') return false;
+      if (capaListFilter === 'done' && c.status !== 'completed') return false;
+      if (!q) return true;
+      return `${c.description} ${c.owner}`.toLowerCase().includes(q);
+    });
+  }, [capaItems, capaListFilter, capaListQuery]);
 
   // ── Sign-Off Modal State (Modal 6) ──
   const [signoffOfficer, setSignoffOfficer] = useState('');
@@ -461,7 +504,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   // ─────────────────────────────────────────────────────────────────────────
   const handleAddNewCapa = () => {
     if (!selectedCapaIncident || !newCapaDesc.trim()) {
-      showToast(t('Please provide CAPA description.', 'সিএপিএ বিবরণ লিখুন।', lang), 'info');
+      setCapaDescError(true);
+      showToast(t('Write what needs to be done.', 'কী করতে হবে তা লিখুন।', lang), 'info');
       return;
     }
 
@@ -475,7 +519,12 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     });
 
     setNewCapaDesc('');
-    showToast(t('New CAPA action item assigned and ledger updated.', 'নতুন সিএপিএ ব্যবস্থা যোগ করা হয়েছে।', lang), 'success');
+    setCapaDescError(false);
+    setCapaListFilter('open');
+    setCapaListQuery('');
+    setCapaListPage(1);
+    setCapaAddOpen(false);
+    showToast(t('Fix assigned. It is now on the still-open list.', 'সমাধানের দায়িত্ব দেওয়া হয়েছে। এটি এখন চলমান তালিকায়।', lang), 'success');
   };
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -519,11 +568,20 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
           : quick === 'closed' ? !isOpenInc(i)
             : true,
   );
-  const hasFilter = quick !== 'all' || activeTab !== 'all' || !!matrixFilter || selectedZone !== 'All Plant Zones' || selectedSeverity > 0 || selectedStage !== 'all' || !!searchQuery.trim();
+  const hasFilter = quick !== 'open' || activeTab !== 'all' || !!matrixFilter || selectedZone !== 'All Plant Zones' || selectedSeverity > 0 || selectedStage !== 'all' || !!searchQuery.trim();
   const clearFilters = () => {
-    setQuick('all'); setActiveTab('all'); setMatrixFilter(null); setSelectedZone('All Plant Zones');
+    setQuick('open'); setActiveTab('all'); setMatrixFilter(null); setSelectedZone('All Plant Zones');
     setSelectedSeverity(0); setSelectedStage('all'); setSearchQuery('');
+    setIncListPage(1);
   };
+
+  useEffect(() => {
+    setIncListPage(1);
+  }, [quick, searchQuery, activeTab, selectedZone, selectedSeverity, selectedStage, matrixFilter]);
+
+  const incPageCount = Math.max(1, Math.ceil(quickFiltered.length / INCIDENT_PAGE));
+  const safeIncPage = Math.min(incListPage, incPageCount);
+  const pagedIncidents = quickFiltered.slice((safeIncPage - 1) * INCIDENT_PAGE, safeIncPage * INCIDENT_PAGE);
 
   const LEVEL_LABEL: Record<number, [string, string]> = {
     1: ['Minor', 'সামান্য'], 2: ['Low', 'নিম্ন'], 3: ['Moderate', 'মাঝারি'], 4: ['Major', 'গুরুতর'], 5: ['Critical', 'চরম'],
@@ -584,6 +642,19 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   };
 
   const canReport = mode !== 'oversight';
+  const capaOpenCount = (capaItems ?? []).filter((c) => c.status !== 'completed').length;
+  const capaDoneCount = (capaItems ?? []).length - capaOpenCount;
+  const capaPageCount = Math.max(1, Math.ceil(filteredCapaItems.length / CAPA_PAGE));
+  const safeCapaPage = Math.min(capaListPage, capaPageCount);
+  const pagedCapaItems = filteredCapaItems.slice((safeCapaPage - 1) * CAPA_PAGE, safeCapaPage * CAPA_PAGE);
+  const showCapaAddForm = capaAddOpen || (capaItems ?? []).length === 0;
+  const capaKindLabel = (type: CapaActionItem['actionType']) => (
+    type === 'immediate_containment'
+      ? t('Fix now', 'এখনই সমাধান', lang)
+      : type === 'preventive'
+        ? t('Stop it happening again', 'পুনরাবৃত্তি রোধ', lang)
+        : t('Remove the cause', 'মূল কারণ সরান', lang)
+  );
 
   return (
     <div>
@@ -730,7 +801,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         </details>
       )}
 
-      {/* Incident cards */}
+      {/* Incident cards — compact work queue */}
       <div className="incident-list">
         {quickFiltered.length === 0 ? (
           <div className="card">
@@ -742,39 +813,42 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
             />
           </div>
         ) : (
-          quickFiltered.map((inc) => {
+          pagedIncidents.map((inc) => {
             const isExpanded = expandedIncidentId === inc.id;
             const items = inc.capaItems || [];
-            const completedCount = items.filter((c) => c.status === 'completed').length;
-            const capaPct = items.length > 0 ? Math.round((completedCount / items.length) * 100) : inc.capaStatus === 'closed' ? 100 : 0;
             const stage = inc.workflowStage || (inc.capaStatus === 'closed' ? 'closed' : 'under_investigation');
             const stageIdx = Math.max(0, STAGES.indexOf(stage));
             const typeMeta = INCIDENT_TYPE_META[inc.incidentType] || INCIDENT_TYPE_META.near_miss;
             const injured = (inc.personsInvolved || []).filter((p) => p.involvementType === 'injured');
             const capaDone = items.length > 0 && items.every((c) => c.status === 'completed');
-            const openFixes = items.filter((c) => c.status !== 'completed');
-            const shownFixes = isExpanded ? items : openFixes;
-            const waitingOn = [...new Set(openFixes.map((c) => c.owner).filter(Boolean))];
+            const needsCause = !inc.fiveWhys && (stage === 'reported' || stage === 'triaged' || stage === 'under_investigation');
+            const primary: 'rca' | 'capa' | 'close' | null = !canInvestigate || inc.capaStatus === 'closed'
+              ? null
+              : needsCause
+                ? 'rca'
+                : capaDone
+                  ? 'close'
+                  : 'capa';
 
             return (
-              <div key={inc.id} className={`incident-card l${inc.level}`}>
+              <div key={inc.id} className={`incident-card inc-compact l${inc.level}${isExpanded ? ' is-open' : ''}`}>
                 <div className="inc-hd">
                   <div className="inc-tags">
                     <StatusPill tone={inc.level >= 4 ? 'danger' : inc.level === 3 ? 'warn' : 'info'}>
-                      {t(`${LEVEL_LABEL[inc.level][0]} severity`, `${LEVEL_LABEL[inc.level][1]} তীব্রতা`, lang)}
+                      {t(...LEVEL_LABEL[inc.level], lang)}
                     </StatusPill>
                     <span className="inc-kind">{t(typeMeta.label, typeMeta.labelBn, lang)}</span>
                     {inc.statutoryReportable && (
-                      <StatusPill tone="danger">{t('Must be reported to the government', 'সরকারকে জানাতে হবে', lang)}</StatusPill>
+                      <StatusPill tone="danger">{t('Tell the government', 'সরকারকে জানান', lang)}</StatusPill>
                     )}
                   </div>
                   <span className="inc-when">{inc.date}</span>
                 </div>
 
-                <h3 className="inc-title" style={{ fontSize: '15px', margin: '6px 0 2px' }}>{t(inc.title, inc.titleBn, lang)}</h3>
+                <h3 className="inc-title">{t(inc.title, inc.titleBn, lang)}</h3>
                 <div className="inc-meta">
-                  <MapPin size={12} /> <strong>{inc.plantZone || 'Keraniganj Complex'}</strong> · {inc.location}
-                  {' · '}{t('reported by', 'রিপোর্ট করেছেন', lang)} <strong>{inc.reportedBy}</strong>
+                  <MapPin size={12} /> {inc.plantZone || inc.location}
+                  {' · '}{t('from', 'রিপোর্ট', lang)} {inc.reportedBy}
                 </div>
 
                 {injured.length > 0 && (
@@ -782,135 +856,115 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     <HeartPulse size={14} />
                     <span>
                       {injured.map((p, idx) => (
-                        <span key={idx}><strong>{p.name}</strong> ({p.role}): {p.injuryNature}{p.treatmentGiven ? `. ${p.treatmentGiven}` : ''}{idx < injured.length - 1 ? ' · ' : ''}</span>
+                        <span key={idx}><strong>{p.name}</strong> ({p.role}): {p.injuryNature}{idx < injured.length - 1 ? ' · ' : ''}</span>
                       ))}
                     </span>
                   </div>
                 )}
 
-                {inc.rootCause && (inc.fiveWhys || stage === 'capa_execution' || stage === 'closed') && (
-                  <p className="inc-cause"><strong>{t('Cause', 'কারণ', lang)}:</strong> {inc.rootCause}</p>
-                )}
-
-                <div className="inc-steps" role="img" aria-label={t(`Step ${stageIdx + 1} of 5: ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫: ${STAGE_LABEL[stage][1]}`, lang)}>
-                  <div className="inc-step-bars">
-                    {STAGES.map((s, i) => <span key={s} className={i <= stageIdx ? 'on' : ''} />)}
-                  </div>
-                  <small>{t(`Step ${stageIdx + 1} of 5 · ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫ · ${STAGE_LABEL[stage][1]}`, lang)}</small>
-                </div>
-
                 <p className="inc-next"><ArrowRight size={13} /> {nextStep(inc)}</p>
 
-                {waitingOn.length > 0 && (
-                  <p className="inc-waiting">
-                    <Users size={13} />
-                    <span>{t(`Responsible now: ${waitingOn.join(' · ')}`, `এখন দায়িত্বে: ${waitingOn.join(' · ')}`, lang)}</span>
-                  </p>
-                )}
-                {!waitingOn.length && stage === 'under_investigation' && inc.investigationLead && (
-                  <p className="inc-waiting">
-                    <Users size={13} />
-                    <span>{t(`Investigator: ${inc.investigationLead}`, `তদন্তকারী: ${inc.investigationLead}`, lang)}</span>
-                  </p>
-                )}
-
-                {items.length > 0 && (
-                  <div className="inc-fixes">
-                    <div className="inc-fixes-head">
-                      <span>{t(`Fixes: ${completedCount} of ${items.length} done`, `সমাধান: ${bn(items.length)}টির মধ্যে ${bn(completedCount)}টি শেষ`, lang)}</span>
-                      <b className={capaPct === 100 ? 'done' : ''}>{capaPct}%</b>
-                    </div>
-                    <div className="hs-bar" aria-hidden><span style={{ width: `${capaPct}%`, background: capaPct === 100 ? 'var(--status-success-solid)' : undefined }} /></div>
-                    {shownFixes.length > 0 && (
-                      <ul className="inc-fix-list">
-                        {shownFixes.map((c) => (
-                          <li key={c.id} className={c.status === 'completed' ? 'done' : ''}>
-                            <span>
-                              <strong>{c.description}</strong>
-                              <small>
-                                {t('Assigned to', 'দায়িত্ব', lang)} {c.owner}
-                                {' · '}
-                                {t(c.actionType === 'immediate_containment' ? 'Immediate' : c.actionType === 'preventive' ? 'Prevent repeat' : 'Correct', c.actionType === 'immediate_containment' ? 'তাৎক্ষণিক' : c.actionType === 'preventive' ? 'পুনরাবৃত্তি রোধ' : 'সংশোধন', lang)}
-                                {' · '}{t('due', 'সময়সীমা', lang)} {c.dueDate}
-                                {c.verificationEvidence ? ` · ${c.verificationEvidence}` : ''}
-                              </small>
-                            </span>
-                            {c.status === 'completed' ? (
-                              <StatusPill tone="success">{t('Done', 'শেষ', lang)}</StatusPill>
-                            ) : canInvestigate ? (
-                              <Button size="sm" variant="secondary" icon={<Check size={12} />} onClick={() => toggleCapaStatus(inc.id, c.id, 'completed', 'Verified compliant on site')}>
-                                {t('Mark done', 'শেষ করুন', lang)}
-                              </Button>
-                            ) : (
-                              <StatusPill tone="warn">{t('Still open', 'এখনো চলমান', lang)}</StatusPill>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-
-                {inc.closureSignOff && (
-                  <p className="inc-closed">
-                    <ShieldCheck size={14} />
-                    <span>
-                      {t('Closed and verified by', 'সমাপ্ত ও যাচাই করেছেন', lang)} {inc.closureSignOff.safetyOfficerName} {t('and', 'ও', lang)} {inc.closureSignOff.gmName}
-                      {inc.closureSignOff.remarks ? `: ${inc.closureSignOff.remarks}` : ''}
-                    </span>
-                  </p>
-                )}
-
-                <div className="inc-foot">
-                  <div className="inc-foot-left">
-                    {items.some((c) => c.status === 'completed') && (
-                      <Button variant="ghost" size="sm" icon={isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />} onClick={() => setExpandedIncidentId(isExpanded ? null : inc.id)}>
-                        {isExpanded ? t('Hide finished fixes', 'শেষ সমাধান লুকান', lang) : t(`Show finished (${completedCount})`, `শেষ দেখুন (${bn(completedCount)})`, lang)}
-                      </Button>
-                    )}
-                    <details className="inc-ref">
-                      <summary>{t('Details', 'বিবরণ', lang)}</summary>
-                      <p>{t('Incident no.', 'ঘটনা নং', lang)}: <code>{inc.incNo}</code></p>
-                      <p>{inc.shift}</p>
-                      <p>{t(`Risk score ${inc.riskScore || inc.level * 2} of 25`, `ঝুঁকির স্কোর ২৫-এর মধ্যে ${bn(inc.riskScore || inc.level * 2)}`, lang)}</p>
-                      {inc.immediateActionsTaken && <p><strong>{t('Done on the spot', 'তাৎক্ষণিক পদক্ষেপ', lang)}:</strong> {inc.immediateActionsTaken}</p>}
-                    </details>
-                  </div>
-
-                  <div className="inc-foot-actions">
-                    {canInvestigate && (
-                      <Button variant="secondary" size="sm" icon={<HelpCircle size={13} />} onClick={() => openRcaModal(inc)}>
-                        {inc.fiveWhys ? t('Cause analysis', 'কারণ বিশ্লেষণ', lang) : t('Find the cause', 'কারণ খুঁজুন', lang)}
-                      </Button>
-                    )}
-                    {canInvestigate && (
-                      <Button variant="secondary" size="sm" icon={<CheckSquare size={13} />} onClick={() => setSelectedCapaIncident(inc)}>
-                        {t('Manage fixes', 'সমাধান পরিচালনা', lang)}
-                      </Button>
-                    )}
-                    {mode !== 'reporter' && inc.statutoryReportable && (
-                      <Button variant="secondary" size="sm" icon={<FileText size={13} />} onClick={() => setSelectedDossierIncident(inc)}>
-                        {t('Government report', 'সরকারি প্রতিবেদন', lang)}
-                      </Button>
-                    )}
-                    {inc.capaStatus !== 'closed' && canInvestigate && (
-                      <Button
-                        size="sm"
-                        icon={<CheckCircle size={13} />}
-                        disabled={!capaDone}
-                        title={capaDone ? undefined : t('Finish all fixes first', 'আগে সব সমাধান শেষ করুন', lang)}
-                        onClick={() => capaDone && setSelectedSignoffIncident(inc)}
-                      >
-                        {t('Verify and close', 'যাচাই করে বন্ধ করুন', lang)}
-                      </Button>
-                    )}
-                  </div>
+                <div className="inc-row-actions">
+                  {primary === 'rca' && (
+                    <Button size="sm" icon={<HelpCircle size={13} />} onClick={() => openRcaModal(inc)}>
+                      {t('Find the cause', 'কারণ খুঁজুন', lang)}
+                    </Button>
+                  )}
+                  {primary === 'capa' && (
+                    <Button size="sm" icon={<CheckSquare size={13} />} onClick={() => setSelectedCapaIncidentId(inc.id)}>
+                      {t('Manage fixes', 'সমাধান পরিচালনা', lang)}
+                    </Button>
+                  )}
+                  {primary === 'close' && (
+                    <Button size="sm" icon={<CheckCircle size={13} />} onClick={() => setSelectedSignoffIncident(inc)}>
+                      {t('Verify and close', 'যাচাই করে বন্ধ করুন', lang)}
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    onClick={() => setExpandedIncidentId(isExpanded ? null : inc.id)}
+                    aria-expanded={isExpanded}
+                  >
+                    {isExpanded ? t('Less', 'কম', lang) : t('More', 'আরও', lang)}
+                  </Button>
                 </div>
+
+                {isExpanded && (
+                  <div className="inc-more-panel">
+                    {inc.rootCause && (
+                      <p className="inc-cause"><strong>{t('Cause', 'কারণ', lang)}:</strong> {inc.rootCause}</p>
+                    )}
+                    <div className="inc-steps" role="img" aria-label={t(`Step ${stageIdx + 1} of 5: ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫: ${STAGE_LABEL[stage][1]}`, lang)}>
+                      <div className="inc-step-bars">
+                        {STAGES.map((s, i) => <span key={s} className={i <= stageIdx ? 'on' : ''} />)}
+                      </div>
+                      <small>{t(`Step ${stageIdx + 1} of 5 · ${STAGE_LABEL[stage][0]}`, `ধাপ ${bn(stageIdx + 1)}/৫ · ${STAGE_LABEL[stage][1]}`, lang)}</small>
+                    </div>
+                    {inc.immediateActionsTaken && (
+                      <p className="inc-cause"><strong>{t('Done on the spot', 'তাৎক্ষণিক পদক্ষেপ', lang)}:</strong> {inc.immediateActionsTaken}</p>
+                    )}
+                    {inc.closureSignOff && (
+                      <p className="inc-closed">
+                        <ShieldCheck size={14} />
+                        <span>
+                          {t('Closed by', 'বন্ধ করেছেন', lang)} {inc.closureSignOff.safetyOfficerName}
+                          {inc.closureSignOff.gmName ? ` · ${inc.closureSignOff.gmName}` : ''}
+                        </span>
+                      </p>
+                    )}
+                    <p className="inc-ref-line">
+                      {inc.incNo}
+                      {' · '}{inc.shift}
+                      {' · '}{t(`Risk ${inc.riskScore || inc.level * 2} of 25`, `ঝুঁকি ${bn(inc.riskScore || inc.level * 2)}/২৫`, lang)}
+                    </p>
+                    <div className="inc-foot-actions">
+                      {canInvestigate && primary !== 'rca' && (
+                        <Button variant="secondary" size="sm" icon={<HelpCircle size={13} />} onClick={() => openRcaModal(inc)}>
+                          {inc.fiveWhys ? t('Cause analysis', 'কারণ বিশ্লেষণ', lang) : t('Find the cause', 'কারণ খুঁজুন', lang)}
+                        </Button>
+                      )}
+                      {canInvestigate && primary !== 'capa' && inc.capaStatus !== 'closed' && (
+                        <Button variant="secondary" size="sm" icon={<CheckSquare size={13} />} onClick={() => setSelectedCapaIncidentId(inc.id)}>
+                          {t('Manage fixes', 'সমাধান পরিচালনা', lang)}
+                        </Button>
+                      )}
+                      {mode !== 'reporter' && inc.statutoryReportable && (
+                        <Button variant="secondary" size="sm" icon={<FileText size={13} />} onClick={() => setSelectedDossierIncident(inc)}>
+                          {t('Government report', 'সরকারি প্রতিবেদন', lang)}
+                        </Button>
+                      )}
+                      {canInvestigate && primary !== 'close' && inc.capaStatus !== 'closed' && (
+                        <Button
+                          size="sm"
+                          icon={<CheckCircle size={13} />}
+                          disabled={!capaDone}
+                          title={capaDone ? undefined : t('Finish all fixes first', 'আগে সব সমাধান শেষ করুন', lang)}
+                          onClick={() => capaDone && setSelectedSignoffIncident(inc)}
+                        >
+                          {t('Verify and close', 'যাচাই করে বন্ধ করুন', lang)}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })
         )}
       </div>
+      {quickFiltered.length > INCIDENT_PAGE && (
+        <div style={{ marginTop: 12 }}>
+          <Pagination
+            currentPage={safeIncPage}
+            totalItems={quickFiltered.length}
+            pageSize={INCIDENT_PAGE}
+            onPageChange={setIncListPage}
+            lang={lang}
+          />
+        </div>
+      )}
 
       {/* Report an incident: three short steps */}
       <Modal
@@ -1446,162 +1500,201 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         </div>
       )}
 
-      {/* ─── MODAL 4: MULTI-TASK CAPA MANAGEMENT MODAL ─── */}
+      {/* ─── MODAL 4: ASSIGN AND TRACK FIXES ─── */}
       {selectedCapaIncident && (
-        <div className="modal-bg" onClick={() => setSelectedCapaIncident(null)}>
+        <div className="modal-bg" onClick={() => setSelectedCapaIncidentId(null)}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'var(--surface-inverse)', color: 'var(--text-on-brand)' }}>
+            <div className="modal-hd">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckSquare size={18} color="var(--status-success-bright)" />
-                  <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
-                    {t('Safety Action Manager (Fix & Prevent - CAPA)', 'নিরাপত্তা প্রতিকার ও প্রতিরোধমূলক কাজ (CAPA)', lang)}
-                  </h3>
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {selectedCapaIncident.incNo} • {selectedCapaIncident.title}
-                </div>
+                <h3>
+                  <CheckSquare size={18} />
+                  {t('Assign and track fixes', 'সমাধান দিন ও খোঁজ রাখুন', lang)}
+                </h3>
+                <p className="capa-hd-sub">
+                  {t(selectedCapaIncident.title, selectedCapaIncident.titleBn, lang)}
+                </p>
               </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setSelectedCapaIncident(null)}>×</button>
+              <button type="button" className="modal-close" onClick={() => setSelectedCapaIncidentId(null)} aria-label={t('Close', 'বন্ধ করুন', lang)}>×</button>
             </div>
 
-            <div className="modal-body" style={{ maxHeight: '72vh', overflowY: 'auto' }}>
-              <div style={{ background: 'var(--status-success-bg)', border: '1px solid var(--status-success-border)', padding: '9px 12px', borderRadius: '6px', fontSize: '11.5px', color: 'var(--status-success-text)', marginBottom: '14px' }}>
-                💡 <strong>What is CAPA?</strong> Corrective actions fix the problem immediately. Preventive actions change maintenance or processes so the issue never happens again.
-              </div>
+            <div className="modal-body capa-body">
+              <p className="capa-next" role="status">
+                {capaOpenCount > 0
+                  ? t(
+                    `${capaOpenCount} still open of ${(capaItems ?? []).length}. Mark one done, or add another named owner.`,
+                    `${bn((capaItems ?? []).length)}টির মধ্যে ${bn(capaOpenCount)}টি এখনো চলমান। একটি শেষ করুন, অথবা নতুন দায়িত্ব দিন।`,
+                    lang,
+                  )
+                  : (capaItems ?? []).length > 0
+                    ? t('All listed fixes are done. Verify on site, then close the incident.', 'তালিকার সব সমাধান শেষ। সাইটে যাচাই করে ঘটনাটি বন্ধ করুন।', lang)
+                    : t('No fixes assigned yet. Add the first named owner and what they must do.', 'এখনও কোনো সমাধান দেওয়া হয়নি। প্রথম দায়িত্ব ও কাজ লিখুন।', lang)}
+              </p>
 
-              {/* Existing Actions List */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--brand-slate-500)' }}>
-                  Assigned Action Tasks ({(selectedCapaIncident.capaItems || []).length})
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
-                  {(selectedCapaIncident.capaItems || []).map((c) => (
-                    <div
-                      key={c.id}
-                      style={{
-                        background: c.status === 'completed' ? 'var(--status-success-bg)' : 'var(--status-warning-bg)',
-                        border: c.status === 'completed' ? '1px solid var(--status-success-border)' : '1px solid var(--status-warning-bright)',
-                        padding: '10px 12px',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '8px',
-                      }}
+              <div className="capa-toolbar">
+                <div className="psf-filters" role="group" aria-label={t('Filter fixes', 'সমাধান ফিল্টার', lang)}>
+                  {([
+                    { key: 'open' as const, label: t('Still open', 'চলমান', lang), count: capaOpenCount },
+                    { key: 'done' as const, label: t('Done', 'শেষ', lang), count: capaDoneCount },
+                    { key: 'all' as const, label: t('All', 'সব', lang), count: (capaItems ?? []).length },
+                  ]).map((f) => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      className={`psf-filter ${capaListFilter === f.key ? 'active' : ''}`}
+                      aria-pressed={capaListFilter === f.key}
+                      onClick={() => { setCapaListFilter(f.key); setCapaListPage(1); }}
                     >
-                      <div style={{ flex: 1, minWidth: '220px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span className={`badge ${c.priority === 'high' ? 'danger' : 'warn'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
-                            {c.priority.toUpperCase()}
-                          </span>
-                          <span style={{ fontSize: '12px', fontWeight: 800 }}>{c.description}</span>
-                        </div>
-                        <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>
-                          Owner: <strong>{c.owner}</strong> • Due: {c.dueDate}
-                          {c.verificationEvidence && <span style={{ color: 'var(--status-success)', marginLeft: '6px' }}>({c.verificationEvidence})</span>}
-                        </div>
-                      </div>
-
-                      <div>
-                        {c.status === 'completed' ? (
-                          <span className="badge success" style={{ fontSize: '10px' }}>✓ VERIFIED DONE</span>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn-primary"
-                            style={{ fontSize: '11px', padding: '4px 8px', background: 'var(--status-success-solid)', borderColor: 'var(--status-success)' }}
-                            onClick={() => {
-                              toggleCapaStatus(selectedCapaIncident.id, c.id, 'completed', 'Completed & tested by technician');
-                              showToast(t(`Action #${c.id} marked completed!`, 'পদক্ষেপটি সম্পন্ন হয়েছে।', lang), 'success');
-                            }}
-                          >
-                            <Check size={12} /> {t('Mark Done', 'সম্পন্ন', lang)}
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                      {f.label} <b>{f.count}</b>
+                    </button>
                   ))}
                 </div>
-              </div>
-
-              {/* Add New CAPA Item Form */}
-              <div style={{ background: 'var(--brand-slate-100)', padding: '14px', borderRadius: '8px', border: '1px solid var(--brand-slate-200)' }}>
-                <div style={{ fontSize: '12px', fontWeight: 800, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Plus size={14} color="var(--brand-crimson)" />
-                  {t('Assign New Action Item', 'নতুন সমাধান ব্যবস্থা যোগ করুন', lang)}
-                </div>
-
-                <div className="form-group mb-2">
-                  <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Action Type', 'পদক্ষেপের ধরন', lang)}</label>
-                  <select
-                    className="form-input"
-                    value={newCapaType}
-                    onChange={(e) => setNewCapaType(e.target.value as any)}
-                  >
-                    <option value="immediate_containment">Immediate Containment (Fix right away)</option>
-                    <option value="corrective">Corrective Action (Eliminate root cause)</option>
-                    <option value="preventive">Preventive Action (Refinery-wide policy/SOP change)</option>
-                  </select>
-                </div>
-
-                <div className="form-group mb-2">
-                  <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Action Description', 'বিবরণ', lang)}</label>
+                <label className="dash-search capa-search">
+                  <Search size={14} aria-hidden />
                   <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g. Conduct ultrasonic thickness testing on Tank 103"
-                    value={newCapaDesc}
-                    onChange={(e) => setNewCapaDesc(e.target.value)}
+                    type="search"
+                    value={capaListQuery}
+                    onChange={(e) => { setCapaListQuery(e.target.value); setCapaListPage(1); }}
+                    placeholder={t('Search by work or owner', 'কাজ বা দায়িত্বপ্রাপ্ত খুঁজুন', lang)}
+                    aria-label={t('Search fixes', 'সমাধান খুঁজুন', lang)}
                   />
-                </div>
-
-                <div className="form-row mb-2">
-                  <div className="form-group">
-                    <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Assigned Owner', 'দায়িত্বপ্রাপ্ত কর্মকর্তা / দল', lang)}</label>
-                    <select
-                      className="form-input"
-                      value={newCapaOwner}
-                      onChange={(e) => setNewCapaOwner(e.target.value)}
-                    >
-                      <option value="Plant Maintenance Team">Plant Maintenance Team</option>
-                      <option value="Electrical & Gate Maintenance">Electrical & Gate Maintenance</option>
-                      <option value="Central Workshop Fabrication Crew">Central Workshop Fabrication Crew</option>
-                      <option value="Safety & Admin Team">Safety & Admin Team</option>
-                      <option value="Farhana Kabir (Lead Safety Officer)">Farhana Kabir (Lead Safety Officer)</option>
-                      <option value="Engr. Md. Harunur Rashid (Plant GM)">Engr. Md. Harunur Rashid (Plant GM)</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label style={{ fontSize: '11.5px', fontWeight: 700 }}>{t('Priority Level', 'অগ্রাধিকার', lang)}</label>
-                    <select
-                      className="form-input"
-                      value={newCapaPriority}
-                      onChange={(e) => setNewCapaPriority(e.target.value as any)}
-                    >
-                      <option value="high">High Priority (1-2 Days)</option>
-                      <option value="medium">Medium Priority (1 Week)</option>
-                      <option value="low">Low Priority (2 Weeks)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn-primary"
-                  style={{ width: '100%', marginTop: '6px' }}
-                  onClick={handleAddNewCapa}
-                >
-                  <Plus size={13} />
-                  {t('Add Action Item to Incident', 'সিএপিএ ব্যবস্থা সংরক্ষণ করুন', lang)}
-                </button>
+                  {capaListQuery && (
+                    <button type="button" onClick={() => { setCapaListQuery(''); setCapaListPage(1); }} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                      <X size={13} />
+                    </button>
+                  )}
+                </label>
               </div>
+
+              {pagedCapaItems.length === 0 ? (
+                <EmptyState
+                  compact
+                  icon={<SearchX size={20} />}
+                  title={capaListQuery || capaListFilter !== 'open'
+                    ? t('No fix matches', 'কোনো সমাধান মেলেনি', lang)
+                    : t('Nothing still open', 'কিছুই চলমান নেই', lang)}
+                  description={capaListQuery || capaListFilter !== 'all'
+                    ? t('Try another search, or show all.', 'অন্য খোঁজ করুন, অথবা সব দেখুন।', lang)
+                    : t('Add a named owner and what they must do.', 'দায়িত্বপ্রাপ্ত ও কাজ লিখে যোগ করুন।', lang)}
+                  action={
+                    (capaListQuery || capaListFilter !== 'all') ? (
+                      <Button variant="secondary" size="sm" onClick={() => { setCapaListQuery(''); setCapaListFilter('all'); setCapaListPage(1); }}>
+                        {t('Show all fixes', 'সব সমাধান দেখুন', lang)}
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              ) : (
+                <>
+                  <ul className="inc-fix-list capa-scroll">
+                    {pagedCapaItems.map((c) => (
+                      <li key={c.id} className={c.status === 'completed' ? 'done' : ''}>
+                        <span>
+                          <strong>{c.description}</strong>
+                          <small>
+                            {t('Assigned to', 'দায়িত্ব', lang)} {c.owner}
+                            {' · '}{capaKindLabel(c.actionType)}
+                            {' · '}{t('due', 'সময়সীমা', lang)} {c.dueDate}
+                            {c.priority === 'high' ? ` · ${t('High', 'জরুরি', lang)}` : ''}
+                          </small>
+                        </span>
+                        {c.status === 'completed' ? (
+                          <StatusPill tone="success">{t('Done', 'শেষ', lang)}</StatusPill>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            icon={<Check size={12} />}
+                            onClick={() => {
+                              toggleCapaStatus(selectedCapaIncident.id, c.id, 'completed', 'Verified compliant on site');
+                              showToast(t('Marked done. Waiting for site verification before close.', 'শেষ হিসেবে চিহ্নিত। বন্ধ করার আগে সাইটে যাচাই বাকি।', lang), 'success');
+                            }}
+                          >
+                            {t('Mark done', 'শেষ করুন', lang)}
+                          </Button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {showCapaAddForm ? (
+                <div className="capa-add" id="capa-add-form">
+                  <div className="capa-add-hd">
+                    <strong>{t('Add a fix', 'একটি সমাধান যোগ করুন', lang)}</strong>
+                    {(capaItems ?? []).length > 0 && (
+                      <button type="button" className="btn-sm-ghost" onClick={() => setCapaAddOpen(false)}>
+                        {t('Hide form', 'ফর্ম লুকান', lang)}
+                      </button>
+                    )}
+                  </div>
+                  <div className="form-group mb-2">
+                    <label htmlFor="capa-desc">{t('What must be done', 'কী করতে হবে', lang)}</label>
+                    <input
+                      id="capa-desc"
+                      type="text"
+                      className="form-input"
+                      placeholder={t('e.g. Replace the TK-102 drain-valve gasket tonight', 'যেমন: আজ রাতে ট্যাংক ১০২-এর গ্যাসকেট বদলান', lang)}
+                      value={newCapaDesc}
+                      aria-invalid={capaDescError}
+                      onChange={(e) => {
+                        setNewCapaDesc(e.target.value);
+                        if (e.target.value.trim()) setCapaDescError(false);
+                      }}
+                    />
+                    {capaDescError && (
+                      <small className="capa-err">{t('A short description is required.', 'সংক্ষিপ্ত বিবরণ প্রয়োজন।', lang)}</small>
+                    )}
+                  </div>
+                  <div className="form-row mb-2">
+                    <div className="form-group">
+                      <label htmlFor="capa-owner">{t('Who will do it', 'কে করবেন', lang)}</label>
+                      <select id="capa-owner" className="form-input" value={newCapaOwner} onChange={(e) => setNewCapaOwner(e.target.value)}>
+                        <option value="Plant Maintenance Team">{t('Plant Maintenance Team', 'প্ল্যান্ট রক্ষণাবেক্ষণ দল', lang)}</option>
+                        <option value="Electrical & Gate Maintenance">{t('Electrical & Gate Maintenance', 'বৈদ্যুতিক ও গেট রক্ষণাবেক্ষণ', lang)}</option>
+                        <option value="Central Workshop Fabrication Crew">{t('Central Workshop Fabrication Crew', 'কেন্দ্রীয় ওয়ার্কশপ দল', lang)}</option>
+                        <option value="Safety & Admin Team">{t('Safety & Admin Team', 'নিরাপত্তা ও প্রশাসন দল', lang)}</option>
+                        <option value="Farhana Kabir (Lead Safety Officer)">Farhana Kabir</option>
+                        <option value="Engr. Md. Harunur Rashid (Plant GM)">Engr. Md. Harunur Rashid</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="capa-priority">{t('How soon', 'কত তাড়াতাড়ি', lang)}</label>
+                      <select id="capa-priority" className="form-input" value={newCapaPriority} onChange={(e) => setNewCapaPriority(e.target.value as 'high' | 'medium' | 'low')}>
+                        <option value="high">{t('High — 1 to 2 days', 'জরুরি — ১–২ দিন', lang)}</option>
+                        <option value="medium">{t('Medium — about a week', 'মাঝারি — প্রায় এক সপ্তাহ', lang)}</option>
+                        <option value="low">{t('Low — up to two weeks', 'কম — দুই সপ্তাহ পর্যন্ত', lang)}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-group mb-2">
+                    <label htmlFor="capa-type">{t('Kind of fix', 'সমাধানের ধরন', lang)}</label>
+                    <select id="capa-type" className="form-input" value={newCapaType} onChange={(e) => setNewCapaType(e.target.value as typeof newCapaType)}>
+                      <option value="immediate_containment">{t('Fix now — stop the immediate risk', 'এখনই সমাধান — তাৎক্ষণিক ঝুঁকি থামান', lang)}</option>
+                      <option value="corrective">{t('Remove the cause', 'মূল কারণ সরান', lang)}</option>
+                      <option value="preventive">{t('Stop it happening again', 'পুনরাবৃত্তি রোধ করুন', lang)}</option>
+                    </select>
+                  </div>
+                  <Button block icon={<Plus size={13} />} onClick={handleAddNewCapa}>
+                    {t('Add this fix', 'এই সমাধান যোগ করুন', lang)}
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="secondary" icon={<Plus size={13} />} onClick={() => setCapaAddOpen(true)}>
+                  {t('Add another fix', 'আরেকটি সমাধান যোগ করুন', lang)}
+                </Button>
+              )}
             </div>
 
-            <div className="modal-ft">
-              <button className="btn-primary" onClick={() => setSelectedCapaIncident(null)}>{t('Close', 'বন্ধ করুন', lang)}</button>
+            <div className="modal-ft capa-ft">
+              <Pagination
+                currentPage={safeCapaPage}
+                totalItems={filteredCapaItems.length}
+                pageSize={CAPA_PAGE}
+                onPageChange={setCapaListPage}
+                lang={lang}
+              />
+              <button type="button" className="btn-sm-ghost" onClick={() => setSelectedCapaIncidentId(null)}>{t('Close', 'বন্ধ করুন', lang)}</button>
             </div>
           </div>
         </div>

@@ -556,6 +556,12 @@ abstract final class NoteSheetEngine {
         'name': dept?['name'],
         'nameBn': dept?['nameBn'],
       },
+      'budget': {
+        'head': dept?['name'] ?? 'Department budget',
+        'headBn': dept?['nameBn'] ?? 'বিভাগীয় বাজেট',
+        'accountCode': 'ACC-4102',
+        'available': 14200000,
+      },
       'initiator': _person(store, s.str('initiatorUserId')),
       'quoteCount': quotes.length,
       'signedCount': s.objList('signatures').length,

@@ -180,10 +180,17 @@ class NoteSheet {
     this.signatures = const [],
     this.verificationCode,
     this.finalHash,
+    this.budgetHead,
+    this.budgetHeadBn,
+    this.budgetAccount,
+    this.budgetAvailable,
   });
 
   factory NoteSheet.fromJson(Map<String, Object?> j) {
     final dept = Map<String, Object?>.from(j['department']! as Map);
+    final budget = j['budget'] is Map
+        ? Map<String, Object?>.from(j['budget']! as Map)
+        : null;
     return NoteSheet(
       id: j['id']! as String,
       fileNo: j['fileNo'] as String?,
@@ -219,6 +226,10 @@ class NoteSheet {
       ],
       verificationCode: j['verificationCode'] as String?,
       finalHash: j['finalHash'] as String?,
+      budgetHead: budget?['head'] as String?,
+      budgetHeadBn: budget?['headBn'] as String?,
+      budgetAccount: budget?['accountCode'] as String?,
+      budgetAvailable: (budget?['available'] as num?)?.toDouble(),
     );
   }
 
@@ -250,6 +261,13 @@ class NoteSheet {
   final List<NoteSignature> signatures;
   final String? verificationCode;
   final String? finalHash;
+  final String? budgetHead;
+  final String? budgetHeadBn;
+  final String? budgetAccount;
+  final double? budgetAvailable;
+
+  String budgetName({required bool bangla}) =>
+      bangla ? (budgetHeadBn ?? budgetHead ?? '') : (budgetHead ?? '');
 
   bool get isOpen => status == 'IN_REVIEW';
   bool get isApproved => status == 'APPROVED';

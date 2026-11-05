@@ -475,6 +475,42 @@ abstract class AppL10n {
   /// **'Open'**
   String get homeOpen;
 
+  /// No description provided for @homeOutputTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s output'**
+  String get homeOutputTitle;
+
+  /// No description provided for @homeOutputLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday made 5,320 MT. The daily target is 5,000.'**
+  String get homeOutputLine;
+
+  /// No description provided for @homeWeekTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get homeWeekTitle;
+
+  /// No description provided for @homeBatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bitumen batch ready'**
+  String get homeBatchTitle;
+
+  /// No description provided for @homeBatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'BOGCL-BIT-2026-B88 · Bitumen 60/70 · 2,400 metric tons. Lab tests passed.'**
+  String get homeBatchBody;
+
+  /// No description provided for @homeBatchDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Released. Loading gates are open.'**
+  String get homeBatchDone;
+
   /// No description provided for @busRegister.
   ///
   /// In en, this message translates to:
@@ -516,6 +552,42 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Saved'**
   String get busSaved;
+
+  /// No description provided for @busSeatRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular'**
+  String get busSeatRegular;
+
+  /// No description provided for @busSeatLady.
+  ///
+  /// In en, this message translates to:
+  /// **'Lady priority'**
+  String get busSeatLady;
+
+  /// No description provided for @busSeatExecutive.
+  ///
+  /// In en, this message translates to:
+  /// **'Executive'**
+  String get busSeatExecutive;
+
+  /// No description provided for @busSeatSenior.
+  ///
+  /// In en, this message translates to:
+  /// **'Senior staff'**
+  String get busSeatSenior;
+
+  /// No description provided for @busMarkBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark boarded'**
+  String get busMarkBoarded;
+
+  /// No description provided for @busBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarded'**
+  String get busBoarded;
 
   /// No description provided for @busSeatsFree.
   ///
@@ -3367,6 +3439,30 @@ abstract class AppL10n {
   /// **'Mark as paid'**
   String get claimPay;
 
+  /// No description provided for @claimBankFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank file'**
+  String get claimBankFile;
+
+  /// No description provided for @claimBankReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s bank transfer'**
+  String get claimBankReady;
+
+  /// No description provided for @claimBankEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting to be paid.'**
+  String get claimBankEmpty;
+
+  /// No description provided for @claimBankCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'The bank file is copied.'**
+  String get claimBankCopied;
+
   /// No description provided for @claimPayConfirm.
   ///
   /// In en, this message translates to:
@@ -4679,6 +4775,54 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Quotations'**
   String get nsQuotesTitle;
+
+  /// No description provided for @nsBudgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is there budget?'**
+  String get nsBudgetTitle;
+
+  /// No description provided for @nsBudgetWithin.
+  ///
+  /// In en, this message translates to:
+  /// **'Within budget'**
+  String get nsBudgetWithin;
+
+  /// No description provided for @nsBudgetOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get nsBudgetOver;
+
+  /// No description provided for @nsBudgetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'This file has no fixed amount to check against the budget.'**
+  String get nsBudgetNone;
+
+  /// No description provided for @nsBudgetAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {amount}'**
+  String nsBudgetAvailable(String amount);
+
+  /// No description provided for @nsBudgetRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'This request {amount}'**
+  String nsBudgetRequest(String amount);
+
+  /// No description provided for @nsBudgetLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left after this {amount}'**
+  String nsBudgetLeft(String amount);
+
+  /// No description provided for @nsBudgetShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short by {amount}'**
+  String nsBudgetShort(String amount);
 
   /// No description provided for @nsQuoteMeta.
   ///
@@ -9167,6 +9311,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Gross {gross} · already written down {accum} · book {nbv} · method {method}'**
   String asBookFull(String gross, String accum, String nbv, String method);
+
+  /// No description provided for @asYearCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'This year {amount}'**
+  String asYearCharge(String amount);
 
   /// No description provided for @asPassport.
   ///

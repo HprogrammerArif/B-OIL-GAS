@@ -213,6 +213,25 @@ class AppL10nBn extends AppL10n {
   String get homeOpen => 'খুলুন';
 
   @override
+  String get homeOutputTitle => 'আজকের উৎপাদন';
+
+  @override
+  String get homeOutputLine => 'রবিবার ৫,৩২০ মে.টন হয়েছে। দৈনিক লক্ষ্য ৫,০০০।';
+
+  @override
+  String get homeWeekTitle => 'এই সপ্তাহ';
+
+  @override
+  String get homeBatchTitle => 'বিটুমিন ব্যাচ প্রস্তুত';
+
+  @override
+  String get homeBatchBody =>
+      'BOGCL-BIT-2026-B88 · বিটুমিন ৬০/৭০ · ২,৪০০ মেট্রিক টন। ল্যাব পরীক্ষা উত্তীর্ণ।';
+
+  @override
+  String get homeBatchDone => 'রিলিজ হয়েছে। লোডিং গেট খোলা।';
+
+  @override
   String get busRegister => 'বাস নিবন্ধন';
 
   @override
@@ -232,6 +251,24 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get busSaved => 'সেভ হয়েছে';
+
+  @override
+  String get busSeatRegular => 'সাধারণ';
+
+  @override
+  String get busSeatLady => 'মহিলা অগ্রাধিকার';
+
+  @override
+  String get busSeatExecutive => 'এক্সিকিউটিভ';
+
+  @override
+  String get busSeatSenior => 'সিনিয়র স্টাফ';
+
+  @override
+  String get busMarkBoarded => 'উঠেছেন চিহ্নিত করুন';
+
+  @override
+  String get busBoarded => 'উঠেছেন';
 
   @override
   String busSeatsFree(int count) {
@@ -1849,6 +1886,18 @@ class AppL10nBn extends AppL10n {
   String get claimPay => 'পরিশোধিত চিহ্নিত করুন';
 
   @override
+  String get claimBankFile => 'ব্যাংক ফাইল';
+
+  @override
+  String get claimBankReady => 'আজকের ব্যাংক ট্রান্সফার';
+
+  @override
+  String get claimBankEmpty => 'পরিশোধের জন্য কিছু অপেক্ষা করছে না।';
+
+  @override
+  String get claimBankCopied => 'ব্যাংক ফাইল কপি হয়েছে।';
+
+  @override
   String claimPayConfirm(String amount) {
     return '$amount পরিশোধ করবেন?';
   }
@@ -2612,6 +2661,39 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsQuotesTitle => 'কোটেশন';
+
+  @override
+  String get nsBudgetTitle => 'বাজেট আছে কি?';
+
+  @override
+  String get nsBudgetWithin => 'বাজেটের মধ্যে';
+
+  @override
+  String get nsBudgetOver => 'বাজেটের বেশি';
+
+  @override
+  String get nsBudgetNone =>
+      'এই ফাইলে বাজেটের সঙ্গে মেলানোর মতো নির্দিষ্ট অঙ্ক নেই।';
+
+  @override
+  String nsBudgetAvailable(String amount) {
+    return 'প্রাপ্য $amount';
+  }
+
+  @override
+  String nsBudgetRequest(String amount) {
+    return 'এই আবেদন $amount';
+  }
+
+  @override
+  String nsBudgetLeft(String amount) {
+    return 'এরপর অবশিষ্ট $amount';
+  }
+
+  @override
+  String nsBudgetShort(String amount) {
+    return 'ঘাটতি $amount';
+  }
 
   @override
   String nsQuoteMeta(int days, int months) {
@@ -5032,6 +5114,11 @@ class AppL10nBn extends AppL10n {
   @override
   String asBookFull(String gross, String accum, String nbv, String method) {
     return 'মোট $gross · লেখা হয়েছে $accum · বই $nbv · পদ্ধতি $method';
+  }
+
+  @override
+  String asYearCharge(String amount) {
+    return 'এই বছর $amount';
   }
 
   @override

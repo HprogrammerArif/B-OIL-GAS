@@ -353,9 +353,33 @@ class _PlantWork extends ConsumerWidget {
       for (final item in permits?.items ?? const <Map<String, Object?>>[])
         if (item['status'] == 'LOCKED') item,
     ];
+    final week = bangla
+        ? 'সোম ৪,৮২০ · মঙ্গল ৫,১২০ · বুধ ৪,৯৫০ · বৃহঃ ৫,২১০ · শুক্র ৫,০৫০ · শনি ৫,১৮০ · রবি ৫,৩২০'
+        : 'Mon 4,820 · Tue 5,120 · Wed 4,950 · Thu 5,210 · Fri 5,050 · Sat 5,180 · Sun 5,320';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        SectionHeader(title: l10n.homeOutputTitle),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.homeOutputLine,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: Space.xs),
+              Text(
+                '${l10n.homeWeekTitle} · $week',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const _BatchCard(),
         SectionHeader(title: permits?.title(bangla: bangla) ?? l10n.homeLocks),
         if (locks.isEmpty)
           Padding(
@@ -390,6 +414,44 @@ class _PlantWork extends ConsumerWidget {
             ],
           ),
       ],
+    );
+  }
+}
+
+class _BatchCard extends StatefulWidget {
+  const _BatchCard();
+
+  @override
+  State<_BatchCard> createState() => _BatchCardState();
+}
+
+class _BatchCardState extends State<_BatchCard> {
+  bool _done = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+      child: Padding(
+        padding: const EdgeInsets.all(Space.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.homeBatchTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: Space.sm),
+            Text(_done ? l10n.homeBatchDone : l10n.homeBatchBody),
+            if (!_done) ...[
+              const SizedBox(height: Space.md),
+              PrimaryButton(
+                label: l10n.homeReleaseBatch,
+                onPressed: () => setState(() => _done = true),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

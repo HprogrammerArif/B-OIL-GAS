@@ -152,6 +152,11 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                     ? l10n.emWhoNone
                     : l10n.emWho(e.managerName!),
               ),
+              if (e.reports.isNotEmpty) ...[
+                const SizedBox(height: Space.sm),
+                Text(l10n.emFieldReports),
+                Text(e.reports.join(', ')),
+              ],
               const SizedBox(height: Space.sm),
               Text(l10n.emWhy),
               const SizedBox(height: Space.sm),
@@ -345,11 +350,6 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                     ListTile(
                       title: Text(l10n.emFieldEmergency),
                       subtitle: Text(e.emergencyContact!),
-                    ),
-                  if (e.reports.isNotEmpty)
-                    ListTile(
-                      title: Text(l10n.emFieldReports),
-                      subtitle: Text(e.reports.join(', ')),
                     ),
                   ListTile(
                     title: Text(l10n.emPassport),

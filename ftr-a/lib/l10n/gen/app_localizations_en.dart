@@ -212,6 +212,26 @@ class AppL10nEn extends AppL10n {
   String get homeOpen => 'Open';
 
   @override
+  String get homeOutputTitle => 'Today\'s output';
+
+  @override
+  String get homeOutputLine =>
+      'Sunday made 5,320 MT. The daily target is 5,000.';
+
+  @override
+  String get homeWeekTitle => 'This week';
+
+  @override
+  String get homeBatchTitle => 'Bitumen batch ready';
+
+  @override
+  String get homeBatchBody =>
+      'BOGCL-BIT-2026-B88 · Bitumen 60/70 · 2,400 metric tons. Lab tests passed.';
+
+  @override
+  String get homeBatchDone => 'Released. Loading gates are open.';
+
+  @override
   String get busRegister => 'Register a bus';
 
   @override
@@ -231,6 +251,24 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get busSaved => 'Saved';
+
+  @override
+  String get busSeatRegular => 'Regular';
+
+  @override
+  String get busSeatLady => 'Lady priority';
+
+  @override
+  String get busSeatExecutive => 'Executive';
+
+  @override
+  String get busSeatSenior => 'Senior staff';
+
+  @override
+  String get busMarkBoarded => 'Mark boarded';
+
+  @override
+  String get busBoarded => 'Boarded';
 
   @override
   String busSeatsFree(int count) {
@@ -1852,6 +1890,18 @@ class AppL10nEn extends AppL10n {
   String get claimPay => 'Mark as paid';
 
   @override
+  String get claimBankFile => 'Bank file';
+
+  @override
+  String get claimBankReady => 'Today\'s bank transfer';
+
+  @override
+  String get claimBankEmpty => 'Nothing is waiting to be paid.';
+
+  @override
+  String get claimBankCopied => 'The bank file is copied.';
+
+  @override
   String claimPayConfirm(String amount) {
     return 'Pay $amount?';
   }
@@ -2619,6 +2669,39 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsQuotesTitle => 'Quotations';
+
+  @override
+  String get nsBudgetTitle => 'Is there budget?';
+
+  @override
+  String get nsBudgetWithin => 'Within budget';
+
+  @override
+  String get nsBudgetOver => 'Over budget';
+
+  @override
+  String get nsBudgetNone =>
+      'This file has no fixed amount to check against the budget.';
+
+  @override
+  String nsBudgetAvailable(String amount) {
+    return 'Available $amount';
+  }
+
+  @override
+  String nsBudgetRequest(String amount) {
+    return 'This request $amount';
+  }
+
+  @override
+  String nsBudgetLeft(String amount) {
+    return 'Left after this $amount';
+  }
+
+  @override
+  String nsBudgetShort(String amount) {
+    return 'Short by $amount';
+  }
 
   @override
   String nsQuoteMeta(int days, int months) {
@@ -5053,6 +5136,11 @@ class AppL10nEn extends AppL10n {
   @override
   String asBookFull(String gross, String accum, String nbv, String method) {
     return 'Gross $gross · already written down $accum · book $nbv · method $method';
+  }
+
+  @override
+  String asYearCharge(String amount) {
+    return 'This year $amount';
   }
 
   @override

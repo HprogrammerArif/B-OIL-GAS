@@ -119,6 +119,16 @@ class BusRepository {
   Future<void> reassignBus(String routeId, String busNo) =>
       _adminPost('/bus/routes/$routeId/bus', {'busNo': busNo});
 
+  Future<void> setSeat(
+    String routeId,
+    int seatNo, {
+    String? category,
+    bool? boarded,
+  }) => _adminPost('/bus/routes/$routeId/seats/$seatNo', {
+    'category': ?category,
+    'boarded': ?boarded,
+  });
+
   Future<Map<String, Object?>> seatMap(String routeId) async {
     try {
       final res = await _dio.get<Object?>('/bus/routes/$routeId');

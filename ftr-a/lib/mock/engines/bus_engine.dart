@@ -612,6 +612,12 @@ abstract final class BusEngine {
             ? 'OFFERED'
             : 'EMPTY',
         'allocationId': a?['id'],
+        'category': a == null
+            ? null
+            : (a['category'] as String?) ?? _seatKind(n),
+        'boarded':
+            a != null &&
+            (a['boarded'] == true || (a['boarded'] == null && n.isEven)),
         'occupant': a == null
             ? null
             : {
@@ -772,4 +778,33 @@ abstract final class BusEngine {
     store.put(Col.busRoutes, r);
     return routeWire(store, r, auth.employeeId);
   }
+
+  /// Lady, executive, senior or regular, and whether they boarded today.
+  static Json setSeat(MockStore store, String routeId, int seatNo, Json body) {
+    Json? alloc;
+    for (final a in allocationsOf(store, routeId)) {
+      if (a.intVal('seatNo') == seatNo) alloc = a;
+    }
+    if (alloc == null) throw notFound('Seat');
+    final cat = body['category'];
+    if (cat is String) {
+      const allowed = {'REGULAR', 'LADY', 'EXECUTIVE', 'SENIOR'};
+      if (!allowed.contains(cat)) {
+        throw validationError('category', 'Unknown seat type');
+      }
+      alloc['category'] = cat;
+    }
+    if (body['boarded'] is bool) alloc['boarded'] = body['boarded'];
+    store.put(Col.busAllocations, alloc);
+    final r = route(store, routeId);
+    if (r == null) throw notFound('Route');
+    return adminDetail(store, r);
+  }
+
+  static String _seatKind(int seat) => switch (seat % 7) {
+    1 => 'EXECUTIVE',
+    2 => 'LADY',
+    3 => 'SENIOR',
+    _ => 'REGULAR',
+  };
 }

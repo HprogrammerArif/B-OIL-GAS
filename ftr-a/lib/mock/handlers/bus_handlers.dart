@@ -206,6 +206,23 @@ List<RouteDef> busRoutes() => [
   ),
   RouteDef(
     'POST',
+    '/bus/routes/:id/seats/:seatNo',
+    (ctx) => _swept(ctx, () async {
+      final seat = int.tryParse(ctx.params['seatNo'] ?? '');
+      if (seat == null) throw validationError('seatNo', 'Pick a seat');
+      final rec = BusEngine.setSeat(
+        ctx.store,
+        ctx.params['id']!,
+        seat,
+        ctx.bodyObject(),
+      );
+      await ctx.store.commit();
+      return ok(rec);
+    }),
+    permission: ['bus:manage'],
+  ),
+  RouteDef(
+    'POST',
     '/bus/routes/:id/bus',
     (ctx) => _swept(ctx, () async {
       final rec = BusEngine.reassign(

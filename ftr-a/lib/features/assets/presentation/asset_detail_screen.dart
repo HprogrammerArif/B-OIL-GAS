@@ -519,6 +519,17 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen> {
                       ),
                     ),
                   ),
+                  if (e.financials.annualDepreciation > 0)
+                    ListTile(
+                      title: Text(
+                        l10n.asYearCharge(
+                          assetTaka(
+                            e.financials.annualDepreciation,
+                            bangla: bangla,
+                          ),
+                        ),
+                      ),
+                    ),
                   ListTile(
                     title: Text(l10n.asPassport),
                     subtitle: Text(

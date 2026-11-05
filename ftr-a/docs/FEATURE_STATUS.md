@@ -24,17 +24,17 @@ Legend: Done = complete in EN+BN, light+dark, all states · WIP · Todo
 | MOD-17 Approvals | 4 | Done (leave, claims, advances, regularisation, note-sheets with signature) | Delegation rules admin deferred |
 | MOD-10 Attendance & Leave | 3 | Done (employee + team roster) | Approvals in Phase 4 |
 | MOD-01 Notices | 3 | Done (employee + publisher) | Drafts, scheduling, POLICY approval deferred; Home broadcast banner shipped |
-| MOD-11/12/13 Claims | 3 | Done (claimant + Finance pay/disburse) | Approver actions in Phase 4 (Approvals Center); BEFTN export deferred |
-| MOD-14 Bus | 3 | Done (rider + Transport admin) | Register, reassign and seat map shipped; seat categories and boarding scans deferred |
-| MOD-03 Note-Sheets | 4 | Done | Budget check, public verify, confidentiality hiding deferred |
+| MOD-11/12/13 Claims | 3 | Done (claimant + Finance pay/disburse) | Approver actions in Phase 4 (Approvals Center); Finance can copy today's bank transfer file from Pay |
+| MOD-14 Bus | 3 | Done (rider + Transport admin) | Register, reassign, seat type (lady, executive, senior, regular) and boarding mark shipped; shift passes deferred |
+| MOD-03 Note-Sheets | 4 | Done | Budget check shipped on the file; public verify and confidentiality hiding deferred |
 | MOD-04 Parcels | 5 | Done (5a) | Ported and extended |
 | MOD-08 Visitors | 5 | Done (5b) | Ported and extended |
 | MOD-09 Fleet | 5 | Done (5c/5d) | Trip chat, pooling card, `tel:` call shipped; vehicle/driver CRUD deferred |
 | MOD-07 Incidents | 6 | Done (6a) | GPS on report + CAPA close-guard shipped; Form B-12 deferred |
 | MOD-05 Assets | 6 | Done (6b) | Tag search shipped; requisition workflow, FI-AA export deferred |
 | MOD-06 Compliance | 6 | Done (6c) | Fund workflow, certificate files, regulator sync deferred |
-| MOD-16 Workforce | 6 | Done (6d) | Org-chart screen, set-password mail, session revoke on IT clear deferred |
-| MOD-02 Dashboards | 7 | Done (on Home) | Standalone Today tile removed; SCADA/DCS and ROI PDF deferred |
+| MOD-16 Workforce | 6 | Done (6d) | Who they report to, and who reports to them, is on the person; set-password mail and session revoke deferred |
+| MOD-02 Dashboards | 7 | Done (on Home) | Plant Home shows this week's output and the bitumen batch release; a live SCADA feed and ROI PDF stay off the phone |
 | MOD-15 Chat | 7 | Done | Voice notes + fleet trip chat shipped; live calls stay `tel:` |
 
 ## Environment
