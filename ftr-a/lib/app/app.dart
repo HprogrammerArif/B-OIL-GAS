@@ -2,7 +2,6 @@ import 'package:bogcl_oneops/app/preferences_controller.dart';
 import 'package:bogcl_oneops/app/router.dart';
 import 'package:bogcl_oneops/app/sync_state.dart';
 import 'package:bogcl_oneops/core/theme/app_theme.dart';
-import 'package:bogcl_oneops/features/auth/presentation/app_lock.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
@@ -24,7 +23,7 @@ class BogclApp extends ConsumerWidget {
         final brightness = Theme.of(context).brightness;
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: AppTheme.statusBarOverlayStyle(brightness),
-          child: AppLockGate(child: child ?? const SizedBox.shrink()),
+          child: child ?? const SizedBox.shrink(),
         );
       },
       onGenerateTitle: (context) => AppL10n.of(context).appName,

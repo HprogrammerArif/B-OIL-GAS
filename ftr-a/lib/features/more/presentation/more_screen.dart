@@ -11,7 +11,6 @@ import 'package:bogcl_oneops/core/offline/outbox_service.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/data/auth_repository.dart';
-import 'package:bogcl_oneops/features/auth/presentation/app_lock.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
@@ -98,9 +97,6 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
     final session = ref.watch(sessionControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final version = ref.watch(appVersionProvider).value;
-    final biometricSupported =
-        ref.watch(biometricSupportedProvider).value ?? false;
-    final biometricEnabled = ref.watch(biometricEnabledProvider).value ?? true;
     final queued = ref.watch(outboxItemsProvider).value?.length ?? 0;
     final pendingApprovals =
         ref.watch(approvalSummaryProvider).value?.pending ?? 0;
@@ -322,22 +318,6 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
               ),
             ),
           ),
-          if (biometricSupported)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.lg),
-              child: Card(
-                margin: const EdgeInsets.symmetric(horizontal: Space.lg),
-                child: SwitchListTile(
-                  title: Text(l10n.settingsBiometric),
-                  subtitle: Text(l10n.settingsBiometricHint),
-                  secondary: const Icon(Icons.fingerprint),
-                  value: biometricEnabled,
-                  onChanged: (v) => unawaited(
-                    ref.read(biometricEnabledProvider.notifier).set(value: v),
-                  ),
-                ),
-              ),
-            ),
           const SizedBox(height: Space.lg),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Space.lg),
