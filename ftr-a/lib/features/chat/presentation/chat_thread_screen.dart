@@ -76,8 +76,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     if (s.startsWith('VOICE:')) {
       final parts = s.split('|');
       return parts.length > 1
-          ? '🎤 ${parts[1]}'
-          : (bangla ? '🎤 ভয়েস নোট' : '🎤 Voice Note');
+          ? parts[1]
+          : (bangla ? 'ভয়েস নোট' : 'Voice Note');
     }
     return s;
   }
@@ -194,21 +194,21 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
-                      Icons.lock,
-                      color: BrandColors.success,
+                      Icons.lock_outline,
+                      color: Colors.white70,
                       size: 14,
                     ),
                     const SizedBox(width: Space.xs),
                     Flexible(
                       child: Text(
                         bangla
-                            ? 'সুরক্ষিত অভ্যন্তরীণ ভয়েস কল'
-                            : 'Secure Enterprise Voice Call',
+                            ? 'অভ্যন্তরীণ ভয়েস কল'
+                            : 'Enterprise Voice Call',
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: BrandColors.success,
+                          color: Colors.white70,
                           fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -216,12 +216,12 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
                 const SizedBox(height: Space.lg),
                 CircleAvatar(
-                  radius: 40,
-                  backgroundColor: BrandColors.crimson,
+                  radius: 38,
+                  backgroundColor: Colors.white12,
                   child: Text(
                     name.isNotEmpty ? name.substring(0, 1) : 'E',
                     style: const TextStyle(
-                      fontSize: 32,
+                      fontSize: 28,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -232,7 +232,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -248,7 +248,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
                 const SizedBox(height: Space.md),
                 const Text(
-                  '00:42 · HD Corporate Voice Line',
+                  '00:42 · Corporate Voice Line',
                   style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 const SizedBox(height: Space.xl),
@@ -321,14 +321,14 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
+                        color: scheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(Corner.md),
                       ),
                       child: Icon(
                         channel.isDirect
                             ? Icons.person_outline
                             : Icons.groups_outlined,
-                        color: scheme.primary,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: Space.md),
@@ -356,8 +356,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 const SizedBox(height: Space.md),
                 Text(
                   bangla
-                      ? 'চ্যানেল সদস্যবৃন্দ (${channel.members.length})'
-                      : 'Channel Participants (${channel.members.length})',
+                      ? 'সদস্যবৃন্দ (${channel.members.length})'
+                      : 'Participants (${channel.members.length})',
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -395,15 +395,15 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                                   vertical: 1,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: scheme.primary.withValues(alpha: 0.12),
+                                  color: scheme.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   bangla ? 'অ্যাডমিন' : 'Admin',
                                   style: TextStyle(
                                     fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: scheme.primary,
+                                    fontWeight: FontWeight.w600,
+                                    color: scheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -414,30 +414,15 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                           '${m.displayTitle(bangla: bangla)} · ${m.displaySite(bangla: bangla)}',
                           style: const TextStyle(fontSize: 11.5),
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: isOnline
-                                    ? BrandColors.success
-                                    : BrandColors.warning,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              isOnline
-                                  ? (bangla ? 'অনলাইন' : 'Online')
-                                  : (bangla ? 'ব্যস্ত' : 'Busy'),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        trailing: Text(
+                          isOnline
+                              ? (bangla ? 'অনলাইন' : 'Online')
+                              : (bangla ? 'ব্যস্ত' : 'Away'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                       );
                     },
@@ -453,6 +438,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 
   Future<void> _attachDocument() async {
     final bangla = context.isBangla;
+    final scheme = Theme.of(context).colorScheme;
     final pick = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
@@ -465,23 +451,23 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
             children: [
               Text(
                 bangla
-                    ? 'অফিসিয়াল BOGCL নথি সংযুক্ত করুন'
-                    : 'Attach Official BOGCL Record',
+                    ? 'অফিসিয়াল নথি সংযুক্ত করুন'
+                    : 'Attach Official Record',
                 style: Theme.of(ctx).textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: Space.xs),
               Text(
                 bangla
-                    ? 'চ্যাটে সরাসরি নোট-শিট, ল্যাব রিপোর্ট বা নিরাপত্তা নথি শেয়ার করুন'
-                    : 'Share a live clickable card linking directly to the operational record',
+                    ? 'চ্যাটে নোট-শিট, ল্যাব রিপোর্ট বা নিরাপত্তা নথি শেয়ার করুন'
+                    : 'Share a reference card linking to the operational record',
                 style: Theme.of(ctx).textTheme.bodySmall,
               ),
               const SizedBox(height: Space.sm),
               ListTile(
-                leading: const Icon(
-                  Icons.description,
-                  color: BrandColors.crimson,
+                leading: Icon(
+                  Icons.description_outlined,
+                  color: scheme.onSurfaceVariant,
                 ),
                 title: const Text('Note-Sheet NS-2026-0042'),
                 subtitle: const Text(
@@ -493,7 +479,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.science, color: BrandColors.success),
+                leading: Icon(
+                  Icons.science_outlined,
+                  color: scheme.onSurfaceVariant,
+                ),
                 title: const Text('Bitumen Lab QC Batch B-88'),
                 subtitle: const Text(
                   'BDS 1238:2020 Penetration Grade 60/70 Test Certificate',
@@ -504,9 +493,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
               ),
               ListTile(
-                leading: const Icon(
-                  Icons.warning_amber,
-                  color: BrandColors.warning,
+                leading: Icon(
+                  Icons.report_problem_outlined,
+                  color: scheme.onSurfaceVariant,
                 ),
                 title: const Text('HSE Incident INC-2026-003'),
                 subtitle: const Text('Flange Joint Gasket Weep at Tank TK-102'),
@@ -516,9 +505,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
               ),
               ListTile(
-                leading: const Icon(
+                leading: Icon(
                   Icons.gavel_outlined,
-                  color: BrandColors.info,
+                  color: scheme.onSurfaceVariant,
                 ),
                 title: const Text('Explosives & Boiler Licence File'),
                 subtitle: const Text(
@@ -558,7 +547,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
       ),
       (
         'Emergency Review Meeting',
-        'All GMs and Department Heads join emergency operational review at 04:00 PM with updated KPI sheets.',
+        'All GMs and Department Heads join operational review at 04:00 PM with updated KPI sheets.',
       ),
       (
         'Stock Position Report',
@@ -567,7 +556,6 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     ];
 
     var selectedPreset = presets.first;
-    var isUrgent = true;
     final titleCtrl = TextEditingController(text: selectedPreset.$1);
     final bodyCtrl = TextEditingController(text: selectedPreset.$2);
 
@@ -588,33 +576,21 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.campaign, color: BrandColors.crimson),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? '⚡ এক্সিকিউটিভ ডিরেক্টিভ জারি করুন'
-                            : '⚡ Issue Executive Directive',
-                        style: Theme.of(ctx).textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
+                Text(
+                  bangla ? 'নির্দেশনা জারি করুন' : 'Issue Official Directive',
+                  style: Theme.of(ctx).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: Space.xs),
                 Text(
                   bangla
-                      ? 'উচ্চ অগ্রাধিকারের নির্দেশাবলী জারি করুন যা সংশ্লিষ্ট বিভাগীয় প্রধানদের দ্বারা বাধ্যতামূলকভাবে প্রাপ্তিস্বীকার করতে হবে।'
-                      : 'Binding directive requiring mandatory digital acknowledgment by officers.',
+                      ? 'সংশ্লিষ্ট বিভাগীয় প্রধানদের দ্বারা প্রাপ্তিস্বীকারের জন্য নির্দেশনা পাঠান।'
+                      : 'Send an official instruction requiring acknowledgment from channel members.',
                   style: Theme.of(ctx).textTheme.bodySmall,
                 ),
                 const SizedBox(height: Space.md),
                 Text(
-                  bangla
-                      ? 'ওয়ান-ট্যাপ টেমপ্লেট নির্বাচন করুন'
-                      : 'One-Tap BOGCL Directive Templates',
+                  bangla ? 'টেমপ্লেট' : 'Quick Templates',
                   style: Theme.of(ctx).textTheme.labelMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -638,46 +614,19 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   ],
                 ),
                 const SizedBox(height: Space.md),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? 'জরুরি লাল সতর্কতা (URGENT / RED ALERT)'
-                            : 'Priority: URGENT / RED ALERT',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: BrandColors.danger,
-                        ),
-                      ),
-                    ),
-                    Switch(
-                      value: isUrgent,
-                      activeThumbColor: BrandColors.danger,
-                      onChanged: (v) => setSheet(() => isUrgent = v),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.sm),
                 AppTextField(
                   label: bangla ? 'নির্দেশের শিরোনাম' : 'Directive Title',
                   controller: titleCtrl,
                 ),
                 const SizedBox(height: Space.sm),
                 AppTextField(
-                  label: bangla
-                      ? 'নির্দেশের বিস্তারিত বিবরণ'
-                      : 'Directive Action Items',
+                  label: bangla ? 'নির্দেশের বিবরণ' : 'Instruction Details',
                   controller: bodyCtrl,
                   maxLines: 3,
                 ),
                 const SizedBox(height: Space.lg),
                 PrimaryButton(
-                  label: bangla
-                      ? 'ডিরেক্টিভ জারি করুন'
-                      : 'Broadcast Executive Directive',
+                  label: bangla ? 'নির্দেশনা পাঠান' : 'Send Directive',
                   onPressed: () => Navigator.pop(ctx, true),
                 ),
               ],
@@ -689,9 +638,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
 
     if (ok == true) {
       try {
-        final prefix = isUrgent ? '[URGENT] ' : '';
         await _repo.issue(widget.id, {
-          'title': '$prefix${titleCtrl.text.trim()}',
+          'title': titleCtrl.text.trim(),
           'body': bodyCtrl.text.trim(),
         });
         ref
@@ -700,10 +648,8 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
         if (!mounted) return;
         AppToast.show(
           context,
-          bangla
-              ? 'এক্সিকিউটিভ ডিরেক্টিভ জারি করা হয়েছে।'
-              : 'Executive directive broadcasted to channel.',
-          tone: StatusTone.success,
+          bangla ? 'নির্দেশনা পাঠানো হয়েছে।' : 'Directive posted to channel.',
+          tone: StatusTone.neutral,
         );
       } on ApiException catch (e) {
         if (!mounted) return;
@@ -763,44 +709,33 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
-                    channelSubtitle.isNotEmpty
-                        ? channelSubtitle
-                        : (bangla
-                              ? 'অভ্যন্তরীণ এন্টারপ্রাইজ চ্যানেল'
-                              : 'BOGCL Enterprise Channel'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                  if (channelSubtitle.isNotEmpty)
+                    Text(
+                      channelSubtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
           ),
           actions: [
             IconButton(
-              tooltip: bangla ? 'সিকিউর ভয়েস কল' : 'Voice Call',
-              icon: const Icon(Icons.phone_in_talk_outlined),
+              tooltip: bangla ? 'ভয়েস কল' : 'Voice Call',
+              icon: const Icon(Icons.call_outlined),
               onPressed: () => _showEncryptedCallModal(
                 channelName,
-                channelSubtitle.isNotEmpty
-                    ? channelSubtitle
-                    : 'Official Executive Channel',
+                channelSubtitle.isNotEmpty ? channelSubtitle : 'Corporate Line',
               ),
             ),
-            if (canDir && !(channel?.isDirect ?? false))
-              IconButton(
-                tooltip: l10n.chActDirective,
-                onPressed: () => unawaited(_issueDirectiveSheet()),
-                icon: const Icon(Icons.campaign, color: BrandColors.crimson),
-              ),
             if (channel != null)
               IconButton(
-                tooltip: bangla ? 'সদস্য ও তথ্য' : 'Channel Info & Members',
+                tooltip: bangla ? 'সদস্য ও তথ্য' : 'Participants & Info',
                 icon: const Icon(Icons.info_outline),
                 onPressed: () => _showChannelInfoSheet(channel, bangla),
               ),
@@ -808,38 +743,36 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
         ),
         body: Column(
           children: [
-            // Dynamic Pinned Directive / Message Banner
+            // Calm Neutral Pinned Banner
             if (_showPinned && pinnedMsg != null)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: Space.md,
-                  vertical: 8,
+                  vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: BrandColors.crimson.withValues(alpha: 0.08),
+                  color: scheme.surfaceContainerLow,
                   border: Border(
-                    bottom: BorderSide(
-                      color: BrandColors.crimson.withValues(alpha: 0.2),
-                    ),
+                    bottom: BorderSide(color: scheme.outlineVariant),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.push_pin,
-                      size: 16,
-                      color: BrandColors.crimson,
+                    Icon(
+                      Icons.push_pin_outlined,
+                      size: 15,
+                      color: scheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: Space.xs),
                     Expanded(
                       child: Text(
                         pinnedMsg.directive != null
-                            ? '${bangla ? "পিনকৃত ডিরেক্টিভ" : "PINNED DIRECTIVE"} (${pinnedMsg.directive!.refNo}): ${pinnedMsg.directive!.title}'
-                            : '${bangla ? "পিনকৃত বার্তা" : "PINNED"}: ${_cleanSnippet(pinnedMsg.body, bangla)}',
-                        style: const TextStyle(
+                            ? '${pinnedMsg.directive!.refNo}: ${pinnedMsg.directive!.title}'
+                            : _cleanSnippet(pinnedMsg.body, bangla),
+                        style: TextStyle(
                           fontSize: 11.5,
-                          fontWeight: FontWeight.bold,
-                          color: BrandColors.crimson,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -847,10 +780,10 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                     ),
                     InkWell(
                       onTap: () => setState(() => _showPinned = false),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
-                        size: 14,
-                        color: BrandColors.crimson,
+                        size: 15,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -917,9 +850,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                                 AppToast.show(
                                   context,
                                   bangla
-                                      ? 'ডিরেক্টিভ সফলভাবে প্রাপ্তিস্বীকার করা হয়েছে।'
-                                      : 'Executive directive acknowledged with timestamp.',
-                                  tone: StatusTone.success,
+                                      ? 'প্রাপ্তিস্বীকার রেকর্ড করা হয়েছে।'
+                                      : 'Directive acknowledged.',
+                                  tone: StatusTone.neutral,
                                 );
                               },
                         onDone: m.directive == null
@@ -932,9 +865,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                                 AppToast.show(
                                   context,
                                   bangla
-                                      ? 'ডিরেক্টিভ বাস্তবায়িত হিসেবে চিহ্নিত হয়েছে।'
-                                      : 'Directive marked as executed.',
-                                  tone: StatusTone.success,
+                                      ? 'নির্দেশনা সম্পন্ন হিসেবে চিহ্নিত হয়েছে।'
+                                      : 'Directive marked as completed.',
+                                  tone: StatusTone.neutral,
                                 );
                               },
                         onReact: (emoji) async {
@@ -961,11 +894,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 12,
-                      height: 12,
+                      width: 11,
+                      height: 11,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: scheme.primary,
+                        strokeWidth: 1.8,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -973,7 +906,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                       child: Text(
                         bangla
                             ? '${(channel?.isDirect ?? false) ? channelName : "প্ল্যান্ট জিএম"} উত্তর লিখছেন...'
-                            : '${(channel?.isDirect ?? false) ? channelName : "Plant GM"} is typing a reply...',
+                            : '${(channel?.isDirect ?? false) ? channelName : "Plant GM"} is typing...',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
@@ -985,7 +918,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
               ),
 
-            // Reply Quote Preview Bar (when replying to a message)
+            // Reply Quote Preview Bar
             if (_replyingTo != null)
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -993,12 +926,12 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
+                  color: scheme.surfaceContainerLow,
                   border: Border(top: BorderSide(color: scheme.outlineVariant)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.reply, size: 16, color: scheme.primary),
+                    Icon(Icons.reply, size: 16, color: scheme.onSurfaceVariant),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Column(
@@ -1006,12 +939,12 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                         children: [
                           Text(
                             bangla
-                                ? 'উত্তর দিচ্ছেন: ${_replyingTo!.sender?.display(bangla: true) ?? "আপনি"}'
+                                ? 'উত্তর: ${_replyingTo!.sender?.display(bangla: true) ?? "আপনি"}'
                                 : 'Replying to ${_replyingTo!.sender?.display(bangla: false) ?? "You"}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: scheme.primary,
+                              color: scheme.onSurface,
                             ),
                           ),
                           Text(
@@ -1111,13 +1044,9 @@ class _EnhancedBubble extends StatelessWidget {
         mainBody.startsWith('[VOICE BRIEFING');
     final isAttachedRecord = mainBody.startsWith('Attached ');
 
-    final bg = isDirective
-        ? BrandColors.crimson.withValues(alpha: 0.08)
-        : (mine ? scheme.primary.withValues(alpha: 0.12) : scheme.surface);
-
-    final borderColor = isDirective
-        ? BrandColors.crimson.withValues(alpha: 0.5)
-        : scheme.outlineVariant;
+    // Calm neutral bubble backgrounds
+    final bg = mine ? scheme.surfaceContainerHighest : scheme.surface;
+    final borderColor = isDirective ? scheme.outline : scheme.outlineVariant;
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -1134,7 +1063,7 @@ class _EnhancedBubble extends StatelessWidget {
                 borderRadius: BorderRadius.circular(Corner.md),
                 border: Border.all(
                   color: borderColor,
-                  width: isDirective ? 1.5 : 1.0,
+                  width: isDirective ? 1.2 : 1.0,
                 ),
               ),
               child: Padding(
@@ -1142,7 +1071,7 @@ class _EnhancedBubble extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Sender Header + Role Badge (for incoming messages)
+                    // Sender Header + Role Subtitle (neutral colors)
                     if (!mine && message.sender != null) ...[
                       Row(
                         children: [
@@ -1152,8 +1081,8 @@ class _EnhancedBubble extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: scheme.primary,
-                                fontWeight: FontWeight.w800,
+                                color: scheme.onSurface,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -1161,24 +1090,13 @@ class _EnhancedBubble extends StatelessWidget {
                               message.sender!.title!.isNotEmpty) ...[
                             const SizedBox(width: 6),
                             Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 5,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: scheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  message.sender!.title!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: scheme.onSurfaceVariant,
-                                  ),
+                              child: Text(
+                                '· ${message.sender!.title!}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: scheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -1188,7 +1106,7 @@ class _EnhancedBubble extends StatelessWidget {
                       const SizedBox(height: 4),
                     ],
 
-                    // Quoted Reply Block (if replying to an earlier message)
+                    // Quoted Reply Block (neutral left border)
                     if (quotedLine != null) ...[
                       Container(
                         width: double.infinity,
@@ -1198,12 +1116,10 @@ class _EnhancedBubble extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(
-                            alpha: 0.6,
-                          ),
+                          color: scheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(6),
                           border: Border(
-                            left: BorderSide(color: scheme.primary, width: 3),
+                            left: BorderSide(color: scheme.outline, width: 2.5),
                           ),
                         ),
                         child: Text(
@@ -1212,7 +1128,6 @@ class _EnhancedBubble extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
-                            fontStyle: FontStyle.italic,
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -1227,18 +1142,18 @@ class _EnhancedBubble extends StatelessWidget {
                     else if (isDirective) ...[
                       Row(
                         children: [
-                          const Icon(
-                            Icons.campaign,
-                            color: BrandColors.crimson,
-                            size: 18,
+                          Icon(
+                            Icons.assignment_outlined,
+                            color: scheme.onSurface,
+                            size: 16,
                           ),
                           const SizedBox(width: Space.xs),
                           Expanded(
                             child: Text(
                               message.directive!.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: BrandColors.crimson,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: scheme.onSurface,
                                 fontSize: 13,
                               ),
                             ),
@@ -1247,10 +1162,10 @@ class _EnhancedBubble extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Ref: ${message.directive!.refNo}',
+                        '${bangla ? "ডিরেক্টিভ" : "Directive"} · ${message.directive!.refNo}',
                         style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
@@ -1264,10 +1179,10 @@ class _EnhancedBubble extends StatelessWidget {
                         children: [
                           Icon(
                             message.directive!.executedAt != null
-                                ? Icons.verified
-                                : Icons.check_circle_outline,
+                                ? Icons.check_circle
+                                : Icons.schedule,
                             size: 14,
-                            color: BrandColors.success,
+                            color: scheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -1275,14 +1190,15 @@ class _EnhancedBubble extends StatelessWidget {
                               message.directive!.executedAt != null
                                   ? (bangla
                                         ? 'বাস্তবায়িত · ${l10n.chAckCount(message.directive!.acks, message.directive!.needed)}'
-                                        : 'Executed · ${l10n.chAckCount(message.directive!.acks, message.directive!.needed)}')
+                                        : 'Completed · ${l10n.chAckCount(message.directive!.acks, message.directive!.needed)}')
                                   : l10n.chAckCount(
                                       message.directive!.acks,
                                       message.directive!.needed,
                                     ),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
+                                color: scheme.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -1295,17 +1211,13 @@ class _EnhancedBubble extends StatelessWidget {
                           runSpacing: 6,
                           children: [
                             if (!mine && onAck != null)
-                              FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: BrandColors.crimson,
-                                  foregroundColor: Colors.white,
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
                                   visualDensity: VisualDensity.compact,
                                 ),
                                 icon: const Icon(Icons.check, size: 14),
                                 label: Text(
-                                  bangla
-                                      ? 'প্রাপ্তিস্বীকার করুন'
-                                      : 'Acknowledge Directive',
+                                  bangla ? 'প্রাপ্তিস্বীকার' : 'Acknowledge',
                                   style: const TextStyle(fontSize: 11.5),
                                 ),
                                 onPressed: busy ? null : () => onAck!(),
@@ -1321,8 +1233,8 @@ class _EnhancedBubble extends StatelessWidget {
                                 ),
                                 label: Text(
                                   bangla
-                                      ? 'বাস্তবায়িত চিহ্নিত করুন'
-                                      : 'Mark Executed',
+                                      ? 'সম্পন্ন চিহ্নিত করুন'
+                                      : 'Mark Completed',
                                   style: const TextStyle(fontSize: 11.5),
                                 ),
                                 onPressed: busy ? null : () => onDone!(),
@@ -1335,7 +1247,7 @@ class _EnhancedBubble extends StatelessWidget {
 
                     const SizedBox(height: 6),
 
-                    // Footer: Grouped Reactions + Reply + Timestamp + Read Receipt
+                    // Footer: Reactions + Timestamp + Read Receipt + Reply
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
@@ -1351,7 +1263,7 @@ class _EnhancedBubble extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: scheme.surfaceContainerHighest,
+                                color: scheme.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: scheme.outlineVariant,
@@ -1375,7 +1287,11 @@ class _EnhancedBubble extends StatelessWidget {
                             ),
                           ),
                         if (mine)
-                          Icon(Icons.done_all, size: 14, color: scheme.primary),
+                          Icon(
+                            Icons.done_all,
+                            size: 13,
+                            color: scheme.onSurfaceVariant,
+                          ),
                         InkWell(
                           onTap: onReply,
                           child: Padding(
@@ -1385,7 +1301,7 @@ class _EnhancedBubble extends StatelessWidget {
                             ),
                             child: Icon(
                               Icons.reply_outlined,
-                              size: 15,
+                              size: 14,
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -1399,7 +1315,7 @@ class _EnhancedBubble extends StatelessWidget {
                             ),
                             child: Icon(
                               Icons.add_reaction_outlined,
-                              size: 15,
+                              size: 14,
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -1507,24 +1423,7 @@ class _OfficialRecordCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isNoteSheet = raw.contains('Note-Sheet');
-    final isQc = raw.contains('QC Report');
     final isIncident = raw.contains('HSE Incident');
-
-    final icon = isNoteSheet
-        ? Icons.description_outlined
-        : isQc
-        ? Icons.science_outlined
-        : isIncident
-        ? Icons.warning_amber_rounded
-        : Icons.gavel_outlined;
-
-    final color = isNoteSheet
-        ? BrandColors.crimson
-        : isQc
-        ? BrandColors.success
-        : isIncident
-        ? BrandColors.warning
-        : BrandColors.info;
 
     final route = isNoteSheet
         ? AppRoutes.noteSheets
@@ -1540,30 +1439,28 @@ class _OfficialRecordCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(Space.sm),
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(Corner.md),
-        border: Border.all(color: color.withValues(alpha: 0.45)),
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(icon, size: 18, color: color),
+              Icon(
+                Icons.description_outlined,
+                size: 17,
+                color: scheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
                   ),
                 ),
               ),
@@ -1579,15 +1476,15 @@ class _OfficialRecordCard extends StatelessWidget {
           const SizedBox(height: 6),
           Align(
             alignment: Alignment.centerRight,
-            child: FilledButton.tonalIcon(
-              style: FilledButton.styleFrom(
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
               ),
               onPressed: () {
                 Haptics.tap();
                 openAppRoute(context, route);
               },
-              icon: const Icon(Icons.open_in_new, size: 14),
+              icon: const Icon(Icons.open_in_new, size: 13),
               label: Text(
                 bangla ? 'নথি খুলুন' : 'Open Record',
                 style: const TextStyle(fontSize: 11),
@@ -1679,6 +1576,7 @@ class _VoiceWaveformBubbleState extends State<_VoiceWaveformBubble> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final (totalSec, transcript) = _parse();
     final progress = totalSec > 0 ? (_elapsed / totalSec).clamp(0.0, 1.0) : 0.0;
 
@@ -1692,8 +1590,8 @@ class _VoiceWaveformBubbleState extends State<_VoiceWaveformBubble> {
               visualDensity: VisualDensity.compact,
               icon: Icon(
                 _playing ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                color: BrandColors.crimson,
-                size: 30,
+                color: scheme.onSurface,
+                size: 28,
               ),
               onPressed: () => _togglePlay(totalSec),
             ),
@@ -1707,8 +1605,8 @@ class _VoiceWaveformBubbleState extends State<_VoiceWaveformBubble> {
                     margin: const EdgeInsets.symmetric(horizontal: 1.5),
                     decoration: BoxDecoration(
                       color: _playing && (i / 16 <= progress + 0.15)
-                          ? BrandColors.crimson
-                          : Colors.grey.shade400,
+                          ? scheme.onSurface
+                          : scheme.outlineVariant,
                       borderRadius: BorderRadius.circular(1.5),
                     ),
                   ),
@@ -1719,7 +1617,11 @@ class _VoiceWaveformBubbleState extends State<_VoiceWaveformBubble> {
               _playing
                   ? '${_fmtSec(_elapsed)} / ${_fmtSec(totalSec)}'
                   : _fmtSec(totalSec),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -1727,12 +1629,16 @@ class _VoiceWaveformBubbleState extends State<_VoiceWaveformBubble> {
           width: double.infinity,
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: scheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             '"$transcript"',
-            style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],
@@ -1759,7 +1665,7 @@ class _VoiceRecordingBar extends StatelessWidget {
     final rem = (seconds % 60).toString().padLeft(2, '0');
 
     return Material(
-      color: Colors.red.shade50,
+      color: scheme.surfaceContainerHighest,
       child: SafeArea(
         top: false,
         child: Padding(
@@ -1769,21 +1675,17 @@ class _VoiceRecordingBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.fiber_manual_record,
-                color: Colors.red,
-                size: 18,
-              ),
+              Icon(Icons.mic, color: scheme.onSurface, size: 18),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   bangla
                       ? 'ভয়েস নোট রেকর্ড হচ্ছে... 0:$rem'
-                      : 'Recording Voice Note... 0:$rem',
+                      : 'Recording voice note... 0:$rem',
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     fontSize: 12.5,
-                    color: Colors.red.shade900,
+                    color: scheme.onSurface,
                   ),
                 ),
               ),
@@ -1792,14 +1694,13 @@ class _VoiceRecordingBar extends StatelessWidget {
                 child: Text(bangla ? 'বাতিল' : 'Cancel'),
               ),
               const SizedBox(width: 4),
-              FilledButton.icon(
+              FilledButton.tonalIcon(
                 style: FilledButton.styleFrom(
-                  backgroundColor: scheme.primary,
                   visualDensity: VisualDensity.compact,
                 ),
                 onPressed: onSend,
                 icon: const Icon(Icons.send, size: 15),
-                label: Text(bangla ? 'পাঠান' : 'Send Voice'),
+                label: Text(bangla ? 'পাঠান' : 'Send'),
               ),
             ],
           ),
@@ -1850,23 +1751,31 @@ class _Composer extends StatelessWidget {
               IconButton(
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Attach Official Record',
-                icon: const Icon(Icons.attach_file, size: 20),
+                icon: Icon(
+                  Icons.attach_file,
+                  size: 20,
+                  color: scheme.onSurfaceVariant,
+                ),
                 onPressed: busy ? null : onAttach,
               ),
               IconButton(
                 visualDensity: VisualDensity.compact,
                 tooltip: 'Record Voice Note',
-                icon: const Icon(Icons.mic_none, size: 20),
+                icon: Icon(
+                  Icons.mic_none,
+                  size: 20,
+                  color: scheme.onSurfaceVariant,
+                ),
                 onPressed: busy ? null : onVoice,
               ),
               if (canDirect)
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  tooltip: 'Issue Executive Directive',
-                  icon: const Icon(
-                    Icons.campaign_outlined,
+                  tooltip: 'Issue Official Directive',
+                  icon: Icon(
+                    Icons.assignment_outlined,
                     size: 20,
-                    color: BrandColors.crimson,
+                    color: scheme.onSurfaceVariant,
                   ),
                   onPressed: busy ? null : onDirective,
                 ),
@@ -1890,7 +1799,7 @@ class _Composer extends StatelessWidget {
               const SizedBox(width: Space.xs),
               IconButton(
                 onPressed: busy ? null : onSend,
-                icon: const Icon(Icons.send, color: BrandColors.crimson),
+                icon: Icon(Icons.send_rounded, color: scheme.onSurface),
               ),
             ],
           ),

@@ -83,21 +83,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
-                      Icons.lock,
-                      color: BrandColors.success,
+                      Icons.lock_outline,
+                      color: Colors.white70,
                       size: 14,
                     ),
                     const SizedBox(width: Space.xs),
                     Flexible(
                       child: Text(
                         bangla
-                            ? 'সুরক্ষিত অভ্যন্তরীণ ভয়েস কল'
-                            : 'Secure Enterprise Voice Call',
+                            ? 'অভ্যন্তরীণ ভয়েস কল'
+                            : 'Enterprise Voice Call',
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: BrandColors.success,
+                          color: Colors.white70,
                           fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -105,12 +105,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 const SizedBox(height: Space.lg),
                 CircleAvatar(
-                  radius: 40,
-                  backgroundColor: BrandColors.crimson,
+                  radius: 38,
+                  backgroundColor: Colors.white12,
                   child: Text(
                     name.isNotEmpty ? name.substring(0, 1) : 'E',
                     style: const TextStyle(
-                      fontSize: 32,
+                      fontSize: 28,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -121,7 +121,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   name,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -137,7 +137,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 const SizedBox(height: Space.md),
                 const Text(
-                  '00:42 · HD Corporate Voice Line',
+                  '00:42 · Corporate Voice Line',
                   style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 const SizedBox(height: Space.xl),
@@ -205,96 +205,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          bangla ? 'কমান্ড ও এক্সিকিউটিভ চ্যাট' : 'Command & Executive Chat',
-        ),
+        title: Text(bangla ? 'অভ্যন্তরীণ চ্যাট' : 'Messages & Channels'),
         actions: [
           IconButton(
-            tooltip: bangla ? 'নতুন ডিরেক্ট মেসেজ' : 'New Direct Message',
+            tooltip: bangla ? 'নতুন মেসেজ' : 'New Direct Message',
             onPressed: () => unawaited(_direct()),
-            icon: const Icon(Icons.person_add_alt_1_outlined),
+            icon: const Icon(Icons.edit_square),
           ),
           const AppBarActions(),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => unawaited(_direct()),
-        icon: const Icon(Icons.chat_outlined, size: 18),
-        label: Text(bangla ? 'নতুন বার্তা' : 'New Message'),
-      ),
       body: Column(
         children: [
-          // Live Status & Summary Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Space.md,
-                vertical: Space.sm,
-              ),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(Corner.lg),
-                border: Border.all(
-                  color: scheme.outlineVariant.withValues(alpha: 0.6),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: BrandColors.crimson.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(Corner.md),
-                    ),
-                    child: const Icon(
-                      Icons.hub_outlined,
-                      color: BrandColors.crimson,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: Space.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          bangla
-                              ? '$cmdCountটি কমান্ড চ্যানেল · $dmCountটি ডিরেক্ট মেসেজ সক্রিয়'
-                              : '$cmdCount Command Channels · $dmCount Direct Lines Active',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          unreadTotal > 0
-                              ? (bangla
-                                    ? '$unreadTotalটি অপঠিত বার্তা · সদর দপ্তর ও কেরানীগঞ্জ সংযুক্ত'
-                                    : '$unreadTotal unread messages · HQ & Refinery plants linked')
-                              : (bangla
-                                    ? 'সকল বার্তা পঠিত · সদর দপ্তর ও রিফাইনারি প্ল্যান্ট সংযুক্ত'
-                                    : 'All caught up · Baridhara HQ & Refinery plants linked'),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontSize: 11.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: Space.sm),
-
           // Search Field
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Space.md),
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
             child: TextField(
               decoration: InputDecoration(
                 hintText: bangla
-                    ? 'চ্যানেল, কর্মকর্তা বা বার্তা অনুসন্ধান...'
+                    ? 'চ্যানেল, সহকর্মী বা বার্তা খুঁজুন...'
                     : 'Search channels, colleagues, or messages...',
                 prefixIcon: const Icon(Icons.search, size: 20),
                 isDense: true,
@@ -319,13 +248,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 _filterChip(
                   'COMMAND',
-                  bangla
-                      ? 'কমান্ড চ্যানেল ($cmdCount)'
-                      : 'Channels # ($cmdCount)',
+                  bangla ? 'চ্যানেল ($cmdCount)' : 'Channels ($cmdCount)',
                 ),
                 _filterChip(
                   'DIRECT',
-                  bangla ? 'ডিরেক্ট মেসেজ ($dmCount)' : 'Direct 1:1 ($dmCount)',
+                  bangla ? 'ডিরেক্ট ($dmCount)' : 'Direct ($dmCount)',
                 ),
                 if (unreadTotal > 0)
                   _filterChip(
@@ -382,12 +309,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     await ref.read(chatChannelsProvider.future);
                   },
                   child: ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 88),
+                    padding: const EdgeInsets.only(bottom: Space.xxxl),
                     itemCount: filtered.length,
                     separatorBuilder: (_, _) => Divider(
                       height: 1,
                       indent: 72,
-                      color: scheme.outlineVariant.withValues(alpha: 0.6),
+                      color: scheme.outlineVariant.withValues(alpha: 0.5),
                     ),
                     itemBuilder: (context, i) => _RoomTile(
                       channel: filtered[i],
@@ -400,8 +327,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         filtered[i].subheading(bangla: bangla).isNotEmpty
                             ? filtered[i].subheading(bangla: bangla)
                             : (filtered[i].isDirect
-                                  ? 'Direct Executive Line'
-                                  : 'Command Voice Bridge'),
+                                  ? 'Direct Line'
+                                  : 'Channel Voice Bridge'),
                       ),
                     ),
                   ),
@@ -461,10 +388,7 @@ class _RoomTile extends StatelessWidget {
         : DateFmt.time(channel.lastAt!, lang);
     final unread = channel.unreadCount > 0;
     final sub = channel.subheading(bangla: bangla);
-
-    final presence = channel.isDirect
-        ? _presenceBadge(channel.name, channel.presence, bangla)
-        : null;
+    final isOnline = channel.presence == 'ONLINE';
 
     return InkWell(
       onTap: onTap,
@@ -475,36 +399,41 @@ class _RoomTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Channel Icon or Colleague Avatar with Status Dot
+            // Neutral Avatar / Channel Badge with subtle status dot
             Stack(
               children: [
                 if (channel.isDirect)
                   Avatar(name: channel.heading(bangla: bangla))
                 else
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: scheme.primaryContainer.withValues(alpha: 0.7),
+                      color: scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(Corner.md),
+                      border: Border.all(
+                        color: scheme.outlineVariant.withValues(alpha: 0.6),
+                      ),
                     ),
                     child: Icon(
-                      channel.isLocked ? Icons.campaign_outlined : Icons.tag,
-                      color: scheme.primary,
-                      size: 22,
+                      channel.isLocked ? Icons.lock_outline : Icons.tag,
+                      color: scheme.onSurfaceVariant,
+                      size: 19,
                     ),
                   ),
-                if (presence != null)
+                if (channel.isDirect)
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: Container(
-                      width: 12,
-                      height: 12,
+                      width: 10,
+                      height: 10,
                       decoration: BoxDecoration(
-                        color: presence.$2,
+                        color: isOnline
+                            ? const Color(0xFF16A34A)
+                            : scheme.outline,
                         shape: BoxShape.circle,
-                        border: Border.all(color: scheme.surface, width: 2),
+                        border: Border.all(color: scheme.surface, width: 1.8),
                       ),
                     ),
                   ),
@@ -517,14 +446,6 @@ class _RoomTile extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      if (channel.isLocked && !channel.isDirect) ...[
-                        Icon(
-                          Icons.verified_outlined,
-                          size: 14,
-                          color: scheme.primary,
-                        ),
-                        const SizedBox(width: 4),
-                      ],
                       Expanded(
                         child: Text(
                           channel.heading(bangla: bangla),
@@ -533,7 +454,7 @@ class _RoomTile extends StatelessWidget {
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: unread
                                 ? FontWeight.w800
-                                : FontWeight.w700,
+                                : FontWeight.w600,
                           ),
                         ),
                       ),
@@ -543,9 +464,9 @@ class _RoomTile extends StatelessWidget {
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontWeight: unread
                                 ? FontWeight.w700
-                                : FontWeight.w500,
+                                : FontWeight.w400,
                             color: unread
-                                ? scheme.primary
+                                ? scheme.onSurface
                                 : scheme.onSurfaceVariant,
                           ),
                         ),
@@ -559,10 +480,8 @@ class _RoomTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: channel.isDirect
-                            ? scheme.primary.withValues(alpha: 0.85)
-                            : scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -595,32 +514,17 @@ class _RoomTile extends StatelessWidget {
             ),
             IconButton(
               tooltip: bangla ? 'কল করুন' : 'Voice Call',
-              icon: const Icon(Icons.call_outlined, size: 18),
+              icon: Icon(
+                Icons.call_outlined,
+                size: 18,
+                color: scheme.onSurfaceVariant,
+              ),
               onPressed: onCall,
             ),
           ],
         ),
       ),
     );
-  }
-
-  (String label, Color color) _presenceBadge(
-    String name,
-    String rawPresence,
-    bool bangla,
-  ) {
-    if (name.contains('Harunur') || name.contains('হারুনুর')) {
-      return (
-        bangla ? 'প্ল্যান্টে উপস্থিত' : 'On Site at Keraniganj',
-        BrandColors.info,
-      );
-    }
-    if (rawPresence == 'IN_MEETING' ||
-        name.contains('Sayeda') ||
-        name.contains('সায়েদা')) {
-      return (bangla ? 'মিটিংয়ে' : 'In Meeting', BrandColors.warning);
-    }
-    return (bangla ? 'অনলাইনে' : 'Online', BrandColors.success);
   }
 
   String _preview(
@@ -632,16 +536,19 @@ class _RoomTile extends StatelessWidget {
   ) {
     if (body == null || body.isEmpty) return l10n.chNoMessages;
     var clean = body;
-    if (body.startsWith('VOICE:')) {
-      final parts = body.split('|');
+    if (body.startsWith('> ')) {
+      final nl = body.indexOf('\n');
+      if (nl != -1) clean = body.substring(nl + 1).trim();
+    }
+    if (clean.startsWith('VOICE:')) {
+      final parts = clean.split('|');
       clean = parts.length > 1 && parts[1].trim().isNotEmpty
-          ? '🎤 ${parts[1].trim()}'
-          : '🎤 ${l10n.chVoice}';
-    } else if (body.startsWith('[VOICE BRIEFING')) {
-      clean =
-          '🎤 ${body.replaceAll(RegExp(r'^\[VOICE BRIEFING[^\]]*\]\s*'), '')}';
-    } else if (body.startsWith('Attached ')) {
-      clean = '📎 $body';
+          ? (bangla ? 'ভয়েস: ${parts[1].trim()}' : 'Voice: ${parts[1].trim()}')
+          : l10n.chVoice;
+    } else if (clean.startsWith('[VOICE BRIEFING')) {
+      clean = clean.replaceAll(RegExp(r'^\[VOICE BRIEFING[^\]]*\]\s*'), '');
+    } else if (clean.startsWith('Attached ')) {
+      clean = clean.replaceFirst('Attached ', '');
     }
     if (!isDirect && sender != null && sender.isNotEmpty) {
       final shortSender = sender.split(' ').last;
@@ -661,7 +568,7 @@ class _Count extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: scheme.primary,
+        color: scheme.onSurface,
         borderRadius: BorderRadius.circular(Corner.xl),
       ),
       child: Padding(
@@ -669,7 +576,7 @@ class _Count extends StatelessWidget {
         child: Text(
           n > 99 ? '99+' : '$n',
           style: Theme.of(context).textTheme.labelSmall
-              ?.copyWith(color: scheme.onPrimary, fontWeight: FontWeight.w700),
+              ?.copyWith(color: scheme.surface, fontWeight: FontWeight.w700),
         ),
       ),
     );
