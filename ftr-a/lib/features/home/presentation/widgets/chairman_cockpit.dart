@@ -38,11 +38,26 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
     final bangla = context.isBangla;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final pendingCount =
+        ref.watch(approvalInboxProvider).value?.length ??
+        widget.dashboard.badge('approvals');
+    final leaders =
+        widget.dashboard.extras
+            .where((e) => e.kind == 'leaders')
+            .firstOrNull
+            ?.leaders ??
+        const [];
 
     final tabs = [
       if (bangla) 'সারসংক্ষেপ' else 'Overview',
-      if (bangla) 'স্বাক্ষরের ফাইল' else 'Files to Sign',
-      if (bangla) 'ইনার সার্কেল' else 'Inner Circle',
+      if (bangla)
+        'স্বাক্ষরের ফাইল ($pendingCount)'
+      else
+        'Files to Sign ($pendingCount)',
+      if (bangla)
+        'ইনার সার্কেল (${leaders.length})'
+      else
+        'Inner Circle (${leaders.length})',
       if (bangla) 'নোটিশ' else 'Notices',
     ];
 
@@ -125,16 +140,12 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
         // Sub-Tab Content
         switch (_tabIndex) {
           1 => const _FilesToSignTab(),
-          2 => _InnerCircleTab(
-            leaders:
-                widget.dashboard.extras
-                    .where((e) => e.kind == 'leaders')
-                    .firstOrNull
-                    ?.leaders ??
-                const [],
-          ),
+          2 => _InnerCircleTab(leaders: leaders),
           3 => const _NoticesTab(),
-          _ => _OverviewTab(dashboard: widget.dashboard),
+          _ => _OverviewTab(
+            dashboard: widget.dashboard,
+            onViewAllFiles: () => setState(() => _tabIndex = 1),
+          ),
         },
       ],
     );
@@ -1230,10 +1241,25 @@ class _VoiceBriefingConsoleState extends ConsumerState<_VoiceBriefingConsole> {
   }
 }
 
+String _formatBdt(num? amount, {required bool bangla}) {
+  if (amount == null) return '';
+  final val = amount.toDouble();
+  if (val >= 10000000) {
+    final cr = (val / 10000000).toStringAsFixed(2);
+    return bangla ? '৳ $cr কোটি' : 'BDT $cr Cr';
+  }
+  if (val >= 100000) {
+    final l = (val / 100000).toStringAsFixed(1);
+    return bangla ? '৳ $l লক্ষ' : 'BDT $l Lakhs';
+  }
+  return bangla ? '৳ ${val.round()}' : 'BDT ${val.round()}';
+}
+
 class _OverviewTab extends ConsumerWidget {
-  const _OverviewTab({required this.dashboard});
+  const _OverviewTab({required this.dashboard, required this.onViewAllFiles});
 
   final Dashboard dashboard;
+  final VoidCallback onViewAllFiles;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1308,13 +1334,34 @@ class _OverviewTab extends ConsumerWidget {
           const SizedBox(height: Space.md),
 
           // High-Value Files Awaiting Signature
-          Text(
-            bangla
-                ? 'শীর্ষ অনুমোদনের ফাইল'
-                : 'High-Value Files Awaiting Signature',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  bangla
+                      ? 'শীর্ষ অনুমোদনের ফাইল'
+                      : 'High-Value Files Awaiting Signature',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (inbox.length > 2)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () {
+                    Haptics.tap();
+                    onViewAllFiles();
+                  },
+                  child: Text(
+                    bangla
+                        ? 'সব দেখুন (${inbox.length})'
+                        : 'See All (${inbox.length})',
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: Space.xs),
           if (inbox.isEmpty)
@@ -1370,7 +1417,7 @@ class _OverviewTab extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(Corner.sm),
                               ),
                               child: Text(
-                                'BDT ${item.summary.amount}',
+                                _formatBdt(item.summary.amount, bangla: bangla),
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
@@ -1382,7 +1429,9 @@ class _OverviewTab extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${item.initiator.display(bangla: bangla)} · ${item.stepName}',
+                        bangla
+                            ? 'উত্থাপনকারী: ${item.initiator.display(bangla: true)} · ধাপ: চূড়ান্ত স্বাক্ষর (${item.stepName})'
+                            : 'By ${item.initiator.display(bangla: false)} · Step: ${item.stepName} Sign-Off',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -1406,13 +1455,22 @@ class _OverviewTab extends ConsumerWidget {
                               visualDensity: VisualDensity.compact,
                             ),
                             onPressed: () async {
-                              Haptics.tap();
+                              Haptics.success();
                               await ref
                                   .read(approvalRepositoryProvider)
                                   .approve(item.instanceId);
                               ref
                                 ..invalidate(approvalInboxProvider)
                                 ..invalidate(dashboardMeProvider);
+                              if (context.mounted) {
+                                AppToast.show(
+                                  context,
+                                  bangla
+                                      ? 'ফাইলটি ডিজিটাল স্বাক্ষরসহ অনুমোদিত হয়েছে'
+                                      : 'File e-signed and approved',
+                                  tone: StatusTone.success,
+                                );
+                              }
                             },
                             child: Text(
                               bangla ? 'ডিজিটাল স্বাক্ষর' : 'E-Sign Now',
@@ -1441,6 +1499,7 @@ class _FilesToSignTab extends ConsumerWidget {
     final inbox = ref.watch(approvalInboxProvider);
 
     return inbox.when(
+      skipLoadingOnReload: true,
       loading: () => const Padding(
         padding: EdgeInsets.all(Space.xl),
         child: SkeletonList(itemCount: 3),
@@ -1498,7 +1557,7 @@ class _FilesToSignTab extends ConsumerWidget {
                       ),
                       if (item.summary.amount != null)
                         Text(
-                          'BDT ${item.summary.amount}',
+                          _formatBdt(item.summary.amount, bangla: bangla),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: scheme.primary,
@@ -1508,7 +1567,9 @@ class _FilesToSignTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${item.initiator.display(bangla: bangla)} · ${item.stepName}',
+                    bangla
+                        ? 'উত্থাপনকারী: ${item.initiator.display(bangla: true)} · ধাপ: চূড়ান্ত স্বাক্ষর (${item.stepName})'
+                        : 'By ${item.initiator.display(bangla: false)} · Step: ${item.stepName} Sign-Off',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
@@ -1526,13 +1587,22 @@ class _FilesToSignTab extends ConsumerWidget {
                       const SizedBox(width: Space.sm),
                       FilledButton.tonal(
                         onPressed: () async {
-                          Haptics.tap();
+                          Haptics.success();
                           await ref
                               .read(approvalRepositoryProvider)
                               .approve(item.instanceId);
                           ref
                             ..invalidate(approvalInboxProvider)
                             ..invalidate(dashboardMeProvider);
+                          if (context.mounted) {
+                            AppToast.show(
+                              context,
+                              bangla
+                                  ? 'ফাইলটি ডিজিটাল স্বাক্ষরসহ অনুমোদিত হয়েছে'
+                                  : 'File e-signed and approved',
+                              tone: StatusTone.success,
+                            );
+                          }
                         },
                         child: Text(bangla ? 'অনুমোদন' : 'Approve'),
                       ),

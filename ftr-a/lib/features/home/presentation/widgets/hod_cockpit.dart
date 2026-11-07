@@ -13,6 +13,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+String _formatHodBdt(num? amount, {required bool bangla}) {
+  if (amount == null) return '';
+  final val = amount.toDouble();
+  if (val >= 10000000) {
+    final cr = (val / 10000000).toStringAsFixed(2);
+    return bangla ? '৳ $cr কোটি' : 'BDT $cr Cr';
+  }
+  if (val >= 100000) {
+    final l = (val / 100000).toStringAsFixed(1);
+    return bangla ? '৳ $l লক্ষ' : 'BDT $l Lakhs';
+  }
+  return bangla ? '৳ ${val.round()}' : 'BDT ${val.round()}';
+}
+
 class HodCockpit extends ConsumerStatefulWidget {
   const HodCockpit({required this.dashboard, super.key});
 
@@ -205,6 +219,7 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
         ),
 
         inboxAsync.when(
+          skipLoadingOnReload: true,
           loading: () => const Padding(
             padding: EdgeInsets.all(Space.lg),
             child: SkeletonList(itemCount: 2),
@@ -271,7 +286,8 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               visualDensity: VisualDensity.compact,
                             ),
                             onPressed: () async {
-                              Haptics.tap();
+                              Haptics.success();
+                              final count = _selectedIds.length;
                               final repo = ref.read(approvalRepositoryProvider);
                               for (final id in _selectedIds) {
                                 await repo.approve(id);
@@ -283,7 +299,9 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               if (context.mounted) {
                                 AppToast.show(
                                   context,
-                                  'Approved ${_selectedIds.length} items',
+                                  bangla
+                                      ? '$countটি ফাইল অনুমোদিত হয়েছে'
+                                      : 'Approved $count items',
                                 );
                               }
                             },
@@ -350,7 +368,10 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               ),
                               if (item.summary.amount != null)
                                 Text(
-                                  'BDT ${item.summary.amount}',
+                                  _formatHodBdt(
+                                    item.summary.amount,
+                                    bangla: bangla,
+                                  ),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: scheme.primary,
@@ -363,7 +384,9 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               left: item.batchable ? 40 : 0,
                             ),
                             child: Text(
-                              '${item.initiator.display(bangla: bangla)} · ${item.stepName}',
+                              bangla
+                                  ? 'উত্থাপনকারী: ${item.initiator.display(bangla: true)} · ধাপ: ${item.stepName}'
+                                  : 'By ${item.initiator.display(bangla: false)} · Step: ${item.stepName}',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
@@ -384,13 +407,21 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               const SizedBox(width: Space.sm),
                               FilledButton.tonal(
                                 onPressed: () async {
-                                  Haptics.tap();
+                                  Haptics.success();
                                   await ref
                                       .read(approvalRepositoryProvider)
                                       .approve(item.instanceId);
                                   ref
                                     ..invalidate(approvalInboxProvider)
                                     ..invalidate(dashboardMeProvider);
+                                  if (context.mounted) {
+                                    AppToast.show(
+                                      context,
+                                      bangla
+                                          ? 'ফাইলটি অনুমোদিত হয়েছে'
+                                          : 'File approved',
+                                    );
+                                  }
                                 },
                                 child: Text(bangla ? 'অনুমোদন' : 'Approve'),
                               ),

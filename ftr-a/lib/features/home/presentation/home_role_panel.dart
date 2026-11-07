@@ -1,3 +1,6 @@
+import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/app/shell_scaffold.dart';
+import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/home/presentation/widgets/chairman_cockpit.dart';
@@ -24,6 +27,26 @@ class HomeRolePanel extends StatelessWidget {
   final Dashboard dashboard;
   final Session session;
 
+  void _handleKpiTap(BuildContext context, DashKpi kpi) {
+    Haptics.tap();
+    final route = switch (kpi.key) {
+      'pendingApprovals' || 'pendingValue' => AppRoutes.approvals,
+      'safeDays' || 'openIncidents' => AppRoutes.incidents,
+      'licencesAtRisk' => AppRoutes.licences,
+      'present' => AppRoutes.attendance,
+      'onLeave' || 'leaveLeft' => AppRoutes.leave,
+      'headcount' || 'leaving' || 'deptHeadcount' => AppRoutes.people,
+      'reqs' || 'onRoad' => AppRoutes.fleet,
+      'waitlist' => AppRoutes.bus,
+      'assetOk' => AppRoutes.assets,
+      'myClaims' => AppRoutes.claims,
+      _ => AppRoutes.home,
+    };
+    if (route != AppRoutes.home) {
+      openAppRoute(context, route);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final firstNeed = dashboard.needs.firstOrNull;
@@ -49,7 +72,11 @@ class HomeRolePanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (firstNeed != null) NeedsYouCard(need: firstNeed),
-        if (dashboard.kpis.isNotEmpty) HomeKpiGrid(kpis: dashboard.kpis),
+        if (dashboard.kpis.isNotEmpty)
+          HomeKpiGrid(
+            kpis: dashboard.kpis,
+            onTapKpi: (kpi) => _handleKpiTap(context, kpi),
+          ),
         cockpit,
       ],
     );

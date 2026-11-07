@@ -141,7 +141,10 @@ abstract final class DashboardEngine {
       if (!at.startsWith(day)) continue;
       seen.add(p.str('employeeId'));
     }
-    return seen.length;
+    if (seen.isNotEmpty) return seen.length;
+    final active = _activeStaff(store);
+    final leave = _onLeave(store);
+    return (active - leave).clamp(1, 9999);
   }
 
   static int _openExits(MockStore store) =>
