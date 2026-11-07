@@ -140,6 +140,13 @@
   "moreMyWork": "My work",
   "moreOperations": "Operations",
   "moreCompany": "Company",
+  "moreGovernanceFinance": "Governance & Finance",
+  "moreDailyWork": "My Daily Work & HR",
+  "moreTransportCommute": "Transport & Commute",
+  "moreSiteOperations": "Site Operations & Security",
+  "moreSafetyAssetsComms": "Refinery Safety, Assets & Chat",
+  "moreActivePersona": "Active Persona",
+  "moreSwitchPersona": "Switch Persona",
   "homeGoodMorning": "Good morning, {name}",
   "@homeGoodMorning": {
     "placeholders": {

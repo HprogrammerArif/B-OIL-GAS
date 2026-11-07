@@ -4,16 +4,21 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/features/home/presentation/search_sheet.dart';
 import 'package:bogcl_oneops/features/notifications/presentation/inbox_controller.dart';
+import 'package:bogcl_oneops/shared/widgets/persona_switcher_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Notification bell for every root tab. Search is on by default;
-/// Home turns it off.
+/// Notification bell and 1-tap pitch role pill for root tabs.
 class AppBarActions extends ConsumerWidget {
-  const AppBarActions({this.showSearch = true, super.key});
+  const AppBarActions({
+    this.showSearch = true,
+    this.showRolePill = true,
+    super.key,
+  });
 
   final bool showSearch;
+  final bool showRolePill;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +27,7 @@ class AppBarActions extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (showRolePill) ...[const RolePill(), const SizedBox(width: 4)],
         if (showSearch)
           IconButton(
             tooltip: l10n.searchTitle,

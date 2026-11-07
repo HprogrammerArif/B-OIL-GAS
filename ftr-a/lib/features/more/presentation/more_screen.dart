@@ -5,10 +5,11 @@ import 'package:bogcl_oneops/app/language_switch.dart';
 import 'package:bogcl_oneops/app/modules.dart';
 import 'package:bogcl_oneops/app/preferences_controller.dart';
 import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/offline/outbox_service.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
-import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/data/auth_repository.dart';
 import 'package:bogcl_oneops/features/auth/presentation/app_lock.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
@@ -19,6 +20,7 @@ import 'package:bogcl_oneops/features/home/presentation/search_sheet.dart';
 import 'package:bogcl_oneops/mock/demo/demo_menu.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
+import 'package:bogcl_oneops/shared/widgets/persona_switcher_sheet.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
@@ -44,18 +46,7 @@ class MoreScreen extends ConsumerStatefulWidget {
 }
 
 class _MoreScreenState extends ConsumerState<MoreScreen> {
-  static const _demoTaps = 7;
-  int _taps = 0;
   bool _uploadingPhoto = false;
-
-  void _onVersionTap() {
-    _taps++;
-    if (_taps >= _demoTaps) {
-      _taps = 0;
-      Haptics.heavy();
-      unawaited(showDemoMenu(context));
-    }
-  }
 
   Future<void> _changePhoto() async {
     final l10n = context.l10n;
@@ -106,6 +97,7 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final session = ref.watch(sessionControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final version = ref.watch(appVersionProvider).value;
@@ -113,6 +105,8 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
         ref.watch(biometricSupportedProvider).value ?? false;
     final biometricEnabled = ref.watch(biometricEnabledProvider).value ?? true;
     final queued = ref.watch(outboxItemsProvider).value?.length ?? 0;
+    final pendingApprovals =
+        ref.watch(approvalSummaryProvider).value?.pending ?? 0;
 
     final s = session.value;
     if (s == null) {
@@ -121,28 +115,25 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
           : const SkeletonList();
     }
     final emp = s.profile.employee;
-    final allowed = {
-      for (final m in builtModules)
-        if (s.navigation.contains(m.key) &&
-            m.key != 'attendance' &&
-            m.key != 'approvals' &&
-            !(m.key == 'chat' && s.showChatTab))
-          m,
-    };
+    final persona = findCanonicalPersona(emp.empCode);
 
+    // Grouping modules into 5 B2B operational categories
+    final allowedKeys = s.navigation.toSet();
     List<AppModule> group(Set<String> keys) => [
       for (final m in builtModules)
-        if (allowed.contains(m) && keys.contains(m.key)) m,
+        if (allowedKeys.contains(m.key) && keys.contains(m.key)) m,
     ];
-    final myWork = group({'leave', 'claims', 'bus', 'note-sheets', 'chat'});
-    final operations = group({
-      'visitors',
-      'parcels',
-      'fleet',
-      'incidents',
-      'assets',
+
+    final governanceModules = group({
+      'approvals',
+      'note-sheets',
+      'compliance',
+      'claims',
     });
-    final company = group({'notices', 'employees', 'compliance'});
+    final dailyWorkModules = group({'attendance', 'employees', 'notices'});
+    final transportModules = group({'fleet', 'bus'});
+    final siteOpsModules = group({'parcels', 'visitors'});
+    final refineryModules = group({'incidents', 'assets', 'chat'});
 
     return Scaffold(
       appBar: AppBar(
@@ -152,12 +143,26 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: Space.xxxl),
         children: [
-          SectionHeader(title: l10n.moreProfile),
+          // 1-Tap Pitch Persona Switcher Card
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+            padding: const EdgeInsets.fromLTRB(
+              Space.lg,
+              Space.sm,
+              Space.lg,
+              Space.xs,
+            ),
             child: Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Corner.xl),
+                side: BorderSide(
+                  color: scheme.primary.withValues(alpha: 0.25),
+                  width: 1.2,
+                ),
+              ),
+              color: scheme.primaryContainer.withValues(alpha: 0.2),
               child: Padding(
-                padding: const EdgeInsets.all(Space.lg),
+                padding: const EdgeInsets.all(Space.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -169,19 +174,69 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
                           busy: _uploadingPhoto,
                           onTap: _changePhoto,
                         ),
-                        const SizedBox(width: Space.lg),
+                        const SizedBox(width: Space.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      persona != null
+                                          ? (bangla
+                                                ? persona.roleLabelBn
+                                                : persona.roleLabelEn)
+                                          : emp.displayName(bangla: bangla),
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: Space.xs),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: persona?.isPlantSite == true
+                                          ? Colors.amber.withValues(alpha: 0.2)
+                                          : Colors.teal.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(
+                                        Corner.sm,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      persona?.isPlantSite == true
+                                          ? (bangla ? 'প্ল্যান্ট' : 'Plant')
+                                          : 'HQ',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: persona?.isPlantSite == true
+                                            ? Colors.amber.shade900
+                                            : Colors.teal.shade800,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               Text(
-                                emp.displayName(bangla: bangla),
-                                style: theme.textTheme.titleMedium,
+                                '${emp.displayName(bangla: bangla)} · ${emp.empCode}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
                               ),
                               Text(
                                 emp.designationTitle(bangla: bangla),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: scheme.onSurfaceVariant.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ],
@@ -189,27 +244,100 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: Space.lg),
-                    _Detail(l10n.profileEmployeeId, emp.empCode),
-                    _Detail(l10n.profileEmail, s.profile.email),
-                    _Detail(l10n.profilePhone, s.profile.phone),
+                    if (persona != null) ...[
+                      const SizedBox(height: Space.sm),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Space.sm,
+                          vertical: Space.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.surface,
+                          borderRadius: BorderRadius.circular(Corner.md),
+                          border: Border.all(
+                            color: scheme.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Text(
+                          bangla
+                              ? persona.pitchHighlightBn
+                              : persona.pitchHighlightEn,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: Space.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () =>
+                            unawaited(showPersonaSwitcherSheet(context)),
+                        icon: const Icon(Icons.swap_horiz, size: 20),
+                        label: Text(
+                          bangla
+                              ? 'চরিত্র পরিবর্তন করুন (৭টি ভূমিকা)'
+                              : 'Switch Persona (7 Pitch Roles)',
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-          if (myWork.isNotEmpty) ...[
-            SectionHeader(title: l10n.moreMyWork),
-            _ModuleGroup(modules: myWork),
+
+          // 1. Governance & Finance
+          if (governanceModules.isNotEmpty) ...[
+            SectionHeader(
+              title: bangla ? 'সুশাসন ও অর্থ' : 'Governance & Finance',
+            ),
+            _ModuleGroup(
+              modules: governanceModules,
+              badgeProvider: (key) => key == 'approvals' ? pendingApprovals : 0,
+            ),
           ],
-          if (operations.isNotEmpty) ...[
-            SectionHeader(title: l10n.moreOperations),
-            _ModuleGroup(modules: operations),
+
+          // 2. My Daily Work & HR
+          if (dailyWorkModules.isNotEmpty) ...[
+            SectionHeader(
+              title: bangla ? 'দৈনন্দিন কাজ ও মানবসম্পদ' : 'My Daily Work & HR',
+            ),
+            _ModuleGroup(modules: dailyWorkModules),
           ],
-          if (company.isNotEmpty) ...[
-            SectionHeader(title: l10n.moreCompany),
-            _ModuleGroup(modules: company),
+
+          // 3. Transport & Commute
+          if (transportModules.isNotEmpty) ...[
+            SectionHeader(
+              title: bangla ? 'পরিবহন ও যাতায়াত' : 'Transport & Commute',
+            ),
+            _ModuleGroup(modules: transportModules),
           ],
+
+          // 4. Site Operations & Security
+          if (siteOpsModules.isNotEmpty) ...[
+            SectionHeader(
+              title: bangla
+                  ? 'সাইট অপারেশন ও নিরাপত্তা'
+                  : 'Site Operations & Security',
+            ),
+            _ModuleGroup(modules: siteOpsModules),
+          ],
+
+          // 5. Refinery Safety, Assets & Executive Comms
+          if (refineryModules.isNotEmpty) ...[
+            SectionHeader(
+              title: bangla
+                  ? 'নিরাপত্তা, সম্পদ ও অভ্যন্তরীণ যোগাযোগ'
+                  : 'Refinery Safety, Assets & Chat',
+            ),
+            _ModuleGroup(modules: refineryModules),
+          ],
+
+          // Settings & Preferences
           SectionHeader(title: l10n.moreSettings),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Space.lg),
@@ -323,7 +451,7 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
               padding: const EdgeInsets.only(top: Space.xl),
               child: Center(
                 child: InkWell(
-                  onTap: _onVersionTap,
+                  onTap: () => unawaited(showDemoMenu(context)),
                   child: Padding(
                     padding: const EdgeInsets.all(Space.md),
                     child: Text(
@@ -343,9 +471,10 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
 }
 
 class _ModuleGroup extends StatelessWidget {
-  const _ModuleGroup({required this.modules});
+  const _ModuleGroup({required this.modules, this.badgeProvider});
 
   final List<AppModule> modules;
+  final int Function(String key)? badgeProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -353,52 +482,34 @@ class _ModuleGroup extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: Space.lg),
       children: [
         for (final m in modules)
-          ListRow(
-            inset: true,
-            title: m.label(context.l10n),
-            leading: Icon(m.icon),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(m.route),
+          Builder(
+            builder: (context) {
+              final badgeCount = badgeProvider?.call(m.key) ?? 0;
+              return ListRow(
+                inset: true,
+                title: m.label(context.l10n),
+                leading: Icon(m.icon),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (badgeCount > 0) ...[
+                      Badge(
+                        label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                      ),
+                      const SizedBox(width: Space.sm),
+                    ],
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+                onTap: () => openAppRoute(context, m.route),
+              );
+            },
           ),
       ],
     );
   }
 }
 
-class _Detail extends StatelessWidget {
-  const _Detail(this.label, this.value);
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Space.xs),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(value, style: theme.textTheme.bodyMedium),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Profile photo with a camera badge; tap to change it.
 class _EditableAvatar extends StatelessWidget {
   const _EditableAvatar({
     required this.name,

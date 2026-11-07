@@ -4,6 +4,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/app/sync_state.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
+import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,10 @@ class ShellScaffold extends ConsumerWidget {
     final session = ref.watch(sessionControllerProvider).value;
     final showApprovals = session?.can('workflow:inbox') ?? false;
     final showChat = session?.showChatTab ?? false;
+    final pendingApprovals = showApprovals
+        ? (ref.watch(approvalSummaryProvider).value?.pending ?? 0)
+        : 0;
+
     final visible = [
       shellHome,
       shellAttendance,
@@ -80,6 +85,7 @@ class ShellScaffold extends ConsumerWidget {
           l10n.navApprovals,
           Icons.fact_check_outlined,
           Icons.fact_check,
+          badgeCount: pendingApprovals,
         ),
       if (showChat)
         _TabSpec(shellChat, l10n.navChat, Icons.forum_outlined, Icons.forum),
@@ -106,12 +112,19 @@ class ShellScaffold extends ConsumerWidget {
 }
 
 class _TabSpec {
-  const _TabSpec(this.branch, this.label, this.icon, this.selectedIcon);
+  const _TabSpec(
+    this.branch,
+    this.label,
+    this.icon,
+    this.selectedIcon, {
+    this.badgeCount = 0,
+  });
 
   final int branch;
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final int badgeCount;
 }
 
 class _TabBar extends StatelessWidget {
@@ -196,10 +209,16 @@ class _TabButton extends StatelessWidget {
                     horizontal: Space.md,
                     vertical: Space.xs,
                   ),
-                  child: Icon(
-                    selected ? spec.selectedIcon : spec.icon,
-                    size: 22,
-                    color: color,
+                  child: Badge(
+                    isLabelVisible: spec.badgeCount > 0,
+                    label: Text(
+                      spec.badgeCount > 99 ? '99+' : '${spec.badgeCount}',
+                    ),
+                    child: Icon(
+                      selected ? spec.selectedIcon : spec.icon,
+                      size: 22,
+                      color: color,
+                    ),
                   ),
                 ),
               ),

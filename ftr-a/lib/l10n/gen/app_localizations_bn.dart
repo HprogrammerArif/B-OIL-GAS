@@ -352,6 +352,27 @@ class AppL10nBn extends AppL10n {
   String get moreCompany => 'কোম্পানি';
 
   @override
+  String get moreGovernanceFinance => 'সুশাসন ও অর্থ';
+
+  @override
+  String get moreDailyWork => 'দৈনন্দিন কাজ ও মানবসম্পদ';
+
+  @override
+  String get moreTransportCommute => 'পরিবহন ও যাতায়াত';
+
+  @override
+  String get moreSiteOperations => 'সাইট অপারেশন ও নিরাপত্তা';
+
+  @override
+  String get moreSafetyAssetsComms => 'নিরাপত্তা, সম্পদ ও অভ্যন্তরীণ যোগাযোগ';
+
+  @override
+  String get moreActivePersona => 'বর্তমান ভূমিকা';
+
+  @override
+  String get moreSwitchPersona => 'চরিত্র পরিবর্তন';
+
+  @override
   String homeGoodMorning(String name) {
     return 'সুপ্রভাত, $name';
   }
