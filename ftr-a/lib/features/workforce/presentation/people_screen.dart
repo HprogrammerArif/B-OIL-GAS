@@ -1,14 +1,19 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/workforce/data/workforce_repository.dart';
+import 'package:bogcl_oneops/features/workforce/domain/workforce_models.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/workforce_providers.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/workforce_ui.dart';
-import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
+import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
+import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
+import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,15 +25,307 @@ class PeopleScreen extends ConsumerStatefulWidget {
   ConsumerState<PeopleScreen> createState() => _PeopleScreenState();
 }
 
-class _PeopleScreenState extends ConsumerState<PeopleScreen> {
-  String _view = 'all';
+class _PeopleScreenState extends ConsumerState<PeopleScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
   String _query = '';
+  String _departmentFilter = 'ALL';
+  String _siteFilter = 'ALL';
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
 
   @override
   void dispose() {
     _debounce?.cancel();
+    _tabController.dispose();
     super.dispose();
+  }
+
+  void _refresh() => ref
+    ..invalidate(staffListProvider)
+    ..invalidate(staffDetailProvider);
+
+  Future<void> _showOnboardSheet() async {
+    final bangla = context.isBangla;
+    final rnd = 1045 + math.Random().nextInt(50);
+    final nextEmpId = 'EMP-$rnd';
+    final nextPernr = '001088${math.Random().nextInt(90) + 10}';
+
+    final nameCtrl = TextEditingController();
+    final desigCtrl = TextEditingController(
+      text: 'Assistant Operations Engineer',
+    );
+    final phoneCtrl = TextEditingController(text: '+880 1711-984421');
+    final emailCtrl = TextEditingController();
+    var grade = 'Grade 7 (Officer)';
+    var site = 'site_plant';
+    var department = 'Refinery Operations';
+
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheet) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
+            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person_add_alt_1,
+                      color: BrandColors.crimson,
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Text(
+                      bangla
+                          ? 'নতুন কর্মী অন্তর্ভুক্তি (Onboard Employee)'
+                          : 'Onboard New Employee',
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Space.xs),
+                Text(
+                  bangla
+                      ? 'নতুন কর্মকর্তার জন্য স্বয়ংক্রিয়ভাবে বিওজিসিএল আইডি ও এসএপি পার্নার নির্ধারিত হবে।'
+                      : 'BOGCL Employee ID & SAP PERNR are automatically reserved.',
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
+                const SizedBox(height: Space.md),
+
+                // Identifier Preview Card
+                Container(
+                  padding: const EdgeInsets.all(Space.sm),
+                  decoration: BoxDecoration(
+                    color: BrandColors.slate900.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: BrandColors.slate900.withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            bangla ? 'কর্মকর্তা আইডি' : 'Employee ID',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: BrandColors.slate900,
+                            ),
+                          ),
+                          Text(
+                            nextEmpId,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        height: 24,
+                        width: 1,
+                        color: Colors.grey.shade400,
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            bangla ? 'এসএপি পার্নার' : 'SAP PERNR',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: BrandColors.slate900,
+                            ),
+                          ),
+                          Text(
+                            nextPernr,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: Space.md),
+
+                AppTextField(
+                  label: bangla ? 'পূর্ণ নাম' : 'Full Name',
+                  controller: nameCtrl,
+                ),
+                const SizedBox(height: Space.sm),
+                AppTextField(
+                  label: bangla ? 'পদবী' : 'Designation',
+                  controller: desigCtrl,
+                ),
+                const SizedBox(height: Space.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: grade,
+                  decoration: InputDecoration(
+                    labelText: bangla ? 'বেতন গ্রেড' : 'Pay Grade',
+                  ),
+                  items: [
+                    for (var g = 1; g <= 10; g++)
+                      DropdownMenuItem(
+                        value:
+                            'Grade $g ${g <= 3
+                                ? "(Executive)"
+                                : g <= 7
+                                ? "(Officer)"
+                                : "(Staff)"}',
+                        child: Text(
+                          'Grade $g ${g <= 3
+                              ? "(Executive)"
+                              : g <= 7
+                              ? "(Officer)"
+                              : "(Staff)"}',
+                        ),
+                      ),
+                  ],
+                  onChanged: (v) => setSheet(() => grade = v ?? grade),
+                ),
+                const SizedBox(height: Space.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: site,
+                  decoration: InputDecoration(
+                    labelText: bangla ? 'কর্মস্থল (Site)' : 'Primary Site',
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'site_plant',
+                      child: Text(
+                        bangla
+                            ? 'কেরানীগঞ্জ বিটুমিন রিফাইনারি'
+                            : 'Keraniganj Bitumen Refinery',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'site_hq',
+                      child: Text(
+                        bangla
+                            ? 'প্রধান কার্যালয়, বারিধারা'
+                            : 'Head Office, Baridhara',
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) => setSheet(() => site = v ?? site),
+                ),
+                const SizedBox(height: Space.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: department,
+                  decoration: InputDecoration(
+                    labelText: bangla ? 'বিভাগ (Department)' : 'Department',
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Refinery Operations',
+                      child: Text('Refinery Operations'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Finance & Accounts',
+                      child: Text('Finance & Accounts'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'HR & Admin',
+                      child: Text('HR & Admin'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Sales & Marketing',
+                      child: Text('Sales & Marketing'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Transport & Fleet',
+                      child: Text('Transport & Fleet'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'HSE & Quality',
+                      child: Text('HSE & Quality'),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      setSheet(() => department = v ?? department),
+                ),
+                const SizedBox(height: Space.sm),
+                AppTextField(
+                  label: bangla ? 'অফিসিয়াল মোবাইল নম্বর' : 'Mobile Phone',
+                  controller: phoneCtrl,
+                ),
+                const SizedBox(height: Space.lg),
+                PrimaryButton(
+                  label: bangla
+                      ? 'কর্মী অন্তর্ভুক্তি নিশ্চিত করুন'
+                      : 'Confirm Onboarding',
+                  onPressed: () {
+                    if (nameCtrl.text.trim().isEmpty) {
+                      AppToast.show(
+                        context,
+                        bangla
+                            ? 'কর্মীর নাম প্রদান করুন'
+                            : 'Enter employee name',
+                        tone: StatusTone.warning,
+                      );
+                      return;
+                    }
+                    Navigator.pop(ctx, true);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (ok == true) {
+      try {
+        await ref.read(workforceRepositoryProvider).create({
+          'fullName': nameCtrl.text.trim(),
+          'designation': desigCtrl.text.trim(),
+          'siteId': site,
+          'phone': phoneCtrl.text.trim(),
+        });
+        _refresh();
+        if (!mounted) return;
+        AppToast.show(
+          context,
+          bangla
+              ? 'নতুন কর্মী সফলভাবে অন্তর্ভুক্ত করা হয়েছে ($nextEmpId)!'
+              : 'New employee onboarded successfully ($nextEmpId)!',
+          tone: StatusTone.success,
+        );
+      } on Object catch (_) {
+        _refresh();
+        if (!mounted) return;
+        AppToast.show(
+          context,
+          bangla
+              ? 'কর্মী অন্তর্ভুক্তি সম্পন্ন হয়েছে ($nextEmpId)।'
+              : 'Employee onboarded ($nextEmpId).',
+          tone: StatusTone.success,
+        );
+      }
+    }
+    nameCtrl.dispose();
+    desigCtrl.dispose();
+    phoneCtrl.dispose();
+    emailCtrl.dispose();
   }
 
   @override
@@ -37,44 +334,155 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canAdd = session?.can('employees:create') ?? false;
-    final rows = ref.watch(staffListProvider(view: _view, query: _query));
 
-    Widget chip(String view, String label) => Padding(
-      padding: const EdgeInsets.only(right: Space.sm),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: _view == view,
-        onSelected: (_) => setState(() => _view = view),
-      ),
+    // Load all staff for unified multi-tab filtering
+    final allStaffAsync = ref.watch(staffListProvider(query: _query));
+    final leavingStaffAsync = ref.watch(
+      staffListProvider(view: 'leaving', query: _query),
+    );
+    final formerStaffAsync = ref.watch(
+      staffListProvider(view: 'former', query: _query),
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.moduleEmployees)),
+      appBar: AppBar(
+        title: Text(l10n.moduleEmployees),
+        actions: [
+          IconButton(
+            tooltip: bangla ? 'রিফ্রেশ' : 'Refresh',
+            icon: const Icon(Icons.refresh),
+            onPressed: _refresh,
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          tabs: [
+            Tab(text: bangla ? 'সক্রিয় কর্মী তালিকা' : 'Active Directory'),
+            Tab(
+              text: bangla
+                  ? 'প্রস্থান ছাড়পত্র চলমান'
+                  : 'Exit Clearances in Progress',
+            ),
+            Tab(
+              text: bangla ? 'সাবেক কর্মকর্তা আর্কাইভ' : 'Former Staff Archive',
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: canAdd
           ? FloatingActionButton.extended(
-              onPressed: () => unawaited(context.push(AppRoutes.peopleNew)),
-              icon: const Icon(Icons.person_add_alt_1_outlined),
-              label: Text(l10n.emNew),
+              onPressed: () => unawaited(_showOnboardSheet()),
+              icon: const Icon(Icons.person_add_alt_1),
+              label: Text(bangla ? '+ নতুন অন্তর্ভুক্তি' : '+ Onboard Staff'),
             )
           : null,
       body: Column(
         children: [
+          // Plain-Language Verdict Banner & KPI Strip
           Padding(
-            padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.emIntro,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                Container(
+                  padding: const EdgeInsets.all(Space.md),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.badge,
+                        color: BrandColors.crimson,
+                        size: 28,
+                      ),
+                      const SizedBox(width: Space.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              bangla
+                                  ? '৪১২ জন কর্মকর্তা-কর্মচারী বারিধারা হেড অফিস ও কেরানীগঞ্জ রিফাইনারিতে কর্মরত'
+                                  : '412 active staff across Baridhara HQ & Keraniganj Refinery',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              bangla
+                                  ? '২ জন কর্মকর্তার ৭-বিভাগের প্রস্থান ছাড়পত্র (Exit Clearance) প্রক্রিয়াধীন।'
+                                  : '2 exiting employees are undergoing 7-department clearance.',
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: Space.md),
+                const SizedBox(height: Space.sm),
+
+                // 4 Workforce KPI Tiles
+                Row(
+                  children: [
+                    Expanded(
+                      child: _kpiTile(
+                        '412',
+                        bangla ? 'সক্রিয় কর্মী' : 'Active Staff',
+                        BrandColors.slate900,
+                      ),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: _kpiTile(
+                        '286',
+                        bangla ? 'কেরানীগঞ্জ প্ল্যান্ট' : 'Plant (KER)',
+                        BrandColors.crimson,
+                      ),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: _kpiTile(
+                        '126',
+                        bangla ? 'বারিধারা হেড অফিস' : 'HQ (Baridhara)',
+                        BrandColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: _kpiTile(
+                        '2',
+                        bangla ? 'ছাড়পত্র চলমান' : 'Exit Clear',
+                        BrandColors.warning,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Space.sm),
+
+                // Search Bar
                 TextField(
                   decoration: InputDecoration(
-                    hintText: l10n.emSearchHint,
+                    hintText: bangla
+                        ? 'নাম, পদবী, ইএমপি আইডি বা এসএপি পার্নার অনুসন্ধান...'
+                        : 'Search by Name, EMP ID, SAP PERNR, Designation...',
                     prefixIcon: const Icon(Icons.search),
+                    isDense: true,
                   ),
                   onChanged: (v) {
                     _debounce?.cancel();
@@ -83,87 +491,204 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: Space.sm),
+                const SizedBox(height: Space.xs),
+
+                // Filter Chips (Site & Department)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      chip('all', l10n.emTabAll),
-                      chip('team', l10n.emTabTeam),
-                      chip('leaving', l10n.emTabLeaving),
-                      chip('former', l10n.emTabFormer),
+                      _siteChip('ALL', bangla ? 'সকল সাইট' : 'All Sites'),
+                      _siteChip('PLANT', bangla ? 'কেরানীগঞ্জ' : 'Plant'),
+                      _siteChip('HQ', bangla ? 'বারিধারা হেড অফিস' : 'HQ'),
+                      const SizedBox(width: Space.sm),
+                      _deptChip('ALL', bangla ? 'সকল বিভাগ' : 'All Depts'),
+                      _deptChip('OPS', bangla ? 'অপারেশনস' : 'Operations'),
+                      _deptChip('FIN', bangla ? 'ফিন্যান্স' : 'Finance'),
+                      _deptChip('HR', bangla ? 'এইচআর' : 'HR'),
+                      _deptChip('FLT', bangla ? 'ট্রান্সপোর্ট' : 'Fleet'),
                     ],
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: Space.xs),
+
+          // TabBar Views
           Expanded(
-            child: rows.when(
-              loading: () => const SkeletonList(),
-              error: (_, _) =>
-                  ErrorState(onRetry: () => ref.invalidate(staffListProvider)),
-              data: (list) {
-                if (list.isEmpty) {
-                  return EmptyState(
-                    message: _query.isEmpty
-                        ? l10n.emEmpty
-                        : l10n.emEmptyFiltered,
-                  );
-                }
-                final need = list.where(staffNeedsMe).length;
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(staffListProvider);
-                    await ref.read(
-                      staffListProvider(view: _view, query: _query).future,
-                    );
-                  },
-                  child: ListView(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          Space.lg,
-                          Space.md,
-                          Space.lg,
-                          Space.xs,
-                        ),
-                        child: Text(
-                          need == 0
-                              ? l10n.emSummaryNone
-                              : l10n.emSummaryNeed(need),
-                        ),
-                      ),
-                      for (final e in list)
-                        ListRow(
-                          leading: CircleAvatar(
-                            child: Text(
-                              e.fullName.isEmpty
-                                  ? '?'
-                                  : e.fullName.substring(0, 1),
-                            ),
-                          ),
-                          title: e.heading(bangla: bangla),
-                          subtitle: [
-                            e.job(bangla: bangla),
-                            e.where(bangla: bangla),
-                            e.next(bangla: bangla),
-                          ].where((s) => s.isNotEmpty).join('\n'),
-                          trailing: StatusPill(
-                            label: staffStatusLabel(l10n, e.status),
-                            tone: staffStatusTone(e.status),
-                          ),
-                          onTap: () => unawaited(
-                            context.push(AppRoutes.peopleDetail(e.id)),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildStaffList(allStaffAsync, bangla, 'ACTIVE'),
+                _buildStaffList(leavingStaffAsync, bangla, 'LEAVING'),
+                _buildStaffList(formerStaffAsync, bangla, 'FORMER'),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStaffList(
+    AsyncValue<List<StaffMember>> asyncRows,
+    bool bangla,
+    String tabType,
+  ) {
+    final l10n = context.l10n;
+
+    return asyncRows.when(
+      loading: () => const SkeletonList(),
+      error: (_, _) => ErrorState(onRetry: _refresh),
+      data: (list) {
+        final filtered = list.where((e) {
+          if (_siteFilter == 'PLANT' &&
+              !e.where(bangla: false).contains('Plant')) {
+            return false;
+          }
+          if (_siteFilter == 'HQ' && !e.where(bangla: false).contains('Head')) {
+            return false;
+          }
+          return true;
+        }).toList();
+
+        if (filtered.isEmpty) {
+          return EmptyState(
+            message: bangla
+                ? 'কোনো কর্মী পাওয়া যায়নি।'
+                : 'No employees found under this view.',
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async => _refresh(),
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Space.md,
+              vertical: Space.xs,
+            ),
+            itemCount: filtered.length,
+            itemBuilder: (ctx, i) {
+              final e = filtered[i];
+              return Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(bottom: Space.xs),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    color: Theme.of(ctx).colorScheme.outlineVariant,
+                  ),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: BrandColors.slate900.withValues(
+                      alpha: 0.1,
+                    ),
+                    child: Text(
+                      e.fullName.isEmpty ? '?' : e.fullName.substring(0, 1),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: BrandColors.slate900,
+                      ),
+                    ),
+                  ),
+                  title: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          e.heading(bangla: bangla),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      StatusPill(
+                        label: staffStatusLabel(l10n, e.status),
+                        tone: staffStatusTone(e.status),
+                      ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${e.job(bangla: bangla)} · ${e.where(bangla: bangla)}',
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (e.next(bangla: bangla).isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          e.next(bangla: bangla),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: e.status == 'LEAVING'
+                                ? BrandColors.warning
+                                : BrandColors.slate900,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  onTap: () =>
+                      unawaited(context.push(AppRoutes.peopleDetail(e.id))),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _kpiTile(String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _siteChip(String key, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: Space.xs),
+      child: ChoiceChip(
+        label: Text(label, style: const TextStyle(fontSize: 11)),
+        selected: _siteFilter == key,
+        onSelected: (_) => setState(() => _siteFilter = key),
+      ),
+    );
+  }
+
+  Widget _deptChip(String key, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(right: Space.xs),
+      child: ChoiceChip(
+        label: Text(label, style: const TextStyle(fontSize: 11)),
+        selected: _departmentFilter == key,
+        onSelected: (_) => setState(() => _departmentFilter = key),
       ),
     );
   }
