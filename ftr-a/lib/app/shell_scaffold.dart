@@ -6,6 +6,7 @@ import 'package:bogcl_oneops/app/sync_state.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/chat/presentation/chat_providers.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +60,13 @@ class ShellScaffold extends ConsumerWidget {
     final pendingApprovals = showApprovals
         ? (ref.watch(approvalSummaryProvider).value?.pending ?? 0)
         : 0;
+    final unreadChat = showChat
+        ? (ref
+                  .watch(chatChannelsProvider)
+                  .value
+                  ?.fold<int>(0, (sum, ch) => sum + ch.unreadCount) ??
+              0)
+        : 0;
 
     final visible = [
       shellHome,
@@ -88,7 +96,13 @@ class ShellScaffold extends ConsumerWidget {
           badgeCount: pendingApprovals,
         ),
       if (showChat)
-        _TabSpec(shellChat, l10n.navChat, Icons.forum_outlined, Icons.forum),
+        _TabSpec(
+          shellChat,
+          l10n.navChat,
+          Icons.forum_outlined,
+          Icons.forum,
+          badgeCount: unreadChat,
+        ),
       _TabSpec(shellMore, l10n.navMore, Icons.menu, Icons.menu_open),
     ];
 

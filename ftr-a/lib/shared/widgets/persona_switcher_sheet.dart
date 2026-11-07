@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/language_switch.dart';
+import 'package:bogcl_oneops/app/routes.dart';
+import 'package:bogcl_oneops/app/shell_scaffold.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
@@ -11,7 +13,9 @@ import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 7 Canonical personas with roles, sites, and pitch highlights for BOGCL OneOps.
+typedef PersonaMission = ({String labelEn, String labelBn, String route});
+
+/// 7 Canonical personas with roles, sites, pitch highlights, and 1-tap demo missions.
 class CanonicalPersona {
   const CanonicalPersona({
     required this.code,
@@ -28,6 +32,7 @@ class CanonicalPersona {
     required this.color,
     required this.pitchHighlightEn,
     required this.pitchHighlightBn,
+    this.missions = const [],
   });
 
   final String code;
@@ -44,6 +49,7 @@ class CanonicalPersona {
   final Color color;
   final String pitchHighlightEn;
   final String pitchHighlightBn;
+  final List<PersonaMission> missions;
 }
 
 const canonicalPersonas = <CanonicalPersona>[
@@ -63,6 +69,23 @@ const canonicalPersonas = <CanonicalPersona>[
     pitchHighlightEn: 'Approve high-value note-sheets, broadcast notices & send voice briefings',
     pitchHighlightBn:
         'উচ্চ-মূল্যের নোট-শিট অনুমোদন, নোটিশ সম্প্রচার ও ভয়েস ব্রিফিং',
+    missions: [
+      (
+        labelEn: '1. E-Sign Note-Sheet',
+        labelBn: '১. নোট-শিট ই-স্বাক্ষর',
+        route: AppRoutes.noteSheets,
+      ),
+      (
+        labelEn: '2. Executive Directive',
+        labelBn: '২. নির্বাহী নির্দেশনা',
+        route: AppRoutes.chat,
+      ),
+      (
+        labelEn: '3. Broadcast Notice',
+        labelBn: '৩. নোটিশ সম্প্রচার',
+        route: AppRoutes.notices,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-0012',
@@ -81,6 +104,23 @@ const canonicalPersonas = <CanonicalPersona>[
         'Release bitumen batches (BDS 1238), manage LOTO & refinery safety',
     pitchHighlightBn:
         'বিটুমিন ব্যাচ রিলিজ (বিডিএস ১২৩৮), লোতো পারমিট ও রিফাইনারি নিরাপত্তা',
+    missions: [
+      (
+        labelEn: '1. 5-Whys Safety RCA',
+        labelBn: '১. ৫-হোয়াইস নিরাপত্তা',
+        route: AppRoutes.incidents,
+      ),
+      (
+        labelEn: '2. Assets & LOTO',
+        labelBn: '২. সম্পদ ও লোতো',
+        route: AppRoutes.assets,
+      ),
+      (
+        labelEn: '3. Refinery Permits',
+        labelBn: '৩. রিফাইনারি লাইসেন্স',
+        route: AppRoutes.licences,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-0028',
@@ -98,6 +138,23 @@ const canonicalPersonas = <CanonicalPersona>[
     pitchHighlightEn:
         'Onboard staff, manage 7-desk exit clearance & company attendance',
     pitchHighlightBn: 'কর্মী অনবোর্ডিং, ৭-দপ্তরের ছাড়পত্র ও সার্বিক উপস্থিতি',
+    missions: [
+      (
+        labelEn: '1. 7-Desk Exit Clearance',
+        labelBn: '১. ৭-দপ্তর ছাড়পত্র',
+        route: AppRoutes.people,
+      ),
+      (
+        labelEn: '2. Team Attendance',
+        labelBn: '২. টিম উপস্থিতি',
+        route: AppRoutes.attendance,
+      ),
+      (
+        labelEn: '3. Publish Circular',
+        labelBn: '৩. সার্কুলার প্রকাশ',
+        route: AppRoutes.notices,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-0045',
@@ -116,6 +173,23 @@ const canonicalPersonas = <CanonicalPersona>[
         'Dispatch pool cars, merge smart carpools & manage 10 shuttle buses',
     pitchHighlightBn:
         'গাড়ি রিকুইজিশন বরাদ্দ, স্মার্ট কারপুলিং ও ১০টি বাস পরিচালনা',
+    missions: [
+      (
+        labelEn: '1. Dispatch & Carpool',
+        labelBn: '১. গাড়ি বরাদ্দ ও কারপুল',
+        route: AppRoutes.fleet,
+      ),
+      (
+        labelEn: '2. 52-Seat Bus Map',
+        labelBn: '২. ৫২-আসন বাস ম্যাপ',
+        route: AppRoutes.bus,
+      ),
+      (
+        labelEn: '3. Emergency Muster',
+        labelBn: '৩. জরুরি মাস্টার রোল',
+        route: AppRoutes.visitMuster,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-0062',
@@ -134,6 +208,23 @@ const canonicalPersonas = <CanonicalPersona>[
         'Control quarterly budget ceiling, batch-approve & verify claims',
     pitchHighlightBn:
         'ত্রৈমাসিক বাজেট সিলিং নিয়ন্ত্রণ, একযোগে অনুমোদন ও দাবি যাচাই',
+    missions: [
+      (
+        labelEn: '1. Approvals Inbox',
+        labelBn: '১. অনুমোদন ইনবক্স',
+        route: AppRoutes.approvals,
+      ),
+      (
+        labelEn: '2. Verify Claims & Pay',
+        labelBn: '২. বিল যাচাই ও পেমেন্ট',
+        route: AppRoutes.claims,
+      ),
+      (
+        labelEn: '3. Audit Note-Sheets',
+        labelBn: '৩. নোট-শিট বাজেট যাচাই',
+        route: AppRoutes.noteSheets,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-1042',
@@ -151,6 +242,23 @@ const canonicalPersonas = <CanonicalPersona>[
     pitchHighlightEn:
         'Punch in with GPS geofence, book cars/bus & submit expense claims',
     pitchHighlightBn: 'জিপিএস জিওফেন্সে উপস্থিতি, গাড়ি/বাস বুকিং ও বিল পেশ',
+    missions: [
+      (
+        labelEn: '1. Geofence Radar Punch',
+        labelBn: '১. জিওফেন্স রাডার পাঞ্চ',
+        route: AppRoutes.attendance,
+      ),
+      (
+        labelEn: '2. Submit TA/DA Claim',
+        labelBn: '২. টিএ/ডিএ বিল পেশ',
+        route: AppRoutes.claims,
+      ),
+      (
+        labelEn: '3. Parcel OTP Pickup',
+        labelBn: '৩. পার্সেল ওটিপি সংগ্রহ',
+        route: AppRoutes.parcels,
+      ),
+    ],
   ),
   CanonicalPersona(
     code: 'EMP-0821',
@@ -169,6 +277,23 @@ const canonicalPersonas = <CanonicalPersona>[
         'Pre-trip vehicle readiness, odometer trip console & toll logging',
     pitchHighlightBn:
         'গাড়ির প্রস্তুতি পরীক্ষা, ওডোমিটার ট্রিপ কনসোল ও টোল স্লিপ',
+    missions: [
+      (
+        labelEn: '1. Active Trip & Meter',
+        labelBn: '১. চলমান ট্রিপ ও মিটার',
+        route: AppRoutes.fleet,
+      ),
+      (
+        labelEn: '2. Emergency SOS Alert',
+        labelBn: '২. জরুরি এসওএস সংকেত',
+        route: AppRoutes.fleetSos,
+      ),
+      (
+        labelEn: '3. Mailroom Pouch',
+        labelBn: '৩. মেইলরুম ডাক ব্যাগ',
+        route: AppRoutes.parcels,
+      ),
+    ],
   ),
 ];
 
@@ -210,9 +335,38 @@ class PersonaSwitcherSheet extends ConsumerWidget {
     final config = ref.watch(mockConfigControllerProvider);
     final controller = ref.read(mockConfigControllerProvider.notifier);
 
+    Future<void> switchAndGo(CanonicalPersona p, {String? route}) async {
+      Haptics.tap();
+      final nav = Navigator.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      final label = bangla ? p.roleLabelBn : p.roleLabelEn;
+      final text = bangla
+          ? '$label হিসেবে সাইন ইন করা হয়েছে'
+          : 'Switched to $label';
+      if (p.code != currentCode) {
+        await ref
+            .read(sessionControllerProvider.notifier)
+            .switchPersona(p.code);
+      }
+      if (context.mounted) {
+        nav.pop();
+        if (route != null) {
+          openAppRoute(context, route);
+        } else {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(text),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.85,
+      initialChildSize: 0.86,
       maxChildSize: 0.95,
       minChildSize: 0.5,
       builder: (context, scrollController) => Column(
@@ -246,16 +400,16 @@ class PersonaSwitcherSheet extends ConsumerWidget {
                     children: [
                       Text(
                         bangla
-                            ? 'উপস্থাপনা চরিত্র পরিবর্তন'
-                            : 'Pitch Persona Switcher',
+                            ? 'উপস্থাপনা চরিত্র ও মিশন লঞ্চার'
+                            : 'Pitch Persona & Guided Mission Switcher',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       Text(
                         bangla
-                            ? '৭টি মূল চরিত্রের ভূমিকা ও সাইটের দৃষ্টিকোণ'
-                            : 'Select any of 7 canonical roles for live pitch',
+                            ? 'ভূমিকায় ট্যাপ করুন অথবা সরাসরি ১-ট্যাপ মিশন চিপে যান'
+                            : 'Tap a role or launch any 1-tap guided demo mission below',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
@@ -283,28 +437,7 @@ class PersonaSwitcherSheet extends ConsumerWidget {
                 final isSelected = p.code == currentCode;
                 return InkWell(
                   borderRadius: BorderRadius.circular(Corner.lg),
-                  onTap: () async {
-                    Haptics.tap();
-                    final nav = Navigator.of(context);
-                    final messenger = ScaffoldMessenger.of(context);
-                    final label = bangla ? p.roleLabelBn : p.roleLabelEn;
-                    final text = bangla
-                        ? '$label হিসেবে সাইন ইন করা হয়েছে'
-                        : 'Switched to $label';
-                    await ref
-                        .read(sessionControllerProvider.notifier)
-                        .switchPersona(p.code);
-                    if (context.mounted) {
-                      nav.pop();
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(text),
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  },
+                  onTap: () => unawaited(switchAndGo(p)),
                   child: Container(
                     padding: const EdgeInsets.all(Space.sm),
                     decoration: BoxDecoration(
@@ -438,6 +571,36 @@ class PersonaSwitcherSheet extends ConsumerWidget {
                             ),
                           ),
                         ),
+                        if (p.missions.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              for (final m in p.missions)
+                                ActionChip(
+                                  visualDensity: VisualDensity.compact,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  avatar: Icon(
+                                    Icons.play_circle_outline,
+                                    size: 14,
+                                    color: p.color,
+                                  ),
+                                  label: Text(
+                                    bangla ? m.labelBn : m.labelEn,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  onPressed: () =>
+                                      unawaited(switchAndGo(p, route: m.route)),
+                                ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -463,10 +626,8 @@ class PersonaSwitcherSheet extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    // Language Switch
                     const Expanded(child: LanguageSwitch()),
                     const SizedBox(width: Space.md),
-                    // Offline Simulator Chip
                     FilterChip(
                       avatar: Icon(
                         config.offline ? Icons.cloud_off : Icons.cloud_done,
