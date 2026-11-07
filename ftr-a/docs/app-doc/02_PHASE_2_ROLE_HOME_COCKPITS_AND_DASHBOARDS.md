@@ -21,8 +21,9 @@
 
 Every persona's `HomeScreen` follows a consistent, low-cognitive-load 4-block vertical structure:
 
-1. **Block A — Role Header & Primary Role CTA**:
-   - Greeting + Persona Name, Designation, Employee ID, and Site badge.
+1. **Block A — Clean Greeting AppBar & Primary Role CTA**:
+   - Top `AppBar` shows only the time-of-day greeting (`Good morning/afternoon/evening, <Name>`), designation subtitle, and notification bell.
+   - **No search bar and no context pills** (`Site`, `Department`, `EMP-xxxx`) are rendered below the greeting for any user.
    - **Role-Specific Action Button** (where applicable: `Voice Briefing` for Chairman, `Release Bitumen Batch` for Plant GM, `Digital Gate Pass` for Employee, `Emergency SOS` for Driver).
 2. **Block B — "Needs Your Attention" Banner (`NeedsYouCard`)**:
    - A single high-contrast card showing the #1 urgent item for this persona right now, with a 1-tap `Review` / `Act Now` button.

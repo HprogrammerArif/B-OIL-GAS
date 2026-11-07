@@ -15,21 +15,13 @@
 
 ## 2. Phase 1 Deliverables & Exact Specifications
 
-### 2.1 Always-Accessible 1-Tap Pitch Persona Switcher
+### 2.1 Clean Enterprise Sign-In Role Selection (No Signed-In Pitch Leftovers)
 
-- **Where**: In `ShellScaffold` (`lib/app/shell_scaffold.dart`) top app bar / header strip AND at the top of `MoreScreen`.
-- **Visual Design (Simple & Clean)**:
-  - A compact **Role Pill** in the top app bar showing the active persona's avatar initials, short role label (e.g., `Chairman`, `Plant GM`, `HR Admin`, `Transport`, `HOD Finance`, `Employee`, `Driver`), and site indicator dot.
-  - Tapping the Role Pill opens `showPersonaSwitcherSheet(context)` immediately (1 tap, no 7-tap secret required).
-- **Persona Switcher Bottom Sheet Contents**:
-  - Lists all **7 canonical personas** with:
-    - Avatar, Full Name, Employee ID (`EMP-0001` through `EMP-0821`), Designation, and Site (`HQ Baridhara` / `Keraniganj Plant`).
-    - **1-Line Pitch Highlight** below each persona (e.g., *"Approve files, broadcast notices & send voice briefings"* for Chairman; *"Release bitumen batches, manage LOTO & refinery safety"* for Plant GM).
-    - **Active Badge** on the currently signed-in persona.
-  - **Demo Utility Strip at Bottom of Sheet**:
-    - `Toggle EN / বাংলা` language chip.
-    - `Simulate Offline / Online` toggle chip (demonstrates offline queue & banner).
-    - `Reset Demo Data` button (with confirmation) to restore initial pitch state before a meeting.
+- **Where**: Exclusively on `LoginScreen` (`lib/features/auth/presentation/login_screen.dart`).
+- **Visual Design (Clean Production App)**:
+  - No `RolePill`, pitch persona switcher, or search icon appears in `AppBarActions` or `MoreScreen` while signed in; the top `AppBar` displays only the notification bell and unread badge.
+  - On `MoreScreen`, the top card is a clean **Employee Identity Card** showing the employee's avatar, full name, employee code, designation, department, and site.
+  - Users switch roles/accounts by signing out (`Sign Out` on `MoreScreen`) and selecting a role on the `LoginScreen` (`Quick Role Sign-In` or `ID & Passkey`).
 
 ---
 

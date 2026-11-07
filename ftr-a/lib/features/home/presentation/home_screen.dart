@@ -208,7 +208,6 @@ class _HomeScaffold extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: Space.xxxl),
           children: [
-            _HomeContextStrip(session: session),
             _HomeWork(session: session),
             if (shortcuts.isNotEmpty) ...[
               SectionHeader(
@@ -226,89 +225,6 @@ class _HomeScaffold extends ConsumerWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _HomeContextStrip extends StatelessWidget {
-  const _HomeContextStrip({required this.session});
-
-  final Session session;
-
-  @override
-  Widget build(BuildContext context) {
-    final bangla = context.isBangla;
-    final emp = session.profile.employee;
-    final siteName = emp.site.displayName(bangla: bangla);
-    final deptName = emp.department.displayName(bangla: bangla);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _PulseChip(
-              icon: Icons.location_on_outlined,
-              iconColor: BrandColors.success,
-              label: siteName,
-            ),
-            const SizedBox(width: Space.xs),
-            _PulseChip(
-              icon: Icons.apartment_outlined,
-              iconColor: BrandColors.info,
-              label: deptName,
-            ),
-            const SizedBox(width: Space.xs),
-            _PulseChip(
-              icon: Icons.badge_outlined,
-              iconColor: BrandColors.crimson,
-              label: emp.empCode,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PulseChip extends StatelessWidget {
-  const _PulseChip({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(Corner.md),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: iconColor),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }
