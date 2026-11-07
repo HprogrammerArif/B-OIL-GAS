@@ -155,7 +155,6 @@ class _HomeBar extends ConsumerWidget implements PreferredSizeWidget {
         return (
           name: emp.shortDisplayName(bangla: bangla),
           title: emp.designationTitle(bangla: bangla),
-          executive: session.homeVariant == HomeVariant.executive,
         );
       }),
     );
@@ -170,7 +169,8 @@ class _HomeBar extends ConsumerWidget implements PreferredSizeWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: identity.executive ? context.bogcl.executiveGold : null,
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
             ),
           ),
           Text(
