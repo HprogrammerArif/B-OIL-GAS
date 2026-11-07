@@ -13,7 +13,6 @@ import 'package:bogcl_oneops/features/dashboards/data/dashboard_repository.dart'
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_providers.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_role_panel.dart';
-import 'package:bogcl_oneops/features/home/presentation/search_sheet.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -21,7 +20,7 @@ import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Role landing: Omnibar search, operational pulse strip, role cockpit, and 6-tile Bento launcher.
+/// Role landing: operational context strip, role cockpit, and 6-tile module launcher.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -209,7 +208,7 @@ class _HomeScaffold extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: Space.xxxl),
           children: [
-            _HomeOmnibarAndPulse(session: session),
+            _HomeContextStrip(session: session),
             _HomeWork(session: session),
             if (shortcuts.isNotEmpty) ...[
               SectionHeader(
@@ -232,115 +231,43 @@ class _HomeScaffold extends ConsumerWidget {
   }
 }
 
-class _HomeOmnibarAndPulse extends StatelessWidget {
-  const _HomeOmnibarAndPulse({required this.session});
+class _HomeContextStrip extends StatelessWidget {
+  const _HomeContextStrip({required this.session});
 
   final Session session;
 
   @override
   Widget build(BuildContext context) {
     final bangla = context.isBangla;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final siteName = session.profile.employee.site.displayName(bangla: bangla);
+    final emp = session.profile.employee;
+    final siteName = emp.site.displayName(bangla: bangla);
+    final deptName = emp.department.displayName(bangla: bangla);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1-Tap Omnibar Search & Command Launcher Pill
-          Material(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(Corner.lg),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(Corner.lg),
-              onTap: () {
-                Haptics.tap();
-                unawaited(showGlobalSearch(context));
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.md,
-                  vertical: 10,
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, size: 20, color: scheme.primary),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? 'কর্মী, নোট-শিট, সম্পদ বা ১-ট্যাপ অ্যাকশন খুঁজুন...'
-                            : 'Search staff, note-sheets, assets or quick action...',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: scheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(Corner.sm),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.bolt, size: 13, color: scheme.primary),
-                          const SizedBox(width: 2),
-                          Text(
-                            bangla ? 'কমান্ড' : ' Quick',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: scheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _PulseChip(
+              icon: Icons.location_on_outlined,
+              iconColor: BrandColors.success,
+              label: siteName,
             ),
-          ),
-          const SizedBox(height: Space.xs),
-          // Compact Operational Pulse Strip
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _PulseChip(
-                  icon: Icons.circle,
-                  iconColor: BrandColors.success,
-                  label: siteName,
-                ),
-                const SizedBox(width: Space.xs),
-                _PulseChip(
-                  icon: Icons.schedule_outlined,
-                  iconColor: BrandColors.info,
-                  label: bangla
-                      ? 'শিফট: ০৯:০০–১৮:০০'
-                      : 'Shift: 09:00–18:00 BST',
-                ),
-                const SizedBox(width: Space.xs),
-                _PulseChip(
-                  icon: Icons.verified_user_outlined,
-                  iconColor: BrandColors.crimson,
-                  label: bangla
-                      ? 'SHA-256 অডিট সক্রিয়'
-                      : 'SHA-256 Ledger Verified',
-                ),
-              ],
+            const SizedBox(width: Space.xs),
+            _PulseChip(
+              icon: Icons.apartment_outlined,
+              iconColor: BrandColors.info,
+              label: deptName,
             ),
-          ),
-        ],
+            const SizedBox(width: Space.xs),
+            _PulseChip(
+              icon: Icons.badge_outlined,
+              iconColor: BrandColors.crimson,
+              label: emp.empCode,
+            ),
+          ],
+        ),
       ),
     );
   }
