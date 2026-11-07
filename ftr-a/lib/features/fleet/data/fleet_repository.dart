@@ -134,6 +134,39 @@ class FleetRepository {
     }
   }
 
+  Future<List<FleetVehicle>> vehicles() async {
+    try {
+      final res = await _dio.get<Object?>('/fleet/vehicles');
+      return [
+        for (final e in Envelope.data(res.data)! as List)
+          FleetVehicle.fromJson(Map<String, Object?>.from(e! as Map)),
+      ];
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<List<FleetDriver>> drivers() async {
+    try {
+      final res = await _dio.get<Object?>('/fleet/drivers');
+      return [
+        for (final e in Envelope.data(res.data)! as List)
+          FleetDriver.fromJson(Map<String, Object?>.from(e! as Map)),
+      ];
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<Map<String, Object?>> issueFuel(Map<String, Object?> body) async {
+    try {
+      final res = await _dio.post<Object?>('/fuel-vouchers', data: body);
+      return Envelope.object(res.data);
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<Map<String, Object?>?> pooling() async {
     try {
       final res = await _dio.get<Object?>('/fleet/pooling');

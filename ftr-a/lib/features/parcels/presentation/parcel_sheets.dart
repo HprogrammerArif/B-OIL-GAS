@@ -392,6 +392,48 @@ class _SheetState extends ConsumerState<_Sheet> {
                     setState(() => _exceptionKind = s.first),
               ),
             if (k == ParcelSheet.verify) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: Space.sm),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Space.md,
+                  vertical: Space.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.pin, size: 16, color: Colors.blue),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: Text(
+                        'Demo PIN: ${widget.parcel.status.startsWith('RETURN') ? (widget.parcel.demoReturnOtp ?? '9104') : (widget.parcel.demoOtp ?? '4829')}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () {
+                        _otp.text = widget.parcel.status.startsWith('RETURN')
+                            ? (widget.parcel.demoReturnOtp ?? '9104')
+                            : (widget.parcel.demoOtp ?? '4829');
+                      },
+                      child: const Text(
+                        'Auto-Fill',
+                        style: TextStyle(fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               AppTextField(
                 label: l10n.pcFieldCode,
                 controller: _otp,

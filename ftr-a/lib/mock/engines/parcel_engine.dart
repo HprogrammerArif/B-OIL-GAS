@@ -540,7 +540,8 @@ abstract final class ParcelEngine {
         isUtc: true,
       ).toIso8601String()
       ..['otpAttempts'] = 0
-      ..['otpIssuedAt'] = [...(p['otpIssuedAt']! as List), now];
+      ..['otpIssuedAt'] = [...(p['otpIssuedAt']! as List), now]
+      ..['_demoOtp'] = otp;
     store.put(Col.parcels, p);
     _notify(
       store,
@@ -832,7 +833,8 @@ abstract final class ParcelEngine {
         isUtc: true,
       ).toIso8601String()
       ..['otpAttempts'] = 0
-      ..['otpIssuedAt'] = [...(p['otpIssuedAt']! as List), now];
+      ..['otpIssuedAt'] = [...(p['otpIssuedAt']! as List), now]
+      ..['_demoReturnOtp'] = otp;
     store.put(Col.parcels, p);
     _notify(
       store,
@@ -1072,6 +1074,12 @@ abstract final class ParcelEngine {
       'deliveredMethod': p['deliveredMethod'],
       'lastEventAt': p['lastEventAt'],
       'createdAt': p['createdAt'],
+      'demoOtp':
+          p['_demoOtp'] ?? (p['status'] == 'OUT_FOR_DELIVERY' ? '4829' : null),
+      'demoReturnOtp':
+          p['_demoReturnOtp'] ??
+          (p.str('status').startsWith('RETURN') ? '9104' : null),
+      'otpAttempts': (p['otpAttempts'] as num?)?.toInt() ?? 0,
       'me': {
         'isSender': isSender,
         'isRecipient': isRecipient,

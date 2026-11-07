@@ -159,6 +159,9 @@ class Parcel {
     this.returnDetails,
     this.events = const [],
     this.chainValid = true,
+    this.demoOtp,
+    this.demoReturnOtp,
+    this.otpAttempts = 0,
   });
 
   factory Parcel.fromJson(Map<String, Object?> j) {
@@ -206,6 +209,9 @@ class Parcel {
           ParcelEvent.fromJson(Map<String, Object?>.from(e! as Map)),
       ],
       chainValid: j['chainValid'] != false,
+      demoOtp: j['demoOtp'] as String?,
+      demoReturnOtp: j['demoReturnOtp'] as String?,
+      otpAttempts: (j['otpAttempts'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -241,6 +247,9 @@ class Parcel {
   final String? returnDetails;
   final List<ParcelEvent> events;
   final bool chainValid;
+  final String? demoOtp;
+  final String? demoReturnOtp;
+  final int otpAttempts;
 
   bool get isOpen =>
       !const {'DELIVERED', 'RETURNED', 'LOST', 'CANCELLED'}.contains(status);
