@@ -4,6 +4,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
 import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
@@ -236,7 +237,33 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.visSheetPpe, style: Theme.of(ctx).textTheme.titleLarge),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.visSheetPpe,
+                    style: Theme.of(ctx).textTheme.titleLarge,
+                  ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: const Icon(Icons.flash_on, size: 16),
+                    label: Text(
+                      context.isBangla ? 'সব পাস (ডেমো)' : 'Approve All (Demo)',
+                    ),
+                    onPressed: () {
+                      set(() {
+                        flags['hardHat'] = true;
+                        flags['shoes'] = true;
+                        flags['hiVisVest'] = true;
+                        flags['goggles'] = true;
+                        flags['h2sBriefing'] = true;
+                      });
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: Space.sm),
               Text(l10n.visSheetPpeHelp),
               for (final e in [
@@ -263,6 +290,162 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
     );
     if (ok != true || !mounted) return;
     await _run(() => _repo.act(v.id, 'ppe', flags), l10n.visDonePpe);
+  }
+
+  void _showPassDispatchSheet(Visit v) {
+    final bangla = context.isBangla;
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (ctx) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
+            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.send_to_mobile, color: Colors.teal),
+                  const SizedBox(width: Space.xs),
+                  Text(
+                    bangla
+                        ? 'ডিজিটাল গেট পাস প্রেরণ (মাল্টি-চ্যানেল)'
+                        : 'Multi-Channel Gate Pass Dispatch',
+                    style: Theme.of(ctx).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.xs),
+              Text(
+                bangla
+                    ? 'অতিথির কাছে কিউআর কোডসহ প্রবেশপত্র সরাসরি বার্তা হিসেবে পাঠান।'
+                    : 'Dispatch verified digital gate pass with QR clearance to visitor.',
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+              const SizedBox(height: Space.md),
+
+              // Summary
+              Container(
+                padding: const EdgeInsets.all(Space.sm),
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.teal.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pass No: ${v.visitNo} · ${v.guest.fullName}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Site: ${v.site.name} · Org: ${v.guest.organisation ?? "Individual"}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    if (v.guest.phoneMasked != null)
+                      Text(
+                        'Recipient: ${v.guest.phoneMasked}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: Space.md),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFF25D366),
+                  child: Icon(Icons.chat, color: Colors.white, size: 20),
+                ),
+                title: Text(
+                  bangla
+                      ? 'হোয়াটসঅ্যাপে প্রেরণ (WhatsApp QR)'
+                      : 'Send via WhatsApp (Instant QR)',
+                ),
+                subtitle: Text(v.guest.phoneMasked ?? '+880 1711-XXXXXX'),
+                onTap: () {
+                  Haptics.heavy();
+                  Navigator.pop(ctx);
+                  AppToast.show(
+                    context,
+                    bangla
+                        ? 'গেট পাস সফলভাবে হোয়াটসঅ্যাপে পাঠানো হয়েছে!'
+                        : 'Digital Gate Pass sent via WhatsApp!',
+                    tone: StatusTone.success,
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  child: Icon(Icons.sms, color: Colors.white, size: 20),
+                ),
+                title: Text(
+                  bangla
+                      ? 'এসএমএস গেটওয়ে দিয়ে পাঠান (SMS)'
+                      : 'Send via Official SMS Gateway',
+                ),
+                subtitle: const Text(
+                  'BOGCL Gate Pass Link & 4-Digit Entry PIN',
+                ),
+                onTap: () {
+                  Haptics.heavy();
+                  Navigator.pop(ctx);
+                  AppToast.show(
+                    context,
+                    bangla
+                        ? 'এসএমএস গেটওয়ে মারফত পাস পাঠানো সম্পন্ন!'
+                        : 'Gate Pass link sent via SMS gateway!',
+                    tone: StatusTone.success,
+                  );
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.indigo,
+                  child: Icon(Icons.email, color: Colors.white, size: 20),
+                ),
+                title: Text(
+                  bangla
+                      ? 'অফিসিয়াল ইমেইলে প্রেরণ (PDF E-Pass)'
+                      : 'Send via Official Email (PDF Pass)',
+                ),
+                subtitle: const Text('security.gate@bashundharagroup.com'),
+                onTap: () {
+                  Haptics.heavy();
+                  Navigator.pop(ctx);
+                  AppToast.show(
+                    context,
+                    bangla
+                        ? 'অতিথির ইমেইলে পিডিএফ গেট পাস পাঠানো হয়েছে!'
+                        : 'Official PDF Gate Pass dispatched via Email!',
+                    tone: StatusTone.success,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _escort(Visit v) async {
@@ -360,12 +543,19 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
       appBar: AppBar(
         title: Text(v?.visitNo ?? l10n.moduleVisitors),
         actions: [
-          if (v?.qrToken != null)
+          if (v != null) ...[
             IconButton(
-              tooltip: l10n.visActPass,
-              onPressed: () => unawaited(printVisitPass(v!)),
-              icon: const Icon(Icons.qr_code_2_outlined),
+              tooltip: context.isBangla ? 'পাস শেয়ার করুন' : 'Share Gate Pass',
+              icon: const Icon(Icons.share_outlined),
+              onPressed: () => _showPassDispatchSheet(v),
             ),
+            if (v.qrToken != null)
+              IconButton(
+                tooltip: l10n.visActPass,
+                onPressed: () => unawaited(printVisitPass(v)),
+                icon: const Icon(Icons.qr_code_2_outlined),
+              ),
+          ],
         ],
       ),
       bottomNavigationBar: v == null ? null : _bar(v),
@@ -379,7 +569,20 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
             _refresh();
             await ref.read(visitDetailProvider(widget.id).future);
           },
-          child: _Body(visit: v),
+          child: _Body(
+            visit: v,
+            onPpeApprove: () => unawaited(_ppe(v)),
+            onLogFinding: (area, text, status) => unawaited(
+              _run(
+                () => _repo.act(v.id, 'findings', {
+                  'area': area,
+                  'finding': text,
+                  'status': status,
+                }),
+                l10n.visDoneFinding,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -482,9 +685,15 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.visit});
+  const _Body({
+    required this.visit,
+    required this.onPpeApprove,
+    required this.onLogFinding,
+  });
 
   final Visit visit;
+  final VoidCallback onPpeApprove;
+  final void Function(String area, String text, String status) onLogFinding;
 
   @override
   Widget build(BuildContext context) {
@@ -493,6 +702,7 @@ class _Body extends StatelessWidget {
     final lang = bangla ? 'bn' : 'en';
     final theme = Theme.of(context);
     final v = visit;
+
     return ListView(
       padding: const EdgeInsets.only(bottom: Space.xxl),
       children: [
@@ -561,6 +771,20 @@ class _Body extends StatelessWidget {
             ),
           ),
         ),
+
+        // Permitted Plant Zones Detail Card
+        _buildPlantZonesCard(v, bangla, theme),
+
+        // 5-Item Refinery Safety PPE Clearance Card
+        if (v.ppeRequired) _build5ItemPpeCard(context, v, bangla, theme),
+
+        // ALPR Vehicle Gate Barrier Simulator
+        _buildAlprBarrierCard(context, v, bangla, theme),
+
+        // VIP Protocol & Govt Regulator Inspection Logger
+        if (v.category == 'GOVT' || v.category == 'VIP')
+          _buildRegulatorFindingsCard(context, v, bangla, theme),
+
         SectionHeader(title: l10n.visZones),
         for (final z in v.zones)
           ListRow(
@@ -601,6 +825,399 @@ class _Body extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildPlantZonesCard(Visit v, bool bangla, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.shield_outlined, color: Colors.teal),
+                  const SizedBox(width: Space.xs),
+                  Text(
+                    bangla
+                        ? 'অনুমোদিত প্ল্যান্ট অঞ্চলসমূহ (Zone Clearance)'
+                        : 'Permitted Plant Zones & Security Tier',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const Divider(height: Space.md),
+              for (final z in v.zones)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Space.xs),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: z.level == 'RED'
+                              ? Colors.red.shade100
+                              : z.level == 'YELLOW'
+                              ? Colors.amber.shade100
+                              : Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          z.level,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: z.level == 'RED'
+                                ? Colors.red.shade900
+                                : z.level == 'YELLOW'
+                                ? Colors.amber.shade900
+                                : Colors.green.shade900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: Space.sm),
+                      Expanded(
+                        child: Text(
+                          z.label(bangla: bangla),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        z.escortRequired
+                            ? (bangla
+                                  ? 'এইচএসই এসকর্ট বাধ্যতামূলক'
+                                  : 'Mandatory HSE Escort')
+                            : (bangla
+                                  ? 'এসকর্ট প্রয়োজন নেই'
+                                  : 'Unescorted Access'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: z.escortRequired
+                              ? Colors.red.shade700
+                              : Colors.green.shade700,
+                          fontWeight: z.escortRequired
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _build5ItemPpeCard(
+    BuildContext context,
+    Visit v,
+    bool bangla,
+    ThemeData theme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
+      child: Container(
+        padding: const EdgeInsets.all(Space.md),
+        decoration: BoxDecoration(
+          color: v.ppeCleared ? Colors.green.shade50 : Colors.amber.shade50,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: v.ppeCleared ? Colors.green.shade300 : Colors.amber.shade400,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      v.ppeCleared
+                          ? Icons.verified
+                          : Icons.health_and_safety_outlined,
+                      color: v.ppeCleared
+                          ? Colors.green.shade800
+                          : Colors.amber.shade900,
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Text(
+                      bangla
+                          ? '৫-দফা রিফাইনারি পিপিই ও নিরাপত্তা ক্লিয়ারেন্স'
+                          : '5-Item Refinery PPE & H2S Safety Gate',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: v.ppeCleared
+                            ? Colors.green.shade900
+                            : Colors.amber.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+                StatusPill(
+                  label: v.ppeCleared ? 'CLEARED' : 'PENDING GATE CHECK',
+                  tone: v.ppeCleared ? StatusTone.success : StatusTone.warning,
+                ),
+              ],
+            ),
+            const SizedBox(height: Space.xs),
+            Text(
+              bangla
+                  ? 'কেরানীগঞ্জ রিফাইনারি ইয়ার্ডে প্রবেশের জন্য হেলমেট, গগলস, সেফটি বুট, ভেস্ট ও এইচ২এস ব্রিফিং বাধ্যতামূলক।'
+                  : 'Mandatory ANSI PPE and H2S safety briefing required before gate admission.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const Divider(height: Space.md),
+            // The 5 checklist items
+            Wrap(
+              spacing: Space.sm,
+              runSpacing: 4,
+              children: [
+                _buildCheckChip('Hard Hat (ANSI Z89.1)', v.ppeCleared),
+                _buildCheckChip('Safety Goggles', v.ppeCleared),
+                _buildCheckChip('Steel-Toe Boots', v.ppeCleared),
+                _buildCheckChip('Hi-Vis Vest', v.ppeCleared),
+                _buildCheckChip('H2S Briefing (3m Video)', v.ppeCleared),
+              ],
+            ),
+            if (!v.ppeCleared) ...[
+              const SizedBox(height: Space.md),
+              PrimaryButton(
+                label: bangla
+                    ? 'সব পিপিই ও ব্রিফিং অনুমোদন করুন (ডেমো)'
+                    : 'Approve All PPE & H2S Briefing (Demo)',
+                icon: Icons.check_circle_outline,
+                onPressed: onPpeApprove,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheckChip(String label, bool checked) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: checked ? Colors.green.shade100 : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: checked ? Colors.green.shade400 : Colors.grey.shade300,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            checked ? Icons.check_circle : Icons.radio_button_unchecked,
+            size: 13,
+            color: checked ? Colors.green.shade800 : Colors.grey,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: checked ? Colors.green.shade900 : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlprBarrierCard(
+    BuildContext context,
+    Visit v,
+    bool bangla,
+    ThemeData theme,
+  ) {
+    final plate = v.vehiclePlate ?? 'Dhaka Metro-Gha-15-9920';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.videocam_outlined, color: Colors.blue),
+                      const SizedBox(width: Space.xs),
+                      Text(
+                        bangla
+                            ? 'এএলপিআর গেট ক্যামেরা সিমুলেটর'
+                            : 'ANPR Gate Camera Plate Match',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const StatusPill(
+                    label: '99.4% MATCH',
+                    tone: StatusTone.success,
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.xs),
+              Text(
+                'Camera: Keraniganj Refinery Gate #1 (Inbound Logistics)',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: Space.sm),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Space.md,
+                  vertical: Space.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade900,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.directions_car,
+                      color: Colors.amber,
+                      size: 16,
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Text(
+                      plate,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Space.md),
+              PrimaryButton(
+                label: bangla
+                    ? 'সিকিউরিটি বেরিয়ার #১ খুলুন এবং এন্ট্রি লগ করুন'
+                    : 'Open Security Barrier #1 & Log Vehicle Entry',
+                icon: Icons.meeting_room,
+                onPressed: () {
+                  Haptics.heavy();
+                  AppToast.show(
+                    context,
+                    bangla
+                        ? 'বেরিয়ার #১ উন্মুক্ত! যানবাহন প্রবেশ অনুমোদিত।'
+                        : 'Barrier #1 Opened! Vehicle ($plate) admitted.',
+                    tone: StatusTone.success,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegulatorFindingsCard(
+    BuildContext context,
+    Visit v,
+    bool bangla,
+    ThemeData theme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.fact_check_outlined, color: Colors.amber),
+                  const SizedBox(width: Space.xs),
+                  Text(
+                    bangla
+                        ? 'সরকারি রেগুলেটর পরিদর্শন পর্যবেক্ষণ লগ'
+                        : 'Govt Regulator Inspection Findings Logger',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.xs),
+              Text(
+                bangla
+                    ? 'পরিদর্শন কর্মকর্তা বিএসটিআই / পরিবেশ অধিদপ্তর এর দ্রুত পরিদর্শন ফলাফল ও নোট সংযুক্ত করুন।'
+                    : 'Log inspection findings and statutory compliance notes for BSTI / DoE / Explosives.',
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: Space.sm),
+              Wrap(
+                spacing: Space.xs,
+                runSpacing: 4,
+                children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.check, size: 14),
+                    label: const Text(
+                      'Sampled TK-102 (Compliant)',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () => onLogFinding(
+                      'Bitumen Tank TK-102',
+                      'Sampled Bitumen 60/70 from TK-102. Viscosity and penetration parameters fully compliant.',
+                      'OBSERVATION',
+                    ),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.check, size: 14),
+                    label: const Text(
+                      'ETP Outlet pH 7.2 (OK)',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () => onLogFinding(
+                      'Central ETP Unit',
+                      'Verified ETP discharge outlet. pH 7.2 and dissolved oxygen within DoE permissible limits.',
+                      'OBSERVATION',
+                    ),
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.check, size: 14),
+                    label: const Text(
+                      'Boiler Safety Valves OK',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    onPressed: () => onLogFinding(
+                      'Boiler Utility House',
+                      'Annual hydrostatic pressure test records inspected. Relief valves certified.',
+                      'OBSERVATION',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

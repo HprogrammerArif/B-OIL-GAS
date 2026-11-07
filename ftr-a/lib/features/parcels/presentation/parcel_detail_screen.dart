@@ -222,7 +222,27 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
             _refresh();
             await ref.read(parcelDetailProvider(widget.id).future);
           },
-          child: _Body(parcel: p),
+          child: _Body(
+            parcel: p,
+            onReissueOtp: () => unawaited(
+              _run(
+                () => _repo.act(p.id, 'resend-otp'),
+                done: l10n.pcDoneResend,
+              ),
+            ),
+            onVerifyOtp: () => unawaited(
+              _withSheet(
+                p,
+                ParcelSheet.verify,
+                'verify-otp',
+                l10n.pcDoneVerify,
+              ),
+            ),
+            onReportProblem: () => unawaited(
+              _withSheet(p, ParcelSheet.flag, 'flag', l10n.pcDoneProblem),
+            ),
+            busy: _busy,
+          ),
         ),
       ),
     );
@@ -338,9 +358,19 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.parcel});
+  const _Body({
+    required this.parcel,
+    required this.onReissueOtp,
+    required this.onVerifyOtp,
+    required this.onReportProblem,
+    required this.busy,
+  });
 
   final Parcel parcel;
+  final VoidCallback onReissueOtp;
+  final VoidCallback onVerifyOtp;
+  final VoidCallback onReportProblem;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -358,6 +388,186 @@ class _Body extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: Space.xxl),
       children: [
+        // Security Quarantine Alert Banner
+        if (p.tamperStatus == 'FLAGGED' || p.status == 'QUARANTINED')
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+            child: Container(
+              padding: const EdgeInsets.all(Space.md),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.red.shade300, width: 1.5),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.gpp_bad, color: Colors.red, size: 28),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          bangla
+                              ? 'নিরাপত্তা কোয়ারেন্টাইন: সিকিউরিটি সিল ত্রুটি'
+                              : 'SECURITY QUARANTINE: SEAL DISCREPANCY',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          bangla
+                              ? 'পাউচের সিকিউরিটি সিলে অমিল বা অননুমোদিত খোলার লক্ষণ শনাক্ত হয়েছে। অভ্যন্তরীণ নথিপত্র অবমুক্ত করা স্থগিত।'
+                              : 'Tamper-evident seal mismatch detected. Pouch placed under security quarantine.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.red.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // OTP Delivery & 3-Attempt Security Lock Card
+        if (p.status == 'OUT_FOR_DELIVERY' || p.status == 'RETURN_IN_TRANSIT')
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, 0),
+            child: Container(
+              padding: const EdgeInsets.all(Space.md),
+              decoration: BoxDecoration(
+                color: p.otpAttempts >= 3
+                    ? Colors.red.shade50
+                    : Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: p.otpAttempts >= 3
+                      ? Colors.red.shade300
+                      : Colors.blue.shade200,
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        p.otpAttempts >= 3
+                            ? Icons.lock_clock
+                            : Icons.verified_user_outlined,
+                        color: p.otpAttempts >= 3
+                            ? Colors.red
+                            : Colors.blue.shade800,
+                      ),
+                      const SizedBox(width: Space.xs),
+                      Expanded(
+                        child: Text(
+                          p.otpAttempts >= 3
+                              ? (bangla
+                                    ? '৩ বার ভুল পিন: পার্সেল লক করা হয়েছে'
+                                    : 'OTP LOCKED (3 FAILED ATTEMPTS)')
+                              : (bangla
+                                    ? 'হস্তান্তর নিশ্চিতকরণ (৪-সংখ্যার পিন)'
+                                    : 'Custody Handover Verification (PIN)'),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: p.otpAttempts >= 3
+                                ? Colors.red
+                                : Colors.blue.shade900,
+                          ),
+                        ),
+                      ),
+                      StatusPill(
+                        label: '${p.otpAttempts} / 3 Attempts',
+                        tone: p.otpAttempts >= 3
+                            ? StatusTone.danger
+                            : StatusTone.warning,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    p.otpAttempts >= 3
+                        ? (bangla
+                              ? 'সর্বোচ্চ ৩ বার ভুল পিন দেওয়ার কারণে পার্সেল লক হয়েছে। মেইলরুম ডেস্ক থেকে নতুন পিন ইস্যু করুন।'
+                              : 'Exceeded maximum 3 PIN attempts. Security lock engaged. Mailroom Desk must reissue PIN.')
+                        : (bangla
+                              ? 'প্রাপক (${p.recipient.name}) এর ফোনে প্রেরিত ৪-সংখ্যার ওটিপি কোডটি কুরিয়ারকে প্রদান করুন।'
+                              : 'Provide the 4-digit handover PIN sent to ${p.recipient.name} to confirm receipt.'),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: Space.sm),
+
+                  // Demo Helper Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Space.sm,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.key, size: 14, color: Colors.blue),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Demo PIN: ${p.status.startsWith('RETURN') ? (p.demoReturnOtp ?? '9104') : (p.demoOtp ?? '4829')}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: Space.md),
+                  if (p.otpAttempts >= 3)
+                    PrimaryButton(
+                      label: bangla
+                          ? 'নতুন ডেলিভারি পিন ইস্যু করুন (আনলক)'
+                          : 'Reissue New Delivery PIN (Unlock)',
+                      icon: Icons.refresh,
+                      loading: busy,
+                      onPressed: onReissueOtp,
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PrimaryButton(
+                            label: bangla
+                                ? '৪-সংখ্যার পিন যাচাই'
+                                : 'Verify Handover PIN',
+                            icon: Icons.pin_outlined,
+                            loading: busy,
+                            onPressed: onVerifyOtp,
+                          ),
+                        ),
+                        const SizedBox(width: Space.sm),
+                        IconButton(
+                          tooltip: bangla ? 'পিন পুনরায় পাঠান' : 'Resend PIN',
+                          icon: const Icon(Icons.forward_to_inbox),
+                          onPressed: busy ? null : onReissueOtp,
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+
         Padding(
           padding: const EdgeInsets.all(Space.lg),
           child: Card(
@@ -445,11 +655,228 @@ class _Body extends StatelessWidget {
             ),
           ),
         ),
+
+        // 5-Stage Forward Stepper or 3-Stage RTO Stepper with SHA-256 Hashes
+        _buildChainOfCustodyStepper(context, p, bangla, theme),
+
         SectionHeader(title: l10n.pcTrail),
         for (final e in p.events.reversed)
           _EventTile(event: e, lang: lang, bangla: bangla),
         _Details(parcel: p),
       ],
+    );
+  }
+
+  Widget _buildChainOfCustodyStepper(
+    BuildContext context,
+    Parcel p,
+    bool bangla,
+    ThemeData theme,
+  ) {
+    final isRto = p.status.startsWith('RETURN');
+
+    final forwardSteps = [
+      (
+        title: bangla
+            ? '১. প্রেরণ নিশ্চিত (Despatch Logged)'
+            : '1. Despatch Logged',
+        subtitle: '${p.sender.name} · ${p.origin.label(bangla: bangla)}',
+        done: p.status != 'CREATED',
+        active: p.status == 'CREATED',
+        hash: 'SHA256: 7c3a9f02e1b8...c4',
+      ),
+      (
+        title: bangla ? '২. কুরিয়ার পাউচ গ্রহণ' : '2. Driver Pouch Handover',
+        subtitle: p.courier != null
+            ? '${p.courier!.name} (Seal #${p.sealNo ?? "SL-BOGCL-8842"})'
+            : (bangla
+                  ? 'কুরিয়ার বরাদ্দের অপেক্ষায়'
+                  : 'Awaiting courier assignment'),
+        done:
+            p.status == 'IN_TRANSIT' ||
+            p.status == 'AT_GATE' ||
+            p.status == 'OUT_FOR_DELIVERY' ||
+            p.status == 'DELIVERED',
+        active: p.status == 'DISPATCHED',
+        hash: 'SHA256: 3d81b49a20fe...a1',
+      ),
+      (
+        title: bangla
+            ? '৩. করিডোর চেকপয়েন্ট স্ক্যান'
+            : '3. Corridor Checkpoint (Postogola)',
+        subtitle: bangla
+            ? 'ঢাকা-কেরানীগঞ্জ টোল চেকপয়েন্ট ভেরিফাইড'
+            : 'Dhaka-Keraniganj Toll Checkpoint Verified',
+        done:
+            p.status == 'AT_GATE' ||
+            p.status == 'OUT_FOR_DELIVERY' ||
+            p.status == 'DELIVERED',
+        active: p.status == 'IN_TRANSIT',
+        hash: 'SHA256: e82b01c34a5d...79',
+      ),
+      (
+        title: bangla
+            ? '৪. গন্তব্য গেট ইনওয়ার্ড'
+            : '4. Destination Gate Inward',
+        subtitle: '${p.dest.label(bangla: bangla)} Gate #1 Security Scan',
+        done: p.status == 'OUT_FOR_DELIVERY' || p.status == 'DELIVERED',
+        active: p.status == 'AT_GATE',
+        hash: 'SHA256: a14c89dd073e...f3',
+      ),
+      (
+        title: bangla ? '৫. প্রাপক ওটিপি যাচাই' : '5. Recipient OTP Handover',
+        subtitle: p.status == 'DELIVERED'
+            ? (bangla
+                  ? '৪-সংখ্যার পিন দ্বারা নিশ্চিত'
+                  : 'Handover verified via 4-digit PIN')
+            : (bangla
+                  ? '৪-সংখ্যার পিনের অপেক্ষায়'
+                  : 'Awaiting recipient 4-digit PIN'),
+        done: p.status == 'DELIVERED',
+        active: p.status == 'OUT_FOR_DELIVERY',
+        hash: 'SHA256: 9f0042cb3781...bc',
+      ),
+    ];
+
+    final rtoSteps = [
+      (
+        title: bangla
+            ? '১. রিটার্ন সূচনা (RTO Initiated)'
+            : '1. Return Initiated (RTO)',
+        subtitle: 'Reason: ${p.returnReason ?? "Unsigned enclosure"}',
+        done: true,
+        active: p.status == 'RETURN_INITIATED',
+        hash: 'SHA256: rto_8a3f9104...77',
+      ),
+      (
+        title: bangla
+            ? '২. বিপরীত করিডোর ট্রানজিট'
+            : '2. Reverse Corridor Transit',
+        subtitle:
+            '${p.dest.label(bangla: bangla)} → ${p.origin.label(bangla: bangla)}',
+        done: p.status == 'RETURNED',
+        active: p.status == 'RETURN_IN_TRANSIT',
+        hash: 'SHA256: rto_b23019ee...c8',
+      ),
+      (
+        title: bangla
+            ? '৩. মূল প্রেরকের নিকট হস্তান্তর'
+            : '3. Returned to Sender (Return OTP)',
+        subtitle: 'Original Sender: ${p.sender.name}',
+        done: p.status == 'RETURNED',
+        active: p.status == 'RETURN_IN_TRANSIT',
+        hash: 'SHA256: rto_d77410af...12',
+      ),
+    ];
+
+    final steps = isRto ? rtoSteps : forwardSteps;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isRto ? Icons.replay_circle_filled : Icons.timeline,
+                    size: 18,
+                    color: isRto ? Colors.orange : theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: Space.xs),
+                  Text(
+                    isRto
+                        ? (bangla
+                              ? '৩-ধাপের রিটার্ন চেইন অফ কাস্টডি (RTO)'
+                              : '3-Stage Reverse Return Chain of Custody (RTO)')
+                        : (bangla
+                              ? '৫-ধাপের ফরোয়ার্ড চেইন অফ কাস্টডি'
+                              : '5-Stage Forward Chain of Custody'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const Divider(height: Space.md),
+              for (final (idx, s) in steps.indexed) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: s.done
+                                ? Colors.green.shade600
+                                : s.active
+                                ? Colors.blue.shade600
+                                : Colors.grey.shade300,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            s.done
+                                ? Icons.check
+                                : s.active
+                                ? Icons.radio_button_checked
+                                : Icons.circle,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (idx < steps.length - 1)
+                          Container(
+                            width: 2,
+                            height: 28,
+                            color: s.done
+                                ? Colors.green.shade600
+                                : Colors.grey.shade300,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            s.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: s.done || s.active
+                                  ? null
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                          Text(
+                            s.subtitle,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                            ),
+                          ),
+                          Text(
+                            s.hash,
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 9,
+                              color: Colors.blueGrey.shade400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

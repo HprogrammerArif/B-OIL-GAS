@@ -352,6 +352,27 @@ class AppL10nEn extends AppL10n {
   String get moreCompany => 'Company';
 
   @override
+  String get moreGovernanceFinance => 'Governance & Finance';
+
+  @override
+  String get moreDailyWork => 'My Daily Work & HR';
+
+  @override
+  String get moreTransportCommute => 'Transport & Commute';
+
+  @override
+  String get moreSiteOperations => 'Site Operations & Security';
+
+  @override
+  String get moreSafetyAssetsComms => 'Refinery Safety, Assets & Chat';
+
+  @override
+  String get moreActivePersona => 'Active Persona';
+
+  @override
+  String get moreSwitchPersona => 'Switch Persona';
+
+  @override
   String homeGoodMorning(String name) {
     return 'Good morning, $name';
   }

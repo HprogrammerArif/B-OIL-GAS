@@ -16,6 +16,10 @@ class ActivityEntry {
     required this.action,
     required this.entityType,
     required this.createdAt,
+    this.seq,
+    this.entityId,
+    this.prevHash,
+    this.hash,
   });
 
   factory ActivityEntry.fromJson(Map<String, Object?> json) => ActivityEntry(
@@ -23,12 +27,20 @@ class ActivityEntry {
     action: json['action']! as String,
     entityType: json['entityType']! as String,
     createdAt: DateTime.parse(json['createdAt']! as String).toUtc(),
+    seq: (json['seq'] as num?)?.toInt(),
+    entityId: json['entityId'] as String?,
+    prevHash: json['prevHash'] as String?,
+    hash: json['hash'] as String?,
   );
 
   final String id;
   final String action;
   final String entityType;
   final DateTime createdAt;
+  final int? seq;
+  final String? entityId;
+  final String? prevHash;
+  final String? hash;
 }
 
 class ActivityRepository {

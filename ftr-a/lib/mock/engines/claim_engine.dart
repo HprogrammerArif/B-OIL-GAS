@@ -861,14 +861,16 @@ abstract final class ClaimEngine {
             : 'PENDING_MANAGER';
       case WorkflowEvent.approved:
         c['status'] = 'APPROVED';
+        c['sapVoucherNo'] ??=
+            'SAP-FI-${DateTime.now().year}-${c.str('id').replaceAll(RegExp(r'\D'), '').padLeft(4, '0')}';
         _notifyOwner(
           store,
           c,
           'CLAIM_APPROVED',
           const Bi('Claim approved', 'দাবি অনুমোদিত'),
           Bi(
-            '${c['claimNo']} is approved and queued for payment.',
-            '${c['claimNo']} অনুমোদিত হয়েছে, পরিশোধের অপেক্ষায়।',
+            '${c['claimNo']} is approved and queued for payment (Voucher: ${c['sapVoucherNo']}).',
+            '${c['claimNo']} অনুমোদিত হয়েছে, পরিশোধের অপেক্ষায় (ভাউচার: ${c['sapVoucherNo']})।',
           ),
         );
       case WorkflowEvent.rejected:

@@ -709,6 +709,48 @@ abstract class AppL10n {
   /// **'Company'**
   String get moreCompany;
 
+  /// No description provided for @moreGovernanceFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Governance & Finance'**
+  String get moreGovernanceFinance;
+
+  /// No description provided for @moreDailyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'My Daily Work & HR'**
+  String get moreDailyWork;
+
+  /// No description provided for @moreTransportCommute.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport & Commute'**
+  String get moreTransportCommute;
+
+  /// No description provided for @moreSiteOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Site Operations & Security'**
+  String get moreSiteOperations;
+
+  /// No description provided for @moreSafetyAssetsComms.
+  ///
+  /// In en, this message translates to:
+  /// **'Refinery Safety, Assets & Chat'**
+  String get moreSafetyAssetsComms;
+
+  /// No description provided for @moreActivePersona.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Persona'**
+  String get moreActivePersona;
+
+  /// No description provided for @moreSwitchPersona.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Persona'**
+  String get moreSwitchPersona;
+
   /// No description provided for @homeGoodMorning.
   ///
   /// In en, this message translates to:

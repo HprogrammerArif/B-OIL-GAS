@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
+import 'package:bogcl_oneops/mock/engines/parcel_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -527,13 +528,29 @@ abstract final class LicenceEngine {
     final n = store.all(Col.licenceLetters).length + 1;
     final memo =
         'BOGCL/CMD-DO/${lic['bodyCode']}-$y-${n.toString().padLeft(4, '0')}';
+    final channel = (body['channel'] as String?)?.toUpperCase() ?? 'EMAIL';
+    String? parcelId;
+    if (channel == 'COURIER' || channel == 'DISPATCH_RIDER') {
+      final p = ParcelEngine.create(store, auth, {
+        'category': 'LEGAL_DOCUMENTS',
+        'urgency': 'HIGH',
+        'description':
+            'DO Letter $memo for ${lic['title']} to ${lic['bodyCode']}',
+        'declaredValue': 50000,
+        'weightKg': 0.5,
+        'recipientUserId': auth.user.str('id'),
+        'specialHandling': ['DO_NOT_BEND', 'CONFIDENTIAL'],
+      });
+      parcelId = p.str('id');
+    }
     store.put(Col.licenceLetters, {
       'id': 'ltr_$n',
       'licenceId': lic['id'],
       'memoNo': memo,
-      'channel': body['channel'] ?? 'EMAIL',
+      'channel': channel,
       'subject': body['subject'] ?? 'Request for early renewal',
       'body': body['body'],
+      'parcelId': parcelId,
       'createdAt': _stamp(store),
       'createdBy': _me(auth),
     });

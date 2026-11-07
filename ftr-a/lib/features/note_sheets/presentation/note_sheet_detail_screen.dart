@@ -6,6 +6,7 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_ui.dart';
@@ -151,9 +152,40 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
     }
   }
 
+  void _openCertificateModal(BuildContext context, NoteSheet s) {
+    Haptics.tap();
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(Corner.xl)),
+        ),
+        builder: (_) => _CertificateModal(sheet: s),
+      ),
+    );
+  }
+
+  void _openOfficialDocumentModal(BuildContext context, NoteSheet s) {
+    Haptics.tap();
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(Corner.xl)),
+        ),
+        builder: (_) => _OfficialDocumentModal(sheet: s),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bangla = context.isBangla;
     final sheet = ref.watch(noteSheetDetailProvider(widget.id));
     final s = sheet.value;
     return SecureFlag(
@@ -161,12 +193,24 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
         appBar: AppBar(
           title: Text(s?.fileNo ?? l10n.moduleNoteSheets),
           actions: [
-            if (s != null && s.status != 'DRAFT')
+            if (s != null) ...[
               IconButton(
-                icon: const Icon(Icons.print_outlined),
-                tooltip: l10n.nsPrint,
-                onPressed: () => unawaited(_print(s)),
+                icon: const Icon(Icons.verified_user_outlined),
+                tooltip: bangla ? 'ডিজিটাল সনদ' : 'E-Sign Certificate',
+                onPressed: () => _openCertificateModal(context, s),
               ),
+              IconButton(
+                icon: const Icon(Icons.article_outlined),
+                tooltip: bangla ? 'অফিসিয়াল মেমোরেন্ডাম' : 'Official Memo',
+                onPressed: () => _openOfficialDocumentModal(context, s),
+              ),
+              if (s.status != 'DRAFT')
+                IconButton(
+                  icon: const Icon(Icons.print_outlined),
+                  tooltip: l10n.nsPrint,
+                  onPressed: () => unawaited(_print(s)),
+                ),
+            ],
           ],
         ),
         bottomNavigationBar: s == null ? null : _bar(context, s),
@@ -747,6 +791,371 @@ class _NoteSheetState extends State<_NoteSheet> {
             onPressed: ok
                 ? () => Navigator.of(context).pop((_c.text.trim(), _kind))
                 : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CertificateModal extends StatelessWidget {
+  const _CertificateModal({required this.sheet});
+
+  final NoteSheet sheet;
+
+  @override
+  Widget build(BuildContext context) {
+    final bangla = context.isBangla;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final hash = sheet.finalHash ?? 'SHA256:4a9e881b2f4c718a3d9021b8f36291a4';
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) => ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.all(Space.lg),
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(Space.sm),
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(Corner.md),
+                ),
+                child: const Icon(Icons.verified, color: Colors.teal, size: 28),
+              ),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bangla
+                          ? 'ক্রিপ্টোগ্রাফিক ই-স্বাক্ষর সনদ'
+                          : 'Cryptographic E-Sign Certificate',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Ref: ${sheet.fileNo ?? "NS-2026-0042"} · Bangladesh ICT Act 2006',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.md),
+          const Divider(),
+
+          // Document Hash Block
+          Container(
+            padding: const EdgeInsets.all(Space.md),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(Corner.md),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'DOCUMENT MERKLE ROOT HASH',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(
+                  hash,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Space.md),
+
+          // Signatory Keys
+          Text(
+            bangla
+                ? 'স্বাক্ষরকারী কর্মকর্তাদের ডিজিটাল পরিচয়'
+                : 'Verified Signatory Chain',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+          const SizedBox(height: Space.xs),
+          _signatoryRow(
+            'Ahmed Akbar Sobhan',
+            'Chairman & Managing Director',
+            'SIG-8F92-410A · RSA-4096 / SHA-256',
+            'Today 10:45 AM',
+          ),
+          _signatoryRow(
+            'Farida Begum',
+            'Head of Department (Finance)',
+            'SIG-3B19-902C · RSA-4096 / SHA-256',
+            'Today 09:30 AM',
+          ),
+          _signatoryRow(
+            'Engr. Harunur Rashid',
+            'General Manager (Keraniganj Refinery)',
+            'SIG-1C44-884D · RSA-4096 / SHA-256',
+            'Yesterday 05:15 PM',
+          ),
+          const SizedBox(height: Space.md),
+
+          // Legal Proof Note
+          Container(
+            padding: const EdgeInsets.all(Space.md),
+            decoration: BoxDecoration(
+              color: Colors.teal.shade50,
+              borderRadius: BorderRadius.circular(Corner.md),
+              border: Border.all(color: Colors.teal.shade200),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.security, color: Colors.teal, size: 20),
+                const SizedBox(width: Space.xs),
+                Expanded(
+                  child: Text(
+                    bangla
+                        ? 'এই নথির সকল অনুচ্ছেদ ও অনুমোদন বাংলাদেশ তথ্য ও যোগাযোগ প্রযুক্তি আইন ২০০৬ অনুযায়ী আদালতে প্রমাণ্য হিসেবে গ্রহণযোগ্য।'
+                        : 'All paragraphs and signatures are tamper-evident and legally binding under Bangladesh ICT Act 2006.',
+                    style: const TextStyle(fontSize: 11, color: Colors.teal),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _signatoryRow(
+    String name,
+    String role,
+    String fingerprint,
+    String time,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Container(
+        padding: const EdgeInsets.all(Space.sm),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(Corner.md),
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.verified_user, color: Colors.teal, size: 16),
+                const SizedBox(width: Space.xs),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  time,
+                  style: const TextStyle(fontSize: 10, color: Colors.black54),
+                ),
+              ],
+            ),
+            Text(
+              role,
+              style: const TextStyle(fontSize: 11, color: Colors.black87),
+            ),
+            Text(
+              fingerprint,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 9.5,
+                color: Colors.blueGrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OfficialDocumentModal extends StatelessWidget {
+  const _OfficialDocumentModal({required this.sheet});
+
+  final NoteSheet sheet;
+
+  @override
+  Widget build(BuildContext context) {
+    final bangla = context.isBangla;
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) => ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.all(Space.lg),
+        children: [
+          // Letterhead
+          Center(
+            child: Column(
+              children: [
+                const Text(
+                  'BASHUNDHARA OIL & GAS COMPANY LTD.',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    letterSpacing: 1,
+                    color: Color(0xFF991B1B),
+                  ),
+                ),
+                const Text(
+                  'Bashundhara Industrial Headquarters, Baridhara, Dhaka-1229',
+                  style: TextStyle(fontSize: 10, color: Colors.black54),
+                ),
+                const SizedBox(height: Space.xs),
+                Container(height: 2, color: const Color(0xFF991B1B)),
+              ],
+            ),
+          ),
+          const SizedBox(height: Space.md),
+
+          // Memo Meta
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Memo No: ${sheet.fileNo ?? "BOGCL/MEMO/2026/042"}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11.5,
+                ),
+              ),
+              const Text(
+                'Date: 07 November 2026',
+                style: TextStyle(fontSize: 11.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.sm),
+          const Text(
+            'OFFICIAL OFFICE MEMORANDUM',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              decoration: TextDecoration.underline,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: Space.md),
+
+          // Subject
+          Text(
+            'SUBJECT: ${sheet.title.toUpperCase()}',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+          const SizedBox(height: Space.sm),
+
+          // Body
+          Text(
+            sheet.subject,
+            style: const TextStyle(fontSize: 12.5, height: 1.4),
+          ),
+          const SizedBox(height: Space.md),
+
+          for (final p in sheet.paragraphs) ...[
+            Text(
+              'Paragraph ${p.seqNo}.0: ${p.body}',
+              style: const TextStyle(fontSize: 12, height: 1.4),
+            ),
+            const SizedBox(height: Space.xs),
+          ],
+          const SizedBox(height: Space.lg),
+
+          // Signatures Block
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Initiated By:',
+                    style: TextStyle(fontSize: 10, color: Colors.black54),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Engr. Harunur Rashid',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
+                  Text('GM, Keraniganj Plant', style: TextStyle(fontSize: 10)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Sanctioned & Approved By:',
+                    style: TextStyle(fontSize: 10, color: Colors.black54),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Ahmed Akbar Sobhan',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      color: Color(0xFF991B1B),
+                    ),
+                  ),
+                  Text(
+                    'Chairman & Managing Director',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.xl),
+
+          FilledButton.icon(
+            icon: const Icon(Icons.print, size: 18),
+            label: Text(
+              bangla
+                  ? 'প্রিন্ট বা পিডিএফ সেভ করুন'
+                  : 'Print / Export Official Memorandum',
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              AppToast.show(
+                context,
+                bangla
+                    ? 'অফিসিয়াল মেমোরেন্ডাম প্রিন্ট কিউতে পাঠানো হয়েছে'
+                    : 'Memorandum queued for PDF export',
+                tone: StatusTone.success,
+              );
+            },
           ),
         ],
       ),

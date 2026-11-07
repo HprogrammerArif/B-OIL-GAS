@@ -125,12 +125,15 @@ abstract final class AuditEngine {
     'hash': e['hash'],
   };
 
-  /// Redacted shape for the user's own `/me/activity` (no before/after).
+  /// Redacted shape for the user's own `/me/activity` (no before/after, keeps cryptographic proof).
   static Json toActivity(Json e) => {
     'id': e['id'],
+    'seq': e['seq'],
     'action': e['action'],
     'entityType': e['entityType'],
     'entityId': e['entityId'],
     'createdAt': e['createdAt'],
+    'prevHash': e['prevHash'],
+    'hash': e['hash'],
   };
 }
