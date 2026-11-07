@@ -7,6 +7,7 @@ import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_ui.dart';
+import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
@@ -15,14 +16,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Leave home: balances, filter and the caller's requests.
-class LeaveScreen extends ConsumerStatefulWidget {
+class LeaveScreen extends StatelessWidget {
   const LeaveScreen({super.key});
 
   @override
-  ConsumerState<LeaveScreen> createState() => _LeaveScreenState();
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.leaveTitle),
+        actions: const [AppBarActions()],
+      ),
+      body: const MyLeaveView(),
+    );
+  }
 }
 
-class _LeaveScreenState extends ConsumerState<LeaveScreen> {
+/// Reusable view embedded into both LeaveScreen and the unified AttendanceScreen.
+class MyLeaveView extends ConsumerStatefulWidget {
+  const MyLeaveView({this.showHeaderAction = true, super.key});
+
+  final bool showHeaderAction;
+
+  @override
+  ConsumerState<MyLeaveView> createState() => _MyLeaveViewState();
+}
+
+class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
   LeaveStatus? _filter;
 
   Future<void> _refresh() async {
@@ -35,74 +55,93 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bangla = context.isBangla;
     final requests = ref.watch(myLeaveRequestsProvider);
     final balances = ref.watch(leaveBalancesProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.leaveTitle)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => unawaited(context.push(AppRoutes.leaveNew)),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.leaveApply),
-      ),
-      body: requests.when(
-        loading: () => const SkeletonList(),
-        error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
-        data: (all) {
-          final items = _filter == null
-              ? all
-              : all.where((r) => r.status == _filter).toList();
-          return RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 96),
-              children: [
-                SectionHeader(title: l10n.leaveBalancesTitle),
-                balances.when(
-                  loading: () => const SizedBox(
-                    height: 120,
-                    child: Center(child: CircularProgressIndicator()),
+    return requests.when(
+      loading: () => const SkeletonList(),
+      error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
+      data: (all) {
+        final items = _filter == null
+            ? all
+            : all.where((r) => r.status == _filter).toList();
+        return RefreshIndicator(
+          onRefresh: _refresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 96),
+            children: [
+              // CTA Banner to Apply
+              if (widget.showHeaderAction)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Space.lg,
+                    Space.md,
+                    Space.lg,
+                    Space.xs,
                   ),
-                  error: (_, _) => ErrorState(
-                    onRetry: () => ref.invalidate(leaveBalancesProvider),
-                  ),
-                  data: (b) => _BalanceStrip(balances: b),
-                ),
-                SectionHeader(title: l10n.leaveRequestsTitle),
-                _FilterBar(
-                  selected: _filter,
-                  onSelected: (s) => setState(() => _filter = s),
-                ),
-                if (items.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: Space.xxxl),
-                    child: EmptyState(
-                      icon: Icons.beach_access_outlined,
-                      title: l10n.leaveEmptyTitle,
-                      message: l10n.leaveEmptyMessage,
-                    ),
-                  )
-                else
-                  for (final r in items)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Space.lg,
-                        vertical: Space.xs,
+                  child: FilledButton.tonalIcon(
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: Space.md),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Corner.lg),
                       ),
-                      child: _RequestRow(item: r),
                     ),
-              ],
-            ),
-          );
-        },
-      ),
+                    icon: const Icon(Icons.add, size: 20),
+                    label: Text(
+                      bangla ? '+ নতুন ছুটির আবেদন করুন' : '+ Request Leave',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () => context.push(AppRoutes.leaveNew),
+                  ),
+                ),
+
+              SectionHeader(title: l10n.leaveBalancesTitle),
+              balances.when(
+                loading: () => const SizedBox(
+                  height: 120,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, _) => ErrorState(
+                  onRetry: () => ref.invalidate(leaveBalancesProvider),
+                ),
+                data: (b) => BalanceStrip(balances: b),
+              ),
+              SectionHeader(title: l10n.leaveRequestsTitle),
+              LeaveFilterBar(
+                selected: _filter,
+                onSelected: (s) => setState(() => _filter = s),
+              ),
+              const SizedBox(height: Space.xs),
+              if (items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.xxxl),
+                  child: EmptyState(
+                    icon: Icons.beach_access_outlined,
+                    title: l10n.leaveEmptyTitle,
+                    message: l10n.leaveEmptyMessage,
+                  ),
+                )
+              else
+                for (final r in items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Space.lg,
+                      vertical: Space.xs,
+                    ),
+                    child: LeaveRequestRow(item: r),
+                  ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
-class _BalanceStrip extends StatelessWidget {
-  const _BalanceStrip({required this.balances});
+class BalanceStrip extends StatelessWidget {
+  const BalanceStrip({required this.balances, super.key});
 
   final List<LeaveBalance> balances;
 
@@ -117,14 +156,14 @@ class _BalanceStrip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: Space.lg),
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: Space.md),
-        itemBuilder: (_, i) => _BalanceCard(balance: items[i]),
+        itemBuilder: (_, i) => BalanceCard(balance: items[i]),
       ),
     );
   }
 }
 
-class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.balance});
+class BalanceCard extends StatelessWidget {
+  const BalanceCard({required this.balance, super.key});
 
   final LeaveBalance balance;
 
@@ -187,8 +226,12 @@ class _BalanceCard extends StatelessWidget {
   }
 }
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({required this.selected, required this.onSelected});
+class LeaveFilterBar extends StatelessWidget {
+  const LeaveFilterBar({
+    required this.selected,
+    required this.onSelected,
+    super.key,
+  });
 
   final LeaveStatus? selected;
   final ValueChanged<LeaveStatus?> onSelected;
@@ -220,8 +263,8 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-class _RequestRow extends StatelessWidget {
-  const _RequestRow({required this.item});
+class LeaveRequestRow extends StatelessWidget {
+  const LeaveRequestRow({required this.item, super.key});
 
   final LeaveRequestItem item;
 
