@@ -1700,12 +1700,12 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
 .modal {
   position: relative !important;
   background: var(--surface-1) !important;
-  border: 1px solid var(--border-1) !important;
+  border: none !important;
   border-radius: 16px !important;
   width: 100% !important;
   max-width: 620px;
   max-height: calc(100vh - 32px) !important;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35) !important;
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1718,6 +1718,7 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
 }
 .modal-hd {
   flex: 0 0 auto !important;
+  margin: -1px -1px 0 !important;
   padding: 14px 20px !important;
   display: flex !important;
   align-items: center !important;
@@ -1824,8 +1825,9 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
   max-width: 820px !important;
   width: 95% !important;
   max-height: 92vh !important;
+  border: none !important;
   border-radius: 18px !important;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4) !important;
   background: var(--surface-1) !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1836,6 +1838,7 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
 
 .notice-modal-hd {
   flex: 0 0 auto !important;
+  margin: -1px -1px 0 !important;
   padding: 18px 28px !important;
   display: flex !important;
   align-items: center !important;
@@ -1922,8 +1925,9 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
   max-width: 780px !important;
   width: 95% !important;
   max-height: 92vh !important;
+  border: none !important;
   border-radius: 16px !important;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4) !important;
   background: var(--surface-1) !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1934,12 +1938,13 @@ body:has(.modal-bg, .app-modal-overlay, .eam-modal-overlay, .apv-drawer-backdrop
 
 [data-theme="dark"] .fleet-modal-dialog {
   background: var(--surface-inverse) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
   box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.7) !important;
 }
 
 .fleet-modal-hd {
   flex: 0 0 auto !important;
+  margin: -1px -1px 0 !important;
   padding: 12px 20px !important;
   display: flex !important;
   align-items: center !important;
@@ -4078,9 +4083,9 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   max-height: calc(100vh - 32px) !important;
   background: var(--surface-1) !important;
   color: var(--text-1) !important;
-  border: 1px solid var(--border-1) !important;
+  border: none !important;
   border-radius: 16px !important;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35) !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
@@ -4101,6 +4106,7 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 
 .app-modal-header {
   flex: 0 0 auto !important;
+  margin: -1px -1px 0 !important;
   padding: 14px 20px !important;
   display: flex !important;
   align-items: center !important;
@@ -4572,21 +4578,22 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   display: flex;
   flex-direction: column;
   background-color: var(--brand-modal-bg, var(--surface-1));
-  border: 1px solid var(--brand-slate-200, var(--border-1));
+  border: none;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4);
   box-sizing: border-box;
   animation: modal-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 [data-theme="dark"] .claims-modal-dialog {
   background-color: var(--surface-inverse);
-  border-color: rgba(255, 255, 255, 0.1);
+  border: none;
   box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.7);
 }
 
 .claims-modal-header {
+  margin: -1px -1px 0;
   padding: 16px 24px;
   background: linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 55%, var(--brand-crimson-dark) 100%);
   display: flex;

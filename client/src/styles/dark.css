@@ -318,10 +318,15 @@
 
 /* ─── MODALS & DIALOGS ─────────────────────────────────────────────────────── */
 [data-theme="dark"] .modal,
-[data-theme="dark"] .modal-card,
+[data-theme="dark"] .modal-card {
+  background: #0B132B !important;
+  border: none !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8) !important;
+  color: #E2E8F0 !important;
+}
+
 [data-theme="dark"] .ic-call-modal {
   background: #0B132B !important;
-  border: 1px solid #1E293B !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8) !important;
   color: #E2E8F0 !important;
 }
@@ -912,7 +917,7 @@
 [data-theme="dark"] .app-modal-dialog {
   background: #0E1834 !important;
   color: #F8FAFC !important;
-  border-color: #1E293B !important;
+  border: none !important;
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8) !important;
 }
 
