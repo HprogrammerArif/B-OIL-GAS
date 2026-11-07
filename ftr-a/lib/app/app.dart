@@ -19,7 +19,8 @@ class BogclApp extends ConsumerWidget {
     ref.watch(syncCoordinatorProvider);
 
     return MaterialApp.router(
-      builder: (context, child) => AppLockGate(child: child!),
+      builder: (context, child) =>
+          AppLockGate(child: child ?? const SizedBox.shrink()),
       onGenerateTitle: (context) => AppL10n.of(context).appName,
       debugShowCheckedModeBanner: false,
       routerConfig: router,

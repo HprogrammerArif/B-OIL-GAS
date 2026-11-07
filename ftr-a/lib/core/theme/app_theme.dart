@@ -128,7 +128,7 @@ abstract final class AppTheme {
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(Corner.lg),
     );
-    const minSize = WidgetStatePropertyAll(Size.fromHeight(kMinTouchTarget));
+    const minSize = WidgetStatePropertyAll(Size(64, kMinTouchTarget));
 
     return ThemeData(
       useMaterial3: true,

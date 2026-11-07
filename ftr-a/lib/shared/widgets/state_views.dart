@@ -137,6 +137,7 @@ class SkeletonList extends StatelessWidget {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final base = scheme.surfaceContainerHighest;
     final list = ListView.separated(
+      shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(Space.lg),
       itemCount: itemCount,
