@@ -36,7 +36,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void initState() {
     super.initState();
     _poll = Timer.periodic(const Duration(seconds: 12), (_) {
-      ref.invalidate(chatChannelsProvider);
+      if (mounted) {
+        ref.invalidate(chatChannelsProvider);
+      }
     });
   }
 
@@ -86,14 +88,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       size: 14,
                     ),
                     const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? 'এন্ড-টু-এন্ড এনক্রিপ্টেড এক্সিকিউটিভ কল'
-                          : 'End-to-End Encrypted Executive Call',
-                      style: const TextStyle(
-                        color: BrandColors.success,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        bangla
+                            ? 'সুরক্ষিত অভ্যন্তরীণ ভয়েস কল'
+                            : 'Secure Enterprise Voice Call',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: BrandColors.success,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -124,6 +129,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 const SizedBox(height: 2),
                 Text(
                   role,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
@@ -131,12 +137,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 const SizedBox(height: Space.md),
                 const Text(
-                  '00:42 · HD Secure Audio (256-bit AES)',
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                    fontFeatures: [],
-                  ),
+                  '00:42 · HD Corporate Voice Line',
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
                 const SizedBox(height: Space.xl),
                 Row(
@@ -170,9 +172,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         Navigator.pop(ctx);
                         AppToast.show(
                           context,
-                          bangla
-                              ? 'কল সমাপ্ত হয়েছে।'
-                              : 'Executive call ended.',
+                          bangla ? 'কল সমাপ্ত হয়েছে।' : 'Voice call ended.',
                           tone: StatusTone.neutral,
                         );
                       },
@@ -192,74 +192,91 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final rows = ref.watch(chatChannelsProvider);
+
+    final allChannels = rows.asData?.value ?? const <ChatChannel>[];
+    final cmdCount = allChannels.where((c) => !c.isDirect).length;
+    final dmCount = allChannels.where((c) => c.isDirect).length;
+    final unreadTotal = allChannels
+        .where((c) => c.unreadCount > 0)
+        .fold<int>(0, (acc, c) => acc + c.unreadCount);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          bangla
-              ? 'ইনার-সার্কেল লিডারশিপ চ্যাট'
-              : 'Inner-Circle Leadership Chat',
+          bangla ? 'কমান্ড ও এক্সিকিউটিভ চ্যাট' : 'Command & Executive Chat',
         ),
         actions: [
           IconButton(
-            tooltip: bangla ? 'সিকিউর কল' : 'Secure Call',
-            icon: const Icon(Icons.phone_in_talk_outlined),
-            onPressed: () => _showEncryptedCallModal(
-              'Engr. Md. Harunur Rashid',
-              'Plant General Manager (Keraniganj)',
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.chDirect,
+            tooltip: bangla ? 'নতুন ডিরেক্ট মেসেজ' : 'New Direct Message',
             onPressed: () => unawaited(_direct()),
-            icon: const Icon(Icons.edit_outlined),
+            icon: const Icon(Icons.person_add_alt_1_outlined),
           ),
           const AppBarActions(),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => unawaited(_direct()),
+        icon: const Icon(Icons.chat_outlined, size: 18),
+        label: Text(bangla ? 'নতুন বার্তা' : 'New Message'),
+      ),
       body: Column(
         children: [
-          // Plain-Language Verdict Banner
+          // Live Status & Summary Banner
           Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
             child: Container(
-              padding: const EdgeInsets.all(Space.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Space.md,
+                vertical: Space.sm,
+              ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(Corner.lg),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outlineVariant,
+                  color: scheme.outlineVariant.withValues(alpha: 0.6),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.shield_outlined,
-                    color: BrandColors.crimson,
-                    size: 24,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: BrandColors.crimson.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(Corner.md),
+                    ),
+                    child: const Icon(
+                      Icons.hub_outlined,
+                      color: BrandColors.crimson,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(width: Space.md),
+                  const SizedBox(width: Space.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           bangla
-                              ? '৪টি কমান্ড চ্যানেল ও এক্সিকিউটিভ ডিরেক্ট মেসেজ সক্রিয়'
-                              : '4 command channels & executive direct lines active',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                              ? '$cmdCountটি কমান্ড চ্যানেল · $dmCountটি ডিরেক্ট মেসেজ সক্রিয়'
+                              : '$cmdCount Command Channels · $dmCount Direct Lines Active',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        const SizedBox(height: 2),
                         Text(
-                          bangla
-                              ? 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস অভ্যন্তরীণ প্রটোকলে সংরক্ষিত।'
-                              : 'Encrypted under BOGCL internal executive protocol.',
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                            fontSize: 12,
+                          unreadTotal > 0
+                              ? (bangla
+                                    ? '$unreadTotalটি অপঠিত বার্তা · সদর দপ্তর ও কেরানীগঞ্জ সংযুক্ত'
+                                    : '$unreadTotal unread messages · HQ & Refinery plants linked')
+                              : (bangla
+                                    ? 'সকল বার্তা পঠিত · সদর দপ্তর ও রিফাইনারি প্ল্যান্ট সংযুক্ত'
+                                    : 'All caught up · Baridhara HQ & Refinery plants linked'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontSize: 11.5,
                           ),
                         ),
                       ],
@@ -277,9 +294,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: bangla
-                    ? 'চ্যানেল বা বার্তা অনুসন্ধান...'
-                    : 'Search channels & messages...',
-                prefixIcon: const Icon(Icons.search),
+                    ? 'চ্যানেল, কর্মকর্তা বা বার্তা অনুসন্ধান...'
+                    : 'Search channels, colleagues, or messages...',
+                prefixIcon: const Icon(Icons.search, size: 20),
                 isDense: true,
               ),
               onChanged: (v) =>
@@ -288,21 +305,33 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           const SizedBox(height: Space.xs),
 
-          // Filter Chips
+          // Filter Chips with Live Counts
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: Space.md),
             child: Row(
               children: [
-                _filterChip('ALL', bangla ? 'সকল' : 'All Channels'),
+                _filterChip(
+                  'ALL',
+                  bangla
+                      ? 'সকল (${allChannels.length})'
+                      : 'All (${allChannels.length})',
+                ),
                 _filterChip(
                   'COMMAND',
-                  bangla ? 'কমান্ড চ্যানেল (#)' : 'Command Channels (#)',
+                  bangla
+                      ? 'কমান্ড চ্যানেল ($cmdCount)'
+                      : 'Channels # ($cmdCount)',
                 ),
                 _filterChip(
                   'DIRECT',
-                  bangla ? 'ডিরেক্ট মেসেজ (১:১)' : 'Direct Messages (1:1)',
+                  bangla ? 'ডিরেক্ট মেসেজ ($dmCount)' : 'Direct 1:1 ($dmCount)',
                 ),
+                if (unreadTotal > 0)
+                  _filterChip(
+                    'UNREAD',
+                    bangla ? 'অপঠিত ($unreadTotal)' : 'Unread ($unreadTotal)',
+                  ),
               ],
             ),
           ),
@@ -311,6 +340,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // Channel Stream
           Expanded(
             child: rows.when(
+              skipLoadingOnReload: true,
               loading: () => const SkeletonList(),
               error: (e, _) => ErrorState(
                 message: e is ApiException
@@ -322,12 +352,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 final filtered = list.where((c) {
                   if (_filter == 'COMMAND' && c.isDirect) return false;
                   if (_filter == 'DIRECT' && !c.isDirect) return false;
-                  if (_search.isNotEmpty &&
-                      !c
-                          .heading(bangla: bangla)
-                          .toLowerCase()
-                          .contains(_search)) {
-                    return false;
+                  if (_filter == 'UNREAD' && c.unreadCount == 0) return false;
+                  if (_search.isNotEmpty) {
+                    final h = c.heading(bangla: bangla).toLowerCase();
+                    final sub = c.subheading(bangla: bangla).toLowerCase();
+                    final prev = (c.lastPreview ?? '').toLowerCase();
+                    if (!h.contains(_search) &&
+                        !sub.contains(_search) &&
+                        !prev.contains(_search)) {
+                      return false;
+                    }
                   }
                   return true;
                 }).toList();
@@ -348,11 +382,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     await ref.read(chatChannelsProvider.future);
                   },
                   child: ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 88),
                     itemCount: filtered.length,
                     separatorBuilder: (_, _) => Divider(
                       height: 1,
                       indent: 72,
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                      color: scheme.outlineVariant.withValues(alpha: 0.6),
                     ),
                     itemBuilder: (context, i) => _RoomTile(
                       channel: filtered[i],
@@ -362,9 +397,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       onCall: () => _showEncryptedCallModal(
                         filtered[i].heading(bangla: bangla),
-                        filtered[i].isDirect
-                            ? 'Direct Line'
-                            : 'Command Voice Bridge',
+                        filtered[i].subheading(bangla: bangla).isNotEmpty
+                            ? filtered[i].subheading(bangla: bangla)
+                            : (filtered[i].isDirect
+                                  ? 'Direct Executive Line'
+                                  : 'Command Voice Bridge'),
                       ),
                     ),
                   ),
@@ -381,9 +418,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Padding(
       padding: const EdgeInsets.only(right: Space.xs),
       child: ChoiceChip(
+        visualDensity: VisualDensity.compact,
         label: Text(label, style: const TextStyle(fontSize: 12)),
         selected: _filter == key,
-        onSelected: (_) => setState(() => _filter = key),
+        onSelected: (_) {
+          Haptics.tap();
+          setState(() => _filter = key);
+        },
       ),
     );
   }
@@ -405,164 +446,208 @@ class _RoomTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final lang = Localizations.localeOf(context).languageCode;
-    final preview = _preview(l10n, channel.lastPreview);
+    final preview = _preview(
+      l10n,
+      channel.lastPreview,
+      channel.lastSender,
+      channel.isDirect,
+      bangla,
+    );
     final time = channel.lastAt == null
         ? null
         : DateFmt.time(channel.lastAt!, lang);
     final unread = channel.unreadCount > 0;
+    final sub = channel.subheading(bangla: bangla);
 
-    // Simulated presence status for direct executive messages
     final presence = channel.isDirect
-        ? _presenceStatus(channel.name, bangla)
+        ? _presenceBadge(channel.name, channel.presence, bangla)
         : null;
 
     return InkWell(
       onTap: onTap,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: kMinTouchTarget + Space.lg,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Space.md,
+          vertical: Space.sm + 2,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Space.md,
-            vertical: Space.md,
-          ),
-          child: Row(
-            children: [
-              Stack(
-                children: [
-                  Avatar(name: channel.heading(bangla: bangla)),
-                  if (presence != null)
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: presence.$2,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
+        child: Row(
+          children: [
+            // Channel Icon or Colleague Avatar with Status Dot
+            Stack(
+              children: [
+                if (channel.isDirect)
+                  Avatar(name: channel.heading(bangla: bangla))
+                else
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(Corner.md),
+                    ),
+                    child: Icon(
+                      channel.isLocked ? Icons.campaign_outlined : Icons.tag,
+                      color: scheme.primary,
+                      size: 22,
+                    ),
+                  ),
+                if (presence != null)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: presence.$2,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: scheme.surface, width: 2),
                       ),
                     ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: Space.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (channel.isLocked && !channel.isDirect) ...[
+                        Icon(
+                          Icons.verified_outlined,
+                          size: 14,
+                          color: scheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: Text(
+                          channel.heading(bangla: bangla),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: unread
+                                ? FontWeight.w800
+                                : FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      if (time != null)
+                        Text(
+                          time,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontWeight: unread
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: unread
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (sub.isNotEmpty) ...[
+                    const SizedBox(height: 1),
+                    Text(
+                      sub,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: channel.isDirect
+                            ? scheme.primary.withValues(alpha: 0.85)
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          preview,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: unread
+                                ? scheme.onSurface
+                                : scheme.onSurfaceVariant,
+                            fontWeight: unread
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      if (unread) ...[
+                        const SizedBox(width: Space.sm),
+                        _Count(n: channel.unreadCount),
+                      ],
+                    ],
+                  ),
                 ],
               ),
-              const SizedBox(width: Space.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        if (channel.isLocked) ...[
-                          Icon(
-                            Icons.lock_outline,
-                            size: 14,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: Space.xs),
-                        ],
-                        Expanded(
-                          child: Text(
-                            channel.heading(bangla: bangla),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: unread
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        if (time != null)
-                          Text(
-                            time,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: unread
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            preview,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: unread
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        if (unread) ...[
-                          const SizedBox(width: Space.sm),
-                          _Count(n: channel.unreadCount),
-                        ],
-                      ],
-                    ),
-                    if (presence != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        presence.$1,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: presence.$2,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.call_outlined, size: 18),
-                onPressed: onCall,
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              tooltip: bangla ? 'কল করুন' : 'Voice Call',
+              icon: const Icon(Icons.call_outlined, size: 18),
+              onPressed: onCall,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  (String label, Color color) _presenceStatus(String name, bool bangla) {
-    if (name.contains('Harunur')) {
+  (String label, Color color) _presenceBadge(
+    String name,
+    String rawPresence,
+    bool bangla,
+  ) {
+    if (name.contains('Harunur') || name.contains('হারুনুর')) {
       return (
-        bangla
-            ? '● প্ল্যান্টে উপস্থিত (কেরানীগঞ্জ)'
-            : '● On Site at Keraniganj',
+        bangla ? 'প্ল্যান্টে উপস্থিত' : 'On Site at Keraniganj',
         BrandColors.info,
       );
     }
-    if (name.contains('Farida')) {
-      return (
-        bangla ? '● অনলাইনে (হেড অফিস)' : '● Online at Baridhara HQ',
-        BrandColors.success,
-      );
+    if (rawPresence == 'IN_MEETING' ||
+        name.contains('Sayeda') ||
+        name.contains('সায়েদা')) {
+      return (bangla ? 'মিটিংয়ে' : 'In Meeting', BrandColors.warning);
     }
-    if (name.contains('Sayeda')) {
-      return (
-        bangla ? '◐ মিটিংয়ে ব্যস্ত' : '◐ In Meeting',
-        BrandColors.warning,
-      );
-    }
-    return (bangla ? '○ দূরে আছেন' : '○ Away', Colors.grey);
+    return (bangla ? 'অনলাইনে' : 'Online', BrandColors.success);
   }
 
-  String _preview(AppL10n l10n, String? body) {
+  String _preview(
+    AppL10n l10n,
+    String? body,
+    String? sender,
+    bool isDirect,
+    bool bangla,
+  ) {
     if (body == null || body.isEmpty) return l10n.chNoMessages;
-    if (body.startsWith('VOICE:')) return l10n.chVoice;
-    return body;
+    var clean = body;
+    if (body.startsWith('VOICE:')) {
+      final parts = body.split('|');
+      clean = parts.length > 1 && parts[1].trim().isNotEmpty
+          ? '🎤 ${parts[1].trim()}'
+          : '🎤 ${l10n.chVoice}';
+    } else if (body.startsWith('[VOICE BRIEFING')) {
+      clean =
+          '🎤 ${body.replaceAll(RegExp(r'^\[VOICE BRIEFING[^\]]*\]\s*'), '')}';
+    } else if (body.startsWith('Attached ')) {
+      clean = '📎 $body';
+    }
+    if (!isDirect && sender != null && sender.isNotEmpty) {
+      final shortSender = sender.split(' ').last;
+      return '$shortSender: $clean';
+    }
+    return clean;
   }
 }
 

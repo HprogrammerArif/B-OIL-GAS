@@ -19,7 +19,7 @@ void seedChat(MockStore store) {
       'isDirect': false,
       'members': [
         _mem('EMP-0001', admin: true, presence: 'ONLINE'),
-        _mem('EMP-0012'),
+        _mem('EMP-0012', presence: 'ONLINE'),
         _mem('EMP-0028', presence: 'ONLINE'),
         _mem('EMP-0062', presence: 'IN_MEETING'),
       ],
@@ -32,7 +32,7 @@ void seedChat(MockStore store) {
       'isLocked': false,
       'isDirect': false,
       'members': [
-        _mem('EMP-0001', admin: true),
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
         _mem('EMP-0012', admin: true, presence: 'ONLINE'),
       ],
     })
@@ -44,9 +44,9 @@ void seedChat(MockStore store) {
       'isLocked': false,
       'isDirect': false,
       'members': [
-        _mem('EMP-0001', admin: true),
-        _mem('EMP-0062', admin: true),
-        _mem('EMP-0028'),
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0062', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0028', presence: 'ONLINE'),
       ],
     })
     ..put(Col.chatChannels, {
@@ -56,7 +56,46 @@ void seedChat(MockStore store) {
       'nameBn': 'অনুমতি',
       'isLocked': true,
       'isDirect': false,
-      'members': [_mem('EMP-0001', admin: true), _mem('EMP-0012')],
+      'members': [
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0012', presence: 'ONLINE'),
+      ],
+    })
+    ..put(Col.chatChannels, {
+      'id': 'dm_usr_0001_usr_0012',
+      'key': 'dm_usr_0001_usr_0012',
+      'name': 'Direct',
+      'nameBn': 'সরাসরি',
+      'isLocked': false,
+      'isDirect': true,
+      'members': [
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0012', admin: true, presence: 'ONLINE'),
+      ],
+    })
+    ..put(Col.chatChannels, {
+      'id': 'dm_usr_0001_usr_0062',
+      'key': 'dm_usr_0001_usr_0062',
+      'name': 'Direct',
+      'nameBn': 'সরাসরি',
+      'isLocked': false,
+      'isDirect': true,
+      'members': [
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0062', admin: true, presence: 'ONLINE'),
+      ],
+    })
+    ..put(Col.chatChannels, {
+      'id': 'dm_usr_0001_usr_0028',
+      'key': 'dm_usr_0001_usr_0028',
+      'name': 'Direct',
+      'nameBn': 'সরাসরি',
+      'isLocked': false,
+      'isDirect': true,
+      'members': [
+        _mem('EMP-0001', admin: true, presence: 'ONLINE'),
+        _mem('EMP-0028', admin: true, presence: 'IN_MEETING'),
+      ],
     });
 
   void msg(
@@ -142,6 +181,27 @@ void seedChat(MockStore store) {
     'EMP-0062',
     'Licence fee for the explosives magazine is in my queue. I will clear it this morning.',
     at: '2026-11-03T06:20:00.000Z',
+  );
+  msg(
+    'cm_6',
+    'dm_usr_0001_usr_0012',
+    'EMP-0012',
+    'Sir, Batch B-88 Bitumen 60/70 passed BDS 1238 lab certification at Keraniganj Refinery. Ready for commercial dispatch.',
+    at: '2026-11-03T07:15:00.000Z',
+  );
+  msg(
+    'cm_7',
+    'dm_usr_0001_usr_0062',
+    'EMP-0062',
+    'Chairman Sir, the Tk 32.0L Bitumen Storage Tank TK-109 Note-Sheet is verified by Finance and placed in your E-Sign queue.',
+    at: '2026-11-03T07:45:00.000Z',
+  );
+  msg(
+    'cm_8',
+    'dm_usr_0001_usr_0028',
+    'EMP-0028',
+    'Morning attendance across Baridhara HQ and Keraniganj Plant is 96.4% on time today.',
+    at: '2026-11-03T08:05:00.000Z',
   );
 
   store.put(Col.briefings, {

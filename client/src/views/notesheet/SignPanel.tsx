@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
-import { CheckCheck, Eraser, PenTool, RotateCcw, ShieldCheck, Stamp } from 'lucide-react';
+import { useLayoutEffect, useRef, useState, type ChangeEvent, type PointerEvent } from 'react';
+import { CheckCheck, Eraser, PenTool, RotateCcw, ShieldCheck, Stamp, Upload } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { readToken } from '../../lib/theme';
 import { Button, Modal } from '../../components/ui';
@@ -7,6 +7,15 @@ import type { CurrentUser } from '../../auth/session';
 import type { NoteFile } from '../../store/notesheetStore';
 
 const REMARK_LIMIT = 500;
+const MAX_SIGNATURE_BYTES = 500 * 1024;
+
+function isSignatureImage(file: File): boolean {
+  const type = file.type.toLowerCase();
+  if (type === 'image/png' || type === 'image/jpeg') return true;
+  if (type) return false;
+  const name = file.name.toLowerCase();
+  return name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg');
+}
 
 interface SignPanelProps {
   file: NoteFile;
@@ -26,11 +35,15 @@ interface SignPanelProps {
  */
 export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSign, onReturn }: SignPanelProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
   const drawing = useRef(false);
+  /** 'image' is a stamp or upload, which the next stroke replaces. */
+  const markKind = useRef<'draw' | 'image' | null>(null);
   const [signed, setSigned] = useState(false);
   const [remark, setRemark] = useState('');
   const [busy, setBusy] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
   // Match the bitmap to the displayed size so strokes are not stretched.
   useLayoutEffect(() => {
@@ -65,7 +78,11 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
 
   const onDown = (e: PointerEvent<HTMLCanvasElement>) => {
     const ctx = ctxOf();
-    if (!ctx) return;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
+    if (markKind.current === 'image') ctx.clearRect(0, 0, canvas.width, canvas.height);
+    markKind.current = 'draw';
+    setUploadError('');
     e.currentTarget.setPointerCapture(e.pointerId);
     drawing.current = true;
     const { x, y } = pointOf(e);
@@ -94,7 +111,9 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
   const clearPad = () => {
     const canvas = canvasRef.current;
     canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+    markKind.current = null;
     setSigned(false);
+    setUploadError('');
   };
 
   const applyStamp = () => {
@@ -110,7 +129,44 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
     ctx.moveTo(14 * ratio, canvas.height * 0.72);
     ctx.bezierCurveTo(canvas.width * 0.25, canvas.height * 0.9, canvas.width * 0.6, canvas.height * 0.55, canvas.width - 14 * ratio, canvas.height * 0.7);
     ctx.stroke();
+    markKind.current = 'image';
+    setUploadError('');
     setSigned(true);
+  };
+
+  const onUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!isSignatureImage(file) || file.size > MAX_SIGNATURE_BYTES) {
+      setUploadError(t('Use a PNG or JPEG under 500 KB.', '৫০০ কিলোবাইটের কম PNG বা JPEG ব্যবহার করুন।', lang));
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d') ?? null;
+      URL.revokeObjectURL(url);
+      if (!canvas || !ctx || img.width < 1 || img.height < 1) {
+        setUploadError(t('That file could not be read. Try another image.', 'এই ফাইলটি পড়া যায়নি। অন্য একটি ছবি চেষ্টা করুন।', lang));
+        return;
+      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+      markKind.current = 'image';
+      setUploadError('');
+      setSigned(true);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      setUploadError(t('That file could not be read. Try another image.', 'এই ফাইলটি পড়া যায়নি। অন্য একটি ছবি চেষ্টা করুন।', lang));
+    };
+    img.src = url;
   };
 
   const submit = async () => {
@@ -164,9 +220,17 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
           <label id="ns-pad-label">{t('Signature', 'স্বাক্ষর', lang)}</label>
           <span className="ns-field-tools">
             <button type="button" onClick={applyStamp}><Stamp size={12} /> {t('Use my stamp', 'আমার স্ট্যাম্প', lang)}</button>
+            <button type="button" onClick={() => fileRef.current?.click()}><Upload size={12} /> {t('Upload', 'আপলোড', lang)}</button>
             <button type="button" onClick={clearPad} disabled={!signed}><Eraser size={12} /> {t('Clear', 'মুছুন', lang)}</button>
           </span>
         </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/png,image/jpeg"
+          hidden
+          onChange={onUpload}
+        />
         <div className={`ns-pad ${signed ? 'is-signed' : ''}`}>
           <canvas
             ref={canvasRef}
@@ -177,9 +241,10 @@ export default function SignPanel({ file, user, lang, isFinal, nextOfficer, onSi
             onPointerCancel={onUp}
           />
           {!signed && (
-            <span className="ns-pad-hint"><PenTool size={14} /> {t('Draw your signature here, or use your stamp', 'এখানে স্বাক্ষর আঁকুন বা স্ট্যাম্প ব্যবহার করুন', lang)}</span>
+            <span className="ns-pad-hint"><PenTool size={14} /> {t('Draw your signature here, use your stamp, or upload an image', 'এখানে স্বাক্ষর আঁকুন, স্ট্যাম্প ব্যবহার করুন, অথবা ছবি আপলোড করুন', lang)}</span>
           )}
         </div>
+        {uploadError && <small className="ns-help">{uploadError}</small>}
       </div>
 
       <div className="ns-field">
