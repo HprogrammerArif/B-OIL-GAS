@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Gold Crest Circle -->
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="2.2"
+        android:fillColor="#00000000"
+        android:pathData="M54,26 A28,28 0 1,1 53.99,26"/>
+    <!-- Outer Oil / Gas Drop in White -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,32 C54,32 40,49 40,59 C40,66.7 46.3,73 54,73 C61.7,73 68,66.7 68,59 C68,49 54,32 54,32 Z"/>
+    <!-- Inner Flame in BOGCL Crimson -->
+    <path
+        android:fillColor="#A51C30"
+        android:pathData="M54,44 C54,44 46,54 46,60 C46,64.4 49.6,68 54,68 C58.4,68 62,64.4 62,60 C62,54 54,44 54,44 Z"/>
+    <!-- Inner Flame Core in Gold -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M54,52 C54,52 49,58 49,61.5 C49,64.2 51.2,66.5 54,66.5 C56.8,66.5 59,64.2 59,61.5 C59,58 54,52 54,52 Z"/>
+    <!-- Gold Foundation Bar -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M38,76 h32 v3.5 h-32 z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,81.5 h20 v2 h-20 z"/>
+</vector>
+

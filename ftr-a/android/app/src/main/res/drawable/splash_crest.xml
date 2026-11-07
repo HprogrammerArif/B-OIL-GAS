@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="192dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <!-- Crimson Shield Base -->
+    <path
+        android:fillColor="#A51C30"
+        android:pathData="M36,28 h120 v74 c0,38 -60,62 -60,62 c0,0 -60,-24 -60,-62 z"/>
+    <!-- Gold Border Ring -->
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="2.5"
+        android:fillColor="#00000000"
+        android:pathData="M44,36 h104 v66 c0,32 -52,52 -52,52 c0,0 -52,-20 -52,-52 z"/>
+    <!-- Central Gas/Oil Flame Emblem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M96,52 C96,52 74,78 74,94 C74,106 84,116 96,116 C108,116 118,106 118,94 C118,78 96,52 96,52 Z"/>
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M96,72 C96,72 84,87 84,96 C84,102.5 89.5,108 96,108 C102.5,108 108,102.5 108,96 C108,87 96,72 96,72 Z"/>
+    <path
+        android:fillColor="#A51C30"
+        android:pathData="M96,82 C96,82 89,92 89,97 C89,101 92,104 96,104 C100,104 103,101 103,97 C103,92 96,82 96,82 Z"/>
+    <!-- Foundation pedestal -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M72,122 h48 v5 h-48 z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,129 h32 v3 h-32 z"/>
+</vector>
+
