@@ -170,7 +170,7 @@ abstract final class AppTheme {
         style: ButtonStyle(
           minimumSize: minSize,
           padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: Space.xl, vertical: Space.md),
+            EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md),
           ),
           shape: WidgetStatePropertyAll(shape),
           textStyle: WidgetStatePropertyAll(text.labelLarge),
@@ -180,7 +180,7 @@ abstract final class AppTheme {
         style: ButtonStyle(
           minimumSize: minSize,
           padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: Space.xl, vertical: Space.md),
+            EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md),
           ),
           shape: WidgetStatePropertyAll(shape),
           textStyle: WidgetStatePropertyAll(text.labelLarge),

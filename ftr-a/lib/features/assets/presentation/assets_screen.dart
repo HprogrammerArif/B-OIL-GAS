@@ -530,13 +530,14 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
 
                       const SizedBox(height: Space.xs),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            '${bangla ? "বুক ভ্যালু" : "NBV"}: ${assetTaka(e.financials.nbv, bangla: bangla)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                          Expanded(
+                            child: Text(
+                              '${bangla ? "বুক ভ্যালু" : "NBV"}: ${assetTaka(e.financials.nbv, bangla: bangla)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           Row(
@@ -1099,11 +1100,12 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                 children: [
                   Row(
                     children: [
-                      Text(
-                        e.title(bangla: bangla),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: Text(
+                          e.title(bangla: bangla),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      const Spacer(),
                       if (e.financials.isEolCandidate)
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1300,16 +1302,18 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
 
         // Decommissioning & Multi-Item Disposal Checklist Section
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              bangla
-                  ? '৫-ধাপের স্ক্র্যাপ ও নিষ্পত্তি চেকলিস্ট'
-                  : '5-Step Disposal & Scrap Checklist',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                bangla
+                    ? '৫-ধাপের স্ক্র্যাপ ও নিষ্পত্তি চেকলিস্ট'
+                    : '5-Step Disposal & Scrap Checklist',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+            const SizedBox(width: Space.xs),
             OutlinedButton.icon(
               icon: const Icon(Icons.transfer_within_a_station, size: 16),
               label: Text(bangla ? 'ট্রান্সফার' : 'Transfer'),
@@ -1341,11 +1345,13 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                 children: [
                   Row(
                     children: [
-                      Text(
-                        decAsset.title(bangla: bangla),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: Text(
+                          decAsset.title(bangla: bangla),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: Space.xs),
                       StatusPill(
                         label: decAsset.stage,
                         tone: StatusTone.warning,

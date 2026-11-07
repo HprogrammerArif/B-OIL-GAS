@@ -492,32 +492,34 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                bangla
-                                    ? '৭-বিভাগের প্রস্থান ছাড়পত্র'
-                                    : '7-Department Exit Clearance',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  bangla
+                                      ? '৭-বিভাগের প্রস্থান ছাড়পত্র'
+                                      : '7-Department Exit Clearance',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '${totalCount - pendingCount} of $totalCount ${bangla ? "বিভাগ সম্পন্ন" : "desks cleared"}',
-                                style: TextStyle(
-                                  color: allCleared
-                                      ? BrandColors.success
-                                      : BrandColors.warning,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                Text(
+                                  '${totalCount - pendingCount} of $totalCount ${bangla ? "বিভাগ সম্পন্ন" : "desks cleared"}',
+                                  style: TextStyle(
+                                    color: allCleared
+                                        ? BrandColors.success
+                                        : BrandColors.warning,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          if (!allCleared)
+                          if (!allCleared) ...[
+                            const SizedBox(width: Space.xs),
                             OutlinedButton.icon(
                               icon: const Icon(
                                 Icons.bolt,
@@ -534,6 +536,7 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                                   ? null
                                   : () => unawaited(_clearAllDesksHelper(x)),
                             ),
+                          ],
                           if (allCleared)
                             IconButton(
                               tooltip: bangla

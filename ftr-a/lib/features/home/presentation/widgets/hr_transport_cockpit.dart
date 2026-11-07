@@ -48,20 +48,23 @@ class _HrTransportCockpitState extends State<HrTransportCockpit> {
             Space.lg,
             Space.xs,
           ),
-          child: Row(
-            children: [
-              for (var i = 0; i < tabs.length; i++) ...[
-                ChoiceChip(
-                  label: Text(tabs[i]),
-                  selected: _tabIndex == i,
-                  onSelected: (_) {
-                    Haptics.tap();
-                    setState(() => _tabIndex = i);
-                  },
-                ),
-                const SizedBox(width: Space.xs),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < tabs.length; i++) ...[
+                  ChoiceChip(
+                    label: Text(tabs[i]),
+                    selected: _tabIndex == i,
+                    onSelected: (_) {
+                      Haptics.tap();
+                      setState(() => _tabIndex = i);
+                    },
+                  ),
+                  const SizedBox(width: Space.xs),
+                ],
               ],
-            ],
+            ),
           ),
         ),
 
@@ -314,8 +317,9 @@ class _HrSitesHeadcountTab extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: Space.sm),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    spacing: Space.md,
+                    runSpacing: 4,
                     children: [
                       Text(
                         'On Duty: ${s['onDuty']}',
@@ -398,15 +402,17 @@ class _TransportDispatchTab extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? 'স্মার্ট কারপুলিং সুযোগ সনাক্ত'
-                          : 'SMART CARPOOLING MERGER DETECTED',
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.teal,
-                        letterSpacing: 0.5,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'স্মার্ট কারপুলিং সুযোগ সনাক্ত'
+                            : 'SMART CARPOOLING MERGER DETECTED',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.teal,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],
@@ -541,13 +547,15 @@ class _TransportCorridorTab extends StatelessWidget {
               children: [
                 const Icon(Icons.navigation, color: Colors.blue, size: 20),
                 const SizedBox(width: Space.xs),
-                Text(
-                  'Toyota Corolla Cross (Ga-18-4421)',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                Expanded(
+                  child: Text(
+                    'Toyota Corolla Cross (Ga-18-4421)',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: Space.xs),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,

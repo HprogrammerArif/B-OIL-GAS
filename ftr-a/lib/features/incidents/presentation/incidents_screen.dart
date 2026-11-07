@@ -543,12 +543,14 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Calculated Risk Score:',
-                            style: TextStyle(fontSize: 12),
+                          const Expanded(
+                            child: Text(
+                              'Calculated Risk Score:',
+                              style: TextStyle(fontSize: 12),
+                            ),
                           ),
+                          const SizedBox(width: Space.xs),
                           StatusPill(
                             label:
                                 'Score: ${severity * likelihood} · ${severity * likelihood >= 12 ? "CRITICAL / HIGH" : "MEDIUM"}',
@@ -851,15 +853,16 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          bangla
-                              ? '৫×৫ ঝুঁকি মূল্যায়ন ম্যাট্রিক্স (Severity × Likelihood):'
-                              : '5×5 Risk Assessment Matrix (Tap cell to filter):',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
+                        Expanded(
+                          child: Text(
+                            bangla
+                                ? '৫×৫ ঝুঁকি মূল্যায়ন ম্যাট্রিক্স (Severity × Likelihood):'
+                                : '5×5 Risk Assessment Matrix (Tap cell to filter):',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
                         if (_filterSeverity != null)

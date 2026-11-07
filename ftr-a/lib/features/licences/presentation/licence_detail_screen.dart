@@ -853,36 +853,38 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                           border: Border.all(color: Colors.red.shade200),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  bangla
-                                      ? 'দৈনিক রিফাইনারি উৎপাদন ক্ষতি'
-                                      : 'Daily Plant Shutdown Exposure',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    bangla
+                                        ? 'দৈনিক রিফাইনারি উৎপাদন ক্ষতি'
+                                        : 'Daily Plant Shutdown Exposure',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  riskTk > 0
-                                      ? (bangla
-                                            ? '${Money.fromPaisa((riskTk * 100).round()).format(bengali: true)} / দিন'
-                                            : '${Money.fromPaisa((riskTk * 100).round()).format()} / day')
-                                      : (bangla
-                                            ? 'ঝুঁকিমুক্ত'
-                                            : 'Low risk profile'),
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.red.shade800,
+                                  Text(
+                                    riskTk > 0
+                                        ? (bangla
+                                              ? '${Money.fromPaisa((riskTk * 100).round()).format(bengali: true)} / দিন'
+                                              : '${Money.fromPaisa((riskTk * 100).round()).format()} / day')
+                                        : (bangla
+                                              ? 'ঝুঁকিমুক্ত'
+                                              : 'Low risk profile'),
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.red.shade800,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: Space.xs),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -1011,15 +1013,16 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                       // Stage 1: Internal Review & Checklist Gate
                       if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              bangla
-                                  ? 'গেট ১: প্রাক-আবেদন অডিট চেকলিস্ট'
-                                  : 'Gate 1: Pre-Submission Audit Checklist',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                            Expanded(
+                              child: Text(
+                                bangla
+                                    ? 'গেট ১: প্রাক-আবেদন অডিট চেকলিস্ট'
+                                    : 'Gate 1: Pre-Submission Audit Checklist',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                             TextButton.icon(

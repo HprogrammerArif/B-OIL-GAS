@@ -447,27 +447,30 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Row(
-                                      children: [
-                                        Icon(
-                                          Icons.warning,
-                                          color: Colors.amber,
-                                          size: 20,
-                                        ),
-                                        SizedBox(width: Space.xs),
-                                        Text(
-                                          'EMERGENCY MUSTER ROLL',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
+                                    const Expanded(
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.warning,
+                                            color: Colors.amber,
+                                            size: 20,
                                           ),
-                                        ),
-                                      ],
+                                          SizedBox(width: Space.xs),
+                                          Flexible(
+                                            child: Text(
+                                              'EMERGENCY MUSTER ROLL',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                    const SizedBox(width: Space.xs),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -712,23 +715,25 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
               if (_musterMode) ...[
                 const Divider(height: Space.md),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      isSafe
-                          ? (bangla
-                                ? '✓ এসেম্বলি পয়েন্টে নিরাপদ'
-                                : '✓ Safe at Assembly Point')
-                          : (bangla
-                                ? 'উপস্থিতি অনুপস্থিত'
-                                : 'Status: Unaccounted'),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: isSafe ? Colors.green.shade700 : Colors.red,
+                    Expanded(
+                      child: Text(
+                        isSafe
+                            ? (bangla
+                                  ? '✓ এসেম্বলি পয়েন্টে নিরাপদ'
+                                  : '✓ Safe at Assembly Point')
+                            : (bangla
+                                  ? 'উপস্থিতি অনুপস্থিত'
+                                  : 'Status: Unaccounted'),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: isSafe ? Colors.green.shade700 : Colors.red,
+                        ),
                       ),
                     ),
-                    if (!isSafe)
+                    if (!isSafe) ...[
+                      const SizedBox(width: Space.xs),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade700,
@@ -753,6 +758,7 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
                           );
                         },
                       ),
+                    ],
                   ],
                 ),
               ],

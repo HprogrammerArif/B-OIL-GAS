@@ -300,15 +300,17 @@ class _OverviewTab extends ConsumerWidget {
                   children: [
                     const Icon(Icons.auto_graph, color: Colors.teal, size: 20),
                     const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? 'অপারেশনাল সাশ্রয় ও কর্মদক্ষতা'
-                          : 'OPERATIONAL EFFICIENCY SAVINGS',
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.teal,
-                        letterSpacing: 0.5,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'অপারেশনাল সাশ্রয় ও কর্মদক্ষতা'
+                            : 'OPERATIONAL EFFICIENCY SAVINGS',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.teal,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],

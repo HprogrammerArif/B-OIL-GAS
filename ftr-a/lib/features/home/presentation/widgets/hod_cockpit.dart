@@ -64,15 +64,17 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                       size: 20,
                     ),
                     const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? 'বিভাগীয় ত্রৈমাসিক বাজেট সিলিং (Q4)'
-                          : 'DEPT QUARTERLY BUDGET CEILING (Q4 FY26)',
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.purple,
-                        letterSpacing: 0.5,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'বিভাগীয় ত্রৈমাসিক বাজেট সিলিং (Q4)'
+                            : 'DEPT QUARTERLY BUDGET CEILING (Q4 FY26)',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.purple,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],
@@ -80,28 +82,30 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                 const SizedBox(height: Space.xs),
                 Row(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BDT 4,50,00,000',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'BDT 4,50,00,000',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                            ),
                           ),
-                        ),
-                        Text(
-                          bangla
-                              ? 'মোট বরাদ্দ সিলিং'
-                              : 'Total Approved Ceiling',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: scheme.onSurfaceVariant,
+                          Text(
+                            bangla
+                                ? 'মোট বরাদ্দ সিলিং'
+                                : 'Total Approved Ceiling',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: Space.xs),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -181,13 +185,14 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
           ),
           child: Row(
             children: [
-              Text(
-                bangla ? 'ফাইন্যান্স অনুমোদন কিউ' : 'Finance Approval Queue',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  bangla ? 'ফাইন্যান্স অনুমোদন কিউ' : 'Finance Approval Queue',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              const Spacer(),
               TextButton(
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
@@ -252,13 +257,14 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                             });
                           },
                         ),
-                        Text(
-                          bangla
-                              ? 'একযোগে নির্বাচন (${_selectedIds.length}/${batchable.length})'
-                              : 'Batch Select (${_selectedIds.length}/${batchable.length})',
-                          style: const TextStyle(fontSize: 12),
+                        Expanded(
+                          child: Text(
+                            bangla
+                                ? 'একযোগে নির্বাচন (${_selectedIds.length}/${batchable.length})'
+                                : 'Batch Select (${_selectedIds.length}/${batchable.length})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
-                        const Spacer(),
                         if (_selectedIds.isNotEmpty)
                           FilledButton.tonal(
                             style: FilledButton.styleFrom(

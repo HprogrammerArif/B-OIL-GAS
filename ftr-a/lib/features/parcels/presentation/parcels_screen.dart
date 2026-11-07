@@ -123,17 +123,19 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          bangla
-                              ? 'শাটল ভ্যান: ঢাকা মেট্রো-চ-৫৩-৮৮২১'
-                              : 'Shuttle Van: Dhaka Metro-Cha-53-8821',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                        Expanded(
+                          child: Text(
+                            bangla
+                                ? 'শাটল ভ্যান: ঢাকা মেট্রো-চ-৫৩-৮৮২১'
+                                : 'Shuttle Van: Dhaka Metro-Cha-53-8821',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: Space.xs),
                         const StatusPill(
                           label: 'SEALED & LOCKED',
                           tone: StatusTone.success,
@@ -142,14 +144,16 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                     ),
                     const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          bangla
-                              ? 'কুরিয়ার: রফিকুল ইসলাম (EMP-0821)'
-                              : 'Courier: Md. Rafiqul Islam (EMP-0821)',
-                          style: const TextStyle(fontSize: 11),
+                        Expanded(
+                          child: Text(
+                            bangla
+                                ? 'কুরিয়ার: রফিকুল ইসলাম (EMP-0821)'
+                                : 'Courier: Md. Rafiqul Islam (EMP-0821)',
+                            style: const TextStyle(fontSize: 11),
+                          ),
                         ),
+                        const SizedBox(width: Space.xs),
                         Text(
                           bangla
                               ? 'সিল নম্বর: SL-BOGCL-8842'

@@ -639,14 +639,16 @@ class _LotoPermitsTabState extends State<_LotoPermitsTab> {
                     size: 20,
                   ),
                   const SizedBox(width: Space.xs),
-                  Text(
-                    id,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                  Expanded(
+                    child: Text(
+                      id,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: Space.xs),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 6,

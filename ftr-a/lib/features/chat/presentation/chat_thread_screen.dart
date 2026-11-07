@@ -625,38 +625,43 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 ),
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _isDirectiveMode
-                              ? Icons.campaign
-                              : Icons.chat_bubble_outline,
-                          size: 16,
-                          color: _isDirectiveMode
-                              ? BrandColors.crimson
-                              : Colors.grey,
-                        ),
-                        const SizedBox(width: Space.xs),
-                        Text(
-                          _isDirectiveMode
-                              ? (bangla
-                                    ? 'মোড: ⚡ এক্সিকিউটিভ ডিরেক্টিভ'
-                                    : 'Mode: ⚡ Executive Directive')
-                              : (bangla
-                                    ? 'মোড: সাধারণ মেসেজ'
-                                    : 'Mode: Standard Message'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isDirectiveMode
+                                ? Icons.campaign
+                                : Icons.chat_bubble_outline,
+                            size: 16,
                             color: _isDirectiveMode
                                 ? BrandColors.crimson
-                                : Colors.grey.shade700,
+                                : Colors.grey,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: Space.xs),
+                          Flexible(
+                            child: Text(
+                              _isDirectiveMode
+                                  ? (bangla
+                                        ? 'মোড: ⚡ এক্সিকিউটিভ ডিরেক্টিভ'
+                                        : 'Mode: ⚡ Executive Directive')
+                                  : (bangla
+                                        ? 'মোড: সাধারণ মেসেজ'
+                                        : 'Mode: Standard Message'),
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: _isDirectiveMode
+                                    ? BrandColors.crimson
+                                    : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: Space.xs),
                     TextButton(
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.compact,

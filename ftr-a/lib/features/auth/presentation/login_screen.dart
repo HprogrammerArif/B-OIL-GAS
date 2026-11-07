@@ -172,27 +172,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: BrandColors.crimson.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(Corner.xl),
-                        ),
-                        child: Text(
-                          bangla
-                              ? 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস (BOGCL)'
-                              : 'BASHUNDHARA OIL & GAS (BOGCL)',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: BrandColors.crimson,
-                            letterSpacing: 0.4,
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: BrandColors.crimson.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(Corner.xl),
+                          ),
+                          child: Text(
+                            bangla
+                                ? 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস (BOGCL)'
+                                : 'BASHUNDHARA OIL & GAS (BOGCL)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: BrandColors.crimson,
+                              letterSpacing: 0.4,
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       const LanguageSwitch(),
                     ],
                   ),

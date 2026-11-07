@@ -1626,16 +1626,18 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
       padding: const EdgeInsets.all(Space.md),
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              bangla
-                  ? 'কোম্পানি যানবাহন স্বাস্থ্য ও টেলিমেটিক্স'
-                  : 'Fleet Vehicles & Telematics',
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                bangla
+                    ? 'কোম্পানি যানবাহন স্বাস্থ্য ও টেলিমেটিক্স'
+                    : 'Fleet Vehicles & Telematics',
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
-            if (canDispatch)
+            if (canDispatch) ...[
+              const SizedBox(width: Space.xs),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   visualDensity: VisualDensity.compact,
@@ -1649,6 +1651,7 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
                   style: const TextStyle(fontSize: 11),
                 ),
               ),
+            ],
           ],
         ),
         const SizedBox(height: Space.sm),
@@ -1757,34 +1760,36 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
               border: Border.all(color: scheme.outlineVariant),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${fv['code']} · ${fv['plate']}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${fv['code']} · ${fv['plate']}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${fv['driver']} · ${fv['station']}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: scheme.onSurfaceVariant,
+                      Text(
+                        '${fv['driver']} · ${fv['station']}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${fv['fuelType']} · ${fv['liters']}L @ ${fv['rate']}/L',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: scheme.onSurfaceVariant,
+                      Text(
+                        '${fv['fuelType']} · ${fv['liters']}L @ ${fv['rate']}/L',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: Space.xs),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -1870,16 +1875,18 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        gl.plate,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          fontFamily: 'monospace',
+                      Expanded(
+                        child: Text(
+                          gl.plate,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            fontFamily: 'monospace',
+                          ),
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       StatusPill(
                         label: gl.type,
                         tone: gl.type.contains('OUT')
@@ -1911,15 +1918,17 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
                   ),
                   const Divider(height: 12),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Verified by: ${gl.officer}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
+                      Expanded(
+                        child: Text(
+                          'Verified by: ${gl.officer}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       Text(
                         gl.time,
                         style: const TextStyle(

@@ -217,14 +217,15 @@ class _DriverCockpitState extends State<DriverCockpit> {
                   children: [
                     const Icon(Icons.directions_car, color: Colors.blue),
                     const SizedBox(width: Space.xs),
-                    const Text(
-                      'Toyota Corolla Cross',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                    const Expanded(
+                      child: Text(
+                        'Toyota Corolla Cross',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -251,8 +252,9 @@ class _DriverCockpitState extends State<DriverCockpit> {
                   style: TextStyle(fontSize: 11.5, color: Colors.black54),
                 ),
                 const SizedBox(height: Space.sm),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const Wrap(
+                  spacing: Space.md,
+                  runSpacing: 4,
                   children: [
                     Text(
                       'Fuel: 78% Full',
@@ -374,64 +376,82 @@ class _DriverCockpitState extends State<DriverCockpit> {
                   if (!_tripStarted) ...[
                     Row(
                       children: [
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline,
+                              size: 16,
+                            ),
+                            label: Text(
+                              bangla ? 'যাত্রীকে বার্তা দিন' : 'Notify at Gate',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () {
+                              Haptics.tap();
+                              AppToast.show(
+                                context,
+                                'Notification sent to passenger: "Car is waiting at Baridhara Gate 1"',
+                              );
+                            },
                           ),
-                          icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                          label: Text(
-                            bangla ? 'যাত্রীকে বার্তা দিন' : 'Notify at Gate',
-                          ),
-                          onPressed: () {
-                            Haptics.tap();
-                            AppToast.show(
-                              context,
-                              'Notification sent to passenger: "Car is waiting at Baridhara Gate 1"',
-                            );
-                          },
                         ),
-                        const Spacer(),
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
+                        const SizedBox(width: Space.xs),
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.play_arrow, size: 16),
+                            label: Text(
+                              bangla
+                                  ? 'যাত্রা শুরু করুন'
+                                  : 'Start Trip (Odometer)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () => _openStartOdometerModal(context),
                           ),
-                          icon: const Icon(Icons.play_arrow, size: 16),
-                          label: Text(
-                            bangla
-                                ? 'যাত্রা শুরু করুন'
-                                : 'Start Trip (Odometer)',
-                          ),
-                          onPressed: () => _openStartOdometerModal(context),
                         ),
                       ],
                     ),
                   ] else if (!_tripCompleted) ...[
                     Row(
                       children: [
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.call, size: 16),
-                          label: Text(bangla ? 'কল করুন' : 'Call Passenger'),
-                          onPressed: () => AppToast.show(
-                            context,
-                            'Calling Tanvir Ahmed (+880 1711-001042)...',
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.call, size: 16),
+                            label: Text(
+                              bangla ? 'কল করুন' : 'Call Passenger',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () => AppToast.show(
+                              context,
+                              'Calling Tanvir Ahmed (+880 1711-001042)...',
+                            ),
                           ),
                         ),
-                        const Spacer(),
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            visualDensity: VisualDensity.compact,
+                        const SizedBox(width: Space.xs),
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.done_all, size: 16),
+                            label: Text(
+                              bangla
+                                  ? 'যাত্রা সমাপ্ত'
+                                  : 'Complete Trip (Odometer)',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () =>
+                                _openCompleteOdometerModal(context),
                           ),
-                          icon: const Icon(Icons.done_all, size: 16),
-                          label: Text(
-                            bangla
-                                ? 'যাত্রা সমাপ্ত'
-                                : 'Complete Trip (Odometer)',
-                          ),
-                          onPressed: () => _openCompleteOdometerModal(context),
                         ),
                       ],
                     ),
