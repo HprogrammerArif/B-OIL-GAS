@@ -955,12 +955,19 @@
   flex-shrink: 0;
 }
 
+.parcel-photo-row {
+  display: flex;
+  gap: 8px;
+  height: 168px;
+}
 .parcel-detail-photo {
   width: 100%;
   height: 168px;
   object-fit: cover;
   display: block;
   border-radius: 8px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .parcel-photo-remove {
   position: absolute;

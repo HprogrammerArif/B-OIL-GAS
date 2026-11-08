@@ -1194,15 +1194,17 @@ export default function ParcelView({ lang }: ViewProps) {
               </div>
 
               {cockpitView === 'photos' && (
-                <div style={{ padding: '22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {selectedParcel.photos.map((src, index) => (
-                    <img
-                      key={`${selectedParcel.id}-${index}`}
-                      className="parcel-detail-photo"
-                      src={src}
-                      alt={selectedParcel.contents}
-                    />
-                  ))}
+                <div style={{ padding: '22px' }}>
+                  <div className="parcel-photo-row">
+                    {selectedParcel.photos.map((src, index) => (
+                      <img
+                        key={`${selectedParcel.id}-${index}`}
+                        className="parcel-detail-photo"
+                        src={src}
+                        alt={selectedParcel.contents}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 
