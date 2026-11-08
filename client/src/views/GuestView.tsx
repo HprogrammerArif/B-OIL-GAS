@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore } from '../store/operationsStore';
+import { useOperationsStore, visitorPhotoFor } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
+import { downloadFile, escHtml, htmlSheet } from './compliance/doLetter';
 import { nowStamp, nowTime, today } from '../lib/clock';
 import { type GuestMode, guestModeFor, visitorsVisibleTo, isMyGuest } from './guest/config';
 import {
@@ -76,6 +77,7 @@ export interface VisitorRecord {
   dietaryPreferences?: string;
   inspectionFindings?: InspectionFindingItem[];
   isEvacuatedSafe?: boolean;
+  photo: string;
 }
 
 
@@ -105,6 +107,8 @@ export default function GuestView({ lang }: ViewProps) {
   const [showGatePassModal, setShowGatePassModal] = useState(false);
   const [showALPRModal, setShowALPRModal] = useState(false);
   const [showMusterModal, setShowMusterModal] = useState(false);
+  const [hostNotified, setHostNotified] = useState<Record<string, boolean>>({});
+  const [pantryNotified, setPantryNotified] = useState<Record<string, boolean>>({});
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
 
@@ -138,6 +142,7 @@ export default function GuestView({ lang }: ViewProps) {
   const [formDuration, setFormDuration] = useState('3');
   const [formIdProofType, setFormIdProofType] = useState<VisitorRecord['idProofType']>('National ID');
   const [formIdProofNum, setFormIdProofNum] = useState('');
+  const [formPhoto, setFormPhoto] = useState('');
 
   // ─────────────────────────────────────────────────────────────────────────
   // Scoped & Filtered Visitors
@@ -151,6 +156,56 @@ export default function GuestView({ lang }: ViewProps) {
     () => scopedVisitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0],
     [selectedVisitorId, scopedVisitors],
   );
+
+  const saveInspectionMemo = () => {
+    if (!selectedVisitor) return;
+    const findings = selectedVisitor.inspectionFindings ?? [];
+    const statusLabel = (status: InspectionFindingItem['status']) => (
+      status === 'passed'
+        ? t('Passed', 'উত্তীর্ণ', lang)
+        : status === 'observation'
+          ? t('Advisory', 'পরামর্শ', lang)
+          : t('Critical', 'জরুরি', lang)
+    );
+    const rows = findings.map((f) => (
+      `<tr><td>${escHtml(f.focusArea)}</td><td>${escHtml(statusLabel(f.status))}</td><td>${escHtml(f.observation)}</td><td>${escHtml(f.signOffDate)}</td></tr>`
+    )).join('');
+    const file = `joint-inspection-${selectedVisitor.id}.html`;
+    const title = t('Joint inspection memo', 'যৌথ পরিদর্শন মেমো', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p><strong>${escHtml(selectedVisitor.name)}</strong> · ${escHtml(selectedVisitor.organization)}</p>
+      <p>${escHtml(t('Host', 'স্বাগতিক', lang))}: ${escHtml(selectedVisitor.hostEmployee)} · ${escHtml(selectedVisitor.facility)}</p>
+      <p>${escHtml(t('Purpose', 'উদ্দেশ্য', lang))}: ${escHtml(selectedVisitor.purpose)}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('Check', 'পরীক্ষা', lang))}</th>
+        <th>${escHtml(t('Result', 'ফল', lang))}</th>
+        <th>${escHtml(t('Note', 'নোট', lang))}</th>
+        <th>${escHtml(t('Date', 'তারিখ', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+  };
+
+  const saveRollCall = () => {
+    const inside = visitors.filter((v) => v.status === 'checked_in');
+    const rows = inside.map((v) => (
+      `<tr><td>${escHtml(v.name)}<br>${escHtml(v.organization)}</td><td>${escHtml(v.facility)}</td><td>${escHtml(v.hostEmployee)}</td><td>${escHtml(v.phone ?? '')}</td><td>${escHtml(v.isEvacuatedSafe ? t('Safe at muster point', 'মাস্টার পয়েন্টে নিরাপদ', lang) : t('Not yet accounted', 'এখনো যাচাই হয়নি', lang))}</td></tr>`
+    )).join('');
+    const file = 'evacuation-roll-call.html';
+    const title = t('Evacuation roll-call', 'ইভাকুয়েশন রোল-কল', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p>${escHtml(t('Assembly Point #3, main security gate.', 'অ্যাসেম্বলি পয়েন্ট ৩, প্রধান নিরাপত্তা গেট।', lang))}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('Guest', 'অতিথি', lang))}</th>
+        <th>${escHtml(t('Place', 'স্থান', lang))}</th>
+        <th>${escHtml(t('Host', 'স্বাগতিক', lang))}</th>
+        <th>${escHtml(t('Phone', 'ফোন', lang))}</th>
+        <th>${escHtml(t('Roll-call', 'রোল-কল', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+    setShowMusterModal(false);
+  };
 
   const stats = useMemo(() => {
     const pool = mode === 'host' ? scopedVisitors : visitors;
@@ -392,11 +447,12 @@ export default function GuestView({ lang }: ViewProps) {
       },
       idProofType: formIdProofType,
       idProofNumber: formIdProofNum.trim(),
+      photo: formPhoto || visitorPhotoFor(undefined, formCategory),
     };
 
     setVisitors(prev => [newVis, ...prev]);
     setSelectedVisitorId(newVis.id);
-    setShowRegisterModal(false);
+    closeRegister();
 
     // Reset Form
     setFormName('');
@@ -409,6 +465,23 @@ export default function GuestView({ lang }: ViewProps) {
     setFormIdProofNum('');
 
     showToast(t(`Gate pass ${newId} issued for ${newVis.name}. The QR pass has been sent to the visitor.`, `${newVis.name}-এর জন্য গেট পাস ${newId} তৈরি হয়েছে। কিউআর পাস অতিথিকে পাঠানো হয়েছে।`, lang), 'success');
+  };
+
+  const closeRegister = () => {
+    setShowRegisterModal(false);
+    setFormPhoto('');
+  };
+
+  const handleVisitorPhoto = (file: File | undefined) => {
+    if (!file) return;
+    const allowed = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    if (!allowed || file.size > 2 * 1024 * 1024) {
+      showToast(t('Use a JPEG, PNG, or WebP image under 2 MB.', '২ এমবির কম JPEG, PNG বা WebP ছবি ব্যবহার করুন।', lang), 'info');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setFormPhoto(String(reader.result));
+    reader.readAsDataURL(file);
   };
 
   const getCategoryBadge = (category: VisitorRecord['category']) => {
@@ -608,80 +681,47 @@ export default function GuestView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="guest-two-col-layout">
         {/* ── LEFT COLUMN: VISITOR DIRECTORY FEED ── */}
-        <div>
-          {/* Feed Header & Search Filter */}
-          <div style={{ background: 'var(--surface-1)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
-                {t('Visitor Directory', 'অতিথি তালিকা', lang)} ({sortedVisitors.length})
-              </span>
+        <div className="guest-directory-col">
+          <div className="guest-directory-bar">
+            <div className="workforce-tabs" role="group" aria-label={t('Filter visitors', 'অতিথি ফিল্টার', lang)}>
+              <button type="button" className={`workforce-tab${activeTab === 'all' ? ' active' : ''}`} aria-pressed={activeTab === 'all'} onClick={() => setActiveTab('all')}>
+                {t('All', 'সব', lang)} <b>{scopedVisitors.length}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'inside' ? ' active' : ''}`} aria-pressed={activeTab === 'inside'} onClick={() => setActiveTab('inside')}>
+                {t('On site', 'উপস্থিত', lang)} <b>{stats.totalInside}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'pre_registered' ? ' active' : ''}`} aria-pressed={activeTab === 'pre_registered'} onClick={() => setActiveTab('pre_registered')}>
+                {t('Expected', 'প্রত্যাশিত', lang)} <b>{stats.preRegisteredCount}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'vip_govt' ? ' active' : ''}`} aria-pressed={activeTab === 'vip_govt'} onClick={() => setActiveTab('vip_govt')}>
+                {t('VIP & Govt', 'ভিআইপি ও সরকারি', lang)} <b>{stats.vipGovtCount}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'my_guests' ? ' active' : ''}`} aria-pressed={activeTab === 'my_guests'} onClick={() => setActiveTab('my_guests')}>
+                {t('My guests', 'আমার অতিথি', lang)} <b>{stats.myGuestsCount}</b>
+              </button>
+            </div>
+            <div className="workforce-filter-row">
+              <div className="workforce-search-wrap">
+                <Search size={14} className="workforce-search-icon" aria-hidden />
+                <input
+                  type="search"
+                  className="workforce-search-input"
+                  placeholder={t('Search visitor, organization, host, or plate...', 'নাম, সংস্থা, স্বাগতিক বা গাড়ি খুঁজুন...', lang)}
+                  aria-label={t('Search visitors', 'অতিথি খুঁজুন', lang)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <select
+                className="workforce-select"
                 value={facilityFilter}
-                onChange={(e) => setFacilityFilter(e.target.value as any)}
-                style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-300)', background: 'var(--surface-1)' }}
+                aria-label={t('Site', 'স্থাপনা', lang)}
+                onChange={(e) => setFacilityFilter(e.target.value as typeof facilityFilter)}
               >
                 <option value="all">{t('All sites', 'সকল স্থাপনা', lang)}</option>
                 <option value="Keraniganj Bitumen Refinery">{t('Keraniganj Refinery', 'কেরানীগঞ্জ রিফাইনারি', lang)}</option>
                 <option value="Bashundhara Corporate HQ, Baridhara">{t('Dhaka HQ', 'ঢাকা প্রধান কার্যালয়', lang)}</option>
               </select>
-            </div>
-
-            {/* Search Input */}
-            <div style={{ position: 'relative', marginBottom: '10px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
-              <input
-                type="text"
-                placeholder={t('Search visitor, organization, host, or plate...', 'নাম, সংস্থা, স্বাগতিক বা গাড়ি খুঁজুন...', lang)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  paddingLeft: '32px',
-                  height: '34px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--brand-slate-300)',
-                  width: '100%',
-                  fontSize: '12px',
-                }}
-              />
-            </div>
-
-            {/* Quick Filter Tabs */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('all')}
-              >
-                {t('All', 'সব', lang)} ({scopedVisitors.length})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'inside' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('inside')}
-              >
-                {t('On site', 'উপস্থিত', lang)} ({stats.totalInside})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'pre_registered' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('pre_registered')}
-              >
-                {t('Expected', 'প্রত্যাশিত', lang)} ({stats.preRegisteredCount})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'vip_govt' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('vip_govt')}
-              >
-                {t('VIP & Govt', 'ভিআইপি ও সরকারি', lang)} ({stats.vipGovtCount})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'my_guests' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('my_guests')}
-              >
-                {t('My guests', 'আমার অতিথি', lang)} ({stats.myGuestsCount})
-              </button>
             </div>
           </div>
 
@@ -709,30 +749,34 @@ export default function GuestView({ lang }: ViewProps) {
                     className={`guest-feed-card ${isSelected ? 'active' : ''}`}
                     onClick={() => setSelectedVisitorId(v.id)}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                      <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)', lineHeight: 1.25 }}>
-                        {v.name}
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <img className="guest-feed-photo" src={v.photo} alt={v.name} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)', lineHeight: 1.25 }}>
+                            {v.name}
+                          </div>
+                          {v.status === 'checked_in' ? (
+                            <span className="badge success" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t(`On site · ${v.checkInTime}`, `উপস্থিত · ${v.checkInTime}`, lang)}
+                            </span>
+                          ) : v.status === 'pre_registered' ? (
+                            <span className="badge info" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t(`Expected ${v.expectedTime}`, `প্রত্যাশিত ${v.expectedTime}`, lang)}
+                            </span>
+                          ) : (
+                            <span className="badge neutral" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t('Checked out', 'চেক-আউট', lang)}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {v.organization}
+                          </div>
+                          <div style={{ flexShrink: 0 }}>{getCategoryBadge(v.category)}</div>
+                        </div>
                       </div>
-                      {v.status === 'checked_in' ? (
-                        <span className="badge success" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t(`On site · ${v.checkInTime}`, `উপস্থিত · ${v.checkInTime}`, lang)}
-                        </span>
-                      ) : v.status === 'pre_registered' ? (
-                        <span className="badge info" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t(`Expected ${v.expectedTime}`, `প্রত্যাশিত ${v.expectedTime}`, lang)}
-                        </span>
-                      ) : (
-                        <span className="badge neutral" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t('Checked out', 'চেক-আউট', lang)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {v.organization}
-                      </div>
-                      <div style={{ flexShrink: 0 }}>{getCategoryBadge(v.category)}</div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '7px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '11px', gap: '8px' }}>
@@ -798,6 +842,7 @@ export default function GuestView({ lang }: ViewProps) {
                 {/* Digital Pass Header */}
                 <div className="guest-pass-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
+                    <img className="guest-pass-photo" src={selectedVisitor.photo} alt={selectedVisitor.name} />
                     <div style={{ flex: 1, minWidth: '220px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                         <span style={{ fontSize: '11px', color: 'var(--status-info-bright)', fontWeight: 700 }}>
@@ -1005,21 +1050,29 @@ export default function GuestView({ lang }: ViewProps) {
                           {selectedVisitor.hostDept}
                         </div>
                         <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <button
+                          <a
+                            href={`tel:${(selectedVisitor.hostPhone || '01711000000').replace(/[^\d+]/g, '')}`}
                             className="btn-primary"
-                            style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={() => showToast(t(`Calling Host ${selectedVisitor.hostEmployee}: ${selectedVisitor.hostPhone || '01711-000000'}`, `হোস্ট ${selectedVisitor.hostEmployee}-কে কল করা হচ্ছে`, lang), 'info')}
+                            style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none' }}
+                            onClick={() => showToast(t(`Host number: ${selectedVisitor.hostPhone || '01711-000000'}`, `হোস্টের নম্বর: ${selectedVisitor.hostPhone || '01711-000000'}`, lang), 'info')}
                           >
                             <Phone size={12} />
                             {t('Call Host', 'হোস্টকে কল করুন', lang)}
-                          </button>
+                          </a>
                           <button
+                            type="button"
                             className="btn-sm-ghost"
                             style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={() => showToast(t(`Host ${selectedVisitor.hostEmployee} notified of guest arrival at reception.`, `হোস্ট ${selectedVisitor.hostEmployee}-কে অতিথির আগমন জানানো হয়েছে।`, lang), 'success')}
+                            disabled={!!hostNotified[selectedVisitor.id]}
+                            onClick={() => {
+                              setHostNotified((prev) => ({ ...prev, [selectedVisitor.id]: true }));
+                              showToast(t(`Host ${selectedVisitor.hostEmployee} notified of guest arrival at reception.`, `হোস্ট ${selectedVisitor.hostEmployee}-কে অতিথির আগমন জানানো হয়েছে।`, lang), 'success');
+                            }}
                           >
                             <MessageSquare size={12} />
-                            {t('Notify Host', 'বার্তা পাঠান', lang)}
+                            {hostNotified[selectedVisitor.id]
+                              ? t('Notified', 'জানানো হয়েছে', lang)
+                              : t('Notify Host', 'বার্তা পাঠান', lang)}
                           </button>
                         </div>
                       </div>
@@ -1278,11 +1331,19 @@ export default function GuestView({ lang }: ViewProps) {
                         </div>
                         <div style={{ marginTop: '6px' }}>
                           <button
+                            type="button"
                             className="btn-sm-ghost"
                             style={{ fontSize: '11px', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => showToast(t(`Hospitality team notified for ${selectedVisitor.name}.`, `আপ্যায়ন টিমকে অবহিত করা হয়েছে।`, lang), 'success')}
+                            disabled={!!pantryNotified[selectedVisitor.id]}
+                            onClick={() => {
+                              setPantryNotified((prev) => ({ ...prev, [selectedVisitor.id]: true }));
+                              showToast(t(`Hospitality team notified for ${selectedVisitor.name}.`, `আপ্যায়ন টিমকে অবহিত করা হয়েছে।`, lang), 'success');
+                            }}
                           >
-                            <Coffee size={11} /> {t('Notify Pantry', 'প্যান্ট্রিতে জানান', lang)}
+                            <Coffee size={11} />
+                            {pantryNotified[selectedVisitor.id]
+                              ? t('Notified', 'জানানো হয়েছে', lang)
+                              : t('Notify Pantry', 'প্যান্ট্রিতে জানান', lang)}
                           </button>
                         </div>
                       </div>
@@ -1299,7 +1360,7 @@ export default function GuestView({ lang }: ViewProps) {
                           <button
                             className="btn-outline"
                             style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                            onClick={() => showToast(t(`Joint Inspection Memo PDF exported for ${selectedVisitor.name}.`, `যৌথ পরিদর্শন মেমো প্রস্তুত সম্পন্ন।`, lang), 'success')}
+                            onClick={saveInspectionMemo}
                           >
                             <Download size={13} />
                             {t('Export Memo (PDF)', 'মেমো ডাউনলোড', lang)}
@@ -1450,7 +1511,7 @@ export default function GuestView({ lang }: ViewProps) {
 
       {/* Pre-Register Guest Modal */}
       {showRegisterModal && (
-        <div className="modal-bg" onClick={() => setShowRegisterModal(false)}>
+        <div className="modal-bg" onClick={closeRegister}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1464,7 +1525,7 @@ export default function GuestView({ lang }: ViewProps) {
                   </div>
                 </div>
               </div>
-              <button className="modal-close" onClick={() => setShowRegisterModal(false)}>×</button>
+              <button className="modal-close" onClick={closeRegister}>×</button>
             </div>
 
             <form onSubmit={handleRegister}>
@@ -1539,6 +1600,27 @@ export default function GuestView({ lang }: ViewProps) {
                   </div>
                 </div>
 
+                <div className="form-group">
+                  <label>{t('Picture', 'ছবি', lang)}</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => {
+                      handleVisitorPhoto(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>
+                    {t('Optional. One JPEG, PNG, or WebP, up to 2 MB. None uses a picture for this visitor type.', 'ঐচ্ছিক। একটি JPEG, PNG বা WebP, সর্বোচ্চ ২ এমবি। না দিলে এই ধরনের অতিথির ছবি থাকবে।', lang)}
+                  </div>
+                  {formPhoto && (
+                    <div style={{ position: 'relative', display: 'inline-block', marginTop: '8px' }}>
+                      <img className="guest-form-photo" src={formPhoto} alt={formName || t('Visitor', 'অতিথি', lang)} />
+                      <button type="button" className="guest-photo-remove" onClick={() => setFormPhoto('')} aria-label={t('Remove picture', 'ছবি সরান', lang)}>×</button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="form-row">
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>{t('Job Title / Role', 'দাপ্তরিক পদবি', lang)}</label>
@@ -1610,7 +1692,7 @@ export default function GuestView({ lang }: ViewProps) {
               </div>
 
               <div className="modal-ft">
-                <button type="button" className="btn-sm-ghost" onClick={() => setShowRegisterModal(false)}>
+                <button type="button" className="btn-sm-ghost" onClick={closeRegister}>
                   {t('Cancel', 'বাতিল', lang)}
                 </button>
                 <button type="submit" className="btn-primary" style={{ background: 'var(--brand-crimson)' }}>
@@ -1853,10 +1935,7 @@ export default function GuestView({ lang }: ViewProps) {
                   <button
                     className="btn-primary"
                     style={{ background: 'var(--status-danger-solid-dark)' }}
-                    onClick={() => {
-                      showToast(t('Evacuation roll-call sheet downloaded.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
-                      setShowMusterModal(false);
-                    }}
+                    onClick={saveRollCall}
                   >
                     <Download size={14} />
                     {t('Export Roll-Call PDF', 'মাস্টার শিট ডাউনলোড', lang)}

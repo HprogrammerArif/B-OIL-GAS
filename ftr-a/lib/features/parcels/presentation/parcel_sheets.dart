@@ -11,6 +11,7 @@ import 'package:bogcl_oneops/features/parcels/presentation/parcel_providers.dart
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_ui.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -286,15 +287,15 @@ class _SheetState extends ConsumerState<_Sheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: Space.xs),
-            Text(
-              intro,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            EnterpriseModalHeader(
+              title: title,
+              subtitle: intro,
+              icon: destructive
+                  ? Icons.warning_amber_rounded
+                  : Icons.local_shipping_outlined,
+              accentColor: destructive ? context.bogcl.danger : null,
             ),
-            const SizedBox(height: Space.lg),
+            const SizedBox(height: Space.sm),
             if (k == ParcelSheet.dispatch) ...[
               Text(l10n.pcFieldCourier, style: theme.textTheme.labelLarge),
               couriers!.when(

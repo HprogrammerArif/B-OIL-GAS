@@ -133,6 +133,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           hash: initHash,
         },
       ],
+      attachments: data.attachments,
       quotations: [],
       budgetInfo: {
         budgetHead: data.dept,

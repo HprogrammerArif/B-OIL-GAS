@@ -585,13 +585,16 @@ class _BusScreenState extends ConsumerState<BusScreen> {
             ) ??
             false);
     final scheme = Theme.of(context).colorScheme;
+    final effectiveTab = (!canSeat && _tab == _BusTab.mySeat)
+        ? _BusTab.fleetAndDeck
+        : _tab;
 
     Widget subTabChip(_BusTab tab, String label, IconData icon) => Padding(
       padding: const EdgeInsets.only(right: Space.xs),
       child: ChoiceChip(
         avatar: Icon(icon, size: 16),
         label: Text(label),
-        selected: _tab == tab,
+        selected: effectiveTab == tab,
         onSelected: (_) => setState(() => _tab = tab),
       ),
     );
@@ -741,7 +744,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
           // Tab Body
           Expanded(
-            child: switch (_tab) {
+            child: switch (effectiveTab) {
               _BusTab.mySeat => RefreshIndicator(
                 onRefresh: _refresh,
                 child: _MySeatTab(
@@ -766,15 +769,17 @@ class _BusScreenState extends ConsumerState<BusScreen> {
       children: [
         // 10-Bus Fleet Overview Grid
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              bangla
-                  ? '১০টি বাস বহর সারসংক্ষেপ (বাস নির্বাচন করুন)'
-                  : '10-Bus Fleet Grid (Select Bus)',
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                bangla
+                    ? '১০টি বাস বহর সারসংক্ষেপ (বাস নির্বাচন করুন)'
+                    : '10-Bus Fleet Grid (Select Bus)',
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
             ),
+            const SizedBox(width: Space.xs),
             Text(
               '${_selectedBusIndex + 1} of 10',
               style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
@@ -798,7 +803,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  width: 140,
+                  width: 168,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isSel
@@ -815,16 +820,21 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            b.code,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: isSel ? scheme.primary : scheme.onSurface,
+                          Expanded(
+                            child: Text(
+                              b.code,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: isSel
+                                    ? scheme.primary
+                                    : scheme.onSurface,
+                              ),
                             ),
                           ),
+                          const SizedBox(width: 4),
                           StatusPill(
                             label: b.status,
                             tone: b.status.contains('Delay')
@@ -925,8 +935,10 @@ class _BusScreenState extends ConsumerState<BusScreen> {
         const SizedBox(height: Space.sm),
 
         // 52-Seat Coach Deck Legend
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        Wrap(
+          spacing: Space.sm,
+          runSpacing: 4,
+          alignment: WrapAlignment.spaceAround,
           children: [
             _LegendItem(
               color: Colors.blue.shade700,
@@ -970,21 +982,26 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.drive_eta, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Driver: ${activeBus.driver}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.drive_eta, size: 16),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              'Driver: ${activeBus.driver}',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: Space.xs),
                     const Row(
                       children: [
                         Icon(Icons.door_front_door_outlined, size: 16),
@@ -1161,17 +1178,19 @@ class _BusScreenState extends ConsumerState<BusScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      bangla
-                          ? 'কন্ডাকটর কিউআর বোর্ডিং স্ক্যানার'
-                          : 'Conductor QR Boarding Verification',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade900,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'কন্ডাকটর কিউআর বোর্ডিং স্ক্যানার'
+                            : 'Conductor QR Boarding Verification',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade900,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: Space.xs),
                     Text(
                       '$boardedCount of 48 Boarded (${((boardedCount / 48) * 100).round()}%)',
                       style: const TextStyle(

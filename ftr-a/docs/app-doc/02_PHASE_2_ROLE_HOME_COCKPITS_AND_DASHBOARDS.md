@@ -21,8 +21,9 @@
 
 Every persona's `HomeScreen` follows a consistent, low-cognitive-load 4-block vertical structure:
 
-1. **Block A — Role Header & Primary Role CTA**:
-   - Greeting + Persona Name, Designation, Employee ID, and Site badge.
+1. **Block A — Clean Greeting AppBar & Primary Role CTA**:
+   - Top `AppBar` shows only the time-of-day greeting (`Good morning/afternoon/evening, <Name>`), designation subtitle, and notification bell.
+   - **No search bar and no context pills** (`Site`, `Department`, `EMP-xxxx`) are rendered below the greeting for any user.
    - **Role-Specific Action Button** (where applicable: `Voice Briefing` for Chairman, `Release Bitumen Batch` for Plant GM, `Digital Gate Pass` for Employee, `Emergency SOS` for Driver).
 2. **Block B — "Needs Your Attention" Banner (`NeedsYouCard`)**:
    - A single high-contrast card showing the #1 urgent item for this persona right now, with a 1-tap `Review` / `Act Now` button.
@@ -38,9 +39,9 @@ Every persona's `HomeScreen` follows a consistent, low-cognitive-load 4-block ve
 ### 3.1 Chairman & MD Cockpit (`chairman` — `EMP-0001`)
 *Reference: `client/src/views/dashboard/ChairmanDashboard.tsx` & `DashboardView.tsx`*
 
-- **Header CTA**: `Send Voice Briefing` button -> Toggles the **Executive Voice Briefing Bar** at the top of the screen:
-  - Play/Pause existing recorded briefing (`0:42` duration, waveform progress bar, transcript preview: *"Prioritize Keraniganj Vacuum Distillation Unit valve overhaul and clear pending BSTI renewal challans before Thursday"*).
-  - `Record New Briefing` toggle with live simulated recording timer (`00:01...`) and `Broadcast to Inner Circle` action.
+- **Header CTA**: `Executive Voice Briefing` button -> Toggles the two-mode **Executive Voice Briefing & Voice Directive Console** (`_VoiceBriefingConsole`):
+  - **Mode 1 (`Daily AI Briefing`)**: 4-chapter interactive audio briefing (`1. Approvals`, `2. Refinery & HSE`, `3. BSTI & Licences`, `4. Logistics ROI`) synthesized from live dashboard/inbox state, with a 28-bar scrubbable waveform, speed selector (`1.0x`/`1.25x`/`1.5x`), word-by-word synchronized transcript highlighting, and 1-tap module deep links.
+  - **Mode 2 (`Record Voice Directive`)**: Selectable executive directive presets or custom voice recording with live animated waveform, streaming speech-to-text transcription, target audience selector (`All Inner Circle`, `Keraniganj Refinery Command`, `HQ Finance & Commercial`), audio preview, real persistence into `MOD-02 Chat` (`sendVoice` + `issue` directive), and a live **Inner Circle Acknowledgment Receipt Card** (`Engr. Harunur Rashid`, `Sayeda Afroza`, `Farida Begum`) with 1-tap navigation to the Command Chat thread.
 - **2×2 KPI Grid**:
   1. `Awaiting My E-Sign` (count + total BDT value) -> selects `Approvals` sub-tab.
   2. `Refinery Output` (`1,420 MT/day` · `94.6% of target`) -> opens Plant summary sheet.

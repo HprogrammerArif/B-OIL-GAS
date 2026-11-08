@@ -107,14 +107,11 @@ class ShellScaffold extends ConsumerWidget {
     ];
 
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            if (offline) const OfflineBanner(),
-            Expanded(child: shell),
-          ],
-        ),
+      body: Column(
+        children: [
+          if (offline) const SafeArea(bottom: false, child: OfflineBanner()),
+          Expanded(child: shell),
+        ],
       ),
       bottomNavigationBar: _TabBar(
         items: items,

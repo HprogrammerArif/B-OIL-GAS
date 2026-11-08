@@ -13,7 +13,6 @@ import 'package:bogcl_oneops/features/dashboards/data/dashboard_repository.dart'
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_providers.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_role_panel.dart';
-import 'package:bogcl_oneops/features/home/presentation/search_sheet.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -21,7 +20,7 @@ import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Role landing: Omnibar search, operational pulse strip, role cockpit, and 6-tile Bento launcher.
+/// Role landing: operational context strip, role cockpit, and 6-tile module launcher.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -29,19 +28,30 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   Timer? _poll;
+  bool _isForeground = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _poll = Timer.periodic(const Duration(seconds: 20), (_) {
-      ref.invalidate(dashboardMeProvider);
+      if (_isForeground && mounted) {
+        ref.invalidate(dashboardMeProvider);
+      }
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _isForeground = state == AppLifecycleState.resumed;
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _poll?.cancel();
     super.dispose();
   }
@@ -78,14 +88,23 @@ List<AppModule> _shortcuts(Session session) {
     ],
     HomeVariant.driver => const [
       'fleet',
-      'parcels',
+      'attendance',
+      'leave',
       'claims',
       'incidents',
       'notices',
-      'attendance',
     ],
     HomeVariant.operations =>
-      session.hasRole('MAILROOM')
+      session.hasRole('TRANSPORT_ADMIN')
+          ? const [
+              'fleet',
+              'bus',
+              'visitors',
+              'parcels',
+              'incidents',
+              'approvals',
+            ]
+          : session.hasRole('MAILROOM')
           ? const [
               'parcels',
               'visitors',
@@ -94,8 +113,6 @@ List<AppModule> _shortcuts(Session session) {
               'claims',
               'attendance',
             ]
-          : session.hasRole('TRANSPORT_ADMIN')
-          ? const ['fleet', 'bus', 'visitors', 'parcels', 'incidents', 'claims']
           : const [
               'incidents',
               'assets',
@@ -104,14 +121,24 @@ List<AppModule> _shortcuts(Session session) {
               'parcels',
               'note-sheets',
             ],
-    HomeVariant.approver => const [
-      'approvals',
-      'note-sheets',
-      'claims',
-      'employees',
-      'notices',
-      'leave',
-    ],
+    HomeVariant.approver =>
+      session.hasRole('HR_ADMIN')
+          ? const [
+              'employees',
+              'attendance',
+              'leave',
+              'approvals',
+              'notices',
+              'compliance',
+            ]
+          : const [
+              'approvals',
+              'note-sheets',
+              'claims',
+              'employees',
+              'notices',
+              'leave',
+            ],
     HomeVariant.executive => const [
       'note-sheets',
       'approvals',
@@ -156,7 +183,6 @@ class _HomeBar extends ConsumerWidget implements PreferredSizeWidget {
         return (
           name: emp.shortDisplayName(bangla: bangla),
           title: emp.designationTitle(bangla: bangla),
-          executive: session.homeVariant == HomeVariant.executive,
         );
       }),
     );
@@ -171,7 +197,8 @@ class _HomeBar extends ConsumerWidget implements PreferredSizeWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: identity.executive ? context.bogcl.executiveGold : null,
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
             ),
           ),
           Text(
@@ -209,7 +236,6 @@ class _HomeScaffold extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.only(bottom: Space.xxxl),
           children: [
-            _HomeOmnibarAndPulse(session: session),
             _HomeWork(session: session),
             if (shortcuts.isNotEmpty) ...[
               SectionHeader(
@@ -232,161 +258,6 @@ class _HomeScaffold extends ConsumerWidget {
   }
 }
 
-class _HomeOmnibarAndPulse extends StatelessWidget {
-  const _HomeOmnibarAndPulse({required this.session});
-
-  final Session session;
-
-  @override
-  Widget build(BuildContext context) {
-    final bangla = context.isBangla;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final siteName = session.profile.employee.site.displayName(bangla: bangla);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1-Tap Omnibar Search & Command Launcher Pill
-          Material(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(Corner.lg),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(Corner.lg),
-              onTap: () {
-                Haptics.tap();
-                unawaited(showGlobalSearch(context));
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.md,
-                  vertical: 10,
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, size: 20, color: scheme.primary),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? 'কর্মী, নোট-শিট, সম্পদ বা ১-ট্যাপ অ্যাকশন খুঁজুন...'
-                            : 'Search staff, note-sheets, assets or quick action...',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: scheme.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(Corner.sm),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.bolt, size: 13, color: scheme.primary),
-                          const SizedBox(width: 2),
-                          Text(
-                            bangla ? 'কমান্ড' : ' Quick',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: scheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: Space.xs),
-          // Compact Operational Pulse Strip
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _PulseChip(
-                  icon: Icons.circle,
-                  iconColor: BrandColors.success,
-                  label: siteName,
-                ),
-                const SizedBox(width: Space.xs),
-                _PulseChip(
-                  icon: Icons.schedule_outlined,
-                  iconColor: BrandColors.info,
-                  label: bangla
-                      ? 'শিফট: ০৯:০০–১৮:০০'
-                      : 'Shift: 09:00–18:00 BST',
-                ),
-                const SizedBox(width: Space.xs),
-                _PulseChip(
-                  icon: Icons.verified_user_outlined,
-                  iconColor: BrandColors.crimson,
-                  label: bangla
-                      ? 'SHA-256 অডিট সক্রিয়'
-                      : 'SHA-256 Ledger Verified',
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PulseChip extends StatelessWidget {
-  const _PulseChip({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(Corner.md),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 11, color: iconColor),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _HomeWork extends ConsumerWidget {
   const _HomeWork({required this.session});
 
@@ -396,6 +267,7 @@ class _HomeWork extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dash = ref.watch(dashboardMeProvider);
     return dash.when(
+      skipLoadingOnReload: true,
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(horizontal: Space.lg),
         child: SkeletonList(itemCount: 3),

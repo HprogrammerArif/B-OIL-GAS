@@ -50,6 +50,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
   const [showBatchReleaseModal, setShowBatchReleaseModal] = useState(false);
   const [showGatePassModal, setShowGatePassModal] = useState(false);
   const [showVoiceBriefingModal, setShowVoiceBriefingModal] = useState(false);
+  const [driverSosSent, setDriverSosSent] = useState(false);
 
   const data = useDashboardData();
   const cfg = DASHBOARD_CONFIG[role];
@@ -108,9 +109,15 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger')}
+                disabled={driverSosSent}
+                onClick={() => {
+                  setDriverSosSent(true);
+                  showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger');
+                }}
               >
-                {t('Emergency SOS', 'জরুরি এসওএস', lang)}
+                {driverSosSent
+                  ? t('Alert sent', 'সংকেত পাঠানো হয়েছে', lang)
+                  : t('Emergency SOS', 'জরুরি এসওএস', lang)}
               </Button>
             )}
           </>
@@ -148,6 +155,15 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
           {role === 'employee' && (
             <>
+              <EmployeeDashboard
+                role={role}
+                lang={lang}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                showGatePassModal={showGatePassModal}
+                setShowGatePassModal={setShowGatePassModal}
+                onNavigate={onNavigate}
+              />
               <div className="dash-tiles">
                 <ActionTile
                   tone="info" icon={<MapPin size={20} />}
@@ -302,7 +318,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         />
       )}
 
-      {role === 'employee' && (
+      {role === 'employee' && activeTab !== 'overview' && (
         <EmployeeDashboard
           role={role}
           lang={lang}

@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore } from '../store/operationsStore';
+import { parcelPhotoFor, useOperationsStore } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
+import { downloadFile, escHtml, htmlSheet } from './compliance/doLetter';
 import { today, nowTime } from '../lib/clock';
 import {
   type ParcelMode, type ParcelAction, OTP_MAX_ATTEMPTS,
@@ -58,6 +59,8 @@ export interface ParcelItem {
   receiverRole?: string;
   destination: string;
   contents: string;
+  photo: string;
+  photos: string[];
   category: 'legal_docs' | 'qc_sample' | 'refinery_spares' | 'tender_bid' | 'it_hardware';
   weight: string;
   declaredValue: string;
@@ -113,7 +116,7 @@ export default function ParcelView({ lang }: ViewProps) {
   const [urgencyFilter, setUrgencyFilter] = useState<'all' | 'critical' | 'high' | 'normal'>('all');
 
   // Cockpit Internal View Switcher: 'map' | 'timeline' | 'details'
-  const [cockpitView, setCockpitView] = useState<'map' | 'timeline' | 'details'>('map');
+  const [cockpitView, setCockpitView] = useState<'map' | 'timeline' | 'details' | 'photos'>('map');
   const [mobileTab, setMobileTab] = useState<'feed' | 'tracker'>('feed');
 
   const [scopeMode, setScopeMode] = useState<'personal' | 'master'>(isDesk ? 'master' : 'personal');
@@ -126,6 +129,7 @@ export default function ParcelView({ lang }: ViewProps) {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showTamperModal, setShowTamperModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [courierNoted, setCourierNoted] = useState<Record<string, boolean>>({});
 
   // Return Form State
   const [returnReason, setReturnReason] = useState<ReturnDetails['reason']>('tamper_broken');
@@ -140,6 +144,7 @@ export default function ParcelView({ lang }: ViewProps) {
   const [newRecipient, setNewRecipient] = useState('');
   const [newRecipientDept, setNewRecipientDept] = useState('Keraniganj Refinery Complex');
   const [newContents, setNewContents] = useState('');
+  const [newPhotos, setNewPhotos] = useState<string[]>([]);
   const [newCategory, setNewCategory] = useState<ParcelItem['category']>('legal_docs');
   const [newUrgency, setNewUrgency] = useState<'critical' | 'high' | 'normal'>('high');
   const [newOrigin, setNewOrigin] = useState('Bashundhara Corporate HQ, Baridhara');
@@ -162,6 +167,28 @@ export default function ParcelView({ lang }: ViewProps) {
     () => scopedParcels.find(p => p.id === selectedParcelId) || scopedParcels[0],
     [selectedParcelId, scopedParcels],
   );
+
+  const saveAuditSheet = () => {
+    if (!selectedParcel) return;
+    const rows = selectedParcel.chainOfCustody.map((log) => (
+      `<tr><td>${escHtml(log.timestamp)}</td><td>${escHtml(t(log.stageName, log.stageNameBn, lang))}</td><td>${escHtml(log.location)}</td><td>${escHtml(`${log.actor} (${log.actorRole})`)}</td><td>${escHtml(log.notes ?? '')}</td></tr>`
+    )).join('');
+    const file = `audit-${selectedParcel.trackingNo.replace(/[^\w.-]+/g, '_')}.html`;
+    const title = t('Board audit copy', 'বোর্ড অডিট কপি', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p>${escHtml(t('Waybill', 'ওয়েবিল', lang))}: <strong>${escHtml(selectedParcel.trackingNo)}</strong> · ${escHtml(t('Seal', 'সিল', lang))}: ${escHtml(selectedParcel.sealNo)}</p>
+      <p>${escHtml(selectedParcel.origin)} → ${escHtml(selectedParcel.destination)}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('When', 'কখন', lang))}</th>
+        <th>${escHtml(t('Step', 'ধাপ', lang))}</th>
+        <th>${escHtml(t('Place', 'স্থান', lang))}</th>
+        <th>${escHtml(t('Logged by', 'এন্ট্রি করেছেন', lang))}</th>
+        <th>${escHtml(t('Note', 'নোট', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+    setShowAuditModal(false);
+  };
   const selectedAction: ParcelAction = selectedParcel && user ? parcelActionFor(selectedParcel, user, mode) : 'none';
   const iAmRecipient = !!(selectedParcel && user && isRecipient(selectedParcel, user));
   const iAmSender = !!(selectedParcel && user && isSender(selectedParcel, user));
@@ -477,6 +504,39 @@ export default function ParcelView({ lang }: ViewProps) {
     showToast(t(`Waybill number copied: ${selectedParcel.trackingNo}`, `ওয়েবিল নম্বর কপি হয়েছে: ${selectedParcel.trackingNo}`, lang), 'success');
   };
 
+  const handleParcelPhotos = async (list: FileList | null) => {
+    if (!list || list.length === 0) return;
+    const room = 6 - newPhotos.length;
+    if (room <= 0) {
+      showToast(t('A parcel can carry 6 pictures.', 'একটি পার্সেলে ৬টি ছবি যুক্ত করা যায়।', lang), 'info');
+      return;
+    }
+    const chosen = Array.from(list);
+    const accepted: File[] = [];
+    let refused = false;
+    for (const file of chosen) {
+      const allowed = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+      if (!allowed || file.size > 2 * 1024 * 1024) {
+        refused = true;
+        continue;
+      }
+      accepted.push(file);
+    }
+    if (refused) {
+      showToast(t('Use a JPEG, PNG, or WebP image under 2 MB.', '২ এমবির কম JPEG, PNG বা WebP ছবি ব্যবহার করুন।', lang), 'info');
+    }
+    if (accepted.length > room) {
+      showToast(t('A parcel can carry 6 pictures.', 'একটি পার্সেলে ৬টি ছবি যুক্ত করা যায়।', lang), 'info');
+    }
+    const urls = await Promise.all(accepted.slice(0, room).map((file) => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('read'));
+      reader.readAsDataURL(file);
+    })));
+    setNewPhotos((prev) => [...prev, ...urls].slice(0, 6));
+  };
+
   const handleCreateParcel = async () => {
     if (!user || !canRegister) return;
     if (!newRecipient.trim() || !newContents.trim()) {
@@ -488,6 +548,7 @@ export default function ParcelView({ lang }: ViewProps) {
     const trackingNo = nextRef('PKG');
     const sealNo = nextRef('SEAL', 5);
     const id = trackingNo;
+    const photos = newPhotos.length > 0 ? newPhotos : [parcelPhotoFor(newCategory)];
     const draft: ParcelItem = {
       id,
       trackingNo,
@@ -499,6 +560,8 @@ export default function ParcelView({ lang }: ViewProps) {
       receiverDept: newRecipientDept,
       destination: newDestination,
       contents: newContents.trim(),
+      photo: photos[0],
+      photos,
       category: newCategory,
       weight: newWeight,
       declaredValue: newDeclaredValue,
@@ -542,6 +605,7 @@ export default function ParcelView({ lang }: ViewProps) {
     setShowNewModal(false);
     setNewRecipient('');
     setNewContents('');
+    setNewPhotos([]);
     showToast(t(`Waybill ${created.trackingNo} registered. ${created.receiver} will receive the delivery PIN.`, `ওয়েবিল ${created.trackingNo} নিবন্ধিত। প্রাপক ডেলিভারি পিন পাবেন।`, lang), 'success');
   };
 
@@ -814,6 +878,9 @@ export default function ParcelView({ lang }: ViewProps) {
                       setMobileTab('tracker');
                     }}
                   >
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                      <img className="parcel-feed-photo" src={p.photo} alt={p.contents} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
                       <div style={{ fontSize: '12.5px', fontWeight: 800, color: 'var(--brand-slate-900)', lineHeight: 1.35, flex: 1 }}>
                         {p.contents}
@@ -863,6 +930,8 @@ export default function ParcelView({ lang }: ViewProps) {
                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {p.origin.split(',')[0]} → {p.destination.split(',')[0]}
                         </span>
+                      </div>
+                    </div>
                       </div>
                     </div>
                   </div>
@@ -1087,6 +1156,15 @@ export default function ParcelView({ lang }: ViewProps) {
                     <Layers size={13} />
                     {t('Package Specs & Custody', 'পণ্যের স্পেকস ও কাস্টডি', lang)}
                   </button>
+                  <button
+                    type="button"
+                    className={`parcel-pill-tab ${cockpitView === 'photos' ? 'active' : ''}`}
+                    onClick={() => setCockpitView('photos')}
+                  >
+                    <Camera size={13} />
+                    {t('Photos', 'ছবি', lang)}
+                    <span className="badge" style={{ fontSize: '9px', padding: '1px 5px' }}>{selectedParcel.photos.length}</span>
+                  </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1114,6 +1192,21 @@ export default function ParcelView({ lang }: ViewProps) {
                   )}
                 </div>
               </div>
+
+              {cockpitView === 'photos' && (
+                <div style={{ padding: '22px' }}>
+                  <div className="parcel-photo-row">
+                    {selectedParcel.photos.map((src, index) => (
+                      <img
+                        key={`${selectedParcel.id}-${index}`}
+                        className="parcel-detail-photo"
+                        src={src}
+                        alt={selectedParcel.contents}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* ── VIEW 1: LIVE TRANSIT CORRIDOR MAP (Simulated Real-Time Route) ── */}
               {cockpitView === 'map' && (
@@ -1205,13 +1298,10 @@ export default function ParcelView({ lang }: ViewProps) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {selectedParcel.courier.phone && (
                           <a
-                            href={`tel:${selectedParcel.courier.phone}`}
+                            href={`tel:${selectedParcel.courier.phone.replace(/[^\d+]/g, '')}`}
                             className="btn-primary"
                             style={{ textDecoration: 'none', fontSize: '11.5px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              showToast(`Dialing Courier ${selectedParcel.courier.name}: ${selectedParcel.courier.phone}`, 'info');
-                            }}
+                            onClick={() => showToast(t(`Courier number: ${selectedParcel.courier.phone}`, `কুরিয়ারের নম্বর: ${selectedParcel.courier.phone}`, lang), 'info')}
                           >
                             <Phone size={13} />
                             {selectedParcel.courier.phone}
@@ -1221,10 +1311,16 @@ export default function ParcelView({ lang }: ViewProps) {
                           type="button"
                           className="btn-sm-ghost"
                           style={{ fontSize: '11.5px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={() => showToast(`Opening secure internal dispatch chat with ${selectedParcel.courier.name}...`, 'info')}
+                          disabled={!!courierNoted[selectedParcel.id]}
+                          onClick={() => {
+                            setCourierNoted((prev) => ({ ...prev, [selectedParcel.id]: true }));
+                            showToast(t(`Message left for ${selectedParcel.courier.name}.`, `${selectedParcel.courier.name}-এর জন্য বার্তা রাখা হয়েছে।`, lang), 'success');
+                          }}
                         >
                           <MessageSquare size={13} />
-                          {t('Chat', 'চ্যাট', lang)}
+                          {courierNoted[selectedParcel.id]
+                            ? t(`Message left for ${selectedParcel.courier.name}`, `${selectedParcel.courier.name}-এর জন্য বার্তা রাখা হয়েছে`, lang)
+                            : t('Chat', 'চ্যাট', lang)}
                         </button>
                       </div>
                     </div>
@@ -1733,10 +1829,7 @@ export default function ParcelView({ lang }: ViewProps) {
               <button className="btn-sm-ghost" onClick={() => setShowAuditModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
               <button
                 className="btn-primary"
-                onClick={() => {
-                  showToast(t(`Audit Ledger for ${selectedParcel.trackingNo} exported for Board review.`, `বোর্ড পর্যালোচনার জন্য অডিট লেজার রপ্তানি সম্পন্ন।`, lang), 'success');
-                  setShowAuditModal(false);
-                }}
+                onClick={saveAuditSheet}
               >
                 <Download size={14} />
                 {t('Export Board Audit PDF', 'বোর্ড অডিট কপি ডাউনলোড', lang)}
@@ -1936,6 +2029,43 @@ export default function ParcelView({ lang }: ViewProps) {
                   value={newContents}
                   onChange={(e) => setNewContents(e.target.value)}
                 />
+              </div>
+
+              <div className="form-group">
+                <label>{t('Pictures', 'ছবি', lang)}</label>
+                <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px' }}>
+                  {t('JPEG, PNG, or WebP. Up to 6 pictures, 2 MB each. The first picture is the list thumbnail.', 'JPEG, PNG বা WebP। সর্বোচ্চ ৬টি ছবি, প্রতিটি ২ এমবি। প্রথম ছবি তালিকায় দেখা যাবে।', lang)}
+                </div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={(e) => {
+                    void handleParcelPhotos(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+                {newPhotos.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                    {newPhotos.map((src, index) => (
+                      <div key={`${index}-${src.slice(0, 32)}`} style={{ position: 'relative', width: '72px', height: '72px' }}>
+                        <img
+                          src={src}
+                          alt={newContents.trim() || t('Parcel picture', 'পার্সেলের ছবি', lang)}
+                          style={{ width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', display: 'block' }}
+                        />
+                        <button
+                          type="button"
+                          className="parcel-photo-remove"
+                          aria-label={t('Remove picture', 'ছবি সরান', lang)}
+                          onClick={() => setNewPhotos((prev) => prev.filter((_, i) => i !== index))}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

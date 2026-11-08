@@ -183,7 +183,7 @@ export default function SendVoiceBriefingModal({
 
     const newBriefing: VoiceBriefingItem = {
       id: `VB-2026-${Date.now().toString().slice(-4)}`,
-      senderName: 'Ahmed Akbar Sobhan',
+      senderName: 'Abdul Mannan Chowdhury',
       senderRole: 'Chairman & Managing Director',
       title: currentPresetObj?.title || "Chairman's Executive Voice Directive",
       titleBn: currentPresetObj?.titleBn || 'চেয়ারম্যান মহোদয়ের ভয়েস নির্দেশনা',

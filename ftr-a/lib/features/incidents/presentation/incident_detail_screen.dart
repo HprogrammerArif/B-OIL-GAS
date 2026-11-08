@@ -896,33 +896,36 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen>
       children: [
         // Section Header: 5-Whys Chain
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  bangla
-                      ? '৫-হোয়াই অনুসন্ধান শৃঙ্খল'
-                      : '5-Whys Root Cause Chain',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    bangla
+                        ? '৫-হোয়াই অনুসন্ধান শৃঙ্খল'
+                        : '5-Whys Root Cause Chain',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(
-                  bangla
-                      ? 'ধারাবাহিক ৫টি প্রশ্নের মাধ্যমে মূল কারণ উদঘাটন'
-                      : 'Step-by-step causal investigation',
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
+                  Text(
+                    bangla
+                        ? 'ধারাবাহিক ৫টি প্রশ্নের মাধ্যমে মূল কারণ উদঘাটন'
+                        : 'Step-by-step causal investigation',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-            if (canEdit)
+            if (canEdit) ...[
+              const SizedBox(width: Space.xs),
               OutlinedButton.icon(
                 icon: const Icon(Icons.edit, size: 16),
                 label: Text(bangla ? 'সম্পাদনা' : 'Edit 5-Whys'),
                 onPressed: () => unawaited(_show5WhysSheet(i)),
               ),
+            ],
           ],
         ),
         const SizedBox(height: Space.sm),

@@ -103,6 +103,7 @@ export interface AssetRecord {
   tag: string;
   sapAssetNo: string;
   name: string;
+  photo: string;
   category: AssetCategory;
   criticality: AssetCriticality;
   lifecycleStage: LifecycleStage;
@@ -189,6 +190,8 @@ export interface AssetRequisition {
   justification: string;
   specs: string;
   urgency: 'critical' | 'high' | 'normal';
+  /** Quotation or specification names kept with the request. Nothing is uploaded. */
+  attachments?: { name: string; size: string }[];
   stage: 'pending_hod' | 'pending_executive' | 'approved_procuring' | 'commissioned' | 'rejected';
   endorsedByHod?: string;
   sanctionedByExec?: string;
@@ -544,6 +547,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-KER-GEN-101',
     sapAssetNo: 'AST-REG-00101',
     name: '1,200 kVA Main Factory Backup Power Generator',
+    photo: '/machines/generator.jpg',
     category: 'plant',
     criticality: 'critical_a',
     lifecycleStage: 'operational',
@@ -631,6 +635,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-VEH-CAR-01',
     sapAssetNo: 'AST-REG-00201',
     name: 'Toyota Prado TXL Executive Car (DHAKA METRO GHA-13-8821)',
+    photo: '/machines/prado.jpg',
     category: 'vehicle',
     criticality: 'essential_b',
     lifecycleStage: 'operational',
@@ -705,6 +710,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-VEH-TNK-03',
     sapAssetNo: 'AST-REG-00203',
     name: 'Tata Prima 18,000L Heated Bitumen Tanker (DHAKA METRO KHA-11-9042)',
+    photo: '/machines/tanker.jpg',
     category: 'vehicle',
     criticality: 'critical_a',
     lifecycleStage: 'operational',
@@ -779,6 +785,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-HQ-LAP-1042',
     sapAssetNo: 'AST-REG-00412',
     name: 'Apple MacBook Pro 14" Work Laptop',
+    photo: '/machines/macbook.jpg',
     category: 'it',
     criticality: 'essential_b',
     lifecycleStage: 'operational',
@@ -848,6 +855,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-HQ-PHN-1042',
     sapAssetNo: 'AST-REG-00488',
     name: 'Apple iPhone 15 Corporate Field Sales Phone',
+    photo: '/machines/iphone.jpg',
     category: 'it',
     criticality: 'general_c',
     lifecycleStage: 'operational',
@@ -917,6 +925,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-KER-BLR-01',
     sapAssetNo: 'AST-REG-00108',
     name: 'Main Bitumen Storage Tank Heating Boiler #1',
+    photo: '/machines/boiler.jpg',
     category: 'plant',
     criticality: 'critical_a',
     lifecycleStage: 'calibration_due',
@@ -989,6 +998,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-KER-FIR-04',
     sapAssetNo: 'AST-REG-00304',
     name: 'Factory Fire Water Pump & Foam Hydrant System',
+    photo: '/machines/fire-pump.jpg',
     category: 'safety',
     criticality: 'critical_a',
     lifecycleStage: 'operational',
@@ -1060,6 +1070,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-KER-LAB-02',
     sapAssetNo: 'AST-REG-00502',
     name: 'Automatic Bitumen Hardness & Quality Testing Machine',
+    photo: '/machines/tester.jpg',
     category: 'lab',
     criticality: 'essential_b',
     lifecycleStage: 'operational',
@@ -1131,6 +1142,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-HQ-SRV-01',
     sapAssetNo: 'AST-REG-00401',
     name: 'Head Office Main Accounting Server & Backup Rack',
+    photo: '/machines/server.jpg',
     category: 'it',
     criticality: 'critical_a',
     lifecycleStage: 'operational',
@@ -1203,6 +1215,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-HQ-LAP-1099',
     sapAssetNo: 'AST-REG-00499',
     name: 'Dell Latitude 5540 Office Laptop (Ready in Store Room)',
+    photo: '/machines/dell-laptop.jpg',
     category: 'it',
     criticality: 'general_c',
     lifecycleStage: 'in_stock',
@@ -1281,6 +1294,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-KER-FRK-02',
     sapAssetNo: 'AST-REG-00145',
     name: '2016 Toyota 3-Ton Warehouse Diesel Forklift',
+    photo: '/machines/forklift.jpg',
     category: 'plant',
     criticality: 'general_c',
     lifecycleStage: 'decommissioned',
@@ -1360,6 +1374,7 @@ const INITIAL_ASSETS: AssetRecord[] = [
     tag: 'BOGCL-HQ-PRN-04',
     sapAssetNo: 'AST-REG-00380',
     name: '2019 Canon Heavy Office Photocopier (Sold in Auction)',
+    photo: '/machines/photocopier.jpg',
     category: 'corporate',
     criticality: 'general_c',
     lifecycleStage: 'disposed',
@@ -1548,7 +1563,7 @@ const INITIAL_REQUISITIONS: AssetRequisition[] = [
     urgency: 'high',
     stage: 'approved_procuring',
     endorsedByHod: 'Farida Begum (Head of Finance & Approver)',
-    sanctionedByExec: 'Ahmed Akbar Sobhan (Chairman & MD)',
+    sanctionedByExec: 'Abdul Mannan Chowdhury (Chairman & MD)',
   },
 ];
 
@@ -1586,10 +1601,14 @@ interface AssetSnapshot {
   transfers: AssetTransfer[];
 }
 const PERSIST_NAME = 'assets';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 2;
 const persistedAssets = loadPersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
 
-let globalAssets: AssetRecord[] = persistedAssets?.assets ?? [...INITIAL_ASSETS];
+let globalAssets: AssetRecord[] = (persistedAssets?.assets ?? INITIAL_ASSETS).map((asset) => {
+  if (asset.photo) return asset;
+  const seeded = INITIAL_ASSETS.find((item) => item.id === asset.id);
+  return { ...asset, photo: seeded?.photo ?? '/machines/generator.jpg' };
+});
 let globalWorkOrders: AssetWorkOrder[] = persistedAssets?.workOrders ?? [...INITIAL_WORK_ORDERS];
 let globalRequisitions: AssetRequisition[] = persistedAssets?.requisitions ?? [...INITIAL_REQUISITIONS];
 let globalTransfers: AssetTransfer[] = persistedAssets?.transfers ?? [...INITIAL_TRANSFERS];
@@ -1693,6 +1712,7 @@ export interface RegisterAssetInput {
   regulatoryAuthority?: AssetRecord['regulatoryAuthority'];
   actorName: string;
   actorRole: string;
+  photo?: string;
 }
 
 export function useAssetStore() {
@@ -1736,6 +1756,14 @@ export function useAssetStore() {
       tag: input.tag.trim() || `BOGCL-EQ-${100 + seq}`,
       sapAssetNo,
       name: input.name.trim(),
+      photo: input.photo || {
+        plant: '/machines/generator.jpg',
+        vehicle: '/machines/prado.jpg',
+        it: '/machines/dell-laptop.jpg',
+        safety: '/machines/fire-pump.jpg',
+        lab: '/machines/tester.jpg',
+        corporate: '/machines/photocopier.jpg',
+      }[input.category],
       category: input.category,
       criticality: input.criticality,
       lifecycleStage: stage,
@@ -2335,6 +2363,7 @@ export function useAssetStore() {
     justification: string;
     specs: string;
     urgency: AssetRequisition['urgency'];
+    attachments?: AssetRequisition['attachments'];
   }): AssetRequisition => {
     const reqNumber = `ARQ-2026-${String(globalRequisitions.length + 24).padStart(3, '0')}`;
     const newReq: AssetRequisition = {
@@ -2352,6 +2381,7 @@ export function useAssetStore() {
       justification: params.justification,
       specs: params.specs,
       urgency: params.urgency,
+      attachments: params.attachments,
       stage: 'pending_hod',
     };
     globalRequisitions = [newReq, ...globalRequisitions];

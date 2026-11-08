@@ -1,19 +1,15 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
-import 'package:bogcl_oneops/features/workforce/data/workforce_repository.dart';
 import 'package:bogcl_oneops/features/workforce/domain/workforce_models.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/workforce_providers.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/workforce_ui.dart';
-import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
-import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,290 +46,17 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
     ..invalidate(staffListProvider)
     ..invalidate(staffDetailProvider);
 
-  Future<void> _showOnboardSheet() async {
-    final bangla = context.isBangla;
-    final rnd = 1045 + math.Random().nextInt(50);
-    final nextEmpId = 'EMP-$rnd';
-    final nextPernr = '001088${math.Random().nextInt(90) + 10}';
-
-    final nameCtrl = TextEditingController();
-    final desigCtrl = TextEditingController(
-      text: 'Assistant Operations Engineer',
-    );
-    final phoneCtrl = TextEditingController(text: '+880 1711-984421');
-    final emailCtrl = TextEditingController();
-    var grade = 'Grade 7 (Officer)';
-    var site = 'site_plant';
-    var department = 'Refinery Operations';
-
-    final ok = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheet) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.person_add_alt_1,
-                      color: BrandColors.crimson,
-                    ),
-                    const SizedBox(width: Space.sm),
-                    Text(
-                      bangla
-                          ? 'নতুন কর্মী অন্তর্ভুক্তি (Onboard Employee)'
-                          : 'Onboard New Employee',
-                      style: Theme.of(ctx).textTheme.titleLarge,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.xs),
-                Text(
-                  bangla
-                      ? 'নতুন কর্মকর্তার জন্য স্বয়ংক্রিয়ভাবে বিওজিসিএল আইডি ও এসএপি পার্নার নির্ধারিত হবে।'
-                      : 'BOGCL Employee ID & SAP PERNR are automatically reserved.',
-                  style: Theme.of(ctx).textTheme.bodySmall,
-                ),
-                const SizedBox(height: Space.md),
-
-                // Identifier Preview Card
-                Container(
-                  padding: const EdgeInsets.all(Space.sm),
-                  decoration: BoxDecoration(
-                    color: BrandColors.slate900.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: BrandColors.slate900.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            bangla ? 'কর্মকর্তা আইডি' : 'Employee ID',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: BrandColors.slate900,
-                            ),
-                          ),
-                          Text(
-                            nextEmpId,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        height: 24,
-                        width: 1,
-                        color: Colors.grey.shade400,
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            bangla ? 'এসএপি পার্নার' : 'SAP PERNR',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: BrandColors.slate900,
-                            ),
-                          ),
-                          Text(
-                            nextPernr,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: Space.md),
-
-                AppTextField(
-                  label: bangla ? 'পূর্ণ নাম' : 'Full Name',
-                  controller: nameCtrl,
-                ),
-                const SizedBox(height: Space.sm),
-                AppTextField(
-                  label: bangla ? 'পদবী' : 'Designation',
-                  controller: desigCtrl,
-                ),
-                const SizedBox(height: Space.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: grade,
-                  decoration: InputDecoration(
-                    labelText: bangla ? 'বেতন গ্রেড' : 'Pay Grade',
-                  ),
-                  items: [
-                    for (var g = 1; g <= 10; g++)
-                      DropdownMenuItem(
-                        value:
-                            'Grade $g ${g <= 3
-                                ? "(Executive)"
-                                : g <= 7
-                                ? "(Officer)"
-                                : "(Staff)"}',
-                        child: Text(
-                          'Grade $g ${g <= 3
-                              ? "(Executive)"
-                              : g <= 7
-                              ? "(Officer)"
-                              : "(Staff)"}',
-                        ),
-                      ),
-                  ],
-                  onChanged: (v) => setSheet(() => grade = v ?? grade),
-                ),
-                const SizedBox(height: Space.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: site,
-                  decoration: InputDecoration(
-                    labelText: bangla ? 'কর্মস্থল (Site)' : 'Primary Site',
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: 'site_plant',
-                      child: Text(
-                        bangla
-                            ? 'কেরানীগঞ্জ বিটুমিন রিফাইনারি'
-                            : 'Keraniganj Bitumen Refinery',
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'site_hq',
-                      child: Text(
-                        bangla
-                            ? 'প্রধান কার্যালয়, বারিধারা'
-                            : 'Head Office, Baridhara',
-                      ),
-                    ),
-                  ],
-                  onChanged: (v) => setSheet(() => site = v ?? site),
-                ),
-                const SizedBox(height: Space.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: department,
-                  decoration: InputDecoration(
-                    labelText: bangla ? 'বিভাগ (Department)' : 'Department',
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Refinery Operations',
-                      child: Text('Refinery Operations'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Finance & Accounts',
-                      child: Text('Finance & Accounts'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'HR & Admin',
-                      child: Text('HR & Admin'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Sales & Marketing',
-                      child: Text('Sales & Marketing'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Transport & Fleet',
-                      child: Text('Transport & Fleet'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'HSE & Quality',
-                      child: Text('HSE & Quality'),
-                    ),
-                  ],
-                  onChanged: (v) =>
-                      setSheet(() => department = v ?? department),
-                ),
-                const SizedBox(height: Space.sm),
-                AppTextField(
-                  label: bangla ? 'অফিসিয়াল মোবাইল নম্বর' : 'Mobile Phone',
-                  controller: phoneCtrl,
-                ),
-                const SizedBox(height: Space.lg),
-                PrimaryButton(
-                  label: bangla
-                      ? 'কর্মী অন্তর্ভুক্তি নিশ্চিত করুন'
-                      : 'Confirm Onboarding',
-                  onPressed: () {
-                    if (nameCtrl.text.trim().isEmpty) {
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'কর্মীর নাম প্রদান করুন'
-                            : 'Enter employee name',
-                        tone: StatusTone.warning,
-                      );
-                      return;
-                    }
-                    Navigator.pop(ctx, true);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (ok == true) {
-      try {
-        await ref.read(workforceRepositoryProvider).create({
-          'fullName': nameCtrl.text.trim(),
-          'designation': desigCtrl.text.trim(),
-          'siteId': site,
-          'phone': phoneCtrl.text.trim(),
-        });
-        _refresh();
-        if (!mounted) return;
-        AppToast.show(
-          context,
-          bangla
-              ? 'নতুন কর্মী সফলভাবে অন্তর্ভুক্ত করা হয়েছে ($nextEmpId)!'
-              : 'New employee onboarded successfully ($nextEmpId)!',
-          tone: StatusTone.success,
-        );
-      } on Object catch (_) {
-        _refresh();
-        if (!mounted) return;
-        AppToast.show(
-          context,
-          bangla
-              ? 'কর্মী অন্তর্ভুক্তি সম্পন্ন হয়েছে ($nextEmpId)।'
-              : 'Employee onboarded ($nextEmpId).',
-          tone: StatusTone.success,
-        );
-      }
-    }
-    nameCtrl.dispose();
-    desigCtrl.dispose();
-    phoneCtrl.dispose();
-    emailCtrl.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canAdd = session?.can('employees:create') ?? false;
+    final canManageHr =
+        canAdd ||
+        (session?.can('employees:offboard') ?? false) ||
+        (session?.can('employees:clearance') ?? false) ||
+        (session?.can('employees:read', GrantScope.site) ?? false);
 
     // Load all staff for unified multi-tab filtering
     final allStaffAsync = ref.watch(staffListProvider(query: _query));
@@ -354,26 +77,32 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
             onPressed: _refresh,
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: [
-            Tab(text: bangla ? 'সক্রিয় কর্মী তালিকা' : 'Active Directory'),
-            Tab(
-              text: bangla
-                  ? 'প্রস্থান ছাড়পত্র চলমান'
-                  : 'Exit Clearances in Progress',
-            ),
-            Tab(
-              text: bangla ? 'সাবেক কর্মকর্তা আর্কাইভ' : 'Former Staff Archive',
-            ),
-          ],
-        ),
+        bottom: canManageHr
+            ? TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                tabs: [
+                  Tab(
+                    text: bangla ? 'সক্রিয় কর্মী তালিকা' : 'Active Directory',
+                  ),
+                  Tab(
+                    text: bangla
+                        ? 'প্রস্থান ছাড়পত্র চলমান'
+                        : 'Exit Clearances in Progress',
+                  ),
+                  Tab(
+                    text: bangla
+                        ? 'সাবেক কর্মকর্তা আর্কাইভ'
+                        : 'Former Staff Archive',
+                  ),
+                ],
+              )
+            : null,
       ),
       floatingActionButton: canAdd
           ? FloatingActionButton.extended(
-              onPressed: () => unawaited(_showOnboardSheet()),
+              onPressed: () => unawaited(context.push(AppRoutes.peopleNew)),
               icon: const Icon(Icons.person_add_alt_1),
               label: Text(bangla ? '+ নতুন অন্তর্ভুক্তি' : '+ Onboard Staff'),
             )
@@ -417,18 +146,20 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              bangla
-                                  ? '২ জন কর্মকর্তার ৭-বিভাগের প্রস্থান ছাড়পত্র (Exit Clearance) প্রক্রিয়াধীন।'
-                                  : '2 exiting employees are undergoing 7-department clearance.',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                                fontSize: 12,
+                            if (canManageHr) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                bangla
+                                    ? '২ জন কর্মকর্তার ৭-বিভাগের প্রস্থান ছাড়পত্র (Exit Clearance) প্রক্রিয়াধীন।'
+                                    : '2 exiting employees are undergoing 7-department clearance.',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
+                            ],
                           ],
                         ),
                       ),
@@ -437,7 +168,7 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
                 ),
                 const SizedBox(height: Space.sm),
 
-                // 4 Workforce KPI Tiles
+                // Workforce KPI Tiles
                 Row(
                   children: [
                     Expanded(
@@ -463,14 +194,16 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
                         BrandColors.success,
                       ),
                     ),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: _kpiTile(
-                        '2',
-                        bangla ? 'ছাড়পত্র চলমান' : 'Exit Clear',
-                        BrandColors.warning,
+                    if (canManageHr) ...[
+                      const SizedBox(width: Space.xs),
+                      Expanded(
+                        child: _kpiTile(
+                          '2',
+                          bangla ? 'ছাড়পত্র চলমান' : 'Exit Clear',
+                          BrandColors.warning,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: Space.sm),
@@ -517,14 +250,16 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
 
           // TabBar Views
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildStaffList(allStaffAsync, bangla, 'ACTIVE'),
-                _buildStaffList(leavingStaffAsync, bangla, 'LEAVING'),
-                _buildStaffList(formerStaffAsync, bangla, 'FORMER'),
-              ],
-            ),
+            child: canManageHr
+                ? TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildStaffList(allStaffAsync, bangla, 'ACTIVE'),
+                      _buildStaffList(leavingStaffAsync, bangla, 'LEAVING'),
+                      _buildStaffList(formerStaffAsync, bangla, 'FORMER'),
+                    ],
+                  )
+                : _buildStaffList(allStaffAsync, bangla, 'ACTIVE'),
           ),
         ],
       ),

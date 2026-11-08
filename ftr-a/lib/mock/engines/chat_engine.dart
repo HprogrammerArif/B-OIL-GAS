@@ -8,7 +8,7 @@ import 'package:bogcl_oneops/mock/store.dart';
 
 /// Inner-circle chat (doc 06 MOD-15). No E2E claim in copy (BR-15-05/17).
 abstract final class ChatEngine {
-  static const emojis = {'👍', '✅', '⚠️', '🙏'};
+  static const emojis = {'👍', '✅', '⚡', '👁️', '🚨', '🙏', '⚠️'};
 
   static Json? channel(MockStore store, String id) =>
       store.get(Col.chatChannels, id);
@@ -61,16 +61,75 @@ abstract final class ChatEngine {
     return best;
   }
 
+  /// Resolves rich employee metadata for a userId.
+  static Json? _employeeInfo(MockStore store, String? userId) {
+    if (userId == null) return null;
+    final u = store.get(Col.users, userId);
+    if (u == null) return null;
+    final emp = store.get(Col.employees, u.str('employeeId'));
+    if (emp == null) return null;
+    final desig = emp.objOrNull('designation');
+    final site = emp.objOrNull('site');
+    final dept = emp.objOrNull('department');
+    return {
+      'userId': userId,
+      'employeeId': emp['id'],
+      'empCode': emp['empCode'],
+      'fullName': emp['fullName'],
+      'fullNameBn': emp['fullNameBn'] ?? emp['fullName'],
+      'title': desig?['title'] ?? '',
+      'titleBn': desig?['titleBn'] ?? desig?['title'] ?? '',
+      'site': site?['name'] ?? 'BOGCL',
+      'siteBn': site?['nameBn'] ?? site?['name'] ?? 'BOGCL',
+      'department': dept?['name'] ?? '',
+      'departmentBn': dept?['nameBn'] ?? dept?['name'] ?? '',
+    };
+  }
+
   static Json channelWire(MockStore store, AuthContext a, Json ch) {
+    final callerId = a.user.str('id');
     final last = lastMessage(store, ch.str('id'));
+    final isDirect = ch['isDirect'] == true;
+    final rawMembers = ch.objList('members');
+
+    var displayName = ch.str('name');
+    var displayNameBn = ch.strOrNull('nameBn') ?? displayName;
+    var subtitle = '${rawMembers.length} Members · #${ch['key']}';
+    var subtitleBn = '${rawMembers.length} জন সদস্য · #${ch['key']}';
+    var directPresence = 'ONLINE';
+
+    if (isDirect) {
+      final otherMem = rawMembers
+          .where((m) => m['userId'] != callerId)
+          .firstOrNull;
+      final otherUid =
+          otherMem?.strOrNull('userId') ??
+          rawMembers.firstOrNull?.strOrNull('userId');
+      final info = _employeeInfo(store, otherUid);
+      if (info != null) {
+        displayName = info.str('fullName');
+        displayNameBn = info.str('fullNameBn');
+        final tEn = info.str('title');
+        final sEn = info.str('site');
+        final tBn = info.str('titleBn');
+        final sBn = info.str('siteBn');
+        subtitle = tEn.isNotEmpty ? '$tEn · $sEn' : sEn;
+        subtitleBn = tBn.isNotEmpty ? '$tBn · $sBn' : sBn;
+      }
+      directPresence = otherMem?.strOrNull('presence') ?? 'ONLINE';
+    }
+
     return {
       'id': ch['id'],
       'key': ch['key'],
-      'name': ch['name'],
-      'nameBn': ch['nameBn'],
+      'name': displayName,
+      'nameBn': displayNameBn,
+      'subtitle': subtitle,
+      'subtitleBn': subtitleBn,
+      'presence': directPresence,
       'isLocked': ch['isLocked'] == true,
-      'isDirect': ch['isDirect'] == true,
-      'unreadCount': unread(store, ch, a.user.str('id')),
+      'isDirect': isDirect,
+      'unreadCount': unread(store, ch, callerId),
       'lastMessage': last == null
           ? null
           : {
@@ -83,14 +142,23 @@ abstract final class ChatEngine {
               ),
             },
       'members': [
-        for (final m in ch.objList('members'))
-          {
-            ...?WorkflowEngine.personRef(store, m.str('userId')),
-            'isAdmin': m['isAdmin'] == true,
-            'presence': m['userId'] == a.user['id']
-                ? 'ONLINE'
-                : (m['presence'] ?? 'AWAY'),
-          },
+        for (final m in rawMembers)
+          () {
+            final uid = m.str('userId');
+            final info = _employeeInfo(store, uid);
+            return {
+              ...?WorkflowEngine.personRef(store, uid),
+              'title': info?['title'] ?? '',
+              'titleBn': info?['titleBn'] ?? '',
+              'site': info?['site'] ?? 'BOGCL',
+              'siteBn': info?['siteBn'] ?? 'BOGCL',
+              'empCode': info?['empCode'] ?? '',
+              'isAdmin': m['isAdmin'] == true,
+              'presence': uid == callerId
+                  ? 'ONLINE'
+                  : (m['presence'] ?? 'ONLINE'),
+            };
+          }(),
       ],
     };
   }
@@ -104,6 +172,9 @@ abstract final class ChatEngine {
       };
     }
     final dir = m.strOrNull('directiveId');
+    final senderId = m.strOrNull('senderUserId');
+    final info = _employeeInfo(store, senderId);
+    final baseSender = WorkflowEngine.personRef(store, senderId);
     return {
       'id': m['id'],
       'channelId': m['channelId'],
@@ -113,14 +184,87 @@ abstract final class ChatEngine {
       'editedAt': m['editedAt'],
       'pinned': m['pinned'] == true,
       'isUrgent': m['isUrgent'] == true,
-      'sender': WorkflowEngine.personRef(store, m.strOrNull('senderUserId')),
+      'sender': baseSender == null
+          ? null
+          : {
+              ...baseSender,
+              'title': info?['title'] ?? baseSender['title'] ?? '',
+              'site': info?['site'] ?? '',
+            },
       'reactions': m['reactions'] ?? const <Json>[],
       'directive': dir == null ? null : store.get(Col.chatDirectives, dir),
     };
   }
 
+  /// Ensures default 1:1 Direct Message conversations exist even on databases
+  /// that were seeded before DM channels were added.
+  static void _ensureDefaultDirects(MockStore store, String callerId) {
+    final hasAnyDirect = store
+        .all(Col.chatChannels)
+        .any((c) => c['isDirect'] == true && isMember(c, callerId));
+    if (hasAnyDirect) return;
+
+    final targets = [
+      (
+        code: 'EMP-0012',
+        msg: 'Sir, Batch B-88 Bitumen 60/70 passed BDS 1238 lab certification at Keraniganj Refinery. Ready for commercial dispatch.',
+        at: '2026-11-03T07:15:00.000Z',
+      ),
+      (
+        code: 'EMP-0062',
+        msg: 'Chairman Sir, the Tk 32.0L Bitumen Storage Tank TK-109 Note-Sheet is verified by Finance and placed in your E-Sign queue.',
+        at: '2026-11-03T07:45:00.000Z',
+      ),
+      (
+        code: 'EMP-0028',
+        msg: 'Morning attendance across Baridhara HQ and Keraniganj Plant is 96.4% on time today.',
+        at: '2026-11-03T08:05:00.000Z',
+      ),
+    ];
+
+    for (final t in targets) {
+      final otherId = userIdFor(t.code);
+      if (otherId == callerId) continue;
+      final pair = [callerId, otherId]..sort();
+      final key = 'dm_${pair.join('_')}';
+      if (store.get(Col.chatChannels, key) == null) {
+        store.put(Col.chatChannels, {
+          'id': key,
+          'key': key,
+          'name': 'Direct',
+          'nameBn': 'সরাসরি',
+          'isLocked': false,
+          'isDirect': true,
+          'members': [
+            {'userId': pair[0], 'isAdmin': true, 'presence': 'ONLINE'},
+            {'userId': pair[1], 'isAdmin': true, 'presence': 'ONLINE'},
+          ],
+        });
+        final msgId = 'cm_seed_$key';
+        if (store.get(Col.chatMessages, msgId) == null) {
+          store.put(Col.chatMessages, {
+            'id': msgId,
+            'channelId': key,
+            'senderUserId': otherId,
+            'type': 'TEXT',
+            'body': t.msg,
+            'createdAt': t.at,
+            'editedAt': null,
+            'deletedAt': null,
+            'pinned': false,
+            'isUrgent': false,
+            'clientMsgId': msgId,
+            'reactions': <Json>[],
+            'directiveId': null,
+          });
+        }
+      }
+    }
+  }
+
   static List<Json> mine(MockStore store, AuthContext a) {
     final me = a.user.str('id');
+    _ensureDefaultDirects(store, me);
     return [
       for (final ch in store.all(Col.chatChannels))
         if (isMember(ch, me)) channelWire(store, a, ch),
@@ -327,8 +471,8 @@ abstract final class ChatEngine {
       'isLocked': false,
       'isDirect': true,
       'members': [
-        {'userId': pair[0], 'isAdmin': true, 'presence': 'AWAY'},
-        {'userId': pair[1], 'isAdmin': true, 'presence': 'AWAY'},
+        {'userId': pair[0], 'isAdmin': true, 'presence': 'ONLINE'},
+        {'userId': pair[1], 'isAdmin': true, 'presence': 'ONLINE'},
       ],
     };
     store.put(Col.chatChannels, rec);
@@ -345,7 +489,7 @@ abstract final class ChatEngine {
     void add(String? uid) {
       if (uid == null) return;
       if (members.any((m) => m['userId'] == uid)) return;
-      members.add({'userId': uid, 'isAdmin': true, 'presence': 'AWAY'});
+      members.add({'userId': uid, 'isAdmin': true, 'presence': 'ONLINE'});
     }
 
     add(r?.strOrNull('requesterUserId'));
@@ -387,18 +531,49 @@ abstract final class ChatEngine {
     });
   }
 
-  /// Scripted plant-GM reply so a send in operations feels live.
+  /// Smart context-aware colleague reply across Direct Messages & Command Channels.
   static void maybeAutoReply(MockStore store, Json ch, Json justSent) {
-    if (ch['key'] != 'factory-operations') return;
-    if (justSent['senderUserId'] == userIdFor('EMP-0012')) return;
+    final senderId = justSent.str('senderUserId');
+    final isDirect = ch['isDirect'] == true;
+    final key = ch.strOrNull('key') ?? '';
+
+    String? responderId;
+    var replyBody =
+        'Noted, Sir. Our team is executing this now and will update the status shortly.';
+
+    if (isDirect) {
+      final other = ch
+          .objList('members')
+          .where((m) => m['userId'] != senderId)
+          .firstOrNull;
+      responderId = other?.strOrNull('userId');
+      if (responderId == userIdFor('EMP-0012')) {
+        replyBody = 'Acknowledged, Sir. Keraniganj Refinery control room has logged your instruction and will submit the compliance report before shift handover.';
+      } else if (responderId == userIdFor('EMP-0062')) {
+        replyBody = 'Noted, Sir. Finance & Treasury have prioritized this file and verified the budget allocation.';
+      } else if (responderId == userIdFor('EMP-0028')) {
+        replyBody = 'Received, Sir. HR & Administration will coordinate across Baridhara HQ and the refinery plants immediately.';
+      }
+    } else if (key == 'factory-operations' || key == 'permits-and-compliance') {
+      responderId = userIdFor('EMP-0012');
+      replyBody = 'Noted. Keraniganj Plant Operations will close the loop on the current shift and report back with QC verification.';
+    } else if (key == 'finance-and-purchases') {
+      responderId = userIdFor('EMP-0062');
+      replyBody = 'Acknowledged by Finance. Voucher and budget check are cleared on our end.';
+    } else if (key == 'executive-leadership') {
+      responderId = userIdFor('EMP-0012');
+      replyBody = 'Acknowledged, Chairman Sir. Refinery and HQ unit heads are aligned and executing on priority.';
+    }
+
+    if (responderId == null || responderId == senderId) return;
+
     final n = store.all(Col.chatMessages).length + 1;
     store.put(Col.chatMessages, {
       'id': 'cm_$n',
       'channelId': ch['id'],
-      'senderUserId': userIdFor('EMP-0012'),
+      'senderUserId': responderId,
       'type': 'TEXT',
-      'body':
-          'Noted. Plant will close the loop on the next shift and report back.',
+      'body': replyBody,
       'createdAt': store.nowIso(),
       'editedAt': null,
       'deletedAt': null,

@@ -4,14 +4,15 @@ import { t, type Lang } from '../../types';
 import { nowTime } from '../../lib/clock';
 import { showToast } from '../../components/ToastManager';
 import { Button, EmptyState, StatusPill } from '../../components/ui';
-import { INITIAL_LOTO_PERMITS, SHIFT_HANDOVER } from './dashboardData';
 import type { LotoPermitItem, ShiftHandoverItem } from './types';
+import { addPermit, addShift, deIsolatePermit, signShift, usePlantSafety } from './plantSafetyState';
 import {
   NewPermitModal, NewShiftModal, PERMIT_TYPE_LABEL, PermitDetailModal, PermitStatusPill,
   type NewPermitInput, type NewShiftInput, type PermitType,
 } from './SafetyModals';
 
 type Filter = 'all' | PermitType;
+type PlantSafetyMode = 'watch' | 'crew';
 
 const TYPE_DEFAULTS: Record<PermitType, { prefix: string; offset: number; label: string }> = {
   loto: { prefix: 'LOTO-0', offset: 45, label: 'Electrical Power Lockout' },
@@ -21,25 +22,31 @@ const TYPE_DEFAULTS: Record<PermitType, { prefix: string; offset: number; label:
 
 const isOpen = (p: LotoPermitItem) => p.status !== 'DE-ISOLATED';
 
+function personName(raw: string | undefined): string {
+  if (!raw) return '';
+  return raw.split('(')[0].trim();
+}
+
 /**
- * Plant safety: work permits (machines locked off while people work on them)
- * and the shift-to-shift handover log.
+ * Plant safety: work permits and the shift handover log.
+ * The plant manager watches. The crew issues, signs, and removes locks.
  */
-export default function PlantSafety({ lang }: { lang: Lang }) {
-  const [permits, setPermits] = useState<LotoPermitItem[]>(INITIAL_LOTO_PERMITS);
-  const [shifts, setShifts] = useState<ShiftHandoverItem[]>(SHIFT_HANDOVER);
+export default function PlantSafety({ lang, mode = 'watch' }: { lang: Lang; mode?: PlantSafetyMode }) {
+  const { permits, shifts } = usePlantSafety();
   const [filter, setFilter] = useState<Filter>('all');
   const [detail, setDetail] = useState<LotoPermitItem | null>(null);
   const [showNewPermit, setShowNewPermit] = useState(false);
   const [showNewShift, setShowNewShift] = useState(false);
+  const crew = mode === 'crew';
 
   const visible = permits.filter((p) => filter === 'all' || (p.type ?? 'loto') === filter);
   const countOf = (f: Filter) => permits.filter((p) => f === 'all' || (p.type ?? 'loto') === f).length;
   const openCount = permits.filter(isOpen).length;
   const filters: Filter[] = ['all', 'loto', 'hot_work', 'confined_space'];
+  const waiting = shifts.filter((s) => !s.safetyChecklistSigned).length;
 
   const handleDeIsolate = (id: string) => {
-    setPermits((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'DE-ISOLATED' } : p)));
+    deIsolatePermit(id);
     setDetail((prev) => (prev && prev.id === id ? { ...prev, status: 'DE-ISOLATED' } : prev));
     showToast(t('Lock removed. The machine is ready to run.', 'লক খোলা হয়েছে। মেশিন চালুর জন্য প্রস্তুত।', lang), 'success');
   };
@@ -66,14 +73,15 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
       timeIssued: nowTime(lang),
       validUntil: 'Today, 06:00 PM',
     };
-    setPermits((prev) => [permit, ...prev]);
+    addPermit(permit);
     setShowNewPermit(false);
     showToast(t(`Permit ${permit.id} issued. The machine is locked.`, `অনুমতি ${permit.id} ইস্যু হয়েছে। মেশিন লক করা হয়েছে।`, lang), 'gold');
   };
 
-  const handleSignShift = (id: string | undefined, idx: number) => {
-    setShifts((prev) => prev.map((s, i) => ((id ? s.id === id : i === idx) ? { ...s, safetyChecklistSigned: true, status: 'completed' } : s)));
-    showToast(t('Handover accepted and signed.', 'হস্তান্তর গ্রহণ ও স্বাক্ষর সম্পন্ন।', lang), 'success');
+  const handleSignShift = (shift: ShiftHandoverItem, index: number) => {
+    signShift(shift.id, index);
+    const who = personName(shift.incomingEngineer) || t('the arriving engineer', 'নতুন প্রকৌশলী', lang);
+    showToast(t(`Handover accepted by ${who}.`, `${who} হস্তান্তর গ্রহণ করেছেন।`, lang), 'success');
   };
 
   const handleCreateShift = (input: NewShiftInput) => {
@@ -90,16 +98,22 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
       criticalWatchItems: input.watch ? input.watch.split(',').map((s) => s.trim()).filter(Boolean) : [],
       safetyChecklistSigned: false,
     };
-    setShifts((prev) => [shift, ...prev]);
+    addShift(shift);
     setShowNewShift(false);
     showToast(t('Handover note saved. The arriving engineer will sign to accept it.', 'হস্তান্তর নোট সংরক্ষিত। নতুন প্রকৌশলী স্বাক্ষর করে গ্রহণ করবেন।', lang), 'success');
   };
 
-  const waiting = shifts.filter((s) => !s.safetyChecklistSigned).length;
-
   return (
-    <div className="tab-pane-fade psf">
-      {/* ── Work permits ── */}
+    <div className={crew ? 'psf psf-crew' : 'tab-pane-fade psf'}>
+      {crew && (
+        <header className="dash-sec-head">
+          <div>
+            <h3>{t('Plant shift', 'প্ল্যান্ট শিফট', lang)}</h3>
+            <p>{t('You lock the machine and accept the handover. The plant manager only watches.', 'আপনি মেশিন লক করেন এবং হস্তান্তর গ্রহণ করেন। প্ল্যান্ট ম্যানেজার শুধু দেখেন।', lang)}</p>
+          </div>
+        </header>
+      )}
+
       <section className="psf-card" aria-labelledby="psf-permits-title">
         <header className="psf-head">
           <div>
@@ -116,9 +130,11 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
             <StatusPill tone={openCount > 0 ? 'danger' : 'success'}>
               {t(`${openCount} open`, `${openCount.toLocaleString('bn-BD')}টি চালু`, lang)}
             </StatusPill>
-            <Button size="sm" icon={<Plus size={13} />} onClick={() => setShowNewPermit(true)}>
-              {t('Issue permit', 'অনুমতি ইস্যু', lang)}
-            </Button>
+            {crew && (
+              <Button size="sm" icon={<Plus size={13} />} onClick={() => setShowNewPermit(true)}>
+                {t('Issue permit', 'অনুমতি ইস্যু', lang)}
+              </Button>
+            )}
           </div>
         </header>
 
@@ -144,6 +160,7 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
             {visible.map((p) => {
               const locked = p.status === 'LOCKED OUT';
               const typeKey = p.type ?? 'loto';
+              const holder = personName(p.issuedTo);
               return (
                 <li key={p.id} className={`psf-item ${locked ? 'is-locked' : p.status === 'DE-ISOLATED' ? 'is-done' : ''}`}>
                   <div className="psf-item-top">
@@ -158,11 +175,16 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
                     <span>{t('Worker', 'কর্মী', lang)}: <strong>{p.issuedTo}</strong></span>
                     {p.validUntil && <span><Clock size={12} /> {t('Until', 'মেয়াদ', lang)} {p.validUntil}</span>}
                   </div>
+                  {!crew && locked && (
+                    <p className="psf-wait">
+                      {t(`${holder} holds this lock. Nothing for you to remove.`, `${holder} এই লক ধরে আছেন। আপনার খোলার কিছু নেই।`, lang)}
+                    </p>
+                  )}
                   <div className="psf-actions">
                     <Button variant="secondary" size="sm" icon={<Eye size={12} />} onClick={() => setDetail(p)}>
                       {t('Details and checks', 'বিস্তারিত ও পরীক্ষা', lang)}
                     </Button>
-                    {locked && (
+                    {crew && locked && (
                       <Button variant="outline-danger" size="sm" icon={<Key size={12} />} onClick={() => handleDeIsolate(p.id)}>
                         {t('Remove lock', 'লক খুলুন', lang)}
                       </Button>
@@ -175,7 +197,6 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
         )}
       </section>
 
-      {/* ── Shift handover ── */}
       <section className="psf-card" aria-labelledby="psf-shift-title">
         <header className="psf-head">
           <div>
@@ -194,51 +215,66 @@ export default function PlantSafety({ lang }: { lang: Lang }) {
                 ? t(`${waiting} to sign`, `${waiting.toLocaleString('bn-BD')}টি স্বাক্ষর বাকি`, lang)
                 : t('All signed', 'সব স্বাক্ষরিত', lang)}
             </StatusPill>
-            <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={() => setShowNewShift(true)}>
-              {t('Write note', 'নোট লিখুন', lang)}
-            </Button>
+            {crew && (
+              <Button variant="secondary" size="sm" icon={<Plus size={13} />} onClick={() => setShowNewShift(true)}>
+                {t('Write note', 'নোট লিখুন', lang)}
+              </Button>
+            )}
           </div>
         </header>
 
         <ul className="psf-list">
-          {shifts.map((s, i) => (
-            <li key={s.id ?? i} className={`psf-item ${s.safetyChecklistSigned ? 'is-done' : ''}`}>
-              <div className="psf-item-top">
-                <div>
-                  <h4>{s.shift}</h4>
-                  <span className="psf-sub">
-                    {s.outgoingEngineer ?? s.handover.split('➔')[0].trim()} <ArrowRight size={11} /> {s.incomingEngineer ?? s.handover.split('➔')[1]?.trim()} · {s.time}
-                  </span>
+          {shifts.map((s, i) => {
+            const arriving = personName(s.incomingEngineer) || t('the arriving engineer', 'নতুন প্রকৌশলী', lang);
+            return (
+              <li key={s.id ?? i} className={`psf-item ${s.safetyChecklistSigned ? 'is-done' : ''}`}>
+                <div className="psf-item-top">
+                  <div>
+                    <h4>{s.shift}</h4>
+                    <span className="psf-sub">
+                      {s.outgoingEngineer ?? s.handover.split('➔')[0].trim()} <ArrowRight size={11} /> {s.incomingEngineer ?? s.handover.split('➔')[1]?.trim()} · {s.time}
+                    </span>
+                  </div>
+                  {s.safetyChecklistSigned
+                    ? <StatusPill tone="success">{t('Signed', 'স্বাক্ষরিত', lang)}</StatusPill>
+                    : <StatusPill tone="warn">{t('Waiting for signature', 'স্বাক্ষরের অপেক্ষায়', lang)}</StatusPill>}
                 </div>
-                {s.safetyChecklistSigned
-                  ? <StatusPill tone="success">{t('Signed', 'স্বাক্ষরিত', lang)}</StatusPill>
-                  : <StatusPill tone="warn">{t('Waiting for signature', 'স্বাক্ষরের অপেক্ষায়', lang)}</StatusPill>}
-              </div>
-              <p className="psf-why">{s.notes}</p>
-              {s.criticalWatchItems && s.criticalWatchItems.length > 0 && (
-                <div className="psf-watch">
-                  <span>{t('Watch', 'নজরে রাখুন', lang)}</span>
-                  <ul>{s.criticalWatchItems.map((w) => <li key={w}>{w}</li>)}</ul>
-                </div>
-              )}
-              {!s.safetyChecklistSigned && (
-                <div className="psf-actions">
-                  <Button size="sm" icon={<PenLine size={12} />} onClick={() => handleSignShift(s.id, i)}>
-                    {t('Sign to accept', 'স্বাক্ষর করে গ্রহণ করুন', lang)}
-                  </Button>
-                </div>
-              )}
-              {s.safetyChecklistSigned && (
-                <div className="psf-signed"><CheckCircle2 size={13} /> {t('Accepted by the arriving engineer', 'নতুন প্রকৌশলী গ্রহণ করেছেন', lang)}</div>
-              )}
-            </li>
-          ))}
+                <p className="psf-why">{s.notes}</p>
+                {s.criticalWatchItems && s.criticalWatchItems.length > 0 && (
+                  <div className="psf-watch">
+                    <span>{t('Watch', 'নজরে রাখুন', lang)}</span>
+                    <ul>{s.criticalWatchItems.map((w) => <li key={w}>{w}</li>)}</ul>
+                  </div>
+                )}
+                {!s.safetyChecklistSigned && !crew && (
+                  <p className="psf-wait">
+                    {t(`Waiting for ${arriving} to accept. Nothing for you to sign.`, `${arriving}-এর গ্রহণের অপেক্ষায়। আপনার স্বাক্ষরের কিছু নেই।`, lang)}
+                  </p>
+                )}
+                {crew && !s.safetyChecklistSigned && (
+                  <div className="psf-actions">
+                    <Button size="sm" icon={<PenLine size={12} />} onClick={() => handleSignShift(s, i)}>
+                      {t('Sign to accept', 'স্বাক্ষর করে গ্রহণ করুন', lang)}
+                    </Button>
+                  </div>
+                )}
+                {s.safetyChecklistSigned && (
+                  <div className="psf-signed"><CheckCircle2 size={13} /> {t(`Accepted by ${arriving}`, `${arriving} গ্রহণ করেছেন`, lang)}</div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
-      <PermitDetailModal permit={detail} lang={lang} onClose={() => setDetail(null)} onDeIsolate={handleDeIsolate} />
-      {showNewPermit && <NewPermitModal lang={lang} onClose={() => setShowNewPermit(false)} onCreate={handleCreatePermit} />}
-      {showNewShift && <NewShiftModal lang={lang} onClose={() => setShowNewShift(false)} onCreate={handleCreateShift} />}
+      <PermitDetailModal
+        permit={detail}
+        lang={lang}
+        onClose={() => setDetail(null)}
+        onDeIsolate={crew ? handleDeIsolate : undefined}
+      />
+      {crew && showNewPermit && <NewPermitModal lang={lang} onClose={() => setShowNewPermit(false)} onCreate={handleCreatePermit} />}
+      {crew && showNewShift && <NewShiftModal lang={lang} onClose={() => setShowNewShift(false)} onCreate={handleCreateShift} />}
     </div>
   );
 }

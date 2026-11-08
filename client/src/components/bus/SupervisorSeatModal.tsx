@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Seat, RouteInfo } from './busTypes';
 import { t } from '../../types';
-import {
-  Shield, X, CheckCircle, UserMinus, UserCheck, AlertTriangle,
-  UserPlus, Phone, Building, Check, MapPin, Clock, Tag, User
-} from 'lucide-react';
+import { useEmployeeStore } from '../../store/employeeStore';
+import { UserCheck } from 'lucide-react';
 
 interface SupervisorSeatModalProps {
   isOpen: boolean;
@@ -18,18 +16,21 @@ interface SupervisorSeatModalProps {
   lang: 'en' | 'bn';
 }
 
-const EMPLOYEE_PRESETS = [
-  { name: 'Tanvir Ahmed', staffId: 'EMP-1042', dept: 'Sales & Distribution', phone: '+880 1720-334455', blood: 'B+' },
-  { name: 'Engr. Md. Harunur Rashid', staffId: 'EMP-0012', dept: 'Plant GM & Operations', phone: '+880 1711-002101', blood: 'O+' },
-  { name: 'Farhana Kabir', staffId: 'EMP-0312', dept: 'EHS Safety Lead', phone: '+880 1819-556677', blood: 'B+' },
-  { name: 'Engr. Tariq Ahmed', staffId: 'EMP-0145', dept: 'Maintenance Div.', phone: '+880 1711-002105', blood: 'AB+' },
-  { name: 'Mizanur Rahman', staffId: 'EMP-0219', dept: 'Quality Assurance', phone: '+880 1712-441122', blood: 'A+' },
-  { name: 'Shariful Islam', staffId: 'EMP-0452', dept: 'Refinery Tech', phone: '+880 1713-998877', blood: 'O+' },
-  { name: 'Rezaul Karim', staffId: 'EMP-0678', dept: 'Instrument Specialist', phone: '+880 1814-223344', blood: 'A+' },
-  { name: 'Nurul Amin', staffId: 'EMP-0782', dept: 'Plant Accounts', phone: '+880 1715-667788', blood: 'B+' },
-  { name: 'Kamrul Hasan', staffId: 'EMP-0891', dept: 'HR & Administration', phone: '+880 1816-554433', blood: 'A+' },
-  { name: 'Mainul Islam', staffId: 'EMP-3656', dept: 'Flare System Tech', phone: '+880 1744-990011', blood: 'O+' },
-];
+function columnFor(num: number): Seat['col'] {
+  const colMod = num % 4;
+  if (colMod === 1) return 'left_win';
+  if (colMod === 2) return 'left_aisle';
+  if (colMod === 3) return 'right_aisle';
+  return 'right_win';
+}
+
+function columnLabel(num: number, lang: 'en' | 'bn'): string {
+  const col = columnFor(num);
+  if (col === 'left_win') return t('Left window', 'বাঁ জানালা', lang);
+  if (col === 'left_aisle') return t('Left aisle', 'বাঁ আইল', lang);
+  if (col === 'right_aisle') return t('Right aisle', 'ডান আইল', lang);
+  return t('Right window', 'ডান জানালা', lang);
+}
 
 export default function SupervisorSeatModal({
   isOpen,
@@ -42,80 +43,62 @@ export default function SupervisorSeatModal({
   activeRoute,
   lang,
 }: SupervisorSeatModalProps) {
-  const [selectedSeatNum, setSelectedSeatNum] = useState<number>(seat?.num || 1);
+  const { activeEmployees } = useEmployeeStore();
+  const [selectedSeatNum, setSelectedSeatNum] = useState(seat?.num || 1);
   const [staffName, setStaffName] = useState(seat?.assignedTo || '');
-  const [staffId, setStaffId] = useState(seat?.staffId || 'EMP-');
-  const [dept, setDept] = useState(seat?.dept || 'Refinery Operations');
-  const [phone, setPhone] = useState(seat?.phone || '+880 17');
-  const [pickupPoint, setPickupPoint] = useState(seat?.pickupPoint || activeRoute.inboundStops[0]?.name || 'Mirpur-10');
-  const [pickupTime, setPickupTime] = useState(seat?.pickupTime || '07:15 AM');
-  const [category, setCategory] = useState<'executive' | 'lady_priority' | 'senior_staff' | 'regular'>(
-    seat?.category || 'regular'
-  );
-  const [bookingType, setBookingType] = useState<'permanent' | 'shift_pass' | 'guest'>(
-    seat?.bookingType || 'permanent'
-  );
-  const [bloodGroup, setBloodGroup] = useState(seat?.bloodGroup || 'B+');
-  const [vacateReasonText, setVacateReasonText] = useState('Official Headquarter Tour / Annual Leave');
+  const [staffId, setStaffId] = useState(seat?.staffId || '');
+  const [dept, setDept] = useState(seat?.dept || '');
+  const [phone, setPhone] = useState(seat?.phone || '');
+  const [pickupPoint, setPickupPoint] = useState(seat?.pickupPoint || activeRoute.inboundStops[0]?.name || '');
+  const [pickupTime, setPickupTime] = useState(seat?.pickupTime || activeRoute.inboundStops[0]?.scheduledTime || '');
+  const [category, setCategory] = useState<NonNullable<Seat['category']>>(seat?.category || 'regular');
+  const [bookingType, setBookingType] = useState<NonNullable<Seat['bookingType']>>(seat?.bookingType || 'permanent');
+  const [bloodGroup, setBloodGroup] = useState(seat?.bloodGroup || '');
+  const [vacateReasonText, setVacateReasonText] = useState('');
 
-  // Sync when seat changes from external trigger
+  const seatNum = seat?.num;
+
   useEffect(() => {
-    if (seat) {
-      setSelectedSeatNum(seat.num);
-      setStaffName(seat.assignedTo || '');
-      setStaffId(seat.staffId || 'EMP-');
-      setDept(seat.dept || 'Refinery Operations');
-      setPhone(seat.phone || '+880 17');
-      setPickupPoint(seat.pickupPoint || activeRoute.inboundStops[0]?.name || 'Mirpur-10');
-      setPickupTime(seat.pickupTime || '07:15 AM');
-      setCategory(seat.category || 'regular');
-      setBookingType(seat.bookingType || 'permanent');
-      setBloodGroup(seat.bloodGroup || 'B+');
-    }
-  }, [seat, activeRoute]);
+    if (!seat || seat.num !== seatNum) return;
+    setSelectedSeatNum(seat.num);
+    setStaffName(seat.assignedTo || '');
+    setStaffId(seat.staffId || '');
+    setDept(seat.dept || '');
+    setPhone(seat.phone || '');
+    setPickupPoint(seat.pickupPoint || activeRoute.inboundStops[0]?.name || '');
+    setPickupTime(seat.pickupTime || activeRoute.inboundStops[0]?.scheduledTime || '');
+    setCategory(seat.category || 'regular');
+    setBookingType(seat.bookingType || 'permanent');
+    setBloodGroup(seat.bloodGroup || '');
+    // Reset only when the opened seat number changes. A later render must not wipe a picked employee.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seatNum]);
 
-  const handleSeatNumChange = (num: number) => {
-    setSelectedSeatNum(num);
-    const target = allSeats.find(s => s.num === num);
-    if (target) {
-      setStaffName(target.assignedTo || '');
-      setStaffId(target.staffId || 'EMP-');
-      setDept(target.dept || 'Refinery Operations');
-      setPhone(target.phone || '+880 17');
-      setPickupPoint(target.pickupPoint || activeRoute.inboundStops[0]?.name || 'Mirpur-10');
-      setPickupTime(target.pickupTime || '07:15 AM');
-      setCategory(target.category || 'regular');
-      setBookingType(target.bookingType || 'permanent');
-      setBloodGroup(target.bloodGroup || 'B+');
-    }
-  };
-
-  const handlePickPreset = (preset: typeof EMPLOYEE_PRESETS[0]) => {
-    setStaffName(preset.name);
-    setStaffId(preset.staffId);
-    setDept(preset.dept);
-    setPhone(preset.phone);
-    setBloodGroup(preset.blood);
+  const fillFromSeat = (target: Seat) => {
+    setSelectedSeatNum(target.num);
+    setStaffName(target.assignedTo || '');
+    setStaffId(target.staffId || '');
+    setDept(target.dept || '');
+    setPhone(target.phone || '');
+    setPickupPoint(target.pickupPoint || activeRoute.inboundStops[0]?.name || '');
+    setPickupTime(target.pickupTime || activeRoute.inboundStops[0]?.scheduledTime || '');
+    setCategory(target.category || 'regular');
+    setBookingType(target.bookingType || 'permanent');
+    setBloodGroup(target.bloodGroup || '');
   };
 
   if (!isOpen) return null;
 
-  const currentSelectedSeat = allSeats.find(s => s.num === selectedSeatNum) || seat;
+  const currentSelectedSeat = allSeats.find((item) => item.num === selectedSeatNum) || seat;
   const rowNumber = Math.ceil(selectedSeatNum / 4);
-  const colMod = selectedSeatNum % 4;
-  const colPosition = colMod === 1 ? 'Left Window' : colMod === 2 ? 'Left Aisle' : colMod === 3 ? 'Right Aisle' : 'Right Window';
 
   const handleAssignSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!staffName.trim()) return;
-
-    const row = Math.ceil(selectedSeatNum / 4);
-    const col = colMod === 1 ? 'left_win' : colMod === 2 ? 'left_aisle' : colMod === 3 ? 'right_aisle' : 'right_win';
-
     const updated: Seat = {
       num: selectedSeatNum,
-      row,
-      col,
+      row: Math.ceil(selectedSeatNum / 4),
+      col: columnFor(selectedSeatNum),
       assignedTo: staffName.trim(),
       staffId: staffId.trim(),
       dept: dept.trim(),
@@ -129,473 +112,192 @@ export default function SupervisorSeatModal({
       category,
       bookingType,
     };
-
     onAssignSeat(updated);
     onClose();
   };
 
+  const statusLine = currentSelectedSeat?.status === 'occupied'
+    ? t(`Occupied by ${currentSelectedSeat.assignedTo}`, `দখলে আছেন ${currentSelectedSeat.assignedTo}`, lang)
+    : currentSelectedSeat?.status === 'vacated'
+      ? t('Free for the standby queue', 'স্ট্যান্ডবাই সারির জন্য খালি', lang)
+      : t('Empty', 'খালি', lang);
+
   return (
-    <div className="modal-bg" onClick={onClose} style={{ zIndex: 9999, backdropFilter: 'blur(6px)' }}>
-      <div
-        className="modal"
-        style={{
-          maxWidth: '720px',
-          width: '92vw',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
-          border: '1px solid rgba(255, 255, 255, 0.15)'
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
-          color: 'var(--text-on-brand)',
-          padding: '18px 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(212, 175, 55, 0.25)',
-              border: '1px solid rgba(212, 175, 55, 0.5)',
-              color: 'var(--status-warning-bright)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <UserPlus size={22} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
-                  {t('Supervisor Seat Reservation & Allocation Console', 'সুপারভাইজার সিট বরাদ্দ ও কর্মী সংরক্ষণ কনসোল', lang)}
-                </h3>
-                <span className="badge gold" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                  {activeRoute.coachNo}
-                </span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                {activeRoute.name} • {t('Full supervisor override & permanent pass authority', 'পূর্ণ প্রশাসনিক সিট নির্ধারণ ও স্থায়ী পাস ক্ষমতা', lang)}
-              </p>
-            </div>
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal shuttle-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-hd">
+          <div>
+            <h3>
+              <UserCheck size={18} />
+              {t('Assign a seat', 'একটি আসন বরাদ্দ করুন', lang)}
+            </h3>
+            <p className="shuttle-sub">
+              {t('The person you pick is written onto this seat.', 'আপনি যাঁকে বাছবেন তাঁর নাম এই আসনে লেখা হবে।', lang)}
+            </p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: 'var(--text-inverse)',
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={18} />
-          </button>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t('Close', 'বন্ধ করুন', lang)}>×</button>
         </div>
 
-        <form onSubmit={handleAssignSubmit}>
-          <div style={{
-            padding: '20px 24px',
-            maxHeight: '74vh',
-            overflowY: 'auto',
-            background: 'var(--brand-card-bg)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px'
-          }}>
-            {/* ─── SECTION 1: Target Seat Status & Selector ─── */}
-            <div style={{
-              background: 'linear-gradient(135deg, var(--brand-slate-50) 0%, var(--surface-1) 100%)',
-              border: '1.5px solid var(--brand-gold)',
-              borderRadius: '12px',
-              padding: '16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '14px',
-              boxShadow: '0 2px 8px rgba(212, 175, 55, 0.12)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
-                  border: '2px solid var(--brand-gold)',
-                  color: 'var(--status-warning-bright)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '18px',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                }}>
-                  #{selectedSeatNum}
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 900, color: 'var(--brand-slate-900)' }}>
-                      {t('Seat Position', 'আসন অবস্থান', lang)}: #{selectedSeatNum}
-                    </span>
-                    <span className="badge info" style={{ fontSize: '10px' }}>
-                      Row {rowNumber} • {colPosition}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--brand-slate-600)', marginTop: '4px' }}>
-                    {t('Current Status', 'বর্তমান অবস্থা', lang)}:{' '}
-                    <strong style={{
-                      color: currentSelectedSeat?.status === 'occupied' ? 'var(--status-success)' : currentSelectedSeat?.status === 'vacated' ? 'var(--status-warning)' : 'var(--status-info)'
-                    }}>
-                      {currentSelectedSeat?.status === 'occupied'
-                        ? `Occupied by ${currentSelectedSeat.assignedTo}`
-                        : currentSelectedSeat?.status === 'vacated'
-                        ? 'Vacated for Standby FIFO'
-                        : 'Unassigned / Open'}
-                    </strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Direct Seat Selector Dropdown */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-slate-700)' }}>
-                  {t('Switch Seat (1–52):', 'সিট বাছুন:', lang)}
-                </span>
+        <form id="shuttle-assign-seat" className="modal-body" onSubmit={handleAssignSubmit}>
+          <div className="shuttle-stack">
+            <div className="shuttle-grid">
+              <p className="shuttle-note" style={{ margin: 0 }}>
+                <strong>{t('Seat', 'আসন', lang)} {selectedSeatNum}</strong>
+                {' · '}
+                {t('Row', 'সারি', lang)} {rowNumber}
+                {' · '}
+                {columnLabel(selectedSeatNum, lang)}
+                <br />
+                {statusLine}
+              </p>
+              <div>
+                <label>{t('Switch seat', 'আসন বদলান', lang)}</label>
                 <select
                   className="form-input"
-                  style={{ width: '105px', padding: '7px 10px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 800 }}
                   value={selectedSeatNum}
-                  onChange={e => handleSeatNumChange(Number(e.target.value))}
+                  onChange={(e) => {
+                    const num = Number(e.target.value);
+                    const target = allSeats.find((item) => item.num === num);
+                    if (target) fillFromSeat(target);
+                    else setSelectedSeatNum(num);
+                  }}
                 >
-                  {allSeats.map(s => (
-                    <option key={s.num} value={s.num}>
-                      Seat #{s.num}
+                  {allSeats.map((item) => (
+                    <option key={item.num} value={item.num}>
+                      {t('Seat', 'আসন', lang)} {item.num}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* ─── SECTION 2: Quick-Fill Registered Staff Member Strip ─── */}
-            <div style={{
-              background: 'var(--brand-slate-50)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '10px',
-              padding: '12px 14px'
-            }}>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                <span>{t('Fill from a registered employee', 'নিবন্ধিত কর্মচারী থেকে পূরণ করুন', lang)}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {EMPLOYEE_PRESETS.map(p => (
+            <div>
+              <label>{t('Pick an employee', 'একজন কর্মী বাছুন', lang)}</label>
+              <div className="shuttle-chips">
+                {activeEmployees.map((employee) => (
                   <button
-                    key={p.staffId}
+                    key={employee.id}
                     type="button"
-                    onClick={() => handlePickPreset(p)}
-                    style={{
-                      background: staffId === p.staffId ? 'rgba(212, 175, 55, 0.2)' : 'var(--surface-1)',
-                      border: staffId === p.staffId ? '1.5px solid var(--brand-gold)' : '1px solid var(--brand-border)',
-                      borderRadius: '8px',
-                      padding: '5px 10px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: staffId === p.staffId ? 'var(--status-warning-text)' : 'var(--brand-slate-700)',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      transition: 'all 0.15s ease'
+                    className="shuttle-chip"
+                    aria-pressed={staffId === employee.id}
+                    onClick={() => {
+                      setStaffName(employee.name);
+                      setStaffId(employee.id);
+                      setDept(employee.dept);
+                      setPhone(employee.phone);
+                      setBloodGroup(employee.bloodGroup || '');
                     }}
                   >
-                    <User size={11} />
-                    <span>{p.name.split(' ')[0]} {p.name.split(' ')[1] || ''}</span>
-                    <span style={{ opacity: 0.65, fontSize: '9.5px' }}>· {p.dept}</span>
+                    {employee.name} · {employee.dept}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* ─── SECTION 3: Passenger Profile Inputs ─── */}
-            <div style={{
-              background: 'var(--surface-1)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px'
-            }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Employee / Passenger Full Name', 'কর্মচারীর নাম', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-                  </label>
-                  <input
-                    className="form-input"
-                    value={staffName}
-                    onChange={e => setStaffName(e.target.value)}
-                    placeholder="e.g. Tanvir Ahmed"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                    required
-                  />
-                </div>
+            <p className="shuttle-sub" style={{ margin: 0 }}>
+              {t(
+                `The fields below are who you will put in seat ${selectedSeatNum}.`,
+                `নিচের ঘরগুলোতে যাঁকে বসাবেন, তিনি আসন ${selectedSeatNum}-এ যাবেন।`,
+                lang,
+              )}
+            </p>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Staff ID / SAP PERNR', 'কর্মচারী আইডি', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-                  </label>
-                  <input
-                    className="form-input"
-                    value={staffId}
-                    onChange={e => setStaffId(e.target.value)}
-                    placeholder="EMP-1042"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Department / Plant Division', 'বিভাগ / প্ল্যান্ট শাখা', lang)}
-                  </label>
-                  <input
-                    className="form-input"
-                    value={dept}
-                    onChange={e => setDept(e.target.value)}
-                    placeholder="Sales & Distribution"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Mobile Contact Number (SMS Gate Pass)', 'মোবাইল নম্বর (গেট পাস SMS)', lang)}
-                  </label>
-                  <input
-                    className="form-input"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    placeholder="+880 1720-334455"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Stoppage Point & Timings */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    <MapPin size={13} style={{ display: 'inline', marginRight: '4px', color: 'var(--status-info)' }} />
-                    {t('Designated Boarding Stoppage', 'বোর্ডিং স্টপেজ পয়েন্ট', lang)}
-                  </label>
-                  <select
-                    className="form-input"
-                    value={pickupPoint}
-                    onChange={e => {
-                      setPickupPoint(e.target.value);
-                      const matched = activeRoute.inboundStops.find(s => s.name === e.target.value);
-                      if (matched) setPickupTime(matched.scheduledTime);
-                    }}
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                  >
-                    {activeRoute.inboundStops.map(s => (
-                      <option key={s.id} value={s.name}>
-                        {s.name} ({s.scheduledTime})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    <Clock size={13} style={{ display: 'inline', marginRight: '4px', color: 'var(--status-warning)' }} />
-                    {t('Morning Boarding Time', 'পিকআপ সময়', lang)}
-                  </label>
-                  <input
-                    className="form-input"
-                    value={pickupTime}
-                    onChange={e => setPickupTime(e.target.value)}
-                    placeholder="07:18 AM"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 700 }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ─── SECTION 4: Priority Category & Entitlement Mode ─── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-              <div style={{
-                background: 'var(--brand-slate-50)',
-                border: '1px solid var(--brand-border)',
-                borderRadius: '10px',
-                padding: '14px'
-              }}>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px' }}>
-                  {t('Seat Priority Classification', 'আসন অগ্রাধিকার শ্রেণী', lang)}
-                </label>
-                <select
-                  className="form-input"
-                  value={category}
-                  onChange={e => setCategory(e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', fontSize: '12px', borderRadius: '6px' }}
-                >
-                  <option value="regular">Regular Staff Commuter</option>
-                  <option value="executive">Executive / Lead Plant Engineer (Row 1–2)</option>
-                  <option value="lady_priority">Lady Priority Dedicated Seat</option>
-                  <option value="senior_staff">Senior Management / Specialist</option>
-                </select>
-              </div>
-
-              <div style={{
-                background: 'var(--brand-slate-50)',
-                border: '1px solid var(--brand-border)',
-                borderRadius: '10px',
-                padding: '14px'
-              }}>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px' }}>
-                  {t('Reservation Entitlement Mode', 'বরাদ্দের ধরন', lang)}
-                </label>
-                <select
-                  className="form-input"
-                  value={bookingType}
-                  onChange={e => setBookingType(e.target.value as any)}
-                  style={{ width: '100%', padding: '8px 10px', fontSize: '12px', borderRadius: '6px' }}
-                >
-                  <option value="permanent">Permanent Designated Pass (Everyday Commute)</option>
-                  <option value="shift_pass">Monthly Shift Duty Pass</option>
-                  <option value="guest">VIP Corporate Guest / Auditor Pass</option>
-                </select>
-              </div>
-            </div>
-
-            {/* ─── SECTION 5: Supervisor Administrative Actions ─── */}
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.4) 0%, rgba(253, 230, 138, 0.15) 100%)',
-              border: '1.5px dashed var(--brand-gold)',
-              borderRadius: '12px',
-              padding: '14px 16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}>
+            <div className="shuttle-grid">
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-text)' }}>
-                  {t('Supervisor Administrative Seat Overrides:', 'প্রশাসনিক সিট বিকল্প:', lang)}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px' }}>
-                  {t('Release seat to standby queue for shift colleagues or reset completely.', 'সিটটি খালি করে ফিফো লাইনে উন্মুক্ত করুন অথবা বরাদ্দ সম্পূর্ণ বাতিল করুন।', lang)}
-                </div>
+                <label>{t('Name', 'নাম', lang)}</label>
+                <input className="form-input" value={staffName} onChange={(e) => setStaffName(e.target.value)} required autoComplete="off" />
               </div>
+              <div>
+                <label>{t('Staff ID', 'কর্মী আইডি', lang)}</label>
+                <input className="form-input" value={staffId} onChange={(e) => setStaffId(e.target.value)} required autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Department', 'বিভাগ', lang)}</label>
+                <input className="form-input" value={dept} onChange={(e) => setDept(e.target.value)} autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Mobile', 'মোবাইল', lang)}</label>
+                <input className="form-input" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Boarding stop', 'উঠবেন যে স্টপে', lang)}</label>
+                <select
+                  className="form-input"
+                  value={pickupPoint}
+                  onChange={(e) => {
+                    setPickupPoint(e.target.value);
+                    const matched = activeRoute.inboundStops.find((stop) => stop.name === e.target.value);
+                    if (matched) setPickupTime(matched.scheduledTime);
+                  }}
+                >
+                  {activeRoute.inboundStops.map((stop) => (
+                    <option key={stop.id} value={stop.name}>{stop.name} ({stop.scheduledTime})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>{t('Boarding time', 'ওঠার সময়', lang)}</label>
+                <input className="form-input" value={pickupTime} onChange={(e) => setPickupTime(e.target.value)} />
+              </div>
+              <div>
+                <label>{t('Seat type', 'আসনের ধরন', lang)}</label>
+                <select className="form-input" value={category} onChange={(e) => setCategory(e.target.value as NonNullable<Seat['category']>)}>
+                  <option value="regular">{t('Regular', 'সাধারণ', lang)}</option>
+                  <option value="executive">{t('Executive', 'এক্সিকিউটিভ', lang)}</option>
+                  <option value="lady_priority">{t('Lady priority', 'নারী অগ্রাধিকার', lang)}</option>
+                  <option value="senior_staff">{t('Senior staff', 'সিনিয়র স্টাফ', lang)}</option>
+                </select>
+              </div>
+              <div>
+                <label>{t('Pass', 'পাস', lang)}</label>
+                <select className="form-input" value={bookingType} onChange={(e) => setBookingType(e.target.value as NonNullable<Seat['bookingType']>)}>
+                  <option value="permanent">{t('Every day', 'প্রতিদিন', lang)}</option>
+                  <option value="shift_pass">{t('Shift pass', 'শিফট পাস', lang)}</option>
+                  <option value="guest">{t('Guest', 'অতিথি', lang)}</option>
+                </select>
+              </div>
+            </div>
 
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {currentSelectedSeat?.status === 'occupied' && (
-                  <button
-                    type="button"
-                    style={{
-                      background: 'var(--surface-1)',
-                      border: '1.5px solid var(--brand-gold)',
-                      color: 'var(--status-warning-text)',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontSize: '11.5px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                    onClick={() => {
-                      onVacateSeat(selectedSeatNum, vacateReasonText);
-                      onClose();
-                    }}
-                  >
-                    <UserMinus size={13} />
-                    <span>{t('Vacate to Standby FIFO', 'ফিফোর জন্য উন্মুক্ত করুন', lang)}</span>
-                  </button>
-                )}
+            {currentSelectedSeat?.status === 'occupied' && (
+              <div>
+                <label>{t('Why this seat is free', 'আসন খালি হওয়ার কারণ', lang)}</label>
+                <input className="form-input" value={vacateReasonText} onChange={(e) => setVacateReasonText(e.target.value)} autoComplete="off" />
+              </div>
+            )}
 
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {currentSelectedSeat?.status === 'occupied' && (
                 <button
                   type="button"
-                  style={{
-                    background: 'var(--surface-1)',
-                    border: '1.5px solid var(--status-danger)',
-                    color: 'var(--status-danger)',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
+                  className="btn-outline"
                   onClick={() => {
-                    onClearSeat(selectedSeatNum);
+                    onVacateSeat(selectedSeatNum, vacateReasonText.trim() || t('Released by transport', 'পরিবহন খালি করেছে', lang));
                     onClose();
                   }}
                 >
-                  <X size={13} />
-                  <span>{t('Clear Seat (Make Empty)', 'সম্পূর্ণ ফাঁকা করুন', lang)}</span>
+                  {t('Free this seat', 'এই আসন খালি করুন', lang)}
                 </button>
-              </div>
+              )}
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => {
+                  onClearSeat(selectedSeatNum);
+                  onClose();
+                }}
+              >
+                {t('Clear this seat', 'এই আসন মুছে দিন', lang)}
+              </button>
             </div>
           </div>
-
-          {/* Footer */}
-          <div style={{
-            padding: '16px 24px',
-            background: 'var(--brand-slate-50)',
-            borderTop: '1px solid var(--brand-border)',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <button
-              type="button"
-              className="btn-outline"
-              onClick={onClose}
-              style={{ padding: '8px 16px', fontSize: '12.5px', fontWeight: 600, borderRadius: '8px' }}
-            >
-              {t('Cancel', 'বাতিল', lang)}
-            </button>
-            <button
-              type="submit"
-              className="btn-gold"
-              style={{
-                padding: '8px 20px',
-                fontSize: '12.5px',
-                fontWeight: 800,
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 8px rgba(212, 175, 55, 0.35)'
-              }}
-            >
-              <CheckCircle size={16} />
-              <span>{t(`Reserve / Assign Seat #${selectedSeatNum}`, `সিট #${selectedSeatNum} নিশ্চিত বরাদ্দ করুন`, lang)}</span>
-            </button>
-          </div>
         </form>
+
+        <div className="modal-ft">
+          <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
+          <button type="submit" form="shuttle-assign-seat" className="btn-primary">
+            {t(`Assign seat ${selectedSeatNum}`, `আসন ${selectedSeatNum} বরাদ্দ করুন`, lang)}
+          </button>
+        </div>
       </div>
     </div>
   );

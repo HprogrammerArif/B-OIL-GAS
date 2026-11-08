@@ -17,6 +17,7 @@ interface BusFleetOverviewGridProps {
   onOpenRouteBuilder: (route?: RouteInfo) => void;
   onOpenReassign: () => void;
   onOpenSupervisorSeat: (routeKey: string) => void;
+  readOnly?: boolean;
   lang: 'en' | 'bn';
 }
 
@@ -28,6 +29,7 @@ export default function BusFleetOverviewGrid({
   onSelectRoute,
   onOpenRouteBuilder,
   onOpenSupervisorSeat,
+  readOnly = false,
   lang,
 }: BusFleetOverviewGridProps) {
   const [corridorQuery, setCorridorQuery] = useState('');
@@ -318,6 +320,7 @@ export default function BusFleetOverviewGrid({
                     <span>{t('Seat Map & Queue', 'সিট ম্যাপ ও কিউ', lang)}</span>
                   </button>
 
+                  {!readOnly && (
                   <button
                     type="button"
                     onClick={() => onOpenRouteBuilder(route)}
@@ -338,7 +341,9 @@ export default function BusFleetOverviewGrid({
                     <Edit3 size={12} />
                     <span>{t('Edit Route', 'রুট সম্পাদনা', lang)}</span>
                   </button>
+                  )}
 
+                  {!readOnly && (
                   <button
                     type="button"
                     onClick={() => onOpenSupervisorSeat(bus.assignedRouteId)}
@@ -359,6 +364,7 @@ export default function BusFleetOverviewGrid({
                     <UserPlus size={12} />
                     <span>{t('Assign Seat', 'সিট বরাদ্দ', lang)}</span>
                   </button>
+                  )}
                 </div>
               </div>
             );

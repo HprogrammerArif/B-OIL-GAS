@@ -70,6 +70,10 @@ export interface Seat {
   bookingType?: 'permanent' | 'shift_pass' | 'guest';
 }
 
+export function shortBusModel(model: string): string {
+  return model.replace(/\s*\([^)]*\)\s*$/, '').trim();
+}
+
 export interface WaitlistEntry {
   rank: number;
   staffId: string;

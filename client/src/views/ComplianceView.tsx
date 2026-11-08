@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore, type LicenseCard, type LicenseEvent } from '../store/operationsStore';
+import { useOperationsStore, licenseScanFor, type LicenseCard, type LicenseEvent } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { today, nowStamp } from '../lib/clock';
 import {
   ShieldCheck, AlertTriangle, Clock, Building, ArrowRight, ArrowLeft,
   ChevronLeft, ChevronRight,
-  FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Filter, Search,
+  FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Search,
   Download, Printer, Send, Check, CircleDot,
 } from 'lucide-react';
 import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
@@ -53,6 +53,7 @@ export default function ComplianceView({ lang }: ViewProps) {
   const [stageAction, setStageAction] = useState<{ kind: 'inspect' | 'certificate'; id: string } | null>(null);
   const [inspectFindings, setInspectFindings] = useState('');
   const [certConfirm, setCertConfirm] = useState(false);
+  const [certPhoto, setCertPhoto] = useState('');
 
   const selectedLicense = licenses.find((l) => l.id === selectedId) ?? null;
 
@@ -91,6 +92,23 @@ export default function ComplianceView({ lang }: ViewProps) {
     showToast(t(`Moved to ${label.title}.`, `${label.titleBn} ধাপে স্থানান্তর হয়েছে।`, lang), 'success');
   };
 
+  const closeStage = () => {
+    setStageAction(null);
+    setCertPhoto('');
+  };
+
+  const handleCertPhoto = (file: File | undefined) => {
+    if (!file) return;
+    const allowed = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    if (!allowed || file.size > 2 * 1024 * 1024) {
+      showToast(t('Use a JPEG, PNG, or WebP image under 2 MB.', '২ এমবির কম JPEG, PNG বা WebP ছবি ব্যবহার করুন।', lang), 'info');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setCertPhoto(String(reader.result));
+    reader.readAsDataURL(file);
+  };
+
   const tryAdvance = (lic: LicenseCard) => {
     const gate = canAdvance(lic, caps);
     if (!gate.ok) {
@@ -104,6 +122,7 @@ export default function ComplianceView({ lang }: ViewProps) {
     }
     if (lic.stage === 4) {
       setCertConfirm(false);
+      setCertPhoto('');
       setStageAction({ kind: 'certificate', id: lic.id });
       return;
     }
@@ -138,6 +157,7 @@ export default function ComplianceView({ lang }: ViewProps) {
       ],
     });
     setStageAction(null);
+    setCertPhoto('');
   };
 
   const confirmCertificate = () => {
@@ -148,12 +168,14 @@ export default function ComplianceView({ lang }: ViewProps) {
     }
     const certName = `Renewal_Certificate_${lic.refNo.replace(/\//g, '-')}.html`;
     commitAdvance(lic, {
+      scan: certPhoto || lic.scan || licenseScanFor(lic.tag),
       documents: [
         { name: certName, size: '120 KB', date: today(), type: 'Renewal Certificate' },
         ...lic.documents,
       ],
     });
     setStageAction(null);
+    setCertPhoto('');
   };
 
   const submitDoLetter = () => {
@@ -281,6 +303,13 @@ export default function ComplianceView({ lang }: ViewProps) {
     setRevertId(null);
     setRevertReason('');
   };
+
+  const urgencyBands = useMemo(() => ([
+    { id: 'all', label: t('Any urgency', 'সব', lang), count: licenses.length },
+    { id: 'critical', label: t('≤ 30 days', '≤ ৩০ দিন', lang), count: licenses.filter((l) => l.daysLeft <= 30).length },
+    { id: 'warning', label: t('31–90 days', '৩১–৯০ দিন', lang), count: licenses.filter((l) => l.daysLeft > 30 && l.daysLeft <= 90).length },
+    { id: 'active', label: t('> 90 days', '> ৯০ দিন', lang), count: licenses.filter((l) => l.daysLeft > 90).length },
+  ]), [licenses, lang]);
 
   const filteredLicenses = useMemo(() => {
     return licenses.filter((lic) => {
@@ -491,15 +520,40 @@ export default function ComplianceView({ lang }: ViewProps) {
         </div>
       )}
 
-      <div className="card mb-4" style={{ padding: '12px 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Filter size={13} /> {t('Agency', 'সংস্থা', lang)}
-            </span>
+      <div className="card mb-4">
+        <div className="workforce-toolbar roster-toolbar">
+          <div className="workforce-tabs" role="group" aria-label={t('Urgency', 'জরুরি অবস্থা', lang)}>
+            {urgencyBands.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                className={`workforce-tab${selectedUrgencyFilter === u.id ? ' active' : ''}`}
+                aria-pressed={selectedUrgencyFilter === u.id}
+                onClick={() => setSelectedUrgencyFilter(u.id)}
+              >
+                {u.label} <b>{u.count}</b>
+              </button>
+            ))}
+          </div>
+          <div className="workforce-filter-row">
+            <div className="workforce-search-wrap">
+              <Search size={14} className="workforce-search-icon" aria-hidden />
+              <input
+                type="search"
+                className="workforce-search-input"
+                placeholder={t('Search license, ref, focal…', 'লাইসেন্স, রেফারেন্স বা কর্মকর্তা…', lang)}
+                aria-label={t('Search permits', 'লাইসেন্স খুঁজুন', lang)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button type="button" className="workforce-search-clear" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                  <X size={13} />
+                </button>
+              )}
+            </div>
             <select
-              className="form-input"
-              style={{ minWidth: 200, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+              className="workforce-select"
               value={selectedAgencyFilter}
               onChange={(e) => setSelectedAgencyFilter(e.target.value)}
               aria-label={t('Agency', 'সংস্থা', lang)}
@@ -508,44 +562,6 @@ export default function ComplianceView({ lang }: ViewProps) {
                 <option key={f.id} value={f.id}>{t(f.label, f.labelBn, lang)}</option>
               ))}
             </select>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'all', label: 'Any urgency', labelBn: 'সব' },
-              { id: 'critical', label: '≤ 30 days', labelBn: '≤ ৩০ দিন' },
-              { id: 'warning', label: '31–90 days', labelBn: '৩১–৯০ দিন' },
-              { id: 'active', label: '> 90 days', labelBn: '> ৯০ দিন' },
-            ].map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => setSelectedUrgencyFilter(u.id)}
-                style={{
-                  fontSize: '11px', padding: '4px 10px', borderRadius: 'var(--radius-full)',
-                  border: selectedUrgencyFilter === u.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                  background: selectedUrgencyFilter === u.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
-                  color: selectedUrgencyFilter === u.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
-                  fontWeight: selectedUrgencyFilter === u.id ? 700 : 500, cursor: 'pointer',
-                }}
-              >
-                {t(u.label, u.labelBn, lang)}
-              </button>
-            ))}
-            <div style={{ position: 'relative', minWidth: '220px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)' }} />
-              <input
-                type="text"
-                placeholder={t('Search license, ref, focal…', 'লাইসেন্স, রেফারেন্স বা কর্মকর্তা…', lang)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: '100%', padding: '6px 10px 6px 30px', fontSize: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', outline: 'none', background: 'var(--surface-0)' }}
-              />
-              {searchQuery && (
-                <button type="button" onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--brand-slate-400)' }}>
-                  <X size={13} />
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -669,7 +685,14 @@ export default function ComplianceView({ lang }: ViewProps) {
                               {lic.daysLeft <= 0 ? t('Expired', 'মেয়াদোত্তীর্ণ', lang) : t(`${lic.daysLeft}d left`, `${lic.daysLeft} দিন বাকি`, lang)}
                             </span>
                           </div>
-                          <div className="k-title">{t(lic.title, lic.titleBn, lang)}</div>
+                          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '6px' }}>
+                            <img
+                              className="permit-feed-photo"
+                              src={lic.scan || licenseScanFor(lic.tag)}
+                              alt={t(lic.title, lic.titleBn, lang)}
+                            />
+                            <div className="k-title" style={{ flex: 1, minWidth: 0 }}>{t(lic.title, lic.titleBn, lang)}</div>
+                          </div>
                           <div className="k-meta">
                             <div style={{ color: 'var(--brand-slate-800)', fontWeight: 600 }}>{t(lic.agency, lic.agencyBn, lang)}</div>
                             <div style={{ fontFamily: 'monospace', fontSize: '10px', color: 'var(--brand-slate-500)', marginTop: '2px' }}>{lic.refNo}</div>
@@ -982,6 +1005,11 @@ export default function ComplianceView({ lang }: ViewProps) {
                   {t('Certificates and evidence', 'সনদ ও প্রমাণ', lang)}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <img
+                    className="permit-scan"
+                    src={selectedLicense.scan || licenseScanFor(selectedLicense.tag)}
+                    alt={t(selectedLicense.title, selectedLicense.titleBn, lang)}
+                  />
                   {selectedLicense.documents.map((doc, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--surface-0)', border: '1px solid var(--border-1)', borderRadius: '6px' }}>
                       <div>
@@ -1144,7 +1172,7 @@ export default function ComplianceView({ lang }: ViewProps) {
                   )}
                 </div>
                 <div style={{ marginTop: '24px', textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800 }}>Ahmed Akbar Sobhan</div>
+                  <div style={{ fontWeight: 800 }}>Abdul Mannan Chowdhury</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang)}</div>
                   {sent
                     ? <div style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 800, marginTop: '4px' }}>{t('SIGNED', 'স্বাক্ষরিত', lang)}</div>
@@ -1176,7 +1204,7 @@ export default function ComplianceView({ lang }: ViewProps) {
       })()}
 
       {stageAction && (
-        <div className="modal-bg" onClick={() => setStageAction(null)}>
+        <div className="modal-bg" onClick={closeStage}>
           <div className="modal" style={{ maxWidth: '520px', width: '95%' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd">
               <h3>
@@ -1184,7 +1212,7 @@ export default function ComplianceView({ lang }: ViewProps) {
                   ? t('Record field inspection', 'মাঠ পরিদর্শন লিপিবদ্ধ করুন', lang)
                   : t('Record the renewal certificate', 'নবায়ন সনদ লিপিবদ্ধ করুন', lang)}
               </h3>
-              <button type="button" className="modal-close" onClick={() => setStageAction(null)}>×</button>
+              <button type="button" className="modal-close" onClick={closeStage}>×</button>
             </div>
             <div className="modal-body">
               {stageAction.kind === 'inspect' ? (
@@ -1209,11 +1237,33 @@ export default function ComplianceView({ lang }: ViewProps) {
                     <input type="checkbox" checked={certConfirm} onChange={(e) => setCertConfirm(e.target.checked)} />
                     <span>{t('I have the signed renewal certificate from the agency.', 'সংস্থার স্বাক্ষরিত নবায়ন সনদ হাতে আছে।', lang)}</span>
                   </label>
+                  <div style={{ marginTop: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '6px' }}>
+                      {t('Certificate picture', 'সনদের ছবি', lang)}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => {
+                        handleCertPhoto(e.target.files?.[0]);
+                        e.target.value = '';
+                      }}
+                    />
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>
+                      {t('Optional. One JPEG, PNG, or WebP, up to 2 MB. None keeps the current certificate.', 'ঐচ্ছিক। একটি JPEG, PNG বা WebP, সর্বোচ্চ ২ এমবি। না দিলে বর্তমান সনদই থাকবে।', lang)}
+                    </div>
+                    {certPhoto && (
+                      <div style={{ position: 'relative', display: 'inline-block', marginTop: '8px' }}>
+                        <img className="permit-form-photo" src={certPhoto} alt={t('Renewal certificate', 'নবায়ন সনদ', lang)} />
+                        <button type="button" className="guest-photo-remove" onClick={() => setCertPhoto('')} aria-label={t('Remove picture', 'ছবি সরান', lang)}>×</button>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
             </div>
             <div className="modal-ft" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <Button variant="ghost" onClick={() => setStageAction(null)}>{t('Cancel', 'বাতিল', lang)}</Button>
+              <Button variant="ghost" onClick={closeStage}>{t('Cancel', 'বাতিল', lang)}</Button>
               <Button variant="primary" onClick={stageAction.kind === 'inspect' ? confirmInspection : confirmCertificate}>
                 {stageAction.kind === 'inspect'
                   ? t('Save and move to ministry vetting', 'সংরক্ষণ করে মন্ত্রণালয় ধাপে যান', lang)

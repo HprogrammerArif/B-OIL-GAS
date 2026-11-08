@@ -431,16 +431,18 @@ class _AssetDetailScreenState extends ConsumerState<AssetDetailScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      bangla
-                          ? 'কারিগরি বিবরণ (Specifications)'
-                          : 'Technical Specifications',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'কারিগরি বিবরণ (Specifications)'
+                            : 'Technical Specifications',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: Space.xs),
                     Row(
                       children: [
                         Text(

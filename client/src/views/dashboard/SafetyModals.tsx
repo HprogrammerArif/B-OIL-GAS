@@ -26,7 +26,7 @@ interface PermitDetailProps {
   permit: LotoPermitItem | null;
   lang: Lang;
   onClose: () => void;
-  onDeIsolate: (id: string) => void;
+  onDeIsolate?: (id: string) => void;
 }
 
 export function PermitDetailModal({ permit, lang, onClose, onDeIsolate }: PermitDetailProps) {
@@ -49,7 +49,7 @@ export function PermitDetailModal({ permit, lang, onClose, onDeIsolate }: Permit
       footer={(
         <>
           <Button variant="ghost" onClick={onClose}>{t('Close', 'বন্ধ করুন', lang)}</Button>
-          {locked && (
+          {locked && onDeIsolate && (
             <Button variant="outline-danger" icon={<Key size={14} />} onClick={() => onDeIsolate(permit.id)}>
               {t('Remove lock and restore machine', 'লক খুলে মেশিন চালু করুন', lang)}
             </Button>

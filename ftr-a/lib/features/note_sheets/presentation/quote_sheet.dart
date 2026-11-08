@@ -3,8 +3,25 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+const _vendorPresets = <(String, String)>[
+  (
+    'Meghna Industrial Engineering Ltd.',
+    'মেঘনা ইন্ডাস্ট্রিয়াল ইঞ্জিনিয়ারিং লিমিটেড',
+  ),
+  ('Bengal Gas & Valve Automation Co.', 'বেঙ্গল গ্যাস ও ভালভ অটোমেশন কোং'),
+  (
+    'Karnaphuli Technical Spares & Services',
+    'কর্ণফুলী টেকনিক্যাল স্পেয়ারস অ্যান্ড সার্ভিসেস',
+  ),
+  (
+    'Delta Safety & Fire Systems BD',
+    'ডেল্টা সেফটি অ্যান্ড ফায়ার সিস্টেমস বিডি',
+  ),
+];
 
 /// Add or change one supplier quotation.
 Future<Quote?> showQuoteSheet(BuildContext context, {Quote? existing}) =>
@@ -33,10 +50,10 @@ class _QuoteSheetState extends State<_QuoteSheet> {
         : widget.existing!.amount.toStringAsFixed(0),
   );
   late final _days = TextEditingController(
-    text: widget.existing?.deliveryDays.toString() ?? '',
+    text: widget.existing?.deliveryDays.toString() ?? '7',
   );
   late final _warranty = TextEditingController(
-    text: widget.existing?.warrantyMonths.toString() ?? '',
+    text: widget.existing?.warrantyMonths.toString() ?? '12',
   );
 
   @override
@@ -64,6 +81,7 @@ class _QuoteSheetState extends State<_QuoteSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bangla = context.isBangla;
     final digits = [FilteringTextInputFormatter.digitsOnly];
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -77,7 +95,25 @@ class _QuoteSheetState extends State<_QuoteSheet> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              EnterpriseModalHeader(
+                title: widget.existing == null
+                    ? l10n.nsQuoteAdd
+                    : l10n.nsQuotesTitle,
+                subtitle: bangla
+                    ? 'তুলনামূলক বিবরণীর (CS) জন্য সরবরাহকারীর দরপত্র যুক্ত করুন'
+                    : 'Enter vendor quotation for Comparative Statement (CS) evaluation',
+                icon: Icons.request_quote_outlined,
+              ),
+              EnterpriseTemplateDropdown(
+                presets: _vendorPresets,
+                controller: _vendor,
+                onPicked: () => setState(() {}),
+                labelEn: 'Enlisted BOGCL Supplier (Quick Pick)',
+                labelBn: 'তালিকাভুক্ত সরবরাহকারী নির্বাচন (দ্রুত পূরণ)',
+              ),
+              const SizedBox(height: Space.sm),
               AppTextField(
                 label: l10n.nsQuoteVendor,
                 controller: _vendor,
@@ -121,7 +157,11 @@ class _QuoteSheetState extends State<_QuoteSheet> {
                 ],
               ),
               const SizedBox(height: Space.lg),
-              PrimaryButton(label: l10n.commonSave, onPressed: _save),
+              PrimaryButton(
+                label: l10n.commonSave,
+                icon: Icons.check_circle_outline,
+                onPressed: _save,
+              ),
             ],
           ),
         ),

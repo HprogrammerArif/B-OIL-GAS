@@ -1,11 +1,22 @@
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 
 /// Builds the light and dark Material 3 themes (doc 05-F §6).
 abstract final class AppTheme {
   static const _latin = 'Inter';
   static const _bengali = 'NotoSansBengali';
+
+  static SystemUiOverlayStyle statusBarOverlayStyle(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemStatusBarContrastEnforced: false,
+    );
+  }
 
   static const _lightScheme = ColorScheme(
     brightness: Brightness.light,
@@ -128,7 +139,7 @@ abstract final class AppTheme {
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(Corner.lg),
     );
-    const minSize = WidgetStatePropertyAll(Size.fromHeight(kMinTouchTarget));
+    const minSize = WidgetStatePropertyAll(Size(64, kMinTouchTarget));
 
     return ThemeData(
       useMaterial3: true,
@@ -146,6 +157,7 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: statusBarOverlayStyle(scheme.brightness),
         centerTitle: false,
         titleTextStyle: text.titleLarge,
         titleSpacing: Space.lg,
@@ -170,7 +182,7 @@ abstract final class AppTheme {
         style: ButtonStyle(
           minimumSize: minSize,
           padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: Space.xl, vertical: Space.md),
+            EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md),
           ),
           shape: WidgetStatePropertyAll(shape),
           textStyle: WidgetStatePropertyAll(text.labelLarge),
@@ -180,7 +192,7 @@ abstract final class AppTheme {
         style: ButtonStyle(
           minimumSize: minSize,
           padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: Space.xl, vertical: Space.md),
+            EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.md),
           ),
           shape: WidgetStatePropertyAll(shape),
           textStyle: WidgetStatePropertyAll(text.labelLarge),

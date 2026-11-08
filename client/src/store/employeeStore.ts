@@ -49,8 +49,8 @@ export const INITIAL_EMPLOYEES: Employee[] = [
   {
     id: 'EMP-0001',
     sapPernr: 'PR-10001',
-    name: 'Ahmed Akbar Sobhan',
-    nameBn: 'আহমেদ আকবর সোবহান',
+    name: 'Abdul Mannan Chowdhury',
+    nameBn: 'আব্দুল মান্নান চৌধুরী',
     email: 'chairman@bashundhara.com',
     phone: '+880 1711-000001',
     dept: 'Executive',
@@ -62,7 +62,7 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     status: 'active',
     joinDate: '01 Jan 1987',
     avatarColor: '#A51C30',
-    initials: 'AAS',
+    initials: 'AMC',
     nationalId: '1962269201928001',
     bloodGroup: 'B+',
     emergencyContact: '+880 1711-999999 (Chairman Office)',
@@ -323,7 +323,7 @@ export const INITIAL_EMPLOYEES: Employee[] = [
 ];
 
 const PERSIST_NAME = 'employees';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 2;
 
 let globalEmployees: Employee[] = loadPersisted<Employee[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...INITIAL_EMPLOYEES];
 let listeners: Array<() => void> = [];

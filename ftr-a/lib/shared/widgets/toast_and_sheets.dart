@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 
@@ -49,43 +50,73 @@ Future<bool> showConfirmSheet(
   final l10n = AppL10n.of(context);
   final result = await showModalBottomSheet<bool>(
     context: context,
-    builder: (ctx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          Space.xxl,
-          Space.sm,
-          Space.xxl,
-          Space.xxl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(ctx).textTheme.titleLarge),
-            if (message != null) ...[
-              const SizedBox(height: Space.sm),
-              Text(message, style: Theme.of(ctx).textTheme.bodyMedium),
-            ],
-            const SizedBox(height: Space.xxl),
-            if (destructive)
-              PrimaryButton.danger(
-                label: confirmLabel ?? l10n.commonConfirm,
-                onPressed: () => Navigator.of(ctx).pop(true),
-              )
-            else
-              PrimaryButton(
-                label: confirmLabel ?? l10n.commonConfirm,
-                onPressed: () => Navigator.of(ctx).pop(true),
+    showDragHandle: true,
+    builder: (ctx) {
+      final theme = Theme.of(ctx);
+      final cs = theme.colorScheme;
+      final accent = destructive ? ctx.bogcl.danger : cs.primary;
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              EnterpriseModalHeader(
+                title: title,
+                icon: destructive
+                    ? Icons.warning_amber_rounded
+                    : Icons.verified_user_outlined,
+                accentColor: accent,
               ),
-            const SizedBox(height: Space.sm),
-            PrimaryButton.secondary(
-              label: l10n.commonCancel,
-              onPressed: () => Navigator.of(ctx).pop(false),
-            ),
-          ],
+              if (message != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(Space.md),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(Radii.md),
+                    border: Border.all(
+                      color: cs.outlineVariant.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Text(
+                    message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Space.lg),
+              ],
+              Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton.secondary(
+                      label: l10n.commonCancel,
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                    ),
+                  ),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    flex: 2,
+                    child: destructive
+                        ? PrimaryButton.danger(
+                            label: confirmLabel ?? l10n.commonConfirm,
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                          )
+                        : PrimaryButton(
+                            label: confirmLabel ?? l10n.commonConfirm,
+                            onPressed: () => Navigator.of(ctx).pop(true),
+                          ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
   return result ?? false;
 }

@@ -18,7 +18,7 @@ export interface VoiceBriefingItem {
 
 const DEFAULT_BRIEFING: VoiceBriefingItem = {
   id: 'VB-2026-1029-01',
-  senderName: 'Ahmed Akbar Sobhan',
+  senderName: 'Abdul Mannan Chowdhury',
   senderRole: 'Chairman & Managing Director',
   title: "Chairman's Morning Strategic Direction",
   titleBn: 'চেয়ারম্যান মহোদয়ের সকালের দিকনির্দেশনা',

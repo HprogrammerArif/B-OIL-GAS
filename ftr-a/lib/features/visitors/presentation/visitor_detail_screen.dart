@@ -238,11 +238,12 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    l10n.visSheetPpe,
-                    style: Theme.of(ctx).textTheme.titleLarge,
+                  Expanded(
+                    child: Text(
+                      l10n.visSheetPpe,
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
                   ),
                   TextButton.icon(
                     style: TextButton.styleFrom(
@@ -940,32 +941,36 @@ class _Body extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      v.ppeCleared
-                          ? Icons.verified
-                          : Icons.health_and_safety_outlined,
-                      color: v.ppeCleared
-                          ? Colors.green.shade800
-                          : Colors.amber.shade900,
-                    ),
-                    const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? '৫-দফা রিফাইনারি পিপিই ও নিরাপত্তা ক্লিয়ারেন্স'
-                          : '5-Item Refinery PPE & H2S Safety Gate',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        v.ppeCleared
+                            ? Icons.verified
+                            : Icons.health_and_safety_outlined,
                         color: v.ppeCleared
-                            ? Colors.green.shade900
+                            ? Colors.green.shade800
                             : Colors.amber.shade900,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: Space.xs),
+                      Flexible(
+                        child: Text(
+                          bangla
+                              ? '৫-দফা রিফাইনারি পিপিই ও নিরাপত্তা ক্লিয়ারেন্স'
+                              : '5-Item Refinery PPE & H2S Safety Gate',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: v.ppeCleared
+                                ? Colors.green.shade900
+                                : Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: Space.xs),
                 StatusPill(
                   label: v.ppeCleared ? 'CLEARED' : 'PENDING GATE CHECK',
                   tone: v.ppeCleared ? StatusTone.success : StatusTone.warning,
@@ -1057,20 +1062,24 @@ class _Body extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.videocam_outlined, color: Colors.blue),
-                      const SizedBox(width: Space.xs),
-                      Text(
-                        bangla
-                            ? 'এএলপিআর গেট ক্যামেরা সিমুলেটর'
-                            : 'ANPR Gate Camera Plate Match',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.videocam_outlined, color: Colors.blue),
+                        const SizedBox(width: Space.xs),
+                        Flexible(
+                          child: Text(
+                            bangla
+                                ? 'এএলপিআর গেট ক্যামেরা সিমুলেটর'
+                                : 'ANPR Gate Camera Plate Match',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: Space.xs),
                   const StatusPill(
                     label: '99.4% MATCH',
                     tone: StatusTone.success,

@@ -11,16 +11,12 @@ import 'package:bogcl_oneops/core/offline/outbox_service.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/data/auth_repository.dart';
-import 'package:bogcl_oneops/features/auth/presentation/app_lock.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
 import 'package:bogcl_oneops/features/files/presentation/profile_avatar.dart';
-import 'package:bogcl_oneops/features/home/presentation/search_sheet.dart';
-import 'package:bogcl_oneops/mock/demo/demo_menu.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
-import 'package:bogcl_oneops/shared/widgets/persona_switcher_sheet.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
@@ -101,9 +97,6 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
     final session = ref.watch(sessionControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final version = ref.watch(appVersionProvider).value;
-    final biometricSupported =
-        ref.watch(biometricSupportedProvider).value ?? false;
-    final biometricEnabled = ref.watch(biometricEnabledProvider).value ?? true;
     final queued = ref.watch(outboxItemsProvider).value?.length ?? 0;
     final pendingApprovals =
         ref.watch(approvalSummaryProvider).value?.pending ?? 0;
@@ -115,7 +108,6 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
           : const SkeletonList();
     }
     final emp = s.profile.employee;
-    final persona = findCanonicalPersona(emp.empCode);
 
     // Grouping modules into 5 B2B operational categories
     final allowedKeys = s.navigation.toSet();
@@ -130,7 +122,12 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       'compliance',
       'claims',
     });
-    final dailyWorkModules = group({'attendance', 'employees', 'notices'});
+    final dailyWorkModules = group({
+      'attendance',
+      'leave',
+      'employees',
+      'notices',
+    });
     final transportModules = group({'fleet', 'bus'});
     final siteOpsModules = group({'parcels', 'visitors'});
     final refineryModules = group({'incidents', 'assets', 'chat'});
@@ -143,7 +140,7 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: Space.xxxl),
         children: [
-          // 1-Tap Pitch Persona Switcher Card
+          // Employee Identity Card
           Padding(
             padding: const EdgeInsets.fromLTRB(
               Space.lg,
@@ -152,136 +149,73 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
               Space.xs,
             ),
             child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(Corner.xl),
-                side: BorderSide(
-                  color: scheme.primary.withValues(alpha: 0.25),
-                  width: 1.2,
-                ),
-              ),
-              color: scheme.primaryContainer.withValues(alpha: 0.2),
               child: Padding(
                 padding: const EdgeInsets.all(Space.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        _EditableAvatar(
-                          name: emp.fullName,
-                          photoFileId: emp.photoFileId,
-                          busy: _uploadingPhoto,
-                          onTap: _changePhoto,
-                        ),
-                        const SizedBox(width: Space.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    _EditableAvatar(
+                      name: emp.fullName,
+                      photoFileId: emp.photoFileId,
+                      busy: _uploadingPhoto,
+                      onTap: _changePhoto,
+                    ),
+                    const SizedBox(width: Space.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      persona != null
-                                          ? (bangla
-                                                ? persona.roleLabelBn
-                                                : persona.roleLabelEn)
-                                          : emp.displayName(bangla: bangla),
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                              Flexible(
+                                child: Text(
+                                  emp.displayName(bangla: bangla),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  const SizedBox(width: Space.xs),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: persona?.isPlantSite == true
-                                          ? Colors.amber.withValues(alpha: 0.2)
-                                          : Colors.teal.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(
-                                        Corner.sm,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      persona?.isPlantSite == true
-                                          ? (bangla ? 'প্ল্যান্ট' : 'Plant')
-                                          : 'HQ',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: persona?.isPlantSite == true
-                                            ? Colors.amber.shade900
-                                            : Colors.teal.shade800,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                '${emp.displayName(bangla: bangla)} · ${emp.empCode}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Text(
-                                emp.designationTitle(bangla: bangla),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: scheme.onSurfaceVariant.withValues(
-                                    alpha: 0.8,
+                              const SizedBox(width: Space.xs),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(
+                                    Corner.sm,
+                                  ),
+                                ),
+                                child: Text(
+                                  emp.empCode,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: scheme.primary,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    if (persona != null) ...[
-                      const SizedBox(height: Space.sm),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Space.sm,
-                          vertical: Space.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: scheme.surface,
-                          borderRadius: BorderRadius.circular(Corner.md),
-                          border: Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: 0.5),
+                          const SizedBox(height: 2),
+                          Text(
+                            emp.designationTitle(bangla: bangla),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          bangla
-                              ? persona.pitchHighlightBn
-                              : persona.pitchHighlightEn,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.primary,
-                            fontWeight: FontWeight.w600,
+                          Text(
+                            '${emp.department.displayName(bangla: bangla)} · ${emp.site.displayName(bangla: bangla)}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.85,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: Space.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.tonalIcon(
-                        onPressed: () =>
-                            unawaited(showPersonaSwitcherSheet(context)),
-                        icon: const Icon(Icons.swap_horiz, size: 20),
-                        label: Text(
-                          bangla
-                              ? 'চরিত্র পরিবর্তন করুন (৭টি ভূমিকা)'
-                              : 'Switch Persona (7 Pitch Roles)',
-                        ),
+                        ],
                       ),
                     ),
                   ],
@@ -389,33 +323,7 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
               ),
             ),
           ),
-          if (biometricSupported)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.lg),
-              child: Card(
-                margin: const EdgeInsets.symmetric(horizontal: Space.lg),
-                child: SwitchListTile(
-                  title: Text(l10n.settingsBiometric),
-                  subtitle: Text(l10n.settingsBiometricHint),
-                  secondary: const Icon(Icons.fingerprint),
-                  value: biometricEnabled,
-                  onChanged: (v) => unawaited(
-                    ref.read(biometricEnabledProvider.notifier).set(value: v),
-                  ),
-                ),
-              ),
-            ),
           const SizedBox(height: Space.lg),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Space.lg),
-            child: ListRow(
-              title: l10n.searchTitle,
-              leading: const Icon(Icons.search),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => unawaited(showGlobalSearch(context)),
-            ),
-          ),
-          const SizedBox(height: Space.md),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Space.lg),
             child: ListRow(
@@ -450,15 +358,12 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
             Padding(
               padding: const EdgeInsets.only(top: Space.xl),
               child: Center(
-                child: InkWell(
-                  onTap: () => unawaited(showDemoMenu(context)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(Space.md),
-                    child: Text(
-                      l10n.versionLabel(version),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(Space.md),
+                  child: Text(
+                    l10n.versionLabel(version),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),

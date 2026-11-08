@@ -6,10 +6,12 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
 import 'package:bogcl_oneops/features/note_sheets/data/note_sheet_repository.dart';
 import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +28,7 @@ Future<NoteSheet?> showSignatureSheet(
   builder: (_) => _SignatureSheet(sheet: sheet),
 );
 
-enum _Method { typed, drawn, stamp }
+enum _Method { typed, drawn, stamp, uploaded }
 
 class _SignatureSheet extends ConsumerStatefulWidget {
   const _SignatureSheet({required this.sheet});
@@ -45,6 +47,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
   final _otp = TextEditingController();
   final _comment = TextEditingController();
   final List<List<Offset>> _strokes = [];
+  PickedFile? _uploaded;
   bool _busy = false;
   String? _error;
 
@@ -57,6 +60,16 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
   }
 
   static const _padSize = Size(320, 160);
+
+  Future<void> _pickSignatureImage() async {
+    final picked = await pickAttachment(context);
+    if (picked != null) {
+      setState(() {
+        _uploaded = picked;
+        _error = null;
+      });
+    }
+  }
 
   Future<Uint8List> _renderPng() async {
     const scale = 2.0;
@@ -83,6 +96,10 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
       setState(() => _error = l10n.nsSignErrDraw);
       return;
     }
+    if (_method == _Method.uploaded && _uploaded == null) {
+      setState(() => _error = l10n.nsSignErrUpload);
+      return;
+    }
     if (_otp.text.trim().length != 6) {
       setState(() => _error = l10n.nsSignErrOtp);
       return;
@@ -102,6 +119,11 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
         );
         await uploads.awaitClean(meta.id);
         imageId = meta.id;
+      } else if (_method == _Method.uploaded) {
+        final uploads = ref.read(uploadServiceProvider);
+        final meta = await uploads.upload(_uploaded!, purpose: 'SIGNATURE');
+        await uploads.awaitClean(meta.id);
+        imageId = meta.id;
       }
       final comment = _comment.text.trim();
       final updated = await ref
@@ -112,6 +134,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               _Method.typed => 'TYPED',
               _Method.drawn => 'DRAWN',
               _Method.stamp => 'STAMP',
+              _Method.uploaded => 'UPLOADED',
             },
             otp: _otp.text.trim(),
             typedName: _method == _Method.typed ? typed : null,
@@ -152,28 +175,47 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.nsSignTitle, style: theme.textTheme.titleLarge),
-            const SizedBox(height: Space.xs),
-            Text(
-              l10n.nsSignIntro(widget.sheet.fileNo ?? widget.sheet.title),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            EnterpriseModalHeader(
+              title: l10n.nsSignTitle,
+              subtitle: l10n.nsSignIntro(
+                widget.sheet.fileNo ?? widget.sheet.title,
               ),
+              icon: Icons.draw_outlined,
             ),
-            const SizedBox(height: Space.lg),
+            const SizedBox(height: Space.sm),
             SegmentedButton<_Method>(
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+              ),
               segments: [
                 ButtonSegment(
                   value: _Method.typed,
-                  label: Text(l10n.nsSignTyped),
+                  label: Text(
+                    l10n.nsSignTyped,
+                    style: const TextStyle(fontSize: 11),
+                  ),
                 ),
                 ButtonSegment(
                   value: _Method.drawn,
-                  label: Text(l10n.nsSignDrawn),
+                  label: Text(
+                    l10n.nsSignDrawn,
+                    style: const TextStyle(fontSize: 11),
+                  ),
                 ),
                 ButtonSegment(
                   value: _Method.stamp,
-                  label: Text(l10n.nsSignStamp),
+                  label: Text(
+                    l10n.nsSignStamp,
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ),
+                ButtonSegment(
+                  value: _Method.uploaded,
+                  label: Text(
+                    l10n.nsSignUpload,
+                    style: const TextStyle(fontSize: 11),
+                  ),
                 ),
               ],
               selected: {_method},
@@ -212,6 +254,128 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                   ),
                 ),
               ),
+              _Method.uploaded =>
+                _uploaded == null
+                    ? InkWell(
+                        onTap: _pickSignatureImage,
+                        borderRadius: BorderRadius.circular(Corner.md),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: Space.xl,
+                            horizontal: Space.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerLowest,
+                            borderRadius: BorderRadius.circular(Corner.md),
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.cloud_upload_outlined,
+                                size: 40,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(height: Space.sm),
+                              Text(
+                                l10n.nsSignUploadHint,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.nsSignUploadSub,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(Space.md),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(Corner.md),
+                          border: Border.all(
+                            color: Colors.teal.shade400,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 120,
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(Space.sm),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(Corner.sm),
+                                border: Border.all(
+                                  color: theme.colorScheme.outlineVariant
+                                      .withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: Image.memory(
+                                _uploaded!.bytes,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(height: Space.sm),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.image_outlined,
+                                  size: 18,
+                                  color: Colors.teal,
+                                ),
+                                const SizedBox(width: Space.xs),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _uploaded!.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${(_uploaded!.bytes.length / 1024).toStringAsFixed(1)} KB · Ready to embed',
+                                        style: TextStyle(
+                                          color: theme
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  icon: const Icon(Icons.refresh, size: 15),
+                                  label: Text(l10n.nsSignChange),
+                                  onPressed: _pickSignatureImage,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
             },
             const SizedBox(height: Space.md),
             AppTextField(

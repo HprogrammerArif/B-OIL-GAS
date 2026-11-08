@@ -13,6 +13,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+String _formatHodBdt(num? amount, {required bool bangla}) {
+  if (amount == null) return '';
+  final val = amount.toDouble();
+  if (val >= 10000000) {
+    final cr = (val / 10000000).toStringAsFixed(2);
+    return bangla ? '৳ $cr কোটি' : 'BDT $cr Cr';
+  }
+  if (val >= 100000) {
+    final l = (val / 100000).toStringAsFixed(1);
+    return bangla ? '৳ $l লক্ষ' : 'BDT $l Lakhs';
+  }
+  return bangla ? '৳ ${val.round()}' : 'BDT ${val.round()}';
+}
+
 class HodCockpit extends ConsumerStatefulWidget {
   const HodCockpit({required this.dashboard, super.key});
 
@@ -64,15 +78,17 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                       size: 20,
                     ),
                     const SizedBox(width: Space.xs),
-                    Text(
-                      bangla
-                          ? 'বিভাগীয় ত্রৈমাসিক বাজেট সিলিং (Q4)'
-                          : 'DEPT QUARTERLY BUDGET CEILING (Q4 FY26)',
-                      style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.purple,
-                        letterSpacing: 0.5,
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'বিভাগীয় ত্রৈমাসিক বাজেট সিলিং (Q4)'
+                            : 'DEPT QUARTERLY BUDGET CEILING (Q4 FY26)',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.purple,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],
@@ -80,28 +96,30 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                 const SizedBox(height: Space.xs),
                 Row(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BDT 4,50,00,000',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'BDT 4,50,00,000',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                            ),
                           ),
-                        ),
-                        Text(
-                          bangla
-                              ? 'মোট বরাদ্দ সিলিং'
-                              : 'Total Approved Ceiling',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: scheme.onSurfaceVariant,
+                          Text(
+                            bangla
+                                ? 'মোট বরাদ্দ সিলিং'
+                                : 'Total Approved Ceiling',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: Space.xs),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -181,13 +199,14 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
           ),
           child: Row(
             children: [
-              Text(
-                bangla ? 'ফাইন্যান্স অনুমোদন কিউ' : 'Finance Approval Queue',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: Text(
+                  bangla ? 'ফাইন্যান্স অনুমোদন কিউ' : 'Finance Approval Queue',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              const Spacer(),
               TextButton(
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
@@ -200,6 +219,7 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
         ),
 
         inboxAsync.when(
+          skipLoadingOnReload: true,
           loading: () => const Padding(
             padding: EdgeInsets.all(Space.lg),
             child: SkeletonList(itemCount: 2),
@@ -252,20 +272,22 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                             });
                           },
                         ),
-                        Text(
-                          bangla
-                              ? 'একযোগে নির্বাচন (${_selectedIds.length}/${batchable.length})'
-                              : 'Batch Select (${_selectedIds.length}/${batchable.length})',
-                          style: const TextStyle(fontSize: 12),
+                        Expanded(
+                          child: Text(
+                            bangla
+                                ? 'একযোগে নির্বাচন (${_selectedIds.length}/${batchable.length})'
+                                : 'Batch Select (${_selectedIds.length}/${batchable.length})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
-                        const Spacer(),
                         if (_selectedIds.isNotEmpty)
                           FilledButton.tonal(
                             style: FilledButton.styleFrom(
                               visualDensity: VisualDensity.compact,
                             ),
                             onPressed: () async {
-                              Haptics.tap();
+                              Haptics.success();
+                              final count = _selectedIds.length;
                               final repo = ref.read(approvalRepositoryProvider);
                               for (final id in _selectedIds) {
                                 await repo.approve(id);
@@ -277,7 +299,9 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               if (context.mounted) {
                                 AppToast.show(
                                   context,
-                                  'Approved ${_selectedIds.length} items',
+                                  bangla
+                                      ? '$countটি ফাইল অনুমোদিত হয়েছে'
+                                      : 'Approved $count items',
                                 );
                               }
                             },
@@ -344,7 +368,10 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               ),
                               if (item.summary.amount != null)
                                 Text(
-                                  'BDT ${item.summary.amount}',
+                                  _formatHodBdt(
+                                    item.summary.amount,
+                                    bangla: bangla,
+                                  ),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: scheme.primary,
@@ -357,7 +384,9 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               left: item.batchable ? 40 : 0,
                             ),
                             child: Text(
-                              '${item.initiator.display(bangla: bangla)} · ${item.stepName}',
+                              bangla
+                                  ? 'উত্থাপনকারী: ${item.initiator.display(bangla: true)} · ধাপ: ${item.stepName}'
+                                  : 'By ${item.initiator.display(bangla: false)} · Step: ${item.stepName}',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
@@ -378,13 +407,21 @@ class _HodCockpitState extends ConsumerState<HodCockpit> {
                               const SizedBox(width: Space.sm),
                               FilledButton.tonal(
                                 onPressed: () async {
-                                  Haptics.tap();
+                                  Haptics.success();
                                   await ref
                                       .read(approvalRepositoryProvider)
                                       .approve(item.instanceId);
                                   ref
                                     ..invalidate(approvalInboxProvider)
                                     ..invalidate(dashboardMeProvider);
+                                  if (context.mounted) {
+                                    AppToast.show(
+                                      context,
+                                      bangla
+                                          ? 'ফাইলটি অনুমোদিত হয়েছে'
+                                          : 'File approved',
+                                    );
+                                  }
                                 },
                                 child: Text(bangla ? 'অনুমোদন' : 'Approve'),
                               ),

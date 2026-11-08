@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/workforce/data/workforce_repository.dart';
 import 'package:bogcl_oneops/features/workforce/domain/workforce_models.dart';
 import 'package:bogcl_oneops/features/workforce/presentation/workforce_providers.dart';
@@ -247,6 +248,7 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
+    final session = ref.watch(sessionControllerProvider).value;
     final async = ref.watch(staffDetailProvider(widget.id));
     final theme = Theme.of(context);
 
@@ -492,32 +494,37 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                bangla
-                                    ? '৭-বিভাগের প্রস্থান ছাড়পত্র'
-                                    : '7-Department Exit Clearance',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  bangla
+                                      ? '৭-বিভাগের প্রস্থান ছাড়পত্র'
+                                      : '7-Department Exit Clearance',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '${totalCount - pendingCount} of $totalCount ${bangla ? "বিভাগ সম্পন্ন" : "desks cleared"}',
-                                style: TextStyle(
-                                  color: allCleared
-                                      ? BrandColors.success
-                                      : BrandColors.warning,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                Text(
+                                  '${totalCount - pendingCount} of $totalCount ${bangla ? "বিভাগ সম্পন্ন" : "desks cleared"}',
+                                  style: TextStyle(
+                                    color: allCleared
+                                        ? BrandColors.success
+                                        : BrandColors.warning,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          if (!allCleared)
+                          if (!allCleared &&
+                              ((m?.isHr ?? false) ||
+                                  (session?.can('employees:offboard') ??
+                                      false))) ...[
+                            const SizedBox(width: Space.xs),
                             OutlinedButton.icon(
                               icon: const Icon(
                                 Icons.bolt,
@@ -534,6 +541,7 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                                   ? null
                                   : () => unawaited(_clearAllDesksHelper(x)),
                             ),
+                          ],
                           if (allCleared)
                             IconButton(
                               tooltip: bangla
@@ -624,7 +632,12 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                               ],
                             ),
                           ),
-                          if (item.pending)
+                          if (item.pending &&
+                              ((m?.isHr ?? false) ||
+                                  (m?.clearableKeys.contains(item.key) ??
+                                      false) ||
+                                  (session?.can('employees:clearance') ??
+                                      false)))
                             TextButton(
                               onPressed: _busy
                                   ? null
@@ -650,7 +663,8 @@ class _PeopleDetailScreenState extends ConsumerState<PeopleDetailScreen> {
                 const SizedBox(height: Space.md),
 
                 // Final Archive Button
-                if (allCleared)
+                if (allCleared &&
+                    ((m?.canFinalize ?? false) || (m?.isHr ?? false)))
                   PrimaryButton(
                     label: bangla
                         ? 'চূড়ান্ত নিষ্পত্তি ও সাবেক আর্কাইভে স্থানান্তর'

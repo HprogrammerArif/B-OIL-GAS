@@ -94,6 +94,7 @@ export default function FleetView({ role, lang }: ViewProps) {
   const [assigningReq, setAssigningReq] = useState<VehicleRequisition | null>(null);
   const [selectedTripPassReq, setSelectedTripPassReq] = useState<VehicleRequisition | null>(null);
   const [trackingReq, setTrackingReq] = useState<VehicleRequisition | null>(null);
+  const [sosSent, setSosSent] = useState<Record<string, boolean>>({});
   const [showFuelModal, setShowFuelModal] = useState<Vehicle | null>(null);
   const [showSmartPoolModal, setShowSmartPoolModal] = useState(false);
   const [completingReq, setCompletingReq] = useState<VehicleRequisition | null>(null);
@@ -2005,19 +2006,26 @@ export default function FleetView({ role, lang }: ViewProps) {
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  type="button"
-                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', backgroundColor: 'var(--surface-1)', color: 'var(--text-1)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                  onClick={() => showToast(`Calling Driver ${trackingReq.assignedDriverName} (${trackingReq.assignedDriverPhone})...`, 'info')}
+                <a
+                  href={`tel:${(trackingReq.assignedDriverPhone ?? '').replace(/[^\d+]/g, '')}`}
+                  style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--border-2)', backgroundColor: 'var(--surface-1)', color: 'var(--text-1)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', textDecoration: 'none' }}
+                  onClick={() => showToast(t(`Driver number: ${trackingReq.assignedDriverName} ${trackingReq.assignedDriverPhone ?? ''}`, `চালকের নম্বর: ${trackingReq.assignedDriverName} ${trackingReq.assignedDriverPhone ?? ''}`, lang), 'info')}
                 >
-                  <Phone size={15} color="var(--status-info)" /> Call Driver
-                </button>
+                  <Phone size={15} color="var(--status-info)" /> {t('Call Driver', 'চালককে কল করুন', lang)}
+                </a>
                 <button
                   type="button"
+                  disabled={!!sosSent[trackingReq.id]}
                   style={{ flex: 1, padding: '11px 16px', borderRadius: '10px', border: '1.5px solid var(--status-danger)', backgroundColor: 'var(--status-danger-bg)', color: 'var(--status-danger)', fontWeight: 700, fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}
-                  onClick={() => showToast('SOS Dispatcher notified. Emergency vehicle en route.', 'info')}
+                  onClick={() => {
+                    setSosSent((prev) => ({ ...prev, [trackingReq.id]: true }));
+                    showToast(t('Dispatcher notified. An emergency vehicle is on the way.', 'ডিসপ্যাচকে জানানো হয়েছে। জরুরি গাড়ি আসছে।', lang), 'info');
+                  }}
                 >
-                  <AlertOctagon size={15} /> Emergency SOS
+                  <AlertOctagon size={15} />
+                  {sosSent[trackingReq.id]
+                    ? t('Dispatcher notified', 'ডিসপ্যাচকে জানানো হয়েছে', lang)
+                    : t('Emergency SOS', 'জরুরি এসওএস', lang)}
                 </button>
               </div>
             </div>

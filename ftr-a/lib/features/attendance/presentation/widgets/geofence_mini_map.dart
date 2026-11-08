@@ -7,9 +7,9 @@ import 'package:bogcl_oneops/mock/mock_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Interactive 140px-tall schematic map displaying the employee's live GPS fix
-/// relative to the site geofence perimeter (HQ Baridhara 300m / Keraniganj Plant 500m).
-/// Includes interactive demo location toggle chips for pitch presentations.
+/// Interactive production-grade geofence & GPS telemetry schematic map
+/// displaying the employee's live GPS fix relative to BOGCL site perimeters
+/// (HQ Baridhara 300m / Keraniganj Refinery 500m / Field Duty).
 class GeofenceMiniMap extends ConsumerStatefulWidget {
   const GeofenceMiniMap({
     super.key,
@@ -18,6 +18,9 @@ class GeofenceMiniMap extends ConsumerStatefulWidget {
     this.fenceRadiusM = 300,
     this.isInside = true,
     this.distanceM = 110,
+    this.gpsHardwareReady = true,
+    this.accuracyM = 5.8,
+    this.onRequestEnableGps,
     this.onLocationChanged,
   });
 
@@ -26,6 +29,9 @@ class GeofenceMiniMap extends ConsumerStatefulWidget {
   final int fenceRadiusM;
   final bool isInside;
   final int distanceM;
+  final bool gpsHardwareReady;
+  final double accuracyM;
+  final VoidCallback? onRequestEnableGps;
   final void Function(DemoLocation)? onLocationChanged;
 
   @override
@@ -58,27 +64,34 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
     final scheme = theme.colorScheme;
     final mockLocation = ref.watch(mockConfigControllerProvider).location;
 
+    final isPlant = mockLocation == DemoLocation.plant;
     final isOutsideSimulated = mockLocation == DemoLocation.outside;
     final isInsideEffective = !isOutsideSimulated && widget.isInside;
-    final effectiveDistanceM = isOutsideSimulated ? 4200 : widget.distanceM;
+    final effectiveDistanceM = isOutsideSimulated
+        ? 4200
+        : (isPlant ? 145 : widget.distanceM);
+    final effectiveRadiusM = isPlant ? 500 : widget.fenceRadiusM;
 
-    final primarySite = widget.siteName;
-    final otherSite = primarySite.contains('Baridhara')
-        ? (bangla
-              ? 'কেরানীগঞ্জ প্ল্যান্ট · ১৪.৮ কিমি'
-              : 'Keraniganj Plant · 14.8 km')
-        : (bangla
-              ? 'বারিধারা প্রধান কার্যালয় · ১৪.৮ কিমি'
-              : 'HQ Baridhara · 14.8 km');
+    final activeSiteLabel = isPlant
+        ? (bangla ? 'কেরানীগঞ্জ রিফাইনারি প্ল্যান্ট' : 'Keraniganj Refinery')
+        : (bangla ? widget.siteNameBn : widget.siteName);
+
+    final coordsText = isOutsideSimulated
+        ? '23.7800° N, 90.4000° E'
+        : (isPlant ? '23.7004° N, 90.3500° E' : '23.8104° N, 90.4126° E');
+
+    final gpsReady = widget.gpsHardwareReady;
 
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(Corner.lg),
         border: Border.all(
-          color: isInsideEffective
-              ? Colors.teal.withValues(alpha: 0.4)
-              : Colors.deepOrange.withValues(alpha: 0.5),
+          color: !gpsReady
+              ? Colors.amber.shade700.withValues(alpha: 0.6)
+              : (isInsideEffective
+                    ? Colors.teal.withValues(alpha: 0.4)
+                    : Colors.deepOrange.withValues(alpha: 0.5)),
           width: 1.2,
         ),
       ),
@@ -86,11 +99,64 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Map Header Strip
+          // Hardware GPS Off Alert Banner (when device Location Service is disabled)
+          if (!gpsReady)
+            InkWell(
+              onTap: widget.onRequestEnableGps,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Space.md,
+                  vertical: Space.xs + 2,
+                ),
+                color: const Color(0xFFFEF3C7),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_disabled_rounded,
+                      size: 16,
+                      color: Color(0xFFB45309),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'ফোনের লোকেশন (GPS) বন্ধ আছে · চালু করতে ট্যাপ করুন'
+                            : 'Device Location (GPS) is turned off · Tap to Turn On',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD97706),
+                        borderRadius: BorderRadius.circular(Corner.sm),
+                      ),
+                      child: Text(
+                        bangla ? 'চালু করুন' : 'Turn On',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          // Map Header Strip (Geofence Verdict + Live GPS Accuracy Badge)
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: Space.md,
-              vertical: Space.xs,
+              vertical: Space.xs + 2,
             ),
             color: isInsideEffective
                 ? Colors.teal.withValues(alpha: 0.08)
@@ -99,8 +165,8 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
               children: [
                 Icon(
                   isInsideEffective
-                      ? Icons.check_circle
-                      : Icons.warning_amber_rounded,
+                      ? Icons.verified_rounded
+                      : Icons.share_location_rounded,
                   size: 15,
                   color: isInsideEffective ? Colors.teal : Colors.deepOrange,
                 ),
@@ -109,15 +175,15 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
                   child: Text(
                     isInsideEffective
                         ? (bangla
-                              ? 'অনুমোদিত সাইট জিওফেন্সের ভিতরে ($effectiveDistanceM মি)'
-                              : 'INSIDE GEOFENCE ($effectiveDistanceM m from gate)')
+                              ? 'অনুমোদিত জিওফেন্সের ভিতরে (গেট থেকে $effectiveDistanceM মি)'
+                              : 'GEOFENCE VERIFIED ($effectiveDistanceM m from gate)')
                         : (bangla
-                              ? 'সাইট জিওফেন্সের বাইরে (${(effectiveDistanceM / 1000).toStringAsFixed(1)} কিমি)'
-                              : 'OUTSIDE GEOFENCE (${(effectiveDistanceM / 1000).toStringAsFixed(1)} km from gate)'),
+                              ? 'সাইটের বাইরে / মাঠ পর্যায়ের কাজ (${(effectiveDistanceM / 1000).toStringAsFixed(1)} কিমি)'
+                              : 'OFF-SITE / FIELD DUTY (${(effectiveDistanceM / 1000).toStringAsFixed(1)} km from gate)'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
+                      letterSpacing: 0.2,
                       color: isInsideEffective
                           ? Colors.teal.shade800
                           : Colors.deepOrange.shade900,
@@ -134,13 +200,31 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
                     borderRadius: BorderRadius.circular(Corner.sm),
                     border: Border.all(color: scheme.outlineVariant),
                   ),
-                  child: Text(
-                    otherSite,
-                    style: TextStyle(
-                      fontSize: 9.5,
-                      fontWeight: FontWeight.w500,
-                      color: scheme.onSurfaceVariant,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: gpsReady
+                              ? const Color(0xFF16A34A)
+                              : const Color(0xFFD97706),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        gpsReady
+                            ? 'GPS ±${widget.accuracyM.toStringAsFixed(0)}m'
+                            : (bangla ? 'GPS বন্ধ' : 'GPS Off'),
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -151,35 +235,82 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
           AnimatedBuilder(
             animation: _pulseController,
             builder: (context, _) {
-              return SizedBox(
-                height: 140,
-                child: CustomPaint(
-                  painter: _GeofenceMapPainter(
-                    isInside: isInsideEffective,
-                    distanceM: effectiveDistanceM,
-                    fenceRadiusM: widget.fenceRadiusM,
-                    siteLabel: bangla ? widget.siteNameBn : widget.siteName,
-                    pulseProgress: _pulseController.value,
-                    isBangla: bangla,
+              return Stack(
+                children: [
+                  SizedBox(
+                    height: 140,
+                    width: double.infinity,
+                    child: CustomPaint(
+                      painter: _GeofenceMapPainter(
+                        isInside: isInsideEffective,
+                        distanceM: effectiveDistanceM,
+                        fenceRadiusM: effectiveRadiusM,
+                        siteLabel: activeSiteLabel,
+                        pulseProgress: _pulseController.value,
+                        isBangla: bangla,
+                      ),
+                    ),
                   ),
-                ),
+                  // Bottom-left Live Coordinates Telemetry Pill
+                  Positioned(
+                    left: 8,
+                    bottom: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.my_location_rounded,
+                            size: 10,
+                            color: Color(0xFF475569),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            coordsText,
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF334155),
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
 
-          // Interactive Demo Location Toggle Strip
+          // Production Duty Location Selector Strip
           Container(
-            padding: const EdgeInsets.fromLTRB(Space.sm, 4, Space.sm, 6),
+            padding: const EdgeInsets.fromLTRB(Space.sm, 5, Space.sm, 6),
             decoration: BoxDecoration(
               color: scheme.surface,
               border: Border(top: BorderSide(color: scheme.outlineVariant)),
             ),
             child: Row(
               children: [
+                Icon(
+                  Icons.place_outlined,
+                  size: 13,
+                  color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
                 Text(
-                  bangla ? 'ডেমো সিমুলেশন:' : 'Demo GPS:',
+                  bangla ? 'কর্মস্থল:' : 'Duty Zone:',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w600,
                     color: scheme.onSurfaceVariant,
                   ),
@@ -190,12 +321,14 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _demoChip(
+                        _zoneChip(
                           label: bangla
-                              ? 'গেটে অবস্থান (১১০মি)'
-                              : 'Inside Gate (110m)',
-                          isSelected: !isOutsideSimulated,
-                          tone: Colors.teal,
+                              ? 'বারিধারা সদর দপ্তর (৩০০মি)'
+                              : 'HQ Baridhara (300m)',
+                          isSelected:
+                              mockLocation == DemoLocation.headOffice ||
+                              mockLocation == DemoLocation.device,
+                          tone: Colors.teal.shade700,
                           onTap: () {
                             Haptics.tap();
                             ref
@@ -206,13 +339,28 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
                             );
                           },
                         ),
-                        const SizedBox(width: 4),
-                        _demoChip(
+                        const SizedBox(width: 6),
+                        _zoneChip(
                           label: bangla
-                              ? 'বাইরে অবস্থান (৪.২ কিমি)'
-                              : 'Outside Gate (4.2km)',
+                              ? 'কেরানীগঞ্জ প্ল্যান্ট (৫০০মি)'
+                              : 'Keraniganj Plant (500m)',
+                          isSelected: mockLocation == DemoLocation.plant,
+                          tone: Colors.teal.shade700,
+                          onTap: () {
+                            Haptics.tap();
+                            ref
+                                .read(mockConfigControllerProvider.notifier)
+                                .setLocation(DemoLocation.plant);
+                            widget.onLocationChanged?.call(DemoLocation.plant);
+                          },
+                        ),
+                        const SizedBox(width: 6),
+                        _zoneChip(
+                          label: bangla
+                              ? 'মাঠ পর্যায়ের কাজ (বাইরে)'
+                              : 'Field Duty / Off-Site',
                           isSelected: isOutsideSimulated,
-                          tone: Colors.deepOrange,
+                          tone: Colors.deepOrange.shade700,
                           onTap: () {
                             Haptics.tap();
                             ref
@@ -235,7 +383,7 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
     );
   }
 
-  Widget _demoChip({
+  Widget _zoneChip({
     required String label,
     required bool isSelected,
     required Color tone,
@@ -245,9 +393,9 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
       onTap: onTap,
       borderRadius: BorderRadius.circular(Corner.sm),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
         decoration: BoxDecoration(
-          color: isSelected ? tone.withValues(alpha: 0.15) : Colors.transparent,
+          color: isSelected ? tone.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(Corner.sm),
           border: Border.all(
             color: isSelected ? tone : Colors.grey.shade400,
@@ -258,7 +406,7 @@ class _GeofenceMiniMapState extends ConsumerState<GeofenceMiniMap>
           label,
           style: TextStyle(
             fontSize: 10,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? tone : Colors.black87,
           ),
         ),
@@ -302,12 +450,11 @@ class _GeofenceMapPainter extends CustomPainter {
     }
 
     // Site Center Coordinate
-    // When inside, place site near center; when outside, place site on the left.
     final siteCenter = isInside
-        ? Offset(size.width * 0.42, size.height * 0.5)
-        : Offset(size.width * 0.28, size.height * 0.5);
+        ? Offset(size.width * 0.42, size.height * 0.48)
+        : Offset(size.width * 0.28, size.height * 0.48);
 
-    final fenceRadius = size.height * 0.36;
+    final fenceRadius = size.height * 0.35;
 
     // Draw Geofence allowed zone (shaded circle)
     final zoneFillPaint = Paint()
@@ -329,18 +476,18 @@ class _GeofenceMapPainter extends CustomPainter {
     final siteBadgePaint = Paint()
       ..color = isInside ? const Color(0xFF059669) : const Color(0xFF0369A1)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(siteCenter, 14, siteBadgePaint);
+    canvas.drawCircle(siteCenter, 13, siteBadgePaint);
 
     final siteInnerWhite = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(siteCenter, 5, siteInnerWhite);
+    canvas.drawCircle(siteCenter, 4.5, siteInnerWhite);
 
     // Site Label
     final siteTextPainter = TextPainter(
       text: TextSpan(
-        text: siteLabel.length > 20
-            ? '${siteLabel.substring(0, 18)}...'
+        text: siteLabel.length > 26
+            ? '${siteLabel.substring(0, 24)}...'
             : siteLabel,
         style: const TextStyle(
           color: Color(0xFF1E293B),
@@ -352,13 +499,13 @@ class _GeofenceMapPainter extends CustomPainter {
     )..layout();
     siteTextPainter.paint(
       canvas,
-      Offset(siteCenter.dx - siteTextPainter.width / 2, siteCenter.dy + 17),
+      Offset(siteCenter.dx - siteTextPainter.width / 2, siteCenter.dy + 16),
     );
 
     // Perimeter radius tag
     final radiusTextPainter = TextPainter(
       text: TextSpan(
-        text: '${fenceRadiusM}m ${isBangla ? "সীমানা" : "Radius"}',
+        text: '${fenceRadiusM}m ${isBangla ? "সীমানা" : "Perimeter"}',
         style: TextStyle(
           color: isInside ? const Color(0xFF047857) : const Color(0xFF0369A1),
           fontSize: 8.5,
@@ -378,22 +525,18 @@ class _GeofenceMapPainter extends CustomPainter {
     // Employee Pin ("You")
     final Offset userPos;
     if (isInside) {
-      // 110m inside: position slightly offset from site center within fence
       userPos = Offset(
-        siteCenter.dx + fenceRadius * 0.35,
-        siteCenter.dy - fenceRadius * 0.25,
+        siteCenter.dx + fenceRadius * 0.45,
+        siteCenter.dy - fenceRadius * 0.28,
       );
     } else {
-      // 4.2 km outside: position far right
       userPos = Offset(size.width * 0.82, size.height * 0.44);
 
-      // Draw dashed connecting vector line
       final vectorPaint = Paint()
         ..color = const Color(0xFFEA580C)
         ..strokeWidth = 1.5;
       _drawDashedLine(canvas, siteCenter, userPos, vectorPaint);
 
-      // Distance pill on the line
       final midPoint = Offset(
         (siteCenter.dx + userPos.dx) / 2,
         (siteCenter.dy + userPos.dy) / 2 - 12,
@@ -457,12 +600,12 @@ class _GeofenceMapPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawCircle(userPos, 3.5, userInnerDot);
 
-    // "You" Pin Label
+    // "You" Pin Label (placed above the dot when inside so it never collides with site pin)
     final userLabelPainter = TextPainter(
       text: TextSpan(
         text: isInside
-            ? (isBangla ? 'আপনি (১১মি)' : 'You (110m)')
-            : (isBangla ? 'আপনি (বাইরে)' : 'You (Outside)'),
+            ? (isBangla ? 'আপনি ($distanceMমি)' : 'You (${distanceM}m)')
+            : (isBangla ? 'আপনি (মাঠ পর্যায়ে)' : 'You (Field Duty)'),
         style: TextStyle(
           color: isInside ? const Color(0xFF047857) : const Color(0xFF9A3412),
           fontSize: 9.5,
@@ -471,9 +614,12 @@ class _GeofenceMapPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    final labelY = isInside
+        ? userPos.dy - userLabelPainter.height - 9
+        : userPos.dy + 11;
     userLabelPainter.paint(
       canvas,
-      Offset(userPos.dx - userLabelPainter.width / 2, userPos.dy + 11),
+      Offset(userPos.dx - userLabelPainter.width / 2, labelY),
     );
   }
 
@@ -519,6 +665,8 @@ class _GeofenceMapPainter extends CustomPainter {
   bool shouldRepaint(covariant _GeofenceMapPainter oldDelegate) {
     return oldDelegate.isInside != isInside ||
         oldDelegate.distanceM != distanceM ||
+        oldDelegate.fenceRadiusM != fenceRadiusM ||
+        oldDelegate.siteLabel != siteLabel ||
         oldDelegate.pulseProgress != pulseProgress ||
         oldDelegate.isBangla != isBangla;
   }

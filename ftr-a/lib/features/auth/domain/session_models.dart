@@ -138,7 +138,9 @@ class Session {
   HomeVariant get homeVariant {
     if (hasRole('DRIVER')) return HomeVariant.driver;
     if (hasRole('CHAIRMAN')) return HomeVariant.executive;
-    if (hasRole('PLANT_GM') || hasRole('HOD')) return HomeVariant.approver;
+    if (hasRole('PLANT_GM') || hasRole('HOD') || hasRole('HR_ADMIN')) {
+      return HomeVariant.approver;
+    }
     if (hasRole('TRANSPORT_ADMIN') ||
         hasRole('SECURITY_GATE') ||
         hasRole('MAILROOM') ||
@@ -148,7 +150,7 @@ class Session {
     return HomeVariant.employee;
   }
 
-  /// Chat sits on the tab bar for leadership only (not Employee or Driver).
+  /// Chat sits on the tab bar for leadership & operations (not Employee or Driver).
   bool get showChatTab {
     if (homeVariant == HomeVariant.employee ||
         homeVariant == HomeVariant.driver) {

@@ -1,6 +1,7 @@
 import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,10 @@ Future<PickedFile?> pickAttachment(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SectionHeader(title: l10n.pickerTitle),
+            EnterpriseModalHeader(
+              title: l10n.pickerTitle,
+              icon: Icons.attach_file_outlined,
+            ),
             if (allowCamera)
               ListRow(
                 title: l10n.pickerCamera,

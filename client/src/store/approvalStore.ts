@@ -34,6 +34,10 @@ export interface ClaimItem {
   rejectionImprovementNotes?: string;
   rejectedBy?: string;
   rejectedAt?: string;
+  /** Receipt pictures. Filled from the claim type when missing. */
+  receipts?: string[];
+  /** PDF receipts kept as names. Pictures live in `receipts`. */
+  receiptFiles?: { name: string; size: string }[];
 }
 
 export interface DepartmentApprovalStep {
@@ -78,6 +82,26 @@ export interface ApprovalItem {
   rejectionImprovementNotes?: string;
   rejectedBy?: string;
   rejectedAt?: string;
+}
+
+const HOTEL_RECEIPT = '/receipts/receipt-hotel.jpg';
+const BUS_RECEIPT = '/receipts/receipt-bus.jpg';
+const FUEL_RECEIPT = '/receipts/receipt-fuel.jpg';
+
+const CLAIM_RECEIPTS: Record<string, string[]> = {
+  'TOUR-2026-008': [HOTEL_RECEIPT, FUEL_RECEIPT],
+  'SPRT-2026-003': [HOTEL_RECEIPT],
+  'TADA-2026-0419': [HOTEL_RECEIPT, BUS_RECEIPT],
+  'CNV-2026-1002': [FUEL_RECEIPT],
+  'TADA-2026-0402': [FUEL_RECEIPT],
+  'TADA-2026-0388': [FUEL_RECEIPT],
+};
+
+export function claimReceiptsFor(id: string, type: ClaimItem['type']): string[] {
+  if (CLAIM_RECEIPTS[id]) return CLAIM_RECEIPTS[id];
+  if (type === 'conveyance') return [FUEL_RECEIPT];
+  if (type === 'tada') return [BUS_RECEIPT];
+  return [HOTEL_RECEIPT];
 }
 
 const INITIAL_CLAIMS: ClaimItem[] = [
@@ -522,6 +546,10 @@ class ApprovalStore {
       this.approvalItems = saved.approvalItems;
       this.decidedItems = saved.decidedItems;
     }
+    this.claims = this.claims.map((claim) => ({
+      ...claim,
+      receipts: claim.receipts?.length ? claim.receipts : claimReceiptsFor(claim.id, claim.type),
+    }));
   }
 
   subscribe(listener: () => void): () => void {
@@ -568,6 +596,8 @@ class ApprovalStore {
       status: 'pending_hod',
       dateSubmitted: data.dateSubmitted,
       items: data.items,
+      receipts: data.receipts?.length ? data.receipts : claimReceiptsFor(data.id, data.type),
+      receiptFiles: data.receiptFiles,
     };
 
     this.claims = [newClaim, ...this.claims];

@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { BusVehicle, RouteInfo } from './busTypes';
+import { BusVehicle, RouteInfo, shortBusModel } from './busTypes';
 import { t } from '../../types';
-import {
-  RefreshCw, X, CheckCircle, Bus, ArrowRight, Shield,
-  Navigation, AlertCircle, Check, Sun
-} from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface ReassignBusRouteModalProps {
   isOpen: boolean;
   onClose: () => void;
   buses: BusVehicle[];
   routes: Record<string, RouteInfo>;
-  onReassign: (busId: string, targetRouteId: string) => void;
+  initialBusId?: string | null;
+  bookedByRoute: Record<string, number>;
+  onReassign: (busId: string, targetRouteId: string) => boolean;
   lang: 'en' | 'bn';
+}
+
+function otherRoute(routes: Record<string, RouteInfo>, currentId: string): string {
+  return Object.keys(routes).find((id) => id !== currentId) || currentId;
 }
 
 export default function ReassignBusRouteModal({
@@ -20,283 +23,119 @@ export default function ReassignBusRouteModal({
   onClose,
   buses,
   routes,
+  initialBusId,
+  bookedByRoute,
   onReassign,
   lang,
 }: ReassignBusRouteModalProps) {
-  const [selectedBusId, setSelectedBusId] = useState<string>(buses[0]?.id || 'bus-1');
-  const [targetRouteId, setTargetRouteId] = useState<string>(Object.keys(routes)[0] || 'route-1');
+  const starting = buses.find((bus) => bus.id === initialBusId) || buses[0];
+  const [selectedBusId, setSelectedBusId] = useState(starting?.id || '');
+  const [targetRouteId, setTargetRouteId] = useState(otherRoute(routes, starting?.assignedRouteId || ''));
 
   if (!isOpen) return null;
 
-  const selectedBus = buses.find(b => b.id === selectedBusId) || buses[0];
-  const currentRoute = routes[selectedBus?.assignedRouteId];
+  const selectedBus = buses.find((bus) => bus.id === selectedBusId) || buses[0];
+  const currentRoute = selectedBus ? routes[selectedBus.assignedRouteId] : undefined;
   const targetRoute = routes[targetRouteId];
+  const targetBooked = bookedByRoute[targetRouteId] ?? 0;
+  const sameRoute = !!selectedBus && selectedBus.assignedRouteId === targetRouteId;
+  const tooSmall = !!selectedBus && targetBooked > selectedBus.capacity;
+  const displaced = buses.find((bus) => bus.id !== selectedBus?.id && bus.assignedRouteId === targetRouteId);
+  const sourceBooked = selectedBus ? (bookedByRoute[selectedBus.assignedRouteId] ?? 0) : 0;
+  const displacedTooSmall = !!displaced && sourceBooked > displaced.capacity;
+  const blocked = !selectedBus || !targetRoute || sameRoute || tooSmall || displacedTooSmall;
+
+  const reason = sameRoute
+    ? t('This bus already runs that route.', 'এই বাস ইতিমধ্যে ওই রুটে চলে।', lang)
+    : tooSmall
+      ? t(
+          `That route has ${targetBooked} people booked. This bus has ${selectedBus?.capacity ?? 0} seats.`,
+          `ওই রুটে ${targetBooked} জন বুক করা। এই বাসে ${selectedBus?.capacity ?? 0}টি আসন।`,
+          lang,
+        )
+      : displacedTooSmall
+        ? t(
+            `The coach already on that route has ${displaced?.capacity ?? 0} seats, and this route has ${sourceBooked} people booked.`,
+            `ওই রুটের বর্তমান বাসে ${displaced?.capacity ?? 0}টি আসন, আর এই রুটে ${sourceBooked} জন বুক করা।`,
+            lang,
+          )
+        : t(
+            'People already booked on the new route keep their seats. This bus must have room for them.',
+            'নতুন রুটে যাঁরা বুক করা আছেন তাঁদের আসন থাকবে। এই বাসে তাঁদের জায়গা থাকতে হবে।',
+            lang,
+          );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onReassign(selectedBusId, targetRouteId);
-    onClose();
+    if (blocked || !selectedBus) return;
+    if (onReassign(selectedBus.id, targetRouteId)) onClose();
   };
 
   return (
-    <div className="modal-bg" onClick={onClose} style={{ zIndex: 9999, backdropFilter: 'blur(6px)' }}>
-      <div
-        className="modal"
-        style={{
-          maxWidth: '620px',
-          width: '92vw',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
-          border: '1px solid rgba(255, 255, 255, 0.15)'
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
-          color: 'var(--text-on-brand)',
-          padding: '18px 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(212, 175, 55, 0.25)',
-              border: '1px solid rgba(212, 175, 55, 0.5)',
-              color: 'var(--status-warning-bright)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <RefreshCw size={22} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
-                  {t('Reassign Bus Coach to Road Corridor', 'রোড করিডোরে বাস পুনর্নির্ধারণ', lang)}
-                </h3>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                {t('Dynamic Commuter Fleet Re-routing & Corridor Reallocation', 'যাত্রী চাহিদা অনুযায়ী বাস স্থানান্তর ও রুট পুনর্বণ্টন', lang)}
-              </p>
-            </div>
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal shuttle-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-hd">
+          <div>
+            <h3>
+              <RefreshCw size={18} />
+              {t('Reassign this bus', 'এই বাস অন্য রুটে দিন', lang)}
+            </h3>
+            <p className="shuttle-sub">
+              {t('This coach starts running the route you pick.', 'এই বাস আপনি যে রুট বাছবেন সেটি চালানো শুরু করবে।', lang)}
+            </p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: 'var(--text-inverse)',
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={18} />
-          </button>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t('Close', 'বন্ধ করুন', lang)}>×</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{
-            padding: '20px 24px',
-            maxHeight: '74vh',
-            overflowY: 'auto',
-            background: 'var(--brand-card-bg)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px'
-          }}>
-            {/* Bus Coach Selector */}
-            <div style={{
-              background: 'var(--brand-slate-50)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px'
-            }}>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {t('Select Bus Coach to Reallocate', 'স্থানান্তরের জন্য বাস নির্বাচন করুন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-              </label>
+        <form id="shuttle-reassign-bus" className="modal-body" onSubmit={handleSubmit}>
+          <div className="shuttle-stack">
+            <div>
+              <label>{t('Bus', 'বাস', lang)}</label>
               <select
                 className="form-input"
-                value={selectedBusId}
-                onChange={e => {
-                  setSelectedBusId(e.target.value);
-                  const b = buses.find(x => x.id === e.target.value);
-                  if (b) {
-                    setTargetRouteId(b.assignedRouteId);
+                value={selectedBus?.id || ''}
+                onChange={(e) => {
+                  const nextId = e.target.value;
+                  const nextBus = buses.find((bus) => bus.id === nextId);
+                  setSelectedBusId(nextId);
+                  if (nextBus && targetRouteId === nextBus.assignedRouteId) {
+                    setTargetRouteId(otherRoute(routes, nextBus.assignedRouteId));
                   }
                 }}
-                style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 700 }}
               >
-                {buses.map(b => (
-                  <option key={b.id} value={b.id}>
-                    {b.coachNo} • {b.model} ({b.capacity} Seats) — Currently on {routes[b.assignedRouteId]?.name.split(':')[0] || 'Unassigned'}
+                {buses.map((bus) => (
+                  <option key={bus.id} value={bus.id}>
+                    {bus.coachNo} · {shortBusModel(bus.model)} · {bus.capacity}
                   </option>
                 ))}
               </select>
-
               {selectedBus && (
-                <div style={{ display: 'flex', gap: '16px', marginTop: '10px', fontSize: '11px', color: 'var(--brand-slate-600)' }}>
-                  <span>Driver: <strong>{selectedBus.driverName}</strong></span>
-                  <span>Fitness: <strong>{selectedBus.fitnessExpiry}</strong></span>
-                  <span>AC: <strong>{selectedBus.acType}</strong></span>
-                </div>
+                <p className="shuttle-sub">
+                  {t('Driver', 'চালক', lang)}: {selectedBus.driverName}
+                  {currentRoute ? ` · ${currentRoute.name}` : ''}
+                </p>
               )}
             </div>
 
-            {/* Current vs New Route Flow Visualization */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr',
-              gap: '14px',
-              alignItems: 'center',
-              background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.6) 0%, rgba(219, 234, 254, 0.3) 100%)',
-              border: '1.5px solid var(--status-info-bright)',
-              borderRadius: '12px',
-              padding: '16px'
-            }}>
-              <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--brand-slate-500)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t('Current Road Corridor', 'বর্তমান রুট', lang)}
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: 'var(--status-info-text)' }}>
-                  {currentRoute?.name.split(':')[0] || 'Unassigned'}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
-                  {currentRoute?.name.split(':')[1]?.trim() || 'Custom Road Corridor'}
-                </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Sun size={11} color="var(--brand-gold)" />
-                  <span>{currentRoute?.inboundStartTime}</span>
-                </div>
-              </div>
-
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                background: 'var(--brand-gold)',
-                color: 'var(--text-1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(212, 175, 55, 0.4)'
-              }}>
-                <ArrowRight size={18} />
-              </div>
-
-              <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '10px', border: '1.5px solid var(--status-success)' }}>
-                <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--status-success)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t('Target New Road Corridor', 'নতুন নির্ধারিত রুট', lang)}
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: 900, marginTop: '4px', color: 'var(--status-success)' }}>
-                  {targetRoute?.name.split(':')[0]}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', marginTop: '2px', lineHeight: 1.3 }}>
-                  {targetRoute?.name.split(':')[1]?.trim() || 'New Destination'}
-                </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--status-success)', marginTop: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Sun size={11} />
-                  <span>{targetRoute?.inboundStartTime}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Target Corridor Dropdown */}
-            <div style={{
-              background: 'var(--surface-1)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px'
-            }}>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '8px' }}>
-                {t('Select Target Road Corridor from Master Network', 'মাস্টার নেটওয়ার্ক থেকে নতুন রোড নির্বাচন করুন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-              </label>
-              <select
-                className="form-input"
-                value={targetRouteId}
-                onChange={e => setTargetRouteId(e.target.value)}
-                style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px', fontWeight: 700 }}
-              >
-                {Object.values(routes).map(r => (
-                  <option key={r.id} value={r.id}>
-                    {r.name}
-                  </option>
+            <div>
+              <label>{t('Move to', 'যে রুটে যাবে', lang)}</label>
+              <select className="form-input" value={targetRouteId} onChange={(e) => setTargetRouteId(e.target.value)}>
+                {Object.values(routes).map((route) => (
+                  <option key={route.id} value={route.id}>{route.name}</option>
                 ))}
               </select>
             </div>
 
-            {/* Dispatch Telemetry Warning Strip */}
-            <div style={{
-              fontSize: '11.5px',
-              color: 'var(--status-info-text)',
-              background: 'rgba(59, 130, 246, 0.08)',
-              border: '1.5px solid var(--status-info-border)',
-              padding: '12px 14px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '10px'
-            }}>
-              <AlertCircle size={17} color="var(--status-info)" style={{ flexShrink: 0, marginTop: '1px' }} />
-              <div>
-                <strong>{t('Operational Telemetry Notice:', 'প্রশাসনিক বিজ্ঞপ্তি:', lang)}</strong>{' '}
-                {t(
-                  'Reassigning this bus automatically updates the satellite GPS beacon feed, passenger SMS timetable notices, and digital gate check-in manifests for tomorrow\'s morning inbound shift.',
-                  'বাস পুনর্নির্ধারণ করলে সংশ্লিষ্ট সকল যাত্রীর জিপিএস ট্র্যাকিং, এসএমএস সময়সূচী এবং ডিজিটাল গেট পাস স্বয়ংক্রিয়ভাবে আপডেট হবে।',
-                  lang
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            padding: '16px 24px',
-            background: 'var(--brand-slate-50)',
-            borderTop: '1px solid var(--brand-border)',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <button
-              type="button"
-              className="btn-outline"
-              onClick={onClose}
-              style={{ padding: '8px 16px', fontSize: '12.5px', fontWeight: 600, borderRadius: '8px' }}
-            >
-              {t('Cancel', 'বাতিল', lang)}
-            </button>
-            <button
-              type="submit"
-              className="btn-gold"
-              style={{
-                padding: '8px 20px',
-                fontSize: '12.5px',
-                fontWeight: 800,
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 8px rgba(212, 175, 55, 0.35)'
-              }}
-            >
-              <CheckCircle size={16} />
-              <span>{t('Confirm Road Reassignment', 'পুনর্নির্ধারণ নিশ্চিত করুন', lang)}</span>
-            </button>
+            <p className="shuttle-note">{reason}</p>
           </div>
         </form>
+
+        <div className="modal-ft">
+          <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
+          <button type="submit" form="shuttle-reassign-bus" className="btn-primary" disabled={blocked}>
+            {t('Move this bus', 'এই বাস সরিয়ে দিন', lang)}
+          </button>
+        </div>
       </div>
     </div>
   );

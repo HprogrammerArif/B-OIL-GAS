@@ -67,6 +67,8 @@ export interface LicenseCard {
   doLetterParcelRef?: string;
   inspectionFindings?: string;
   events: LicenseEvent[];
+  /** Certificate scan. Filled from the agency picture when missing. */
+  scan?: string;
 }
 
 export interface LicenseEvent {
@@ -77,9 +79,22 @@ export interface LicenseEvent {
   textBn: string;
 }
 
+const LICENSE_SCAN: Record<LicenseCard['tag'], string> = {
+  trade: '/permits/permit-trade.jpg',
+  fire: '/permits/permit-fire.jpg',
+  env: '/permits/permit-env.jpg',
+  doe: '/permits/permit-doe.jpg',
+  bsti: '/permits/permit-bsti.jpg',
+};
+
+export function licenseScanFor(tag: LicenseCard['tag']): string {
+  return LICENSE_SCAN[tag];
+}
+
 export function normalizeLicense(lic: LicenseCard): LicenseCard {
   return {
     ...lic,
+    scan: lic.scan || licenseScanFor(lic.tag),
     doLetterStatus: lic.doLetterStatus ?? 'none',
     events: lic.events ?? [],
   };
@@ -97,7 +112,7 @@ const INITIAL_LICENSES: LicenseCard[] = [
     refNo: 'EMRD/BOGCL/2026/09',
     daysLeft: 7,
     stage: 4,
-    focalPerson: 'Ahmed Akbar Sobhan',
+    focalPerson: 'Abdul Mannan Chowdhury',
     focalDesignation: 'Chairman & Managing Director',
     lastInspection: '18 Oct 2026',
     criticality: 'critical',
@@ -434,6 +449,8 @@ export interface IncidentItem {
   statutoryNoticeHours?: number;
   evidenceAttached?: boolean;
   spotFiles?: IncidentSpotFile[];
+  photo: string;
+  photos: string[];
   closureSignOff?: {
     safetyOfficerName: string;
     safetySignedAt: string;
@@ -447,6 +464,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-01',
     incNo: 'INC-2026-041',
+    photo: '/incidents/tank-drip.jpg',
+    photos: ['/incidents/tank-drip.jpg'],
     title: 'Hot Bitumen Drip on Storage Tank TK-102 Lower Drain Valve',
     titleBn: 'স্টোরেজ ট্যাংক TK-102 এর ড্রেন ভালভে সামান্য বিটুমিন ফোঁটা',
     incidentType: 'spill_leak',
@@ -529,6 +548,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-02',
     incNo: 'INC-2026-040',
+    photo: '/incidents/gate-barrier.jpg',
+    photos: ['/incidents/gate-barrier.jpg'],
     title: 'Delivery Gate Barrier Arm Sensor Stuck During Morning Rain',
     titleBn: 'সকালের বৃষ্টিতে ডেলিভারি গেট ব্যারিয়ার সেন্সর আটকে যাওয়া',
     incidentType: 'equipment_damage',
@@ -589,6 +610,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-03',
     incNo: 'INC-2026-039',
+    photo: '/incidents/ladder.jpg',
+    photos: ['/incidents/ladder.jpg'],
     title: 'Near-Miss: Unsecured Repair Ladder Near Loading Bay Walkway',
     titleBn: 'নিয়ার-মিস: লোডিং বে পথের পাশে অরক্ষিত মেরামত মই',
     incidentType: 'near_miss',
@@ -666,6 +689,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-04',
     incNo: 'INC-2026-036',
+    photo: '/incidents/pressure-gauge.jpg',
+    photos: ['/incidents/pressure-gauge.jpg'],
     title: 'High Pressure Warning Alarm on Heating Pipe Line #2',
     titleBn: 'হিটিং পাইপলাইন #২-এ অতিরিক্ত চাপ সতর্কতা সংকেত',
     incidentType: 'pressure_piping',
@@ -758,6 +783,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-05',
     incNo: 'INC-2026-042',
+    photo: '/incidents/pump-insulation.jpg',
+    photos: ['/incidents/pump-insulation.jpg'],
     title: 'Hazard Observation: Worn Insulation Jacket on Bitumen Transfer Pump P-109',
     titleBn: 'বিপদ পর্যবেক্ষণ: বিটুমিন পাম্প P-109 এর ইনসুলেশন জ্যাকেট ক্ষতিগ্রস্ত',
     incidentType: 'hazard_observation',
@@ -818,6 +845,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-06',
     incNo: 'INC-2026-043',
+    photo: '/incidents/hose-coupling.jpg',
+    photos: ['/incidents/hose-coupling.jpg'],
     title: 'Minor Thumb Pinch During Tanker Hose Coupling at Loading Bay #3',
     titleBn: 'লোডিং বে ৩-এ ট্যাংকার হোস কাপলিং করার সময় বৃদ্ধাঙ্গুলিতে সামান্য চোট',
     incidentType: 'first_aid',
@@ -884,6 +913,25 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   },
 ];
 
+const INCIDENT_KIND_PHOTO: Record<IncidentType, string> = {
+  spill_leak: '/incidents/tank-drip.jpg',
+  equipment_damage: '/incidents/gate-barrier.jpg',
+  near_miss: '/incidents/ladder.jpg',
+  pressure_piping: '/incidents/pressure-gauge.jpg',
+  hazard_observation: '/incidents/pump-insulation.jpg',
+  first_aid: '/incidents/hose-coupling.jpg',
+  fire_thermal: '/incidents/pump-insulation.jpg',
+  electrical_arc: '/incidents/gate-barrier.jpg',
+  environmental: '/incidents/tank-drip.jpg',
+  medical_treatment: '/incidents/hose-coupling.jpg',
+  lost_time: '/incidents/hose-coupling.jpg',
+};
+
+export function incidentPhotoFor(type: IncidentType, id?: string): string {
+  const seeded = id ? INITIAL_INCIDENTS.find((item) => item.id === id) : undefined;
+  return seeded?.photo ?? INCIDENT_KIND_PHOTO[type];
+}
+
 
 /* ──────────────────────────────────────────────────────────────────────────
    3. OFFICE MAIL & PARCELS
@@ -900,6 +948,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Sales Desk, Level 4, Head Office',
     contents: 'Approved Q3 Sales Performance Bonus Letter & Commission Statement',
+    photo: '/parcels/letter.jpg',
+    photos: ['/parcels/letter.jpg'],
     category: 'legal_docs',
     weight: '0.35 kg',
     declaredValue: 'Confidential HR / Finance Document',
@@ -974,6 +1024,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Plant Operations',
     destination: 'Keraniganj Plant Office',
     contents: 'Signed Highway Bitumen Supply Contract (৳14.5 Crore) & Bank Guarantee Copies',
+    photo: '/parcels/contract.jpg',
+    photos: ['/parcels/contract.jpg'],
     category: 'legal_docs',
     weight: '0.65 kg',
     declaredValue: '৳14,50,00,000 Contract File',
@@ -1038,6 +1090,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Transport & Logistics',
     destination: 'Admin Office, Keraniganj Plant',
     contents: '15 Printed Staff ID Cards & Driver Uniform Allowance Vouchers',
+    photo: '/parcels/id-cards.jpg',
+    photos: ['/parcels/id-cards.jpg'],
     category: 'it_hardware',
     weight: '1.10 kg',
     declaredValue: '৳45,000',
@@ -1092,6 +1146,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Head Office, Baridhara',
     contents: 'BSTI Certified Bitumen Quality Test Reports & Road Sample Tins',
+    photo: '/parcels/sample-tins.jpg',
+    photos: ['/parcels/sample-tins.jpg'],
     category: 'qc_sample',
     weight: '1.20 kg',
     declaredValue: '৳50,000 (Tender Sample Set)',
@@ -1145,6 +1201,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Head Office, Baridhara',
     contents: 'Liquid Bitumen Sample Jars (Batch #88)',
+    photo: '/parcels/sample-jars.jpg',
+    photos: ['/parcels/sample-jars.jpg'],
     category: 'qc_sample',
     weight: '0.80 kg',
     declaredValue: '৳15,000',
@@ -1206,10 +1264,12 @@ const INITIAL_PARCELS: ParcelItem[] = [
     sender: 'Farida Begum',
     senderDept: 'Finance & Accounts',
     origin: 'Head Office, Baridhara',
-    receiver: 'Ahmed Akbar Sobhan',
+    receiver: 'Abdul Mannan Chowdhury',
     receiverDept: "Chairman's Office",
     destination: 'Chairman Secretariat, Level 12, Head Office',
     contents: 'Monthly Group Financial Summary & Signed Bank L/C Documents',
+    photo: '/parcels/finance-folder.jpg',
+    photos: ['/parcels/finance-folder.jpg'],
     category: 'legal_docs',
     weight: '0.50 kg',
     declaredValue: 'Confidential Board Folder',
@@ -1253,12 +1313,48 @@ const INITIAL_PARCELS: ParcelItem[] = [
   },
 ];
 
+const PARCEL_CATEGORY_PHOTO: Record<ParcelItem['category'], string> = {
+  legal_docs: '/parcels/letter.jpg',
+  qc_sample: '/parcels/sample-tins.jpg',
+  refinery_spares: '/parcels/spares.jpg',
+  tender_bid: '/parcels/tender.jpg',
+  it_hardware: '/parcels/id-cards.jpg',
+};
+
+export function parcelPhotoFor(category: ParcelItem['category'], id?: string): string {
+  const seeded = id ? INITIAL_PARCELS.find((item) => item.id === id) : undefined;
+  return seeded?.photo ?? PARCEL_CATEGORY_PHOTO[category];
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
    4. VISITOR GATE PASSES
    ────────────────────────────────────────────────────────────────────────── */
+const VISITOR_PHOTO: Record<string, string> = {
+  'VIS-2026-0811': '/visitors/shahabuddin.jpg',
+  'VIS-2026-0812': '/visitors/francois.jpg',
+  'VIS-2026-0814': '/visitors/mahfuz.jpg',
+  'VIS-2026-0815': '/visitors/rezaul.jpg',
+  'VIS-2026-0813': '/visitors/enamul.jpg',
+  'VIS-2026-0810': '/visitors/kazi.jpg',
+};
+
+const VISITOR_CATEGORY_PHOTO: Record<VisitorRecord['category'], string> = {
+  govt: '/visitors/visitor-govt.jpg',
+  vip: '/visitors/visitor-vip.jpg',
+  client: '/visitors/visitor-client.jpg',
+  vendor: '/visitors/visitor-vendor.jpg',
+  regular: '/visitors/visitor-regular.jpg',
+};
+
+export function visitorPhotoFor(id?: string, category: VisitorRecord['category'] = 'regular'): string {
+  if (id && VISITOR_PHOTO[id]) return VISITOR_PHOTO[id];
+  return VISITOR_CATEGORY_PHOTO[category];
+}
+
 const INITIAL_VISITORS: VisitorRecord[] = [
   {
     id: 'VIS-2026-0811',
+    photo: '/visitors/shahabuddin.jpg',
     name: 'Dr. Shahabuddin Ahmed',
     organization: 'Department of Explosives, Govt. of Bangladesh',
     designation: 'Chief Inspector',
@@ -1308,11 +1404,12 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0812',
+    photo: '/visitors/francois.jpg',
     name: 'Francois Dubois',
     organization: 'Axens Clean Energy Partners (France)',
     designation: 'Regional Engineering Director',
     category: 'vip',
-    hostEmployee: 'Ahmed Akbar Sobhan',
+    hostEmployee: 'Abdul Mannan Chowdhury',
     hostDept: "Chairman's Office",
     hostPhone: '+880 1711-000001',
     facility: 'Bashundhara Corporate HQ, Baridhara',
@@ -1352,6 +1449,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0814',
+    photo: '/visitors/mahfuz.jpg',
     name: 'Engr. Mahfuzur Rahman',
     organization: 'Roads & Highways Department (RHD)',
     designation: 'Executive Engineer',
@@ -1395,6 +1493,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0815',
+    photo: '/visitors/rezaul.jpg',
     name: 'S.M. Rezaul Karim',
     organization: 'National Road & Construction Ltd.',
     designation: 'Managing Director',
@@ -1437,6 +1536,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0813',
+    photo: '/visitors/enamul.jpg',
     name: 'Enamul Haque',
     organization: 'Energypac Power Generation Ltd.',
     designation: 'Senior Generator Service Engineer',
@@ -1477,6 +1577,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0810',
+    photo: '/visitors/kazi.jpg',
     name: 'Kazi Mahbub Alam',
     organization: 'BSTI Standards Bureau',
     designation: 'Senior Quality Inspector',
@@ -1548,6 +1649,8 @@ export interface LeaveRequestItem {
   toDate: string;
   days: number;
   reason: string;
+  /** Supporting document names kept with the request. Nothing is uploaded. */
+  attachments?: { name: string; size: string }[];
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
   reviewedBy?: string;
@@ -1556,7 +1659,7 @@ export interface LeaveRequestItem {
 const INITIAL_ATTENDANCE_ROSTER: ShiftWorker[] = [
   {
     id: 'EMP-0001',
-    name: 'Ahmed Akbar Sobhan',
+    name: 'Abdul Mannan Chowdhury',
     roleTitle: 'Chairman & Managing Director',
     appRole: 'chairman',
     dept: "Chairman's Office",
@@ -1830,9 +1933,9 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
     {
       id: 'm3',
       senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan',
+      senderName: 'Abdul Mannan Chowdhury',
       senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
+      senderInitials: 'AMC',
       senderColor: '#A51C30',
       content: 'PROCEED WITH THE 1,200 KVA BACKUP GENERATOR MAINTENANCE IMMEDIATELY SO FACTORY POWER IS NEVER INTERRUPTED. FINANCE PLEASE PREPARE THE PURCHASE ORDER ONCE SIGNED.',
       timestamp: '09:22 AM',
@@ -1944,9 +2047,9 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
     {
       id: 'dm_hr2',
       senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan',
+      senderName: 'Abdul Mannan Chowdhury',
       senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
+      senderInitials: 'AMC',
       senderColor: '#A51C30',
       content: 'Thank you Harunur. Give him full access to all safety inspection logs and update me once the visit concludes.',
       timestamp: '10:42 AM',
@@ -2071,7 +2174,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 4;
+const PERSIST_VERSION = 5;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
@@ -2090,6 +2193,25 @@ class OperationsStore {
     const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
     if (saved) Object.assign(this, saved);
     this.licenses = this.licenses.map(normalizeLicense);
+    this.parcels = this.parcels.map((parcel) => {
+      const photo = parcel.photo || parcelPhotoFor(parcel.category, parcel.id);
+      const photos = parcel.photos?.length ? parcel.photos : [photo];
+      return { ...parcel, photo: photos[0], photos };
+    });
+    this.visitors = this.visitors.map((visitor) => ({
+      ...visitor,
+      photo: visitor.photo || visitorPhotoFor(visitor.id, visitor.category),
+    }));
+    this.incidents = this.incidents.map((incident) => {
+      if (incident.photos?.length) return incident;
+      const fromFiles = (incident.spotFiles ?? [])
+        .filter((file) => file.mime.startsWith('image/') && file.dataUrl)
+        .map((file) => file.dataUrl);
+      const photos = fromFiles.length
+        ? fromFiles
+        : [incident.photo || incidentPhotoFor(incident.incidentType, incident.id)];
+      return { ...incident, photo: photos[0], photos };
+    });
   }
 
   subscribe(listener: () => void): () => void {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#A51C30"
+        android:pathData="M0,0h108v108h-108z"/>
+    <!-- Darker rich crimson shield facet -->
+    <path
+        android:fillColor="#821424"
+        android:pathData="M18,18h72v44c0,22 -36,36 -36,36c0,0 -36,-14 -36,-36z"/>
+    <!-- Executive Gold accent border -->
+    <path
+        android:strokeColor="#D4AF37"
+        android:strokeWidth="1.2"
+        android:fillColor="#00000000"
+        android:pathData="M22,22h64v38c0,20 -32,32 -32,32c0,0 -32,-12 -32,-32z"/>
+</vector>
+

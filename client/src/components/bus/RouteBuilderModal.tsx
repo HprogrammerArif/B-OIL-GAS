@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { RouteInfo, RouteStop, BusVehicle } from './busTypes';
+import { RouteInfo, RouteStop, BusVehicle, shortBusModel } from './busTypes';
 import { t } from '../../types';
-import {
-  MapPin, Plus, Trash2, CheckCircle, X, Navigation, Clock,
-  Bus, User, Phone, ArrowRight, ShieldCheck, Compass, ChevronRight, Sun, Sunset
-} from 'lucide-react';
+import { MapPin, Plus, Trash2, Clock } from 'lucide-react';
 
 interface RouteBuilderModalProps {
   isOpen: boolean;
@@ -23,52 +20,22 @@ export default function RouteBuilderModal({
   buses,
   lang,
 }: RouteBuilderModalProps) {
-  const [routeName, setRouteName] = useState(
-    existingRoute?.name || 'Route-11: Narsingdi ➔ Kanchpur ➔ Jatrabari ➔ Plant'
-  );
-  const [routeNameBn, setRouteNameBn] = useState(
-    existingRoute?.nameBn || 'রুট-১১: নরসিংদী ➔ কাঁচপুর ➔ যাত্রাবাড়ী ➔ প্ল্যান্ট'
-  );
-  const [busId, setBusId] = useState(existingRoute?.busId || buses[0]?.id || 'bus-1');
-  const [corridorRoad, setCorridorRoad] = useState(
-    existingRoute?.corridorRoad ||
-      'Dhaka-Sylhet Highway ➔ Kanchpur Bridge ➔ Postogola Bridge ➔ Babubazar Overpass ➔ Keraniganj Plant Complex'
-  );
-  const [driverName, setDriverName] = useState(existingRoute?.driverName || 'Master Nurul Huda');
-  const [driverPhone, setDriverPhone] = useState(existingRoute?.driverPhone || '+880 1718-445566');
-  const [conductorName, setConductorName] = useState(existingRoute?.conductorName || 'Shafiqul Islam');
-  const [conductorPhone, setConductorPhone] = useState(existingRoute?.conductorPhone || '+880 1819-556677');
+  const [routeName, setRouteName] = useState(existingRoute?.name || '');
+  const [routeNameBn, setRouteNameBn] = useState(existingRoute?.nameBn || '');
+  const [busId, setBusId] = useState(existingRoute?.busId || buses[0]?.id || '');
+  const [corridorRoad, setCorridorRoad] = useState(existingRoute?.corridorRoad || '');
+  const [driverName, setDriverName] = useState(existingRoute?.driverName || '');
+  const [driverPhone, setDriverPhone] = useState(existingRoute?.driverPhone || '');
+  const [conductorName, setConductorName] = useState(existingRoute?.conductorName || '');
+  const [conductorPhone, setConductorPhone] = useState(existingRoute?.conductorPhone || '');
   const [inboundStartTime, setInboundStartTime] = useState(existingRoute?.inboundStartTime || '06:30 AM');
   const [outboundStartTime, setOutboundStartTime] = useState(existingRoute?.outboundStartTime || '05:15 PM');
-
-  // Direction view toggle inside modal
   const [activeDirectionTab, setActiveDirectionTab] = useState<'inbound' | 'outbound'>('inbound');
-
-  // Stoppages lists
-  const [inboundStops, setInboundStops] = useState<RouteStop[]>(
-    existingRoute?.inboundStops || [
-      { id: 'st-1', name: 'Narsingdi Velanagar Terminal', nameBn: 'ভেলানগর বাস টার্মিনাল', scheduledTime: '06:30 AM', passengers: 15, status: 'passed', distanceKm: '0.0 km', landmark: 'Bus Bay #1' },
-      { id: 'st-2', name: 'Madhabdi Bus Stand', nameBn: 'মাধবদী বাস স্ট্যান্ড', scheduledTime: '06:50 AM', passengers: 12, status: 'passed', distanceKm: '9.5 km', landmark: 'Bazar Mosque' },
-      { id: 'st-3', name: 'Kanchpur Overpass Foot', nameBn: 'কাঁচপুর ওভারপাস ফুট', scheduledTime: '07:20 AM', passengers: 11, status: 'active', distanceKm: '22.0 km', landmark: 'Highway Crossing' },
-      { id: 'st-4', name: 'Jatrabari Hanif Flyover Ramp', nameBn: 'যাত্রাবাড়ী হানিফ ফ্লাইওভার র‍্যাম্প', scheduledTime: '07:38 AM', passengers: 8, status: 'upcoming', distanceKm: '31.2 km', landmark: 'Toll Entrance' },
-      { id: 'st-5', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '08:05 AM', passengers: 0, status: 'upcoming', distanceKm: '42.0 km', landmark: 'Main Refinery Gate' },
-    ]
-  );
-
-  const [outboundStops, setOutboundStops] = useState<RouteStop[]>(
-    existingRoute?.outboundStops || [
-      { id: 'ost-1', name: 'Keraniganj Plant Gate-1', nameBn: 'কেরানীগঞ্জ প্ল্যান্ট গেট-১', scheduledTime: '05:15 PM', passengers: 46, status: 'upcoming', distanceKm: '0.0 km', landmark: 'Refinery Departure Bay' },
-      { id: 'ost-2', name: 'Jatrabari Hanif Flyover Ramp', nameBn: 'যাত্রাবাড়ী হানিফ ফ্লাইওভার র‍্যাম্প', scheduledTime: '05:42 PM', passengers: 8, status: 'upcoming', distanceKm: '10.8 km', landmark: 'Toll Exit' },
-      { id: 'ost-3', name: 'Kanchpur Overpass Foot', nameBn: 'কাঁচপুর ওভারপাস ফুট', scheduledTime: '06:05 PM', passengers: 11, status: 'upcoming', distanceKm: '20.0 km', landmark: 'Overpass Foot' },
-      { id: 'ost-4', name: 'Madhabdi Bus Stand', nameBn: 'মাধবদী বাস স্ট্যান্ড', scheduledTime: '06:32 PM', passengers: 12, status: 'upcoming', distanceKm: '32.5 km', landmark: 'Bazar Footover' },
-      { id: 'ost-5', name: 'Narsingdi Velanagar Terminal', nameBn: 'ভেলানগর বাস টার্মিনাল', scheduledTime: '06:55 PM', passengers: 15, status: 'upcoming', distanceKm: '42.0 km', landmark: 'Final Terminal' },
-    ]
-  );
-
-  // New Stop input states
+  const [inboundStops, setInboundStops] = useState<RouteStop[]>(existingRoute?.inboundStops || []);
+  const [outboundStops, setOutboundStops] = useState<RouteStop[]>(existingRoute?.outboundStops || []);
   const [newStopName, setNewStopName] = useState('');
   const [newStopTime, setNewStopTime] = useState('07:10 AM');
-  const [newStopDistance, setNewStopDistance] = useState('14.5 km');
+  const [newStopDistance, setNewStopDistance] = useState('');
   const [newStopLandmark, setNewStopLandmark] = useState('');
 
   if (!isOpen) return null;
@@ -82,30 +49,19 @@ export default function RouteBuilderModal({
       name: newStopName.trim(),
       nameBn: newStopName.trim(),
       scheduledTime: newStopTime.trim(),
-      passengers: 8,
+      passengers: 0,
       status: 'upcoming',
-      distanceKm: newStopDistance.trim() || '15.0 km',
-      landmark: newStopLandmark.trim() || 'Designated Station Stop',
+      distanceKm: newStopDistance.trim() || '0 km',
+      landmark: newStopLandmark.trim(),
     };
-
-    if (activeDirectionTab === 'inbound') {
-      const updated = [...inboundStops];
-      if (updated.length > 0) {
-        updated.splice(updated.length - 1, 0, newStop);
-      } else {
-        updated.push(newStop);
-      }
-      setInboundStops(updated);
-    } else {
-      const updated = [...outboundStops];
-      if (updated.length > 0) {
-        updated.splice(updated.length - 1, 0, newStop);
-      } else {
-        updated.push(newStop);
-      }
-      setOutboundStops(updated);
-    }
-
+    const insert = (list: RouteStop[]) => {
+      const updated = [...list];
+      if (updated.length > 0) updated.splice(updated.length - 1, 0, newStop);
+      else updated.push(newStop);
+      return updated;
+    };
+    if (activeDirectionTab === 'inbound') setInboundStops(insert(inboundStops));
+    else setOutboundStops(insert(outboundStops));
     setNewStopName('');
     setNewStopLandmark('');
   };
@@ -113,626 +69,177 @@ export default function RouteBuilderModal({
   const handleRemoveStop = (id: string) => {
     if (activeDirectionTab === 'inbound') {
       if (inboundStops.length <= 2) return;
-      setInboundStops(inboundStops.filter(s => s.id !== id));
+      setInboundStops(inboundStops.filter((stop) => stop.id !== id));
     } else {
       if (outboundStops.length <= 2) return;
-      setOutboundStops(outboundStops.filter(s => s.id !== id));
+      setOutboundStops(outboundStops.filter((stop) => stop.id !== id));
     }
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedBus = buses.find(b => b.id === busId) || buses[0];
+    const selectedBus = buses.find((bus) => bus.id === busId) || buses[0];
     const routeId = existingRoute?.id || `route-${Date.now().toString().slice(-4)}`;
-
     const compiledRoute: RouteInfo = {
       id: routeId,
       name: routeName.trim(),
-      nameBn: routeNameBn.trim(),
-      coachNo: selectedBus?.coachNo || 'DHAKA METRO-BA 15-4421',
-      busId: selectedBus?.id || 'bus-1',
-      model: selectedBus?.model || 'Hino RM2 Luxury AC (52-Seater)',
+      nameBn: routeNameBn.trim() || routeName.trim(),
+      coachNo: selectedBus?.coachNo || '',
+      busId: selectedBus?.id || '',
+      model: selectedBus?.model || '',
       corridorRoad: corridorRoad.trim(),
       driverName: driverName.trim(),
       driverPhone: driverPhone.trim(),
       conductorName: conductorName.trim(),
       conductorPhone: conductorPhone.trim(),
-      speed: '42 km/h',
-      nextStop: inboundStops[2]?.name || inboundStops[0]?.name || 'Next Station',
-      nextEta: '8 mins',
-      progressPercent: 55,
-      capacity: selectedBus?.capacity || 52,
+      speed: existingRoute?.speed || '42 km/h',
+      nextStop: inboundStops[0]?.name || '',
+      nextEta: existingRoute?.nextEta || '',
+      progressPercent: existingRoute?.progressPercent || 0,
+      capacity: selectedBus?.capacity || existingRoute?.capacity || 52,
       inboundStops,
       outboundStops,
       inboundStartTime,
       outboundStartTime,
     };
-
     onSaveRoute(compiledRoute);
     onClose();
   };
 
-  const selectedBusObj = buses.find(b => b.id === busId) || buses[0];
-
   return (
-    <div className="modal-bg" onClick={onClose} style={{ zIndex: 9999, backdropFilter: 'blur(6px)' }}>
-      <div
-        className="modal"
-        style={{
-          maxWidth: '860px',
-          width: '94vw',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.45)',
-          border: '1px solid rgba(255, 255, 255, 0.15)'
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--status-info-solid-dark) 100%)',
-          color: 'var(--text-on-brand)',
-          padding: '18px 24px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'rgba(59, 130, 246, 0.25)',
-              border: '1px solid rgba(96, 165, 250, 0.4)',
-              color: 'var(--status-info-bright)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Navigation size={22} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-on-brand)', margin: 0, letterSpacing: '-0.2px' }}>
-                  {existingRoute
-                    ? t('Configure Road Corridor & Stoppages Timetable', 'রোড করিডোর ও স্টপেজ সময়সূচী রূপরেখা', lang)
-                    : t('Define New Road Corridor & Sequential Stoppages', 'নতুন রোড করিডোর ও পর্যায়ক্রমিক স্টপেজ প্রণয়ন', lang)}
-                </h3>
-                <span className="badge gold" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                  {selectedBusObj ? `${selectedBusObj.coachNo}` : 'Fleet Bus'}
-                </span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
-                {t(
-                  'Set highway transit corridors, sequential boarding stations, morning departure & evening return timetables.',
-                  'মহাসড়ক পথ, পর্যায়ক্রমিক যাত্রী বোর্ডিং স্টপেজ, সকাল ও সন্ধ্যার যাতায়াত সময়সূচী নির্ধারণ করুন।',
-                  lang
-                )}
-              </p>
-            </div>
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal shuttle-dialog wide" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-hd">
+          <div>
+            <h3>
+              <MapPin size={18} />
+              {t('Edit route and stops', 'রুট ও স্টপ বদলান', lang)}
+            </h3>
+            <p className="shuttle-sub">
+              {t(
+                'Changes the road, the times, and the stops on this route.',
+                'এই রুটের রাস্তা, সময় এবং স্টপ বদলায়।',
+                lang,
+              )}
+            </p>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: 'var(--text-inverse)',
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.15s ease'
-            }}
-          >
-            <X size={18} />
-          </button>
+          <button type="button" className="modal-close" onClick={onClose} aria-label={t('Close', 'বন্ধ করুন', lang)}>×</button>
         </div>
 
-        <form onSubmit={handleSave}>
-          <div style={{
-            padding: '20px 24px',
-            maxHeight: '74vh',
-            overflowY: 'auto',
-            background: 'var(--brand-card-bg)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px'
-          }}>
-            {/* ─── SECTION 1: Route Corridor & Bus Assignment ─── */}
-            <div style={{
-              background: 'var(--brand-slate-50)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-            }}>
-              <div style={{
-                fontSize: '11.5px',
-                fontWeight: 800,
-                color: 'var(--status-info-text)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.6px',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <Compass size={14} />
-                <span>{t('Corridor Identity & Fleet Assignment', 'রোড করিডোর ও বাস বরাদ্দ', lang)}</span>
-              </div>
+        <form id="shuttle-edit-route" className="modal-body" onSubmit={handleSave}>
+          <div className="shuttle-stack">
+            <div>
+              <label>{t('Route name', 'রুটের নাম', lang)}</label>
+              <input className="form-input" value={routeName} onChange={(e) => setRouteName(e.target.value)} required autoComplete="off" />
+            </div>
+            <div>
+              <label>{t('Route name in Bangla', 'রুটের নাম বাংলায়', lang)}</label>
+              <input className="form-input" value={routeNameBn} onChange={(e) => setRouteNameBn(e.target.value)} autoComplete="off" />
+            </div>
+            <div>
+              <label>{t('Bus', 'বাস', lang)}</label>
+              <select className="form-input" value={busId} onChange={(e) => setBusId(e.target.value)}>
+                {buses.map((bus) => (
+                  <option key={bus.id} value={bus.id}>
+                    {bus.coachNo} · {shortBusModel(bus.model)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>{t('Road', 'রাস্তা', lang)}</label>
+              <input className="form-input" value={corridorRoad} onChange={(e) => setCorridorRoad(e.target.value)} required autoComplete="off" />
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Route Code & Designation (English)', 'রুটের নাম (ইংরেজি)', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-                  </label>
-                  <input
-                    className="form-input"
-                    value={routeName}
-                    onChange={e => setRouteName(e.target.value)}
-                    placeholder="Route-5: Gazipur ➔ Tongi ➔ Plant"
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                    {t('Assign Dedicated Bus Coach', 'নির্ধারিত বাস ও কোচ নির্বাচন', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-                  </label>
-                  <select
-                    className="form-input"
-                    value={busId}
-                    onChange={e => setBusId(e.target.value)}
-                    style={{ width: '100%', padding: '9px 12px', fontSize: '12.5px', borderRadius: '8px' }}
-                  >
-                    {buses.map(b => (
-                      <option key={b.id} value={b.id}>
-                        {b.coachNo} • {b.model} ({b.capacity} Seats)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
+            <div className="shuttle-grid">
               <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, marginBottom: '6px', color: 'var(--brand-slate-800)' }}>
-                  {t('Highway / Road Corridor Path Description', 'মহাসড়ক ও সংযোগ সড়ক বিবরণী', lang)} <span style={{ color: 'var(--status-danger)' }}>*</span>
-                </label>
-                <textarea
-                  className="form-input"
-                  rows={2}
-                  value={corridorRoad}
-                  onChange={e => setCorridorRoad(e.target.value)}
-                  placeholder="e.g. Mirpur Road ➔ Agargaon Metro ➔ Farmgate Overbridge ➔ Shahbagh ➔ Babubazar Bridge ➔ Keraniganj Complex"
-                  style={{ width: '100%', padding: '8px 12px', fontSize: '12px', borderRadius: '8px', lineHeight: 1.5 }}
-                  required
-                />
+                <label>{t('Morning departure', 'সকালের রওনা', lang)}</label>
+                <input className="form-input" value={inboundStartTime} onChange={(e) => setInboundStartTime(e.target.value)} />
+              </div>
+              <div>
+                <label>{t('Evening departure', 'সন্ধ্যার রওনা', lang)}</label>
+                <input className="form-input" value={outboundStartTime} onChange={(e) => setOutboundStartTime(e.target.value)} />
+              </div>
+              <div>
+                <label>{t('Driver', 'চালক', lang)}</label>
+                <input className="form-input" value={driverName} onChange={(e) => setDriverName(e.target.value)} autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Driver mobile', 'চালকের মোবাইল', lang)}</label>
+                <input className="form-input" value={driverPhone} onChange={(e) => setDriverPhone(e.target.value)} autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Conductor', 'কন্ডাক্টর', lang)}</label>
+                <input className="form-input" value={conductorName} onChange={(e) => setConductorName(e.target.value)} autoComplete="off" />
+              </div>
+              <div>
+                <label>{t('Conductor mobile', 'কন্ডাক্টরের মোবাইল', lang)}</label>
+                <input className="form-input" value={conductorPhone} onChange={(e) => setConductorPhone(e.target.value)} autoComplete="off" />
               </div>
             </div>
 
-            {/* ─── SECTION 2: Morning Inbound vs Evening Return Departure Timetable ─── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px' }}>
-              {/* Morning Schedule Card */}
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(219, 234, 254, 0.4) 100%)',
-                border: '1.5px solid var(--status-info-bright)',
-                borderRadius: '12px',
-                padding: '14px 16px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-info-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Sun size={14} color="var(--brand-gold)" />
-                    <span>{t('Morning Inbound (City → Plant/HQ)', 'সকালের সময়সূচী (শহর → অফিস)', lang)}</span>
-                  </div>
-                  <span className="badge info" style={{ fontSize: '10px' }}>Inbound</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Clock size={16} color="var(--status-info)" />
-                  <span style={{ fontSize: '12px', color: 'var(--status-info-text)', fontWeight: 600 }}>{t('First Stop Departure:', 'প্রথম স্টপ থেকে রওনা:', lang)}</span>
-                  <input
-                    className="form-input"
-                    style={{ width: '120px', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', fontWeight: 800, textAlign: 'center' }}
-                    value={inboundStartTime}
-                    onChange={e => setInboundStartTime(e.target.value)}
-                    placeholder="06:30 AM"
-                  />
-                </div>
-              </div>
-
-              {/* Evening Schedule Card */}
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.8) 0%, rgba(253, 230, 138, 0.3) 100%)',
-                border: '1.5px solid var(--status-warning-bright)',
-                borderRadius: '12px',
-                padding: '14px 16px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--status-warning-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Sunset size={14} color="var(--brand-crimson)" />
-                    <span>{t('Evening Return (Plant/HQ → City)', 'সন্ধ্যার সময়সূচী (অফিস → শহর)', lang)}</span>
-                  </div>
-                  <span className="badge gold" style={{ fontSize: '10px' }}>Outbound</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Clock size={16} color="var(--status-warning)" />
-                  <span style={{ fontSize: '12px', color: 'var(--status-warning-text)', fontWeight: 600 }}>{t('Plant Gate Departure:', 'প্ল্যান্ট গেট থেকে রওনা:', lang)}</span>
-                  <input
-                    className="form-input"
-                    style={{ width: '120px', padding: '6px 10px', fontSize: '12px', borderRadius: '6px', fontWeight: 800, textAlign: 'center' }}
-                    value={outboundStartTime}
-                    onChange={e => setOutboundStartTime(e.target.value)}
-                    placeholder="05:15 PM"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ─── SECTION 3: Driver & Conductor Crew Assignment ─── */}
-            <div style={{
-              background: 'var(--brand-slate-50)',
-              border: '1px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px'
-            }}>
-              <div style={{
-                fontSize: '11.5px',
-                fontWeight: 800,
-                color: 'var(--status-success)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.6px',
-                marginBottom: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <ShieldCheck size={14} />
-                <span>{t('Assigned Highway Crew (Licensed Driver & Door Marshall)', 'মনোনীত বাস চালক ও কন্ডাক্টর', lang)}</span>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
-                  <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <User size={13} color="var(--status-info)" />
-                    <span>{t('Master Heavy Driver', 'মূল চালক', lang)}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
-                    <input
-                      className="form-input"
-                      value={driverName}
-                      onChange={e => setDriverName(e.target.value)}
-                      placeholder="Driver Name"
-                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px' }}
-                    />
-                    <input
-                      className="form-input"
-                      value={driverPhone}
-                      onChange={e => setDriverPhone(e.target.value)}
-                      placeholder="+880 17..."
-                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px' }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ background: 'var(--surface-1)', padding: '12px', borderRadius: '8px', border: '1px solid var(--brand-border)' }}>
-                  <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-700)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <User size={13} color="var(--status-success)" />
-                    <span>{t('Conductor / Passenger Marshall', 'কন্ডাক্টর', lang)}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '8px' }}>
-                    <input
-                      className="form-input"
-                      value={conductorName}
-                      onChange={e => setConductorName(e.target.value)}
-                      placeholder="Conductor Name"
-                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px' }}
-                    />
-                    <input
-                      className="form-input"
-                      value={conductorPhone}
-                      onChange={e => setConductorPhone(e.target.value)}
-                      placeholder="+880 18..."
-                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ─── SECTION 4: Sequential Stoppages Builder ─── */}
-            <div style={{
-              border: '1.5px solid var(--brand-border)',
-              borderRadius: '12px',
-              padding: '16px',
-              background: 'var(--surface-1)'
-            }}>
-              {/* Stoppage Tab Switcher */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <MapPin size={17} color="var(--status-info)" />
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-                    {t('Sequential Station Stoppages & Arrival Timeline', 'পর্যায়ক্রমিক স্টপেজ তালিকা ও আগমন সময়সূচী', lang)}
-                  </span>
-                </div>
-
-                {/* Sub Tab: Inbound Morning vs Outbound Evening Stops */}
-                <div style={{ display: 'flex', background: 'var(--brand-slate-100)', padding: '3px', borderRadius: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveDirectionTab('inbound')}
-                    style={{
-                      background: activeDirectionTab === 'inbound' ? 'var(--surface-1)' : 'transparent',
-                      color: activeDirectionTab === 'inbound' ? 'var(--status-info-text)' : 'var(--brand-slate-600)',
-                      border: 'none',
-                      padding: '5px 12px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      boxShadow: activeDirectionTab === 'inbound' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                    }}
-                  >
-                    <Sun size={13} color="var(--brand-gold)" />
-                    <span>Morning Inbound ({inboundStops.length})</span>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                <strong>{t('Stops', 'স্টপ', lang)}</strong>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button type="button" className="btn-outline" aria-pressed={activeDirectionTab === 'inbound'} onClick={() => setActiveDirectionTab('inbound')}>
+                    {t('Morning', 'সকাল', lang)} ({inboundStops.length})
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveDirectionTab('outbound')}
-                    style={{
-                      background: activeDirectionTab === 'outbound' ? 'var(--surface-1)' : 'transparent',
-                      color: activeDirectionTab === 'outbound' ? 'var(--status-warning-text)' : 'var(--brand-slate-600)',
-                      border: 'none',
-                      padding: '5px 12px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      boxShadow: activeDirectionTab === 'outbound' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                    }}
-                  >
-                    <Sunset size={13} color="var(--brand-crimson)" />
-                    <span>Evening Outbound ({outboundStops.length})</span>
+                  <button type="button" className="btn-outline" aria-pressed={activeDirectionTab === 'outbound'} onClick={() => setActiveDirectionTab('outbound')}>
+                    {t('Evening', 'সন্ধ্যা', lang)} ({outboundStops.length})
                   </button>
                 </div>
               </div>
-
-              {/* Station Timeline List */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                {currentStops.map((st, idx) => {
-                  const isFirst = idx === 0;
-                  const isLast = idx === currentStops.length - 1;
-
+              <div className="shuttle-stack">
+                {currentStops.map((stop, index) => {
+                  const isEnd = index === 0 || index === currentStops.length - 1;
                   return (
-                    <div
-                      key={st.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: isLast ? 'rgba(16, 185, 129, 0.08)' : isFirst ? 'rgba(59, 130, 246, 0.06)' : 'var(--brand-slate-50)',
-                        border: isLast ? '1.5px solid var(--status-success)' : isFirst ? '1.5px solid var(--status-info-bright)' : '1px solid var(--brand-border)',
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        fontSize: '12px',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '50%',
-                          background: isLast ? 'var(--status-success-solid)' : isFirst ? 'var(--status-info-solid)' : 'var(--brand-slate-600)',
-                          color: 'var(--text-on-brand)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 800,
-                          fontSize: '11px'
-                        }}>
-                          {idx + 1}
-                        </div>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <strong style={{ fontSize: '13px', color: 'var(--brand-slate-900)' }}>{st.name}</strong>
-                            {isFirst && <span className="badge info" style={{ fontSize: '9px', padding: '1px 5px' }}>{t('Origin', 'শুরু', lang)}</span>}
-                            {isLast && <span className="badge success" style={{ fontSize: '9px', padding: '1px 5px' }}>{t('Final Terminus', 'গন্তব্য', lang)}</span>}
-                          </div>
-                          {st.landmark && (
-                            <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <MapPin size={10} />
-                              <span>{st.landmark}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                        <span style={{
-                          fontWeight: 800,
-                          color: 'var(--status-warning)',
-                          background: 'var(--status-warning-bg)',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          border: '1px solid var(--status-warning-bright)',
-                          fontSize: '11.5px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px'
-                        }}>
-                          <Clock size={11} />
-                          <span>{st.scheduledTime}</span>
+                    <div key={stop.id} className="shuttle-stop">
+                      <div style={{ minWidth: 0 }}>
+                        <strong>{index + 1}. {stop.name}</strong>
+                        <span style={{ display: 'block', fontSize: 12, color: 'var(--text-3)' }}>
+                          <Clock size={11} style={{ verticalAlign: 'middle' }} /> {stop.scheduledTime}
+                          {stop.landmark ? ` · ${stop.landmark}` : ''}
                         </span>
-                        <span style={{ fontSize: '11px', color: 'var(--brand-slate-500)', fontWeight: 600 }}>
-                          {st.distanceKm}
-                        </span>
-
-                        {!isFirst && !isLast && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveStop(st.id)}
-                            style={{
-                              background: 'transparent',
-                              border: 'none',
-                              color: 'var(--status-danger)',
-                              cursor: 'pointer',
-                              padding: '4px',
-                              borderRadius: '4px',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}
-                            title="Remove stoppage point"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        )}
                       </div>
+                      {!isEnd && (
+                        <button type="button" className="btn-outline" onClick={() => handleRemoveStop(stop.id)} aria-label={t('Remove stop', 'স্টপ সরান', lang)}>
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
               </div>
-
-              {/* Add New Intermediate Stoppage Form Strip */}
-              <div style={{
-                background: 'linear-gradient(135deg, var(--brand-slate-50) 0%, var(--surface-1) 100%)',
-                padding: '14px',
-                borderRadius: '10px',
-                border: '1.5px dashed var(--border-3)'
-              }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 800, color: 'var(--brand-slate-800)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Plus size={14} color="var(--status-success)" />
-                  <span>
-                    {t(
-                      `Add Intermediate Stoppage to ${activeDirectionTab === 'inbound' ? 'Morning Inbound' : 'Evening Outbound'}:`,
-                      `নতুন স্টপেজ পয়েন্ট যুক্ত করুন (${activeDirectionTab === 'inbound' ? 'সকাল' : 'সন্ধ্যা'}):`,
-                      lang
-                    )}
-                  </span>
+              <div className="shuttle-grid" style={{ marginTop: 10 }}>
+                <div>
+                  <label>{t('New stop', 'নতুন স্টপ', lang)}</label>
+                  <input className="form-input" value={newStopName} onChange={(e) => setNewStopName(e.target.value)} autoComplete="off" />
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr)) auto', gap: '10px', alignItems: 'flex-end' }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: '10.5px', color: 'var(--brand-slate-600)', marginBottom: '4px', fontWeight: 600 }}>
-                      {t('Station Name', 'স্টেশনের নাম', lang)}
-                    </label>
-                    <input
-                      className="form-input"
-                      style={{ fontSize: '12px', padding: '7px 10px', borderRadius: '6px', width: '100%' }}
-                      placeholder="e.g. Shahbagh Square"
-                      value={newStopName}
-                      onChange={e => setNewStopName(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '10.5px', color: 'var(--brand-slate-600)', marginBottom: '4px', fontWeight: 600 }}>
-                      {t('Arrival Time', 'আগমন সময়', lang)}
-                    </label>
-                    <input
-                      className="form-input"
-                      style={{ fontSize: '12px', padding: '7px 10px', borderRadius: '6px', width: '100%' }}
-                      placeholder="07:15 AM"
-                      value={newStopTime}
-                      onChange={e => setNewStopTime(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '10.5px', color: 'var(--brand-slate-600)', marginBottom: '4px', fontWeight: 600 }}>
-                      {t('Distance', 'দূরত্ব', lang)}
-                    </label>
-                    <input
-                      className="form-input"
-                      style={{ fontSize: '12px', padding: '7px 10px', borderRadius: '6px', width: '100%' }}
-                      placeholder="14.5 km"
-                      value={newStopDistance}
-                      onChange={e => setNewStopDistance(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '10.5px', color: 'var(--brand-slate-600)', marginBottom: '4px', fontWeight: 600 }}>
-                      {t('Key Landmark (Optional)', 'ল্যান্ডমার্ক (ঐচ্ছিক)', lang)}
-                    </label>
-                    <input
-                      className="form-input"
-                      style={{ fontSize: '12px', padding: '7px 10px', borderRadius: '6px', width: '100%' }}
-                      placeholder="e.g. Overbridge Foot"
-                      value={newStopLandmark}
-                      onChange={e => setNewStopLandmark(e.target.value)}
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{
-                      padding: '8px 16px',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      borderRadius: '6px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      height: '35px'
-                    }}
-                    onClick={handleAddStop}
-                  >
-                    <Plus size={14} />
-                    <span>{t('Add Stop', 'স্টপ যোগ করুন', lang)}</span>
-                  </button>
+                <div>
+                  <label>{t('Time', 'সময়', lang)}</label>
+                  <input className="form-input" value={newStopTime} onChange={(e) => setNewStopTime(e.target.value)} />
+                </div>
+                <div>
+                  <label>{t('Distance', 'দূরত্ব', lang)}</label>
+                  <input className="form-input" value={newStopDistance} onChange={(e) => setNewStopDistance(e.target.value)} placeholder="14 km" />
+                </div>
+                <div>
+                  <label>{t('Landmark', 'চেনার জায়গা', lang)}</label>
+                  <input className="form-input" value={newStopLandmark} onChange={(e) => setNewStopLandmark(e.target.value)} autoComplete="off" />
                 </div>
               </div>
+              <button type="button" className="btn-outline" style={{ marginTop: 8 }} onClick={handleAddStop}>
+                <Plus size={14} /> {t('Add stop', 'স্টপ যোগ করুন', lang)}
+              </button>
             </div>
           </div>
-
-          {/* Footer */}
-          <div style={{
-            padding: '16px 24px',
-            background: 'var(--brand-slate-50)',
-            borderTop: '1px solid var(--brand-border)',
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <button
-              type="button"
-              className="btn-outline"
-              onClick={onClose}
-              style={{ padding: '8px 16px', fontSize: '12.5px', fontWeight: 600, borderRadius: '8px' }}
-            >
-              {t('Cancel', 'বাতিল', lang)}
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              style={{
-                padding: '8px 20px',
-                fontSize: '12.5px',
-                fontWeight: 800,
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)'
-              }}
-            >
-              <CheckCircle size={16} />
-              <span>{t('Save Road Corridor & Stoppages Timetable', 'রোড করিডোর ও সময়সূচী সংরক্ষণ করুন', lang)}</span>
-            </button>
-          </div>
         </form>
+
+        <div className="modal-ft">
+          <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
+          <button type="submit" form="shuttle-edit-route" className="btn-primary">{t('Save route', 'রুট সেভ করুন', lang)}</button>
+        </div>
       </div>
     </div>
   );

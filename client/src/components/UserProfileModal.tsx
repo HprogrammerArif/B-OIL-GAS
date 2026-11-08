@@ -29,14 +29,14 @@ const EXTENDED_ROLE_DATA: Record<AppRole, {
   },
   plant_gm: {
     grade: 'Senior Management (General Manager)',
-    reportingTo: 'Ahmed Akbar Sobhan (Chairman & MD)',
+    reportingTo: 'Abdul Mannan Chowdhury (Chairman & MD)',
     joinDate: '15 Mar 2012',
     emergencyContact: 'Mrs. Rashid (+880 1711-002199)',
     accessSummary: 'Plant Operations, Machinery, Permits & Shift Staff',
   },
   hr_admin: {
     grade: 'Senior Management (General Manager)',
-    reportingTo: 'Ahmed Akbar Sobhan (Chairman & MD)',
+    reportingTo: 'Abdul Mannan Chowdhury (Chairman & MD)',
     joinDate: '01 Aug 2015',
     emergencyContact: 'Family Contact (+880 1711-002188)',
     accessSummary: 'Staff Directory, Exit Clearance, Leave & Office Assets',
@@ -50,7 +50,7 @@ const EXTENDED_ROLE_DATA: Record<AppRole, {
   },
   hod: {
     grade: 'Senior Management (Head of Finance)',
-    reportingTo: 'Ahmed Akbar Sobhan (Chairman & MD)',
+    reportingTo: 'Abdul Mannan Chowdhury (Chairman & MD)',
     joinDate: '01 Jun 2014',
     emergencyContact: 'Family Contact (+880 1711-002166)',
     accessSummary: 'Finance Approvals, Expense Claims, Assets & Department Team',

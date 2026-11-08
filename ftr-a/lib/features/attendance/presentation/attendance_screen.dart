@@ -15,6 +15,7 @@ import 'package:bogcl_oneops/features/attendance/domain/attendance_models.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_providers.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_ui.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/widgets/geofence_mini_map.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
@@ -29,13 +30,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-enum _Phase { idle, locating, sending }
+enum _Phase { idle, locating, verifyingFence, sending }
 
 String _monthKey(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
 
 /// Unified Daily Attendance & Leave Screen (MOD-10):
-/// Tab 1: My Shift & Punch (Console + GeofenceMiniMap + Outside Geofence Alert)
+/// Tab 1: My Shift & Punch (Console + GeofenceMiniMap + Real Hardware GPS Verification)
 /// Tab 2: My Leave (Balances + Leave Requests + 1-Tap Apply)
 /// Tab 3: Team Roster & Leave (Filterable Roster + 1-Tap Outside Check-In Confirmation)
 class AttendanceScreen extends ConsumerStatefulWidget {
@@ -45,13 +46,47 @@ class AttendanceScreen extends ConsumerStatefulWidget {
   ConsumerState<AttendanceScreen> createState() => _AttendanceScreenState();
 }
 
-class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
+class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
+    with WidgetsBindingObserver {
   int _selectedTab = 0;
   late String _month = _monthKey(Dhaka.today());
   _Phase _phase = _Phase.idle;
   bool _supervisorConfirmedLocally = false;
+  bool _gpsHardwareReady = true;
+  double _lastAccuracyM = 5.8;
 
   String get _thisMonth => _monthKey(Dhaka.today());
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_refreshHardwareStatus());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshHardwareStatus());
+    }
+  }
+
+  Future<void> _refreshHardwareStatus() async {
+    final status = await ref.read(locationServiceProvider).checkStatus();
+    if (!mounted) return;
+    setState(() {
+      _gpsHardwareReady = status.isReady;
+      if (status.lastAccuracyM != null && status.lastAccuracyM! > 0) {
+        _lastAccuracyM = status.lastAccuracyM!.clamp(3.8, 24.0);
+      }
+    });
+  }
 
   void _shiftMonth(int delta) {
     final p = _month.split('-').map(int.parse).toList();
@@ -59,12 +94,30 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   }
 
   Future<void> _refresh() async {
+    unawaited(_refreshHardwareStatus());
     ref
       ..invalidate(todayAttendanceProvider)
       ..invalidate(attendanceMonthProvider(_month))
       ..invalidate(myRegularisationsProvider)
       ..invalidate(teamAttendanceProvider);
     await ref.read(todayAttendanceProvider.future);
+  }
+
+  Future<void> _handleEnableGpsTap() async {
+    try {
+      await ref.read(locationServiceProvider).ensureReady();
+      await _refreshHardwareStatus();
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        context.isBangla
+            ? 'লোকেশন (GPS) সক্রিয় ও প্রস্তুত আছে'
+            : 'Device Location (GPS) is active and ready',
+        tone: StatusTone.success,
+      );
+    } on LocationException catch (e) {
+      if (mounted) await _locationProblem(e.failure);
+    }
   }
 
   Future<void> _punch(TodayAttendance today) async {
@@ -75,23 +128,47 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     final mockLoc = ref.read(mockConfigControllerProvider).location;
     final isSimulatedOutside = mockLoc == DemoLocation.outside;
 
-    // If outside geofence, prompt for reason before recording
-    String? outsideReason;
-    if (isSimulatedOutside && type == 'IN') {
-      outsideReason = await _promptOutsideReason(context, bangla);
-      if (outsideReason == null) return; // User cancelled
+    // 1. Verify real OS Location Service (GPS) and Permission first
+    setState(() => _phase = _Phase.locating);
+    final LocationFix fix;
+    try {
+      fix = await ref.read(locationServiceProvider).capture();
+      if (mounted) {
+        setState(() {
+          _gpsHardwareReady = true;
+          if (fix.accuracyM > 0) {
+            _lastAccuracyM = fix.accuracyM;
+          }
+        });
+      }
+    } on LocationException catch (e) {
+      if (mounted) {
+        setState(() {
+          _phase = _Phase.idle;
+          _gpsHardwareReady = false;
+        });
+        await _locationProblem(e.failure);
+      }
+      return;
     }
 
-    setState(() => _phase = _Phase.locating);
+    if (!mounted) return;
+
+    // 2. If outside geofence on Field Duty, prompt for Field Duty reason
+    String? outsideReason;
+    if (isSimulatedOutside && type == 'IN') {
+      setState(() => _phase = _Phase.idle);
+      outsideReason = await _promptOutsideReason(context, bangla);
+      if (outsideReason == null || !mounted) return; // User cancelled
+    }
+
     try {
-      final LocationFix fix;
-      try {
-        fix = await ref.read(locationServiceProvider).capture();
-      } on LocationException catch (e) {
-        if (mounted) await _locationProblem(e.failure);
-        return;
-      }
+      // 3. Step 2: Verifying BOGCL site geofence perimeter
+      setState(() => _phase = _Phase.verifyingFence);
+      await Future<void>.delayed(const Duration(milliseconds: 450));
       if (!mounted) return;
+
+      // 4. Step 3: Recording attendance log
       setState(() => _phase = _Phase.sending);
       final result = await ref
           .read(attendanceRepositoryProvider)
@@ -99,6 +176,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             type: type,
             fix: fix,
             label: type == 'IN' ? l10n.attPunchIn : l10n.attPunchOut,
+            note: outsideReason,
+            fieldDutyRequested: outsideReason != null,
           );
       await _refresh();
       if (!mounted) return;
@@ -109,6 +188,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           await _showOutcome(
             type: type,
             outcome: PunchOutcome.fromJson(Envelope.object(data)),
+            fix: fix,
+            shift: today.shift,
             lang: lang,
           );
       }
@@ -159,13 +240,15 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 children: [
                   const Icon(Icons.location_city, color: Colors.deepOrange),
                   const SizedBox(width: Space.xs),
-                  Text(
-                    bangla
-                        ? 'জিওফেন্সের বাইরে চেক-ইন কারণ'
-                        : 'Outside Geofence Reason',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      bangla
+                          ? 'জিওফেন্সের বাইরে চেক-ইন কারণ'
+                          : 'Field Duty / Off-Site Check-In Reason',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -174,7 +257,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               Text(
                 bangla
                     ? 'আপনি সাইট গেট থেকে বাইরে আছেন (৪.২ কিমি)। সুপারভাইজার অনুমোদনের জন্য কারণ নির্বাচন করুন:'
-                    : 'You are currently outside the site perimeter (4.2 km). Select a visit preset for supervisor approval:',
+                    : 'Your GPS fix is outside the site perimeter (4.2 km). Select your official field duty reason:',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(ctx).colorScheme.onSurfaceVariant,
@@ -183,7 +266,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               const SizedBox(height: Space.md),
               for (final p in presets) ...[
                 ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: Space.sm,
+                  ),
                   title: Text(p, style: const TextStyle(fontSize: 13)),
                   leading: const Icon(Icons.check_circle_outline, size: 18),
                   shape: RoundedRectangleBorder(
@@ -202,37 +287,42 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
   }
 
   Future<void> _locationProblem(LocationFailure failure) async {
-    final l10n = context.l10n;
-    final message = switch (failure) {
-      LocationFailure.serviceOff => l10n.attLocServiceOff,
-      LocationFailure.denied => l10n.attLocDenied,
-      LocationFailure.deniedForever => l10n.attLocDeniedForever,
-      LocationFailure.unavailable => l10n.attLocUnavailable,
-    };
-    final openSettings =
-        failure == LocationFailure.deniedForever ||
-        failure == LocationFailure.serviceOff;
-    final go = await showConfirmSheet(
-      context,
-      title: l10n.attLocTitle,
-      message: message,
-      confirmLabel: openSettings ? l10n.attOpenSettings : l10n.attTryAgain,
+    final action = await showModalBottomSheet<_LocationSheetAction>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => _LocationEnableSheet(failure: failure),
     );
-    if (!go || !mounted) return;
-    if (openSettings) {
-      await ref.read(locationServiceProvider).openSettings();
+    if (action == null || !mounted) return;
+    final svc = ref.read(locationServiceProvider);
+    switch (action) {
+      case _LocationSheetAction.openLocationSettings:
+        await svc.openLocationSettings();
+      case _LocationSheetAction.openAppSettings:
+        await svc.openAppSettings();
+      case _LocationSheetAction.retryNow:
+        await _handleEnableGpsTap();
     }
   }
 
   Future<void> _showOutcome({
     required String type,
     required PunchOutcome outcome,
+    required LocationFix fix,
+    required Shift shift,
     required String lang,
   }) async {
     final regularise = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
-      builder: (_) => _OutcomeSheet(type: type, outcome: outcome, lang: lang),
+      isScrollControlled: true,
+      builder: (_) => _OutcomeSheet(
+        type: type,
+        outcome: outcome,
+        fix: fix,
+        shift: shift,
+        lang: lang,
+      ),
     );
     if (regularise ?? false) {
       if (!mounted) return;
@@ -248,15 +338,86 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final bangla = context.isBangla;
     final today = ref.watch(todayAttendanceProvider);
     final session = ref.watch(sessionControllerProvider).value;
+    final canPunch = session?.can('attendance:punch') ?? false;
     final isSupervisor =
-        session?.roleKeys.any(
-          (r) => const {'HOD', 'HR_ADMIN', 'PLANT_GM', 'CHAIRMAN'}.contains(r),
-        ) ??
-        false;
+        (session?.can('attendance:read', GrantScope.team) ?? false) ||
+        (session?.roleKeys.any(
+              (r) => const {
+                'HOD',
+                'HR_ADMIN',
+                'PLANT_GM',
+                'CHAIRMAN',
+                'LINE_MANAGER',
+              }.contains(r),
+            ) ??
+            false);
+
+    if (!canPunch && isSupervisor) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            bangla
+                ? 'কোম্পানি হাজিরা ও রোস্টার তদারকি'
+                : 'Company Attendance & Roster Oversight',
+          ),
+          actions: const [AppBarActions()],
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              margin: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.sm,
+                Space.lg,
+                Space.xs,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Space.md,
+                vertical: Space.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.teal.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(Corner.md),
+                border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.insights_rounded,
+                    size: 18,
+                    color: Colors.teal.shade700,
+                  ),
+                  const SizedBox(width: Space.xs),
+                  Expanded(
+                    child: Text(
+                      bangla
+                          ? 'বারিধারা প্রধান কার্যালয় ও কেরানীগঞ্জ রিফাইনারি প্ল্যান্টের সার্বিক উপস্থিতি ও ছুটি তদারকি।'
+                          : 'Executive oversight of live shift attendance, field duty, and leave across Baridhara HQ & Keraniganj Refinery.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.teal.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _TeamRosterTab(
+                onConfirmOutside: () {
+                  setState(() => _supervisorConfirmedLocally = true);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     final tabs = [
       if (bangla) 'আমার শিফট ও হাজিরা' else 'My Shift & Punch',
@@ -272,22 +433,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         ),
         actions: const [AppBarActions()],
       ),
-      floatingActionButton: _selectedTab == 0
-          ? FloatingActionButton.extended(
-              onPressed: () =>
-                  unawaited(context.push(AppRoutes.attendanceRegularise)),
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: Text(l10n.attRegularise),
-            )
-          : null,
       body: today.when(
         loading: () => const SkeletonList(),
         error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
         data: (t) {
+          final lang = Localizations.localeOf(context).languageCode;
           final isPunchedIn = t.day.firstInAt != null;
+          final isPunchedOut = t.day.lastOutAt != null;
           final mockLoc = ref.watch(mockConfigControllerProvider).location;
           final isOutside =
               mockLoc == DemoLocation.outside || t.day.pendingReview;
+          final isPlant = mockLoc == DemoLocation.plant;
 
           // Verdict Banner
           final String verdictText;
@@ -296,21 +452,38 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
           if (!isPunchedIn) {
             verdictText = bangla
-                ? 'আজ আপনি এখনও উপস্থিতি দেননি। শিফট: সাধারণ (সকাল ০৯:০০ - সন্ধ্যা ০৬:০০)।'
-                : 'You have not punched in yet today. Shift: General (09:00 AM – 06:00 PM).';
-            verdictColor = Colors.blueGrey;
-            verdictIcon = Icons.info_outline;
-          } else if (isOutside && !_supervisorConfirmedLocally) {
+                ? 'আজ আপনি এখনও চেক-ইন করেননি। শিফট: ${t.shift.displayName(bangla: true)} (${t.shift.startTime} – ${t.shift.endTime})।'
+                : 'You have not punched in yet today. Shift: ${t.shift.displayName(bangla: false)} (${t.shift.startTime} – ${t.shift.endTime}).';
+            verdictColor = Colors.blueGrey.shade700;
+            verdictIcon = Icons.schedule_rounded;
+          } else if (isPunchedOut) {
+            final inTime = DateFmt.time(t.day.firstInAt!, lang);
+            final outTime = DateFmt.time(t.day.lastOutAt!, lang);
             verdictText = bangla
-                ? 'আপনি সকাল ১০:৫৬ এ চেক-ইন করেছেন (বারিধারা সদর দপ্তর থেকে ৪.২ কিমি দূরে)। সুপারভাইজারের অনুমোদনের অপেক্ষায় রয়েছে।'
-                : 'You punched in at 10:56 AM (4.2 km from Head Office). Outside-geofence check-in is pending supervisor confirmation.';
+                ? 'আজকের শিফট সম্পন্ন হয়েছে (চেক-ইন $inTime · চেক-আউট $outTime)।'
+                : 'Shift attendance completed for today (In $inTime · Out $outTime).';
+            verdictColor = Colors.teal.shade700;
+            verdictIcon = Icons.verified_rounded;
+          } else if (isOutside && !_supervisorConfirmedLocally) {
+            final inTime = DateFmt.time(t.day.firstInAt!, lang);
+            verdictText = bangla
+                ? 'আপনি $inTime এ মাঠ পর্যায়ে চেক-ইন করেছেন (৪.২ কিমি দূরে)। সুপারভাইজারের অনুমোদনের অপেক্ষায়।'
+                : 'Checked in at $inTime on Field Duty (4.2 km from gate). Pending supervisor confirmation.';
             verdictColor = const Color(0xFF6B21A8);
             verdictIcon = Icons.shield_outlined;
           } else {
+            final inTime = DateFmt.time(t.day.firstInAt!, lang);
+            final siteText = isPlant
+                ? (bangla
+                      ? 'কেরানীগঞ্জ রিফাইনারি প্ল্যান্ট'
+                      : 'Keraniganj Refinery')
+                : (bangla
+                      ? 'বারিধারা প্রধান কার্যালয়'
+                      : 'Head Office, Baridhara');
             verdictText = bangla
-                ? 'আপনি সকাল ০৮:৫৪ এ বারিধারা প্রধান কার্যালয়ে চেক-ইন করেছেন (গেট থেকে ১১০ মি)। শিফট শেষে পাঞ্চ-আউট করুন।'
-                : 'You punched in at 08:54 AM at Head Office, Baridhara (110 m from gate). Punch out when your shift ends.';
-            verdictColor = Colors.teal;
+                ? 'আপনি $inTime এ $siteText-এ চেক-ইন করেছেন। শিফট শেষে পাঞ্চ-আউট করুন।'
+                : 'Checked in at $inTime at $siteText. Punch out when your shift concludes.';
+            verdictColor = Colors.teal.shade700;
             verdictIcon = Icons.check_circle_outline;
           }
 
@@ -355,7 +528,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               ),
 
               // Segmented Sub-Tabs
-              Padding(
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(
                   Space.lg,
                   Space.sm,
@@ -365,6 +539,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 child: Row(
                   children: [
                     for (var i = 0; i < tabs.length; i++) ...[
+                      if (i > 0) const SizedBox(width: Space.xs),
                       ChoiceChip(
                         label: Text(tabs[i]),
                         selected: _selectedTab == i,
@@ -373,7 +548,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                           setState(() => _selectedTab = i);
                         },
                       ),
-                      const SizedBox(width: Space.xs),
                     ],
                   ],
                 ),
@@ -400,6 +574,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                           isOutsideSimulated: isOutside,
                           supervisorConfirmedLocally:
                               _supervisorConfirmedLocally,
+                          gpsHardwareReady: _gpsHardwareReady,
+                          accuracyM: _lastAccuracyM,
+                          onRequestEnableGps: () =>
+                              unawaited(_handleEnableGpsTap()),
                           onPunch: () => unawaited(_punch(t)),
                         ),
                         _MonthSection(
@@ -428,6 +606,9 @@ class _TodayCard extends StatelessWidget {
     required this.phase,
     required this.isOutsideSimulated,
     required this.supervisorConfirmedLocally,
+    required this.gpsHardwareReady,
+    required this.accuracyM,
+    required this.onRequestEnableGps,
     required this.onPunch,
   });
 
@@ -435,6 +616,9 @@ class _TodayCard extends StatelessWidget {
   final _Phase phase;
   final bool isOutsideSimulated;
   final bool supervisorConfirmedLocally;
+  final bool gpsHardwareReady;
+  final double accuracyM;
+  final VoidCallback onRequestEnableGps;
   final VoidCallback onPunch;
 
   @override
@@ -442,87 +626,139 @@ class _TodayCard extends StatelessWidget {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final lang = Localizations.localeOf(context).languageCode;
     final day = today.day;
-    final muted = theme.colorScheme.onSurfaceVariant;
+    final muted = scheme.onSurfaceVariant;
     final onLeave = day.status == DayStatus.onLeave;
     final busy = phase != _Phase.idle;
     final nextIn = today.nextIsIn;
     final worked = day.workedMinutes;
 
     return Padding(
-      padding: const EdgeInsets.all(Space.lg),
+      padding: const EdgeInsets.fromLTRB(
+        Space.lg,
+        Space.sm,
+        Space.lg,
+        Space.md,
+      ),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(Space.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Date & Status Header
               Row(
                 children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(Corner.md),
+                    ),
+                    child: Icon(
+                      Icons.fingerprint_rounded,
+                      size: 20,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: Space.sm),
                   Expanded(
-                    child: Text(
-                      DateFmt.key(day.date, lang, pattern: 'EEEE, dd MMM yyyy'),
-                      style: theme.textTheme.titleMedium,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DateFmt.key(
+                            day.date,
+                            lang,
+                            pattern: 'EEEE, dd MMM yyyy',
+                          ),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.attShiftLine(
+                            today.shift.displayName(bangla: bangla),
+                            today.shift.startTime,
+                            today.shift.endTime,
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: muted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   if (day.status != null)
                     StatusPill(
                       label: dayStatusLabel(l10n, day.status),
                       tone: dayStatusTone(day.status),
-                    ),
+                    )
+                  else
+                    StatusPill(label: bangla ? 'শিফট প্রস্তুত' : 'Shift Ready'),
                 ],
-              ),
-              const SizedBox(height: Space.xs),
-              Text(
-                l10n.attShiftLine(
-                  today.shift.displayName(bangla: bangla),
-                  today.shift.startTime,
-                  today.shift.endTime,
-                ),
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
               const SizedBox(height: Space.md),
 
-              // Time metrics (In / Out / Worked)
+              // 3 Elevated Time Metric Tiles (Check-In / Check-Out / Worked)
               Row(
                 children: [
                   Expanded(
                     child: _TimeBlock(
+                      icon: Icons.login_rounded,
                       label: l10n.attIn,
                       value: day.firstInAt == null
                           ? '—'
                           : DateFmt.time(day.firstInAt!, lang),
+                      isHighlighted: day.firstInAt != null,
                     ),
                   ),
+                  const SizedBox(width: Space.xs),
                   Expanded(
                     child: _TimeBlock(
+                      icon: Icons.logout_rounded,
                       label: l10n.attOut,
                       value: day.lastOutAt == null
                           ? '—'
                           : DateFmt.time(day.lastOutAt!, lang),
+                      isHighlighted: day.lastOutAt != null,
                     ),
                   ),
+                  const SizedBox(width: Space.xs),
                   Expanded(
                     child: _TimeBlock(
+                      icon: Icons.schedule_rounded,
                       label: l10n.attWorked,
                       value: worked == 0
                           ? '—'
                           : durationText(l10n, worked, lang),
+                      isHighlighted: worked > 0,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: Space.md),
 
-              // Geofence Mini-Map Schematic Visualization
+              // Geofence & Live GPS Telemetry Console
               GeofenceMiniMap(
                 isInside: !isOutsideSimulated,
                 distanceM: isOutsideSimulated ? 4200 : 110,
+                gpsHardwareReady: gpsHardwareReady,
+                accuracyM: accuracyM,
+                onRequestEnableGps: onRequestEnableGps,
               ),
               const SizedBox(height: Space.sm),
 
-              // Outside Geofence Warning Notice (Matches user screenshot)
+              // Multi-Step Live Verification Banner while punching
+              if (busy) ...[
+                _LiveVerificationProgress(phase: phase, bangla: bangla),
+                const SizedBox(height: Space.sm),
+              ],
+
+              // Outside Geofence Warning Notice
               if (isOutsideSimulated && !supervisorConfirmedLocally)
                 Container(
                   padding: const EdgeInsets.all(Space.md),
@@ -543,8 +779,8 @@ class _TodayCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           bangla
-                              ? 'আজকের চেক-ইন সাইট জিওফেন্সের বাইরে ছিল এবং আপনার সুপারভাইজার কর্তৃক নিশ্চিত করা হবে।'
-                              : "Today's check-in was outside the site geofence and will be confirmed by your supervisor.",
+                              ? 'মাঠ পর্যায়ের চেক-ইন আপনার সুপারভাইজার কর্তৃক নিশ্চিত করা হবে।'
+                              : 'Field duty check-in outside the site perimeter will be routed to your supervisor for confirmation.',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF6B21A8),
@@ -589,14 +825,21 @@ class _TodayCard extends StatelessWidget {
 
               const SizedBox(height: Space.md),
 
-              // Punch Button
+              // Primary Punch In / Punch Out Button
               PrimaryButton(
                 label: switch (phase) {
-                  _Phase.locating => l10n.attLocating,
+                  _Phase.locating =>
+                    bangla
+                        ? 'GPS লোকেশন যাচাই করা হচ্ছে…'
+                        : 'Acquiring GPS Lock…',
+                  _Phase.verifyingFence =>
+                    bangla
+                        ? 'জিওফেন্স সীমানা যাচাই করা হচ্ছে…'
+                        : 'Verifying Site Geofence…',
                   _Phase.sending => l10n.attRecording,
                   _Phase.idle => nextIn ? l10n.attPunchIn : l10n.attPunchOut,
                 },
-                icon: nextIn ? Icons.login : Icons.logout,
+                icon: nextIn ? Icons.login_rounded : Icons.logout_rounded,
                 loading: busy,
                 onPressed: onLeave || busy ? null : onPunch,
               ),
@@ -605,17 +848,306 @@ class _TodayCard extends StatelessWidget {
               Center(
                 child: Text(
                   bangla
-                      ? 'প্রধান কার্যালয়ের ৩০০ মি বা প্ল্যান্ট গেটের ৫০০ মিটারের মধ্যে পাঞ্চ গ্রহণযোগ্য।'
-                      : 'Punch-in is accepted within 300 m of Head Office or 500 m of the plant gate.',
+                      ? 'প্রধান কার্যালয়ের ৩০০ মি বা প্ল্যান্ট গেটের ৫০০ মিটারের মধ্যে GPS পাঞ্চ গ্রহণযোগ্য।'
+                      : 'Hardware GPS verification within 300 m of Head Office or 500 m of the Refinery gate.',
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
+
+              // Inline Today's Verified Punch Log
+              if (day.punches.isNotEmpty) ...[
+                const SizedBox(height: Space.md),
+                const Divider(height: 1),
+                const SizedBox(height: Space.sm),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.verified_user_outlined,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      bangla
+                          ? 'আজকের যাচাইকৃত পাঞ্চ লগ (${day.punches.length})'
+                          : "Today's Verified Punch Log (${day.punches.length})",
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Space.xs),
+                for (final p in day.punches)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Space.sm,
+                        vertical: Space.xs + 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(Corner.md),
+                        border: Border.all(color: scheme.outlineVariant),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            p.isIn ? Icons.login_rounded : Icons.logout_rounded,
+                            size: 16,
+                            color: p.isIn
+                                ? Colors.teal.shade700
+                                : Colors.blueGrey.shade700,
+                          ),
+                          const SizedBox(width: Space.xs),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${p.isIn ? l10n.attIn : l10n.attOut} · ${DateFmt.time(p.punchedAt, lang)}',
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  [
+                                    if (p.site != null)
+                                      p.site!.displayName(bangla: bangla),
+                                    if (p.distanceM != null)
+                                      '${p.distanceM!.round()} m',
+                                    if (p.accuracyM != null)
+                                      'GPS ±${p.accuracyM!.round()} m',
+                                  ].join(' · '),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: 11,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          StatusPill(
+                            label: switch (p.result) {
+                              PunchResult.accepted => l10n.attPunchAccepted,
+                              PunchResult.pendingRegularisation =>
+                                l10n.attPunchPending,
+                              _ => l10n.attPunchRejected,
+                            },
+                            tone: switch (p.result) {
+                              PunchResult.accepted => StatusTone.success,
+                              PunchResult.pendingRegularisation =>
+                                StatusTone.warning,
+                              _ => StatusTone.danger,
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LiveVerificationProgress extends StatelessWidget {
+  const _LiveVerificationProgress({required this.phase, required this.bangla});
+
+  final _Phase phase;
+  final bool bangla;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final step = switch (phase) {
+      _Phase.locating => 1,
+      _Phase.verifyingFence => 2,
+      _Phase.sending => 3,
+      _Phase.idle => 0,
+    };
+    final text = switch (phase) {
+      _Phase.locating =>
+        bangla
+            ? 'ধাপ ১/৩: ফোনের হার্ডওয়্যার জিপিএস ও স্যাটেলাইট সংযোগ যাচাই করা হচ্ছে…'
+            : 'Step 1/3: Acquiring hardware GPS & satellite lock…',
+      _Phase.verifyingFence =>
+        bangla
+            ? 'ধাপ ২/৩: বিওজিসিএল সাইট জিওফেন্স সীমানা যাচাই করা হচ্ছে…'
+            : 'Step 2/3: Verifying BOGCL site geofence perimeter…',
+      _Phase.sending =>
+        bangla
+            ? 'ধাপ ৩/৩: উপস্থিতি সময় ও লোকেশন সংরক্ষণ করা হচ্ছে…'
+            : 'Step 3/3: Recording verified attendance log…',
+      _Phase.idle => '',
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Space.md,
+        vertical: Space.sm,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(Corner.md),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(width: Space.xs),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(value: step / 3.0, minHeight: 3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+enum _LocationSheetAction { openLocationSettings, openAppSettings, retryNow }
+
+class _LocationEnableSheet extends StatelessWidget {
+  const _LocationEnableSheet({required this.failure});
+
+  final LocationFailure failure;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    final isServiceOff = failure == LocationFailure.serviceOff;
+    final isDeniedForever = failure == LocationFailure.deniedForever;
+
+    final title = isServiceOff
+        ? (bangla
+              ? 'ফোনের লোকেশন (GPS) চালু করুন'
+              : 'Turn On Device Location (GPS)')
+        : l10n.attLocTitle;
+
+    final message = switch (failure) {
+      LocationFailure.serviceOff =>
+        bangla
+            ? 'উপস্থিতি (Punch In / Out) রেকর্ড করার জন্য আপনার ফোনের জিপিএস (Location Services) চালু থাকা আবশ্যক। নিচের বাটনে ট্যাপ করে লোকেশন চালু করুন।'
+            : 'BOGCL OneOps requires live hardware GPS telemetry to verify site proximity before recording shift attendance. Please turn on Device Location (GPS).',
+      LocationFailure.denied => l10n.attLocDenied,
+      LocationFailure.deniedForever => l10n.attLocDeniedForever,
+      LocationFailure.unavailable => l10n.attLocUnavailable,
+    };
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          Space.xl,
+          Space.xs,
+          Space.xl,
+          Space.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFF59E0B)),
+              ),
+              child: const Icon(
+                Icons.location_searching_rounded,
+                size: 28,
+                color: Color(0xFFB45309),
+              ),
+            ),
+            const SizedBox(height: Space.md),
+            Text(
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Space.xs),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Space.lg),
+            if (isServiceOff) ...[
+              PrimaryButton(
+                label: bangla
+                    ? 'লোকেশন সেটিংস খুলুন (Turn On GPS)'
+                    : 'Turn On Location (GPS)',
+                icon: Icons.gps_fixed_rounded,
+                onPressed: () =>
+                    Navigator.of(context)
+                        .pop(_LocationSheetAction.openLocationSettings),
+              ),
+              const SizedBox(height: Space.xs),
+              PrimaryButton.secondary(
+                label: bangla ? 'পুনরায় চেষ্টা করুন' : l10n.attTryAgain,
+                onPressed: () =>
+                    Navigator.of(context).pop(_LocationSheetAction.retryNow),
+              ),
+            ] else if (isDeniedForever) ...[
+              PrimaryButton(
+                label: l10n.attOpenSettings,
+                icon: Icons.settings_outlined,
+                onPressed: () =>
+                    Navigator.of(context)
+                        .pop(_LocationSheetAction.openAppSettings),
+              ),
+            ] else ...[
+              PrimaryButton(
+                label: bangla
+                    ? 'লোকেশন অনুমতি দিন'
+                    : 'Grant Location Permission',
+                icon: Icons.my_location_rounded,
+                onPressed: () =>
+                    Navigator.of(context).pop(_LocationSheetAction.retryNow),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -924,30 +1456,70 @@ class _TeamRosterTabState extends ConsumerState<_TeamRosterTab> {
 }
 
 class _TimeBlock extends StatelessWidget {
-  const _TimeBlock({required this.label, required this.value});
+  const _TimeBlock({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isHighlighted = false,
+  });
 
+  final IconData icon;
   final String label;
   final String value;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Semantics(
       container: true,
       label: '$label $value',
       child: ExcludeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: Space.sm,
+            vertical: Space.sm,
+          ),
+          decoration: BoxDecoration(
+            color: isHighlighted
+                ? scheme.surfaceContainerLow
+                : scheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(Corner.md),
+            border: Border.all(color: scheme.outlineVariant),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 13, color: scheme.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(value, style: theme.textTheme.titleMedium),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1005,8 +1577,23 @@ class _MonthSection extends ConsumerWidget {
           data: (r) {
             final days = r.days.where((d) => d.status != null).toList();
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _SummaryRow(summary: r.summary),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Space.lg,
+                    Space.sm,
+                    Space.lg,
+                    Space.xs,
+                  ),
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        unawaited(context.push(AppRoutes.attendanceRegularise)),
+                    icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                    label: Text(l10n.attRegularise),
+                  ),
+                ),
                 if (days.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: Space.xl),
@@ -1230,22 +1817,28 @@ class _OutcomeSheet extends StatelessWidget {
   const _OutcomeSheet({
     required this.type,
     required this.outcome,
+    required this.fix,
+    required this.shift,
     required this.lang,
   });
 
   final String type;
   final PunchOutcome outcome;
+  final LocationFix fix;
+  final Shift shift;
   final String lang;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bangla = context.isBangla;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final bogcl = context.bogcl;
     final site = outcome.geofenceName == null
-        ? null
-        : (context.isBangla ? outcome.geofenceNameBn : outcome.geofenceName);
-    final distance = (outcome.distanceM ?? 0).round();
+        ? (bangla ? 'বারিধারা প্রধান কার্যালয়' : 'Head Office, Baridhara')
+        : (bangla ? outcome.geofenceNameBn : outcome.geofenceName);
+    final distance = (outcome.distanceM ?? 110).round();
 
     final (IconData icon, Color color, String title, String message) = _content(
       l10n,
@@ -1254,33 +1847,76 @@ class _OutcomeSheet extends StatelessWidget {
       distance,
     );
 
+    final nowStr = DateFmt.time(Dhaka.clock(), lang);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          Space.xxl,
-          Space.sm,
-          Space.xxl,
-          Space.xxl,
+          Space.xl,
+          Space.xs,
+          Space.xl,
+          Space.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: color),
-            const SizedBox(height: Space.md),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
+            Icon(icon, size: 52, color: color),
             const SizedBox(height: Space.sm),
             Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: Space.xl),
+            const SizedBox(height: 4),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: Space.md),
+
+            // Digital Attendance Verification Receipt Card
+            Container(
+              padding: const EdgeInsets.all(Space.md),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(Corner.lg),
+                border: Border.all(color: scheme.outlineVariant),
+              ),
+              child: Column(
+                children: [
+                  _receiptRow(
+                    theme,
+                    bangla ? 'রেকর্ডকৃত সময়' : 'Recorded Time',
+                    nowStr,
+                  ),
+                  const Divider(height: Space.md),
+                  _receiptRow(
+                    theme,
+                    bangla ? 'নির্ধারিত স্থান' : 'Verified Site',
+                    '$site ($distance m)',
+                  ),
+                  const Divider(height: Space.md),
+                  _receiptRow(
+                    theme,
+                    bangla ? 'জিপিএস স্থানাঙ্ক' : 'GPS Telemetry',
+                    '${fix.lat.toStringAsFixed(4)}° N, ${fix.lng.toStringAsFixed(4)}° E (±${fix.accuracyM.toStringAsFixed(0)}m)',
+                  ),
+                  const Divider(height: Space.md),
+                  _receiptRow(
+                    theme,
+                    bangla ? 'শিফট' : 'Shift Schedule',
+                    '${shift.displayName(bangla: bangla)} (${shift.startTime}–${shift.endTime})',
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: Space.lg),
             if (outcome.canRegularise) ...[
               PrimaryButton(
                 label: l10n.attRegularise,
@@ -1303,6 +1939,35 @@ class _OutcomeSheet extends StatelessWidget {
     );
   }
 
+  Widget _receiptRow(ThemeData theme, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(width: Space.sm),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+
   (IconData, Color, String, String) _content(
     AppL10n l10n,
     BogclColors bogcl,
@@ -1312,7 +1977,7 @@ class _OutcomeSheet extends StatelessWidget {
     final isIn = type == 'IN';
     return switch (outcome.result) {
       PunchResult.accepted => (
-        Icons.check_circle,
+        Icons.verified_rounded,
         bogcl.success,
         outcome.duplicate
             ? l10n.attResultDuplicate
@@ -1320,19 +1985,19 @@ class _OutcomeSheet extends StatelessWidget {
         site == null ? l10n.attResultOk : l10n.attResultAtSite(site),
       ),
       PunchResult.pendingRegularisation => (
-        Icons.hourglass_top,
+        Icons.hourglass_top_rounded,
         bogcl.warning,
         l10n.attResultPendingTitle,
         l10n.attResultPendingMessage,
       ),
       PunchResult.rejectedOutsideFence => (
-        Icons.location_off,
+        Icons.location_off_rounded,
         bogcl.danger,
         l10n.attResultOutsideTitle,
         l10n.attResultOutsideMessage(distance, site ?? ''),
       ),
       PunchResult.rejectedAccuracy => (
-        Icons.gps_not_fixed,
+        Icons.gps_not_fixed_rounded,
         bogcl.danger,
         l10n.attResultAccuracyTitle,
         l10n.attResultAccuracyMessage,

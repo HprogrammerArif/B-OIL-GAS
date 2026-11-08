@@ -10,6 +10,7 @@ import 'package:bogcl_oneops/features/fleet/data/fleet_repository.dart';
 import 'package:bogcl_oneops/features/fleet/presentation/fleet_providers.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
@@ -17,6 +18,21 @@ import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+const _sosTemplates = <(String, String)>[
+  (
+    'Mechanical breakdown / engine overheating on Dhaka–Mawa Expressway; relief vehicle requested.',
+    'ঢাকা–মাওয়া এক্সপ্রেসওয়েতে যান্ত্রিক ত্রুটি / ইঞ্জিন ওভারহিটিং; বিকল্প গাড়ি প্রেরণের অনুরোধ।',
+  ),
+  (
+    'Tyre puncture / battery failure near Keraniganj Plant approach road; roadside assistance needed.',
+    'কেরানীগঞ্জ প্ল্যান্ট সংযোগ সড়কের নিকট টায়ার পাংচার / ব্যাটারি বিকল; জরুরি সহায়তা প্রয়োজন।',
+  ),
+  (
+    'Minor road traffic congestion / blockade; passengers safe, awaiting transport control room guidance.',
+    'সড়কে তীব্র যানজট / অবরোধ; যাত্রীরা নিরাপদ আছেন, ট্রান্সপোর্ট কন্ট্রোল রুমের নির্দেশনার অপেক্ষায়।',
+  ),
+];
 
 class FleetSosScreen extends ConsumerStatefulWidget {
   const FleetSosScreen({super.key});
@@ -50,28 +66,48 @@ class _FleetSosScreenState extends ConsumerState<FleetSosScreen> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          Space.lg,
-          0,
-          Space.lg,
-          MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.flActSos, style: Theme.of(ctx).textTheme.titleLarge),
-            const SizedBox(height: Space.xs),
-            Text(l10n.flSosHelp),
-            const SizedBox(height: Space.md),
-            AppTextField(label: l10n.flFieldSos, controller: c, maxLines: 3),
-            const SizedBox(height: Space.md),
-            PrimaryButton(
-              label: l10n.flActSos,
-              onPressed: () => Navigator.pop(ctx, c.text.trim()),
-            ),
-          ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
+            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              EnterpriseModalHeader(
+                title: l10n.flActSos,
+                subtitle: l10n.flSosHelp,
+                icon: Icons.sos_outlined,
+                accentColor: ctx.bogcl.danger,
+              ),
+              EnterpriseTemplateDropdown(
+                presets: _sosTemplates,
+                controller: c,
+                onPicked: () => setModalState(() {}),
+                labelEn: 'Nature of Emergency (Quick Pick)',
+                labelBn: 'জরুরি পরিস্থিতির ধরন (দ্রুত পূরণ)',
+              ),
+              const SizedBox(height: Space.sm),
+              AppTextField(
+                label: l10n.flFieldSos,
+                controller: c,
+                maxLines: 3,
+                onChanged: (_) => setModalState(() {}),
+              ),
+              const SizedBox(height: Space.md),
+              PrimaryButton.danger(
+                label: l10n.flActSos,
+                icon: Icons.sos_outlined,
+                onPressed: c.text.trim().length < 3
+                    ? null
+                    : () => Navigator.pop(ctx, c.text.trim()),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -38,6 +38,19 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
   Timer? _debounce;
 
   @override
+  void initState() {
+    super.initState();
+    final s = ref.read(sessionControllerProvider).value;
+    if (s != null &&
+        (s.hasRole('SECURITY_GATE') ||
+            s.hasRole('TRANSPORT_ADMIN') ||
+            s.hasRole('CHAIRMAN'))) {
+      _mode = 'gate';
+      _view = 'all';
+    }
+  }
+
+  @override
   void dispose() {
     _debounce?.cancel();
     super.dispose();
@@ -91,9 +104,10 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
             ) ??
             false);
 
+    final effectiveMode = (canGate || canSite) ? _mode : 'host';
     final effectiveView = _musterMode
         ? 'inside'
-        : (_mode == 'gate' ? 'all' : _view);
+        : (effectiveMode == 'gate' ? 'all' : _view);
 
     final rows = ref.watch(visitsProvider(view: effectiveView, query: _query));
 
@@ -102,32 +116,33 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
         title: Text(l10n.moduleVisitors),
         actions: [
           // Emergency Muster Roll Mode Toggle
-          IconButton(
-            tooltip: _musterMode
-                ? (bangla ? 'নিয়মিত মোডে ফিরুন' : 'Exit Muster Mode')
-                : (bangla
-                      ? 'জরুরি ইভাকুয়েশন মাস্টার রোল'
-                      : 'Emergency Muster Roll'),
-            icon: Icon(
-              Icons.crisis_alert,
-              color: _musterMode ? Colors.red : Colors.orange.shade700,
+          if (canGate || canSite)
+            IconButton(
+              tooltip: _musterMode
+                  ? (bangla ? 'নিয়মিত মোডে ফিরুন' : 'Exit Muster Mode')
+                  : (bangla
+                        ? 'জরুরি ইভাকুয়েশন মাস্টার রোল'
+                        : 'Emergency Muster Roll'),
+              icon: Icon(
+                Icons.crisis_alert,
+                color: _musterMode ? Colors.red : Colors.orange.shade700,
+              ),
+              onPressed: () {
+                Haptics.heavy();
+                setState(() => _musterMode = !_musterMode);
+                AppToast.show(
+                  context,
+                  _musterMode
+                      ? (bangla
+                            ? 'জরুরি মাস্টার রোল সক্রিয় — অন-সাইট সকল ভিজিটর ফিল্টার করা হয়েছে'
+                            : 'Emergency Muster Mode Active — Showing all on-site visitors!')
+                      : (bangla
+                            ? 'সাধারণ ভিজিটর মোডে ফিরে আসা হয়েছে'
+                            : 'Exited Emergency Muster Mode.'),
+                  tone: _musterMode ? StatusTone.danger : StatusTone.info,
+                );
+              },
             ),
-            onPressed: () {
-              Haptics.heavy();
-              setState(() => _musterMode = !_musterMode);
-              AppToast.show(
-                context,
-                _musterMode
-                    ? (bangla
-                          ? 'জরুরি মাস্টার রোল সক্রিয় — অন-সাইট সকল ভিজিটর ফিল্টার করা হয়েছে'
-                          : 'Emergency Muster Mode Active — Showing all on-site visitors!')
-                    : (bangla
-                          ? 'সাধারণ ভিজিটর মোডে ফিরে আসা হয়েছে'
-                          : 'Exited Emergency Muster Mode.'),
-                tone: _musterMode ? StatusTone.danger : StatusTone.info,
-              );
-            },
-          ),
           if (canGate)
             IconButton(
               tooltip: l10n.visMuster,
@@ -175,9 +190,13 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
                           ? (bangla
                                 ? 'জরুরি অ্যালার্ম: প্ল্যান্ট সাইটের ভেতরের সকল ভিজিটরকে অ্যাসেম্বলি পয়েন্টে হিসাব করুন।'
                                 : 'Emergency Alarm: Verify all on-site plant visitors at Assembly Point #3.')
-                          : (bangla
+                          : (canGate || canSite)
+                          ? (bangla
                                 ? '৪ জন অতিথি বর্তমানে কেরানীগঞ্জ রিফাইনারি ও হেড অফিসে অবস্থান করছেন · ১১:৩০ টায় বিএসটিআই অডিট টিম আসছেন (ভিআইপি প্রোটোকল)।'
-                                : '4 visitors currently inside Keraniganj & HQ · 1 BSTI Regulator team arriving at 11:30 AM (VIP Protocol).'),
+                                : '4 visitors currently inside Keraniganj & HQ · 1 BSTI Regulator team arriving at 11:30 AM (VIP Protocol).')
+                          : (bangla
+                                ? 'আপনার আমন্ত্রিত অতিথিদের গেট পাস এবং নিরাপত্তা পিপিই ক্লিয়ারেন্স এখানে পরিচালনা করুন।'
+                                : 'Manage gate passes and safety PPE clearance for your invited guests.'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -193,46 +212,62 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
           ),
 
           // Host View vs Security Gate Console Scope Switch
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment(
-                        value: 'host',
-                        icon: const Icon(Icons.person_outline, size: 16),
-                        label: Text(
-                          bangla ? 'আমার আমন্ত্রিত অতিথি' : 'My Guests (Host)',
-                          style: const TextStyle(fontSize: 12),
+          if (canGate || canSite)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                Space.xs,
+                Space.md,
+                0,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SegmentedButton<String>(
+                      segments: [
+                        if (canCreate)
+                          ButtonSegment(
+                            value: 'host',
+                            icon: const Icon(Icons.person_outline, size: 16),
+                            label: Text(
+                              bangla
+                                  ? 'আমার আমন্ত্রিত অতিথি'
+                                  : 'My Guests (Host)',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ButtonSegment(
+                          value: 'gate',
+                          icon: const Icon(Icons.security, size: 16),
+                          label: Text(
+                            bangla
+                                ? 'সিকিউরিটি গেট কনসোল'
+                                : 'Gate Console (All)',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                      ButtonSegment(
-                        value: 'gate',
-                        icon: const Icon(Icons.security, size: 16),
-                        label: Text(
-                          bangla ? 'সিকিউরিটি গেট কনসোল' : 'Gate Console (All)',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ],
-                    selected: {_mode},
-                    onSelectionChanged: (s) {
-                      setState(() {
-                        _mode = s.first;
-                        if (_mode == 'gate') {
-                          _view = 'all';
-                        } else {
-                          _view = 'mine';
-                        }
-                      });
-                    },
+                      ],
+                      selected: {
+                        if (!canCreate && effectiveMode == 'host')
+                          'gate'
+                        else
+                          effectiveMode,
+                      },
+                      onSelectionChanged: (s) {
+                        setState(() {
+                          _mode = s.first;
+                          if (_mode == 'gate') {
+                            _view = 'all';
+                          } else {
+                            _view = 'mine';
+                          }
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           // Search Bar
           Padding(
@@ -447,27 +482,30 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Row(
-                                      children: [
-                                        Icon(
-                                          Icons.warning,
-                                          color: Colors.amber,
-                                          size: 20,
-                                        ),
-                                        SizedBox(width: Space.xs),
-                                        Text(
-                                          'EMERGENCY MUSTER ROLL',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
+                                    const Expanded(
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.warning,
+                                            color: Colors.amber,
+                                            size: 20,
                                           ),
-                                        ),
-                                      ],
+                                          SizedBox(width: Space.xs),
+                                          Flexible(
+                                            child: Text(
+                                              'EMERGENCY MUSTER ROLL',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                    const SizedBox(width: Space.xs),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
@@ -712,23 +750,25 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
               if (_musterMode) ...[
                 const Divider(height: Space.md),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      isSafe
-                          ? (bangla
-                                ? '✓ এসেম্বলি পয়েন্টে নিরাপদ'
-                                : '✓ Safe at Assembly Point')
-                          : (bangla
-                                ? 'উপস্থিতি অনুপস্থিত'
-                                : 'Status: Unaccounted'),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: isSafe ? Colors.green.shade700 : Colors.red,
+                    Expanded(
+                      child: Text(
+                        isSafe
+                            ? (bangla
+                                  ? '✓ এসেম্বলি পয়েন্টে নিরাপদ'
+                                  : '✓ Safe at Assembly Point')
+                            : (bangla
+                                  ? 'উপস্থিতি অনুপস্থিত'
+                                  : 'Status: Unaccounted'),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: isSafe ? Colors.green.shade700 : Colors.red,
+                        ),
                       ),
                     ),
-                    if (!isSafe)
+                    if (!isSafe) ...[
+                      const SizedBox(width: Space.xs),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade700,
@@ -753,6 +793,7 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
                           );
                         },
                       ),
+                    ],
                   ],
                 ),
               ],

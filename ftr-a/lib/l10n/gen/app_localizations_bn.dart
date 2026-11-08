@@ -2977,6 +2977,22 @@ class AppL10nBn extends AppL10n {
   String get nsSignStamp => 'সিল';
 
   @override
+  String get nsSignUpload => 'আপলোড';
+
+  @override
+  String get nsSignUploadHint => 'স্বাক্ষরের ছবি নির্বাচন করতে ট্যাপ করুন';
+
+  @override
+  String get nsSignUploadSub => 'ডিভাইস গ্যালারি বা ফাইল থেকে পিএনজি বা জেপিজি';
+
+  @override
+  String get nsSignErrUpload =>
+      'অনুগ্রহ করে প্রথমে স্বাক্ষরের ছবি নির্বাচন করুন।';
+
+  @override
+  String get nsSignChange => 'পরিবর্তন';
+
+  @override
   String get nsSignTypedLabel => 'আপনার পূর্ণ নাম';
 
   @override

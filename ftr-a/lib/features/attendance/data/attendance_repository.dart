@@ -82,6 +82,7 @@ class AttendanceRepository {
     required LocationFix fix,
     required String label,
     String? note,
+    bool fieldDutyRequested = false,
   }) async {
     final deviceId = await _deviceId();
     return await _outbox.sendOrQueue(
@@ -97,6 +98,7 @@ class AttendanceRepository {
         'isMockLocation': fix.isMock,
         'platform': 'ANDROID',
         'deviceId': deviceId,
+        'fieldDutyRequested': fieldDutyRequested,
         if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
       },
     );

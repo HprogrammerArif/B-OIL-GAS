@@ -8,6 +8,7 @@ import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/claims/data/claim_repository.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
@@ -100,16 +101,25 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
+    final canCreate = session?.can('claims:create') ?? false;
     final isApprover =
-        session?.roleKeys.any(
-          (r) => const {'HOD', 'HR_ADMIN', 'FINANCE', 'CHAIRMAN'}.contains(r),
-        ) ??
-        false;
+        (session?.can('claims:read', GrantScope.team) ?? false) ||
+        (session?.roleKeys.any(
+              (r) => const {
+                'HOD',
+                'HR_ADMIN',
+                'FINANCE',
+                'CHAIRMAN',
+                'PLANT_GM',
+                'LINE_MANAGER',
+              }.contains(r),
+            ) ??
+            false);
     final canSettle = session?.can('claims:settle') ?? false;
     final canAdvance = session?.can('claims:advance') ?? false;
 
     final tabs = <(_Tab, String)>[
-      (_Tab.claims, bangla ? 'আমার দাবি' : 'My Claims'),
+      if (canCreate) (_Tab.claims, bangla ? 'আমার দাবি' : 'My Claims'),
       if (isApprover)
         (_Tab.awaitingMe, bangla ? 'অনুমোদনের অপেক্ষা (৩)' : 'Awaiting Me (3)'),
       if (canAdvance) (_Tab.advances, l10n.claimTabAdvances),
@@ -119,6 +129,8 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
         bangla ? 'ভাতা নীতি (গ্রেড ১–১০)' : 'Allowance Policy (G1–10)',
       ),
     ];
+
+    final effectiveTab = tabs.any((t) => t.$1 == _tab) ? _tab : tabs.first.$1;
 
     // One-Sentence Plain Language Verdict Banner
     final String verdictText;
@@ -144,13 +156,13 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
         title: Text(l10n.claimsTitle),
         actions: const [AppBarActions()],
       ),
-      floatingActionButton: switch (_tab) {
-        _Tab.claims => FloatingActionButton.extended(
+      floatingActionButton: switch (effectiveTab) {
+        _Tab.claims when canCreate => FloatingActionButton.extended(
           onPressed: () => unawaited(_newClaim()),
           icon: const Icon(Icons.add),
           label: Text(l10n.claimNew),
         ),
-        _Tab.advances => FloatingActionButton.extended(
+        _Tab.advances when canAdvance => FloatingActionButton.extended(
           onPressed: () => unawaited(context.push(AppRoutes.advanceNew)),
           icon: const Icon(Icons.add),
           label: Text(l10n.advNew),
@@ -205,7 +217,7 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
                   for (final t in tabs) ...[
                     ChoiceChip(
                       label: Text(t.$2),
-                      selected: _tab == t.$1,
+                      selected: effectiveTab == t.$1,
                       onSelected: (_) {
                         Haptics.tap();
                         setState(() => _tab = t.$1);
@@ -221,10 +233,10 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refresh,
-              child: switch (_tab) {
+              child: switch (effectiveTab) {
                 _Tab.claims => const _ClaimList(scope: 'mine'),
                 _Tab.awaitingMe => _ClaimList(
-                  scope: 'mine',
+                  scope: 'team',
                   showOwner: true,
                   isApproverView: true,
                   onAction: _settle,
@@ -575,7 +587,14 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
             ],
 
             // Approver / Executive Quick Action Strip
-            if (widget.isApproverView) ...[
+            if (widget.isApproverView &&
+                ref
+                        .watch(sessionControllerProvider)
+                        .value
+                        ?.profile
+                        .employee
+                        .id !=
+                    c.employeeId) ...[
               const Divider(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,

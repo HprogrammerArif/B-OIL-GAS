@@ -7,7 +7,7 @@
 /* ─── 1. MODAL COORDINATION DESK (TripChatModal) ─── */
 .trip-chat-dialog {
   background: var(--brand-card-bg, var(--surface-1));
-  border: 1px solid var(--brand-slate-200, var(--border-1));
+  border: none;
   border-radius: 24px;
   width: 100%;
   max-width: 820px;
@@ -25,12 +25,13 @@
 
 [data-theme="dark"] .trip-chat-dialog {
   background: var(--surface-inverse);
-  border-color: rgba(255, 255, 255, 0.09);
+  border: none;
   box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.75);
 }
 
 .trip-chat-header {
   flex-shrink: 0;
+  margin: -1px -1px 0;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(135deg, #0A1128 0%, #162447 100%);

@@ -172,27 +172,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: BrandColors.crimson.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(Corner.xl),
-                        ),
-                        child: Text(
-                          bangla
-                              ? 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস (BOGCL)'
-                              : 'BASHUNDHARA OIL & GAS (BOGCL)',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: BrandColors.crimson,
-                            letterSpacing: 0.4,
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: BrandColors.crimson.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(Corner.xl),
+                          ),
+                          child: Text(
+                            bangla
+                                ? 'বসুন্ধরা অয়েল অ্যান্ড গ্যাস (BOGCL)'
+                                : 'BASHUNDHARA OIL & GAS (BOGCL)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: BrandColors.crimson,
+                              letterSpacing: 0.4,
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: Space.xs),
                       const LanguageSwitch(),
                     ],
                   ),
@@ -253,7 +258,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         value: 0,
                         icon: const Icon(Icons.badge_outlined, size: 16),
                         label: Text(
-                          bangla ? '৭টি উপস্থাপনা ভূমিকা' : '7 Pitch Roles',
+                          bangla ? 'দ্রুত রোল সাইন-ইন' : 'Quick Role Sign-In',
                         ),
                       ),
                       ButtonSegment(
@@ -457,9 +462,9 @@ class _EnrichedPersonaCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final name = bangla ? persona.nameBn : persona.nameEn;
     final role = bangla ? persona.roleLabelBn : persona.roleLabelEn;
-    final highlight = bangla
-        ? persona.pitchHighlightBn
-        : persona.pitchHighlightEn;
+    final subtitle = bangla
+        ? '${persona.titleBn} · ${persona.siteBn}'
+        : '${persona.titleEn} · ${persona.siteEn}';
 
     return Card(
       margin: EdgeInsets.zero,
@@ -544,11 +549,11 @@ class _EnrichedPersonaCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      highlight,
+                      subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.primary,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
