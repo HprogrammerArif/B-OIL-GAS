@@ -2986,6 +2986,21 @@ class AppL10nEn extends AppL10n {
   String get nsSignStamp => 'Stamp';
 
   @override
+  String get nsSignUpload => 'Upload';
+
+  @override
+  String get nsSignUploadHint => 'Tap to choose signature image';
+
+  @override
+  String get nsSignUploadSub => 'PNG or JPG from device gallery or files';
+
+  @override
+  String get nsSignErrUpload => 'Please choose a signature image first.';
+
+  @override
+  String get nsSignChange => 'Change';
+
+  @override
   String get nsSignTypedLabel => 'Your full name';
 
   @override

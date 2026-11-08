@@ -20,6 +20,13 @@ import type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle } from '../c
 export type { Seat, WaitlistEntry, RouteStop, RouteInfo, BusVehicle };
 
 import { INITIAL_ROUTES, generateSeatsForRoute } from '../components/bus/busData';
+
+function routeChipLabel(name: string): string {
+  const [code, rest = ''] = name.split(':');
+  const firstStop = rest.split('➔')[0]?.trim() ?? '';
+  const pretty = code.replace('-', ' ').trim();
+  return firstStop ? `${pretty} · ${firstStop}` : pretty;
+}
 import { useBusStore } from '../store/busStore';
 import RegisterBusModal from '../components/bus/RegisterBusModal';
 import RouteBuilderModal from '../components/bus/RouteBuilderModal';
@@ -202,8 +209,6 @@ export default function BusView({ role, lang }: ViewProps) {
   const vacatedCount = seats.filter(s => s.status === 'vacated').length;
   const emptyCount = seats.filter(s => s.status === 'empty').length;
   const boardedCount = seats.filter(s => s.status === 'occupied' && s.boarded).length;
-  const totalSeats = seats.length;
-  const fillRate = totalSeats > 0 ? ((occupiedCount / totalSeats) * 100).toFixed(0) : '0';
 
   // Fleet-wide aggregate counts across all buses
   const fleetTotals = useMemo(() => {
@@ -709,9 +714,6 @@ export default function BusView({ role, lang }: ViewProps) {
               <Bus size={21} color="var(--brand-crimson)" />
               {t('Staff Shuttle Buses & Seats', 'স্টাফ শাটল বাস ও সিট রিজার্ভেশন', lang)}
             </h2>
-            <span className="badge info" style={{ fontSize: '10px' }}>
-              {activeRoute.coachNo}
-            </span>
             <span className="badge gold" style={{ fontSize: '10px' }}>
               {selectedDate === SYSTEM_TODAY ? t('Today (29 Oct)', 'আজ (২৯ অক্টোবর)', lang) : selectedDate}
             </span>
@@ -793,6 +795,59 @@ export default function BusView({ role, lang }: ViewProps) {
             </button>
           </div>
 
+          {activePerspective === 'supervisor' && (
+            <div style={{
+              background: 'var(--brand-slate-100)',
+              padding: '3px',
+              borderRadius: '8px',
+              display: 'flex',
+              border: '1px solid var(--brand-slate-300)'
+            }}>
+              <button
+                type="button"
+                onClick={() => setSupervisorSubTab('fleet')}
+                style={{
+                  background: supervisorSubTab === 'fleet' ? 'var(--surface-1)' : 'transparent',
+                  color: supervisorSubTab === 'fleet' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: supervisorSubTab === 'fleet' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <Bus size={12} />
+                <span>{t('Routes', 'রুট', lang)}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSupervisorSubTab('seats')}
+                style={{
+                  background: supervisorSubTab === 'seats' ? 'var(--surface-1)' : 'transparent',
+                  color: supervisorSubTab === 'seats' ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: supervisorSubTab === 'seats' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <Users size={12} />
+                <span>{t('This coach', 'এই কোচ', lang)}</span>
+              </button>
+            </div>
+          )}
+
           {canManageBus && (
             <div style={{
               background: 'var(--brand-slate-100)',
@@ -865,6 +920,44 @@ export default function BusView({ role, lang }: ViewProps) {
           <button type="button" className="btn-outline" onClick={() => setShowTimetableModal(true)}>
             <Calendar size={13} /> {t('Timetable', 'সময়সূচী', lang)}
           </button>
+
+          {canManageBus && (
+            <>
+              <button type="button" className="btn-outline" onClick={() => setShowRegisterBusModal(true)}>
+                <UserPlus size={13} /> {t('Add Bus', 'নতুন বাস', lang)}
+              </button>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => {
+                  setRouteToEdit(activeRoute);
+                  setShowRouteBuilderModal(true);
+                }}
+              >
+                <MapPin size={13} /> {t('Edit Route & Stops', 'রুট ও স্টপ', lang)}
+              </button>
+              <button type="button" className="btn-outline" onClick={() => setShowSupervisorSeatModal(true)}>
+                <UserCheck size={13} /> {t('Assign Seat', 'সিট বরাদ্দ', lang)}
+              </button>
+              <button
+                type="button"
+                className="btn-outline"
+                onClick={() => {
+                  const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
+                  setReassignBusTarget(b);
+                  setShowReassignBusModal(true);
+                }}
+              >
+                <RefreshCw size={13} /> {t('Reassign Bus', 'বাস পরিবর্তন', lang)}
+              </button>
+              <button type="button" className="btn-outline" onClick={() => setShowBroadcastModal(true)}>
+                <Send size={13} /> {t('Broadcast Notice', 'বিজ্ঞপ্তি', lang)}
+              </button>
+              <button type="button" className="btn-outline" onClick={handleSupervisorAutoFIFO}>
+                <UserPlus size={13} /> {t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}
+              </button>
+            </>
+          )}
 
           {/* My Boarding Pass */}
           {mySeat && (
@@ -942,8 +1035,8 @@ export default function BusView({ role, lang }: ViewProps) {
         </div>
       )}
 
-      {/* ─── Role Operational Toolbar (Single Unified Bar per Perspective) ── */}
-      {activePerspective === 'staff' ? (
+      {/* ─── Staff reminder. Company readers use the light Routes / This coach switch in the header. ── */}
+      {activePerspective === 'staff' && (
         <div style={{
           background: 'rgba(59, 130, 246, 0.06)',
           border: '1px solid rgba(59, 130, 246, 0.2)',
@@ -974,217 +1067,6 @@ export default function BusView({ role, lang }: ViewProps) {
           >
             <HelpCircle size={12} /> {t('Transit Rules', 'যাতায়াত নিয়মাবলী', lang)}
           </button>
-        </div>
-      ) : (
-        /* Single Unified Supervisor Command Bar (replaces the 3 duplicate stacked banners) */
-        <div style={{
-          background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse-2) 100%)',
-          border: '1.5px solid rgba(212, 175, 55, 0.6)',
-          borderRadius: '12px',
-          padding: '10px 14px',
-          marginBottom: '14px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '10px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.16)'
-        }}>
-          {/* View Sub-Tabs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', padding: '3px', borderRadius: '8px', gap: '3px' }}>
-              <button
-                type="button"
-                onClick={() => setSupervisorSubTab('fleet')}
-                style={{
-                  background: supervisorSubTab === 'fleet' ? 'var(--brand-gold)' : 'transparent',
-                  color: supervisorSubTab === 'fleet' ? 'var(--text-1)' : 'var(--text-inverse)',
-                  border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Bus size={13} />
-                <span>{t('All 10 Buses & Routes', 'সবগুলো বাস ও রুট', lang)}</span>
-                <span style={{
-                  fontSize: '10px',
-                  background: supervisorSubTab === 'fleet' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)',
-                  padding: '1px 6px',
-                  borderRadius: '10px'
-                }}>
-                  {buses.length}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSupervisorSubTab('seats')}
-                style={{
-                  background: supervisorSubTab === 'seats' ? 'var(--brand-gold)' : 'transparent',
-                  color: supervisorSubTab === 'seats' ? 'var(--text-1)' : 'var(--text-inverse)',
-                  border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '11.5px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <Users size={13} />
-                <span>{t('Seat Map & Standby Queue', 'সিট ম্যাপ ও অপেক্ষাতালিকা', lang)}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Single Set of Supervisor Actions */}
-          {canManageBus && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => setShowRegisterBusModal(true)}
-              style={{
-                background: 'var(--status-success-solid)',
-                color: 'var(--text-on-brand)',
-                border: 'none',
-                padding: '5px 11px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-            >
-              <UserPlus size={13} />
-              <span>{t('+ Add Bus', '+ নতুন বাস', lang)}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setRouteToEdit(activeRoute);
-                setShowRouteBuilderModal(true);
-              }}
-              style={{
-                background: 'rgba(212, 175, 55, 0.18)',
-                border: '1.5px solid var(--brand-gold)',
-                color: 'var(--status-warning-bright)',
-                padding: '5px 11px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <MapPin size={13} />
-              <span>{t('Edit Route & Stops', 'রুট ও স্টপ', lang)}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowSupervisorSeatModal(true)}
-              style={{
-                background: 'rgba(59, 130, 246, 0.18)',
-                border: '1.5px solid var(--status-info-bright)',
-                color: 'var(--status-info-bright)',
-                padding: '5px 11px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <UserCheck size={13} />
-              <span>{t('Assign Seat', 'সিট বরাদ্দ', lang)}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                const b = buses.find(x => x.assignedRouteId === selectedRouteKey) || buses[0];
-                setReassignBusTarget(b);
-                setShowReassignBusModal(true);
-              }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                color: 'var(--text-inverse)',
-                padding: '5px 11px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <RefreshCw size={13} />
-              <span>{t('Reassign Bus', 'বাস পরিবর্তন', lang)}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowBroadcastModal(true)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.25)',
-                color: 'var(--text-inverse)',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <Send size={12} />
-              <span>{t('Broadcast Notice', 'বিজ্ঞপ্তি', lang)}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSupervisorAutoFIFO}
-              style={{
-                background: 'var(--brand-gold)',
-                border: 'none',
-                color: 'var(--text-1)',
-                padding: '5px 11px',
-                borderRadius: '6px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <UserPlus size={12} />
-              <span>{t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}</span>
-            </button>
-          </div>
-          )}
         </div>
       )}
 
@@ -1218,278 +1100,84 @@ export default function BusView({ role, lang }: ViewProps) {
         />
       ) : (
         <>
-          {/* ─── Unified Sleek Commuter & Fleet Command Bar ─────────────── */}
-          <div className="card mb-3" style={{
-        background: 'linear-gradient(135deg, var(--surface-inverse) 0%, var(--surface-inverse) 100%)',
-        color: 'var(--text-on-brand)',
-        border: '1px solid var(--border-inverse)',
-        boxShadow: 'var(--shadow-sm)',
-        padding: '14px 18px'
-      }}>
-        <div className="bus-hero-dossier-grid">
-          {/* Sub-card 1: My Personal Commute Dossier */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: isMySeatVacated ? 'rgba(212, 175, 55, 0.2)' : 'rgba(225, 29, 72, 0.2)',
-                border: isMySeatVacated ? '1.5px solid var(--brand-gold)' : '1.5px solid var(--brand-crimson)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: isMySeatVacated ? 'var(--status-warning-bright)' : 'var(--status-danger-bright)',
-                fontWeight: 900,
-                fontSize: '14px'
-              }}>
-                {mySeat ? `#${String(mySeat.num).padStart(2, '0')}` : '—'}
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '12.5px', fontWeight: 800 }}>{mySeat?.assignedTo || currentStaffMeta.name}</span>
-                  <span className={`badge ${!mySeat ? 'info' : isMySeatVacated ? 'gold' : 'success'}`} style={{ fontSize: '8.5px', padding: '1px 5px' }}>
-                    {!mySeat
-                      ? (myWaitlistEntry ? t(`Waitlist #${myWaitlistEntry.rank}`, `অপেক্ষাতালিকা #${myWaitlistEntry.rank}`, lang) : t('No seat on this route', 'এই রুটে আসন নেই', lang))
-                      : isMySeatVacated ? t('Vacated Today', 'আজ ফাঁকা', lang) : t('Confirmed', 'নিশ্চিত', lang)}
-                  </span>
+          {activePerspective === 'staff' && mySeat && (
+            <div className="card mb-3" style={{ padding: '10px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '13px', color: 'var(--brand-slate-800)' }}>
+                  <strong>
+                    {t(`Your seat is #${String(mySeat.num).padStart(2, '0')}`, `আপনার আসন #${String(mySeat.num).padStart(2, '0')}`, lang)}
+                  </strong>
+                  {' · '}
+                  {mySeat.pickupPoint}
+                  {' · '}
+                  {commuteDirection === 'inbound'
+                    ? mySeat.pickupTime
+                    : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')}
+                  {isMySeatVacated ? ` · ${t('Released today', 'আজ ছাড়া', lang)}` : ''}
                 </div>
-                <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                  <span>{activeRoute.name}</span>
-                  {mySeat && (
-                    <>
-                      <span>·</span>
-                      <MapPin size={10} />
-                      <span>{mySeat.pickupPoint} ({commuteDirection === 'inbound' ? mySeat.pickupTime : (activeRoute.outboundStops.find(s => s.name === mySeat.pickupPoint)?.scheduledTime ?? '—')})</span>
-                    </>
-                  )}
-                </div>
+                {isMySeatVacated ? (
+                  <button type="button" className="btn-outline" onClick={handleReclaimMySeat}>
+                    <UserPlus size={13} /> {t('Reclaim', 'পুনরুদ্ধার', lang)}
+                  </button>
+                ) : (
+                  <button type="button" className="btn-outline" onClick={() => setShowVacateDialog(true)}>
+                    <UserMinus size={13} /> {t('Release', 'ছেড়ে দিন', lang)}
+                  </button>
+                )}
               </div>
             </div>
+          )}
 
-            {mySeat && !fleetReadOnly && (
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {isMySeatVacated ? (
-                <button
-                  className="btn-gold"
-                  style={{ fontSize: '10.5px', padding: '4px 8px' }}
-                  onClick={handleReclaimMySeat}
-                >
-                  <UserPlus size={11} /> {t('Reclaim', 'পুনরুদ্ধার', lang)}
-                </button>
-              ) : (
-                <button
-                  style={{
-                    background: 'rgba(212, 175, 55, 0.15)',
-                    border: '1px solid var(--brand-gold)',
-                    color: 'var(--status-warning-bright)',
-                    fontSize: '10.5px',
-                    fontWeight: 700,
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                  onClick={() => setShowVacateDialog(true)}
-                >
-                  <UserMinus size={11} /> {t('Release', 'ছেড়ে দিন', lang)}
-                </button>
-              )}
-            </div>
-            )}
-          </div>
-
-          {/* Sub-card 2: Route Selector & Live Beacon */}
-          <div>
-            {/* Route Selector Tabs (All 10 Routes) */}
-            <div style={{ display: 'flex', gap: '5px', marginBottom: '6px', overflowX: 'auto', paddingBottom: '3px' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
               {Object.values(routes).map((route: RouteInfo) => {
                 const isSelected = route.id === selectedRouteKey;
                 return (
                   <button
                     key={route.id}
+                    type="button"
                     onClick={() => handleSelectRoute(route.id)}
+                    title={`${route.coachNo} · ${route.name}`}
                     style={{
-                      background: isSelected ? 'rgba(212, 175, 55, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-                      border: isSelected ? '1.5px solid var(--brand-gold)' : '1px solid rgba(255, 255, 255, 0.12)',
-                      color: isSelected ? 'var(--status-warning-bright)' : 'var(--text-inverse-2)',
-                      padding: '3px 8px',
-                      borderRadius: '5px',
-                      fontSize: '10.5px',
+                      background: isSelected ? 'var(--surface-1)' : 'var(--brand-slate-100)',
+                      color: isSelected ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
+                      border: '1px solid var(--brand-slate-300)',
+                      padding: '5px 10px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
                       whiteSpace: 'nowrap',
-                      flexShrink: 0
+                      flexShrink: 0,
+                      boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
                     }}
-                    title={`${route.coachNo} - ${route.name}`}
                   >
-                    <span>{route.coachNo}</span>
-                    <span style={{ opacity: 0.65, fontSize: '9.5px' }}>({route.name.split(':')[0]})</span>
-                    {isSelected && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--status-success-bright)' }} />}
+                    {routeChipLabel(route.name)}
                   </button>
                 );
               })}
             </div>
-
-            {/* Timetable for the selected direction */}
             {(() => {
               const stops = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
               const first = stops[0];
               const last = stops[stops.length - 1];
               return (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', fontSize: '11px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
-                    <Navigation size={12} color="var(--status-success-bright)" />
-                    <span style={{ color: 'var(--text-muted)' }}>{t('Departs', 'ছাড়ে', lang)}</span>
-                    <strong style={{ color: 'var(--status-warning-bright)' }}>{first ? `${first.scheduledTime} · ${first.name}` : '—'}</strong>
-                  </div>
-                  <div style={{ color: 'var(--status-success-bright)', fontWeight: 800 }}>
-                    {t('Arrives', 'পৌঁছায়', lang)} {last?.scheduledTime ?? '—'} · {t(`${stops.length} stops`, `${stops.length}টি স্টপ`, lang)}
-                  </div>
+                <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--brand-slate-600)' }}>
+                  {t('Departs', 'ছাড়ে', lang)} {first ? `${first.scheduledTime} · ${first.name}` : '—'}
+                  {' · '}
+                  {t('Arrives', 'পৌঁছায়', lang)} {last?.scheduledTime ?? '—'}
+                  {' · '}
+                  {t(`${stops.length} stops`, `${stops.length}টি স্টপ`, lang)}
                 </div>
               );
             })()}
           </div>
 
-          {/* Sub-card 3: Key Shuttle Metrics */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '12px',
-            padding: '8px 12px'
-          }}>
-            <div>
-              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                {t('Occupancy', 'আসন দখল', lang)}
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-info-bright)' }}>
-                {occupiedCount}/{totalSeats} <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>({fillRate}%)</span>
-              </div>
-            </div>
-
-            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '10px' }}>
-              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                {t('Boarded', 'বোর্ডিং সম্পন্ন', lang)}
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--status-success)' }}>
-                {boardedCount} <span style={{ fontSize: '9.5px', color: 'var(--status-success-bright)' }}>{t('pax', 'জন', lang)}</span>
-              </div>
-            </div>
-
-            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '10px' }}>
-              <div style={{ fontSize: '9.5px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                {t('Standby / Free', 'ফাঁকা / দাবিযোগ্য', lang)}
-              </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--brand-gold)' }}>
-                {vacatedCount + emptyCount} <span style={{ fontSize: '9.5px', color: 'var(--status-warning-bright)' }}>{t('Seats', 'সিট', lang)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Search & Quick Action Toolbar ──────────────────────────── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        marginBottom: '12px',
-        flexWrap: 'wrap'
-      }}>
-        {/* Passenger Search Input */}
-        <div style={{
-          position: 'relative',
-          flex: '1',
-          minWidth: '260px',
-          maxWidth: '460px'
-        }}>
-          <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
-          <input
-            type="text"
-            className="input-text"
-            style={{ width: '100%', paddingLeft: '32px', height: '32px', fontSize: '12px' }}
-            placeholder={t('Search passenger by name, staff ID, dept, or blood group...', 'যাত্রী খুঁজুন (নাম, আইডি, বিভাগ, রক্তের গ্রুপ)...', lang)}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              style={{
-                position: 'absolute',
-                right: '8px',
-                top: '7px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--brand-slate-400)'
-              }}
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        {/* Search match stats */}
-        {searchQuery.trim() && (
-          <div style={{ fontSize: '11px', color: 'var(--brand-slate-600)', background: 'var(--brand-slate-100)', padding: '4px 10px', borderRadius: '6px' }}>
-            {t('Matched Passengers:', 'পাওয়া গেছে:', lang)}{' '}
-            <strong style={{ color: 'var(--brand-crimson)' }}>{filteredSearchSeats.length}</strong> {t('seats highlighted', 'সিট হাইলাইট করা হয়েছে', lang)}
-          </div>
-        )}
-
-        {/* Action Button: Book Any Free Seat — staff and the transport supervisor */}
-        {(canManageBus || activePerspective === 'staff') && (
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            className="btn-primary"
-            style={{ fontSize: '11px', padding: '5px 12px' }}
-            onClick={() => {
-              const firstEmpty = seats.find(s => s.status === 'empty') || seats.find(s => s.status === 'vacated') || seats[11];
-              handleOpenBookModal(firstEmpty);
-            }}
-          >
-            <UserPlus size={13} /> {t('Book / Reserve Empty Seat', 'খালি সিট বুক করুন', lang)}
-          </button>
-
-          <button
-            className="btn-outline"
-            style={{ fontSize: '11px', padding: '5px 10px' }}
-            onClick={() => {
-              setSelectedSeat(seats.find(s => s.num === 5) || seats[4]);
-              setShowSwapModal(true);
-            }}
-          >
-            <ArrowUpDown size={13} /> {t('Request Seat Swap', 'সিট সোয়াপ আবেদন', lang)}
-          </button>
-        </div>
-        )}
-      </div>
-
       {/* ─── 2-Column Master-Cockpit Layout ──────────────────────────── */}
       <div className="bus-two-col-layout">
         {/* LEFT COLUMN: 52-Seater Coach Cabin Deck */}
         <div className="card">
-          <div className="card-hd">
+          <div className="card-hd" style={{ flexWrap: 'wrap', gap: '10px' }}>
             <div className="card-hd-left">
               <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
                 <Bus size={18} />
@@ -1504,36 +1192,97 @@ export default function BusView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            {/* Filter Pills */}
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {(['all', 'occupied', 'vacated', 'mine', 'empty'] as const).map(filterKey => {
-                const isActive = seatFilter === filterKey;
-                const labels: Record<string, string> = {
-                  all: t('All (52)', 'সব (৫২)', lang),
-                  occupied: t(`Occupied (${occupiedCount})`, `পূর্ণ (${occupiedCount})`, lang),
-                  vacated: t(`Free (${vacatedCount})`, `ফাঁকা (${vacatedCount})`, lang),
-                  mine: t('My Seat', 'আমার সিট', lang),
-                  empty: t(`Empty (${emptyCount})`, `খালি (${emptyCount})`, lang),
-                };
-                return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: '1 1 320px', justifyContent: 'flex-end' }}>
+              <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '160px', maxWidth: '280px' }}>
+                <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
+                <input
+                  type="text"
+                  className="input-text"
+                  style={{ width: '100%', paddingLeft: '32px', height: '32px', fontSize: '12px' }}
+                  placeholder={t('Search passenger by name, staff ID, dept, or blood group...', 'যাত্রী খুঁজুন (নাম, আইডি, বিভাগ, রক্তের গ্রুপ)...', lang)}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
                   <button
-                    key={filterKey}
-                    onClick={() => setSeatFilter(filterKey)}
+                    type="button"
+                    onClick={() => setSearchQuery('')}
                     style={{
-                      padding: '3px 8px',
-                      borderRadius: '5px',
-                      fontSize: '10.5px',
-                      fontWeight: 600,
+                      position: 'absolute',
+                      right: '8px',
+                      top: '7px',
+                      background: 'none',
+                      border: 'none',
                       cursor: 'pointer',
-                      border: isActive ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                      background: isActive ? 'var(--brand-crimson)' : 'transparent',
-                      color: isActive ? 'var(--text-on-brand)' : 'var(--brand-slate-600)'
+                      color: 'var(--brand-slate-400)'
                     }}
                   >
-                    {labels[filterKey]}
+                    <X size={14} />
                   </button>
-                );
-              })}
+                )}
+              </div>
+              {searchQuery.trim() && (
+                <span style={{ fontSize: '11px', color: 'var(--brand-slate-600)', whiteSpace: 'nowrap' }}>
+                  {filteredSearchSeats.length} {t('seats highlighted', 'সিট হাইলাইট করা হয়েছে', lang)}
+                </span>
+              )}
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {(['all', 'occupied', 'vacated', 'mine', 'empty'] as const).map(filterKey => {
+                  const isActive = seatFilter === filterKey;
+                  const labels: Record<string, string> = {
+                    all: t('All (52)', 'সব (৫২)', lang),
+                    occupied: t(`Occupied (${occupiedCount})`, `পূর্ণ (${occupiedCount})`, lang),
+                    vacated: t(`Free (${vacatedCount})`, `ফাঁকা (${vacatedCount})`, lang),
+                    mine: t('My Seat', 'আমার সিট', lang),
+                    empty: t(`Empty (${emptyCount})`, `খালি (${emptyCount})`, lang),
+                  };
+                  return (
+                    <button
+                      key={filterKey}
+                      type="button"
+                      onClick={() => setSeatFilter(filterKey)}
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '5px',
+                        fontSize: '10.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        border: isActive ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
+                        background: isActive ? 'var(--brand-crimson)' : 'transparent',
+                        color: isActive ? 'var(--text-on-brand)' : 'var(--brand-slate-600)'
+                      }}
+                    >
+                      {labels[filterKey]}
+                    </button>
+                  );
+                })}
+              </div>
+              {(canManageBus || activePerspective === 'staff') && (
+                <>
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    style={{ fontSize: '11px', padding: '5px 12px' }}
+                    onClick={() => {
+                      const firstEmpty = seats.find(s => s.status === 'empty') || seats.find(s => s.status === 'vacated') || seats[11];
+                      handleOpenBookModal(firstEmpty);
+                    }}
+                  >
+                    <UserPlus size={13} /> {t('Book / Reserve Empty Seat', 'খালি সিট বুক করুন', lang)}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-outline"
+                    style={{ fontSize: '11px', padding: '5px 10px' }}
+                    onClick={() => {
+                      setSelectedSeat(seats.find(s => s.num === 5) || seats[4]);
+                      setShowSwapModal(true);
+                    }}
+                  >
+                    <ArrowUpDown size={13} /> {t('Request Seat Swap', 'সিট সোয়াপ আবেদন', lang)}
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

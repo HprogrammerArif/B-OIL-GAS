@@ -5322,6 +5322,36 @@ abstract class AppL10n {
   /// **'Stamp'**
   String get nsSignStamp;
 
+  /// No description provided for @nsSignUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get nsSignUpload;
+
+  /// No description provided for @nsSignUploadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose signature image'**
+  String get nsSignUploadHint;
+
+  /// No description provided for @nsSignUploadSub.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG or JPG from device gallery or files'**
+  String get nsSignUploadSub;
+
+  /// No description provided for @nsSignErrUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a signature image first.'**
+  String get nsSignErrUpload;
+
+  /// No description provided for @nsSignChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get nsSignChange;
+
   /// No description provided for @nsSignTypedLabel.
   ///
   /// In en, this message translates to:

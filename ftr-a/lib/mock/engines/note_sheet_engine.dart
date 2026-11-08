@@ -17,7 +17,7 @@ abstract final class NoteSheetPolicy {
   static const maxQuotes = 6;
   static const urgencies = {'NORMAL', 'HIGH', 'CRITICAL'};
   static const confidentiality = {'INTERNAL', 'CONFIDENTIAL', 'SECRET'};
-  static const signMethods = {'DRAWN', 'TYPED', 'STAMP'};
+  static const signMethods = {'DRAWN', 'TYPED', 'STAMP', 'UPLOADED'};
 
   /// The pitch app has no SMS gateway; this code stands in for the OTP.
   static const demoOtp = '123456';
@@ -384,9 +384,14 @@ abstract final class NoteSheetEngine {
       throw validationError('method', 'Choose how to sign');
     }
     final image = body['imageFileId'];
-    if (method == 'DRAWN' &&
+    if ((method == 'DRAWN' || method == 'UPLOADED') &&
         (image is! String || store.get(Col.files, image) == null)) {
-      throw validationError('imageFileId', 'Draw your signature');
+      throw validationError(
+        'imageFileId',
+        method == 'DRAWN'
+            ? 'Draw your signature'
+            : 'Upload your signature image',
+      );
     }
     if (!skipOtp) {
       final otp = body['otp'];
