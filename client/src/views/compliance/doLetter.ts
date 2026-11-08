@@ -1,6 +1,6 @@
 import { nextRef } from '../../lib/refs';
 import { today, nowStamp } from '../../lib/clock';
-import type { LicenseCard } from '../../store/operationsStore';
+import { parcelPhotoFor, type LicenseCard } from '../../store/operationsStore';
 import type { ParcelItem } from '../ParcelView';
 import { t, type Lang } from '../../types';
 
@@ -114,6 +114,8 @@ export function makeCourierParcel(lic: LicenseCard, memo: string, actor: string,
     receiverDept: lic.agency,
     destination: lic.ministryAddress,
     contents: `DO letter ${memo} — ${lic.title} (${lic.refNo})`,
+    photo: parcelPhotoFor('legal_docs'),
+    photos: [parcelPhotoFor('legal_docs')],
     category: 'legal_docs',
     weight: '0.4 kg',
     declaredValue: 'Confidential',

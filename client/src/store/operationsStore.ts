@@ -900,6 +900,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Sales Desk, Level 4, Head Office',
     contents: 'Approved Q3 Sales Performance Bonus Letter & Commission Statement',
+    photo: '/parcels/letter.jpg',
+    photos: ['/parcels/letter.jpg'],
     category: 'legal_docs',
     weight: '0.35 kg',
     declaredValue: 'Confidential HR / Finance Document',
@@ -974,6 +976,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Plant Operations',
     destination: 'Keraniganj Plant Office',
     contents: 'Signed Highway Bitumen Supply Contract (৳14.5 Crore) & Bank Guarantee Copies',
+    photo: '/parcels/contract.jpg',
+    photos: ['/parcels/contract.jpg'],
     category: 'legal_docs',
     weight: '0.65 kg',
     declaredValue: '৳14,50,00,000 Contract File',
@@ -1038,6 +1042,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Transport & Logistics',
     destination: 'Admin Office, Keraniganj Plant',
     contents: '15 Printed Staff ID Cards & Driver Uniform Allowance Vouchers',
+    photo: '/parcels/id-cards.jpg',
+    photos: ['/parcels/id-cards.jpg'],
     category: 'it_hardware',
     weight: '1.10 kg',
     declaredValue: '৳45,000',
@@ -1092,6 +1098,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Head Office, Baridhara',
     contents: 'BSTI Certified Bitumen Quality Test Reports & Road Sample Tins',
+    photo: '/parcels/sample-tins.jpg',
+    photos: ['/parcels/sample-tins.jpg'],
     category: 'qc_sample',
     weight: '1.20 kg',
     declaredValue: '৳50,000 (Tender Sample Set)',
@@ -1145,6 +1153,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: 'Sales & Distribution',
     destination: 'Head Office, Baridhara',
     contents: 'Liquid Bitumen Sample Jars (Batch #88)',
+    photo: '/parcels/sample-jars.jpg',
+    photos: ['/parcels/sample-jars.jpg'],
     category: 'qc_sample',
     weight: '0.80 kg',
     declaredValue: '৳15,000',
@@ -1210,6 +1220,8 @@ const INITIAL_PARCELS: ParcelItem[] = [
     receiverDept: "Chairman's Office",
     destination: 'Chairman Secretariat, Level 12, Head Office',
     contents: 'Monthly Group Financial Summary & Signed Bank L/C Documents',
+    photo: '/parcels/finance-folder.jpg',
+    photos: ['/parcels/finance-folder.jpg'],
     category: 'legal_docs',
     weight: '0.50 kg',
     declaredValue: 'Confidential Board Folder',
@@ -1252,6 +1264,19 @@ const INITIAL_PARCELS: ParcelItem[] = [
     ],
   },
 ];
+
+const PARCEL_CATEGORY_PHOTO: Record<ParcelItem['category'], string> = {
+  legal_docs: '/parcels/letter.jpg',
+  qc_sample: '/parcels/sample-tins.jpg',
+  refinery_spares: '/parcels/spares.jpg',
+  tender_bid: '/parcels/tender.jpg',
+  it_hardware: '/parcels/id-cards.jpg',
+};
+
+export function parcelPhotoFor(category: ParcelItem['category'], id?: string): string {
+  const seeded = id ? INITIAL_PARCELS.find((item) => item.id === id) : undefined;
+  return seeded?.photo ?? PARCEL_CATEGORY_PHOTO[category];
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
    4. VISITOR GATE PASSES
@@ -2092,6 +2117,11 @@ class OperationsStore {
     const saved = loadPersisted<OperationsSnapshot>(PERSIST_NAME, PERSIST_VERSION);
     if (saved) Object.assign(this, saved);
     this.licenses = this.licenses.map(normalizeLicense);
+    this.parcels = this.parcels.map((parcel) => {
+      const photo = parcel.photo || parcelPhotoFor(parcel.category, parcel.id);
+      const photos = parcel.photos?.length ? parcel.photos : [photo];
+      return { ...parcel, photo: photos[0], photos };
+    });
   }
 
   subscribe(listener: () => void): () => void {
