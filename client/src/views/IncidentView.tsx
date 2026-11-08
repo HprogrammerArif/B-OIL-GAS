@@ -789,10 +789,9 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
       {/* Find what you need: status chips, search, and the less-used filters */}
       <div className="card mb-4 inc-filters">
-        <div className="inc-chips">
+        <div className="inc-find">
           <select
             className="form-input"
-            style={{ minWidth: 220, fontSize: 12, padding: '5px 10px', height: 'auto' }}
             value={quick}
             onChange={(e) => setQuick(e.target.value as typeof quick)}
             aria-label={t('Show incidents', 'ঘটনা দেখান', lang)}
@@ -801,8 +800,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
               <option key={q.id} value={q.id}>{t(...q.label, lang)} ({q.count})</option>
             ))}
           </select>
-        </div>
-        <div className="inc-search">
+          <div className="inc-search">
           <Search size={15} />
           <input
             type="text"
@@ -815,6 +813,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
           {searchQuery && (
             <button type="button" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={15} /></button>
           )}
+          </div>
         </div>
         <details className="inc-more">
           <summary><Filter size={13} /> {t('More filters', 'আরও ফিল্টার', lang)}</summary>
