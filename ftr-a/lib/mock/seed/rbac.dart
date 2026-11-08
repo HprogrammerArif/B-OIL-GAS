@@ -167,10 +167,6 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('fleet:request', _self),
     _g('bus:read', _co),
     _g('bus:seat-self', _self),
-    _g('bus:manage', _co),
-    _g('bus:allocate', _co),
-    _g('bus:broadcast', _co),
-    _g('bus:manifest', _co),
     _g('visitors:read', _co),
     _g('visitors:create', _self),
     _g('visitors:gate', _site),
@@ -309,7 +305,6 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('compliance:dispatch-letter', _co),
     _g('visitors:read', _co),
     _g('visitors:approve', _co),
-    _g('fleet:read', _co),
     _g('incidents:read', _co),
     _g('attendance:read', _co),
     _g('employees:read', _co),
@@ -357,6 +352,9 @@ List<Json> grantsForRoles(List<String> roles) {
       'claims:advance',
       'fleet:request',
       'bus:seat-self',
+      'incidents:report',
+      'note-sheets:create',
+      'note-sheets:submit',
     ].forEach(byKey.remove);
   }
   return byKey.values.toList()

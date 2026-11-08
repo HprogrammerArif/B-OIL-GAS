@@ -50,9 +50,9 @@ Review in `app_bn.arb`: previous keys plus pre-hardening `search*`, `lock*Passwo
 
 After a data reset, each persona can finish the same acts as the web demo from Home:
 
-1. **Chairman (EMP-0001)** — Home files with Approve and Return, play the briefing; open a leadership room from Chat; search a person from another tab; dismiss the banner.
+1. **Chairman (EMP-0001)** — Home files with Approve and Return, play the briefing; open a leadership room from Chat; search a person from another tab; dismiss the banner. Safety is the full list, with no Report. Note-sheets are to sign, not to compose. Cars is not on the menu.
 2. **Plant GM (EMP-0012)** — Home lock-out release; scan an asset tag into its passport; open an incident; licence letter and certificate on the renewal.
-3. **HR (EMP-0028)** — Home exits and site counts, each opening People; team attendance; onboard with NID; publish a notice.
+3. **HR (EMP-0028)** — Home exits and site counts, each opening People; team attendance; onboard with NID; publish a notice. She can file a safety report and still sees every report. She can open the coach list; she does not register a bus, move one, or run the seat desk.
 4. **Transport (EMP-0045)** — Home cars waiting for a driver; register a car and enrol a driver; register a bus, move it, open the seat map.
 5. **HOD Finance (EMP-0062)** — Home waiting list with Approve and Return; reject with one sentence the requester sees.
 6. **Employee (EMP-1042)** — Home punch line opens attendance; leave, claims, and visitors are the shortcuts. Claim, bus seat, and parcel stay in those modules.

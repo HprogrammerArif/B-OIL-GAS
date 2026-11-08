@@ -574,16 +574,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canSeat = session?.can('bus:seat-self') ?? false;
-    final canManage =
-        (session?.can('bus:manage') ?? false) ||
-        (session?.roleKeys.any(
-              (r) =>
-                  r == 'TRANSPORT_ADMIN' ||
-                  r == 'HR_ADMIN' ||
-                  r == 'CHAIRMAN' ||
-                  r == 'PLANT_GM',
-            ) ??
-            false);
+    final canManage = session?.can('bus:manage') ?? false;
     final scheme = Theme.of(context).colorScheme;
     final effectiveTab = (!canSeat && _tab == _BusTab.mySeat)
         ? _BusTab.fleetAndDeck
