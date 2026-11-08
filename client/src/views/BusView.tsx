@@ -70,8 +70,7 @@ export default function BusView({ role, lang }: ViewProps) {
 
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(() => seats.find(s => s.num === 5) ?? seats[0] ?? null);
 
-  // Filters & Tabs
-  const [seatFilter, setSeatFilter] = useState<'all' | 'occupied' | 'vacated' | 'empty' | 'mine'>('all');
+  // Tabs
   const [activeTab, setActiveTab] = useState<'dossier' | 'fifo' | 'route' | 'driver' | 'roster'>('dossier');
 
   // Search & Highlighting State
@@ -1129,45 +1128,33 @@ export default function BusView({ role, lang }: ViewProps) {
           )}
 
           <div style={{ marginBottom: '12px' }}>
-            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-              {Object.values(routes).map((route: RouteInfo) => {
-                const isSelected = route.id === selectedRouteKey;
-                return (
-                  <button
-                    key={route.id}
-                    type="button"
-                    onClick={() => handleSelectRoute(route.id)}
-                    title={`${route.coachNo} · ${route.name}`}
-                    style={{
-                      background: isSelected ? 'var(--surface-1)' : 'var(--brand-slate-100)',
-                      color: isSelected ? 'var(--brand-slate-900)' : 'var(--brand-slate-500)',
-                      border: '1px solid var(--brand-slate-300)',
-                      padding: '5px 10px',
-                      borderRadius: '8px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
-                    }}
-                  >
-                    {routeChipLabel(route.name)}
-                  </button>
-                );
-              })}
-            </div>
+            <label htmlFor="shuttle-coach">
+              {t('Coach', 'কোচ', lang)}
+            </label>
+            <select
+              id="shuttle-coach"
+              value={selectedRouteKey}
+              onChange={e => handleSelectRoute(e.target.value)}
+            >
+              {Object.values(routes).map((route: RouteInfo) => (
+                <option key={route.id} value={route.id}>
+                  {routeChipLabel(route.name)}
+                </option>
+              ))}
+            </select>
             {(() => {
               const stops = commuteDirection === 'inbound' ? activeRoute.inboundStops : activeRoute.outboundStops;
               const first = stops[0];
               const last = stops[stops.length - 1];
               return (
                 <div style={{ marginTop: '6px', fontSize: '12px', color: 'var(--brand-slate-600)' }}>
-                  {t('Departs', 'ছাড়ে', lang)} {first ? `${first.scheduledTime} · ${first.name}` : '—'}
-                  {' · '}
-                  {t('Arrives', 'পৌঁছায়', lang)} {last?.scheduledTime ?? '—'}
-                  {' · '}
-                  {t(`${stops.length} stops`, `${stops.length}টি স্টপ`, lang)}
+                  {first
+                    ? t(
+                        `Leaves ${first.scheduledTime} from ${first.name}. Arrives ${last?.scheduledTime ?? '—'}.`,
+                        `${first.scheduledTime}-এ ${first.name} থেকে ছাড়ে। ${last?.scheduledTime ?? '—'}-এ পৌঁছায়।`,
+                        lang,
+                      )
+                    : '—'}
                 </div>
               );
             })()}
@@ -1177,29 +1164,29 @@ export default function BusView({ role, lang }: ViewProps) {
       <div className="bus-two-col-layout">
         {/* LEFT COLUMN: 52-Seater Coach Cabin Deck */}
         <div className="card">
-          <div className="card-hd" style={{ flexWrap: 'wrap', gap: '10px' }}>
+          <div className="card-hd" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px' }}>
             <div className="card-hd-left">
               <div className="card-hd-icon" style={{ background: 'rgba(212, 175, 55, 0.15)', color: 'var(--brand-gold)' }}>
                 <Bus size={18} />
               </div>
               <div>
                 <div className="card-title">
-                  {t('52-Seater Executive Coach Cabin Deck', '৫২-সিটার এক্সিকিউটিভ কোচ ক্যাবিন বিন্যাস', lang)}
+                  {t('Seat map', 'সিট ম্যাপ', lang)}
                 </div>
                 <div className="card-subtitle">
-                  {activeRoute.model} · {activeRoute.coachNo}
+                  {activeRoute.coachNo}
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flex: '1 1 320px', justifyContent: 'flex-end' }}>
-              <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '160px', maxWidth: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ position: 'relative', flex: '1 1 auto', minWidth: 0 }}>
                 <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
                 <input
                   type="text"
                   className="input-text"
                   style={{ width: '100%', paddingLeft: '32px', height: '32px', fontSize: '12px' }}
-                  placeholder={t('Search passenger by name, staff ID, dept, or blood group...', 'যাত্রী খুঁজুন (নাম, আইডি, বিভাগ, রক্তের গ্রুপ)...', lang)}
+                  placeholder={t('Search by name', 'নাম দিয়ে খুঁজুন', lang)}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
@@ -1207,6 +1194,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
+                    aria-label={t('Clear search', 'খোঁজ মুছুন', lang)}
                     style={{
                       position: 'absolute',
                       right: '8px',
@@ -1226,64 +1214,33 @@ export default function BusView({ role, lang }: ViewProps) {
                   {filteredSearchSeats.length} {t('seats highlighted', 'সিট হাইলাইট করা হয়েছে', lang)}
                 </span>
               )}
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {(['all', 'occupied', 'vacated', 'mine', 'empty'] as const).map(filterKey => {
-                  const isActive = seatFilter === filterKey;
-                  const labels: Record<string, string> = {
-                    all: t('All (52)', 'সব (৫২)', lang),
-                    occupied: t(`Occupied (${occupiedCount})`, `পূর্ণ (${occupiedCount})`, lang),
-                    vacated: t(`Free (${vacatedCount})`, `ফাঁকা (${vacatedCount})`, lang),
-                    mine: t('My Seat', 'আমার সিট', lang),
-                    empty: t(`Empty (${emptyCount})`, `খালি (${emptyCount})`, lang),
-                  };
-                  return (
-                    <button
-                      key={filterKey}
-                      type="button"
-                      onClick={() => setSeatFilter(filterKey)}
-                      style={{
-                        padding: '3px 8px',
-                        borderRadius: '5px',
-                        fontSize: '10.5px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        border: isActive ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                        background: isActive ? 'var(--brand-crimson)' : 'transparent',
-                        color: isActive ? 'var(--text-on-brand)' : 'var(--brand-slate-600)'
-                      }}
-                    >
-                      {labels[filterKey]}
-                    </button>
-                  );
-                })}
-              </div>
-              {(canManageBus || activePerspective === 'staff') && (
-                <>
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{ fontSize: '11px', padding: '5px 12px' }}
-                    onClick={() => {
-                      const firstEmpty = seats.find(s => s.status === 'empty') || seats.find(s => s.status === 'vacated') || seats[11];
-                      handleOpenBookModal(firstEmpty);
-                    }}
-                  >
-                    <UserPlus size={13} /> {t('Book / Reserve Empty Seat', 'খালি সিট বুক করুন', lang)}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-outline"
-                    style={{ fontSize: '11px', padding: '5px 10px' }}
-                    onClick={() => {
-                      setSelectedSeat(seats.find(s => s.num === 5) || seats[4]);
-                      setShowSwapModal(true);
-                    }}
-                  >
-                    <ArrowUpDown size={13} /> {t('Request Seat Swap', 'সিট সোয়াপ আবেদন', lang)}
-                  </button>
-                </>
-              )}
             </div>
+            {(canManageBus || activePerspective === 'staff') && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  style={{ fontSize: '11px', padding: '5px 12px' }}
+                  onClick={() => {
+                    const firstEmpty = seats.find(s => s.status === 'empty') || seats.find(s => s.status === 'vacated') || seats[11];
+                    handleOpenBookModal(firstEmpty);
+                  }}
+                >
+                  <UserPlus size={13} /> {t('Book / Reserve Empty Seat', 'খালি সিট বুক করুন', lang)}
+                </button>
+                <button
+                  type="button"
+                  className="btn-outline"
+                  style={{ fontSize: '11px', padding: '5px 10px' }}
+                  onClick={() => {
+                    setSelectedSeat(seats.find(s => s.num === 5) || seats[4]);
+                    setShowSwapModal(true);
+                  }}
+                >
+                  <ArrowUpDown size={13} /> {t('Request Seat Swap', 'সিট সোয়াপ আবেদন', lang)}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="card-body" style={{ padding: '16px' }}>
@@ -1327,14 +1284,6 @@ export default function BusView({ role, lang }: ViewProps) {
                     const isBoarded = s.boarded;
 
                     // Match active filter
-                    const matchesFilter =
-                      seatFilter === 'all' ||
-                      (seatFilter === 'occupied' && isOccupied) ||
-                      (seatFilter === 'vacated' && isVacated) ||
-                      (seatFilter === 'mine' && isMine) ||
-                      (seatFilter === 'empty' && isEmpty);
-
-                    // Match search query
                     const matchesSearch =
                       !searchQuery.trim() ||
                       filteredSearchSeats.some(fs => fs.num === s.num);
@@ -1362,8 +1311,8 @@ export default function BusView({ role, lang }: ViewProps) {
                         key={s.num}
                         className={cellClasses}
                         style={{
-                          opacity: matchesFilter && matchesSearch ? 1 : 0.22,
-                          transform: matchesFilter && matchesSearch ? (matchesSearch && searchQuery ? 'scale(1.05)' : undefined) : 'scale(0.92)',
+                          opacity: matchesSearch ? 1 : 0.22,
+                          transform: matchesSearch && searchQuery ? 'scale(1.05)' : undefined,
                           boxShadow: matchesSearch && searchQuery ? '0 0 10px var(--status-info)' : undefined,
                           borderColor: matchesSearch && searchQuery ? 'var(--status-info)' : undefined
                         }}
@@ -1591,10 +1540,7 @@ export default function BusView({ role, lang }: ViewProps) {
                   </div>
                   <div>
                     <div className="card-title">
-                      {t(`Seat #${String(selectedSeat.num).padStart(2, '0')} (${selectedSeat.col.replace('_', ' ').toUpperCase()})`, `সিট #${selectedSeat.num}`, lang)}
-                    </div>
-                    <div className="card-subtitle">
-                      Row {selectedSeat.row} · {selectedSeat.assignedTo || t('Unassigned Empty Seat', 'খালি আসন', lang)}
+                      {t(`Seat ${selectedSeat.num}`, `সিট ${selectedSeat.num}`, lang)}
                     </div>
                   </div>
                 </div>
@@ -1644,38 +1590,18 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
 
                 {/* Key Passenger Metadata Table */}
-                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Assigned Route', 'বরাদ্দকৃত রুট', lang)}:</span>
-                    <strong>{activeRoute.name}</strong>
+                <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-500)' }}>{t('Pickup stop', 'পিকআপ স্টপ', lang)}</div>
+                    <div style={{ fontWeight: 600, marginTop: '2px' }}>
+                      {selectedSeat.pickupPoint || t('Not set', 'নির্ধারিত নয়', lang)}
+                    </div>
                   </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Pickup Stop', 'পিকআপ স্টপ', lang)}:</span>
-                    <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <MapPin size={12} color="var(--brand-crimson)" />
-                      {selectedSeat.pickupPoint || 'Mirpur-10 / Farmgate'}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Scheduled Boarding', 'বোর্ডিং সময়', lang)}:</span>
-                    <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <Clock size={12} color="var(--brand-gold)" />
+                  <div>
+                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--brand-slate-500)' }}>{t('Boarding time', 'বোর্ডিং সময়', lang)}</div>
+                    <div style={{ fontWeight: 600, marginTop: '2px' }}>
                       {selectedSeat.pickupTime || (commuteDirection === 'inbound' ? '07:18 AM' : '05:15 PM')}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Blood Group', 'রক্তের গ্রুপ', lang)}:</span>
-                    <span className="badge danger" style={{ fontSize: '10px' }}>{selectedSeat.bloodGroup || 'B+'}</span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid var(--brand-slate-100)' }}>
-                    <span style={{ color: 'var(--brand-slate-500)' }}>{t('Booking Category', 'বুকিং ক্যাটাগরি', lang)}:</span>
-                    <span className="badge purple" style={{ fontSize: '10px' }}>
-                      {selectedSeat.bookingType === 'shift_pass' ? t('Single Shift Pass', 'সিঙ্গেল শিফট পাস', lang) : t('Permanent Roster', 'স্থায়ী রোস্টার', lang)}
-                    </span>
+                    </div>
                   </div>
 
                   {selectedSeat.assignedTo && (
