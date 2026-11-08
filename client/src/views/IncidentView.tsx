@@ -20,7 +20,7 @@ import {
 import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, AlertOctagon, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip,
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -112,6 +112,20 @@ async function toSpotFile(file: File): Promise<IncidentSpotFile> {
   };
 }
 
+const EMERGENCY_KINDS: {
+  id: 'fire' | 'spill' | 'gas' | 'medical' | 'evacuation';
+  type: IncidentType;
+  en: string;
+  bn: string;
+  photo?: string;
+}[] = [
+  { id: 'fire', type: 'fire_thermal', en: 'Fire', bn: 'আগুন' },
+  { id: 'spill', type: 'spill_leak', en: 'Spill or leak', bn: 'নিঃসরণ বা লিক' },
+  { id: 'gas', type: 'pressure_piping', en: 'Gas or pressure', bn: 'গ্যাস বা চাপ' },
+  { id: 'medical', type: 'medical_treatment', en: 'Medical', bn: 'চিকিৎসা' },
+  { id: 'evacuation', type: 'near_miss', en: 'Evacuation', bn: 'সরিয়ে নেওয়া', photo: '/incidents/gate-barrier.jpg' },
+];
+
 export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const {
     incidents,
@@ -201,6 +215,14 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [quickHazardZone, setQuickHazardZone] = useState('Circulation Pump House, Unit-2');
   const [quickHazardDesc, setQuickHazardDesc] = useState('');
   const [quickHazardFix, setQuickHazardFix] = useState('');
+  const [quickHazardFiles, setQuickHazardFiles] = useState<IncidentSpotFile[]>([]);
+  const hazardFileInputRef = useRef<HTMLInputElement>(null);
+  const hazardCameraInputRef = useRef<HTMLInputElement>(null);
+
+  const [emergencyKind, setEmergencyKind] = useState<'fire' | 'spill' | 'gas' | 'medical' | 'evacuation'>('fire');
+  const [emergencyZone, setEmergencyZone] = useState('');
+  const [emergencyWhat, setEmergencyWhat] = useState('');
+  const [emergencyLine, setEmergencyLine] = useState<{ kind: string; kindBn: string; place: string; time: string } | null>(null);
 
   // ── 5-Whys & Fishbone State (Modal 3) ──
   const [rcaSubTab, setRcaSubTab] = useState<'5whys' | 'fishbone'>('5whys');
@@ -403,9 +425,13 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   };
 
   // ─────────────────────────────────────────────────────────────────────────
-  const addSpotFiles = async (list: FileList | null) => {
+  const addSpotFiles = async (
+    list: FileList | null,
+    current: IncidentSpotFile[],
+    setFiles: React.Dispatch<React.SetStateAction<IncidentSpotFile[]>>,
+  ) => {
     if (!list || list.length === 0) return;
-    const room = MAX_SPOT_FILES - wizardSpotFiles.length;
+    const room = MAX_SPOT_FILES - current.length;
     if (room <= 0) {
       showToast(t(`You can attach up to ${MAX_SPOT_FILES} files.`, `সর্বোচ্চ ${MAX_SPOT_FILES}টি ফাইল যুক্ত করা যায়।`, lang), 'warn');
       return;
@@ -428,7 +454,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       }
     }
     if (next.length > 0) {
-      setWizardSpotFiles((prev) => [...prev, ...next]);
+      setFiles((prev) => [...prev, ...next]);
       showToast(
         t(
           next.length === 1 ? `${next[0].name} attached.` : `${next.length} files attached.`,
@@ -561,6 +587,75 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     );
   };
 
+  const closeEmergency = () => {
+    setShowEmergencyModal(false);
+    setEmergencyKind('fire');
+    setEmergencyZone('');
+    setEmergencyWhat('');
+  };
+
+  const handleSendEmergency = () => {
+    if (!emergencyZone || !emergencyWhat.trim()) return;
+    const kind = EMERGENCY_KINDS.find((item) => item.id === emergencyKind) ?? EMERGENCY_KINDS[0];
+    const incRef = nextRef('INC');
+    const photo = kind.photo ?? incidentPhotoFor(kind.type);
+    const legacyCategory =
+      kind.type === 'spill_leak' ? 'spill' :
+      kind.type === 'pressure_piping' ? 'pressure' :
+      kind.type === 'fire_thermal' ? 'fire' : 'near_miss';
+    const statutory = kind.id === 'fire' || kind.id === 'spill' || kind.id === 'gas';
+    const sentAt = nowTime();
+    addIncident({
+      id: incRef,
+      incNo: incRef,
+      title: `${kind.en}: ${emergencyWhat.trim()}`,
+      titleBn: `${kind.bn}: ${emergencyWhat.trim()}`,
+      incidentType: kind.type,
+      category: legacyCategory,
+      level: 4,
+      likelihood: 3,
+      riskScore: 12,
+      riskCategory: 'high',
+      plantZone: emergencyZone,
+      location: `${emergencyZone}, Keraniganj Complex`,
+      shift: 'Morning Shift (07:00 - 15:00)',
+      reportedBy: `${currentPersona.name} (${currentPersona.label})`,
+      reporterEmpId: currentPersona.empId,
+      date: `${SYSTEM_TODAY}, ${sentAt}`,
+      workflowStage: 'reported',
+      immediateActionsTaken: emergencyWhat.trim(),
+      rootCause: 'Site emergency alert. Cause not yet investigated.',
+      capaItems: [{
+        id: nextRef('CAPA', 3),
+        actionType: 'immediate_containment',
+        description: emergencyWhat.trim(),
+        owner: 'Plant safety team',
+        dueDate: SYSTEM_TODAY,
+        priority: 'high',
+        status: 'pending',
+      }],
+      capaAction: emergencyWhat.trim(),
+      capaOwner: 'Plant safety team',
+      capaStatus: 'open',
+      statutoryReportable: statutory,
+      statutoryAgency: statutory ? 'Department of Explosives (DoE)' : undefined,
+      statutoryNoticeHours: statutory ? 24 : undefined,
+      evidenceAttached: false,
+      photo,
+      photos: [photo],
+    });
+    setEmergencyLine({ kind: kind.en, kindBn: kind.bn, place: emergencyZone, time: sentAt });
+    closeEmergency();
+    showToast(
+      t(
+        `Emergency alert sent at ${sentAt}. Muster roll call started.`,
+        `${nowTime(lang)}-এ জরুরি সতর্কবার্তা পাঠানো হয়েছে। হাজিরা গণনা শুরু হয়েছে।`,
+        lang,
+      ),
+      'danger',
+    );
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
   // Quick Hazard Observation Submit (Modal 2)
   // ─────────────────────────────────────────────────────────────────────────
@@ -571,7 +666,10 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     }
 
     const incRef = nextRef('INC');
-    const photo = incidentPhotoFor('hazard_observation');
+    const imagePhotos = quickHazardFiles
+      .filter((file) => file.mime.startsWith('image/'))
+      .map((file) => file.dataUrl);
+    const photos = imagePhotos.length > 0 ? imagePhotos : [incidentPhotoFor('hazard_observation')];
     const newInc: IncidentItem = {
       id: incRef,
       incNo: incRef,
@@ -607,9 +705,10 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       capaOwner: 'Plant Maintenance Team',
       capaStatus: 'open',
       statutoryReportable: false,
-      evidenceAttached: false,
-      photo,
-      photos: [photo],
+      evidenceAttached: quickHazardFiles.length > 0,
+      spotFiles: quickHazardFiles,
+      photo: photos[0],
+      photos,
     };
 
     addIncident(newInc);
@@ -617,6 +716,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     setQuickHazardTitle('');
     setQuickHazardDesc('');
     setQuickHazardFix('');
+    setQuickHazardFiles([]);
 
     showToast(
       t(
@@ -816,6 +916,21 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
         <span>{verdict}</span>
       </p>
+      {emergencyLine && (
+        <div className="inc-emergency-line" role="status">
+          <Siren size={16} />
+          <span>
+            {t(
+              `Emergency alert at ${emergencyLine.time}: ${emergencyLine.kind} at ${emergencyLine.place}. Muster roll call started.`,
+              `${emergencyLine.time}-এ জরুরি সতর্কবার্তা: ${emergencyLine.kindBn}, ${emergencyLine.place}। হাজিরা গণনা শুরু হয়েছে।`,
+              lang,
+            )}
+          </span>
+          <Button variant="outline-danger" size="sm" onClick={() => setEmergencyLine(null)}>
+            {t('Stand down', 'সতর্কতা তুলে নিন', lang)}
+          </Button>
+        </div>
+      )}
 
       {/* Find what you need: status chips, search, and the less-used filters */}
       <div className="card mb-4 inc-filters">
@@ -1331,7 +1446,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 accept="image/*"
                 capture="environment"
                 hidden
-                onChange={(e) => { void addSpotFiles(e.target.files); e.target.value = ''; }}
+                onChange={(e) => { void addSpotFiles(e.target.files, wizardSpotFiles, setWizardSpotFiles); e.target.value = ''; }}
               />
               <input
                 ref={spotFileInputRef}
@@ -1339,7 +1454,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 accept="image/*,application/pdf,.pdf"
                 multiple
                 hidden
-                onChange={(e) => { void addSpotFiles(e.target.files); e.target.value = ''; }}
+                onChange={(e) => { void addSpotFiles(e.target.files, wizardSpotFiles, setWizardSpotFiles); e.target.value = ''; }}
               />
               <div className="inc-spot-actions">
                 <Button type="button" variant="secondary" icon={<Camera size={14} />} onClick={() => spotCameraInputRef.current?.click()}>
@@ -1380,7 +1495,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
       {/* ─── MODAL 2: 1-MINUTE GOOD CATCH / HAZARD REPORTER ─── */}
       {showQuickHazardModal && (
-        <div className="modal-bg" onClick={() => setShowQuickHazardModal(false)}>
+        <div className="modal-bg" onClick={() => { setShowQuickHazardModal(false); setQuickHazardFiles([]); }}>
           <div className="modal" style={{ maxWidth: '520px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd" style={{ background: 'var(--status-purple-solid)', color: 'var(--text-on-brand)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1389,7 +1504,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                   {t('1-Minute "Good Catch" / Hazard Observation', '১-মিনিট বিপদ ও নিয়ার-মিস পর্যবেক্ষণ রিপোর্ট', lang)}
                 </h3>
               </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowQuickHazardModal(false)}>×</button>
+              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => { setShowQuickHazardModal(false); setQuickHazardFiles([]); }}>×</button>
             </div>
 
             <div className="modal-body">
@@ -1442,10 +1557,65 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                   onChange={(e) => setQuickHazardFix(e.target.value)}
                 />
               </div>
+
+              <div className="inc-spot-attach">
+                <div className="inc-spot-label">{t('Photos or files of the spot', 'ঘটনাস্থলের ছবি বা ফাইল', lang)}</div>
+                <p className="inc-spot-hint">
+                  {t('Take a photo or attach a picture or PDF from this phone. Up to 6 files.', 'এই ফোন থেকে ছবি তুলুন, অথবা ছবি বা PDF যুক্ত করুন। সর্বোচ্চ ৬টি।', lang)}
+                </p>
+                <input
+                  ref={hazardCameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  hidden
+                  onChange={(e) => { void addSpotFiles(e.target.files, quickHazardFiles, setQuickHazardFiles); e.target.value = ''; }}
+                />
+                <input
+                  ref={hazardFileInputRef}
+                  type="file"
+                  accept="image/*,application/pdf,.pdf"
+                  multiple
+                  hidden
+                  onChange={(e) => { void addSpotFiles(e.target.files, quickHazardFiles, setQuickHazardFiles); e.target.value = ''; }}
+                />
+                <div className="inc-spot-actions">
+                  <Button type="button" variant="secondary" icon={<Camera size={14} />} onClick={() => hazardCameraInputRef.current?.click()}>
+                    {t('Take a photo', 'ছবি তুলুন', lang)}
+                  </Button>
+                  <Button type="button" variant="ghost" icon={<Paperclip size={14} />} onClick={() => hazardFileInputRef.current?.click()}>
+                    {t('Choose files', 'ফাইল বেছে নিন', lang)}
+                  </Button>
+                </div>
+                {quickHazardFiles.length > 0 && (
+                  <div className="inc-spot-grid">
+                    {quickHazardFiles.map((file) => (
+                      <div key={file.id} className="inc-spot-item">
+                        {file.mime === 'application/pdf' ? (
+                          <div className="inc-spot-pdf">
+                            <Paperclip size={14} />
+                            <span>{file.name}</span>
+                          </div>
+                        ) : (
+                          <img src={file.dataUrl} alt={file.name} />
+                        )}
+                        <button
+                          type="button"
+                          className="inc-spot-remove"
+                          aria-label={t(`Remove ${file.name}`, `${file.name} সরান`, lang)}
+                          onClick={() => setQuickHazardFiles((prev) => prev.filter((f) => f.id !== file.id))}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setShowQuickHazardModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button className="btn-sm-ghost" onClick={() => { setShowQuickHazardModal(false); setQuickHazardFiles([]); }}>{t('Cancel', 'বাতিল', lang)}</button>
               <button
                 type="button"
                 className="btn-primary"
@@ -2085,52 +2255,71 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
       {/* ─── MODAL 7: SITE EMERGENCY ALERT ─── */}
       {showEmergencyModal && canInvestigate && (
-        <div className="modal-bg" onClick={() => setShowEmergencyModal(false)}>
+        <div className="modal-bg" onClick={closeEmergency}>
           <div className="modal" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-hd" style={{ background: 'var(--status-danger-solid-dark)', color: 'var(--text-on-brand)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertOctagon size={20} color="var(--status-warning-bright)" />
-                <h3 style={{ color: 'var(--text-on-brand)', margin: 0 }}>
-                  {t('Raise Site Emergency Alert', 'সাইট জরুরি সতর্কবার্তা পাঠান', lang)}
-                </h3>
-              </div>
-              <button className="modal-close" style={{ color: 'var(--text-on-brand)' }} onClick={() => setShowEmergencyModal(false)}>×</button>
+            <div className="modal-hd danger">
+              <h3>
+                <Siren size={18} />
+                {t('Site emergency alert', 'সাইট জরুরি সতর্কবার্তা', lang)}
+              </h3>
+              <button className="modal-close" onClick={closeEmergency}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--status-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                  <Siren size={30} color="var(--status-danger)" />
-                </div>
-                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', maxWidth: '420px', margin: '0 auto' }}>
-                  {t(
-                    'Sends an urgent notification to the emergency response team and starts a muster roll call. Follow the plant emergency procedure for physical shutdown.',
-                    'জরুরি সাড়াদান দলের কাছে তাৎক্ষণিক বার্তা পাঠাবে এবং হাজিরা গণনা শুরু করবে। প্ল্যান্ট বন্ধের জন্য জরুরি কার্যপ্রণালী অনুসরণ করুন।',
-                    lang
-                  )}
-                </p>
+              <p style={{ margin: '0 0 14px', fontSize: '13px', lineHeight: 1.45 }}>
+                {t(
+                  'This tells the plant manager, the chairman’s office, and the gate supervisors, and starts a muster roll call.',
+                  'এটি প্ল্যান্ট ম্যানেজার, চেয়ারম্যানের দপ্তর ও গেট তত্ত্বাবধায়কদের জানায় এবং হাজিরা গণনা শুরু করে।',
+                  lang,
+                )}
+              </p>
+
+              <div className="form-group mb-3">
+                <label>{t('What is it?', 'এটি কী?', lang)}</label>
+                <select className="form-input" value={emergencyKind} onChange={(e) => setEmergencyKind(e.target.value as typeof emergencyKind)}>
+                  {EMERGENCY_KINDS.map((kind) => (
+                    <option key={kind.id} value={kind.id}>{t(kind.en, kind.bn, lang)}</option>
+                  ))}
+                </select>
               </div>
 
-              <div style={{ background: 'var(--status-warning-bg)', border: '1px solid var(--status-warning-border)', padding: '12px', borderRadius: '6px', fontSize: '12px' }}>
-                <div style={{ fontWeight: 700, color: 'var(--status-warning-text)', marginBottom: '6px' }}>{t('Who is notified', 'যাদের জানানো হবে', lang)}</div>
-                <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--status-warning-text)', lineHeight: 1.6 }}>
-                  <li>{t('Plant General Manager', 'প্ল্যান্ট জেনারেল ম্যানেজার', lang)}</li>
-                  <li>{t("Chairman's Office", 'চেয়ারম্যানের দপ্তর', lang)}</li>
-                  <li>{t('Transport and gate supervisors (for muster roll call)', 'পরিবহন ও গেট তত্ত্বাবধায়ক (হাজিরা গণনার জন্য)', lang)}</li>
-                </ul>
+              <div className="form-group mb-3">
+                <label>{t('Where?', 'কোথায়?', lang)}</label>
+                <select className="form-input" value={emergencyZone} onChange={(e) => setEmergencyZone(e.target.value)}>
+                  <option value="">{t('Choose the area', 'এলাকা বেছে নিন', lang)}</option>
+                  {PLANT_ZONES.filter((zone) => zone !== 'All Plant Zones').map((zone) => (
+                    <option key={zone} value={zone}>{zone}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group mb-3">
+                <label>{t('What is happening?', 'কী হচ্ছে?', lang)}</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={emergencyWhat}
+                  onChange={(e) => setEmergencyWhat(e.target.value)}
+                  placeholder={t('e.g. Smoke from the pump house', 'যেমন: পাম্প হাউস থেকে ধোঁয়া', lang)}
+                />
+              </div>
+
+              <div style={{ fontSize: '12.5px', lineHeight: 1.55 }}>
+                <div style={{ fontWeight: 700, marginBottom: '4px' }}>{t('Who is told', 'যাদের জানানো হবে', lang)}</div>
+                <div>{t('Plant General Manager', 'প্ল্যান্ট জেনারেল ম্যানেজার', lang)}</div>
+                <div>{t("Chairman's Office", 'চেয়ারম্যানের দপ্তর', lang)}</div>
+                <div>{t('Transport and gate supervisors, for the muster roll call', 'পরিবহন ও গেট তত্ত্বাবধায়ক, হাজিরা গণনার জন্য', lang)}</div>
               </div>
             </div>
 
             <div className="modal-ft">
-              <button className="btn-sm-ghost" onClick={() => setShowEmergencyModal(false)}>{t('Cancel', 'বাতিল', lang)}</button>
+              <button className="btn-sm-ghost" onClick={closeEmergency}>{t('Cancel', 'বাতিল', lang)}</button>
               <button
                 type="button"
                 className="btn-danger"
-                style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontWeight: 800 }}
-                onClick={() => {
-                  setShowEmergencyModal(false);
-                  showToast(t(`Emergency alert sent at ${nowTime()}. Muster roll call started.`, `${nowTime(lang)}-এ জরুরি সতর্কবার্তা পাঠানো হয়েছে। হাজিরা গণনা শুরু হয়েছে।`, lang), 'danger');
-                }}
+                style={{ background: 'var(--status-danger-solid)', color: 'var(--text-on-brand)', fontWeight: 800, opacity: !emergencyZone || !emergencyWhat.trim() ? 0.55 : 1 }}
+                disabled={!emergencyZone || !emergencyWhat.trim()}
+                onClick={handleSendEmergency}
               >
                 <Siren size={14} />
                 {t('Send Emergency Alert', 'জরুরি সতর্কবার্তা পাঠান', lang)}

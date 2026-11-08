@@ -119,6 +119,20 @@
 @media (max-width: 560px) { .lv-balances { grid-template-columns: 1fr; } }
 .lv-status.warn { background: var(--status-warning-bg, #FEF3C7); color: var(--status-warning-text); }
 .lv-status.warn svg { color: var(--status-warning-solid); }
+.inc-emergency-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -8px 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.inc-emergency-line svg { flex-shrink: 0; color: var(--status-danger); }
+.inc-emergency-line span { flex: 1; }
 
 /* Fleet assign dialog: trip summary and fit checks */
 .asg-trip { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); font-size: 13px; color: var(--text-2); line-height: 1.5; }
