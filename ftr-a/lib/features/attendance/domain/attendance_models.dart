@@ -103,6 +103,7 @@ class Punch {
     required this.result,
     this.site,
     this.distanceM,
+    this.accuracyM,
   });
 
   factory Punch.fromJson(Map<String, Object?> j) => Punch(
@@ -114,6 +115,7 @@ class Punch {
         ? null
         : SiteInfo.fromJson(_map(j['site'])),
     distanceM: (j['distanceM'] as num?)?.toDouble(),
+    accuracyM: (j['accuracyM'] as num?)?.toDouble(),
   );
 
   final String id;
@@ -122,6 +124,7 @@ class Punch {
   final PunchResult result;
   final SiteInfo? site;
   final double? distanceM;
+  final double? accuracyM;
 
   bool get isIn => type == 'IN';
 }

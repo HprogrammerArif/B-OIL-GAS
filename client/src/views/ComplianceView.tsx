@@ -7,7 +7,7 @@ import { today, nowStamp } from '../lib/clock';
 import {
   ShieldCheck, AlertTriangle, Clock, Building, ArrowRight, ArrowLeft,
   ChevronLeft, ChevronRight,
-  FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Filter, Search,
+  FileText, User, CheckSquare, X, FileBadge, ShieldAlert, Search,
   Download, Printer, Send, Check, CircleDot,
 } from 'lucide-react';
 import { Button, EmptyState, PageHeader, StatusPill } from '../components/ui';
@@ -282,6 +282,13 @@ export default function ComplianceView({ lang }: ViewProps) {
     setRevertReason('');
   };
 
+  const urgencyBands = useMemo(() => ([
+    { id: 'all', label: t('Any urgency', 'সব', lang), count: licenses.length },
+    { id: 'critical', label: t('≤ 30 days', '≤ ৩০ দিন', lang), count: licenses.filter((l) => l.daysLeft <= 30).length },
+    { id: 'warning', label: t('31–90 days', '৩১–৯০ দিন', lang), count: licenses.filter((l) => l.daysLeft > 30 && l.daysLeft <= 90).length },
+    { id: 'active', label: t('> 90 days', '> ৯০ দিন', lang), count: licenses.filter((l) => l.daysLeft > 90).length },
+  ]), [licenses, lang]);
+
   const filteredLicenses = useMemo(() => {
     return licenses.filter((lic) => {
       const agency = AGENCY_FILTERS.find((f) => f.id === selectedAgencyFilter);
@@ -491,15 +498,40 @@ export default function ComplianceView({ lang }: ViewProps) {
         </div>
       )}
 
-      <div className="card mb-4" style={{ padding: '12px 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand-slate-500)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Filter size={13} /> {t('Agency', 'সংস্থা', lang)}
-            </span>
+      <div className="card mb-4">
+        <div className="workforce-toolbar roster-toolbar">
+          <div className="workforce-tabs" role="group" aria-label={t('Urgency', 'জরুরি অবস্থা', lang)}>
+            {urgencyBands.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                className={`workforce-tab${selectedUrgencyFilter === u.id ? ' active' : ''}`}
+                aria-pressed={selectedUrgencyFilter === u.id}
+                onClick={() => setSelectedUrgencyFilter(u.id)}
+              >
+                {u.label} <b>{u.count}</b>
+              </button>
+            ))}
+          </div>
+          <div className="workforce-filter-row">
+            <div className="workforce-search-wrap">
+              <Search size={14} className="workforce-search-icon" aria-hidden />
+              <input
+                type="search"
+                className="workforce-search-input"
+                placeholder={t('Search license, ref, focal…', 'লাইসেন্স, রেফারেন্স বা কর্মকর্তা…', lang)}
+                aria-label={t('Search permits', 'লাইসেন্স খুঁজুন', lang)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button type="button" className="workforce-search-clear" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                  <X size={13} />
+                </button>
+              )}
+            </div>
             <select
-              className="form-input"
-              style={{ minWidth: 200, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+              className="workforce-select"
               value={selectedAgencyFilter}
               onChange={(e) => setSelectedAgencyFilter(e.target.value)}
               aria-label={t('Agency', 'সংস্থা', lang)}
@@ -508,44 +540,6 @@ export default function ComplianceView({ lang }: ViewProps) {
                 <option key={f.id} value={f.id}>{t(f.label, f.labelBn, lang)}</option>
               ))}
             </select>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'all', label: 'Any urgency', labelBn: 'সব' },
-              { id: 'critical', label: '≤ 30 days', labelBn: '≤ ৩০ দিন' },
-              { id: 'warning', label: '31–90 days', labelBn: '৩১–৯০ দিন' },
-              { id: 'active', label: '> 90 days', labelBn: '> ৯০ দিন' },
-            ].map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => setSelectedUrgencyFilter(u.id)}
-                style={{
-                  fontSize: '11px', padding: '4px 10px', borderRadius: 'var(--radius-full)',
-                  border: selectedUrgencyFilter === u.id ? '1px solid var(--brand-crimson)' : '1px solid var(--brand-slate-200)',
-                  background: selectedUrgencyFilter === u.id ? 'var(--brand-crimson)' : 'var(--surface-1)',
-                  color: selectedUrgencyFilter === u.id ? 'var(--text-on-brand)' : 'var(--brand-slate-700)',
-                  fontWeight: selectedUrgencyFilter === u.id ? 700 : 500, cursor: 'pointer',
-                }}
-              >
-                {t(u.label, u.labelBn, lang)}
-              </button>
-            ))}
-            <div style={{ position: 'relative', minWidth: '220px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--brand-slate-400)' }} />
-              <input
-                type="text"
-                placeholder={t('Search license, ref, focal…', 'লাইসেন্স, রেফারেন্স বা কর্মকর্তা…', lang)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ width: '100%', padding: '6px 10px 6px 30px', fontSize: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--brand-slate-200)', outline: 'none', background: 'var(--surface-0)' }}
-              />
-              {searchQuery && (
-                <button type="button" onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--brand-slate-400)' }}>
-                  <X size={13} />
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </div>
