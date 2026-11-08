@@ -721,8 +721,8 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
             padded={false}
             className="mb-5"
           >
-            <div className="cn-toolbar" style={{ padding: '12px 16px 8px' }}>
-              <div className="psf-filters" role="group" aria-label={t('Filter roster', 'রোস্টার ফিল্টার', lang)}>
+            <div className="workforce-toolbar roster-toolbar">
+              <div className="workforce-tabs" role="group" aria-label={t('Filter roster', 'রোস্টার ফিল্টার', lang)}>
                 {([
                   { key: 'all' as const, label: t('All', 'সব', lang), count: visible.length },
                   { key: 'review' as const, label: t('To review', 'পর্যালোচনা', lang), count: teamStats.review },
@@ -733,7 +733,7 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                   <button
                     key={f.key}
                     type="button"
-                    className={`psf-filter ${rosterKind === f.key ? 'active' : ''}`}
+                    className={`workforce-tab${rosterKind === f.key ? ' active' : ''}`}
                     aria-pressed={rosterKind === f.key}
                     onClick={() => setRosterFilter({ kind: f.key })}
                   >
@@ -741,11 +741,26 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                   </button>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div className="workforce-filter-row">
+                <div className="workforce-search-wrap">
+                  <Search size={14} className="workforce-search-icon" aria-hidden />
+                  <input
+                    type="search"
+                    className="workforce-search-input"
+                    value={rosterQuery}
+                    onChange={(e) => setRosterFilter({ query: e.target.value })}
+                    placeholder={t('Search name, role or department', 'নাম, পদ বা বিভাগ খুঁজুন', lang)}
+                    aria-label={t('Search roster', 'রোস্টার খুঁজুন', lang)}
+                  />
+                  {rosterQuery && (
+                    <button type="button" className="workforce-search-clear" onClick={() => setRosterFilter({ query: '' })} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
                 {rosterSites.length > 1 && (
                   <select
-                    className="form-input"
-                    style={{ height: 36, fontSize: 12, minWidth: 160, padding: '0 10px' }}
+                    className="workforce-select"
                     value={rosterSite}
                     aria-label={t('Site', 'সাইট', lang)}
                     onChange={(e) => setRosterFilter({ site: e.target.value as SiteId | 'all' })}
@@ -756,21 +771,6 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                     ))}
                   </select>
                 )}
-                <label className="dash-search">
-                  <Search size={14} aria-hidden />
-                  <input
-                    type="search"
-                    value={rosterQuery}
-                    onChange={(e) => setRosterFilter({ query: e.target.value })}
-                    placeholder={t('Search name, role or department', 'নাম, পদ বা বিভাগ খুঁজুন', lang)}
-                    aria-label={t('Search roster', 'রোস্টার খুঁজুন', lang)}
-                  />
-                  {rosterQuery && (
-                    <button type="button" onClick={() => setRosterFilter({ query: '' })} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
-                      <X size={13} />
-                    </button>
-                  )}
-                </label>
               </div>
             </div>
             {pagedRoster.length === 0 ? (

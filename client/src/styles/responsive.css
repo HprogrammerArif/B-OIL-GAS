@@ -1082,9 +1082,22 @@
 .workforce-search-input {
   width: 100%;
   padding-left: 32px;
+  padding-right: 28px;
   height: 36px;
   font-size: 12.5px;
 }
+.workforce-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 9px;
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  padding: 2px;
+}
+.roster-toolbar { padding: 12px 16px; }
 
 .workforce-select {
   width: auto;
