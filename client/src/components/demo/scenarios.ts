@@ -13,7 +13,7 @@ import { nextRef } from '../../lib/refs';
 import { nowTime } from '../../lib/clock';
 import { fleetStore } from '../../store/fleetStore';
 import { approvalStore } from '../../store/approvalStore';
-import { operationsStore } from '../../store/operationsStore';
+import { incidentPhotoFor, operationsStore } from '../../store/operationsStore';
 
 export interface DemoScenario {
   id: string;
@@ -52,6 +52,7 @@ function injectIncident() {
   if (!template) return;
   const reporter = ROLE_META.employee;
   const ref = nextRef('INC');
+  const photo = incidentPhotoFor('near_miss');
   operationsStore.addIncident({
     ...template,
     id: ref,
@@ -81,6 +82,9 @@ function injectIncident() {
     statutoryAgency: undefined,
     statutoryNoticeHours: undefined,
     evidenceAttached: false,
+    spotFiles: undefined,
+    photo,
+    photos: [photo],
     closureSignOff: undefined,
   });
 }

@@ -434,6 +434,8 @@ export interface IncidentItem {
   statutoryNoticeHours?: number;
   evidenceAttached?: boolean;
   spotFiles?: IncidentSpotFile[];
+  photo: string;
+  photos: string[];
   closureSignOff?: {
     safetyOfficerName: string;
     safetySignedAt: string;
@@ -447,6 +449,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-01',
     incNo: 'INC-2026-041',
+    photo: '/incidents/tank-drip.jpg',
+    photos: ['/incidents/tank-drip.jpg'],
     title: 'Hot Bitumen Drip on Storage Tank TK-102 Lower Drain Valve',
     titleBn: 'স্টোরেজ ট্যাংক TK-102 এর ড্রেন ভালভে সামান্য বিটুমিন ফোঁটা',
     incidentType: 'spill_leak',
@@ -529,6 +533,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-02',
     incNo: 'INC-2026-040',
+    photo: '/incidents/gate-barrier.jpg',
+    photos: ['/incidents/gate-barrier.jpg'],
     title: 'Delivery Gate Barrier Arm Sensor Stuck During Morning Rain',
     titleBn: 'সকালের বৃষ্টিতে ডেলিভারি গেট ব্যারিয়ার সেন্সর আটকে যাওয়া',
     incidentType: 'equipment_damage',
@@ -589,6 +595,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-03',
     incNo: 'INC-2026-039',
+    photo: '/incidents/ladder.jpg',
+    photos: ['/incidents/ladder.jpg'],
     title: 'Near-Miss: Unsecured Repair Ladder Near Loading Bay Walkway',
     titleBn: 'নিয়ার-মিস: লোডিং বে পথের পাশে অরক্ষিত মেরামত মই',
     incidentType: 'near_miss',
@@ -666,6 +674,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-04',
     incNo: 'INC-2026-036',
+    photo: '/incidents/pressure-gauge.jpg',
+    photos: ['/incidents/pressure-gauge.jpg'],
     title: 'High Pressure Warning Alarm on Heating Pipe Line #2',
     titleBn: 'হিটিং পাইপলাইন #২-এ অতিরিক্ত চাপ সতর্কতা সংকেত',
     incidentType: 'pressure_piping',
@@ -758,6 +768,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-05',
     incNo: 'INC-2026-042',
+    photo: '/incidents/pump-insulation.jpg',
+    photos: ['/incidents/pump-insulation.jpg'],
     title: 'Hazard Observation: Worn Insulation Jacket on Bitumen Transfer Pump P-109',
     titleBn: 'বিপদ পর্যবেক্ষণ: বিটুমিন পাম্প P-109 এর ইনসুলেশন জ্যাকেট ক্ষতিগ্রস্ত',
     incidentType: 'hazard_observation',
@@ -818,6 +830,8 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
   {
     id: 'INC-06',
     incNo: 'INC-2026-043',
+    photo: '/incidents/hose-coupling.jpg',
+    photos: ['/incidents/hose-coupling.jpg'],
     title: 'Minor Thumb Pinch During Tanker Hose Coupling at Loading Bay #3',
     titleBn: 'লোডিং বে ৩-এ ট্যাংকার হোস কাপলিং করার সময় বৃদ্ধাঙ্গুলিতে সামান্য চোট',
     incidentType: 'first_aid',
@@ -883,6 +897,25 @@ const INITIAL_INCIDENTS: IncidentItem[] = [
     evidenceAttached: true,
   },
 ];
+
+const INCIDENT_KIND_PHOTO: Record<IncidentType, string> = {
+  spill_leak: '/incidents/tank-drip.jpg',
+  equipment_damage: '/incidents/gate-barrier.jpg',
+  near_miss: '/incidents/ladder.jpg',
+  pressure_piping: '/incidents/pressure-gauge.jpg',
+  hazard_observation: '/incidents/pump-insulation.jpg',
+  first_aid: '/incidents/hose-coupling.jpg',
+  fire_thermal: '/incidents/pump-insulation.jpg',
+  electrical_arc: '/incidents/gate-barrier.jpg',
+  environmental: '/incidents/tank-drip.jpg',
+  medical_treatment: '/incidents/hose-coupling.jpg',
+  lost_time: '/incidents/hose-coupling.jpg',
+};
+
+export function incidentPhotoFor(type: IncidentType, id?: string): string {
+  const seeded = id ? INITIAL_INCIDENTS.find((item) => item.id === id) : undefined;
+  return seeded?.photo ?? INCIDENT_KIND_PHOTO[type];
+}
 
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -2121,6 +2154,16 @@ class OperationsStore {
       const photo = parcel.photo || parcelPhotoFor(parcel.category, parcel.id);
       const photos = parcel.photos?.length ? parcel.photos : [photo];
       return { ...parcel, photo: photos[0], photos };
+    });
+    this.incidents = this.incidents.map((incident) => {
+      if (incident.photos?.length) return incident;
+      const fromFiles = (incident.spotFiles ?? [])
+        .filter((file) => file.mime.startsWith('image/') && file.dataUrl)
+        .map((file) => file.dataUrl);
+      const photos = fromFiles.length
+        ? fromFiles
+        : [incident.photo || incidentPhotoFor(incident.incidentType, incident.id)];
+      return { ...incident, photo: photos[0], photos };
     });
   }
 

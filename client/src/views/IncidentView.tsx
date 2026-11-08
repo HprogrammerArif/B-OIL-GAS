@@ -8,6 +8,7 @@ import { nowStamp, nowTime } from '../lib/clock';
 import { type IncidentMode, incidentModeFor, incidentsVisibleTo, daysSinceLostTime } from './incident/config';
 import { clearIncidentDraft, incidentDraftPlace, peekIncidentDraft, queueIncidentDraft } from './incident/handoff';
 import {
+  incidentPhotoFor,
   useOperationsStore,
   IncidentItem,
   IncidentSpotFile,
@@ -501,6 +502,10 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       },
     ];
 
+    const imagePhotos = wizardSpotFiles
+      .filter((file) => file.mime.startsWith('image/'))
+      .map((file) => file.dataUrl);
+    const photos = imagePhotos.length > 0 ? imagePhotos : [incidentPhotoFor(wizardType)];
     const newInc: IncidentItem = {
       id: incRef,
       incNo: incRef,
@@ -533,6 +538,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       statutoryNoticeHours: wizardSeverity >= 3 ? 24 : undefined,
       evidenceAttached: wizardSpotFiles.length > 0,
       spotFiles: wizardSpotFiles,
+      photo: photos[0],
+      photos,
     };
 
     addIncident(newInc);
@@ -564,6 +571,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     }
 
     const incRef = nextRef('INC');
+    const photo = incidentPhotoFor('hazard_observation');
     const newInc: IncidentItem = {
       id: incRef,
       incNo: incRef,
@@ -600,6 +608,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
       capaStatus: 'open',
       statutoryReportable: false,
       evidenceAttached: false,
+      photo,
+      photos: [photo],
     };
 
     addIncident(newInc);
@@ -963,10 +973,15 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                   <span className="inc-when">{inc.date}</span>
                 </div>
 
-                <h3 className="inc-title">{t(inc.title, inc.titleBn, lang)}</h3>
-                <div className="inc-meta">
-                  <MapPin size={12} /> {inc.plantZone || inc.location}
-                  {' · '}{t('from', 'রিপোর্ট', lang)} {inc.reportedBy}
+                <div className="inc-title-row">
+                  <img className="inc-feed-photo" src={inc.photo} alt={t(inc.title, inc.titleBn, lang)} />
+                  <div className="inc-title-copy">
+                    <h3 className="inc-title">{t(inc.title, inc.titleBn, lang)}</h3>
+                    <div className="inc-meta">
+                      <MapPin size={12} /> {inc.plantZone || inc.location}
+                      {' · '}{t('from', 'রিপোর্ট', lang)} {inc.reportedBy}
+                    </div>
+                  </div>
                 </div>
 
                 {injured.length > 0 && (
@@ -1011,6 +1026,24 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
                 {isExpanded && (
                   <div className="inc-more-panel">
+                    <div className="inc-photo-row">
+                      {inc.photos.map((src, index) => (
+                        <img key={`${inc.id}-${index}`} src={src} alt={t(inc.title, inc.titleBn, lang)} />
+                      ))}
+                    </div>
+                    {(inc.spotFiles ?? []).some((file) => file.mime === 'application/pdf') && (
+                      <div className="inc-spot-block">
+                        <div className="inc-spot-label">{t('Files', 'ফাইল', lang)}</div>
+                        <div className="inc-spot-grid">
+                          {inc.spotFiles!.filter((file) => file.mime === 'application/pdf').map((file) => (
+                            <a key={file.id} className="inc-spot-pdf" href={file.dataUrl} target="_blank" rel="noreferrer">
+                              <Paperclip size={14} />
+                              <span>{file.name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {inc.rootCause && (
                       <p className="inc-cause"><strong>{t('Cause', 'কারণ', lang)}:</strong> {inc.rootCause}</p>
                     )}
@@ -1022,25 +1055,6 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                     </div>
                     {inc.immediateActionsTaken && (
                       <p className="inc-cause"><strong>{t('Done on the spot', 'তাৎক্ষণিক পদক্ষেপ', lang)}:</strong> {inc.immediateActionsTaken}</p>
-                    )}
-                    {(inc.spotFiles?.length ?? 0) > 0 && (
-                      <div className="inc-spot-block">
-                        <div className="inc-spot-label">{t('Photos of the spot', 'ঘটনাস্থলের ছবি', lang)}</div>
-                        <div className="inc-spot-grid">
-                          {inc.spotFiles!.map((file) => (
-                            file.mime === 'application/pdf' ? (
-                              <a key={file.id} className="inc-spot-pdf" href={file.dataUrl} target="_blank" rel="noreferrer">
-                                <Paperclip size={14} />
-                                <span>{file.name}</span>
-                              </a>
-                            ) : (
-                              <a key={file.id} className="inc-spot-thumb" href={file.dataUrl} target="_blank" rel="noreferrer" title={file.name}>
-                                <img src={file.dataUrl} alt={file.name} />
-                              </a>
-                            )
-                          ))}
-                        </div>
-                      </div>
                     )}
                     {inc.closureSignOff && (
                       <p className="inc-closed">
