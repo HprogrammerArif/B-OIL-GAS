@@ -159,13 +159,15 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 children: [
                   const Icon(Icons.location_city, color: Colors.deepOrange),
                   const SizedBox(width: Space.xs),
-                  Text(
-                    bangla
-                        ? 'জিওফেন্সের বাইরে চেক-ইন কারণ'
-                        : 'Outside Geofence Reason',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      bangla
+                          ? 'জিওফেন্সের বাইরে চেক-ইন কারণ'
+                          : 'Outside Geofence Reason',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -248,7 +250,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final bangla = context.isBangla;
     final today = ref.watch(todayAttendanceProvider);
     final session = ref.watch(sessionControllerProvider).value;
@@ -272,14 +273,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         ),
         actions: const [AppBarActions()],
       ),
-      floatingActionButton: _selectedTab == 0
-          ? FloatingActionButton.extended(
-              onPressed: () =>
-                  unawaited(context.push(AppRoutes.attendanceRegularise)),
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: Text(l10n.attRegularise),
-            )
-          : null,
       body: today.when(
         loading: () => const SkeletonList(),
         error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
@@ -355,7 +348,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
               ),
 
               // Segmented Sub-Tabs
-              Padding(
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(
                   Space.lg,
                   Space.sm,
@@ -365,6 +359,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 child: Row(
                   children: [
                     for (var i = 0; i < tabs.length; i++) ...[
+                      if (i > 0) const SizedBox(width: Space.xs),
                       ChoiceChip(
                         label: Text(tabs[i]),
                         selected: _selectedTab == i,
@@ -373,7 +368,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                           setState(() => _selectedTab = i);
                         },
                       ),
-                      const SizedBox(width: Space.xs),
                     ],
                   ],
                 ),
@@ -451,7 +445,12 @@ class _TodayCard extends StatelessWidget {
     final worked = day.workedMinutes;
 
     return Padding(
-      padding: const EdgeInsets.all(Space.lg),
+      padding: const EdgeInsets.fromLTRB(
+        Space.lg,
+        Space.sm,
+        Space.lg,
+        Space.md,
+      ),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(Space.lg),
@@ -1005,8 +1004,23 @@ class _MonthSection extends ConsumerWidget {
           data: (r) {
             final days = r.days.where((d) => d.status != null).toList();
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _SummaryRow(summary: r.summary),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Space.lg,
+                    Space.sm,
+                    Space.lg,
+                    Space.xs,
+                  ),
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        unawaited(context.push(AppRoutes.attendanceRegularise)),
+                    icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                    label: Text(l10n.attRegularise),
+                  ),
+                ),
                 if (days.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: Space.xl),

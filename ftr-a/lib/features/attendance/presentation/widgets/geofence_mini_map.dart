@@ -339,8 +339,8 @@ class _GeofenceMapPainter extends CustomPainter {
     // Site Label
     final siteTextPainter = TextPainter(
       text: TextSpan(
-        text: siteLabel.length > 20
-            ? '${siteLabel.substring(0, 18)}...'
+        text: siteLabel.length > 26
+            ? '${siteLabel.substring(0, 24)}...'
             : siteLabel,
         style: const TextStyle(
           color: Color(0xFF1E293B),
@@ -378,10 +378,10 @@ class _GeofenceMapPainter extends CustomPainter {
     // Employee Pin ("You")
     final Offset userPos;
     if (isInside) {
-      // 110m inside: position slightly offset from site center within fence
+      // 110m inside: position upper-right from site center within fence
       userPos = Offset(
-        siteCenter.dx + fenceRadius * 0.35,
-        siteCenter.dy - fenceRadius * 0.25,
+        siteCenter.dx + fenceRadius * 0.45,
+        siteCenter.dy - fenceRadius * 0.28,
       );
     } else {
       // 4.2 km outside: position far right
@@ -457,11 +457,11 @@ class _GeofenceMapPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawCircle(userPos, 3.5, userInnerDot);
 
-    // "You" Pin Label
+    // "You" Pin Label (placed above the dot when inside so it never collides with site pin)
     final userLabelPainter = TextPainter(
       text: TextSpan(
         text: isInside
-            ? (isBangla ? 'আপনি (১১মি)' : 'You (110m)')
+            ? (isBangla ? 'আপনি (১১০মি)' : 'You (110m)')
             : (isBangla ? 'আপনি (বাইরে)' : 'You (Outside)'),
         style: TextStyle(
           color: isInside ? const Color(0xFF047857) : const Color(0xFF9A3412),
@@ -471,9 +471,12 @@ class _GeofenceMapPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    final labelY = isInside
+        ? userPos.dy - userLabelPainter.height - 9
+        : userPos.dy + 11;
     userLabelPainter.paint(
       canvas,
-      Offset(userPos.dx - userLabelPainter.width / 2, userPos.dy + 11),
+      Offset(userPos.dx - userLabelPainter.width / 2, labelY),
     );
   }
 

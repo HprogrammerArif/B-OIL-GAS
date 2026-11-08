@@ -608,80 +608,47 @@ export default function GuestView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       <div className="guest-two-col-layout">
         {/* ── LEFT COLUMN: VISITOR DIRECTORY FEED ── */}
-        <div>
-          {/* Feed Header & Search Filter */}
-          <div style={{ background: 'var(--surface-1)', border: '1px solid var(--brand-slate-200)', borderRadius: 'var(--radius-md)', padding: '14px', marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '8px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--brand-slate-900)' }}>
-                {t('Visitor Directory', 'অতিথি তালিকা', lang)} ({sortedVisitors.length})
-              </span>
+        <div className="guest-directory-col">
+          <div className="guest-directory-bar">
+            <div className="workforce-tabs" role="group" aria-label={t('Filter visitors', 'অতিথি ফিল্টার', lang)}>
+              <button type="button" className={`workforce-tab${activeTab === 'all' ? ' active' : ''}`} aria-pressed={activeTab === 'all'} onClick={() => setActiveTab('all')}>
+                {t('All', 'সব', lang)} <b>{scopedVisitors.length}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'inside' ? ' active' : ''}`} aria-pressed={activeTab === 'inside'} onClick={() => setActiveTab('inside')}>
+                {t('On site', 'উপস্থিত', lang)} <b>{stats.totalInside}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'pre_registered' ? ' active' : ''}`} aria-pressed={activeTab === 'pre_registered'} onClick={() => setActiveTab('pre_registered')}>
+                {t('Expected', 'প্রত্যাশিত', lang)} <b>{stats.preRegisteredCount}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'vip_govt' ? ' active' : ''}`} aria-pressed={activeTab === 'vip_govt'} onClick={() => setActiveTab('vip_govt')}>
+                {t('VIP & Govt', 'ভিআইপি ও সরকারি', lang)} <b>{stats.vipGovtCount}</b>
+              </button>
+              <button type="button" className={`workforce-tab${activeTab === 'my_guests' ? ' active' : ''}`} aria-pressed={activeTab === 'my_guests'} onClick={() => setActiveTab('my_guests')}>
+                {t('My guests', 'আমার অতিথি', lang)} <b>{stats.myGuestsCount}</b>
+              </button>
+            </div>
+            <div className="workforce-filter-row">
+              <div className="workforce-search-wrap">
+                <Search size={14} className="workforce-search-icon" aria-hidden />
+                <input
+                  type="search"
+                  className="workforce-search-input"
+                  placeholder={t('Search visitor, organization, host, or plate...', 'নাম, সংস্থা, স্বাগতিক বা গাড়ি খুঁজুন...', lang)}
+                  aria-label={t('Search visitors', 'অতিথি খুঁজুন', lang)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <select
+                className="workforce-select"
                 value={facilityFilter}
-                onChange={(e) => setFacilityFilter(e.target.value as any)}
-                style={{ fontSize: '11.5px', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--brand-slate-300)', background: 'var(--surface-1)' }}
+                aria-label={t('Site', 'স্থাপনা', lang)}
+                onChange={(e) => setFacilityFilter(e.target.value as typeof facilityFilter)}
               >
                 <option value="all">{t('All sites', 'সকল স্থাপনা', lang)}</option>
                 <option value="Keraniganj Bitumen Refinery">{t('Keraniganj Refinery', 'কেরানীগঞ্জ রিফাইনারি', lang)}</option>
                 <option value="Bashundhara Corporate HQ, Baridhara">{t('Dhaka HQ', 'ঢাকা প্রধান কার্যালয়', lang)}</option>
               </select>
-            </div>
-
-            {/* Search Input */}
-            <div style={{ position: 'relative', marginBottom: '10px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: 'var(--brand-slate-400)' }} />
-              <input
-                type="text"
-                placeholder={t('Search visitor, organization, host, or plate...', 'নাম, সংস্থা, স্বাগতিক বা গাড়ি খুঁজুন...', lang)}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  paddingLeft: '32px',
-                  height: '34px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--brand-slate-300)',
-                  width: '100%',
-                  fontSize: '12px',
-                }}
-              />
-            </div>
-
-            {/* Quick Filter Tabs */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'all' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('all')}
-              >
-                {t('All', 'সব', lang)} ({scopedVisitors.length})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'inside' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('inside')}
-              >
-                {t('On site', 'উপস্থিত', lang)} ({stats.totalInside})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'pre_registered' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('pre_registered')}
-              >
-                {t('Expected', 'প্রত্যাশিত', lang)} ({stats.preRegisteredCount})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'vip_govt' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('vip_govt')}
-              >
-                {t('VIP & Govt', 'ভিআইপি ও সরকারি', lang)} ({stats.vipGovtCount})
-              </button>
-              <button
-                className={`parcel-pill-tab ${activeTab === 'my_guests' ? 'active' : ''}`}
-                style={{ padding: '4px 10px', fontSize: '11px' }}
-                onClick={() => setActiveTab('my_guests')}
-              >
-                {t('My guests', 'আমার অতিথি', lang)} ({stats.myGuestsCount})
-              </button>
             </div>
           </div>
 
