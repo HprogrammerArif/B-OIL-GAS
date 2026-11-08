@@ -122,94 +122,66 @@ export default function WorkforceView({ lang }: ViewProps) {
       {/* Main Surface Card */}
       <div className="card">
         {/* Controls Header */}
-        <div className="card-hd" style={{ flexWrap: 'wrap', gap: '12px' }}>
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '6px' }}>
+        <div className="card-hd workforce-toolbar">
+          <div className="workforce-tabs" role="group" aria-label={t('Staff list', 'কর্মী তালিকা', lang)}>
             <button
-              className={`btn-sm-ghost ${activeTab === 'active' ? 'active-filter' : ''}`}
-              style={{
-                fontSize: '12px',
-                padding: '6px 14px',
-                background: activeTab === 'active' ? 'var(--brand-crimson)' : 'transparent',
-                color: activeTab === 'active' ? 'var(--text-on-brand)' : 'var(--brand-slate-600)',
-                borderColor: activeTab === 'active' ? 'var(--brand-crimson)' : 'var(--brand-slate-200)',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
+              type="button"
+              className={`workforce-tab${activeTab === 'active' ? ' active' : ''}`}
+              aria-pressed={activeTab === 'active'}
               onClick={() => setActiveTab('active')}
             >
-              <Users size={14} />
-              {t('Active Staff', 'সক্রিয় কর্মকর্তা-কর্মচারী', lang)}
-              <span style={{ background: activeTab === 'active' ? 'rgba(255,255,255,0.25)' : 'var(--brand-slate-200)', color: activeTab === 'active' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
-                {activeEmployees.length}
-              </span>
+              {t('Active staff', 'সক্রিয় কর্মী', lang)}
+              <b>{activeEmployees.length}</b>
             </button>
-
             <button
-              className={`btn-sm-ghost ${activeTab === 'offboarded' ? 'active-filter' : ''}`}
-              style={{
-                fontSize: '12px',
-                padding: '6px 14px',
-                background: activeTab === 'offboarded' ? 'var(--brand-slate-900)' : 'transparent',
-                color: activeTab === 'offboarded' ? 'var(--brand-gold)' : 'var(--brand-slate-600)',
-                borderColor: activeTab === 'offboarded' ? 'var(--brand-gold)' : 'var(--brand-slate-200)',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
+              type="button"
+              className={`workforce-tab${activeTab === 'offboarded' ? ' active' : ''}`}
+              aria-pressed={activeTab === 'offboarded'}
               onClick={() => setActiveTab('offboarded')}
             >
-              <UserX size={14} />
-              {t('Former Staff / Exit Archive', 'সাবেক কর্মী / আর্কাইভ', lang)}
-              <span style={{ background: activeTab === 'offboarded' ? 'rgba(212,175,55,0.3)' : 'var(--brand-slate-200)', color: activeTab === 'offboarded' ? 'var(--text-on-brand)' : 'var(--brand-slate-800)', padding: '1px 6px', borderRadius: '10px', fontSize: '10px' }}>
-                {offboardedEmployees.length}
-              </span>
+              {t('Former staff', 'সাবেক কর্মী', lang)}
+              <b>{offboardedEmployees.length}</b>
             </button>
           </div>
 
-          {/* Search & Department Filters */}
           <div className="workforce-filter-row">
             <div className="workforce-search-wrap">
               <Search size={14} className="workforce-search-icon" />
               <input
-                type="text"
+                type="search"
                 placeholder={t('Search employee name, ID, phone...', 'কর্মচারীর নাম, আইডি, ফোন নম্বর দিয়ে খুঁজুন...', lang)}
+                aria-label={t('Search staff', 'কর্মী খুঁজুন', lang)}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="workforce-search-input"
               />
             </div>
-
-            <div className="workforce-select-group">
-              <select
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                className="workforce-select"
-              >
-                <option value="ALL">All Departments</option>
-                <option value="Plant Operations">Plant Operations</option>
-                <option value="Sales & Distribution">Sales & Distribution</option>
-                <option value="Finance & Accounts">Finance & Accounts</option>
-                <option value="Transport & Logistics">Transport & Logistics</option>
-                <option value="HSE & Compliance">HSE & Safety</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Security Administration">Security Administration</option>
-              </select>
-
-              <select
-                value={selectedSite}
-                onChange={(e) => setSelectedSite(e.target.value)}
-                className="workforce-select"
-              >
-                <option value="ALL">All Locations</option>
-                <option value="PLANT_KERANIGANJ">Keraniganj Plant</option>
-                <option value="HQ_BARIDHARA">Baridhara HQ</option>
-                <option value="TERMINAL_CTG">Chattogram Port Depot</option>
-              </select>
-            </div>
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="workforce-select"
+              aria-label={t('Department', 'বিভাগ', lang)}
+            >
+              <option value="ALL">{t('All departments', 'সব বিভাগ', lang)}</option>
+              <option value="Plant Operations">{t('Plant Operations', 'প্ল্যান্ট অপারেশন', lang)}</option>
+              <option value="Sales & Distribution">{t('Sales & Distribution', 'বিক্রয় ও বিতরণ', lang)}</option>
+              <option value="Finance & Accounts">{t('Finance & Accounts', 'অর্থ ও হিসাব', lang)}</option>
+              <option value="Transport & Logistics">{t('Transport & Logistics', 'পরিবহন ও লজিস্টিকস', lang)}</option>
+              <option value="HSE & Compliance">{t('HSE & Safety', 'স্বাস্থ্য, নিরাপত্তা ও পরিবেশ', lang)}</option>
+              <option value="Human Resources">{t('Human Resources', 'মানবসম্পদ', lang)}</option>
+              <option value="Security Administration">{t('Security Administration', 'নিরাপত্তা প্রশাসন', lang)}</option>
+            </select>
+            <select
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              className="workforce-select"
+              aria-label={t('Location', 'কর্মস্থল', lang)}
+            >
+              <option value="ALL">{t('All locations', 'সব কর্মস্থল', lang)}</option>
+              <option value="PLANT_KERANIGANJ">{t('Keraniganj Plant', 'কেরানীগঞ্জ প্ল্যান্ট', lang)}</option>
+              <option value="HQ_BARIDHARA">{t('Baridhara HQ', 'বারিধারা প্রধান কার্যালয়', lang)}</option>
+              <option value="TERMINAL_CTG">{t('Chattogram Port Depot', 'চট্টগ্রাম বন্দর ডিপো', lang)}</option>
+            </select>
           </div>
         </div>
 
