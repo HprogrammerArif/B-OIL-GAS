@@ -17,6 +17,7 @@ const STATUSES: ReadonlyArray<{ id: string; label: readonly [string, string]; to
 /** Where each member of the leadership team is today, and how to reach them. */
 export default function LeadershipPresence({ lang }: { lang: Lang }) {
   const [filter, setFilter] = useState('all');
+  const [hrAsked, setHrAsked] = useState<Record<string, boolean>>({});
   const count = (id: string) => INNER_CIRCLE.filter((p) => p.status === id).length;
   const people = INNER_CIRCLE.filter((p) => filter === 'all' || p.status === filter);
   const uninformed = count('uninformed');
@@ -64,9 +65,15 @@ export default function LeadershipPresence({ lang }: { lang: Lang }) {
                   <Button
                     variant="outline-danger"
                     size="sm"
-                    onClick={() => showToast(t(`HR has been asked to follow up with ${p.name}.`, `${p.name}-এর বিষয়ে এইচআরকে অনুসন্ধান করতে বলা হয়েছে।`, lang), 'danger')}
+                    disabled={!!hrAsked[p.name]}
+                    onClick={() => {
+                      setHrAsked((prev) => ({ ...prev, [p.name]: true }));
+                      showToast(t(`HR has been asked to follow up with ${p.name}.`, `${p.name}-এর বিষয়ে এইচআরকে অনুসন্ধান করতে বলা হয়েছে।`, lang), 'danger');
+                    }}
                   >
-                    {t('Ask HR to follow up', 'এইচআরকে জানান', lang)}
+                    {hrAsked[p.name]
+                      ? t('HR has been asked', 'এইচআরকে জানানো হয়েছে', lang)
+                      : t('Ask HR to follow up', 'এইচআরকে জানান', lang)}
                   </Button>
                 )}
               </div>

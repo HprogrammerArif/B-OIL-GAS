@@ -12,7 +12,7 @@ import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
@@ -20,6 +20,25 @@ import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+const _claimPurposePresets = <(String, String)>[
+  (
+    'Official engineering inspection and technical audit at Keraniganj LPG Filling Plant.',
+    'কেরানীগঞ্জ এলপিজি ফিলিং প্ল্যান্টে দাপ্তরিক ইঞ্জিনিয়ারিং পরিদর্শন ও কারিগরি অডিট।',
+  ),
+  (
+    'Outstation tour to Chattogram Terminal for bulk LPG vessel discharge & logistics coordination.',
+    'বাল্ক এলপিজি ভেসেল ডিসচার্জ ও লজিস্টিকস সমন্বয়ের জন্য চট্টগ্রাম টার্মিনালে দাপ্তরিক সফর।',
+  ),
+  (
+    'Local conveyance for regulatory filings at Petrobangla, BERC, and Department of Explosives.',
+    'পেট্রোবাংলা, বিইআরসি এবং বিস্ফোরক পরিদপ্তরে দাপ্তরিক নথি দাখিলের স্থানীয় যাতায়াত।',
+  ),
+  (
+    'Field distribution dealer inspection and safety compliance visit in Dhaka Metro zone.',
+    'ঢাকা মেট্রো অঞ্চলে ডিলার পরিদর্শন এবং নিরাপত্তা কমপ্লায়েন্স সফর।',
+  ),
+];
 
 /// Create ([id] null, [type] given) or edit a draft/returned claim.
 class ClaimEditScreen extends ConsumerWidget {
@@ -213,6 +232,8 @@ class _FormState extends ConsumerState<_Form> {
       ? _periodStart != null && _periodEnd != null
       : _depart != null && _return != null && _return!.isAfter(_depart!);
 
+  bool get _isReady => _purpose.text.trim().length >= 3 && _datesOk;
+
   Map<String, Object?> _body() => {
     'type': _type.wire,
     'purpose': _purpose.text.trim(),
@@ -271,6 +292,7 @@ class _FormState extends ConsumerState<_Form> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final bangla = context.isBangla;
     final lang = Localizations.localeOf(context).languageCode;
     final total = _lines.fold<double>(0, (s, l) => s + l.amount);
@@ -282,222 +304,356 @@ class _FormState extends ConsumerState<_Form> {
         if (a.open || a.id == _advanceId) a,
     ];
 
-    Widget picker({
-      required String label,
-      required String? value,
-      required VoidCallback onTap,
-      bool invalid = false,
-    }) => InkWell(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          suffixIcon: const Icon(Icons.calendar_today_outlined),
-          errorText: invalid ? l10n.claimErrDates : null,
-        ),
-        child: Text(value ?? '—'),
-      ),
-    );
-
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(Space.lg),
-        children: [
-          Row(
-            children: [
-              Icon(claimTypeIcon(_type)),
-              const SizedBox(width: Space.sm),
-              Text(
-                claimTypeLabel(l10n, _type),
-                style: theme.textTheme.titleMedium,
+    return Column(
+      children: [
+        Expanded(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.md,
+                Space.lg,
+                Space.xxl,
               ),
-            ],
-          ),
-          const SizedBox(height: Space.lg),
-          AppTextField(
-            label: l10n.claimFieldPurpose,
-            controller: _purpose,
-            required: true,
-            maxLength: 200,
-            validator: (v) =>
-                (v ?? '').trim().length < 3 ? l10n.claimErrPurpose : null,
-          ),
-          const SizedBox(height: Space.md),
-          if (_isConveyance) ...[
-            picker(
-              label: l10n.claimFieldPeriodFrom,
-              value: _periodStart == null
-                  ? null
-                  : DateFmt.range(
-                      dateKey(_periodStart!),
-                      dateKey(_periodStart!),
-                      lang,
-                    ),
-              onTap: () => unawaited(_pickPeriod(start: true)),
-              invalid: _showErrors && _periodStart == null,
-            ),
-            const SizedBox(height: Space.md),
-            picker(
-              label: l10n.claimFieldPeriodTo,
-              value: _periodEnd == null
-                  ? null
-                  : DateFmt.range(
-                      dateKey(_periodEnd!),
-                      dateKey(_periodEnd!),
-                      lang,
-                    ),
-              onTap: () => unawaited(_pickPeriod(start: false)),
-              invalid: _showErrors && _periodEnd == null,
-            ),
-          ] else ...[
-            picker(
-              label: l10n.claimFieldDepart,
-              value: _depart == null
-                  ? null
-                  : DateFmt.dateTime(_utcOf(_depart!), lang),
-              onTap: () => unawaited(_pickMoment(depart: true)),
-              invalid: _showErrors && _depart == null,
-            ),
-            const SizedBox(height: Space.md),
-            picker(
-              label: l10n.claimFieldReturn,
-              value: _return == null
-                  ? null
-                  : DateFmt.dateTime(_utcOf(_return!), lang),
-              onTap: () => unawaited(_pickMoment(depart: false)),
-              invalid: _showErrors && !_datesOk && _depart != null,
-            ),
-            const SizedBox(height: Space.md),
-            SegmentedButton<String>(
-              segments: [
-                ButtonSegment(value: 'DHAKA', label: Text(l10n.claimDestDhaka)),
-                ButtonSegment(value: 'OTHER', label: Text(l10n.claimDestOther)),
-              ],
-              selected: {_destination},
-              onSelectionChanged: (s) => setState(() => _destination = s.first),
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              label: l10n.claimFieldDestination,
-              controller: _place,
-              maxLength: 80,
-            ),
-            const SizedBox(height: Space.sm),
-            DropdownButtonFormField<String?>(
-              initialValue: _mode,
-              decoration: InputDecoration(labelText: l10n.claimFieldMode),
-              items: [
-                DropdownMenuItem<String?>(child: Text(l10n.claimModeNone)),
-                for (final m in widget.policy.allowedTravelModes)
-                  DropdownMenuItem(
-                    value: m,
-                    child: Text(travelModeLabel(l10n, m)),
-                  ),
-              ],
-              onChanged: (v) => setState(() => _mode = v),
-            ),
-            if (_type == ClaimType.tourEvent && openAdvances.isNotEmpty) ...[
-              const SizedBox(height: Space.md),
-              DropdownButtonFormField<String?>(
-                initialValue: _advanceId,
-                decoration: InputDecoration(labelText: l10n.claimFieldAdvance),
-                items: [
-                  DropdownMenuItem<String?>(child: Text(l10n.claimAdvanceNone)),
-                  for (final a in openAdvances)
-                    DropdownMenuItem(
-                      value: a.id,
-                      child: Text(
-                        '${bdt(a.amount, bangla: bangla)} · ${a.advanceNo}',
+              children: [
+                EnterpriseApplicantStrip(
+                  badgeLabel: claimTypeLabel(l10n, _type).toUpperCase(),
+                  badgeIcon: claimTypeIcon(_type),
+                ),
+                const SizedBox(height: Space.md),
+                EnterpriseSectionCard(
+                  stepNumber: 1,
+                  icon: Icons.date_range_outlined,
+                  title: _isConveyance
+                      ? (bangla
+                            ? 'যাতায়াত বিলের সময়কাল'
+                            : 'Conveyance Claim Period')
+                      : (bangla
+                            ? 'ভ্রমণের সময়সূচি ও গন্তব্য'
+                            : 'Travel Schedule & Destination'),
+                  subtitle: _isConveyance
+                      ? (bangla
+                            ? 'বিলের শুরুর এবং শেষের তারিখ নির্বাচন করুন'
+                            : 'Select start and end dates for local conveyance')
+                      : l10n.claimDaAuto,
+                  children: [
+                    if (_isConveyance) ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: EnterpriseDateTile(
+                              label: l10n.claimFieldPeriodFrom,
+                              valueText: _periodStart == null
+                                  ? '—'
+                                  : DateFmt.range(
+                                      dateKey(_periodStart!),
+                                      dateKey(_periodStart!),
+                                      lang,
+                                    ),
+                              errorText: _showErrors && _periodStart == null
+                                  ? l10n.claimErrDates
+                                  : null,
+                              onTap: () => unawaited(_pickPeriod(start: true)),
+                            ),
+                          ),
+                          const SizedBox(width: Space.sm),
+                          Expanded(
+                            child: EnterpriseDateTile(
+                              label: l10n.claimFieldPeriodTo,
+                              valueText: _periodEnd == null
+                                  ? '—'
+                                  : DateFmt.range(
+                                      dateKey(_periodEnd!),
+                                      dateKey(_periodEnd!),
+                                      lang,
+                                    ),
+                              errorText: _showErrors && _periodEnd == null
+                                  ? l10n.claimErrDates
+                                  : null,
+                              onTap: () => unawaited(_pickPeriod(start: false)),
+                            ),
+                          ),
+                        ],
                       ),
+                    ] else ...[
+                      EnterpriseDateTile(
+                        label: l10n.claimFieldDepart,
+                        valueText: _depart == null
+                            ? '—'
+                            : DateFmt.dateTime(_utcOf(_depart!), lang),
+                        icon: Icons.flight_takeoff_outlined,
+                        errorText: _showErrors && _depart == null
+                            ? l10n.claimErrDates
+                            : null,
+                        onTap: () => unawaited(_pickMoment(depart: true)),
+                      ),
+                      const SizedBox(height: Space.sm),
+                      EnterpriseDateTile(
+                        label: l10n.claimFieldReturn,
+                        valueText: _return == null
+                            ? '—'
+                            : DateFmt.dateTime(_utcOf(_return!), lang),
+                        icon: Icons.flight_land_outlined,
+                        errorText: _showErrors && !_datesOk && _depart != null
+                            ? l10n.claimErrDates
+                            : null,
+                        onTap: () => unawaited(_pickMoment(depart: false)),
+                      ),
+                      const SizedBox(height: Space.md),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: EnterpriseDropdownField<String>(
+                              label: bangla
+                                  ? 'গন্তব্য অঞ্চল'
+                                  : 'Destination Zone',
+                              icon: Icons.location_city_outlined,
+                              value: _destination,
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'DHAKA',
+                                  child: Text(l10n.claimDestDhaka),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'OTHER',
+                                  child: Text(l10n.claimDestOther),
+                                ),
+                              ],
+                              onChanged: (v) => setState(
+                                () => _destination = v ?? _destination,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: Space.sm),
+                          Expanded(
+                            child: EnterpriseDropdownField<String?>(
+                              label: l10n.claimFieldMode,
+                              icon: Icons.commute_outlined,
+                              value: _mode,
+                              items: [
+                                DropdownMenuItem<String?>(
+                                  child: Text(l10n.claimModeNone),
+                                ),
+                                for (final m
+                                    in widget.policy.allowedTravelModes)
+                                  DropdownMenuItem(
+                                    value: m,
+                                    child: Text(travelModeLabel(l10n, m)),
+                                  ),
+                              ],
+                              onChanged: (v) => setState(() => _mode = v),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: Space.md),
+                      AppTextField(
+                        label: l10n.claimFieldDestination,
+                        controller: _place,
+                        maxLength: 80,
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: Space.md),
+                EnterpriseSectionCard(
+                  stepNumber: 2,
+                  icon: Icons.assignment_outlined,
+                  title: bangla
+                      ? 'দাপ্তরিক উদ্দেশ্য ও অগ্রিম সমন্বয়'
+                      : 'Official Purpose & Advance Adjustment',
+                  subtitle: bangla
+                      ? 'স্ট্যান্ডার্ড টেমপ্লেট বাছাই করুন অথবা ভ্রমণের উদ্দেশ্য লিখুন'
+                      : 'Select a standard BOGCL claim template or enter custom purpose',
+                  children: [
+                    EnterpriseTemplateDropdown(
+                      presets: _claimPurposePresets,
+                      controller: _purpose,
+                      onPicked: () => setState(() {}),
+                      labelEn: 'Standard Claim Purpose (Quick Fill)',
+                      labelBn: 'স্ট্যান্ডার্ড বিলের উদ্দেশ্য (দ্রুত পূরণ)',
                     ),
-                ],
-                onChanged: (v) => setState(() => _advanceId = v),
-              ),
-            ],
-            const SizedBox(height: Space.sm),
-            Text(
-              l10n.claimDaAuto,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-          SectionHeader(title: l10n.claimLines(_lines.length)),
-          if (_lines.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: Space.md),
-              child: Text(
-                l10n.claimNoLinesYet,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(height: Space.sm),
+                    AppTextField(
+                      label: l10n.claimFieldPurpose,
+                      controller: _purpose,
+                      required: true,
+                      maxLength: 200,
+                      onChanged: (_) => setState(() {}),
+                      validator: (v) => (v ?? '').trim().length < 3
+                          ? l10n.claimErrPurpose
+                          : null,
+                    ),
+                    if (_type == ClaimType.tourEvent &&
+                        openAdvances.isNotEmpty) ...[
+                      const SizedBox(height: Space.md),
+                      EnterpriseDropdownField<String?>(
+                        label: l10n.claimFieldAdvance,
+                        icon: Icons.account_balance_wallet_outlined,
+                        value: _advanceId,
+                        items: [
+                          DropdownMenuItem<String?>(
+                            child: Text(l10n.claimAdvanceNone),
+                          ),
+                          for (final a in openAdvances)
+                            DropdownMenuItem(
+                              value: a.id,
+                              child: Text(
+                                '${bdt(a.amount, bangla: bangla)} · ${a.advanceNo}',
+                              ),
+                            ),
+                        ],
+                        onChanged: (v) => setState(() => _advanceId = v),
+                      ),
+                    ],
+                  ],
                 ),
-              ),
-            ),
-          for (final (i, l) in _lines.indexed)
-            Dismissible(
-              key: ValueKey('${l.id}_$i'),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                alignment: AlignmentDirectional.centerEnd,
-                padding: const EdgeInsets.symmetric(horizontal: Space.lg),
-                color: context.bogcl.danger,
-                child: const Icon(Icons.delete_outline, color: Colors.white),
-              ),
-              onDismissed: (_) =>
-                  setState(() => _lines = [..._lines]..removeAt(i)),
-              child: ListRow(
-                title: l.category == 'MILEAGE'
-                    ? '${claimCategoryLabel(l10n, l.category)} · '
-                          '${l10n.claimKm(l.distanceKm!.toStringAsFixed(0))}'
-                    : '${claimCategoryLabel(l10n, l.category)} · '
-                          '${bdt(l.amount, bangla: bangla)}',
-                subtitle: [
-                  DateFmt.range(l.date, l.date, lang),
-                  if (l.description.isNotEmpty) l.description,
-                ].join(' · '),
-                leading: Icon(
-                  l.receiptFileId != null
-                      ? Icons.receipt_long_outlined
-                      : Icons.notes_outlined,
-                  size: 20,
+                const SizedBox(height: Space.md),
+                EnterpriseSectionCard(
+                  stepNumber: 3,
+                  icon: Icons.receipt_long_outlined,
+                  title: l10n.claimLines(_lines.length),
+                  subtitle: bangla
+                      ? 'ভাউচার ও রসিদসহ খরচের আইটেমসমূহ যুক্ত করুন'
+                      : 'Add itemised expense lines with receipts or self-declaration',
+                  trailing: FilledButton.tonalIcon(
+                    onPressed: () => unawaited(_editLine()),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: Text(l10n.claimLineAdd),
+                  ),
+                  children: [
+                    if (_lines.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(Space.md),
+                        decoration: BoxDecoration(
+                          color: cs.surface,
+                          borderRadius: BorderRadius.circular(Radii.sm),
+                          border: Border.all(color: cs.outlineVariant),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.playlist_add_outlined,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: Space.sm),
+                            Expanded(
+                              child: Text(
+                                l10n.claimNoLinesYet,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    for (final (i, l) in _lines.indexed)
+                      Dismissible(
+                        key: ValueKey('${l.id}_$i'),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: AlignmentDirectional.centerEnd,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Space.lg,
+                          ),
+                          color: context.bogcl.danger,
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                          ),
+                        ),
+                        onDismissed: (_) =>
+                            setState(() => _lines = [..._lines]..removeAt(i)),
+                        child: ListRow(
+                          title: l.category == 'MILEAGE'
+                              ? '${claimCategoryLabel(l10n, l.category)} · '
+                                    '${l10n.claimKm(l.distanceKm!.toStringAsFixed(0))}'
+                              : '${claimCategoryLabel(l10n, l.category)} · '
+                                    '${bdt(l.amount, bangla: bangla)}',
+                          subtitle: [
+                            DateFmt.range(l.date, l.date, lang),
+                            if (l.description.isNotEmpty) l.description,
+                          ].join(' · '),
+                          leading: Icon(
+                            l.receiptFileId != null
+                                ? Icons.receipt_long_outlined
+                                : Icons.notes_outlined,
+                            size: 20,
+                          ),
+                          trailing: const Icon(Icons.edit_outlined, size: 18),
+                          onTap: () => unawaited(_editLine(i)),
+                        ),
+                      ),
+                    if (_lines.isNotEmpty) ...[
+                      const SizedBox(height: Space.sm),
+                      Container(
+                        padding: const EdgeInsets.all(Space.md),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(Radii.sm),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              bangla
+                                  ? 'মোট দাখিলকৃত বিল'
+                                  : 'Entered Line Total',
+                              style: theme.textTheme.labelLarge,
+                            ),
+                            Text(
+                              l10n.claimEnteredTotal(
+                                bdt(total, bangla: bangla),
+                              ),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                trailing: const Icon(Icons.edit_outlined, size: 18),
-                onTap: () => unawaited(_editLine(i)),
-              ),
-            ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: TextButton.icon(
-              onPressed: () => unawaited(_editLine()),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.claimLineAdd),
+                const SizedBox(height: Space.md),
+                EnterpriseWorkflowCard(
+                  title: bangla
+                      ? 'বিল যাচাই ও অর্থ পরিশোধ প্রক্রিয়া'
+                      : 'Claim Audit & Reimbursement Workflow',
+                  steps: [
+                    (
+                      Icons.receipt_long_outlined,
+                      bangla ? 'বিল দাখিল' : 'Claimant',
+                      bangla ? 'রসিদ সংযুক্ত' : 'Receipts Filed',
+                    ),
+                    (
+                      Icons.supervisor_account_outlined,
+                      bangla ? 'লাইন ম্যানেজার' : 'Line Manager',
+                      bangla ? 'সফর অনুমোদন' : 'Tour Verified',
+                    ),
+                    (
+                      Icons.account_balance_outlined,
+                      bangla ? 'অর্থ ও অডিট' : 'Finance Audit',
+                      bangla ? 'ব্যাংক পেআউট' : 'BDT Payout',
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          if (_lines.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.sm),
-              child: Text(
-                l10n.claimEnteredTotal(bdt(total, bangla: bangla)),
-                style: theme.textTheme.titleSmall,
-              ),
-            ),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.md),
-              child: Text(
-                _error!,
-                style: TextStyle(color: context.bogcl.danger),
-              ),
-            ),
-          const SizedBox(height: Space.xl),
-          PrimaryButton(
-            label: l10n.claimSaveDraft,
-            loading: _saving,
-            onPressed: _save,
-          ),
-        ],
-      ),
+        ),
+        EnterpriseFormBottomBar(
+          primaryLabel: l10n.claimSaveDraft,
+          primaryIcon: Icons.save_outlined,
+          loading: _saving,
+          isReady: _isReady,
+          errorMessage: _error,
+          onPrimaryPressed: () => unawaited(_save()),
+        ),
+      ],
     );
   }
 }

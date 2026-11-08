@@ -30,7 +30,7 @@ export function letterHtml(lic: LicenseCard, lang: Lang, memo: string, signed: b
     lang,
   );
   const stamp = signed
-    ? `<div style="margin-top:8px;color:#A51C30;font-weight:800;font-size:12px">SIGNED ${today()} · Ahmed Akbar Sobhan, CMD</div>`
+    ? `<div style="margin-top:8px;color:#A51C30;font-weight:800;font-size:12px">SIGNED ${today()} · Abdul Mannan Chowdhury, CMD</div>`
     : `<div style="margin-top:8px;color:#64748b;font-size:12px">DRAFT — awaiting Chairman signature</div>`;
   return `<!doctype html><html><head><meta charset="utf-8"><title>${memo}</title>
 <style>
@@ -54,11 +54,26 @@ export function letterHtml(lic: LicenseCard, lang: Lang, memo: string, signed: b
   <div class="subject">${subject}</div>
   <p>${body}</p>
   <div style="text-align:right;margin-top:32px">
-    <div style="font-weight:800">Ahmed Akbar Sobhan</div>
+    <div style="font-weight:800">Abdul Mannan Chowdhury</div>
     <div style="font-size:12px;color:#64748b">${t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang)}</div>
     ${stamp}
   </div>
 </body></html>`;
+}
+
+export function escHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** A one-page HTML sheet, the same kind of file the DO letter saves. */
+export function htmlSheet(title: string, bodyHtml: string): string {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${escHtml(title)}</title>
+<style>body{font-family:Segoe UI,sans-serif;color:#1a1a1a;padding:32px;max-width:760px;margin:0 auto}h1{font-size:20px;margin:0 0 8px}p,li,td,th{font-size:13px;line-height:1.45}table{border-collapse:collapse;width:100%;margin-top:12px}td,th{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f4f4f4}</style>
+</head><body><h1>${escHtml(title)}</h1>${bodyHtml}<p>Bashundhara Oil &amp; Gas Co. Ltd.</p></body></html>`;
 }
 
 export function downloadFile(filename: string, contents: string, mime = 'text/html;charset=utf-8') {

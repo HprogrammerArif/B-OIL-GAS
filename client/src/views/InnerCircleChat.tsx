@@ -267,7 +267,6 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
   const channelUnread = CHANNELS.reduce((sum, c) => sum + (c.unread ?? 0), 0);
   const directUnread = selfId === CHAIRMAN_ID ? members.reduce((sum, m) => sum + (m.unread ?? 0), 0) : 0;
-  const onlineCount = members.filter((m) => m.status === 'online').length + 1;
 
   const pinnedMessages = activeMessages.filter((m) => m.isPinned);
   const sharedFiles = activeMessages.filter((m) => m.type === 'document');
@@ -772,14 +771,6 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             <span>{t('Private', 'ব্যক্তিগত', lang)}</span>
           </div>
           <h3 className="ic-hub-heading">{t("Chairman's Inner Circle", 'চেয়ারম্যানের ইনার সার্কেল', lang)}</h3>
-          <div className="ic-hub-subtext">
-            <ShieldCheck size={12} />
-            <span>{t('Chairman and department heads only', 'শুধু চেয়ারম্যান ও বিভাগীয় প্রধানগণ', lang)}</span>
-          </div>
-          <div className="ic-hub-presence">
-            <span className="ic-dot online" />
-            {t(`${onlineCount} of ${roster.length} online`, `${roster.length} জনের মধ্যে ${onlineCount} জন অনলাইন`, lang)}
-          </div>
         </div>
 
         <div className="ic-hub-search">

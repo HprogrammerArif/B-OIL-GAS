@@ -10,6 +10,7 @@ import 'package:bogcl_oneops/features/note_sheets/data/note_sheet_repository.dar
 import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -152,15 +153,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.nsSignTitle, style: theme.textTheme.titleLarge),
-            const SizedBox(height: Space.xs),
-            Text(
-              l10n.nsSignIntro(widget.sheet.fileNo ?? widget.sheet.title),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            EnterpriseModalHeader(
+              title: l10n.nsSignTitle,
+              subtitle: l10n.nsSignIntro(
+                widget.sheet.fileNo ?? widget.sheet.title,
               ),
+              icon: Icons.draw_outlined,
             ),
-            const SizedBox(height: Space.lg),
+            const SizedBox(height: Space.sm),
             SegmentedButton<_Method>(
               segments: [
                 ButtonSegment(

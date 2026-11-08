@@ -96,7 +96,7 @@ export default function AuthorizeDirectiveModal({
       ? 'Sayeda Afroza Sultana'
       : roleTitle && roleTitle.toLowerCase().includes('plant')
       ? 'Engr. Md. Harunur Rashid'
-      : 'Ahmed Akbar Sobhan');
+      : 'Abdul Mannan Chowdhury');
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

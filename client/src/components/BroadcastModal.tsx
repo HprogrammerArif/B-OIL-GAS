@@ -28,7 +28,7 @@ export default function BroadcastModal({ onClose, lang = 'en' }: BroadcastModalP
       body: body.trim(),
       requireAck: ack,
       sendSms: sms,
-      author: 'Ahmed Akbar Sobhan',
+      author: 'Abdul Mannan Chowdhury',
       authorRole: 'Chairman & Managing Director',
     });
     onClose();

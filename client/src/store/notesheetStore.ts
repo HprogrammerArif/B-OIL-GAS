@@ -135,10 +135,10 @@ const INITIAL_NOTE_FILES: NoteFile[] = [
         roleId: 'chairman',
         roleName: 'Chairman & Managing Director',
         roleNameBn: 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক',
-        officerName: 'Ahmed Akbar Sobhan',
+        officerName: 'Abdul Mannan Chowdhury',
         dept: "Chairman's Office",
         avatarColor: '#A51C30',
-        initials: 'AAS',
+        initials: 'AMC',
         status: 'pending',
       },
     ],
@@ -471,7 +471,7 @@ const INITIAL_NOTE_FILES: NoteFile[] = [
 ];
 
 const PERSIST_NAME = 'notesheets';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 2;
 
 class NotesheetStore {
   private files: NoteFile[] = loadPersisted<NoteFile[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...INITIAL_NOTE_FILES];

@@ -233,6 +233,26 @@
 .psf-checks li.ok > svg { color: var(--status-success); flex-shrink: 0; }
 .psf-checks li.missing { background: color-mix(in srgb, var(--status-danger) 8%, var(--surface-1)); border-color: color-mix(in srgb, var(--status-danger) 38%, var(--border-1)); }
 .psf-checks li.missing > svg { color: var(--status-danger); flex-shrink: 0; }
+.psf-checks li.psf-test { align-items: center; }
+.psf-test-fields { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.psf-checks li.psf-test .psf-test-fields input { width: auto; height: 36px; min-width: 0; font-size: 13px; }
+.psf-test-fields input:first-child { flex: 1.4 1 140px; }
+.psf-test-fields input:nth-child(2) { flex: 1 1 100px; }
+.psf-test-remove {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--status-danger);
+  cursor: pointer;
+}
+.psf-test-remove:hover { background: color-mix(in srgb, var(--status-danger) 10%, var(--surface-1)); }
+.psf-facts dd .form-input { height: 36px; font-size: 13px; }
 .psf-rule { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
 .psf-form { display: flex; flex-direction: column; gap: 12px; }
 .psf-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }

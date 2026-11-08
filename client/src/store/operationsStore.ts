@@ -97,7 +97,7 @@ const INITIAL_LICENSES: LicenseCard[] = [
     refNo: 'EMRD/BOGCL/2026/09',
     daysLeft: 7,
     stage: 4,
-    focalPerson: 'Ahmed Akbar Sobhan',
+    focalPerson: 'Abdul Mannan Chowdhury',
     focalDesignation: 'Chairman & Managing Director',
     lastInspection: '18 Oct 2026',
     criticality: 'critical',
@@ -1206,7 +1206,7 @@ const INITIAL_PARCELS: ParcelItem[] = [
     sender: 'Farida Begum',
     senderDept: 'Finance & Accounts',
     origin: 'Head Office, Baridhara',
-    receiver: 'Ahmed Akbar Sobhan',
+    receiver: 'Abdul Mannan Chowdhury',
     receiverDept: "Chairman's Office",
     destination: 'Chairman Secretariat, Level 12, Head Office',
     contents: 'Monthly Group Financial Summary & Signed Bank L/C Documents',
@@ -1312,7 +1312,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
     organization: 'Axens Clean Energy Partners (France)',
     designation: 'Regional Engineering Director',
     category: 'vip',
-    hostEmployee: 'Ahmed Akbar Sobhan',
+    hostEmployee: 'Abdul Mannan Chowdhury',
     hostDept: "Chairman's Office",
     hostPhone: '+880 1711-000001',
     facility: 'Bashundhara Corporate HQ, Baridhara',
@@ -1556,7 +1556,7 @@ export interface LeaveRequestItem {
 const INITIAL_ATTENDANCE_ROSTER: ShiftWorker[] = [
   {
     id: 'EMP-0001',
-    name: 'Ahmed Akbar Sobhan',
+    name: 'Abdul Mannan Chowdhury',
     roleTitle: 'Chairman & Managing Director',
     appRole: 'chairman',
     dept: "Chairman's Office",
@@ -1830,9 +1830,9 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
     {
       id: 'm3',
       senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan',
+      senderName: 'Abdul Mannan Chowdhury',
       senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
+      senderInitials: 'AMC',
       senderColor: '#A51C30',
       content: 'PROCEED WITH THE 1,200 KVA BACKUP GENERATOR MAINTENANCE IMMEDIATELY SO FACTORY POWER IS NEVER INTERRUPTED. FINANCE PLEASE PREPARE THE PURCHASE ORDER ONCE SIGNED.',
       timestamp: '09:22 AM',
@@ -1944,9 +1944,9 @@ const INITIAL_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
     {
       id: 'dm_hr2',
       senderId: 'chairman',
-      senderName: 'Ahmed Akbar Sobhan',
+      senderName: 'Abdul Mannan Chowdhury',
       senderRole: 'Chairman & Managing Director',
-      senderInitials: 'AAS',
+      senderInitials: 'AMC',
       senderColor: '#A51C30',
       content: 'Thank you Harunur. Give him full access to all safety inspection logs and update me once the visit concludes.',
       timestamp: '10:42 AM',
@@ -2071,7 +2071,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 4;
+const PERSIST_VERSION = 5;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];

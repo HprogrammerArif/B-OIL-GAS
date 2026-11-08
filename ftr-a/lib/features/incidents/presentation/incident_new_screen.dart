@@ -11,12 +11,27 @@ import 'package:bogcl_oneops/features/incidents/data/incident_repository.dart';
 import 'package:bogcl_oneops/features/incidents/presentation/incident_providers.dart';
 import 'package:bogcl_oneops/features/incidents/presentation/incident_ui.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+const _incidentTemplates = <(String, String)>[
+  (
+    'Minor pressure fluctuation observed on Filling Carousel Valve #08 during cylinder batch charging; line isolated immediately for seal check.',
+    'সিলিন্ডার চার্জিং চলাকালীন ফিলিং ক্যারোসেল ভালভ #০৮-এ সামান্য চাপের তারতম্য পরিলক্ষিত হয়েছে; সিল পরীক্ষার জন্য তাৎক্ষণিকভাবে লাইনটি বিচ্ছিন্ন করা হয়েছে।',
+  ),
+  (
+    'Forklift reversing alarm intermittent in Empty Cylinder Stacking Bay; operator instructed to halt vehicle for electrical maintenance.',
+    'খালি সিলিন্ডার স্ট্যাকিং বে-তে ফর্কলিফটের রিভার্সিং অ্যালার্ম অনিয়মিতভাবে কাজ করছে; বৈদ্যুতিক মেরামতের জন্য যানটি থামাতে নির্দেশ দেওয়া হয়েছে।',
+  ),
+  (
+    'Static earthing clamp cable insulation wear detected at Bulk LPG Road Tanker Decanting Bay #02 prior to unloading.',
+    'আনলোডিংয়ের পূর্বে বাল্ক এলপিজি রোড ট্যাংকার ডিক্যান্টিং বে #০২-এ স্ট্যাটিক আর্থিং ক্ল্যাম্প ক্যাবলের ইনসুলেশন ক্ষয় শনাক্ত করা হয়েছে।',
+  ),
+];
 
 class IncidentNewScreen extends ConsumerStatefulWidget {
   const IncidentNewScreen({super.key});
@@ -60,6 +75,9 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
   }
 
   (int, String) get _risk => incidentScore(_sev, _like);
+
+  bool get _isReady =>
+      _title.text.trim().length >= 5 && _desc.text.trim().length >= 20;
 
   Future<void> _pickWhen() async {
     final d = await showDatePicker(
@@ -127,133 +145,314 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final bangla = context.isBangla;
+    final lang = bangla ? 'bn' : 'en';
     final zones = ref.watch(incidentZonesProvider(_siteId)).asData?.value ?? [];
     final scored = _risk;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.inNew)),
+      bottomNavigationBar: EnterpriseFormBottomBar(
+        primaryLabel: l10n.inCreate,
+        primaryIcon: Icons.health_and_safety_outlined,
+        loading: _saving,
+        isReady: _isReady,
+        onPrimaryPressed: _saving ? null : () => unawaited(_submit()),
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(Space.lg),
+        padding: const EdgeInsets.fromLTRB(
+          Space.lg,
+          Space.md,
+          Space.lg,
+          Space.xxl,
+        ),
         children: [
-          Text(l10n.inFormIntro),
-          const SizedBox(height: Space.md),
-          Text(l10n.inFieldType, style: Theme.of(context).textTheme.labelLarge),
-          Wrap(
-            spacing: Space.sm,
-            children: [
-              for (final t in incidentTypes)
-                ChoiceChip(
-                  label: Text(incidentTypeLabel(l10n, t)),
-                  selected: _type == t,
-                  onSelected: (_) => setState(() => _type = t),
-                ),
-            ],
+          EnterpriseApplicantStrip(
+            anonymousMode: _anon,
+            badgeLabel: _anon
+                ? (bangla ? 'গোপনীয় রিপোর্ট' : 'ANONYMOUS HSE')
+                : (bangla ? 'এইচএসই রিপোর্ট' : 'HSE REPORT'),
+            badgeIcon: Icons.health_and_safety_outlined,
           ),
           const SizedBox(height: Space.md),
-          AppTextField(label: l10n.inFieldTitle, controller: _title),
-          const SizedBox(height: Space.md),
-          AppTextField(label: l10n.inFieldDesc, controller: _desc, maxLines: 4),
-          const SizedBox(height: Space.md),
-          Text(l10n.inFieldSite, style: Theme.of(context).textTheme.labelLarge),
-          Wrap(
-            spacing: Space.sm,
+          EnterpriseSectionCard(
+            stepNumber: 1,
+            icon: Icons.warning_amber_rounded,
+            title: bangla
+                ? 'ঘটনার ধরন, স্থাপনা ও সময়কাল'
+                : 'Incident Classification, Facility & Time',
+            subtitle: l10n.inFormIntro,
             children: [
-              for (final e in [
-                ('site_hq', l10n.visSiteHq),
-                ('site_plant', l10n.visSitePlant),
-                ('site_ctg', l10n.visSiteCtg),
-              ])
-                ChoiceChip(
-                  label: Text(e.$2),
-                  selected: _siteId == e.$1,
-                  onSelected: (_) => setState(() {
-                    _siteId = e.$1;
-                    _zone = null;
-                  }),
-                ),
-            ],
-          ),
-          if (zones.isNotEmpty) ...[
-            const SizedBox(height: Space.md),
-            Text(
-              l10n.inFieldZone,
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            Wrap(
-              spacing: Space.sm,
-              children: [
-                for (final z in zones)
-                  ChoiceChip(
-                    label: Text(z.label(bangla: bangla)),
-                    selected: _zone == z.name,
-                    onSelected: (_) => setState(() => _zone = z.name),
+              Row(
+                children: [
+                  Expanded(
+                    child: EnterpriseDropdownField<String>(
+                      label: l10n.inFieldType,
+                      icon: Icons.report_problem_outlined,
+                      value: _type,
+                      items: [
+                        for (final t in incidentTypes)
+                          DropdownMenuItem(
+                            value: t,
+                            child: Text(incidentTypeLabel(l10n, t)),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _type = v ?? _type),
+                    ),
                   ),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: EnterpriseDropdownField<String>(
+                      label: l10n.inFieldSite,
+                      icon: Icons.factory_outlined,
+                      value: _siteId,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'site_hq',
+                          child: Text(l10n.visSiteHq),
+                        ),
+                        DropdownMenuItem(
+                          value: 'site_plant',
+                          child: Text(l10n.visSitePlant),
+                        ),
+                        DropdownMenuItem(
+                          value: 'site_ctg',
+                          child: Text(l10n.visSiteCtg),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _siteId = v ?? _siteId;
+                        _zone = null;
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+              if (zones.isNotEmpty) ...[
+                const SizedBox(height: Space.md),
+                EnterpriseDropdownField<String?>(
+                  label: l10n.inFieldZone,
+                  icon: Icons.place_outlined,
+                  value: _zone,
+                  items: [
+                    DropdownMenuItem<String?>(
+                      child: Text(
+                        bangla
+                            ? 'সকল জোন / সাধারণ এলাকা'
+                            : 'General / Any Zone',
+                      ),
+                    ),
+                    for (final z in zones)
+                      DropdownMenuItem(
+                        value: z.name,
+                        child: Text(z.label(bangla: bangla)),
+                      ),
+                  ],
+                  onChanged: (v) => setState(() => _zone = v),
+                ),
               ],
+              const SizedBox(height: Space.md),
+              EnterpriseDateTile(
+                label: l10n.inFieldWhen,
+                valueText: DateFmt.dateTime(_when, lang),
+                icon: Icons.schedule_outlined,
+                onTap: () => unawaited(_pickWhen()),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.md),
+          EnterpriseSectionCard(
+            stepNumber: 2,
+            icon: Icons.description_outlined,
+            title: bangla
+                ? 'ঘটনার শিরোনাম ও বিস্তারিত পর্যবেক্ষণ'
+                : 'Incident Summary & Detailed Observation',
+            subtitle: bangla
+                ? 'কমপক্ষে ২০ অক্ষরে ঘটনার বিবরণ ও তাৎক্ষণিক গৃহীত ব্যবস্থা লিখুন'
+                : 'Describe what occurred and immediate containment actions taken (min 20 chars)',
+            children: [
+              AppTextField(
+                label: l10n.inFieldTitle,
+                controller: _title,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: Space.md),
+              EnterpriseTemplateDropdown(
+                presets: _incidentTemplates,
+                controller: _desc,
+                onPicked: () => setState(() {}),
+                labelEn: 'Standard HSE Observation Template (Quick Fill)',
+                labelBn: 'স্ট্যান্ডার্ড এইচএসই পর্যবেক্ষণ (দ্রুত পূরণ)',
+              ),
+              const SizedBox(height: Space.sm),
+              AppTextField(
+                label: l10n.inFieldDesc,
+                controller: _desc,
+                maxLines: 4,
+                onChanged: (_) => setState(() {}),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.md),
+          EnterpriseSectionCard(
+            stepNumber: 3,
+            icon: Icons.grid_view_outlined,
+            title: bangla
+                ? '৫×৫ ঝুঁকি মূল্যায়ন ম্যাট্রিক্স ও জিপিএস'
+                : '5×5 HSE Risk Matrix, GPS & Anonymity',
+            subtitle: bangla ? 'তীব্রতা ও সম্ভাবনার মাত্রা নির্ধারণ করুন' : 'Assess severity × likelihood score and attach live GPS coordinates',
+            trailing: StatusPill(
+              label: l10n.inRiskLine(
+                scored.$1,
+                incidentRiskLabel(l10n, scored.$2),
+              ),
+              tone: incidentRiskTone(scored.$2),
             ),
-          ],
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.inFieldWhen),
-            subtitle: Text(DateFmt.dateTime(_when, bangla ? 'bn' : 'en')),
-            trailing: const Icon(Icons.schedule),
-            onTap: _pickWhen,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: EnterpriseDropdownField<int>(
+                      label: l10n.inFieldSev(_sev),
+                      icon: Icons.speed_outlined,
+                      value: _sev,
+                      items: [
+                        for (var n = 1; n <= 5; n++)
+                          DropdownMenuItem(
+                            value: n,
+                            child: Text(
+                              bangla
+                                  ? 'তীব্রতা স্তর $n / ৫'
+                                  : 'Severity $n / 5',
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _sev = v ?? _sev),
+                    ),
+                  ),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: EnterpriseDropdownField<int>(
+                      label: l10n.inFieldLike(_like),
+                      icon: Icons.trending_up_outlined,
+                      value: _like,
+                      items: [
+                        for (var n = 1; n <= 5; n++)
+                          DropdownMenuItem(
+                            value: n,
+                            child: Text(
+                              bangla
+                                  ? 'সম্ভাবনা স্তর $n / ৫'
+                                  : 'Likelihood $n / 5',
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _like = v ?? _like),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.md),
+              InkWell(
+                borderRadius: BorderRadius.circular(Radii.md),
+                onTap: () async {
+                  try {
+                    final fix = await ref
+                        .read(locationServiceProvider)
+                        .capture();
+                    if (!mounted) return;
+                    setState(() {
+                      _lat = fix.lat;
+                      _lng = fix.lng;
+                    });
+                  } on Object {
+                    if (!context.mounted) return;
+                    AppToast.show(context, l10n.attLocUnavailable);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(Space.md),
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: BorderRadius.circular(Radii.md),
+                    border: Border.all(
+                      color: _lat != null
+                          ? context.bogcl.success
+                          : cs.outlineVariant,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _lat != null
+                            ? Icons.gps_fixed
+                            : Icons.my_location_outlined,
+                        color: _lat != null
+                            ? context.bogcl.success
+                            : cs.primary,
+                      ),
+                      const SizedBox(width: Space.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.inGps,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              _lat == null
+                                  ? (bangla
+                                        ? 'ঘটনাস্থলের জিপিএস স্থানাঙ্ক যুক্ত করতে ট্যাপ করুন'
+                                        : 'Tap to lock live GPS coordinates of incident spot')
+                                  : '${l10n.inGpsOn} (${_lat!.toStringAsFixed(4)}, ${_lng!.toStringAsFixed(4)})',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: Space.xs),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.inFieldAnon),
+                subtitle: Text(l10n.inFieldAnonHelp),
+                value: _anon,
+                onChanged: (v) => setState(() => _anon = v),
+              ),
+            ],
           ),
-          Text(l10n.inFieldSev(_sev)),
-          Slider(
-            value: _sev.toDouble(),
-            min: 1,
-            max: 5,
-            divisions: 4,
-            label: '$_sev',
-            onChanged: (v) => setState(() => _sev = v.round()),
-          ),
-          Text(l10n.inFieldLike(_like)),
-          Slider(
-            value: _like.toDouble(),
-            min: 1,
-            max: 5,
-            divisions: 4,
-            label: '$_like',
-            onChanged: (v) => setState(() => _like = v.round()),
-          ),
-          StatusPill(
-            label: l10n.inRiskLine(
-              scored.$1,
-              incidentRiskLabel(l10n, scored.$2),
-            ),
-            tone: incidentRiskTone(scored.$2),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.inGps),
-            subtitle: Text(_lat == null ? l10n.inGps : l10n.inGpsOn),
-            trailing: const Icon(Icons.my_location),
-            onTap: () async {
-              try {
-                final fix = await ref.read(locationServiceProvider).capture();
-                if (!mounted) return;
-                setState(() {
-                  _lat = fix.lat;
-                  _lng = fix.lng;
-                });
-              } on Object {
-                if (!context.mounted) return;
-                AppToast.show(context, l10n.attLocUnavailable);
-              }
-            },
-          ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.inFieldAnon),
-            subtitle: Text(l10n.inFieldAnonHelp),
-            value: _anon,
-            onChanged: (v) => setState(() => _anon = v),
-          ),
-          const SizedBox(height: Space.lg),
-          PrimaryButton(
-            label: l10n.inCreate,
-            onPressed: _saving ? null : _submit,
+          const SizedBox(height: Space.md),
+          EnterpriseWorkflowCard(
+            title: bangla
+                ? 'এইচএসই তদন্ত ও কাপ্পা (CAPA) প্রক্রিয়া'
+                : 'HSE Triage, Root-Cause & CAPA Workflow',
+            steps: [
+              (
+                Icons.notification_important_outlined,
+                bangla ? 'রিপোর্ট দাখিল' : 'Logged',
+                bangla ? 'এইচএসই অ্যালার্ট' : 'HSE Alerted',
+              ),
+              (
+                Icons.search_outlined,
+                bangla ? '৫-হোয়াই তদন্ত' : '5-Why RCA',
+                bangla ? 'মূল কারণ নির্ণয়' : 'Investigation',
+              ),
+              (
+                Icons.task_alt_outlined,
+                bangla ? 'কাপ্পা (CAPA)' : 'CAPA Closure',
+                bangla ? 'প্রতিরোধমূলক ব্যবস্থা' : 'Verified Fix',
+              ),
+            ],
           ),
         ],
       ),

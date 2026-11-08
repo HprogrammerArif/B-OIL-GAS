@@ -77,6 +77,8 @@ export default function BusView({ role, lang }: ViewProps) {
   const [showManifestModal, setShowManifestModal] = useState<boolean>(false);
   const [showBroadcastModal, setShowBroadcastModal] = useState<boolean>(false);
   const [showPolicyModal, setShowPolicyModal] = useState<boolean>(false);
+  const [seatNoteSent, setSeatNoteSent] = useState<Record<string, boolean>>({});
+  const [dispatchSent, setDispatchSent] = useState(false);
 
   // Supervisor Dedicated Modals
   const [showRegisterBusModal, setShowRegisterBusModal] = useState<boolean>(false);
@@ -1985,10 +1987,17 @@ export default function BusView({ role, lang }: ViewProps) {
                         <ArrowUpDown size={13} /> {t(`Request Swap with Seat #${selectedSeat.num}`, `সিট সোয়াপ আবেদন`, lang)}
                       </button>
                       <button
+                        type="button"
                         className="btn-outline"
-                        onClick={() => showToast(t(`Contact inquiry sent to ${selectedSeat.assignedTo}`, 'বার্তা পাঠানো হয়েছে', lang), 'info')}
+                        disabled={!!seatNoteSent[String(selectedSeat.num)]}
+                        onClick={() => {
+                          setSeatNoteSent((prev) => ({ ...prev, [String(selectedSeat.num)]: true }));
+                          showToast(t(`Message sent to ${selectedSeat.assignedTo ?? ''}.`, `${selectedSeat.assignedTo ?? ''}-কে বার্তা পাঠানো হয়েছে।`, lang), 'info');
+                        }}
                       >
-                        <Phone size={13} />
+                        {seatNoteSent[String(selectedSeat.num)]
+                          ? t('Sent', 'পাঠানো হয়েছে', lang)
+                          : <Phone size={13} />}
                       </button>
                     </div>
                   )}
@@ -2377,8 +2386,17 @@ export default function BusView({ role, lang }: ViewProps) {
                         +880 1711-009988
                       </div>
                     </div>
-                    <button className="btn-outline" style={{ borderColor: 'var(--status-danger)', color: 'var(--status-danger)', fontSize: '11px' }} onClick={() => showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info')}>
-                      <Phone size={12} /> {t('Call Dispatch', 'কল করুন', lang)}
+                    <button
+                      type="button"
+                      className="btn-outline"
+                      style={{ borderColor: 'var(--status-danger)', color: 'var(--status-danger)', fontSize: '11px' }}
+                      disabled={dispatchSent}
+                      onClick={() => {
+                        setDispatchSent(true);
+                        showToast(t('Emergency dispatcher notified.', 'জরুরি হটলাইনে যোগাযোগ করা হয়েছে।', lang), 'info');
+                      }}
+                    >
+                      <Phone size={12} /> {dispatchSent ? t('Sent', 'পাঠানো হয়েছে', lang) : t('Call Dispatch', 'কল করুন', lang)}
                     </button>
                   </div>
                 </div>

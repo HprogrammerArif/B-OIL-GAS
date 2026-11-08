@@ -4,6 +4,7 @@ import { showToast } from '../components/ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
+import { downloadFile, escHtml, htmlSheet } from './compliance/doLetter';
 import { nowStamp, nowTime, today } from '../lib/clock';
 import { type GuestMode, guestModeFor, visitorsVisibleTo, isMyGuest } from './guest/config';
 import {
@@ -105,6 +106,8 @@ export default function GuestView({ lang }: ViewProps) {
   const [showGatePassModal, setShowGatePassModal] = useState(false);
   const [showALPRModal, setShowALPRModal] = useState(false);
   const [showMusterModal, setShowMusterModal] = useState(false);
+  const [hostNotified, setHostNotified] = useState<Record<string, boolean>>({});
+  const [pantryNotified, setPantryNotified] = useState<Record<string, boolean>>({});
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
 
@@ -151,6 +154,56 @@ export default function GuestView({ lang }: ViewProps) {
     () => scopedVisitors.find(v => v.id === selectedVisitorId) || scopedVisitors[0],
     [selectedVisitorId, scopedVisitors],
   );
+
+  const saveInspectionMemo = () => {
+    if (!selectedVisitor) return;
+    const findings = selectedVisitor.inspectionFindings ?? [];
+    const statusLabel = (status: InspectionFindingItem['status']) => (
+      status === 'passed'
+        ? t('Passed', 'উত্তীর্ণ', lang)
+        : status === 'observation'
+          ? t('Advisory', 'পরামর্শ', lang)
+          : t('Critical', 'জরুরি', lang)
+    );
+    const rows = findings.map((f) => (
+      `<tr><td>${escHtml(f.focusArea)}</td><td>${escHtml(statusLabel(f.status))}</td><td>${escHtml(f.observation)}</td><td>${escHtml(f.signOffDate)}</td></tr>`
+    )).join('');
+    const file = `joint-inspection-${selectedVisitor.id}.html`;
+    const title = t('Joint inspection memo', 'যৌথ পরিদর্শন মেমো', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p><strong>${escHtml(selectedVisitor.name)}</strong> · ${escHtml(selectedVisitor.organization)}</p>
+      <p>${escHtml(t('Host', 'স্বাগতিক', lang))}: ${escHtml(selectedVisitor.hostEmployee)} · ${escHtml(selectedVisitor.facility)}</p>
+      <p>${escHtml(t('Purpose', 'উদ্দেশ্য', lang))}: ${escHtml(selectedVisitor.purpose)}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('Check', 'পরীক্ষা', lang))}</th>
+        <th>${escHtml(t('Result', 'ফল', lang))}</th>
+        <th>${escHtml(t('Note', 'নোট', lang))}</th>
+        <th>${escHtml(t('Date', 'তারিখ', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+  };
+
+  const saveRollCall = () => {
+    const inside = visitors.filter((v) => v.status === 'checked_in');
+    const rows = inside.map((v) => (
+      `<tr><td>${escHtml(v.name)}<br>${escHtml(v.organization)}</td><td>${escHtml(v.facility)}</td><td>${escHtml(v.hostEmployee)}</td><td>${escHtml(v.phone ?? '')}</td><td>${escHtml(v.isEvacuatedSafe ? t('Safe at muster point', 'মাস্টার পয়েন্টে নিরাপদ', lang) : t('Not yet accounted', 'এখনো যাচাই হয়নি', lang))}</td></tr>`
+    )).join('');
+    const file = 'evacuation-roll-call.html';
+    const title = t('Evacuation roll-call', 'ইভাকুয়েশন রোল-কল', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p>${escHtml(t('Assembly Point #3, main security gate.', 'অ্যাসেম্বলি পয়েন্ট ৩, প্রধান নিরাপত্তা গেট।', lang))}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('Guest', 'অতিথি', lang))}</th>
+        <th>${escHtml(t('Place', 'স্থান', lang))}</th>
+        <th>${escHtml(t('Host', 'স্বাগতিক', lang))}</th>
+        <th>${escHtml(t('Phone', 'ফোন', lang))}</th>
+        <th>${escHtml(t('Roll-call', 'রোল-কল', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+    setShowMusterModal(false);
+  };
 
   const stats = useMemo(() => {
     const pool = mode === 'host' ? scopedVisitors : visitors;
@@ -972,21 +1025,29 @@ export default function GuestView({ lang }: ViewProps) {
                           {selectedVisitor.hostDept}
                         </div>
                         <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <button
+                          <a
+                            href={`tel:${(selectedVisitor.hostPhone || '01711000000').replace(/[^\d+]/g, '')}`}
                             className="btn-primary"
-                            style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={() => showToast(t(`Calling Host ${selectedVisitor.hostEmployee}: ${selectedVisitor.hostPhone || '01711-000000'}`, `হোস্ট ${selectedVisitor.hostEmployee}-কে কল করা হচ্ছে`, lang), 'info')}
+                            style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px', textDecoration: 'none' }}
+                            onClick={() => showToast(t(`Host number: ${selectedVisitor.hostPhone || '01711-000000'}`, `হোস্টের নম্বর: ${selectedVisitor.hostPhone || '01711-000000'}`, lang), 'info')}
                           >
                             <Phone size={12} />
                             {t('Call Host', 'হোস্টকে কল করুন', lang)}
-                          </button>
+                          </a>
                           <button
+                            type="button"
                             className="btn-sm-ghost"
                             style={{ fontSize: '11px', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={() => showToast(t(`Host ${selectedVisitor.hostEmployee} notified of guest arrival at reception.`, `হোস্ট ${selectedVisitor.hostEmployee}-কে অতিথির আগমন জানানো হয়েছে।`, lang), 'success')}
+                            disabled={!!hostNotified[selectedVisitor.id]}
+                            onClick={() => {
+                              setHostNotified((prev) => ({ ...prev, [selectedVisitor.id]: true }));
+                              showToast(t(`Host ${selectedVisitor.hostEmployee} notified of guest arrival at reception.`, `হোস্ট ${selectedVisitor.hostEmployee}-কে অতিথির আগমন জানানো হয়েছে।`, lang), 'success');
+                            }}
                           >
                             <MessageSquare size={12} />
-                            {t('Notify Host', 'বার্তা পাঠান', lang)}
+                            {hostNotified[selectedVisitor.id]
+                              ? t('Notified', 'জানানো হয়েছে', lang)
+                              : t('Notify Host', 'বার্তা পাঠান', lang)}
                           </button>
                         </div>
                       </div>
@@ -1245,11 +1306,19 @@ export default function GuestView({ lang }: ViewProps) {
                         </div>
                         <div style={{ marginTop: '6px' }}>
                           <button
+                            type="button"
                             className="btn-sm-ghost"
                             style={{ fontSize: '11px', padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            onClick={() => showToast(t(`Hospitality team notified for ${selectedVisitor.name}.`, `আপ্যায়ন টিমকে অবহিত করা হয়েছে।`, lang), 'success')}
+                            disabled={!!pantryNotified[selectedVisitor.id]}
+                            onClick={() => {
+                              setPantryNotified((prev) => ({ ...prev, [selectedVisitor.id]: true }));
+                              showToast(t(`Hospitality team notified for ${selectedVisitor.name}.`, `আপ্যায়ন টিমকে অবহিত করা হয়েছে।`, lang), 'success');
+                            }}
                           >
-                            <Coffee size={11} /> {t('Notify Pantry', 'প্যান্ট্রিতে জানান', lang)}
+                            <Coffee size={11} />
+                            {pantryNotified[selectedVisitor.id]
+                              ? t('Notified', 'জানানো হয়েছে', lang)
+                              : t('Notify Pantry', 'প্যান্ট্রিতে জানান', lang)}
                           </button>
                         </div>
                       </div>
@@ -1266,7 +1335,7 @@ export default function GuestView({ lang }: ViewProps) {
                           <button
                             className="btn-outline"
                             style={{ fontSize: '11.5px', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                            onClick={() => showToast(t(`Joint Inspection Memo PDF exported for ${selectedVisitor.name}.`, `যৌথ পরিদর্শন মেমো প্রস্তুত সম্পন্ন।`, lang), 'success')}
+                            onClick={saveInspectionMemo}
                           >
                             <Download size={13} />
                             {t('Export Memo (PDF)', 'মেমো ডাউনলোড', lang)}
@@ -1820,10 +1889,7 @@ export default function GuestView({ lang }: ViewProps) {
                   <button
                     className="btn-primary"
                     style={{ background: 'var(--status-danger-solid-dark)' }}
-                    onClick={() => {
-                      showToast(t('Evacuation roll-call sheet downloaded.', 'ইভাকুয়েশন মাস্টার শিট ডাউনলোড সম্পন্ন।', lang), 'success');
-                      setShowMusterModal(false);
-                    }}
+                    onClick={saveRollCall}
                   >
                     <Download size={14} />
                     {t('Export Roll-Call PDF', 'মাস্টার শিট ডাউনলোড', lang)}

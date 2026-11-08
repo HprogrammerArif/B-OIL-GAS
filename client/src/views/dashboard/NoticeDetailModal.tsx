@@ -590,7 +590,7 @@ export default function NoticeDetailModal({
                     letterSpacing: '0.5px',
                   }}
                 >
-                  Ahmed Akbar Sobhan
+                  Abdul Mannan Chowdhury
                 </div>
                 <div
                   style={{
@@ -600,7 +600,7 @@ export default function NoticeDetailModal({
                     marginTop: '4px',
                   }}
                 >
-                  {notice.author || 'Ahmed Akbar Sobhan'}
+                  {notice.author || 'Abdul Mannan Chowdhury'}
                 </div>
                 <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-3)' }}>
                   {notice.authorRole || 'Chairman & Managing Director'}

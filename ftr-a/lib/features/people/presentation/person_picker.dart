@@ -4,6 +4,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/people/data/people_repository.dart';
 import 'package:bogcl_oneops/features/people/domain/person_pick.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:flutter/material.dart';
@@ -55,8 +56,9 @@ class _PickerState extends ConsumerState<_Picker> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
+    final cs = Theme.of(context).colorScheme;
     return SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.75,
+      height: MediaQuery.sizeOf(context).height * 0.78,
       child: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -68,11 +70,13 @@ class _PickerState extends ConsumerState<_Picker> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.title,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  EnterpriseModalHeader(
+                    title: widget.title,
+                    subtitle: bangla
+                        ? 'নাম, পদবি বা বিভাগ অনুযায়ী কর্মকর্তা অনুসন্ধান করুন'
+                        : 'Search BOGCL directory by officer name, designation, or department',
+                    icon: Icons.person_search_outlined,
                   ),
-                  const SizedBox(height: Space.md),
                   TextField(
                     controller: _c,
                     autofocus: true,
@@ -82,6 +86,7 @@ class _PickerState extends ConsumerState<_Picker> {
                       prefixIcon: const Icon(Icons.search),
                     ),
                   ),
+                  const SizedBox(height: Space.sm),
                 ],
               ),
             ),
@@ -110,14 +115,23 @@ class _PickerState extends ConsumerState<_Picker> {
                     itemBuilder: (_, i) {
                       final p = rows[i];
                       return ListRow(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person_outline),
+                        leading: CircleAvatar(
+                          backgroundColor: cs.primaryContainer,
+                          child: Icon(
+                            Icons.person_outline,
+                            color: cs.onPrimaryContainer,
+                          ),
                         ),
                         title: p.person.display(bangla: bangla),
                         subtitle: [
                           if (p.person.title != null) p.person.title!,
                           p.where(bangla: bangla),
-                        ].join('\n'),
+                        ].join(' · '),
+                        trailing: Icon(
+                          Icons.check_circle_outline,
+                          size: 18,
+                          color: cs.primary,
+                        ),
                         onTap: () => Navigator.of(context).pop(p),
                       );
                     },

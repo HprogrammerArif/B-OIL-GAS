@@ -11,8 +11,7 @@ import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_provid
 import 'package:bogcl_oneops/features/note_sheets/presentation/quote_sheet.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
-import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
@@ -20,6 +19,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+const _nsTemplates = <(String, String)>[
+  (
+    'Procurement of critical plant spares and safety valves for Keraniganj Filling Plant to ensure uninterrupted LPG cylinder bottling operations.',
+    'কেরানীগঞ্জ ফিলিং প্ল্যান্টের নিরবচ্ছিন্ন এলপিজি সিলিন্ডার বোতলজাতকরণ নিশ্চিত করতে জরুরি প্ল্যান্ট স্পেয়ারস ও সেফটি ভালভ ক্রয় প্রস্তাব।',
+  ),
+  (
+    'Renewal of annual maintenance contract (AMC) for industrial fire-fighting pumps and gas leak detection sensors across plant storage spheres.',
+    'প্ল্যান্ট স্টোরেজ স্ফিয়ারের ইন্ডাস্ট্রিয়াল ফায়ার-ফাইটিং পাম্প ও গ্যাস লিক ডিটেকশন সেন্সরের বার্ষিক রক্ষণাবেক্ষণ চুক্তি (AMC) নবায়ন।',
+  ),
+  (
+    'Approval for emergency calibration and hydro-testing equipment replacement required under Department of Explosives compliance guidelines.',
+    'বিস্ফোরক পরিদপ্তরের কমপ্লায়েন্স নির্দেশিকা অনুযায়ী জরুরি ক্যালিব্রেশন ও হাইড্রো-টেস্টিং সরঞ্জাম প্রতিস্থাপনের অনুমোদন।',
+  ),
+  (
+    'Administrative expenditure sanction for Head Office IT infrastructure upgrade and enterprise cybersecurity endpoint licensing.',
+    'প্রধান কার্যালয়ের আইটি অবকাঠামো উন্নয়ন এবং এন্টারপ্রাইজ সাইবার সিকিউরিটি এন্ডপয়েন্ট লাইসেন্সিংয়ের প্রশাসনিক ব্যয় অনুমোদন।',
+  ),
+];
 
 /// Write or fix a note-sheet. [id] null means a new one.
 class NoteSheetEditScreen extends ConsumerWidget {
@@ -86,6 +104,12 @@ class _FormState extends ConsumerState<_Form> {
   }
 
   bool get _quotesRequired => _amountValue >= quotesRequiredAbove;
+
+  bool get _isReady =>
+      _title.text.trim().length >= 5 &&
+      _subject.text.trim().length >= 3 &&
+      (_returned || _justification.text.trim().length >= 10) &&
+      (!_quotesRequired || _quotes.length >= minQuotes);
 
   @override
   void dispose() {
@@ -215,6 +239,7 @@ class _FormState extends ConsumerState<_Form> {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final existing = widget.existing;
     final returnedWhy = existing?.paragraphs
         .where((p) => p.kind == 'RETURN')
@@ -232,196 +257,340 @@ class _FormState extends ConsumerState<_Form> {
             ),
         ],
       ),
+      bottomNavigationBar: EnterpriseFormBottomBar(
+        primaryLabel: _returned ? l10n.nsSendAgain : l10n.nsSend,
+        loading: _busy,
+        isReady: _isReady,
+        errorMessage: _error,
+        secondaryLabel: _returned ? l10n.nsSaveChanges : l10n.nsSaveDraft,
+        onSecondaryPressed: () => unawaited(_save(send: false)),
+        onPrimaryPressed: () => unawaited(_save(send: true)),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(Space.lg),
+          padding: const EdgeInsets.fromLTRB(
+            Space.lg,
+            Space.md,
+            Space.lg,
+            Space.xxl,
+          ),
           children: [
+            EnterpriseApplicantStrip(
+              badgeLabel: _returned
+                  ? (bangla ? 'ফেরত পাঠানো' : 'RETURNED')
+                  : existing == null
+                  ? (bangla ? 'নতুন নোট শিট' : 'NEW NOTE SHEET')
+                  : (bangla ? 'খসড়া সম্পাদনা' : 'EDITING DRAFT'),
+            ),
+            const SizedBox(height: Space.md),
             if (returnedWhy != null) ...[
-              Card(
-                color: context.bogcl.warning.withValues(alpha: 0.12),
-                child: Padding(
-                  padding: const EdgeInsets.all(Space.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.nsWhyReturned(
-                          returnedWhy.author.display(bangla: bangla),
-                        ),
-                        style: theme.textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Text(returnedWhy.body),
-                    ],
+              Container(
+                padding: const EdgeInsets.all(Space.md),
+                decoration: BoxDecoration(
+                  color: context.bogcl.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(Radii.md),
+                  border: Border.all(
+                    color: context.bogcl.warning.withValues(alpha: 0.4),
                   ),
                 ),
-              ),
-              const SizedBox(height: Space.lg),
-            ],
-            AppTextField(
-              label: l10n.nsFieldTitle,
-              controller: _title,
-              required: true,
-              maxLength: 200,
-              validator: (v) =>
-                  (v ?? '').trim().length < 5 ? l10n.nsErrTitle : null,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              label: l10n.nsFieldSubject,
-              controller: _subject,
-              required: true,
-              maxLength: 200,
-              validator: (v) =>
-                  (v ?? '').trim().length < 3 ? l10n.nsErrSubject : null,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              label: l10n.nsFieldAmount,
-              controller: _amount,
-              helper: l10n.nsFieldAmountHelp,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (_) => setState(() {}),
-            ),
-            if (!_returned) ...[
-              const SizedBox(height: Space.md),
-              AppTextField(
-                label: l10n.nsFieldJustification,
-                controller: _justification,
-                required: true,
-                maxLines: 6,
-                maxLength: 10000,
-                validator: (v) => (v ?? '').trim().length < 10
-                    ? l10n.nsErrJustification
-                    : null,
-              ),
-            ],
-            SectionHeader(title: l10n.nsFieldUrgency),
-            SegmentedButton<String>(
-              segments: [
-                ButtonSegment(value: 'NORMAL', label: Text(l10n.nsUrgNormal)),
-                ButtonSegment(value: 'HIGH', label: Text(l10n.nsUrgHigh)),
-                ButtonSegment(
-                  value: 'CRITICAL',
-                  label: Text(l10n.nsUrgCritical),
-                ),
-              ],
-              selected: {_urgency},
-              onSelectionChanged: (s) => setState(() => _urgency = s.first),
-            ),
-            SectionHeader(title: l10n.nsFieldConfidentiality),
-            SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                  value: 'INTERNAL',
-                  label: Text(l10n.nsConfInternal),
-                ),
-                ButtonSegment(
-                  value: 'CONFIDENTIAL',
-                  label: Text(l10n.nsConfConfidential),
-                ),
-                ButtonSegment(value: 'SECRET', label: Text(l10n.nsConfSecret)),
-              ],
-              selected: {_confidentiality},
-              onSelectionChanged: (s) =>
-                  setState(() => _confidentiality = s.first),
-            ),
-            SectionHeader(
-              title: l10n.nsQuotesTitle,
-              trailing: TextButton.icon(
-                onPressed: _quotes.length >= 6
-                    ? null
-                    : () => unawaited(_editQuote()),
-                icon: const Icon(Icons.add),
-                label: Text(l10n.nsQuoteAdd),
-              ),
-            ),
-            Text(
-              _quotesRequired ? l10n.nsQuotesNeeded : l10n.nsQuotesOptional,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: Space.sm),
-            RadioGroup<int>(
-              groupValue: _quotes.indexWhere((q) => q.isRecommended),
-              onChanged: (i) => setState(() {
-                _quotes = [
-                  for (final (n, q) in _quotes.indexed)
-                    q.copyWith(isRecommended: n == i),
-                ];
-              }),
-              child: Column(
-                children: [
-                  for (final (i, q) in _quotes.indexed)
-                    Card(
-                      child: ListTile(
-                        leading: Radio<int>(value: i),
-                        title: Text(q.vendorName),
-                        subtitle: Text(
-                          '${taka(q.amount, bangla: bangla)}\n'
-                          '${l10n.nsQuoteMeta(q.deliveryDays, q.warrantyMonths)}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.assignment_return_outlined,
+                          size: 18,
+                          color: context.bogcl.warning,
                         ),
-                        isThreeLine: true,
-                        onTap: () => unawaited(_editQuote(i)),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close),
-                          tooltip: l10n.commonCancel,
-                          onPressed: () => setState(() {
-                            _quotes = [..._quotes]..removeAt(i);
-                          }),
+                        const SizedBox(width: Space.xs),
+                        Expanded(
+                          child: Text(
+                            l10n.nsWhyReturned(
+                              returnedWhy.author.display(bangla: bangla),
+                            ),
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Text(returnedWhy.body),
+                  ],
+                ),
+              ),
+              const SizedBox(height: Space.md),
+            ],
+            EnterpriseSectionCard(
+              stepNumber: 1,
+              icon: Icons.description_outlined,
+              title: bangla
+                  ? 'শিরোনাম ও নথির শ্রেণিবিন্যাস'
+                  : 'Subject & Document Classification',
+              subtitle: bangla
+                  ? 'নোট শিটের শিরোনাম, জরুরিতা এবং গোপনীয়তার স্তর নির্ধারণ করুন'
+                  : 'Set the note sheet title, urgency tier, and confidentiality level',
+              children: [
+                AppTextField(
+                  label: l10n.nsFieldTitle,
+                  controller: _title,
+                  required: true,
+                  maxLength: 200,
+                  onChanged: (_) => setState(() {}),
+                  validator: (v) =>
+                      (v ?? '').trim().length < 5 ? l10n.nsErrTitle : null,
+                ),
+                const SizedBox(height: Space.md),
+                AppTextField(
+                  label: l10n.nsFieldSubject,
+                  controller: _subject,
+                  required: true,
+                  maxLength: 200,
+                  onChanged: (_) => setState(() {}),
+                  validator: (v) =>
+                      (v ?? '').trim().length < 3 ? l10n.nsErrSubject : null,
+                ),
+                const SizedBox(height: Space.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: EnterpriseDropdownField<String>(
+                        label: l10n.nsFieldUrgency,
+                        icon: Icons.bolt_outlined,
+                        value: _urgency,
+                        items: [
+                          DropdownMenuItem(
+                            value: 'NORMAL',
+                            child: Text(l10n.nsUrgNormal),
+                          ),
+                          DropdownMenuItem(
+                            value: 'HIGH',
+                            child: Text(l10n.nsUrgHigh),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CRITICAL',
+                            child: Text(l10n.nsUrgCritical),
+                          ),
+                        ],
+                        onChanged: (v) =>
+                            setState(() => _urgency = v ?? _urgency),
+                      ),
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Expanded(
+                      child: EnterpriseDropdownField<String>(
+                        label: l10n.nsFieldConfidentiality,
+                        icon: Icons.lock_outline,
+                        value: _confidentiality,
+                        items: [
+                          DropdownMenuItem(
+                            value: 'INTERNAL',
+                            child: Text(l10n.nsConfInternal),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CONFIDENTIAL',
+                            child: Text(l10n.nsConfConfidential),
+                          ),
+                          DropdownMenuItem(
+                            value: 'SECRET',
+                            child: Text(l10n.nsConfSecret),
+                          ),
+                        ],
+                        onChanged: (v) => setState(
+                          () => _confidentiality = v ?? _confidentiality,
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: Space.md),
+            EnterpriseSectionCard(
+              stepNumber: 2,
+              icon: Icons.payments_outlined,
+              title: bangla
+                  ? 'আর্থিক মূল্যমান ও প্রস্তাবের যৌক্তিকতা'
+                  : 'Financial Sanction & Justification',
+              subtitle: bangla
+                  ? 'প্রস্তাবিত ব্যয়ের পরিমাণ ও বিস্তারিত যৌক্তিকতা উল্লেখ করুন'
+                  : 'Specify estimated expenditure and background justification',
+              children: [
+                AppTextField(
+                  label: l10n.nsFieldAmount,
+                  controller: _amount,
+                  helper: l10n.nsFieldAmountHelp,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  onChanged: (_) => setState(() {}),
+                ),
+                if (!_returned) ...[
+                  const SizedBox(height: Space.md),
+                  EnterpriseTemplateDropdown(
+                    presets: _nsTemplates,
+                    controller: _justification,
+                    onPicked: () => setState(() {}),
+                    labelEn: 'Standard BOGCL Note Sheet Template (Quick Fill)',
+                    labelBn: 'স্ট্যান্ডার্ড নোট শিট টেমপ্লেট (দ্রুত পূরণ)',
+                  ),
+                  const SizedBox(height: Space.sm),
+                  AppTextField(
+                    label: l10n.nsFieldJustification,
+                    controller: _justification,
+                    required: true,
+                    maxLines: 5,
+                    maxLength: 10000,
+                    onChanged: (_) => setState(() {}),
+                    validator: (v) => (v ?? '').trim().length < 10
+                        ? l10n.nsErrJustification
+                        : null,
+                  ),
                 ],
-              ),
+              ],
             ),
-            if (_quotes.isNotEmpty)
-              Text(
-                l10n.nsQuotePickHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+            const SizedBox(height: Space.md),
+            EnterpriseSectionCard(
+              stepNumber: 3,
+              icon: Icons.request_quote_outlined,
+              title: l10n.nsQuotesTitle,
+              subtitle: _quotesRequired
+                  ? l10n.nsQuotesNeeded
+                  : l10n.nsQuotesOptional,
+              trailing: FilledButton.tonalIcon(
+                onPressed: _quotes.length >= 6
+                    ? null
+                    : () => unawaited(_editQuote()),
+                icon: const Icon(Icons.add, size: 16),
+                label: Text(l10n.nsQuoteAdd),
               ),
-            if (_needsReco) ...[
-              const SizedBox(height: Space.md),
-              AppTextField(
-                label: l10n.nsRecoNote,
-                controller: _reco,
-                maxLines: 3,
-                maxLength: 1000,
-              ),
-            ],
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: Space.md),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: context.bogcl.danger),
-                ),
-              ),
-            const SizedBox(height: Space.xl),
-            PrimaryButton(
-              label: _returned ? l10n.nsSendAgain : l10n.nsSend,
-              icon: Icons.send_outlined,
-              loading: _busy,
-              onPressed: () => unawaited(_save(send: true)),
+              children: [
+                if (_quotes.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(Space.md),
+                    decoration: BoxDecoration(
+                      color: cs.surface,
+                      borderRadius: BorderRadius.circular(Radii.sm),
+                      border: Border.all(
+                        color: _quotesRequired
+                            ? context.bogcl.warning.withValues(alpha: 0.5)
+                            : cs.outlineVariant,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _quotesRequired
+                              ? Icons.warning_amber_rounded
+                              : Icons.info_outline,
+                          size: 18,
+                          color: _quotesRequired
+                              ? context.bogcl.warning
+                              : cs.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: Space.sm),
+                        Expanded(
+                          child: Text(
+                            _quotesRequired
+                                ? l10n.nsQuotesNeeded
+                                : l10n.nsQuotesOptional,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  RadioGroup<int>(
+                    groupValue: _quotes.indexWhere((q) => q.isRecommended),
+                    onChanged: (i) => setState(() {
+                      _quotes = [
+                        for (final (n, q) in _quotes.indexed)
+                          q.copyWith(isRecommended: n == i),
+                      ];
+                    }),
+                    child: Column(
+                      children: [
+                        for (final (i, q) in _quotes.indexed)
+                          Card(
+                            margin: const EdgeInsets.only(bottom: Space.xs),
+                            child: ListTile(
+                              leading: Radio<int>(value: i),
+                              title: Text(
+                                q.vendorName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${taka(q.amount, bangla: bangla)}\n'
+                                '${l10n.nsQuoteMeta(q.deliveryDays, q.warrantyMonths)}',
+                              ),
+                              isThreeLine: true,
+                              onTap: () => unawaited(_editQuote(i)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close),
+                                tooltip: l10n.commonCancel,
+                                onPressed: () => setState(() {
+                                  _quotes = [..._quotes]..removeAt(i);
+                                }),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                if (_quotes.isNotEmpty) ...[
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    l10n.nsQuotePickHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                if (_needsReco) ...[
+                  const SizedBox(height: Space.md),
+                  AppTextField(
+                    label: l10n.nsRecoNote,
+                    controller: _reco,
+                    maxLines: 3,
+                    maxLength: 1000,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                ],
+              ],
             ),
-            if (!_returned) ...[
-              const SizedBox(height: Space.sm),
-              PrimaryButton.secondary(
-                label: l10n.nsSaveDraft,
-                onPressed: _busy ? null : () => unawaited(_save(send: false)),
-              ),
-            ] else ...[
-              const SizedBox(height: Space.sm),
-              PrimaryButton.secondary(
-                label: l10n.nsSaveChanges,
-                onPressed: _busy ? null : () => unawaited(_save(send: false)),
-              ),
-            ],
+            const SizedBox(height: Space.md),
+            EnterpriseWorkflowCard(
+              title: bangla
+                  ? 'অনুমোদন চেইন (ডিওএ রাউটিং)'
+                  : 'Approval Chain (DOA Financial Routing)',
+              steps: [
+                (
+                  Icons.edit_document,
+                  bangla ? 'উদ্যোক্তা' : 'Initiator',
+                  bangla ? 'প্রস্তাব দাখিল' : 'Draft & Sign',
+                ),
+                (
+                  Icons.supervisor_account_outlined,
+                  bangla ? 'বিভাগীয় প্রধান / জিএম' : 'HOD / Plant GM',
+                  bangla ? 'কারিগরি যাচাই' : 'Technical Review',
+                ),
+                (
+                  Icons.verified_outlined,
+                  _amountValue >= 500000
+                      ? (bangla ? 'চেয়ারম্যান' : 'Chairman')
+                      : (bangla ? 'অর্থ বিভাগ' : 'Finance Sanction'),
+                  bangla ? 'চূড়ান্ত অনুমোদন' : 'Final Sanction',
+                ),
+              ],
+              slaNote: bangla
+                  ? 'আর্থিক সীমা অনুযায়ী নোট শিটটি স্বয়ংক্রিয়ভাবে যথাযথ কর্তৃপক্ষের নিকট প্রেরিত হবে।'
+                  : 'Automatically routed by BOGCL Delegation of Authority (DOA) financial thresholds.',
+            ),
           ],
         ),
       ),

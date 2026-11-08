@@ -31,7 +31,11 @@ abstract final class Corner {
   static const double md = 12;
   static const double lg = 16;
   static const double xl = 20;
+  static const double pill = 999;
 }
+
+/// Alias for [Corner] used by enterprise form & modal components.
+typedef Radii = Corner;
 
 /// Minimum touch target (a11y).
 const double kMinTouchTarget = 48;

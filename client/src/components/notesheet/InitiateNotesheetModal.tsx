@@ -85,10 +85,10 @@ export const AVAILABLE_OFFICERS: Omit<SignatoryStep, 'id' | 'status'>[] = [
     roleId: 'chairman',
     roleName: 'Chairman & Managing Director',
     roleNameBn: 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক',
-    officerName: 'Ahmed Akbar Sobhan',
+    officerName: 'Abdul Mannan Chowdhury',
     dept: "Chairman's Office, Baridhara HQ",
     avatarColor: 'var(--brand-crimson)',
-    initials: 'AAS',
+    initials: 'AMC',
   },
 ];
 

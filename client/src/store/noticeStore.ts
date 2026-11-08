@@ -17,7 +17,7 @@ export interface BroadcastPayload {
 }
 
 const PERSIST_NAME = 'notices';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 2;
 
 class NoticeStore {
   private notices: NoticeItem[] = loadPersisted<NoticeItem[]>(PERSIST_NAME, PERSIST_VERSION) ?? [...NOTICE_BOARD];
@@ -64,7 +64,7 @@ class NoticeStore {
   }): { notice: NoticeItem; broadcast: BroadcastPayload } {
     const id = `BC-${Date.now().toString().slice(-4)}`;
     const timestamp = nowStamp();
-    const author = data.author || 'Ahmed Akbar Sobhan';
+    const author = data.author || 'Abdul Mannan Chowdhury';
     const authorRole = data.authorRole || 'Chairman & Managing Director';
 
     const broadcastPayload: BroadcastPayload = {

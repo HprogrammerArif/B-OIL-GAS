@@ -1548,7 +1548,7 @@ const INITIAL_REQUISITIONS: AssetRequisition[] = [
     urgency: 'high',
     stage: 'approved_procuring',
     endorsedByHod: 'Farida Begum (Head of Finance & Approver)',
-    sanctionedByExec: 'Ahmed Akbar Sobhan (Chairman & MD)',
+    sanctionedByExec: 'Abdul Mannan Chowdhury (Chairman & MD)',
   },
 ];
 
@@ -1586,7 +1586,7 @@ interface AssetSnapshot {
   transfers: AssetTransfer[];
 }
 const PERSIST_NAME = 'assets';
-const PERSIST_VERSION = 1;
+const PERSIST_VERSION = 2;
 const persistedAssets = loadPersisted<AssetSnapshot>(PERSIST_NAME, PERSIST_VERSION);
 
 let globalAssets: AssetRecord[] = persistedAssets?.assets ?? [...INITIAL_ASSETS];

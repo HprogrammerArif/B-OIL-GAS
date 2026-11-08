@@ -12,11 +12,27 @@ import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const _lineDescPresets = <(String, String)>[
+  (
+    'CNG / Ride-share fare from Baridhara HQ to Keraniganj Filling Plant gate.',
+    'বারিধারা প্রধান কার্যালয় হতে কেরানীগঞ্জ ফিলিং প্ল্যান্ট পর্যন্ত সিএনজি / রাইড-শেয়ার ভাড়া।',
+  ),
+  (
+    'Intercity highway toll, ferry crossing & official parking receipt.',
+    'আন্তঃজেলা মহাসড়ক টোল, ফেরি পারাপার এবং দাপ্তরিক পার্কিং রসিদ।',
+  ),
+  (
+    'Hotel accommodation during outstation technical inspection duty.',
+    'আউটস্টেশন কারিগরি পরিদর্শন ডিউটি চলাকালীন হোটেল আবাসন ব্যয়।',
+  ),
+];
 
 /// Bottom sheet that adds or edits one expense line. Returns the line, or
 /// null when dismissed.
@@ -208,42 +224,48 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.existing == null
+                EnterpriseModalHeader(
+                  title: widget.existing == null
                       ? l10n.claimLineAdd
                       : l10n.claimLineEdit,
-                  style: theme.textTheme.titleLarge,
+                  subtitle: bangla
+                      ? 'খরচের খাত, তারিখ ও ভাউচার সংযুক্ত করুন'
+                      : 'Specify expense category, date, amount, and voucher',
+                  icon: Icons.receipt_long_outlined,
                 ),
-                const SizedBox(height: Space.lg),
-                DropdownButtonFormField<String>(
-                  initialValue: _category,
-                  decoration: InputDecoration(
-                    labelText: l10n.claimFieldCategory,
-                  ),
-                  items: [
-                    for (final c in _categories)
-                      DropdownMenuItem(
-                        value: c,
-                        child: Text(claimCategoryLabel(l10n, c)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: EnterpriseDropdownField<String>(
+                        label: l10n.claimFieldCategory,
+                        icon: Icons.category_outlined,
+                        value: _category,
+                        items: [
+                          for (final c in _categories)
+                            DropdownMenuItem(
+                              value: c,
+                              child: Text(claimCategoryLabel(l10n, c)),
+                            ),
+                        ],
+                        onChanged: (v) => setState(() {
+                          _category = v ?? _category;
+                          if (!_canDeclare) _declaration = false;
+                        }),
                       ),
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Expanded(
+                      child: EnterpriseDateTile(
+                        label: l10n.claimFieldDate,
+                        valueText: DateFmt.range(
+                          dateKey(_date),
+                          dateKey(_date),
+                          lang,
+                        ),
+                        onTap: () => unawaited(_pickDate()),
+                      ),
+                    ),
                   ],
-                  onChanged: (v) => setState(() {
-                    _category = v ?? _category;
-                    if (!_canDeclare) _declaration = false;
-                  }),
-                ),
-                const SizedBox(height: Space.md),
-                InkWell(
-                  onTap: () => unawaited(_pickDate()),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: l10n.claimFieldDate,
-                      suffixIcon: const Icon(Icons.calendar_today_outlined),
-                    ),
-                    child: Text(
-                      DateFmt.range(dateKey(_date), dateKey(_date), lang),
-                    ),
-                  ),
                 ),
                 const SizedBox(height: Space.md),
                 if (mileage) ...[
@@ -321,6 +343,14 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                   ],
                 ],
                 const SizedBox(height: Space.md),
+                EnterpriseTemplateDropdown(
+                  presets: _lineDescPresets,
+                  controller: _desc,
+                  onPicked: () => setState(() {}),
+                  labelEn: 'Standard Expense Note (Quick Fill)',
+                  labelBn: 'স্ট্যান্ডার্ড খরচের বিবরণ (দ্রুত পূরণ)',
+                ),
+                const SizedBox(height: Space.sm),
                 AppTextField(
                   label: l10n.claimFieldDescription,
                   controller: _desc,
@@ -373,6 +403,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                 const SizedBox(height: Space.lg),
                 PrimaryButton(
                   label: l10n.claimLineSave,
+                  icon: Icons.check_circle_outline,
                   onPressed: _uploading ? null : _save,
                 ),
               ],

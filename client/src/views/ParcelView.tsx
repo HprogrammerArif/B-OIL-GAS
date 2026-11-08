@@ -4,6 +4,7 @@ import { showToast } from '../components/ToastManager';
 import { useOperationsStore } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
+import { downloadFile, escHtml, htmlSheet } from './compliance/doLetter';
 import { today, nowTime } from '../lib/clock';
 import {
   type ParcelMode, type ParcelAction, OTP_MAX_ATTEMPTS,
@@ -126,6 +127,7 @@ export default function ParcelView({ lang }: ViewProps) {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [showTamperModal, setShowTamperModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [courierNoted, setCourierNoted] = useState<Record<string, boolean>>({});
 
   // Return Form State
   const [returnReason, setReturnReason] = useState<ReturnDetails['reason']>('tamper_broken');
@@ -162,6 +164,28 @@ export default function ParcelView({ lang }: ViewProps) {
     () => scopedParcels.find(p => p.id === selectedParcelId) || scopedParcels[0],
     [selectedParcelId, scopedParcels],
   );
+
+  const saveAuditSheet = () => {
+    if (!selectedParcel) return;
+    const rows = selectedParcel.chainOfCustody.map((log) => (
+      `<tr><td>${escHtml(log.timestamp)}</td><td>${escHtml(t(log.stageName, log.stageNameBn, lang))}</td><td>${escHtml(log.location)}</td><td>${escHtml(`${log.actor} (${log.actorRole})`)}</td><td>${escHtml(log.notes ?? '')}</td></tr>`
+    )).join('');
+    const file = `audit-${selectedParcel.trackingNo.replace(/[^\w.-]+/g, '_')}.html`;
+    const title = t('Board audit copy', 'বোর্ড অডিট কপি', lang);
+    downloadFile(file, htmlSheet(title, `
+      <p>${escHtml(t('Waybill', 'ওয়েবিল', lang))}: <strong>${escHtml(selectedParcel.trackingNo)}</strong> · ${escHtml(t('Seal', 'সিল', lang))}: ${escHtml(selectedParcel.sealNo)}</p>
+      <p>${escHtml(selectedParcel.origin)} → ${escHtml(selectedParcel.destination)}</p>
+      <table><thead><tr>
+        <th>${escHtml(t('When', 'কখন', lang))}</th>
+        <th>${escHtml(t('Step', 'ধাপ', lang))}</th>
+        <th>${escHtml(t('Place', 'স্থান', lang))}</th>
+        <th>${escHtml(t('Logged by', 'এন্ট্রি করেছেন', lang))}</th>
+        <th>${escHtml(t('Note', 'নোট', lang))}</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    `));
+    showToast(t(`Saved ${file} to your downloads.`, `${file} ডাউনলোড ফোল্ডারে সংরক্ষিত।`, lang), 'success');
+    setShowAuditModal(false);
+  };
   const selectedAction: ParcelAction = selectedParcel && user ? parcelActionFor(selectedParcel, user, mode) : 'none';
   const iAmRecipient = !!(selectedParcel && user && isRecipient(selectedParcel, user));
   const iAmSender = !!(selectedParcel && user && isSender(selectedParcel, user));
@@ -1205,13 +1229,10 @@ export default function ParcelView({ lang }: ViewProps) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {selectedParcel.courier.phone && (
                           <a
-                            href={`tel:${selectedParcel.courier.phone}`}
+                            href={`tel:${selectedParcel.courier.phone.replace(/[^\d+]/g, '')}`}
                             className="btn-primary"
                             style={{ textDecoration: 'none', fontSize: '11.5px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              showToast(`Dialing Courier ${selectedParcel.courier.name}: ${selectedParcel.courier.phone}`, 'info');
-                            }}
+                            onClick={() => showToast(t(`Courier number: ${selectedParcel.courier.phone}`, `কুরিয়ারের নম্বর: ${selectedParcel.courier.phone}`, lang), 'info')}
                           >
                             <Phone size={13} />
                             {selectedParcel.courier.phone}
@@ -1221,10 +1242,16 @@ export default function ParcelView({ lang }: ViewProps) {
                           type="button"
                           className="btn-sm-ghost"
                           style={{ fontSize: '11.5px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                          onClick={() => showToast(`Opening secure internal dispatch chat with ${selectedParcel.courier.name}...`, 'info')}
+                          disabled={!!courierNoted[selectedParcel.id]}
+                          onClick={() => {
+                            setCourierNoted((prev) => ({ ...prev, [selectedParcel.id]: true }));
+                            showToast(t(`Message left for ${selectedParcel.courier.name}.`, `${selectedParcel.courier.name}-এর জন্য বার্তা রাখা হয়েছে।`, lang), 'success');
+                          }}
                         >
                           <MessageSquare size={13} />
-                          {t('Chat', 'চ্যাট', lang)}
+                          {courierNoted[selectedParcel.id]
+                            ? t(`Message left for ${selectedParcel.courier.name}`, `${selectedParcel.courier.name}-এর জন্য বার্তা রাখা হয়েছে`, lang)
+                            : t('Chat', 'চ্যাট', lang)}
                         </button>
                       </div>
                     </div>
@@ -1733,10 +1760,7 @@ export default function ParcelView({ lang }: ViewProps) {
               <button className="btn-sm-ghost" onClick={() => setShowAuditModal(false)}>{t('Close', 'বন্ধ করুন', lang)}</button>
               <button
                 className="btn-primary"
-                onClick={() => {
-                  showToast(t(`Audit Ledger for ${selectedParcel.trackingNo} exported for Board review.`, `বোর্ড পর্যালোচনার জন্য অডিট লেজার রপ্তানি সম্পন্ন।`, lang), 'success');
-                  setShowAuditModal(false);
-                }}
+                onClick={saveAuditSheet}
               >
                 <Download size={14} />
                 {t('Export Board Audit PDF', 'বোর্ড অডিট কপি ডাউনলোড', lang)}

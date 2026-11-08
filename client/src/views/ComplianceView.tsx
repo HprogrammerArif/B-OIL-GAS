@@ -1138,7 +1138,7 @@ export default function ComplianceView({ lang }: ViewProps) {
                   )}
                 </div>
                 <div style={{ marginTop: '24px', textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800 }}>Ahmed Akbar Sobhan</div>
+                  <div style={{ fontWeight: 800 }}>Abdul Mannan Chowdhury</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{t('Chairman & Managing Director', 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক', lang)}</div>
                   {sent
                     ? <div style={{ fontSize: '11px', color: 'var(--status-danger)', fontWeight: 800, marginTop: '4px' }}>{t('SIGNED', 'স্বাক্ষরিত', lang)}</div>
