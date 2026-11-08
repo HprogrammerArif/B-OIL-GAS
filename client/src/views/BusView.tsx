@@ -606,30 +606,30 @@ export default function BusView({ role, lang }: ViewProps) {
 
   // Supervisor: Save / Update Road Corridor & Timetable
   const handleSaveRoute = (updatedRoute: RouteInfo) => {
+    const roadName = updatedRoute.name.split(':')[1]?.trim() || updatedRoute.name;
     setRoutes(prev => ({
       ...prev,
       [updatedRoute.id]: updatedRoute,
     }));
     setBuses(prev => prev.map(b => {
-      if (b.assignedRouteId === updatedRoute.id) {
-        return {
-          ...b,
-          assignedRoadName: updatedRoute.name.split(':')[1]?.trim() || updatedRoute.name,
-          driverName: updatedRoute.driverName,
-          driverPhone: updatedRoute.driverPhone,
-          conductorName: updatedRoute.conductorName,
-          conductorPhone: updatedRoute.conductorPhone,
-        };
-      }
-      return b;
+      if (b.id !== updatedRoute.busId) return b;
+      return {
+        ...b,
+        assignedRouteId: updatedRoute.id,
+        assignedRoadName: roadName,
+        driverName: updatedRoute.driverName,
+        driverPhone: updatedRoute.driverPhone,
+        conductorName: updatedRoute.conductorName,
+        conductorPhone: updatedRoute.conductorPhone,
+      };
     }));
     showToast(
       t(
-        `✓ Road Corridor "${updatedRoute.name}" path & stoppages saved successfully!`,
-        `✓ রোড করিডোর ও স্টপেজ সময়সূচী সংরক্ষণ সম্পন্ন হয়েছে!`,
-        lang
+        'Route saved. This bus now runs it.',
+        'রুট সেভ হয়েছে। এই বাস এখন সেটি চালাবে।',
+        lang,
       ),
-      'gold'
+      'gold',
     );
   };
 
@@ -677,30 +677,89 @@ export default function BusView({ role, lang }: ViewProps) {
     showToast(t(`Seat #${seatNum} reset to empty state.`, `সিট #${seatNum} খালি করা হয়েছে।`, lang), 'info');
   };
 
-  // Supervisor: Reassign Bus to another Route
-  const handleReassignBusRoute = (busId: string, newRouteId: string, reason: string) => {
+  const roadNameOf = (route: RouteInfo) => route.name.split(':')[1]?.trim() || route.name;
+
+  const handleReassignBusRoute = (busId: string, newRouteId: string): boolean => {
+    const bus = buses.find(b => b.id === busId);
     const targetRoute = routes[newRouteId];
-    if (!targetRoute) return;
+    if (!bus || !targetRoute || bus.assignedRouteId === newRouteId) return false;
+
+    const booked = (list: Seat[] | undefined) => (list ?? []).filter(s => s.status === 'occupied').length;
+    const targetBooked = booked(routeSeats[newRouteId]);
+    if (targetBooked > bus.capacity) {
+      showToast(
+        t(
+          `That route has ${targetBooked} people booked. This bus has ${bus.capacity} seats.`,
+          `ওই রুটে ${targetBooked} জন বুক করা। এই বাসে ${bus.capacity}টি আসন।`,
+          lang,
+        ),
+        'warn',
+      );
+      return false;
+    }
+
+    const sourceRouteId = bus.assignedRouteId;
+    const sourceRoute = routes[sourceRouteId];
+    const displaced = buses.find(b => b.id !== bus.id && b.assignedRouteId === newRouteId);
+    const sourceBooked = booked(routeSeats[sourceRouteId]);
+    if (displaced && sourceBooked > displaced.capacity) {
+      showToast(
+        t(
+          `The coach already on that route has ${displaced.capacity} seats, and this route has ${sourceBooked} people booked.`,
+          `ওই রুটের বর্তমান বাসে ${displaced.capacity}টি আসন, আর এই রুটে ${sourceBooked} জন বুক করা।`,
+          lang,
+        ),
+        'warn',
+      );
+      return false;
+    }
 
     setBuses(prev => prev.map(b => {
-      if (b.id === busId) {
-        return {
-          ...b,
-          assignedRouteId: newRouteId,
-          assignedRoadName: targetRoute.name.split(':')[1]?.trim() || targetRoute.name,
-        };
+      if (b.id === bus.id) {
+        return { ...b, assignedRouteId: newRouteId, assignedRoadName: roadNameOf(targetRoute) };
+      }
+      if (displaced && b.id === displaced.id && sourceRoute) {
+        return { ...b, assignedRouteId: sourceRouteId, assignedRoadName: roadNameOf(sourceRoute) };
       }
       return b;
     }));
-
+    setRoutes(prev => {
+      const next = { ...prev };
+      next[newRouteId] = {
+        ...targetRoute,
+        busId: bus.id,
+        coachNo: bus.coachNo,
+        model: bus.model,
+        capacity: bus.capacity,
+        driverName: bus.driverName,
+        driverPhone: bus.driverPhone,
+        conductorName: bus.conductorName,
+        conductorPhone: bus.conductorPhone,
+      };
+      if (displaced && sourceRoute) {
+        next[sourceRouteId] = {
+          ...sourceRoute,
+          busId: displaced.id,
+          coachNo: displaced.coachNo,
+          model: displaced.model,
+          capacity: displaced.capacity,
+          driverName: displaced.driverName,
+          driverPhone: displaced.driverPhone,
+          conductorName: displaced.conductorName,
+          conductorPhone: displaced.conductorPhone,
+        };
+      }
+      return next;
+    });
     showToast(
       t(
-        `✓ Bus reallocated to ${targetRoute.name}. Real-time passenger SMS & Dispatch notice fired: "${reason}"`,
-        `✓ বাস নতুন রুটে স্থানান্তরিত হয়েছে। যাত্রীদের সতর্কবার্তা প্রেরণ করা হয়েছে।`,
-        lang
+        `${bus.coachNo} now runs ${targetRoute.name}.`,
+        `${bus.coachNo} এখন ${targetRoute.nameBn || targetRoute.name} চালাবে।`,
+        lang,
       ),
-      'gold'
+      'gold',
     );
+    return true;
   };
 
   return (
@@ -3188,9 +3247,11 @@ export default function BusView({ role, lang }: ViewProps) {
           }}
           buses={buses}
           routes={routes}
-          onReassign={(busId: string, targetRouteId: string) => {
-            handleReassignBusRoute(busId, targetRouteId, 'Dynamic Fleet Route Reallocation');
-          }}
+          initialBusId={reassignBusTarget?.id}
+          bookedByRoute={Object.fromEntries(
+            Object.entries(routeSeats).map(([id, list]) => [id, list.filter(s => s.status === 'occupied').length]),
+          )}
+          onReassign={handleReassignBusRoute}
           lang={lang}
         />
       )}
