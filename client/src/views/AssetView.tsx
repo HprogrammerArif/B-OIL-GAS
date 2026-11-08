@@ -982,30 +982,35 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                             setMobileTab('detail');
                           }}
                         >
-                          <div className="ast-row-top">
-                            <span className="eam-feed-name">{item.name}</span>
-                            {getStageBadge(item.lifecycleStage, item.daysToService)}
-                          </div>
-
-                          <div className="eam-feed-meta">
-                            <span>{item.facility.split(',')[0]}</span>
-                            <span>·</span>
-                            <span>{item.custodian}</span>
-                            {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' && (
-                              <span style={{ color: 'var(--status-warning-text)', fontWeight: 700 }}>
-                                · {t('Sign-off needed', 'স্বাক্ষর বাকি', lang)}
-                              </span>
-                            )}
-                          </div>
-
-                          {item.lifecycleStage !== 'disposed' && item.lifecycleStage !== 'decommissioned' && (
-                            <div className="ast-row-health">
-                              <div className="hs-bar" style={{ flex: 1 }} aria-hidden>
-                                <span style={{ width: `${item.healthScore}%`, background: healthColor }} />
+                          <div className="eam-feed-main">
+                            <img className="eam-feed-photo" src={item.photo} alt={item.name} />
+                            <div className="eam-feed-copy">
+                              <div className="ast-row-top">
+                                <span className="eam-feed-name">{item.name}</span>
+                                {getStageBadge(item.lifecycleStage, item.daysToService)}
                               </div>
-                              <small>{t(`${item.healthScore}% health`, `${bn(item.healthScore)}% স্বাস্থ্য`, lang)}</small>
+
+                              <div className="eam-feed-meta">
+                                <span>{item.facility.split(',')[0]}</span>
+                                <span>·</span>
+                                <span>{item.custodian}</span>
+                                {!item.custodianAcknowledged && item.lifecycleStage !== 'disposed' && (
+                                  <span style={{ color: 'var(--status-warning-text)', fontWeight: 700 }}>
+                                    · {t('Sign-off needed', 'স্বাক্ষর বাকি', lang)}
+                                  </span>
+                                )}
+                              </div>
+
+                              {item.lifecycleStage !== 'disposed' && item.lifecycleStage !== 'decommissioned' && (
+                                <div className="ast-row-health">
+                                  <div className="hs-bar" style={{ flex: 1 }} aria-hidden>
+                                    <span style={{ width: `${item.healthScore}%`, background: healthColor }} />
+                                  </div>
+                                  <small>{t(`${item.healthScore}% health`, `${bn(item.healthScore)}% স্বাস্থ্য`, lang)}</small>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
                         </button>
                       );
                     })
@@ -1038,6 +1043,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         </div>
                         {getStageBadge(selectedAsset.lifecycleStage, selectedAsset.daysToService)}
                       </div>
+
+                      <img className="eam-detail-photo" src={selectedAsset.photo} alt={selectedAsset.name} />
 
                       <div className={`lv-status ${next.tone === 'warn' ? 'warn' : 'ok'}`} style={{ marginTop: 12, marginBottom: 8, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flex: '1 1 240px' }}>
