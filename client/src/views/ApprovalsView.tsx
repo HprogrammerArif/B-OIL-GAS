@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  ClipboardCheck, Check, Search, Inbox, X, Clock, History, ArrowUpDown, SearchX, ListChecks,
+  ClipboardCheck, Check, Search, Inbox, X, Clock, History, SearchX, ListChecks,
 } from 'lucide-react';
 
 import { useApprovalStore } from '../store/approvalStore';
@@ -82,23 +82,6 @@ export default function ApprovalsView({ lang }: ViewProps) {
 
     return out;
   }, [listToDisplay, selectedCategory, outcome, dueSoonOnly, query, sortKey, isPending, now]);
-
-  const toggleSortDirection = () => {
-    const map: Record<SortKey, SortKey> = {
-      sla: 'sla_desc',
-      sla_asc: 'sla_desc',
-      sla_desc: 'sla',
-      amount: 'amount_asc',
-      amount_desc: 'amount_asc',
-      amount_asc: 'amount',
-      date_desc: 'date_asc',
-      date_asc: 'date_desc',
-      requester: 'requester_desc',
-      requester_asc: 'requester_desc',
-      requester_desc: 'requester',
-    };
-    setSortKey((prev) => map[prev] ?? 'sla_desc');
-  };
 
   // Only act on what is visible: a selection hidden by a filter is never approved by accident.
   const selectedVisible = useMemo(
@@ -214,41 +197,66 @@ export default function ApprovalsView({ lang }: ViewProps) {
         )}
       </div>
 
-      {/* Tabs + search */}
-      <div className="apv-toolbar">
-        <div className="apv-tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={isPending} className={isPending ? 'active' : ''} onClick={() => switchTab('pending')}>
-            <ClipboardCheck size={14} /> {t('Needs your decision', 'আপনার সিদ্ধান্ত প্রয়োজন', lang)}
-            <span className="apv-count">{approvalItems.length}</span>
+      <div className="workforce-toolbar apv-find">
+        <div className="workforce-tabs" role="group" aria-label={t('Approval list', 'অনুমোদনের তালিকা', lang)}>
+          <button
+            type="button"
+            className={`workforce-tab${isPending ? ' active' : ''}`}
+            aria-pressed={isPending}
+            onClick={() => switchTab('pending')}
+          >
+            {t('Needs your decision', 'আপনার সিদ্ধান্ত প্রয়োজন', lang)} <b>{approvalItems.length}</b>
           </button>
-          <button type="button" role="tab" aria-selected={!isPending} className={!isPending ? 'active' : ''} onClick={() => switchTab('history')}>
-            <History size={14} /> {t('Decision history', 'সিদ্ধান্তের ইতিহাস', lang)}
-            <span className="apv-count">{decidedItems.length}</span>
+          <button
+            type="button"
+            className={`workforce-tab${!isPending ? ' active' : ''}`}
+            aria-pressed={!isPending}
+            onClick={() => switchTab('history')}
+          >
+            {t('Decision history', 'সিদ্ধান্তের ইতিহাস', lang)} <b>{decidedItems.length}</b>
           </button>
-        </div>
-
-        <div className="apv-search">
-          <Search size={14} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Escape') setSearchQuery(''); }}
-            placeholder={t('Search title, requester, reference, amount…', 'শিরোনাম, আবেদনকারী, রেফারেন্স বা পরিমাণ খুঁজুন…', lang)}
-            aria-label={t('Search approvals', 'অনুমোদন খুঁজুন', lang)}
-          />
-          {searchQuery && (
-            <button type="button" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={13} /></button>
+          {!isPending && (
+            <>
+              <button
+                type="button"
+                className={`workforce-tab${outcome === 'approved' ? ' active' : ''}`}
+                aria-pressed={outcome === 'approved'}
+                onClick={() => setOutcome(outcome === 'approved' ? 'all' : 'approved')}
+              >
+                {t('Approved', 'অনুমোদিত', lang)} <b>{approvedCount}</b>
+              </button>
+              <button
+                type="button"
+                className={`workforce-tab${outcome === 'rejected' ? ' active' : ''}`}
+                aria-pressed={outcome === 'rejected'}
+                onClick={() => setOutcome(outcome === 'rejected' ? 'all' : 'rejected')}
+              >
+                {t('Returned', 'ফেরত', lang)} <b>{returnedCount}</b>
+              </button>
+            </>
           )}
         </div>
-      </div>
 
-      {/* Filters */}
-      <div className="apv-filters">
-        <div className="apv-chips">
+        <div className="workforce-filter-row">
+          <div className="workforce-search-wrap">
+            <Search size={14} className="workforce-search-icon" aria-hidden />
+            <input
+              type="search"
+              className="workforce-search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') setSearchQuery(''); }}
+              placeholder={t('Search title, requester, reference, amount…', 'শিরোনাম, আবেদনকারী, রেফারেন্স বা পরিমাণ খুঁজুন…', lang)}
+              aria-label={t('Search approvals', 'অনুমোদন খুঁজুন', lang)}
+            />
+            {searchQuery && (
+              <button type="button" className="workforce-search-clear" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                <X size={13} />
+              </button>
+            )}
+          </div>
           <select
-            className="form-input"
-            style={{ minWidth: 220, fontSize: 12, padding: '5px 10px', height: 'auto' }}
+            className="workforce-select"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             aria-label={t('Category', 'বিভাগ', lang)}
@@ -263,28 +271,8 @@ export default function ApprovalsView({ lang }: ViewProps) {
               );
             })}
           </select>
-          {!isPending && (
-            (['approved', 'rejected'] as const).map((o) => (
-              <button key={o} type="button" className={`apv-filter ${outcome === o ? 'active' : ''}`} onClick={() => setOutcome(outcome === o ? 'all' : o)} aria-pressed={outcome === o}>
-                {o === 'approved' ? t('Approved', 'অনুমোদিত', lang) : t('Returned', 'ফেরত', lang)}{' '}
-                <b>{o === 'approved' ? approvedCount : returnedCount}</b>
-              </button>
-            ))
-          )}
-        </div>
-
-        <div className="apv-sort">
-          <button
-            type="button"
-            className="apv-sort-toggle-btn"
-            onClick={toggleSortDirection}
-            title={t('Click to reverse sort direction', 'সাজানোর দিক পরিবর্তন করতে ক্লিক করুন', lang)}
-            aria-label={t('Toggle sort direction', 'সাজানোর দিক উল্টান', lang)}
-          >
-            <ArrowUpDown size={13} />
-            <span>{t('Sort', 'সাজান', lang)}</span>
-          </button>
           <select
+            className="workforce-select"
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
             aria-label={t('Sort approvals', 'অনুমোদন সাজান', lang)}

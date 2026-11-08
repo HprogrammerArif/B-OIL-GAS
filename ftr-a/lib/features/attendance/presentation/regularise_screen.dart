@@ -10,6 +10,9 @@ import 'package:bogcl_oneops/features/attendance/data/attendance_repository.dart
 import 'package:bogcl_oneops/features/attendance/domain/attendance_models.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_providers.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_ui.dart';
+import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
@@ -26,7 +29,8 @@ const _reasonMin = 10;
 const _reasonMax = 500;
 
 /// Attendance regularisation form (BR-10-04): missed punch, field duty, late
-/// justification or remote work with enterprise dropdown selectors.
+/// justification or remote work with enterprise dropdown selectors, credited
+/// shift duration calculator, approval chain preview, and pinned action bar.
 class RegulariseScreen extends ConsumerStatefulWidget {
   const RegulariseScreen({this.initialDate, this.initialType, super.key});
 
@@ -46,7 +50,10 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
   TimeOfDay? _in = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay? _out = const TimeOfDay(hour: 18, minute: 0);
   String _shiftPreset = 'FULL_GENERAL';
+  String _dutyLocation = 'HQ_BARIDHARA';
   String? _selectedReasonTemplate;
+  ({String id, String name})? _attachment;
+  bool _uploading = false;
   bool _submitting = false;
   bool _touched = false;
   String? _serverError;
@@ -91,13 +98,19 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
     t.minute,
   ).subtract(Dhaka.offset);
 
-  String? _problem(AppL10n l10n) {
+  int? get _creditedMinutes {
+    if (!_takesTimes || _in == null || _out == null) return null;
+    final diff = _instant(_out!).difference(_instant(_in!)).inMinutes;
+    return diff > 0 ? diff : null;
+  }
+
+  String? _blockingMessage(AppL10n l10n) {
     final inT = _in;
     final outT = _out;
     if (_type == RegularisationType.missedPunch &&
         inT == null &&
         outT == null) {
-      return _touched ? l10n.attRegErrMissedTime : '';
+      return l10n.attRegErrMissedTime;
     }
     if (inT != null && outT != null) {
       if (_instant(outT).isBefore(_instant(inT)) ||
@@ -106,7 +119,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
       }
     }
     if (_reason.text.trim().length < _reasonMin) {
-      return _touched ? l10n.attRegReasonMin(_reasonMin) : '';
+      return l10n.attRegReasonMin(_reasonMin);
     }
     return null;
   }
@@ -169,6 +182,70 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
       }
     });
   }
+
+  Future<void> _attachProof() async {
+    final l10n = context.l10n;
+    final picked = await pickAttachment(context);
+    if (picked == null || !mounted) return;
+    setState(() => _uploading = true);
+    try {
+      final uploads = ref.read(uploadServiceProvider);
+      final purpose = picked.mime.startsWith('image/') ? 'PHOTO' : 'DOCUMENT';
+      final meta = await uploads.upload(picked, purpose: purpose);
+      await uploads.awaitClean(meta.id);
+      if (!mounted) return;
+      setState(() => _attachment = (id: meta.id, name: picked.name));
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(context, switch (e.code) {
+        ApiErrorCode.offline ||
+        ApiErrorCode.timeout => l10n.uploadNeedsConnection,
+        ApiErrorCode.forbidden => l10n.uploadBlocked,
+        _ => l10n.uploadRejected,
+      }, tone: StatusTone.danger);
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  List<(String, String)> _dutyLocationOptions(bool bangla) => [
+    (
+      'HQ_BARIDHARA',
+      bangla
+          ? 'প্রধান কার্যালয়, বারিধারা (HQ)'
+          : 'Head Office, Baridhara (HQ)',
+    ),
+    (
+      'KERANIGANJ_PLANT',
+      bangla
+          ? 'কেরানীগঞ্জ বিটুমিন রিফাইনারি প্ল্যান্ট'
+          : 'Keraniganj Bitumen Refinery Plant',
+    ),
+    (
+      'CHATTOGRAM_TERM',
+      bangla
+          ? 'চট্টগ্রাম রিফাইনারি ও বাল্ক টার্মিনাল'
+          : 'Chattogram Refinery & Bulk Terminal',
+    ),
+    (
+      'MONGLA_TERM',
+      bangla
+          ? 'মোংলা পেট্রোকেমিক্যাল ও এলপিজি প্ল্যান্ট'
+          : 'Mongla Petrochemical & LPG Plant',
+    ),
+    (
+      'RHD_MINISTRY',
+      bangla
+          ? 'সড়ক ভবন (RHD) / মন্ত্রণালয়, তেজগাঁও'
+          : 'RHD Sarak Bhaban / Ministry, Tejgaon',
+    ),
+    (
+      'CLIENT_SITE',
+      bangla
+          ? 'কর্পোরেট ক্লায়েন্ট / ডিলার সাইট, মতিঝিল'
+          : 'Corporate Client / Dealer Site, Motijheel',
+    ),
+  ];
 
   List<String> _quickReasons(bool bangla) {
     return switch (_type) {
@@ -258,6 +335,18 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
     };
   }
 
+  Future<void> _handleSubmitTap() async {
+    final l10n = context.l10n;
+    final blocking = _blockingMessage(l10n);
+    if (blocking != null) {
+      Haptics.tap();
+      setState(() => _touched = true);
+      AppToast.show(context, blocking, tone: StatusTone.warning);
+      return;
+    }
+    await _submit();
+  }
+
   Future<void> _submit() async {
     final l10n = context.l10n;
     final lang = Localizations.localeOf(context).languageCode;
@@ -272,7 +361,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
           .regularise(
             date: key,
             type: _type,
-            reason: _reason.text,
+            reason: _reason.text.trim(),
             requestedIn: _takesTimes && _in != null ? _instant(_in!) : null,
             requestedOut: _takesTimes && _out != null ? _instant(_out!) : null,
             label: l10n.attRegQueueLabel(DateFmt.key(key, lang)),
@@ -311,14 +400,19 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final lang = Localizations.localeOf(context).languageCode;
-    final problem = _problem(l10n);
-    final shown =
-        _serverError ?? ((problem?.isNotEmpty ?? false) ? problem : null);
+    final session = ref.watch(sessionControllerProvider).value;
+    final emp = session?.profile.employee;
+
+    final blocking = _blockingMessage(l10n);
+    final isReady = blocking == null;
+    final shownError = _serverError ?? (_touched ? blocking : null);
     String fmtTime(TimeOfDay t) => DateFmt.time(_instant(t), lang);
 
     final quickReasons = _quickReasons(bangla);
     const types = RegularisationType.values;
     final activeMeta = _typeMeta(_type, l10n, bangla);
+    final locationOptions = _dutyLocationOptions(bangla);
+    final creditedMin = _creditedMinutes;
 
     final shiftOptions = <(String, String)>[
       (
@@ -364,51 +458,148 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
         ? _selectedReasonTemplate
         : null;
 
+    final empName = emp == null
+        ? 'BOGCL Staff'
+        : (bangla ? (emp.fullNameBn ?? emp.fullName) : emp.fullName);
+    final empDept = emp == null
+        ? ''
+        : (bangla
+              ? (emp.department.nameBn ?? emp.department.name)
+              : emp.department.name);
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.attRegTitle)),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(
+            Space.lg,
+            Space.sm,
+            Space.lg,
+            Space.md,
+          ),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            border: Border(top: BorderSide(color: scheme.outlineVariant)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isReady
+                        ? Icons.check_circle_rounded
+                        : Icons.info_outline_rounded,
+                    size: 15,
+                    color: isReady
+                        ? Colors.teal.shade700
+                        : scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      isReady
+                          ? '${activeMeta.$2} · ${DateFmt.key(dateKey(_date), lang, pattern: 'dd MMM')}${creditedMin != null ? ' · ${durationText(l10n, creditedMin, lang)}' : ''}'
+                          : (bangla
+                                ? 'জমা দিতে একটি সাধারণ কারণ নির্বাচন করুন বা কমপক্ষে ১০ অক্ষর লিখুন'
+                                : 'Select a standard reason or enter 10+ characters to submit'),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isReady
+                            ? scheme.onSurface
+                            : scheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.xs),
+              PrimaryButton(
+                label: l10n.attRegSubmit,
+                icon: Icons.send_rounded,
+                loading: _submitting,
+                onPressed: _submitting || _uploading
+                    ? null
+                    : () => unawaited(_handleSubmitTap()),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           Space.lg,
           Space.md,
           Space.lg,
-          Space.xxxl,
+          Space.xxl,
         ),
         children: [
-          // Top Guidance Banner
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.md,
-              vertical: Space.sm,
-            ),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(Corner.md),
-              border: Border.all(color: scheme.outlineVariant),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.verified_user_outlined,
-                  size: 18,
-                  color: scheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: Space.xs),
-                Expanded(
-                  child: Text(
-                    bangla
-                        ? 'হাজিরা সংশোধন বা মাঠ পর্যায়ের কাজের আবেদন আপনার লাইন ম্যানেজারের অনুমোদনের পর স্বয়ংক্রিয়ভাবে দৈনিক হাজিরায় যুক্ত হবে।'
-                        : 'Attendance adjustments and field duty logs are routed to your Line Manager and update your daily timesheet upon sign-off.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+          // Top Applicant & Requisition Identity Strip
+          if (emp != null)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Space.md,
+                vertical: Space.sm + 2,
+              ),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(Corner.lg),
+                border: Border.all(color: scheme.outlineVariant),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 17,
+                    backgroundColor: scheme.surfaceContainerHighest,
+                    child: Text(
+                      emp.initials ?? emp.fullName[0],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          empName,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${emp.empCode} · $empDept',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 11,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  StatusPill(
+                    label: isReady
+                        ? (bangla ? 'জমা দেওয়ার জন্য প্রস্তুত' : 'Ready')
+                        : (bangla ? 'খসড়া' : 'Draft'),
+                    tone: isReady ? StatusTone.success : StatusTone.neutral,
+                  ),
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: Space.md),
 
-          // Section 1: Request Type Dropdown Card
+          // Card 1: 1. Request Category & Duty Location
           Card(
             child: Padding(
               padding: const EdgeInsets.all(Space.md),
@@ -421,7 +612,9 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                       const SizedBox(width: Space.xs),
                       Expanded(
                         child: Text(
-                          l10n.attRegType,
+                          bangla
+                              ? '১. আবেদনের বিভাগ ও কর্মস্থল'
+                              : '1. Request Category & Duty Location',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -470,6 +663,10 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                             _date = _clampDate(_date);
                             _selectedReasonTemplate = null;
                             _serverError = null;
+                            if (next == RegularisationType.fieldDuty &&
+                                _dutyLocation == 'HQ_BARIDHARA') {
+                              _dutyLocation = 'RHD_MINISTRY';
+                            }
                           });
                         },
                         items: [
@@ -507,6 +704,57 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: Space.md),
+                  // Duty Site / Visited Facility Dropdown
+                  InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: bangla
+                          ? 'কর্মস্থল / পরিদর্শনকৃত স্থান'
+                          : 'Duty Site / Visited Facility',
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: Space.md,
+                        vertical: 4,
+                      ),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _dutyLocation,
+                        isExpanded: true,
+                        onChanged: (loc) {
+                          if (loc == null) return;
+                          Haptics.tap();
+                          setState(() => _dutyLocation = loc);
+                        },
+                        items: [
+                          for (final loc in locationOptions)
+                            DropdownMenuItem<String>(
+                              value: loc.$1,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.place_outlined,
+                                    size: 17,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: Space.sm),
+                                  Expanded(
+                                    child: Text(
+                                      loc.$2,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: Space.xs),
                   Text(
                     _fieldDuty
@@ -522,7 +770,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
           ),
           const SizedBox(height: Space.md),
 
-          // Section 2: Date & Shift Time Schedule Card with Shift Dropdown
+          // Card 2: 2. Date, Shift Preset & Credited Hours
           Card(
             child: Padding(
               padding: const EdgeInsets.all(Space.md),
@@ -540,13 +788,18 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                       Expanded(
                         child: Text(
                           bangla
-                              ? 'তারিখ ও শিফটের সময়সূচি'
-                              : 'Date & Shift Schedule',
+                              ? '২. তারিখ ও শিফটের সময়সূচি'
+                              : '2. Date, Shift & Credited Hours',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
+                      if (creditedMin != null)
+                        StatusPill(
+                          label: durationText(l10n, creditedMin, lang),
+                          tone: StatusTone.info,
+                        ),
                     ],
                   ),
                   const SizedBox(height: Space.md),
@@ -562,7 +815,6 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                   ),
                   if (_takesTimes) ...[
                     const SizedBox(height: Space.md),
-                    // Shift Preset Dropdown
                     InputDecorator(
                       decoration: InputDecoration(
                         labelText: bangla
@@ -619,6 +871,41 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                         ),
                       ],
                     ),
+                    if (creditedMin != null) ...[
+                      const SizedBox(height: Space.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: Space.sm + 2,
+                          vertical: Space.xs + 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(Corner.md),
+                          border: Border.all(color: scheme.outlineVariant),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.timer_outlined,
+                              size: 15,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                bangla
+                                    ? 'হিসাবকৃত কর্মঘণ্টা: ${durationText(l10n, creditedMin, lang)} (দৈনিক টাইমশিটে যুক্ত হবে)'
+                                    : 'Credited Shift Duration: ${durationText(l10n, creditedMin, lang)} (Full shift credit)',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: scheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -626,7 +913,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
           ),
           const SizedBox(height: Space.md),
 
-          // Section 3: Official Reason & Standard Reason Dropdown Card
+          // Card 3: 3. Official Justification & Supporting Proof
           Card(
             child: Padding(
               padding: const EdgeInsets.all(Space.md),
@@ -644,8 +931,8 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                       Expanded(
                         child: Text(
                           bangla
-                              ? 'আবেদনের কারণ ও বিবরণ'
-                              : 'Official Justification & Reason',
+                              ? '৩. দাপ্তরিক কারণ ও সহায়ক প্রমাণ'
+                              : '3. Official Justification & Supporting Proof',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -657,8 +944,8 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                   InputDecorator(
                     decoration: InputDecoration(
                       labelText: bangla
-                          ? 'সাধারণ কারণ নির্বাচন করুন (ঐচ্ছিক)'
-                          : 'Select Standard Reason Template (Optional)',
+                          ? 'সাধারণ কারণ নির্বাচন করুন (১-ট্যাপ টেমপ্লেট)'
+                          : 'Standard Reason Template (1-Tap Fill)',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: Space.md,
                         vertical: 4,
@@ -671,7 +958,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                         hint: Text(
                           bangla
                               ? 'তালিকা থেকে কারণ নির্বাচন করুন বা নিচে লিখুন…'
-                              : 'Choose a standard reason or type below…',
+                              : 'Select a standard reason or type below…',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
@@ -716,12 +1003,81 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                     required: true,
                     onChanged: (_) => setState(() => _touched = true),
                   ),
+                  const SizedBox(height: Space.sm),
+
+                  // Optional Supporting Gate Pass / Visit Memo Attachment
+                  if (_attachment != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Space.sm,
+                        vertical: Space.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(Corner.md),
+                        border: Border.all(color: scheme.outlineVariant),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.attach_file, size: 18),
+                          const SizedBox(width: Space.xs),
+                          Expanded(
+                            child: Text(
+                              _attachment!.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _attachment = null),
+                            child: Text(bangla ? 'সরান' : 'Remove'),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    OutlinedButton.icon(
+                      onPressed: _uploading
+                          ? null
+                          : () => unawaited(_attachProof()),
+                      icon: const Icon(Icons.attach_file_rounded, size: 17),
+                      label: Text(
+                        bangla
+                            ? 'গেট স্লিপ / মিটিং মেমো সংযুক্ত করুন (ঐচ্ছিক)'
+                            : 'Attach Gate Slip / Visit Memo (Optional)',
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: Space.md),
 
-          if (shown != null)
+          // Card 4: Visual Approval Workflow Chain Preview
+          _ApprovalChainCard(
+            bangla: bangla,
+            steps: [
+              (
+                Icons.person_outline_rounded,
+                bangla ? 'আবেদনকারী' : 'Applicant',
+                empName,
+              ),
+              (
+                Icons.fact_check_outlined,
+                bangla ? 'অনুমোদনকারী' : 'Line Manager',
+                bangla ? 'বিভাগীয় প্রধান / সুপারভাইজার' : 'HOD / Supervisor',
+              ),
+              (
+                Icons.sync_rounded,
+                bangla ? 'টাইমশিট আপডেট' : 'Timesheet Sync',
+                bangla ? 'স্বয়ংক্রিয় হাজিরা আপডেট' : 'Auto Attendance Ledger',
+              ),
+            ],
+          ),
+
+          if (shownError != null)
             Padding(
               padding: const EdgeInsets.only(top: Space.md),
               child: Container(
@@ -743,7 +1099,7 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                     const SizedBox(width: Space.sm),
                     Expanded(
                       child: Text(
-                        shown,
+                        shownError,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: context.bogcl.danger,
                           fontWeight: FontWeight.w600,
@@ -754,15 +1110,115 @@ class _RegulariseScreenState extends ConsumerState<RegulariseScreen> {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
 
-          const SizedBox(height: Space.lg),
-          PrimaryButton(
-            label: l10n.attRegSubmit,
-            icon: Icons.send_rounded,
-            loading: _submitting,
-            onPressed: problem == null && !_submitting
-                ? () => unawaited(_submit())
-                : null,
+class _ApprovalChainCard extends StatelessWidget {
+  const _ApprovalChainCard({required this.bangla, required this.steps});
+
+  final bool bangla;
+  final List<(IconData, String, String)> steps;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(Space.md),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(Corner.lg),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_tree_outlined,
+                size: 16,
+                color: scheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                bangla ? 'অনুমোদন ও পরবর্তী ধাপ' : 'Approval Workflow Route',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: scheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.sm),
+          Row(
+            children: [
+              for (var i = 0; i < steps.length; i++) ...[
+                if (i > 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 11,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      borderRadius: BorderRadius.circular(Corner.md),
+                      border: Border.all(color: scheme.outlineVariant),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              steps[i].$1,
+                              size: 13,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                steps[i].$2,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          steps[i].$3,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),

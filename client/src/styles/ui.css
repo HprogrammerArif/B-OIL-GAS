@@ -273,6 +273,20 @@
 .ast-more { margin-top: 4px; }
 .ast-more > summary { font-size: 12.5px; font-weight: 600; color: var(--text-3); cursor: pointer; padding: 4px 0; }
 .ast-more .ast-top-actions { margin-top: 8px; }
+.ast-report-btn.btn-sm-ghost {
+  background: color-mix(in srgb, var(--brand-crimson) 8%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--brand-crimson) 32%, var(--border-1));
+  color: var(--brand-crimson);
+}
+.ast-report-btn.btn-sm-ghost:hover {
+  background: color-mix(in srgb, var(--brand-crimson) 14%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--brand-crimson) 45%, var(--border-1));
+}
+[data-theme="dark"] .ast-report-btn.btn-sm-ghost {
+  color: var(--status-danger-bright);
+  background: color-mix(in srgb, var(--brand-crimson) 18%, var(--surface-1));
+  border-color: color-mix(in srgb, var(--brand-crimson) 40%, var(--border-1));
+}
 .ast-summary-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
 .ast-life-card { padding: 10px 14px; border: 1px solid var(--border-1); border-radius: 10px; background: var(--surface-2); margin-bottom: 12px; }
 .ast-life-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }

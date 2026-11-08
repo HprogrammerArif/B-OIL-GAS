@@ -1067,7 +1067,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         }
                         if (!ended && !waitingSign) {
                           extras.push(
-                            <Button key="def" size="sm" variant="ghost" icon={<RotateCcw size={13} />} onClick={() => setShowRejectModal(true)}>
+                            <Button key="def" size="sm" variant="ghost" className="ast-report-btn" icon={<RotateCcw size={13} />} onClick={() => setShowRejectModal(true)}>
                               {t('Report defect', 'ত্রুটি জানান', lang)}
                             </Button>,
                           );
@@ -1078,6 +1078,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                               key="saf"
                               size="sm"
                               variant="ghost"
+                              className="ast-report-btn"
                               icon={<AlertTriangle size={13} />}
                               onClick={() => {
                                 queueIncidentDraft({
