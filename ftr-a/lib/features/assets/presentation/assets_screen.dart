@@ -261,6 +261,18 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
     final canAdd =
         session?.can('assets:register') == true ||
         session?.can('assets:commission') == true;
+    final canMaintain =
+        session?.can('assets:maintain') == true ||
+        session?.can('assets:calibrate') == true ||
+        session?.can('assets:update') == true;
+    final canTransfer =
+        session?.can('assets:transfer') == true ||
+        session?.can('assets:custody-assign') == true ||
+        canMaintain;
+    final canDispose =
+        session?.can('assets:dispose') == true ||
+        session?.can('assets:write-off') == true ||
+        session?.can('assets:decommission') == true;
 
     // Load wide portfolio for complete 4-tab EAM management
     final assetsAsync = ref.watch(assetsProvider(view: 'all', query: _query));
@@ -311,9 +323,20 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
             controller: _tabController,
             children: [
               _buildRegisterTab(context, allAssets, bangla),
-              _buildWorkOrdersTab(context, allAssets, bangla),
+              _buildWorkOrdersTab(
+                context,
+                allAssets,
+                bangla,
+                canMaintain: canMaintain,
+              ),
               _buildFinancialsTab(context, allAssets, bangla),
-              _buildCustodyDisposalTab(context, allAssets, bangla),
+              _buildCustodyDisposalTab(
+                context,
+                allAssets,
+                bangla,
+                canTransfer: canTransfer,
+                canDispose: canDispose,
+              ),
             ],
           );
         },
@@ -651,8 +674,9 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
   Widget _buildWorkOrdersTab(
     BuildContext context,
     List<Equipment> list,
-    bool bangla,
-  ) {
+    bool bangla, {
+    required bool canMaintain,
+  }) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
 
@@ -766,16 +790,17 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                         ],
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: BrandColors.warning,
-                        foregroundColor: Colors.white,
+                    if (canMaintain)
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: BrandColors.warning,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: _busy
+                            ? null
+                            : () => unawaited(_certifyBstiCalibration(cAsset)),
+                        child: Text(bangla ? 'নবায়ন করুন' : 'Certify Cal'),
                       ),
-                      onPressed: _busy
-                          ? null
-                          : () => unawaited(_certifyBstiCalibration(cAsset)),
-                      child: Text(bangla ? 'নবায়ন করুন' : 'Certify Cal'),
-                    ),
                   ],
                 ),
               ),
@@ -1197,8 +1222,10 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
   Widget _buildCustodyDisposalTab(
     BuildContext context,
     List<Equipment> list,
-    bool bangla,
-  ) {
+    bool bangla, {
+    required bool canTransfer,
+    required bool canDispose,
+  }) {
     final theme = Theme.of(context);
     final pendingAck = list.where((e) => e.me.canAck).toList();
     final decommissioned = list
@@ -1313,12 +1340,14 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                 ),
               ),
             ),
-            const SizedBox(width: Space.xs),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.transfer_within_a_station, size: 16),
-              label: Text(bangla ? 'ট্রান্সফার' : 'Transfer'),
-              onPressed: () => unawaited(_initiateTransferSheet(list)),
-            ),
+            if (canTransfer) ...[
+              const SizedBox(width: Space.xs),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.transfer_within_a_station, size: 16),
+                label: Text(bangla ? 'ট্রান্সফার' : 'Transfer'),
+                onPressed: () => unawaited(_initiateTransferSheet(list)),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: Space.xs),
@@ -1374,57 +1403,64 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                     '1. Technical Condemnation Survey Signed',
                     decAsset.disposal?.technicalSurveySigned ?? false,
                     'technicalSurveySigned',
+                    canEdit: canDispose,
                   ),
                   _checklistTile(
                     decAsset,
                     '2. Hazardous Bitumen / Hydrocarbon Purge Certified',
                     decAsset.disposal?.decontaminationCertified ?? false,
                     'decontaminationCertified',
+                    canEdit: canDispose,
                   ),
                   _checklistTile(
                     decAsset,
                     '3. Reusable Spares Harvested to Store',
                     decAsset.disposal?.sparesHarvested ?? false,
                     'sparesHarvested',
+                    canEdit: canDispose,
                   ),
                   _checklistTile(
                     decAsset,
                     '4. Finance SAP ABAVN Asset Retirement Booked',
                     decAsset.disposal?.financeVetted ?? false,
                     'financeVetted',
+                    canEdit: canDispose,
                   ),
                   _checklistTile(
                     decAsset,
                     '5. Security Gate Pass for Scrap Buyer Issued',
                     decAsset.disposal?.writeOffApproved ?? false,
                     'writeOffApproved',
+                    canEdit: canDispose,
                   ),
 
-                  const SizedBox(height: Space.sm),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      PrimaryButton(
-                        expand: false,
-                        label: bangla
-                            ? 'চূড়ান্ত নিষ্পত্তি অনুমোদন'
-                            : 'Authorize Final Disposal',
-                        onPressed: _busy
-                            ? null
-                            : () => unawaited(
-                                _run(
-                                  () => _repo.act(decAsset.id, 'dispose', {
-                                    'method': 'SCRAP_AUCTION',
-                                    'proceeds': 75000.0,
-                                  }),
-                                  bangla
-                                      ? 'যন্ত্রপাতি সফলভাবে নিষ্পত্তি (DISPOSED) হিসেবে নথিভুক্ত।'
-                                      : 'Asset officially marked DISPOSED in SAP EAM registry.',
+                  if (canDispose) ...[
+                    const SizedBox(height: Space.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        PrimaryButton(
+                          expand: false,
+                          label: bangla
+                              ? 'চূড়ান্ত নিষ্পত্তি অনুমোদন'
+                              : 'Authorize Final Disposal',
+                          onPressed: _busy
+                              ? null
+                              : () => unawaited(
+                                  _run(
+                                    () => _repo.act(decAsset.id, 'dispose', {
+                                      'method': 'SCRAP_AUCTION',
+                                      'proceeds': 75000.0,
+                                    }),
+                                    bangla
+                                        ? 'যন্ত্রপাতি সফলভাবে নিষ্পত্তি (DISPOSED) হিসেবে নথিভুক্ত।'
+                                        : 'Asset officially marked DISPOSED in SAP EAM registry.',
+                                  ),
                                 ),
-                              ),
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -1434,13 +1470,19 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
     );
   }
 
-  Widget _checklistTile(Equipment e, String label, bool checked, String key) {
+  Widget _checklistTile(
+    Equipment e,
+    String label,
+    bool checked,
+    String key, {
+    required bool canEdit,
+  }) {
     return CheckboxListTile(
       dense: true,
       contentPadding: EdgeInsets.zero,
       title: Text(label, style: const TextStyle(fontSize: 12)),
       value: checked,
-      onChanged: checked || _busy
+      onChanged: !canEdit || checked || _busy
           ? null
           : (_) => unawaited(
               _run(

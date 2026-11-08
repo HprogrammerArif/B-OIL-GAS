@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppRole, ROLE_META, t } from '../../types';
 import { deptCodeOf, nextNoteSheetRef, nextRef, peekNoteSheetRef, peekRef } from '../../lib/refs';
 import { Button, FormField, Modal } from '../ui';
+import AttachDocuments, { type AttachedFile } from '../AttachDocuments';
 import {
   ArrowDown, ArrowUp, FileSignature, Send, Shield, Stamp, X,
 } from 'lucide-react';
@@ -32,6 +33,7 @@ export interface NewNotesheetData {
   initiatorRole: string;
   initiatorDept: string;
   initialNote: string;
+  attachments?: AttachedFile[];
   signatoryRoute: SignatoryStep[];
   finalApproverRole: AppRole;
 }
@@ -197,6 +199,7 @@ export default function InitiateNotesheetModal({
   const [amount, setAmount] = useState(FIRST_PRESET.suggestedAmount);
   const [urgency, setUrgency] = useState<NewNotesheetData['urgency']>('normal');
   const [initialNote, setInitialNote] = useState('');
+  const [docs, setDocs] = useState<AttachedFile[]>([]);
   const [route, setRoute] = useState<SignatoryStep[]>(() => routeFor(FIRST_PRESET));
   const [submitted, setSubmitted] = useState(false);
 
@@ -268,6 +271,7 @@ export default function InitiateNotesheetModal({
       initiatorRole: currentMeta.label,
       initiatorDept: currentMeta.dept,
       initialNote: initialNote.trim(),
+      attachments: docs.length > 0 ? docs : undefined,
       signatoryRoute: route,
       finalApproverRole: route[route.length - 1].roleId,
     });
@@ -466,6 +470,12 @@ export default function InitiateNotesheetModal({
             )}
           </FormField>
           <span className="nsf-count">{initialNote.length}/{NOTE_LIMIT}</span>
+          <AttachDocuments
+            lang={lang}
+            files={docs}
+            onChange={setDocs}
+            label={t('Attach a supporting document', 'একটি সহায়ক নথি সংযুক্ত করুন', lang)}
+          />
         </section>
       </form>
     </Modal>

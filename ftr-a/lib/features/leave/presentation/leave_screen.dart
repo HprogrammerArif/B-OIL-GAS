@@ -4,6 +4,7 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_ui.dart';
@@ -56,6 +57,9 @@ class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
+    final canRequest =
+        ref.watch(sessionControllerProvider).value?.can('leave:request') ??
+        false;
     final requests = ref.watch(myLeaveRequestsProvider);
     final balances = ref.watch(leaveBalancesProvider);
 
@@ -73,7 +77,7 @@ class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
             padding: const EdgeInsets.only(bottom: 96),
             children: [
               // CTA Banner to Apply
-              if (widget.showHeaderAction)
+              if (widget.showHeaderAction && canRequest)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     Space.lg,

@@ -89,6 +89,12 @@ export default function FileSummary({
             <dd><span className="ns-why">{why}</span></dd>
           </div>
         )}
+        {file.attachments && file.attachments.length > 0 && (
+          <div>
+            <dt>{t('Documents', 'নথি', lang)}</dt>
+            <dd>{file.attachments.map((fileDoc) => fileDoc.name).join(', ')}</dd>
+          </div>
+        )}
       </dl>
 
       <RouteStepper file={file} lang={lang} myRole={myRole} />

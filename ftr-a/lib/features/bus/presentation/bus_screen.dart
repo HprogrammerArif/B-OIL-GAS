@@ -585,13 +585,16 @@ class _BusScreenState extends ConsumerState<BusScreen> {
             ) ??
             false);
     final scheme = Theme.of(context).colorScheme;
+    final effectiveTab = (!canSeat && _tab == _BusTab.mySeat)
+        ? _BusTab.fleetAndDeck
+        : _tab;
 
     Widget subTabChip(_BusTab tab, String label, IconData icon) => Padding(
       padding: const EdgeInsets.only(right: Space.xs),
       child: ChoiceChip(
         avatar: Icon(icon, size: 16),
         label: Text(label),
-        selected: _tab == tab,
+        selected: effectiveTab == tab,
         onSelected: (_) => setState(() => _tab = tab),
       ),
     );
@@ -741,7 +744,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
           // Tab Body
           Expanded(
-            child: switch (_tab) {
+            child: switch (effectiveTab) {
               _BusTab.mySeat => RefreshIndicator(
                 onRefresh: _refresh,
                 child: _MySeatTab(

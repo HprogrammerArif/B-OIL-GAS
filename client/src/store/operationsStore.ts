@@ -1548,6 +1548,8 @@ export interface LeaveRequestItem {
   toDate: string;
   days: number;
   reason: string;
+  /** Supporting document names kept with the request. Nothing is uploaded. */
+  attachments?: { name: string; size: string }[];
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
   reviewedBy?: string;

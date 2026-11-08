@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppRole, Lang, ROLE_META, t } from '../../types';
 import { showToast } from '../ToastManager';
+import AttachDocuments, { type AttachedFile } from '../AttachDocuments';
 import { peekRef } from '../../lib/refs';
 import { useEmployeeStore } from '../../store/employeeStore';
 import {
@@ -916,6 +917,7 @@ export function SubmitAssetRequisitionModal({
     justification: string;
     specs: string;
     urgency: 'critical' | 'high' | 'normal';
+    attachments?: AttachedFile[];
   }) => void;
   role: AppRole;
   lang: Lang;
@@ -941,6 +943,11 @@ export function SubmitAssetRequisitionModal({
       ? 'Required for multi-district bitumen dealer credit reconciliation and mobile ERP order entry.'
       : 'Preventive refractory & electrical hotspot diagnostics across Keraniganj Distillation Unit 1 & 2.'
   );
+  const [docs, setDocs] = useState<AttachedFile[]>([]);
+
+  useEffect(() => {
+    if (!isOpen) setDocs([]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
   const meta = ROLE_META[role];
@@ -999,6 +1006,7 @@ export function SubmitAssetRequisitionModal({
       justification,
       specs,
       urgency,
+      attachments: docs.length > 0 ? docs : undefined,
     });
     onClose();
   };
@@ -1104,6 +1112,13 @@ export function SubmitAssetRequisitionModal({
               <label className="eam-label">{t('Why this equipment is needed', 'ব্যবসায়িক যৌক্তিকতা', lang)} *</label>
               <textarea className="eam-textarea" rows={2} value={justification} onChange={(e) => setJustification(e.target.value)} required />
             </div>
+
+            <AttachDocuments
+              lang={lang}
+              files={docs}
+              onChange={setDocs}
+              label={t('Supporting document', 'সহায়ক নথি', lang)}
+            />
 
             <div className="eam-live-calc-box" style={{ marginBottom: 0 }}>
               <span>
@@ -1757,29 +1772,29 @@ export function AssetScannerModal({
           </div>
 
           <div className="eam-field" style={{ marginBottom: 0 }}>
-            <label className="eam-label">{t('Choose the tagged machine', 'ট্যাগ করা মেশিন বেছে নিন', lang)}</label>
-            <select
-              className="eam-select"
-              value=""
-              onChange={(e) => {
-                const a = assets.find((item) => item.id === e.target.value);
-                if (!a) return;
-                onSelectScanned(a);
-                onClose();
-                showToast(t(`Opened ${a.name}.`, `ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
-              }}
-            >
-              <option value="">
-                {filtered.length === 0
-                  ? t('No machine matches that search', 'এই খোঁজে কোনো মেশিন নেই', lang)
-                  : t(`Select from ${filtered.length} machines…`, `${filtered.length}টি মেশিন থেকে বেছে নিন…`, lang)}
-              </option>
-              {filtered.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name} — {a.facility} ({a.tag})
-                </option>
-              ))}
-            </select>
+            <label className="eam-label" id="eam-scan-label">{t('Choose the tagged machine', 'ট্যাগ করা মেশিন বেছে নিন', lang)}</label>
+            {filtered.length === 0 ? (
+              <p className="eam-scan-empty">{t('No machine matches that search', 'এই খোঁজে কোনো মেশিন নেই', lang)}</p>
+            ) : (
+              <ul className="eam-scan-list" aria-labelledby="eam-scan-label">
+                {filtered.map((a) => (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      className="eam-scan-item"
+                      onClick={() => {
+                        onSelectScanned(a);
+                        onClose();
+                        showToast(t(`Opened ${a.name}.`, `ট্যাগ ${a.tag} স্ক্যান সম্পন্ন।`, lang), 'success');
+                      }}
+                    >
+                      <span className="eam-scan-name">{a.name}</span>
+                      <span className="eam-scan-meta">{a.facility} · {a.tag}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 

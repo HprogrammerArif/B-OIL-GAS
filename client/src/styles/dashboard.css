@@ -216,6 +216,7 @@
 .psf-watch li { padding: 2px 9px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--brand-gold) 14%, var(--surface-1)); border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, var(--border-1)); color: var(--text-1); }
 .psf-wait { margin: 0; font-size: 13px; line-height: 1.45; color: var(--text-2); }
 .psf-crew { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.psf-crew.psf { display: flex; }
 .psf-signed { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--status-success-text); }
 [data-theme='dark'] .psf-signed { color: var(--status-success-bright); }
 

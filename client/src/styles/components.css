@@ -4832,6 +4832,13 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   border-color: rgba(217, 119, 6, 0.35);
 }
 
+.attach-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 6px 0 8px;
+}
+
 .claims-voucher-chip {
   display: flex;
   align-items: center;

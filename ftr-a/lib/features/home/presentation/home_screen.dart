@@ -88,14 +88,23 @@ List<AppModule> _shortcuts(Session session) {
     ],
     HomeVariant.driver => const [
       'fleet',
-      'parcels',
+      'attendance',
+      'leave',
       'claims',
       'incidents',
       'notices',
-      'attendance',
     ],
     HomeVariant.operations =>
-      session.hasRole('MAILROOM')
+      session.hasRole('TRANSPORT_ADMIN')
+          ? const [
+              'fleet',
+              'bus',
+              'visitors',
+              'parcels',
+              'incidents',
+              'approvals',
+            ]
+          : session.hasRole('MAILROOM')
           ? const [
               'parcels',
               'visitors',
@@ -104,8 +113,6 @@ List<AppModule> _shortcuts(Session session) {
               'claims',
               'attendance',
             ]
-          : session.hasRole('TRANSPORT_ADMIN')
-          ? const ['fleet', 'bus', 'visitors', 'parcels', 'incidents', 'claims']
           : const [
               'incidents',
               'assets',
@@ -114,14 +121,24 @@ List<AppModule> _shortcuts(Session session) {
               'parcels',
               'note-sheets',
             ],
-    HomeVariant.approver => const [
-      'approvals',
-      'note-sheets',
-      'claims',
-      'employees',
-      'notices',
-      'leave',
-    ],
+    HomeVariant.approver =>
+      session.hasRole('HR_ADMIN')
+          ? const [
+              'employees',
+              'attendance',
+              'leave',
+              'approvals',
+              'notices',
+              'compliance',
+            ]
+          : const [
+              'approvals',
+              'note-sheets',
+              'claims',
+              'employees',
+              'notices',
+              'leave',
+            ],
     HomeVariant.executive => const [
       'note-sheets',
       'approvals',

@@ -122,7 +122,12 @@ class _MoreScreenState extends ConsumerState<MoreScreen> {
       'compliance',
       'claims',
     });
-    final dailyWorkModules = group({'attendance', 'employees', 'notices'});
+    final dailyWorkModules = group({
+      'attendance',
+      'leave',
+      'employees',
+      'notices',
+    });
     final transportModules = group({'fleet', 'bus'});
     final siteOpsModules = group({'parcels', 'visitors'});
     final refineryModules = group({'incidents', 'assets', 'chat'});

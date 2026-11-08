@@ -89,6 +89,9 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
     } else if (s?.can('fleet:endorse') == true &&
         s?.can('fleet:request') != true) {
       _view = 'to-endorse';
+    } else if (s?.can('fleet:read', GrantScope.site) == true &&
+        s?.can('fleet:request') != true) {
+      _view = 'all';
     }
   }
 
@@ -737,11 +740,17 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
     final canDrive = session?.can('fleet:drive') ?? false;
     final canDispatch = session?.can('fleet:dispatch') ?? false;
     final canEndorse = session?.can('fleet:endorse') ?? false;
-    final canSos =
-        canDrive ||
-        canDispatch ||
-        (session?.can('fleet:gate') ?? false) ||
-        (session?.can('fleet:read', GrantScope.site) ?? false);
+    final canGate = session?.can('fleet:gate') ?? false;
+    final canSite = session?.can('fleet:read', GrantScope.site) ?? false;
+    final canSeeDriversAndGate = canDispatch || canGate || canSite;
+    final canSeeVehicles = canDispatch || canDrive || canGate || canSite;
+    final canSos = canDrive || canDispatch || canGate || canSite;
+    final effectiveTab = switch (_tab) {
+      _FleetTab.drivers ||
+      _FleetTab.gateLog when !canSeeDriversAndGate => _FleetTab.requisitions,
+      _FleetTab.vehicles when !canSeeVehicles => _FleetTab.requisitions,
+      _ => _tab,
+    };
     final rows = ref.watch(
       fleetRequisitionsProvider(view: _view, query: _query),
     );
@@ -757,6 +766,10 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
       verdictMessage = bangla
           ? '১টি সক্রিয় ট্রিপ নির্ধারিত · বারিধারা → কেরানীগঞ্জ রিফাইনারি রিটার্ন রুট · প্রারম্ভিক ওডো: ৪৮,২১০ কিমি'
           : '1 active trip dispatched · Baridhara HQ → Keraniganj Refinery return route · Opening Odo: 48,210 km';
+    } else if (canSite) {
+      verdictMessage = bangla
+          ? 'কোম্পানি যানবাহন বহর, চালক ও আন্তঃসাইট ট্রিপ মুভমেন্টের রিয়েল-টাইম তদারকি।'
+          : 'Live executive oversight of company fleet vehicles, drivers, and inter-site trip movements.';
     } else {
       verdictMessage = bangla
           ? 'আপনার REQ-2026-089 ট্রিপে টয়োটা করোলা ক্রস (ঢাকা মেট্রো-গ-১৮-৪৪২১) বরাদ্দকৃত · চালক: মোঃ রফিকুল ইসলাম'
@@ -768,7 +781,7 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
       child: ChoiceChip(
         avatar: Icon(icon, size: 16),
         label: Text(label),
-        selected: _tab == tab,
+        selected: effectiveTab == tab,
         onSelected: (_) => setState(() => _tab = tab),
       ),
     );
@@ -841,43 +854,54 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
             ),
           ),
 
-          // 4 Sub-Tabs
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  subTabChip(
-                    _FleetTab.requisitions,
-                    bangla ? 'অধিযাচন ও ট্রিপ' : 'Requisitions & Trips',
-                    Icons.route,
-                  ),
-                  subTabChip(
-                    _FleetTab.drivers,
-                    bangla ? 'চালক ও ব্রেথালাইজার' : 'Drivers & Breathalyzer',
-                    Icons.badge_outlined,
-                  ),
-                  subTabChip(
-                    _FleetTab.vehicles,
-                    bangla ? 'যানবাহন ও জ্বালানি' : 'Vehicles & Fuel',
-                    Icons.local_gas_station_outlined,
-                  ),
-                  subTabChip(
-                    _FleetTab.gateLog,
-                    bangla ? 'গেট লগ ও চ্যাট' : 'Gate Manifest & Chat',
-                    Icons.door_sliding_outlined,
-                  ),
-                ],
+          // Role-Scoped Sub-Tabs
+          if (canSeeDriversAndGate || canSeeVehicles)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                Space.sm,
+                Space.md,
+                0,
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    subTabChip(
+                      _FleetTab.requisitions,
+                      bangla ? 'অধিযাচন ও ট্রিপ' : 'Requisitions & Trips',
+                      Icons.route,
+                    ),
+                    if (canSeeDriversAndGate)
+                      subTabChip(
+                        _FleetTab.drivers,
+                        bangla
+                            ? 'চালক ও ব্রেথালাইজার'
+                            : 'Drivers & Breathalyzer',
+                        Icons.badge_outlined,
+                      ),
+                    if (canSeeVehicles)
+                      subTabChip(
+                        _FleetTab.vehicles,
+                        bangla ? 'যানবাহন ও জ্বালানি' : 'Vehicles & Fuel',
+                        Icons.local_gas_station_outlined,
+                      ),
+                    if (canSeeDriversAndGate)
+                      subTabChip(
+                        _FleetTab.gateLog,
+                        bangla ? 'গেট লগ ও চ্যাট' : 'Gate Manifest & Chat',
+                        Icons.door_sliding_outlined,
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
 
           const SizedBox(height: Space.xs),
 
           // Sub-Tab Content
           Expanded(
-            child: switch (_tab) {
+            child: switch (effectiveTab) {
               _FleetTab.requisitions => _buildRequisitionsTab(
                 context,
                 l10n,

@@ -45,7 +45,27 @@ final List<_Spec> _base = [
   _g('files:read', _self),
   _g('search:use', _self),
   _g('due-items:read', _self),
-  _g('employees:read', _co),
+  _g('employees:read', _dept),
+];
+
+/// Focused operational base grants for pure Driver accounts (EMP-0821).
+final List<_Spec> _driverBase = [
+  _g('dashboards:read', _self),
+  _g('notices:read', _co),
+  _g('briefings:read', _self),
+  _g('incidents:read', _self),
+  _g('incidents:report', _self),
+  _g('attendance:punch', _self),
+  _g('attendance:read', _self),
+  _g('leave:request', _self),
+  _g('leave:read', _self),
+  _g('claims:read', _self),
+  _g('claims:create', _self),
+  _g('claims:submit', _self),
+  _g('files:upload', _self),
+  _g('files:read', _self),
+  _g('search:use', _self),
+  _g('due-items:read', _self),
 ];
 
 final Map<String, List<_Spec>> _roleGrants = {
@@ -115,6 +135,7 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('assets:depreciation-policy', _co),
     _g('compliance:read', _co),
     _g('compliance:approve-fund', _co),
+    _g('employees:read', _co),
     _g('employees:clearance', _co),
   ],
   'HR_ADMIN': [
@@ -189,7 +210,9 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('assets:transfer', _co),
     _g('assets:maintain', _co),
     _g('incidents:read', _site),
+    _g('employees:read', _site),
     _g('employees:clearance', _co),
+    _g('chat:use', _self),
   ],
   'SECURITY_GATE': [
     _g('visitors:read', _site),
@@ -201,6 +224,7 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('fleet:gate', _site),
     _g('incidents:triage', _site),
     _g('employees:clearance', _site),
+    _g('chat:use', _self),
   ],
   'MAILROOM': [
     _g('parcels:read', _co),
@@ -209,6 +233,7 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('parcels:deliver', _co),
     _g('parcels:return', _co),
     _g('parcels:manage', _co),
+    _g('chat:use', _self),
   ],
   'HSE_OFFICER': [
     _g('visitors:read', _site),
@@ -224,6 +249,7 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('assets:read', _site),
     _g('assets:loto', _site),
     _g('compliance:read', _site),
+    _g('chat:use', _self),
   ],
   'PLANT_GM': [
     _g('dashboards:plant', _site),
@@ -256,6 +282,8 @@ final Map<String, List<_Spec>> _roleGrants = {
     _g('parcels:read', _site),
     _g('parcels:dispatch', _site),
     _g('fleet:read', _site),
+    _g('claims:read', _site),
+    _g('employees:read', _site),
     _g('notices:create', _site),
     _g('notices:publish', _site),
     _g('chat:use', _self),
@@ -311,13 +339,25 @@ List<Json> grantsForRoles(List<String> roles) {
     }
   }
 
-  for (final g in _base) {
-    add(g, 'ROLE:EMPLOYEE');
+  final isPureDriver = roles.length == 1 && roles.first == 'DRIVER';
+  for (final g in isPureDriver ? _driverBase : _base) {
+    add(g, isPureDriver ? 'ROLE:DRIVER' : 'ROLE:EMPLOYEE');
   }
   for (final role in roles) {
     for (final g in _roleGrants[role] ?? const <_Spec>[]) {
       add(g, 'ROLE:$role');
     }
+  }
+  if (roles.contains('CHAIRMAN')) {
+    const [
+      'attendance:punch',
+      'leave:request',
+      'claims:create',
+      'claims:submit',
+      'claims:advance',
+      'fleet:request',
+      'bus:seat-self',
+    ].forEach(byKey.remove);
   }
   return byKey.values.toList()
     ..sort((a, b) => a.str('key').compareTo(b.str('key')));
@@ -330,9 +370,13 @@ const List<_NavRule> _navRules = [
   (module: 'approvals', anyOf: ['workflow:inbox'], readAbove: null),
   (module: 'notices', anyOf: ['notices:read'], readAbove: null),
   (module: 'note-sheets', anyOf: ['note-sheets:read'], readAbove: null),
-  (module: 'attendance', anyOf: ['attendance:punch'], readAbove: null),
-  (module: 'leave', anyOf: ['leave:request'], readAbove: null),
-  (module: 'claims', anyOf: ['claims:create'], readAbove: null),
+  (
+    module: 'attendance',
+    anyOf: ['attendance:punch'],
+    readAbove: 'attendance:read',
+  ),
+  (module: 'leave', anyOf: ['leave:request'], readAbove: 'leave:read'),
+  (module: 'claims', anyOf: ['claims:create'], readAbove: 'claims:read'),
   (
     module: 'fleet',
     anyOf: [
@@ -345,7 +389,11 @@ const List<_NavRule> _navRules = [
     ],
     readAbove: null,
   ),
-  (module: 'bus', anyOf: ['bus:seat-self', 'bus:manage'], readAbove: null),
+  (
+    module: 'bus',
+    anyOf: ['bus:seat-self', 'bus:manage'],
+    readAbove: 'bus:read',
+  ),
   (module: 'parcels', anyOf: ['parcels:read'], readAbove: null),
   (
     module: 'visitors',

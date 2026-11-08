@@ -52,6 +52,8 @@ export interface NoteFile {
   finalApproverRole?: AppRole;
   signatoryRoute?: SignatoryStep[];
   notes: NoteItem[];
+  /** Supporting document names kept with the file. Nothing is uploaded. */
+  attachments?: { name: string; size: string }[];
   quotations: VendorQuoteItem[];
   budgetInfo: BudgetSummaryInfo;
 }

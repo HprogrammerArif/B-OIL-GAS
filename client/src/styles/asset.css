@@ -1251,6 +1251,67 @@
   flex-shrink: 0;
 }
 
+.eam-scan-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 4px;
+  max-height: 160px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1.5px solid var(--brand-slate-200);
+  border-radius: 8px;
+  background: var(--brand-input-bg, var(--surface-1));
+}
+
+.eam-scan-list li { min-width: 0; }
+
+.eam-scan-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--brand-slate-900);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.eam-scan-item:hover,
+.eam-scan-item:focus-visible {
+  background: color-mix(in srgb, var(--brand-crimson) 8%, var(--surface-1));
+  outline: none;
+}
+
+.eam-scan-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.eam-scan-meta {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.eam-scan-empty {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border: 1.5px dashed var(--brand-slate-200);
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
 /* 1-Click Quick-Fill Template Bar inside Modals */
 .eam-preset-bar {
   background: var(--brand-canvas);
@@ -1494,6 +1555,22 @@
 [data-theme="dark"] .eam-textarea:focus {
   border-color: var(--brand-crimson-light);
   box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.18);
+}
+
+[data-theme="dark"] .eam-scan-list {
+  background: var(--surface-inverse);
+  border-color: var(--border-inverse-2);
+}
+
+[data-theme="dark"] .eam-scan-item { color: var(--text-inverse); }
+
+[data-theme="dark"] .eam-scan-item:hover,
+[data-theme="dark"] .eam-scan-item:focus-visible {
+  background: color-mix(in srgb, var(--brand-crimson-light) 16%, var(--surface-inverse));
+}
+
+[data-theme="dark"] .eam-scan-empty {
+  border-color: var(--border-inverse-2);
 }
 
 [data-theme="dark"] .eam-view-switcher,

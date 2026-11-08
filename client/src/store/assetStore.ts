@@ -189,6 +189,8 @@ export interface AssetRequisition {
   justification: string;
   specs: string;
   urgency: 'critical' | 'high' | 'normal';
+  /** Quotation or specification names kept with the request. Nothing is uploaded. */
+  attachments?: { name: string; size: string }[];
   stage: 'pending_hod' | 'pending_executive' | 'approved_procuring' | 'commissioned' | 'rejected';
   endorsedByHod?: string;
   sanctionedByExec?: string;
@@ -2335,6 +2337,7 @@ export function useAssetStore() {
     justification: string;
     specs: string;
     urgency: AssetRequisition['urgency'];
+    attachments?: AssetRequisition['attachments'];
   }): AssetRequisition => {
     const reqNumber = `ARQ-2026-${String(globalRequisitions.length + 24).padStart(3, '0')}`;
     const newReq: AssetRequisition = {
@@ -2352,6 +2355,7 @@ export function useAssetStore() {
       justification: params.justification,
       specs: params.specs,
       urgency: params.urgency,
+      attachments: params.attachments,
       stage: 'pending_hod',
     };
     globalRequisitions = [newReq, ...globalRequisitions];

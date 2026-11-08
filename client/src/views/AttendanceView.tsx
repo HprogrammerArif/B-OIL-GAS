@@ -8,6 +8,7 @@ import { useOperationsStore, type ShiftWorker, type LeaveRequestItem } from '../
 import { approvalStore } from '../store/approvalStore';
 import { useCan } from '../auth/session';
 import { Button, Card, EmptyState, FormField, Modal, PageHeader, StatusPill, type StatusTone } from '../components/ui';
+import AttachDocuments, { type AttachedFile } from '../components/AttachDocuments';
 import Pagination from '../components/Pagination';
 import {
   SITES, SITE_LIST, type SiteId, type GeoFix, requestPosition, nearestSite, isLateFor, formatDistance, useAttendanceScope,
@@ -372,6 +373,7 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [reason, setReason] = useState('');
+  const [leaveDocs, setLeaveDocs] = useState<AttachedFile[]>([]);
   const [leaveError, setLeaveError] = useState<string | null>(null);
   const [rosterQuery, setRosterQuery] = useState('');
   const [rosterKind, setRosterKind] = useState<RosterKind>('all');
@@ -508,12 +510,14 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       toDate: fmtDate(toDate),
       days,
       reason: reason.trim(),
+      attachments: leaveDocs.length > 0 ? leaveDocs : undefined,
     });
     approvalStore.addLeaveApproval(created.id, user.name, user.label, user.dept, leaveType, days, reason.trim());
     setShowLeaveModal(false);
     setFromDate('');
     setToDate('');
     setReason('');
+    setLeaveDocs([]);
     setLeaveError(null);
     showToast(
       t(`Leave request ${created.id} submitted for approval.`, `ছুটির আবেদন ${created.id} অনুমোদনের জন্য জমা হয়েছে।`, lang),
@@ -680,6 +684,11 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700 }}>{t(...LEAVE_LABEL[l.leaveType], lang)} · {l.days} {t(l.days === 1 ? 'day' : 'days', 'দিন', lang)}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{l.fromDate} → {l.toDate}</div>
+                    {l.attachments && l.attachments.length > 0 && (
+                      <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                        {t('Attached', 'সংযুক্ত', lang)}: {l.attachments.map((file) => file.name).join(', ')}
+                      </div>
+                    )}
                   </div>
                   <StatusPill tone={l.status === 'approved' ? 'success' : l.status === 'rejected' ? 'danger' : 'warn'}>
                     {l.status === 'approved' ? t('Approved', 'অনুমোদিত', lang) : l.status === 'rejected' ? t('Declined', 'প্রত্যাখ্যাত', lang) : t('Waiting for your manager', 'ম্যানেজারের অপেক্ষায়', lang)}
@@ -947,13 +956,13 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
       {/* Apply for leave — not shown for Chairman (BR-10-12: informational / HR-recorded). */}
       <Modal
         open={canApplyLeave && showLeaveModal}
-        onClose={() => { setShowLeaveModal(false); setLeaveError(null); }}
+        onClose={() => { setShowLeaveModal(false); setLeaveError(null); setLeaveDocs([]); }}
         title={t('Request leave', 'ছুটির আবেদন', lang)}
         icon={<CalendarDays size={16} />}
         size="sm"
         footer={
           <>
-            <Button variant="ghost" onClick={() => { setShowLeaveModal(false); setLeaveError(null); }}>{t('Cancel', 'বাতিল', lang)}</Button>
+            <Button variant="ghost" onClick={() => { setShowLeaveModal(false); setLeaveError(null); setLeaveDocs([]); }}>{t('Cancel', 'বাতিল', lang)}</Button>
             <Button onClick={submitLeave}>{t('Submit request', 'আবেদন জমা দিন', lang)}</Button>
           </>
         }
@@ -989,6 +998,12 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         >
           {(id) => <textarea id={id} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t('e.g. Family event in Chattogram', 'যেমন: চট্টগ্রামে পারিবারিক অনুষ্ঠান', lang)} />}
         </FormField>
+        <AttachDocuments
+          lang={lang}
+          files={leaveDocs}
+          onChange={setLeaveDocs}
+          label={t('Supporting document', 'সহায়ক নথি', lang)}
+        />
         <p style={{ fontSize: 11.5, color: 'var(--text-3)', margin: 0, display: 'flex', gap: 6, alignItems: 'center' }}>
           <Clock size={12} /> {t('Routed to your approving manager; you will see the decision here.', 'আপনার অনুমোদনকারী ব্যবস্থাপকের কাছে পাঠানো হবে; সিদ্ধান্ত এখানে দেখা যাবে।', lang)}
         </p>

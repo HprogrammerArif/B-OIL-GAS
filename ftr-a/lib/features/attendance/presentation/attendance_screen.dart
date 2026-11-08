@@ -15,6 +15,7 @@ import 'package:bogcl_oneops/features/attendance/domain/attendance_models.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_providers.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/attendance_ui.dart';
 import 'package:bogcl_oneops/features/attendance/presentation/widgets/geofence_mini_map.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_screen.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
@@ -340,11 +341,83 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     final bangla = context.isBangla;
     final today = ref.watch(todayAttendanceProvider);
     final session = ref.watch(sessionControllerProvider).value;
+    final canPunch = session?.can('attendance:punch') ?? false;
     final isSupervisor =
-        session?.roleKeys.any(
-          (r) => const {'HOD', 'HR_ADMIN', 'PLANT_GM', 'CHAIRMAN'}.contains(r),
-        ) ??
-        false;
+        (session?.can('attendance:read', GrantScope.team) ?? false) ||
+        (session?.roleKeys.any(
+              (r) => const {
+                'HOD',
+                'HR_ADMIN',
+                'PLANT_GM',
+                'CHAIRMAN',
+                'LINE_MANAGER',
+              }.contains(r),
+            ) ??
+            false);
+
+    if (!canPunch && isSupervisor) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            bangla
+                ? 'কোম্পানি হাজিরা ও রোস্টার তদারকি'
+                : 'Company Attendance & Roster Oversight',
+          ),
+          actions: const [AppBarActions()],
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              margin: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.sm,
+                Space.lg,
+                Space.xs,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: Space.md,
+                vertical: Space.sm,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.teal.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(Corner.md),
+                border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.insights_rounded,
+                    size: 18,
+                    color: Colors.teal.shade700,
+                  ),
+                  const SizedBox(width: Space.xs),
+                  Expanded(
+                    child: Text(
+                      bangla
+                          ? 'বারিধারা প্রধান কার্যালয় ও কেরানীগঞ্জ রিফাইনারি প্ল্যান্টের সার্বিক উপস্থিতি ও ছুটি তদারকি।'
+                          : 'Executive oversight of live shift attendance, field duty, and leave across Baridhara HQ & Keraniganj Refinery.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.teal.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _TeamRosterTab(
+                onConfirmOutside: () {
+                  setState(() => _supervisorConfirmedLocally = true);
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     final tabs = [
       if (bangla) 'আমার শিফট ও হাজিরা' else 'My Shift & Punch',

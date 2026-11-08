@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/parcels/data/parcel_repository.dart';
 import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
@@ -37,6 +38,19 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
   String _statusFilter = 'ALL';
   String _directionFilter = 'ALL';
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    final s = ref.read(sessionControllerProvider).value;
+    if (s != null &&
+        (s.hasRole('MAILROOM') ||
+            s.hasRole('TRANSPORT_ADMIN') ||
+            s.hasRole('CHAIRMAN'))) {
+      _scope = 'mailroom';
+      _view = 'all';
+    }
+  }
 
   @override
   void dispose() {
@@ -243,8 +257,14 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     final theme = Theme.of(context);
     final session = ref.watch(sessionControllerProvider).value;
     final canCreate = session?.can('parcels:create') ?? false;
+    final canMailroom =
+        (session?.can('parcels:dispatch') ?? false) ||
+        (session?.can('parcels:manage') ?? false) ||
+        (session?.can('parcels:scan') ?? false) ||
+        (session?.can('parcels:read', GrantScope.site) ?? false);
 
-    final effectiveView = _scope == 'mailroom' ? 'all' : _view;
+    final effectiveScope = canMailroom ? _scope : 'personal';
+    final effectiveView = effectiveScope == 'mailroom' ? 'all' : _view;
     final rows = ref.watch(
       parcelsProvider(effectiveView, query: _query, stuckOnly: _stuckOnly),
     );
@@ -253,15 +273,16 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
       appBar: AppBar(
         title: Text(l10n.moduleParcels),
         actions: [
-          IconButton(
-            tooltip: bangla
-                ? 'করিডোর পাউচ মেনিফেস্ট'
-                : 'Corridor Pouch Manifest',
-            icon: const Icon(Icons.workspaces_outlined, color: Colors.blue),
-            onPressed: () {
-              rows.whenData(_showPouchManifestSheet);
-            },
-          ),
+          if (canMailroom)
+            IconButton(
+              tooltip: bangla
+                  ? 'করিডোর পাউচ মেনিফেস্ট'
+                  : 'Corridor Pouch Manifest',
+              icon: const Icon(Icons.workspaces_outlined, color: Colors.blue),
+              onPressed: () {
+                rows.whenData(_showPouchManifestSheet);
+              },
+            ),
           IconButton(
             tooltip: bangla ? 'রিফ্রেশ' : 'Refresh',
             icon: const Icon(Icons.refresh),
@@ -298,9 +319,13 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                   const SizedBox(width: Space.xs),
                   Expanded(
                     child: Text(
-                      bangla
-                          ? 'হেড অফিস ও প্ল্যান্টের মধ্যে ৩টি গোপনীয় পাউচ ট্রানজিটে রয়েছে · ১টি পার্সেল ডেস্কে পিন হস্তান্তরের অপেক্ষায়।'
-                          : '3 confidential pouches in transit between HQ & Plant · 1 parcel at desk awaiting 4-digit PIN handover.',
+                      canMailroom
+                          ? (bangla
+                                ? 'হেড অফিস ও প্ল্যান্টের মধ্যে ৩টি গোপনীয় পাউচ ট্রানজিটে রয়েছে · ১টি পার্সেল ডেস্কে পিন হস্তান্তরের অপেক্ষায়।'
+                                : '3 confidential pouches in transit between HQ & Plant · 1 parcel at desk awaiting 4-digit PIN handover.')
+                          : (bangla
+                                ? 'আপনার প্রেরিত ও আগত অফিসিয়াল নথি এবং গোপনীয় পাউচসমূহ এখানে ট্র্যাক করুন।'
+                                : 'Track your sent and incoming inter-site documents and confidential pouches.'),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -314,51 +339,57 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
           ),
 
           // Scope Switcher: Personal vs Mailroom Master Desk
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SegmentedButton<String>(
-                    segments: [
-                      ButtonSegment(
-                        value: 'personal',
-                        icon: const Icon(Icons.person_outline, size: 16),
-                        label: Text(
-                          bangla ? 'আমার পার্সেল' : 'My Parcels',
-                          style: const TextStyle(fontSize: 12),
+          if (canMailroom)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                Space.xs,
+                Space.md,
+                0,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(
+                          value: 'personal',
+                          icon: const Icon(Icons.person_outline, size: 16),
+                          label: Text(
+                            bangla ? 'আমার পার্সেল' : 'My Parcels',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                      ButtonSegment(
-                        value: 'mailroom',
-                        icon: const Icon(
-                          Icons.markunread_mailbox_outlined,
-                          size: 16,
+                        ButtonSegment(
+                          value: 'mailroom',
+                          icon: const Icon(
+                            Icons.markunread_mailbox_outlined,
+                            size: 16,
+                          ),
+                          label: Text(
+                            bangla
+                                ? 'মেইলরুম মাস্টার ডেস্ক'
+                                : 'Mailroom Desk (All)',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
-                        label: Text(
-                          bangla
-                              ? 'মেইলরুম মাস্টার ডেস্ক'
-                              : 'Mailroom Desk (All)',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ],
-                    selected: {_scope},
-                    onSelectionChanged: (s) {
-                      setState(() {
-                        _scope = s.first;
-                        if (_scope == 'mailroom') {
-                          _view = 'all';
-                        } else {
-                          _view = 'mine';
-                        }
-                      });
-                    },
+                      ],
+                      selected: {effectiveScope},
+                      onSelectionChanged: (s) {
+                        setState(() {
+                          _scope = s.first;
+                          if (_scope == 'mailroom') {
+                            _view = 'all';
+                          } else {
+                            _view = 'mine';
+                          }
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           // Search Bar
           Padding(

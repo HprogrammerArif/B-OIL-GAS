@@ -1844,6 +1844,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                         <div style={{ fontSize: '11px', color: 'var(--brand-slate-400)', marginTop: '3px' }}>
                           {req.justification}
                         </div>
+                        {req.attachments && req.attachments.length > 0 && (
+                          <div style={{ fontSize: '11px', color: 'var(--brand-slate-500)', marginTop: '3px' }}>
+                            {t('Attached', 'সংযুক্ত', lang)}: {req.attachments.map((file) => file.name).join(', ')}
+                          </div>
+                        )}
 
                         {/* Visual 3-Step Approval Progress Pills */}
                         <div className="eam-req-steps">

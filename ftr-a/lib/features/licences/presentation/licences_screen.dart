@@ -70,6 +70,9 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canAdd = session?.can('compliance:create') ?? false;
+    final canWide =
+        (session?.can('compliance:manage') ?? false) ||
+        (session?.can('compliance:read', GrantScope.site) ?? false);
     final rows = ref.watch(licencesProvider(view: _view, query: _query));
     final scheme = Theme.of(context).colorScheme;
 
@@ -223,12 +226,12 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      viewChip('critical', l10n.cpTabCritical),
+                      if (canWide) viewChip('critical', l10n.cpTabCritical),
                       viewChip('mine', l10n.cpTabMine),
-                      viewChip('warning', l10n.cpTabWarning),
-                      viewChip('renewing', l10n.cpTabRenew),
-                      viewChip('expired', l10n.cpTabExpired),
-                      viewChip('all', l10n.cpTabAll),
+                      if (canWide) viewChip('warning', l10n.cpTabWarning),
+                      if (canWide) viewChip('renewing', l10n.cpTabRenew),
+                      if (canWide) viewChip('expired', l10n.cpTabExpired),
+                      if (canWide) viewChip('all', l10n.cpTabAll),
                     ],
                   ),
                 ),
