@@ -214,6 +214,8 @@
 .psf-watch > span { font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.4px; font-size: 11px; }
 .psf-watch ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .psf-watch li { padding: 2px 9px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--brand-gold) 14%, var(--surface-1)); border: 1px solid color-mix(in srgb, var(--brand-gold) 45%, var(--border-1)); color: var(--text-1); }
+.psf-wait { margin: 0; font-size: 13px; line-height: 1.45; color: var(--text-2); }
+.psf-crew { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
 .psf-signed { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--status-success-text); }
 [data-theme='dark'] .psf-signed { color: var(--status-success-bright); }
 
@@ -254,8 +256,33 @@
 .psf-test-remove:hover { background: color-mix(in srgb, var(--status-danger) 10%, var(--surface-1)); }
 .psf-facts dd .form-input { height: 36px; font-size: 13px; }
 .psf-rule { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-2); }
-.psf-form { display: flex; flex-direction: column; gap: 12px; }
-.psf-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.psf-form { display: flex; flex-direction: column; gap: 14px; }
+.psf-form .form-group { margin-bottom: 0; min-width: 0; }
+.psf-form .form-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-1);
+  font-size: 13px;
+  font-family: inherit;
+}
+.psf-form textarea.form-input {
+  height: auto;
+  min-height: 88px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.psf-form .form-input:focus {
+  border-color: var(--brand-crimson);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-crimson) 12%, transparent);
+}
+.psf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .psf-row { grid-template-columns: 1fr; } }
 
 /* ─── Chairman: notices + leadership presence ──────────────────────────────── */
 .cn-head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

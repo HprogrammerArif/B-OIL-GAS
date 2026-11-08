@@ -5,6 +5,7 @@ import { useOperationsStore } from '../../store/operationsStore';
 import { useEmployeeStore } from '../../store/employeeStore';
 import { Button, EmptyState } from '../../components/ui';
 import { DashboardSubViewProps } from './types';
+import PlantSafety from './PlantSafety';
 import { CASUAL_LEAVE_ENTITLEMENT_DAYS, useDashboardData } from './useDashboardData';
 
 const SICK_LEAVE_ENTITLEMENT_DAYS = 14;
@@ -100,6 +101,7 @@ export default function EmployeeDashboard({
 
   return (
     <>
+      {activeTab === 'overview' && <PlantSafety lang={lang} mode="crew" />}
       {activeTab === 'activity' && (
         <div className="tab-pane-fade my-grid">
           <section className="dash-section" aria-labelledby="my-leave-title">

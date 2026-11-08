@@ -155,6 +155,15 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
           {role === 'employee' && (
             <>
+              <EmployeeDashboard
+                role={role}
+                lang={lang}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                showGatePassModal={showGatePassModal}
+                setShowGatePassModal={setShowGatePassModal}
+                onNavigate={onNavigate}
+              />
               <div className="dash-tiles">
                 <ActionTile
                   tone="info" icon={<MapPin size={20} />}
@@ -309,7 +318,7 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
         />
       )}
 
-      {role === 'employee' && (
+      {role === 'employee' && activeTab !== 'overview' && (
         <EmployeeDashboard
           role={role}
           lang={lang}
