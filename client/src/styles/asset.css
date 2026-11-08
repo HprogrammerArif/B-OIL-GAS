@@ -1243,6 +1243,35 @@
   color: rgba(241, 245, 249, 0.78);
   margin-top: 2px;
 }
+.eam-machine-photo {
+  position: relative;
+  width: 120px;
+  height: 84px;
+  margin-top: 10px;
+}
+.eam-machine-photo img {
+  width: 120px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+.eam-machine-photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-0);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
 
 .eam-modal-close {
   width: 32px;

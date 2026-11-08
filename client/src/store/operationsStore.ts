@@ -67,6 +67,8 @@ export interface LicenseCard {
   doLetterParcelRef?: string;
   inspectionFindings?: string;
   events: LicenseEvent[];
+  /** Certificate scan. Filled from the agency picture when missing. */
+  scan?: string;
 }
 
 export interface LicenseEvent {
@@ -77,9 +79,22 @@ export interface LicenseEvent {
   textBn: string;
 }
 
+const LICENSE_SCAN: Record<LicenseCard['tag'], string> = {
+  trade: '/permits/permit-trade.jpg',
+  fire: '/permits/permit-fire.jpg',
+  env: '/permits/permit-env.jpg',
+  doe: '/permits/permit-doe.jpg',
+  bsti: '/permits/permit-bsti.jpg',
+};
+
+export function licenseScanFor(tag: LicenseCard['tag']): string {
+  return LICENSE_SCAN[tag];
+}
+
 export function normalizeLicense(lic: LicenseCard): LicenseCard {
   return {
     ...lic,
+    scan: lic.scan || licenseScanFor(lic.tag),
     doLetterStatus: lic.doLetterStatus ?? 'none',
     events: lic.events ?? [],
   };
@@ -1314,9 +1329,32 @@ export function parcelPhotoFor(category: ParcelItem['category'], id?: string): s
 /* ──────────────────────────────────────────────────────────────────────────
    4. VISITOR GATE PASSES
    ────────────────────────────────────────────────────────────────────────── */
+const VISITOR_PHOTO: Record<string, string> = {
+  'VIS-2026-0811': '/visitors/shahabuddin.jpg',
+  'VIS-2026-0812': '/visitors/francois.jpg',
+  'VIS-2026-0814': '/visitors/mahfuz.jpg',
+  'VIS-2026-0815': '/visitors/rezaul.jpg',
+  'VIS-2026-0813': '/visitors/enamul.jpg',
+  'VIS-2026-0810': '/visitors/kazi.jpg',
+};
+
+const VISITOR_CATEGORY_PHOTO: Record<VisitorRecord['category'], string> = {
+  govt: '/visitors/visitor-govt.jpg',
+  vip: '/visitors/visitor-vip.jpg',
+  client: '/visitors/visitor-client.jpg',
+  vendor: '/visitors/visitor-vendor.jpg',
+  regular: '/visitors/visitor-regular.jpg',
+};
+
+export function visitorPhotoFor(id?: string, category: VisitorRecord['category'] = 'regular'): string {
+  if (id && VISITOR_PHOTO[id]) return VISITOR_PHOTO[id];
+  return VISITOR_CATEGORY_PHOTO[category];
+}
+
 const INITIAL_VISITORS: VisitorRecord[] = [
   {
     id: 'VIS-2026-0811',
+    photo: '/visitors/shahabuddin.jpg',
     name: 'Dr. Shahabuddin Ahmed',
     organization: 'Department of Explosives, Govt. of Bangladesh',
     designation: 'Chief Inspector',
@@ -1366,6 +1404,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0812',
+    photo: '/visitors/francois.jpg',
     name: 'Francois Dubois',
     organization: 'Axens Clean Energy Partners (France)',
     designation: 'Regional Engineering Director',
@@ -1410,6 +1449,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0814',
+    photo: '/visitors/mahfuz.jpg',
     name: 'Engr. Mahfuzur Rahman',
     organization: 'Roads & Highways Department (RHD)',
     designation: 'Executive Engineer',
@@ -1453,6 +1493,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0815',
+    photo: '/visitors/rezaul.jpg',
     name: 'S.M. Rezaul Karim',
     organization: 'National Road & Construction Ltd.',
     designation: 'Managing Director',
@@ -1495,6 +1536,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0813',
+    photo: '/visitors/enamul.jpg',
     name: 'Enamul Haque',
     organization: 'Energypac Power Generation Ltd.',
     designation: 'Senior Generator Service Engineer',
@@ -1535,6 +1577,7 @@ const INITIAL_VISITORS: VisitorRecord[] = [
   },
   {
     id: 'VIS-2026-0810',
+    photo: '/visitors/kazi.jpg',
     name: 'Kazi Mahbub Alam',
     organization: 'BSTI Standards Bureau',
     designation: 'Senior Quality Inspector',
@@ -2155,6 +2198,10 @@ class OperationsStore {
       const photos = parcel.photos?.length ? parcel.photos : [photo];
       return { ...parcel, photo: photos[0], photos };
     });
+    this.visitors = this.visitors.map((visitor) => ({
+      ...visitor,
+      photo: visitor.photo || visitorPhotoFor(visitor.id, visitor.category),
+    }));
     this.incidents = this.incidents.map((incident) => {
       if (incident.photos?.length) return incident;
       const fromFiles = (incident.spotFiles ?? [])

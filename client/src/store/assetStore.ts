@@ -1712,6 +1712,7 @@ export interface RegisterAssetInput {
   regulatoryAuthority?: AssetRecord['regulatoryAuthority'];
   actorName: string;
   actorRole: string;
+  photo?: string;
 }
 
 export function useAssetStore() {
@@ -1755,7 +1756,7 @@ export function useAssetStore() {
       tag: input.tag.trim() || `BOGCL-EQ-${100 + seq}`,
       sapAssetNo,
       name: input.name.trim(),
-      photo: {
+      photo: input.photo || {
         plant: '/machines/generator.jpg',
         vehicle: '/machines/prado.jpg',
         it: '/machines/dell-laptop.jpg',

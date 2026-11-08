@@ -76,6 +76,27 @@ export function RegisterAssetModal({
   const [specs, setSpecs] = useState(
     'High-Pressure Bitumen Circulation Booster Pump (28 Bar, 240°C Thermal Jacket, ATEX Zone-1 Explosion-Proof)'
   );
+  const [step, setStep] = useState<1 | 2>(1);
+  const [photo, setPhoto] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setPhoto('');
+    }
+  }, [isOpen]);
+
+  const onMachinePhoto = (file: File | undefined) => {
+    if (!file) return;
+    const allowed = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    if (!allowed || file.size > 2 * 1024 * 1024) {
+      showToast(t('Use a JPEG, PNG, or WebP image under 2 MB.', '২ এমবির কম JPEG, PNG বা WebP ছবি ব্যবহার করুন।', lang), 'warn');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setPhoto(String(reader.result || ''));
+    reader.readAsDataURL(file);
+  };
 
   const applyPreset = (presetKey: 'pump' | 'laptop' | 'tanker' | 'safety' | 'lab') => {
     const suffix = peekRef('TAG', 3).slice(-3);
@@ -192,8 +213,13 @@ export function RegisterAssetModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      showToast(t('Please enter the equipment / asset title.', 'অনুগ্রহ করে সম্পদের পূর্ণ নাম লিখুন।', lang), 'warn');
+    if (!tag.trim() || !name.trim()) {
+      showToast(t('Please enter the tag and the equipment name.', 'অনুগ্রহ করে ট্যাগ ও সম্পদের নাম লিখুন।', lang), 'warn');
+      setStep(1);
+      return;
+    }
+    if (step === 1) {
+      setStep(2);
       return;
     }
     onRegister({
@@ -220,6 +246,7 @@ export function RegisterAssetModal({
       regulatoryAuthority: regAuthority,
       actorName: actor.name,
       actorRole: actor.label,
+      photo: photo || undefined,
     });
     onClose();
   };
@@ -235,6 +262,11 @@ export function RegisterAssetModal({
             <div>
               <h3 className="eam-modal-title">{t('Add Purchased Equipment to Register', 'নতুন মূলধনী সম্পদ নিবন্ধন ও কমিশনিং', lang)}</h3>
               <div className="eam-modal-subtitle">{t('Record details, assign an operator or store pool, and set yearly depreciation.', 'তথ্য নথিভুক্ত করুন, দায়িত্বপ্রাপ্ত কর্মকর্তা নির্ধারণ করুন এবং বার্ষিক অবচয় নির্ধারণ করুন।', lang)}</div>
+              <div className="eam-modal-subtitle">
+                {step === 1
+                  ? t('Step 1 of 2 · The machine', 'ধাপ ১/২ · যন্ত্রটি', lang)
+                  : t('Step 2 of 2 · Money and the maker', 'ধাপ ২/২ · মূল্য ও প্রস্তুতকারক', lang)}
+              </div>
             </div>
           </div>
           <button type="button" className="eam-modal-close" onClick={onClose}><X size={18} /></button>
@@ -263,6 +295,8 @@ export function RegisterAssetModal({
               </select>
             </div>
 
+            {step === 1 && (
+            <>
             <div className="eam-form-section-title">
               1. {t('Equipment Identity, Site & Operator', 'সম্পদের পরিচিতি, অবস্থান ও হেফাজত', lang)}
             </div>
@@ -295,6 +329,34 @@ export function RegisterAssetModal({
                 placeholder="e.g. Sulzer High-Pressure Bitumen Circulation Booster Pump"
                 required
               />
+            </div>
+
+            <div className="eam-field">
+              <label className="eam-label">{t('Picture', 'ছবি', lang)}</label>
+              <div style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '8px' }}>
+                {t('JPEG, PNG, or WebP. One picture, up to 2 MB.', 'JPEG, PNG বা WebP। একটি ছবি, সর্বোচ্চ ২ এমবি।', lang)}
+              </div>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  onMachinePhoto(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              {photo && (
+                <div className="eam-machine-photo">
+                  <img src={photo} alt={name.trim() || t('Machine picture', 'যন্ত্রের ছবি', lang)} />
+                  <button
+                    type="button"
+                    className="eam-machine-photo-remove"
+                    aria-label={t('Remove picture', 'ছবি সরান', lang)}
+                    onClick={() => setPhoto('')}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="eam-form-grid-2">
@@ -352,7 +414,11 @@ export function RegisterAssetModal({
                 )}
               </span>
             </label>
+            </>
+            )}
 
+            {step === 2 && (
+            <>
             <div className="eam-form-section-title">
               2. {t('Purchase Cost, Scrap Value & Yearly Depreciation', 'মূল্যায়ন ও অবচয় নীতি', lang)}
             </div>
@@ -444,13 +510,26 @@ export function RegisterAssetModal({
               <label className="eam-label">{t('Technical Operating Specifications', 'প্রযুক্তিগত বৈশিষ্ট্য', lang)}</label>
               <textarea className="eam-textarea" rows={2} value={specs} onChange={(e) => setSpecs(e.target.value)} />
             </div>
+            </>
+            )}
           </div>
 
           <div className="eam-modal-ft">
-            <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
-            <button type="submit" className="btn-primary">
-              <CheckCircle size={15} /> {t('Register Asset & Generate QR Tag', 'সম্পদ নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
-            </button>
+            {step === 1 ? (
+              <>
+                <button type="button" className="btn-outline" onClick={onClose}>{t('Cancel', 'বাতিল', lang)}</button>
+                <button type="submit" className="btn-primary" disabled={!tag.trim() || !name.trim()} style={{ opacity: !tag.trim() || !name.trim() ? 0.55 : 1 }}>
+                  {t('Next', 'পরের ধাপ', lang)}
+                </button>
+              </>
+            ) : (
+              <>
+                <button type="button" className="btn-outline" onClick={() => setStep(1)}>{t('Back', 'পেছনে', lang)}</button>
+                <button type="submit" className="btn-primary">
+                  <CheckCircle size={15} /> {t('Register Asset & Generate QR Tag', 'সম্পদ নিবন্ধন ও ট্যাগ তৈরি করুন', lang)}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>

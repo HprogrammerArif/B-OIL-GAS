@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
-import { useOperationsStore } from '../store/operationsStore';
+import { useOperationsStore, visitorPhotoFor } from '../store/operationsStore';
 import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
 import { downloadFile, escHtml, htmlSheet } from './compliance/doLetter';
@@ -77,6 +77,7 @@ export interface VisitorRecord {
   dietaryPreferences?: string;
   inspectionFindings?: InspectionFindingItem[];
   isEvacuatedSafe?: boolean;
+  photo: string;
 }
 
 
@@ -141,6 +142,7 @@ export default function GuestView({ lang }: ViewProps) {
   const [formDuration, setFormDuration] = useState('3');
   const [formIdProofType, setFormIdProofType] = useState<VisitorRecord['idProofType']>('National ID');
   const [formIdProofNum, setFormIdProofNum] = useState('');
+  const [formPhoto, setFormPhoto] = useState('');
 
   // ─────────────────────────────────────────────────────────────────────────
   // Scoped & Filtered Visitors
@@ -445,11 +447,12 @@ export default function GuestView({ lang }: ViewProps) {
       },
       idProofType: formIdProofType,
       idProofNumber: formIdProofNum.trim(),
+      photo: formPhoto || visitorPhotoFor(undefined, formCategory),
     };
 
     setVisitors(prev => [newVis, ...prev]);
     setSelectedVisitorId(newVis.id);
-    setShowRegisterModal(false);
+    closeRegister();
 
     // Reset Form
     setFormName('');
@@ -462,6 +465,23 @@ export default function GuestView({ lang }: ViewProps) {
     setFormIdProofNum('');
 
     showToast(t(`Gate pass ${newId} issued for ${newVis.name}. The QR pass has been sent to the visitor.`, `${newVis.name}-এর জন্য গেট পাস ${newId} তৈরি হয়েছে। কিউআর পাস অতিথিকে পাঠানো হয়েছে।`, lang), 'success');
+  };
+
+  const closeRegister = () => {
+    setShowRegisterModal(false);
+    setFormPhoto('');
+  };
+
+  const handleVisitorPhoto = (file: File | undefined) => {
+    if (!file) return;
+    const allowed = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+    if (!allowed || file.size > 2 * 1024 * 1024) {
+      showToast(t('Use a JPEG, PNG, or WebP image under 2 MB.', '২ এমবির কম JPEG, PNG বা WebP ছবি ব্যবহার করুন।', lang), 'info');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setFormPhoto(String(reader.result));
+    reader.readAsDataURL(file);
   };
 
   const getCategoryBadge = (category: VisitorRecord['category']) => {
@@ -729,30 +749,34 @@ export default function GuestView({ lang }: ViewProps) {
                     className={`guest-feed-card ${isSelected ? 'active' : ''}`}
                     onClick={() => setSelectedVisitorId(v.id)}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
-                      <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)', lineHeight: 1.25 }}>
-                        {v.name}
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <img className="guest-feed-photo" src={v.photo} alt={v.name} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: 800, fontSize: '13.5px', color: 'var(--brand-slate-900)', lineHeight: 1.25 }}>
+                            {v.name}
+                          </div>
+                          {v.status === 'checked_in' ? (
+                            <span className="badge success" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t(`On site · ${v.checkInTime}`, `উপস্থিত · ${v.checkInTime}`, lang)}
+                            </span>
+                          ) : v.status === 'pre_registered' ? (
+                            <span className="badge info" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t(`Expected ${v.expectedTime}`, `প্রত্যাশিত ${v.expectedTime}`, lang)}
+                            </span>
+                          ) : (
+                            <span className="badge neutral" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
+                              {t('Checked out', 'চেক-আউট', lang)}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {v.organization}
+                          </div>
+                          <div style={{ flexShrink: 0 }}>{getCategoryBadge(v.category)}</div>
+                        </div>
                       </div>
-                      {v.status === 'checked_in' ? (
-                        <span className="badge success" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t(`On site · ${v.checkInTime}`, `উপস্থিত · ${v.checkInTime}`, lang)}
-                        </span>
-                      ) : v.status === 'pre_registered' ? (
-                        <span className="badge info" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t(`Expected ${v.expectedTime}`, `প্রত্যাশিত ${v.expectedTime}`, lang)}
-                        </span>
-                      ) : (
-                        <span className="badge neutral" style={{ fontSize: '10px', padding: '2px 7px', flexShrink: 0 }}>
-                          {t('Checked out', 'চেক-আউট', lang)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '11.5px', color: 'var(--brand-slate-600)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {v.organization}
-                      </div>
-                      <div style={{ flexShrink: 0 }}>{getCategoryBadge(v.category)}</div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '7px', borderTop: '1px solid var(--brand-slate-100)', fontSize: '11px', gap: '8px' }}>
@@ -818,6 +842,7 @@ export default function GuestView({ lang }: ViewProps) {
                 {/* Digital Pass Header */}
                 <div className="guest-pass-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px', position: 'relative', zIndex: 2 }}>
+                    <img className="guest-pass-photo" src={selectedVisitor.photo} alt={selectedVisitor.name} />
                     <div style={{ flex: 1, minWidth: '220px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
                         <span style={{ fontSize: '11px', color: 'var(--status-info-bright)', fontWeight: 700 }}>
@@ -1486,7 +1511,7 @@ export default function GuestView({ lang }: ViewProps) {
 
       {/* Pre-Register Guest Modal */}
       {showRegisterModal && (
-        <div className="modal-bg" onClick={() => setShowRegisterModal(false)}>
+        <div className="modal-bg" onClick={closeRegister}>
           <div className="modal" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-hd">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1500,7 +1525,7 @@ export default function GuestView({ lang }: ViewProps) {
                   </div>
                 </div>
               </div>
-              <button className="modal-close" onClick={() => setShowRegisterModal(false)}>×</button>
+              <button className="modal-close" onClick={closeRegister}>×</button>
             </div>
 
             <form onSubmit={handleRegister}>
@@ -1575,6 +1600,27 @@ export default function GuestView({ lang }: ViewProps) {
                   </div>
                 </div>
 
+                <div className="form-group">
+                  <label>{t('Picture', 'ছবি', lang)}</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => {
+                      handleVisitorPhoto(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
+                  <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '4px' }}>
+                    {t('Optional. One JPEG, PNG, or WebP, up to 2 MB. None uses a picture for this visitor type.', 'ঐচ্ছিক। একটি JPEG, PNG বা WebP, সর্বোচ্চ ২ এমবি। না দিলে এই ধরনের অতিথির ছবি থাকবে।', lang)}
+                  </div>
+                  {formPhoto && (
+                    <div style={{ position: 'relative', display: 'inline-block', marginTop: '8px' }}>
+                      <img className="guest-form-photo" src={formPhoto} alt={formName || t('Visitor', 'অতিথি', lang)} />
+                      <button type="button" className="guest-photo-remove" onClick={() => setFormPhoto('')} aria-label={t('Remove picture', 'ছবি সরান', lang)}>×</button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="form-row">
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>{t('Job Title / Role', 'দাপ্তরিক পদবি', lang)}</label>
@@ -1646,7 +1692,7 @@ export default function GuestView({ lang }: ViewProps) {
               </div>
 
               <div className="modal-ft">
-                <button type="button" className="btn-sm-ghost" onClick={() => setShowRegisterModal(false)}>
+                <button type="button" className="btn-sm-ghost" onClick={closeRegister}>
                   {t('Cancel', 'বাতিল', lang)}
                 </button>
                 <button type="submit" className="btn-primary" style={{ background: 'var(--brand-crimson)' }}>

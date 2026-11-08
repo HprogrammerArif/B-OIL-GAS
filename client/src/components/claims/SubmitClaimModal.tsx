@@ -22,7 +22,8 @@ import { currentUser } from '../../auth/session';
 import { nextRef } from '../../lib/refs';
 import { today } from '../../lib/clock';
 
-const MAX_RECEIPT_BYTES = 15 * 1024 * 1024;
+const MAX_RECEIPT_BYTES = 2 * 1024 * 1024;
+const MAX_RECEIPT_IMAGES = 6;
 
 function formatFileSize(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -44,6 +45,8 @@ export interface ClaimSubmissionData {
   status: 'pending_hod';
   dateSubmitted: string;
   items: { desc: string; date: string; amount: number; category: string }[];
+  receipts?: string[];
+  receiptFiles?: { name: string; size: string }[];
 }
 
 interface SubmitClaimModalProps {
@@ -134,7 +137,7 @@ export default function SubmitClaimModal({
   ]);
 
   // Uploaded Vouchers Simulation
-  const [vouchers, setVouchers] = useState([
+  const [vouchers, setVouchers] = useState<{ name: string; size: string; dataUrl?: string }[]>([
     { name: 'Hotel_Peninsula_VAT_Mushak6_3.pdf', size: '1.4 MB' },
     { name: 'Shohoz_AC_Bus_Ticket_EB4491.pdf', size: '420 KB' },
     { name: 'Depot_Gate_Clearance_Slip.jpg', size: '890 KB' },
@@ -271,6 +274,10 @@ export default function SubmitClaimModal({
         amount: Number(it.amount) || 0,
         category: it.category,
       })),
+      receipts: vouchers.flatMap((file) => (file.dataUrl ? [file.dataUrl] : [])),
+      receiptFiles: vouchers
+        .filter((file) => !file.dataUrl)
+        .map((file) => ({ name: file.name, size: file.size })),
     };
 
     onSubmit(submissionData);
@@ -683,7 +690,11 @@ export default function SubmitClaimModal({
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
               {vouchers.map((v, i) => (
                 <div key={i} className="claims-voucher-chip">
-                  <FileText size={14} style={{ color: 'var(--status-info)' }} />
+                  {v.dataUrl ? (
+                    <img className="claim-chip-photo" src={v.dataUrl} alt={v.name} />
+                  ) : (
+                    <FileText size={14} style={{ color: 'var(--status-info)' }} />
+                  )}
                   <span style={{ fontWeight: 600, color: 'var(--brand-slate-800)' }}>{v.name}</span>
                   <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>({v.size})</span>
                   <button
@@ -700,21 +711,50 @@ export default function SubmitClaimModal({
             <label className="claims-dropzone" style={{ display: 'block', cursor: 'pointer' }}>
               <input
                 type="file"
-                accept="application/pdf,image/jpeg,image/png"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
                 multiple
                 style={{ display: 'none' }}
                 onChange={(e) => {
                   const picked = Array.from(e.target.files ?? []);
                   e.target.value = '';
-                  const accepted = picked.filter(
-                    (f) => ['application/pdf', 'image/jpeg', 'image/png'].includes(f.type) && f.size <= MAX_RECEIPT_BYTES
-                  );
-                  if (accepted.length < picked.length) {
-                    showToast(t('Only PDF, JPG or PNG files up to 15 MB can be attached.', 'শুধু ১৫ এমবি পর্যন্ত PDF, JPG বা PNG ফাইল সংযুক্ত করা যাবে।', lang), 'warn');
-                  }
-                  if (accepted.length === 0) return;
-                  setVouchers([...vouchers, ...accepted.map((f) => ({ name: f.name, size: formatFileSize(f.size) }))]);
-                  showToast(t(`${accepted.length} receipt(s) attached.`, `${accepted.length}টি রসিদ সংযুক্ত হয়েছে।`, lang), 'success');
+                  const readFile = (file: File) => new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result));
+                    reader.onerror = () => reject(new Error('read'));
+                    reader.readAsDataURL(file);
+                  });
+                  void (async () => {
+                    let room = MAX_RECEIPT_IMAGES - vouchers.filter((file) => file.dataUrl).length;
+                    const next = [...vouchers];
+                    let refused = false;
+                    let capped = false;
+                    for (const file of picked) {
+                      const isImage = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+                      const isPdf = file.type === 'application/pdf';
+                      if ((!isImage && !isPdf) || file.size > MAX_RECEIPT_BYTES) {
+                        refused = true;
+                        continue;
+                      }
+                      if (isPdf) {
+                        next.push({ name: file.name, size: formatFileSize(file.size) });
+                        continue;
+                      }
+                      if (room <= 0) {
+                        capped = true;
+                        continue;
+                      }
+                      next.push({ name: file.name, size: formatFileSize(file.size), dataUrl: await readFile(file) });
+                      room -= 1;
+                    }
+                    if (refused) {
+                      showToast(t('Use a JPEG, PNG, WebP, or PDF under 2 MB.', '২ এমবির কম JPEG, PNG, WebP বা PDF ব্যবহার করুন।', lang), 'info');
+                    }
+                    if (capped) {
+                      showToast(t('A claim can carry 6 pictures.', 'একটি দাবিতে ৬টি ছবি যুক্ত করা যায়।', lang), 'info');
+                    }
+                    if (next.length === vouchers.length) return;
+                    setVouchers(next);
+                  })();
                 }}
               />
               <UploadCloud size={24} style={{ color: 'var(--status-info)', margin: '0 auto 6px' }} />
@@ -722,7 +762,7 @@ export default function SubmitClaimModal({
                 {t('Click to attach receipts', 'রসিদ বা ইনভয়েস সংযুক্ত করতে ক্লিক করুন', lang)}
               </div>
               <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                {t('PDF, JPG or PNG, up to 15 MB each', 'PDF, JPG বা PNG, প্রতিটি সর্বোচ্চ ১৫ এমবি', lang)}
+                {t('PDF, JPEG, PNG, or WebP, up to 2 MB. Up to 6 pictures.', 'PDF, JPEG, PNG বা WebP, সর্বোচ্চ ২ এমবি। ছবি সর্বোচ্চ ৬টি।', lang)}
               </div>
             </label>
           </div>
