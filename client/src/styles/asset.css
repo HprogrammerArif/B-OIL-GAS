@@ -497,6 +497,15 @@
   box-shadow: var(--shadow-xs);
 }
 
+.asset-toolbar .eam-view-switcher {
+  margin-left: auto;
+  height: 36px;
+  box-sizing: border-box;
+}
+.asset-toolbar .workforce-filter-row {
+  flex: 1 1 100%;
+}
+
 /* ─── 5. TWO-COLUMN COCKPIT MASTER-DETAIL LAYOUT ─────────────────────────── */
 .eam-cockpit-grid {
   display: grid;

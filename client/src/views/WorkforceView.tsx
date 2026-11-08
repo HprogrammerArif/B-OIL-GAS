@@ -4,10 +4,13 @@ import { useEmployeeStore, Employee } from '../store/employeeStore';
 import { useCurrentUser } from '../auth/session';
 import OnboardEmployeeModal from '../components/workforce/OnboardEmployeeModal';
 import OffboardClearanceDrawer from '../components/workforce/OffboardClearanceDrawer';
+import Pagination from '../components/Pagination';
 import {
   Users, UserPlus, UserX, Search, Building, MapPin,
   CheckCircle, FileText, Shield
 } from 'lucide-react';
+
+const STAFF_PAGE = 8;
 
 export default function WorkforceView({ lang }: ViewProps) {
   const { activeEmployees, offboardedEmployees } = useEmployeeStore();
@@ -17,6 +20,7 @@ export default function WorkforceView({ lang }: ViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('ALL');
   const [selectedSite, setSelectedSite] = useState<string>('ALL');
+  const [staffPage, setStaffPage] = useState(1);
 
   // Modals & Drawers
   const [showOnboardModal, setShowOnboardModal] = useState(false);
@@ -37,6 +41,10 @@ export default function WorkforceView({ lang }: ViewProps) {
 
     return matchesSearch && matchesDept && matchesSite;
   });
+
+  const staffPages = Math.max(1, Math.ceil(displayedList.length / STAFF_PAGE));
+  const safeStaffPage = Math.min(staffPage, staffPages);
+  const pagedList = displayedList.slice((safeStaffPage - 1) * STAFF_PAGE, safeStaffPage * STAFF_PAGE);
 
   const plantCount = activeEmployees.filter((e) => e.assignedSite === 'PLANT_KERANIGANJ').length;
   const hqCount = activeEmployees.filter((e) => e.assignedSite === 'HQ_BARIDHARA').length;
@@ -128,7 +136,7 @@ export default function WorkforceView({ lang }: ViewProps) {
               type="button"
               className={`workforce-tab${activeTab === 'active' ? ' active' : ''}`}
               aria-pressed={activeTab === 'active'}
-              onClick={() => setActiveTab('active')}
+              onClick={() => { setActiveTab('active'); setStaffPage(1); }}
             >
               {t('Active staff', 'সক্রিয় কর্মী', lang)}
               <b>{activeEmployees.length}</b>
@@ -137,7 +145,7 @@ export default function WorkforceView({ lang }: ViewProps) {
               type="button"
               className={`workforce-tab${activeTab === 'offboarded' ? ' active' : ''}`}
               aria-pressed={activeTab === 'offboarded'}
-              onClick={() => setActiveTab('offboarded')}
+              onClick={() => { setActiveTab('offboarded'); setStaffPage(1); }}
             >
               {t('Former staff', 'সাবেক কর্মী', lang)}
               <b>{offboardedEmployees.length}</b>
@@ -152,13 +160,13 @@ export default function WorkforceView({ lang }: ViewProps) {
                 placeholder={t('Search employee name, ID, phone...', 'কর্মচারীর নাম, আইডি, ফোন নম্বর দিয়ে খুঁজুন...', lang)}
                 aria-label={t('Search staff', 'কর্মী খুঁজুন', lang)}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setStaffPage(1); }}
                 className="workforce-search-input"
               />
             </div>
             <select
               value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
+              onChange={(e) => { setSelectedDept(e.target.value); setStaffPage(1); }}
               className="workforce-select"
               aria-label={t('Department', 'বিভাগ', lang)}
             >
@@ -173,7 +181,7 @@ export default function WorkforceView({ lang }: ViewProps) {
             </select>
             <select
               value={selectedSite}
-              onChange={(e) => setSelectedSite(e.target.value)}
+              onChange={(e) => { setSelectedSite(e.target.value); setStaffPage(1); }}
               className="workforce-select"
               aria-label={t('Location', 'কর্মস্থল', lang)}
             >
@@ -207,7 +215,7 @@ export default function WorkforceView({ lang }: ViewProps) {
                   </td>
                 </tr>
               ) : (
-                displayedList.map((emp) => (
+                pagedList.map((emp) => (
                   <tr key={emp.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -317,7 +325,7 @@ export default function WorkforceView({ lang }: ViewProps) {
               {t('No personnel found matching the specified filters.', 'কোনো কর্মচারী পাওয়া যায়নি।', lang)}
             </div>
           ) : (
-            displayedList.map((emp) => (
+            pagedList.map((emp) => (
               <div key={emp.id} className="workforce-card-item">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -384,6 +392,15 @@ export default function WorkforceView({ lang }: ViewProps) {
               </div>
             ))
           )}
+        </div>
+        <div style={{ padding: '4px 16px 12px' }}>
+          <Pagination
+            currentPage={safeStaffPage}
+            totalItems={displayedList.length}
+            pageSize={STAFF_PAGE}
+            onPageChange={setStaffPage}
+            lang={lang}
+          />
         </div>
       </div>
 

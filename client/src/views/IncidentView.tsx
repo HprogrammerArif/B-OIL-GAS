@@ -6,6 +6,7 @@ import { useCurrentUser } from '../auth/session';
 import { nextRef } from '../lib/refs';
 import { nowStamp, nowTime } from '../lib/clock';
 import { type IncidentMode, incidentModeFor, incidentsVisibleTo, daysSinceLostTime } from './incident/config';
+import { clearIncidentDraft, incidentDraftPlace, peekIncidentDraft, queueIncidentDraft } from './incident/handoff';
 import {
   useOperationsStore,
   IncidentItem,
@@ -143,7 +144,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [matrixFilter, setMatrixFilter] = useState<{ level: number; likelihood: number } | null>(null);
 
   // ── Modals State ──
-  const [showLogWizard, setShowLogWizard] = useState(false);
+  const [showLogWizard, setShowLogWizard] = useState(() => peekIncidentDraft() != null);
   const [showQuickHazardModal, setShowQuickHazardModal] = useState(false);
   const [selectedRcaIncident, setSelectedRcaIncident] = useState<IncidentItem | null>(null);
   const [selectedCapaIncidentId, setSelectedCapaIncidentId] = useState<string | null>(null);
@@ -161,7 +162,10 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [wizardType, setWizardType] = useState<IncidentType>('near_miss');
   const [wizardTitle, setWizardTitle] = useState('');
   const [wizardZone, setWizardZone] = useState<string>('Storage Tank Yard (TK-101 to TK-108)');
-  const [wizardLocation, setWizardLocation] = useState('Storage Tank Yard, Tank TK-102');
+  const [wizardLocation, setWizardLocation] = useState(() => {
+    const draft = peekIncidentDraft();
+    return draft ? incidentDraftPlace(draft) : 'Storage Tank Yard, Tank TK-102';
+  });
   const [wizardShift, setWizardShift] = useState<'Morning Shift (07:00 - 15:00)' | 'Evening Shift (15:00 - 23:00)' | 'Night Shift (23:00 - 07:00)'>('Morning Shift (07:00 - 15:00)');
   const [wizardSeverity, setWizardSeverity] = useState<1 | 2 | 3 | 4 | 5>(2);
   const [wizardLikelihood, setWizardLikelihood] = useState<1 | 2 | 3 | 4 | 5>(2);
@@ -174,6 +178,22 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
   const [wizardSpotFiles, setWizardSpotFiles] = useState<IncidentSpotFile[]>([]);
   const spotFileInputRef = useRef<HTMLInputElement>(null);
   const spotCameraInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const draft = peekIncidentDraft();
+    if (!draft) return;
+    clearIncidentDraft();
+    setWizardTitle('');
+    setWizardStep(1);
+    setWizardError(null);
+    setWizardLocation(incidentDraftPlace(draft));
+    setShowLogWizard(true);
+    let settled = false;
+    queueMicrotask(() => { settled = true; });
+    return () => {
+      if (!settled) queueIncidentDraft(draft);
+    };
+  }, []);
 
   // ── Quick Hazard State (Modal 2) ──
   const [quickHazardTitle, setQuickHazardTitle] = useState('');
