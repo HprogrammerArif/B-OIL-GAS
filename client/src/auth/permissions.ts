@@ -40,6 +40,7 @@ export type Permission =
   | 'fleet:drive'
   | 'fleet:view_all'
   | 'bus:view'
+  | 'bus:view_all'
   | 'bus:manage'
   // Parcels, visitors, incidents
   | 'parcel:view'
@@ -109,7 +110,7 @@ const ROLE_PERMISSIONS: Record<AppRole, Permission[]> = {
     'chat:leadership', 'notices:publish',
     'compliance:view',
     'fleet:request', 'fleet:view_all',
-    'bus:view', 'bus:manage',
+    'bus:view', 'bus:view_all',
     'guest:invite', 'guest:view_all',
     'incident:view_all',
     'attendance:all', 'leave:approve',

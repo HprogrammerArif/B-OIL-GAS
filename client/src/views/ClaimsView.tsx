@@ -326,7 +326,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
             </button>
           </div>
 
-          <div className="responsive-col-2">
+          <div className="responsive-col-2 claims-split">
             {/* Claims List */}
             <div className={`card ${mobileTab === 'detail' ? 'mobile-hide' : ''}`}>
               <div className="card-hd">

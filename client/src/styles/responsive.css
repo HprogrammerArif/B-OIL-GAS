@@ -1295,6 +1295,28 @@
   }
 }
 
+/* Claims list and the open claim share one row. Both must shrink inside the page. */
+.claims-split {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+}
+.claims-split > * { min-width: 0; }
+.claims-split .card-hd-left { min-width: 0; }
+.claims-split .card-title,
+.claims-split .card-subtitle,
+.claims-split .card-body {
+  overflow-wrap: break-word;
+}
+
+.claims-desktop-table .data-table { min-width: 640px; }
+.claims-desktop-table th,
+.claims-desktop-table td:nth-child(1),
+.claims-desktop-table td:nth-child(2),
+.claims-desktop-table td:nth-child(4),
+.claims-desktop-table td:nth-child(5),
+.claims-desktop-table .badge {
+  white-space: nowrap;
+}
+
 /* ─── CLAIMS MOBILE CARD STYLING ─── */
 .claims-mobile-cards {
   display: none;

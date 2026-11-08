@@ -30,8 +30,13 @@ import BusFleetOverviewGrid from '../components/bus/BusFleetOverviewGrid';
 export default function BusView({ role, lang }: ViewProps) {
   const user = useCurrentUser();
   const canManageBus = !!user?.permissions.has('bus:manage');
-  const [perspective, setActivePerspective] = useState<'staff' | 'supervisor'>(canManageBus ? 'supervisor' : 'staff');
-  const activePerspective = canManageBus ? perspective : 'staff';
+  const canReadFleet = !!user?.permissions.has('bus:view_all');
+  const fleetReadOnly = canReadFleet && !canManageBus;
+  const [perspective, setActivePerspective] = useState<'staff' | 'supervisor'>(canManageBus || canReadFleet ? 'supervisor' : 'staff');
+  const activePerspective = canManageBus ? perspective : (canReadFleet ? 'supervisor' : 'staff');
+  useEffect(() => {
+    if (canManageBus) setActivePerspective('supervisor');
+  }, [canManageBus]);
   const [scanQuery, setScanQuery] = useState('');
 
   // Commute Direction & Date
@@ -712,11 +717,17 @@ export default function BusView({ role, lang }: ViewProps) {
             </span>
           </div>
           <p className="section-subtitle" style={{ marginTop: '4px' }}>
-            {t(
-              'Seat map for each staff coach, seat booking, standby waitlist, route timetable and gate manifest.',
-              '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
-              lang
-            )}
+            {fleetReadOnly
+              ? t(
+                  'Who holds a seat on each staff coach. Transport changes the buses, routes, and seats.',
+                  'কোন স্টাফ কোন কোচে আসন ধরে আছে। বাস, রুট ও আসন পরিবর্তন করেন পরিবহন।',
+                  lang,
+                )
+              : t(
+                  'Seat map for each staff coach, seat booking, standby waitlist, route timetable and gate manifest.',
+                  '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
+                  lang,
+                )}
           </p>
         </div>
 
@@ -836,10 +847,12 @@ export default function BusView({ role, lang }: ViewProps) {
             </div>
           )}
 
-          {/* Security Gate Manifest */}
+          {/* Security Gate Manifest — hidden from the HR read of the fleet */}
+          {!fleetReadOnly && (
           <button type="button" className="btn-outline" onClick={() => setShowManifestModal(true)} title="Security Gate Commuter Manifest">
             <FileText size={13} /> {t('Gate Manifest', 'গেট পাস তালিকা', lang)}
           </button>
+          )}
 
           {/* Conductor Scanner */}
           {canManageBus && (
@@ -916,7 +929,7 @@ export default function BusView({ role, lang }: ViewProps) {
               <span style={{ fontSize: '10.5px', color: 'var(--brand-slate-500)', marginLeft: '6px' }}>({routeAlert.time})</span>
             </div>
           </div>
-          {activePerspective === 'supervisor' && (
+          {activePerspective === 'supervisor' && canManageBus && (
             <button
               type="button"
               className="btn-outline"
@@ -1035,6 +1048,7 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
 
           {/* Single Set of Supervisor Actions */}
+          {canManageBus && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
             <button
               type="button"
@@ -1170,6 +1184,7 @@ export default function BusView({ role, lang }: ViewProps) {
               <span>{t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}</span>
             </button>
           </div>
+          )}
         </div>
       )}
 
@@ -1198,6 +1213,7 @@ export default function BusView({ role, lang }: ViewProps) {
             handleSelectRoute(routeKey);
             setShowSupervisorSeatModal(true);
           }}
+          readOnly={fleetReadOnly}
           lang={lang}
         />
       ) : (
@@ -1261,7 +1277,7 @@ export default function BusView({ role, lang }: ViewProps) {
               </div>
             </div>
 
-            {mySeat && (
+            {mySeat && !fleetReadOnly && (
             <div style={{ display: 'flex', gap: '4px' }}>
               {isMySeatVacated ? (
                 <button
@@ -1441,7 +1457,8 @@ export default function BusView({ role, lang }: ViewProps) {
           </div>
         )}
 
-        {/* Action Button: Book Any Free Seat */}
+        {/* Action Button: Book Any Free Seat — staff and the transport supervisor */}
+        {(canManageBus || activePerspective === 'staff') && (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             className="btn-primary"
@@ -1465,6 +1482,7 @@ export default function BusView({ role, lang }: ViewProps) {
             <ArrowUpDown size={13} /> {t('Request Seat Swap', 'সিট সোয়াপ আবেদন', lang)}
           </button>
         </div>
+        )}
       </div>
 
       {/* ─── 2-Column Master-Cockpit Layout ──────────────────────────── */}
@@ -1938,6 +1956,7 @@ export default function BusView({ role, lang }: ViewProps) {
                 </div>
 
                 {/* Clear Role Boundary Controls & Booking Actions */}
+                {(canManageBus || activePerspective === 'staff') && (
                 <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {/* Case 1: Empty Seat — Direct Booking Available to Everyone */}
                   {selectedSeat.status === 'empty' && (
@@ -2071,6 +2090,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     </div>
                   )}
                 </div>
+                )}
               </div>
             </div>
           )}
@@ -2113,7 +2133,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         <UserPlus size={13} /> {t('Request Standby Seat', 'সিটের আবেদন', lang)}
                       </button>
                     )
-                  ) : (
+                  ) : canManageBus ? (
                     <button
                       className="btn-gold"
                       style={{ fontSize: '11px', padding: '4px 10px' }}
@@ -2121,7 +2141,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     >
                       <UserPlus size={13} /> {t('Promote Standby', 'স্ট্যান্ডবাই পদোন্নতি', lang)}
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="card-body">
@@ -2179,8 +2199,8 @@ export default function BusView({ role, lang }: ViewProps) {
                               </div>
                             </div>
 
-                            {/* Action Button: Visible only to Supervisor */}
-                            {activePerspective === 'supervisor' ? (
+                            {/* Action Button: Visible only to the transport supervisor */}
+                            {activePerspective === 'supervisor' && canManageBus ? (
                               vacatedCount > 0 ? (
                                 <button
                                   className="btn-gold"
@@ -2229,9 +2249,11 @@ export default function BusView({ role, lang }: ViewProps) {
                     </div>
                   </div>
 
+                  {!fleetReadOnly && (
                   <button className="btn-outline" style={{ fontSize: '11px', padding: '4px 8px' }} onClick={() => setShowManifestModal(true)}>
                     <Printer size={12} /> {t('Print Roster', 'প্রিন্ট', lang)}
                   </button>
+                  )}
                 </div>
 
                 <div className="card-body" style={{ maxHeight: '280px', overflowY: 'auto' }}>
@@ -2386,6 +2408,7 @@ export default function BusView({ role, lang }: ViewProps) {
                         +880 1711-009988
                       </div>
                     </div>
+                    {!fleetReadOnly && (
                     <button
                       type="button"
                       className="btn-outline"
@@ -2398,6 +2421,7 @@ export default function BusView({ role, lang }: ViewProps) {
                     >
                       <Phone size={12} /> {dispatchSent ? t('Sent', 'পাঠানো হয়েছে', lang) : t('Call Dispatch', 'কল করুন', lang)}
                     </button>
+                    )}
                   </div>
                 </div>
               </div>

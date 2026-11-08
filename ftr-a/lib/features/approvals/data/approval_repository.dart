@@ -79,8 +79,16 @@ class ApprovalRepository {
     }
   }
 
-  Future<void> approve(String instanceId, {String? comment}) =>
-      _act(instanceId, {'type': 'APPROVE', 'comment': ?comment});
+  Future<void> approve(
+    String instanceId, {
+    String? comment,
+    Map<String, Object?>? signature,
+  }) => _act(instanceId, {
+    'type': 'APPROVE',
+    'comment': ?comment,
+    'signature':
+        signature ?? {'method': 'TYPED', 'typedName': 'Digital E-Sign'},
+  });
 
   Future<void> reject(String instanceId, {required String comment}) =>
       _act(instanceId, {'type': 'REJECT', 'comment': comment});
