@@ -31,9 +31,16 @@ import 'package:go_router/go_router.dart';
 /// One note-sheet on one page: what it asks, the price verdict, who signed,
 /// the route, and the notes. Signing happens from the bottom bar.
 class NoteSheetDetailScreen extends ConsumerStatefulWidget {
-  const NoteSheetDetailScreen({required this.id, super.key});
+  const NoteSheetDetailScreen({
+    required this.id,
+    this.openSign = false,
+    super.key,
+  });
 
   final String id;
+
+  /// When true, the signature sheet opens once the file has loaded.
+  final bool openSign;
 
   @override
   ConsumerState<NoteSheetDetailScreen> createState() =>
@@ -42,6 +49,29 @@ class NoteSheetDetailScreen extends ConsumerStatefulWidget {
 
 class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
   bool _busy = false;
+  bool _askedSign = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openSign) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_openSignOnce());
+      });
+    }
+  }
+
+  Future<void> _openSignOnce() async {
+    if (!mounted || _askedSign || !widget.openSign) return;
+    _askedSign = true;
+    try {
+      final sheet = await ref.read(noteSheetDetailProvider(widget.id).future);
+      if (!mounted || !sheet.me.canSign) return;
+      await _sign(sheet);
+    } on Object {
+      // The page already shows the load error.
+    }
+  }
 
   void _refreshAll() {
     ref

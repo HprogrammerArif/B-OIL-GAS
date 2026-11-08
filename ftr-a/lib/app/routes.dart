@@ -24,7 +24,8 @@ abstract final class AppRoutes {
   static String busRoute(String id) => '/home/bus/routes/$id';
   static const noteSheets = '/home/note-sheets';
   static const noteSheetNew = '/home/note-sheets/new';
-  static String noteSheetDetail(String id) => '/home/note-sheets/$id';
+  static String noteSheetDetail(String id, {bool sign = false}) =>
+      sign ? '/home/note-sheets/$id?sign=1' : '/home/note-sheets/$id';
   static String noteSheetEdit(String id) => '/home/note-sheets/$id/edit';
   static const parcels = '/home/parcels';
   static const parcelNew = '/home/parcels/new';

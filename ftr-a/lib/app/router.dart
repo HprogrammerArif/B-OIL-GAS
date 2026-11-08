@@ -151,6 +151,7 @@ GoRouter router(Ref ref) {
                         path: ':id',
                         builder: (context, state) => NoteSheetDetailScreen(
                           id: state.pathParameters['id']!,
+                          openSign: state.uri.queryParameters['sign'] == '1',
                         ),
                         routes: [
                           GoRoute(
