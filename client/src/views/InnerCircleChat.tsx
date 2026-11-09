@@ -919,7 +919,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
                 const preview = previewOf(ch.id, true);
                 const unread = ch.unread ?? 0;
                 return (
-                  <div key={ch.id} className="ic-list-row">
+                  <div key={ch.id} className={`ic-list-row${active ? ' active' : ''}`}>
                     <button
                       type="button"
                       className={`ic-list-item ${active ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''}`}
