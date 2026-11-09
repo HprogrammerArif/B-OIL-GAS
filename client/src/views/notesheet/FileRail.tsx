@@ -215,19 +215,18 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
             <button type="button" onClick={() => setQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={13} /></button>
           )}
         </div>
-        <div className="ns-filters" role="group" aria-label={t('Filter files', 'ফাইল ফিল্টার', lang)}>
+        <select
+          className="ns-status-select"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as Filter)}
+          aria-label={t('Filter files', 'ফাইল ফিল্টার', lang)}
+        >
           {filters.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              className={`ns-filter ${filter === f.key ? 'active' : ''}`}
-              aria-pressed={filter === f.key}
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label} <b>{f.count}</b>
-            </button>
+            <option key={f.key} value={f.key}>
+              {f.label} ({f.count})
+            </option>
           ))}
-        </div>
+        </select>
         {createAction && <div className="ns-rail-create">{createAction}</div>}
       </div>
 

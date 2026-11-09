@@ -1243,6 +1243,16 @@
   align-items: stretch;
 }
 .guest-two-col-layout > * { min-width: 0; }
+.guest-page-head {
+  position: sticky;
+  top: var(--topbar-height, 68px);
+  z-index: 21;
+  background: var(--brand-canvas);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  box-shadow: 0 10px 12px -10px rgba(11, 19, 43, 0.14);
+}
+
 .guest-directory-col {
   display: flex;
   flex-direction: column;

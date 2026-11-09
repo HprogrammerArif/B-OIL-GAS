@@ -588,7 +588,7 @@ export default function GuestView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. TOP HEADER & EMERGENCY MUSTER ACTIONS */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex-between mb-3" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
+      <div className="flex-between mb-3 guest-page-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
             {isGate
