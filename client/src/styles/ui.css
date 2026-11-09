@@ -242,7 +242,7 @@
 .capa-next { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-1); line-height: 1.45; flex-shrink: 0; }
 .capa-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; flex-shrink: 0; }
 .capa-toolbar .psf-filters { margin-bottom: 0; }
-.capa-search { flex: 1 1 200px; min-width: 0; }
+.capa-search { flex: 1 1 200px; min-width: 0; max-width: 28rem; }
 .capa-scroll { margin-top: 0; flex: 0 0 auto; }
 .capa-ft { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
 .capa-ft .enterprise-pagination { margin: 0; flex: 1 1 240px; }

@@ -454,6 +454,10 @@
   scrollbar-width: thin;
   padding-inline: 28px;
 }
+.pipe-board .kanban-col {
+  flex: 1 0 210px;
+  min-width: 210px;
+}
 .pipe-nav {
   width: 32px;
   height: 32px;
