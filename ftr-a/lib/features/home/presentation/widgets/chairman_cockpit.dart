@@ -66,9 +66,11 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
       children: [
         // Voice Briefing Bar (Executive Audio Control)
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Space.lg,
-            vertical: Space.xs,
+          padding: const EdgeInsets.fromLTRB(
+            Space.lg,
+            Space.xs,
+            Space.lg,
+            Space.xl,
           ),
           child: Row(
             children: [
@@ -111,12 +113,7 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
 
         // Role Sub-Tabs
         Padding(
-          padding: const EdgeInsets.fromLTRB(
-            Space.lg,
-            Space.sm,
-            Space.lg,
-            Space.xs,
-          ),
+          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.xs),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -130,7 +127,7 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
                       setState(() => _tabIndex = i);
                     },
                   ),
-                  const SizedBox(width: Space.xs),
+                  const SizedBox(width: Space.sm),
                 ],
               ],
             ),

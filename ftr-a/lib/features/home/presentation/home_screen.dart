@@ -12,6 +12,7 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/dashboards/data/dashboard_repository.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
 import 'package:bogcl_oneops/features/dashboards/presentation/dashboard_providers.dart';
+import 'package:bogcl_oneops/features/home/presentation/home_motion.dart';
 import 'package:bogcl_oneops/features/home/presentation/home_role_panel.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
@@ -223,8 +224,6 @@ class _HomeScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final bangla = context.isBangla;
     final shortcuts = _shortcuts(session);
     return Scaffold(
       backgroundColor: BrandColors.canvas,
@@ -236,23 +235,7 @@ class _HomeScaffold extends ConsumerWidget {
         },
         child: ListView(
           padding: const EdgeInsets.only(top: Space.lg, bottom: Space.xxxl),
-          children: [
-            _HomeWork(session: session),
-            if (shortcuts.isNotEmpty) ...[
-              SectionHeader(
-                title: l10n.homeQuickActions,
-                trailing: TextButton.icon(
-                  onPressed: () {
-                    Haptics.tap();
-                    openAppRoute(context, AppRoutes.more);
-                  },
-                  icon: const Icon(Icons.apps_outlined, size: 16),
-                  label: Text(bangla ? 'সকল মডিউল' : 'All Modules'),
-                ),
-              ),
-              _BentoModuleGrid(shortcuts: shortcuts),
-            ],
-          ],
+          children: [_HomeWork(session: session, shortcuts: shortcuts)],
         ),
       ),
     );
@@ -260,12 +243,15 @@ class _HomeScaffold extends ConsumerWidget {
 }
 
 class _HomeWork extends ConsumerWidget {
-  const _HomeWork({required this.session});
+  const _HomeWork({required this.session, required this.shortcuts});
 
   final Session session;
+  final List<AppModule> shortcuts;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
     final dash = ref.watch(dashboardMeProvider);
     return dash.when(
       skipLoadingOnReload: true,
@@ -275,14 +261,58 @@ class _HomeWork extends ConsumerWidget {
       ),
       error: (_, _) =>
           ErrorState(onRetry: () => ref.invalidate(dashboardMeProvider)),
-      data: (d) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: Space.xl,
-        children: [
-          if (d.broadcast != null) _Banner(broadcast: d.broadcast!),
-          HomeRolePanel(dashboard: d, session: session),
-        ],
-      ),
+      data: (d) {
+        var index = 0;
+        final noticeIndex = d.broadcast != null ? index++ : null;
+        final needIndex = d.needs.isNotEmpty ? index++ : null;
+        final kpiIndex = d.kpis.isNotEmpty ? index++ : null;
+        final workIndex = index++;
+        final shortcutIndex = index;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: Space.xl,
+              children: [
+                if (noticeIndex != null)
+                  HomeRiseIn(
+                    index: noticeIndex,
+                    child: _Banner(broadcast: d.broadcast!),
+                  ),
+                HomeRolePanel(
+                  dashboard: d,
+                  session: session,
+                  needIndex: needIndex,
+                  kpiIndex: kpiIndex,
+                  workIndex: workIndex,
+                ),
+              ],
+            ),
+            if (shortcuts.isNotEmpty)
+              HomeRiseIn(
+                index: shortcutIndex,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionHeader(
+                      title: l10n.homeQuickActions,
+                      trailing: TextButton.icon(
+                        onPressed: () {
+                          Haptics.tap();
+                          openAppRoute(context, AppRoutes.more);
+                        },
+                        icon: const Icon(Icons.apps_outlined, size: 16),
+                        label: Text(bangla ? 'সকল মডিউল' : 'All Modules'),
+                      ),
+                    ),
+                    _BentoModuleGrid(shortcuts: shortcuts),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -392,51 +422,53 @@ class _ShortcutTile extends StatelessWidget {
     final label = module.label(context.l10n);
     final accent = _moduleAccent(module.key, scheme.primary);
 
-    return Semantics(
-      button: true,
-      label: label,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          borderRadius: BorderRadius.circular(Corner.lg),
-          boxShadow: cardShadow(scheme.shadow),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          shape: RoundedRectangleBorder(
+    return HomePressScale(
+      child: Semantics(
+        button: true,
+        label: label,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: scheme.surface,
             borderRadius: BorderRadius.circular(Corner.lg),
+            boxShadow: cardShadow(scheme.shadow),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(Corner.lg),
-            onTap: () {
-              Haptics.tap();
-              openAppRoute(context, module.route);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(Space.sm),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(Corner.md),
+          child: Material(
+            color: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Corner.lg),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(Corner.lg),
+              onTap: () {
+                Haptics.tap();
+                openAppRoute(context, module.route);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(Space.sm),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(Corner.md),
+                      ),
+                      child: Icon(module.icon, color: accent, size: 22),
                     ),
-                    child: Icon(module.icon, color: accent, size: 22),
-                  ),
-                  const SizedBox(height: Space.xs),
-                  Text(
-                    label,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: Space.xs),
+                    Text(
+                      label,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

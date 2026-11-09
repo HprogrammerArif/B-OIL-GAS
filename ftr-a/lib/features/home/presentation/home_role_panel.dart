@@ -4,6 +4,7 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
+import 'package:bogcl_oneops/features/home/presentation/home_motion.dart';
 import 'package:bogcl_oneops/features/home/presentation/widgets/chairman_cockpit.dart';
 import 'package:bogcl_oneops/features/home/presentation/widgets/driver_cockpit.dart';
 import 'package:bogcl_oneops/features/home/presentation/widgets/employee_cockpit.dart';
@@ -22,11 +23,17 @@ class HomeRolePanel extends StatelessWidget {
   const HomeRolePanel({
     required this.dashboard,
     required this.session,
+    required this.needIndex,
+    required this.kpiIndex,
+    required this.workIndex,
     super.key,
   });
 
   final Dashboard dashboard;
   final Session session;
+  final int? needIndex;
+  final int? kpiIndex;
+  final int workIndex;
 
   void _handleKpiTap(BuildContext context, DashKpi kpi) {
     Haptics.tap();
@@ -69,17 +76,26 @@ class HomeRolePanel extends StatelessWidget {
       _ => EmployeeCockpit(dashboard: dashboard),
     };
 
+    final needAt = needIndex;
+    final kpiAt = kpiIndex;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: Space.xl,
       children: [
-        if (firstNeed != null) NeedsYouCard(need: firstNeed),
-        if (dashboard.kpis.isNotEmpty)
-          HomeKpiGrid(
-            kpis: dashboard.kpis,
-            onTapKpi: (kpi) => _handleKpiTap(context, kpi),
+        if (firstNeed != null && needAt != null)
+          HomeRiseIn(
+            index: needAt,
+            child: NeedsYouCard(need: firstNeed),
           ),
-        cockpit,
+        if (dashboard.kpis.isNotEmpty && kpiAt != null)
+          HomeRiseIn(
+            index: kpiAt,
+            child: HomeKpiGrid(
+              kpis: dashboard.kpis,
+              onTapKpi: (kpi) => _handleKpiTap(context, kpi),
+            ),
+          ),
+        HomeRiseIn(index: workIndex, child: cockpit),
       ],
     );
   }
