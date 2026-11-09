@@ -43,9 +43,17 @@ class SessionController extends _$SessionController {
   }
 
   /// Signs in. Throws [ApiException] so the form can show a generic message.
-  Future<void> login(String identifier, String password) async {
+  Future<void> login(
+    String identifier,
+    String password, {
+    bool rememberMe = true,
+  }) async {
     final repo = ref.read(authRepositoryProvider);
-    final tokens = await repo.login(identifier, password);
+    final tokens = await repo.login(
+      identifier,
+      password,
+      rememberMe: rememberMe,
+    );
     await _saveTokens(tokens);
     state = AsyncData(await repo.loadSession());
   }

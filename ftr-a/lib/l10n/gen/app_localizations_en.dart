@@ -63,14 +63,50 @@ class AppL10nEn extends AppL10n {
   String get loginTitle => 'Sign in';
 
   @override
-  String get loginSubtitle =>
-      'Tap a demo role to open the app. Company sign-in is off for now.';
+  String get loginSubtitle => 'Sign in with your work email or employee ID.';
+
+  @override
+  String get loginBrand => 'OneOps';
+
+  @override
+  String get loginWelcome => 'Welcome back';
+
+  @override
+  String get loginEmailLabel => 'Email';
+
+  @override
+  String get loginEmailHint => 'Work email or employee ID';
 
   @override
   String get loginIdentifierLabel => 'Email, phone or employee ID';
 
   @override
   String get loginPasswordLabel => 'Password';
+
+  @override
+  String get loginPasswordHint => 'Enter password';
+
+  @override
+  String get loginRemember => 'Remember me';
+
+  @override
+  String get loginOr => 'or';
+
+  @override
+  String get loginLangEn => 'EN';
+
+  @override
+  String get loginLangBn => 'বাং';
+
+  @override
+  String loginLangSwitch(String language) {
+    return 'Switch to $language';
+  }
+
+  @override
+  String loginDemoAs(String role) {
+    return 'Sign in as $role';
+  }
 
   @override
   String get loginSubmit => 'Sign in';

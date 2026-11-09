@@ -39,68 +39,70 @@ class NeedsYouCard extends StatelessWidget {
         : Icons.info_outline;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        Space.lg,
-        Space.sm,
-        Space.lg,
-        Space.xs,
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Corner.lg),
-        onTap: () => openAppRoute(context, need.route),
-        child: Container(
-          padding: const EdgeInsets.all(Space.md),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(Corner.lg),
-            border: Border.all(color: border, width: 1.2),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: textCol, size: 22),
-              const SizedBox(width: Space.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          bangla
-                              ? 'আপনার মনোযোগ প্রয়োজন'
-                              : 'NEEDS YOUR ATTENTION',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
+      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(Corner.lg),
+          onTap: () => openAppRoute(context, need.route),
+          child: Ink(
+            padding: const EdgeInsets.all(Space.lg),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(Corner.lg),
+              border: Border.all(color: border),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: textCol, size: 22),
+                const SizedBox(width: Space.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            bangla
+                                ? 'আপনার মনোযোগ প্রয়োজন'
+                                : 'NEEDS YOUR ATTENTION',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: textCol,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            bangla ? 'দেখুন' : 'Review',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: textCol,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 10,
                             color: textCol,
                           ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          bangla ? 'দেখুন' : 'Review',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: textCol,
-                          ),
-                        ),
-                        Icon(Icons.arrow_forward_ios, size: 10, color: textCol),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      need.text(bangla: bangla),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        need.text(bangla: bangla),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

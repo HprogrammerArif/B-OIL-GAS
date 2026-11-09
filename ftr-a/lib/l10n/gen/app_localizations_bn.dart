@@ -63,14 +63,50 @@ class AppL10nBn extends AppL10n {
   String get loginTitle => 'সাইন ইন';
 
   @override
-  String get loginSubtitle =>
-      'অ্যাপ খুলতে একটি ডেমো ভূমিকা চাপুন। কোম্পানি সাইন ইন এখন বন্ধ।';
+  String get loginSubtitle => 'কাজের ইমেইল বা কর্মী আইডি দিয়ে সাইন ইন করুন।';
+
+  @override
+  String get loginBrand => 'ওয়ানঅপস';
+
+  @override
+  String get loginWelcome => 'আবার স্বাগতম';
+
+  @override
+  String get loginEmailLabel => 'ইমেইল';
+
+  @override
+  String get loginEmailHint => 'কাজের ইমেইল বা কর্মী আইডি';
 
   @override
   String get loginIdentifierLabel => 'ইমেইল, ফোন অথবা কর্মচারী আইডি';
 
   @override
   String get loginPasswordLabel => 'পাসওয়ার্ড';
+
+  @override
+  String get loginPasswordHint => 'পাসওয়ার্ড লিখুন';
+
+  @override
+  String get loginRemember => 'আমাকে মনে রাখুন';
+
+  @override
+  String get loginOr => 'অথবা';
+
+  @override
+  String get loginLangEn => 'EN';
+
+  @override
+  String get loginLangBn => 'বাং';
+
+  @override
+  String loginLangSwitch(String language) {
+    return '$language-এ যান';
+  }
+
+  @override
+  String loginDemoAs(String role) {
+    return '$role হিসেবে সাইন ইন';
+  }
 
   @override
   String get loginSubmit => 'সাইন ইন করুন';

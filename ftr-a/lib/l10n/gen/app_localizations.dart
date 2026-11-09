@@ -202,8 +202,32 @@ abstract class AppL10n {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tap a demo role to open the app. Company sign-in is off for now.'**
+  /// **'Sign in with your work email or employee ID.'**
   String get loginSubtitle;
+
+  /// No description provided for @loginBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'OneOps'**
+  String get loginBrand;
+
+  /// No description provided for @loginWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get loginWelcome;
+
+  /// No description provided for @loginEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get loginEmailLabel;
+
+  /// No description provided for @loginEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Work email or employee ID'**
+  String get loginEmailHint;
 
   /// No description provided for @loginIdentifierLabel.
   ///
@@ -216,6 +240,48 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Password'**
   String get loginPasswordLabel;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get loginPasswordHint;
+
+  /// No description provided for @loginRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember me'**
+  String get loginRemember;
+
+  /// No description provided for @loginOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get loginOr;
+
+  /// No description provided for @loginLangEn.
+  ///
+  /// In en, this message translates to:
+  /// **'EN'**
+  String get loginLangEn;
+
+  /// No description provided for @loginLangBn.
+  ///
+  /// In en, this message translates to:
+  /// **'বাং'**
+  String get loginLangBn;
+
+  /// No description provided for @loginLangSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {language}'**
+  String loginLangSwitch(String language);
+
+  /// No description provided for @loginDemoAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as {role}'**
+  String loginDemoAs(String role);
 
   /// No description provided for @loginSubmit.
   ///

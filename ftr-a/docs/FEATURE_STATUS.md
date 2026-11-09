@@ -44,7 +44,7 @@ Legend: Done = complete in EN+BN, light+dark, all states · WIP · Todo
 
 ## BN translation review queue
 
-Review in `app_bn.arb`: previous keys plus pre-hardening `search*`, `lock*Password*`, `dbListen*`, `dbActRestore`, `attTeam*`, `flChat*`, `flPool*`, `busConductor*`, `busSwap*`, `chVoice*`, `inGps*`, `emFieldNid`, `homeFilesCount`, `homeLocksCount`, `nsWhoTitle`, `nsRouteSuggested`, `nsRouteCustom`, `nsRouteRestore`, `nsRouteCloses`, `nsRouteAdd`, `nsRouteAddHint`, `nsRouteEmpty`, `nsRouteNeedOne`, `nsRouteKept`, `nsRouteDuplicate`, `nsRouteDrag`, `nsRouteRemove`, `nsRouteFields`, `nsRouteNone`, `nsErrSignerSelf`, `nsErrSignerDup`, `nsErrSignerMissing`.
+Review in `app_bn.arb`: previous keys plus pre-hardening `search*`, `lock*Password*`, `dbListen*`, `dbActRestore`, `attTeam*`, `flChat*`, `flPool*`, `busConductor*`, `busSwap*`, `chVoice*`, `inGps*`, `emFieldNid`, `homeFilesCount`, `homeLocksCount`, `nsWhoTitle`, `nsRouteSuggested`, `nsRouteCustom`, `nsRouteRestore`, `nsRouteCloses`, `nsRouteAdd`, `nsRouteAddHint`, `nsRouteEmpty`, `nsRouteNeedOne`, `nsRouteKept`, `nsRouteDuplicate`, `nsRouteDrag`, `nsRouteRemove`, `nsRouteFields`, `nsRouteNone`, `nsErrSignerSelf`, `nsErrSignerDup`, `nsErrSignerMissing`, `loginWelcome`, `loginEmailLabel`, `loginEmailHint`, `loginPasswordHint`, `loginRemember`, `loginOr`, `loginDemoAs`, `loginSubtitle`, `loginLangEn`, `loginLangBn`, `loginLangSwitch`.
 
 ## Persona walk-through (no dead buttons)
 

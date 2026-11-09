@@ -11,6 +11,9 @@ abstract final class SecureKeys {
   static const dbKey = 'db.key';
   static const deviceId = 'device.id';
   static const biometricEnabled = 'auth.biometricEnabled';
+
+  /// Last identifier when "Remember me" is on. Never a password.
+  static const rememberedIdentifier = 'auth.rememberedIdentifier';
 }
 
 /// Thin wrapper over `flutter_secure_storage`.

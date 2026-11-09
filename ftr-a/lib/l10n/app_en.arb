@@ -20,9 +20,34 @@
   "languageEnglish": "English",
   "languageBangla": "বাংলা",
   "loginTitle": "Sign in",
-  "loginSubtitle": "Tap a demo role to open the app. Company sign-in is off for now.",
+  "loginSubtitle": "Sign in with your work email or employee ID.",
+  "loginBrand": "OneOps",
+  "loginWelcome": "Welcome back",
+  "loginEmailLabel": "Email",
+  "loginEmailHint": "Work email or employee ID",
   "loginIdentifierLabel": "Email, phone or employee ID",
   "loginPasswordLabel": "Password",
+  "loginPasswordHint": "Enter password",
+  "loginRemember": "Remember me",
+  "loginOr": "or",
+  "loginLangEn": "EN",
+  "loginLangBn": "বাং",
+  "loginLangSwitch": "Switch to {language}",
+  "@loginLangSwitch": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "loginDemoAs": "Sign in as {role}",
+  "@loginDemoAs": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "loginSubmit": "Sign in",
   "loginErrorInvalid": "The ID or password is incorrect.",
   "loginErrorLocked": "Too many attempts. Please try again in 15 minutes.",
