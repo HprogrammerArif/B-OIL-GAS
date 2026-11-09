@@ -6087,6 +6087,72 @@ class AppL10nEn extends AppL10n {
   String get chDirect => 'Message one person';
 
   @override
+  String get chNewRoom => 'New room';
+
+  @override
+  String get chNewRoomTitle => 'New leadership room';
+
+  @override
+  String get chNewRoomHint =>
+      'Name the room and pick who should be in it. You are added as admin.';
+
+  @override
+  String get chRoomName => 'Room name';
+
+  @override
+  String get chRoomNameHint => 'e.g. Weekly tank review';
+
+  @override
+  String get chRoomPurpose => 'Purpose';
+
+  @override
+  String get chRoomPurposeHint => 'Daily decisions among these leaders';
+
+  @override
+  String get chRoomLeaders => 'Leaders in this room';
+
+  @override
+  String get chRoomOpen => 'Open room';
+
+  @override
+  String get chRoomNameErr => 'Use 2–60 characters.';
+
+  @override
+  String get chRoomMembersErr => 'Pick at least one other leader.';
+
+  @override
+  String get chRoomOpened => 'Room opened.';
+
+  @override
+  String get chPeopleSearch => 'Search by name';
+
+  @override
+  String get chNoPeopleTitle => 'No people match';
+
+  @override
+  String get chNoPeople => 'Try another name.';
+
+  @override
+  String get chRemoveRoom => 'Remove this room';
+
+  @override
+  String get chRemoveRoomConfirm => 'Remove this room?';
+
+  @override
+  String get chRemoveRoomBody =>
+      'Leaders will no longer see it. Messages stay in the record.';
+
+  @override
+  String get chKeepRoom => 'Keep room';
+
+  @override
+  String get chRoomRemoved => 'Room removed.';
+
+  @override
+  String get chRoomLockedStay =>
+      'This is a standing company room. It cannot be removed.';
+
+  @override
   String get chHint => 'Write a message';
 
   @override

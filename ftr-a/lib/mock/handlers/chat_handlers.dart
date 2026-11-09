@@ -7,6 +7,18 @@ List<RouteDef> chatRoutes() => [
   RouteDef('GET', '/chat/channels', (ctx) async {
     return ok(ChatEngine.mine(ctx.store, ctx.requireAuth()));
   }, permission: ['chat:use']),
+  RouteDef('POST', '/chat/channels', (ctx) async {
+    final a = ctx.requireAuth();
+    final rec = ChatEngine.createChannel(ctx.store, a, ctx.bodyObject());
+    await ctx.store.commit();
+    return ok(ChatEngine.channelWire(ctx.store, a, rec), status: 201);
+  }, permission: ['chat:create-channel']),
+  RouteDef('DELETE', '/chat/channels/:id', (ctx) async {
+    final a = ctx.requireAuth();
+    ChatEngine.archiveChannel(ctx.store, a, ctx.params['id']!);
+    await ctx.store.commit();
+    return ok({'ok': true});
+  }, permission: ['chat:create-channel']),
   RouteDef('POST', '/chat/direct', (ctx) async {
     final a = ctx.requireAuth();
     final id = ctx.bodyObject()['userId'];

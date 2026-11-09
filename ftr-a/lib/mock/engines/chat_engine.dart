@@ -22,7 +22,7 @@ abstract final class ChatEngine {
 
   static Json requireMember(MockStore store, AuthContext a, String id) {
     final ch = channel(store, id);
-    if (ch == null) throw notFound('Conversation');
+    if (ch == null || ch['archivedAt'] != null) throw notFound('Conversation');
     if (!isMember(ch, a.user.str('id'))) throw forbidden();
     return ch;
   }
@@ -267,7 +267,8 @@ abstract final class ChatEngine {
     _ensureDefaultDirects(store, me);
     return [
       for (final ch in store.all(Col.chatChannels))
-        if (isMember(ch, me)) channelWire(store, a, ch),
+        if (ch['archivedAt'] == null && isMember(ch, me))
+          channelWire(store, a, ch),
     ]..sort((x, y) {
       final ax = (x['lastMessage'] as Json?)?['createdAt'] as String? ?? '';
       final ay = (y['lastMessage'] as Json?)?['createdAt'] as String? ?? '';
@@ -477,6 +478,105 @@ abstract final class ChatEngine {
     };
     store.put(Col.chatChannels, rec);
     return rec;
+  }
+
+  /// BR-15-18 — Chairman opens a leadership room.
+  static Json createChannel(MockStore store, AuthContext a, Json body) {
+    final name = (body['name'] as String? ?? '').trim();
+    if (name.length < 2 || name.length > 60) {
+      throw validationError('name', 'Use 2–60 characters');
+    }
+    final rawIds = body['memberUserIds'];
+    if (rawIds is! List) {
+      throw validationError('memberUserIds', 'Pick at least one other leader');
+    }
+    final others = {
+      for (final id in rawIds)
+        if (id is String && id.isNotEmpty && id != a.user['id']) id,
+    };
+    if (others.isEmpty) {
+      throw validationError('memberUserIds', 'Pick at least one other leader');
+    }
+    final n = store.all(Col.chatChannels).length + 1;
+    final slug = name
+        .toLowerCase()
+        .replaceAll(RegExp('[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    var key = slug.isEmpty ? 'room-$n' : slug;
+    var suffix = 1;
+    while (store.all(Col.chatChannels).any((c) => c['key'] == key)) {
+      suffix += 1;
+      key = '${slug.isEmpty ? 'room' : slug}-$suffix';
+    }
+    final members = <Json>[
+      {'userId': a.user.str('id'), 'isAdmin': true, 'presence': 'ONLINE'},
+      for (final id in others)
+        {'userId': id, 'isAdmin': false, 'presence': 'ONLINE'},
+    ];
+    final purpose = (body['description'] as String? ?? '').trim();
+    final rec = <String, Object?>{
+      'id': 'ch_$n',
+      'key': key,
+      'name': name,
+      'nameBn': name,
+      'description': purpose.isEmpty ? 'Leadership room' : purpose,
+      'isLocked': body['isLocked'] == true,
+      'isDirect': false,
+      'createdBy': a.user.str('id'),
+      'archivedAt': null,
+      'members': members,
+    };
+    store.put(Col.chatChannels, rec);
+    final msgN = store.all(Col.chatMessages).length + 1;
+    store.put(Col.chatMessages, {
+      'id': 'cm_$msgN',
+      'channelId': rec['id'],
+      'senderUserId': a.user['id'],
+      'type': 'TEXT',
+      'body': 'Opened this room. ${members.length} leaders are in.',
+      'createdAt': store.nowIso(),
+      'editedAt': null,
+      'deletedAt': null,
+      'pinned': false,
+      'isUrgent': false,
+      'clientMsgId': null,
+      'reactions': <Json>[],
+      'directiveId': null,
+    });
+    AuditEngine.log(
+      store,
+      action: 'CHAT_CHANNEL_CREATED',
+      entityType: 'ChatChannel',
+      actorUserId: a.user.str('id'),
+      entityId: rec.str('id'),
+    );
+    return rec;
+  }
+
+  /// BR-15-18 — Archive (soft-delete). Locked and direct rooms stay.
+  static Json archiveChannel(MockStore store, AuthContext a, String id) {
+    final ch = channel(store, id);
+    if (ch == null) throw notFound('Conversation');
+    if (!isMember(ch, a.user.str('id'))) throw forbidden();
+    if (ch['isDirect'] == true) {
+      throw policyViolation(
+        'DIRECT',
+        'Direct lines cannot be removed this way.',
+      );
+    }
+    if (ch['isLocked'] == true) {
+      throw policyViolation('LOCKED', 'This is a standing company room.');
+    }
+    ch['archivedAt'] = store.nowIso();
+    store.put(Col.chatChannels, ch);
+    AuditEngine.log(
+      store,
+      action: 'CHAT_CHANNEL_ARCHIVED',
+      entityType: 'ChatChannel',
+      actorUserId: a.user.str('id'),
+      entityId: id,
+    );
+    return ch;
   }
 
   static Json ensureReqChannel(MockStore store, String requisitionId) {

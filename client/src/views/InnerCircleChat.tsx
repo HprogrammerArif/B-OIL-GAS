@@ -5,11 +5,13 @@ import {
   Send, Paperclip, Mic, Flag, Pin, PinOff, Search, Phone, Video,
   CheckCheck, Check, Clock, ChevronLeft, MessageSquare, Users, FileText, X, Hash,
   Lock, Eye, Smile, Copy, Download, ShieldCheck, CheckCircle,
-  ArrowDown, PanelRight, SearchX,
+  ArrowDown, PanelRight, SearchX, Plus, Trash2,
   FileCheck, SlidersHorizontal, Image as ImageIcon, ExternalLink,
 } from 'lucide-react';
 import { operationsStore, useOperationsStore, type ChatMessage, type ChatMember } from '../store/operationsStore';
-import { useCurrentUser } from '../auth/session';
+import { useCurrentUser, useCan } from '../auth/session';
+import { Button, Modal } from '../components/ui';
+import CreateLeadershipRoomModal from '../components/chat/CreateLeadershipRoomModal';
 import { nextRef } from '../lib/refs';
 import { nowTime, today } from '../lib/clock';
 import { CHAIRMAN_ID, chatSelfId, dmKey } from './chat/config';
@@ -67,6 +69,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   } = useOperationsStore();
   const user = useCurrentUser();
   const canIssueDirective = !!user?.permissions.has('chat:directive');
+  const canManageRooms = useCan('chat:create-channel');
   const selfId = user ? chatSelfId(user, INNER_CIRCLE_MEMBERS) : '';
   const selfMeta = ROLE_META[role];
 
@@ -101,6 +104,8 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
   const [newMarker, setNewMarker] = useState<{ key: string; count: number } | null>(null);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [removeRoomId, setRemoveRoomId] = useState<string | null>(null);
 
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -243,10 +248,63 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
 
   const matches = (...fields: string[]) => !queryLower || fields.some((f) => f.toLowerCase().includes(queryLower));
 
-  const visibleChannels = CHANNELS.filter((c) => matches(c.name, c.description));
+  const visibleChannels = CHANNELS.filter((c) => {
+    if (c.memberIds && c.memberIds.length > 0 && !c.memberIds.includes(selfId)) {
+      return false;
+    }
+    return matches(c.name, c.description);
+  });
   const visibleMembers = members.filter((m) => matches(m.name, m.role, m.statusLabel));
   const showChannelSection = activeTabFilter !== 'direct' && visibleChannels.length > 0;
   const showDirectSection = activeTabFilter !== 'channels' && visibleMembers.length > 0;
+  const removeTarget = removeRoomId ? CHANNELS.find((c) => c.id === removeRoomId) : undefined;
+
+  const handleCreateRoom = (name: string, description: string, memberIds: string[]): 'name' | 'members' | void => {
+    const result = operationsStore.createChannel({
+      name,
+      description,
+      memberIds,
+      createdBy: selfId,
+      createdByName: selfMeta.name,
+      createdByRole: selfMeta.label,
+      createdByInitials: selfMeta.initials,
+    });
+    if ('error' in result) return result.error;
+    setActiveTarget({ type: 'channel', id: result.id });
+    setMobileShowChat(true);
+    showToast(t('Room opened.', 'রুম খোলা হয়েছে।', lang), 'success');
+  };
+
+  const requestRemoveRoom = (chId: string) => {
+    const ch = CHANNELS.find((c) => c.id === chId);
+    if (!ch) return;
+    if (ch.isLocked) {
+      showToast(
+        t('This is a standing company room. It cannot be removed.', 'এটি স্থায়ী কোম্পানি রুম। সরানো যাবে না।', lang),
+        'warn',
+      );
+      return;
+    }
+    setRemoveRoomId(chId);
+  };
+
+  const confirmRemoveRoom = () => {
+    if (!removeRoomId) return;
+    const result = operationsStore.archiveChannel(removeRoomId);
+    if (!result.ok && result.reason === 'locked') {
+      showToast(
+        t('This is a standing company room. It cannot be removed.', 'এটি স্থায়ী কোম্পানি রুম। সরানো যাবে না।', lang),
+        'warn',
+      );
+    } else if (result.ok) {
+      showToast(t('Room removed. Leaders will no longer see it.', 'রুম সরানো হয়েছে। নেতারা আর দেখবেন না।', lang), 'success');
+      if (activeTarget.type === 'channel' && activeTarget.id === removeRoomId) {
+        const next = operationsStore.getChatChannels()[0];
+        setActiveTarget(next ? { type: 'channel', id: next.id } : { type: 'channel', id: 'ch_executive' });
+      }
+    }
+    setRemoveRoomId(null);
+  };
 
   const searchHits = useMemo(() => {
     if (queryLower.length < 2) return [];
@@ -840,29 +898,56 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             <div className="ic-section-group">
               <div className="ic-section-title">
                 <span>{t('Leadership rooms', 'নেতৃত্ব রুম', lang)}</span>
-                <span className="ic-section-count">{visibleChannels.length}</span>
+                <span className="ic-section-title-end">
+                  <span className="ic-section-count">{visibleChannels.length}</span>
+                  {canManageRooms && (
+                    <button
+                      type="button"
+                      className="ic-new-room-btn"
+                      onClick={() => setShowCreateRoom(true)}
+                      title={t('New room', 'নতুন রুম', lang)}
+                      aria-label={t('New leadership room', 'নতুন নেতৃত্ব রুম', lang)}
+                    >
+                      <Plus size={13} />
+                      <span>{t('New', 'নতুন', lang)}</span>
+                    </button>
+                  )}
+                </span>
               </div>
               {visibleChannels.map((ch) => {
                 const active = activeTarget.type === 'channel' && activeTarget.id === ch.id;
                 const preview = previewOf(ch.id, true);
                 const unread = ch.unread ?? 0;
                 return (
-                  <button
-                    key={ch.id} type="button"
-                    className={`ic-list-item ${active ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''}`}
-                    aria-current={active ? 'true' : undefined}
-                    onClick={() => selectTarget({ type: 'channel', id: ch.id })}
-                  >
-                    <span className="ic-item-prefix">{ch.isLocked ? <Lock size={14} /> : <Hash size={14} />}</span>
-                    <span className="ic-item-body">
-                      <span className="ic-item-top">
-                        <span className="ic-item-title"><Highlight text={ch.name} query={query} /></span>
-                        <span className="ic-item-time">{preview.time}</span>
+                  <div key={ch.id} className="ic-list-row">
+                    <button
+                      type="button"
+                      className={`ic-list-item ${active ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''}`}
+                      aria-current={active ? 'true' : undefined}
+                      onClick={() => selectTarget({ type: 'channel', id: ch.id })}
+                    >
+                      <span className="ic-item-prefix">{ch.isLocked ? <Lock size={14} /> : <Hash size={14} />}</span>
+                      <span className="ic-item-body">
+                        <span className="ic-item-top">
+                          <span className="ic-item-title"><Highlight text={ch.name} query={query} /></span>
+                          <span className="ic-item-time">{preview.time}</span>
+                        </span>
+                        <span className="ic-item-snippet">{preview.text}</span>
                       </span>
-                      <span className="ic-item-snippet">{preview.text}</span>
-                    </span>
-                    {unread > 0 && <span className="ic-unread-pill">{unread}</span>}
-                  </button>
+                      {unread > 0 && <span className="ic-unread-pill">{unread}</span>}
+                    </button>
+                    {canManageRooms && (
+                      <button
+                        type="button"
+                        className="ic-room-overflow"
+                        title={t('Remove room', 'রুম সরান', lang)}
+                        aria-label={t(`Remove ${ch.name}`, `${ch.name} সরান`, lang)}
+                        onClick={() => requestRemoveRoom(ch.id)}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -968,6 +1053,17 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
               <Video size={14} />
               <span>{t('Video', 'ভিডিও', lang)}</span>
             </button>
+            {canManageRooms && isGroup && (
+              <button
+                type="button"
+                className="ic-btn-panel-toggle"
+                onClick={() => activeChannel && requestRemoveRoom(activeChannel.id)}
+                aria-label={t('Remove this room', 'এই রুম সরান', lang)}
+                title={t('Remove this room', 'এই রুম সরান', lang)}
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
             <button
               type="button" className={`ic-btn-panel-toggle ${showRightDrawer ? 'active' : ''}`}
               onClick={() => setShowRightDrawer(!showRightDrawer)}
@@ -1486,6 +1582,42 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
           lang={lang}
         />
       )}
+
+      {canManageRooms && (
+        <CreateLeadershipRoomModal
+          open={showCreateRoom}
+          lang={lang}
+          members={members}
+          onClose={() => setShowCreateRoom(false)}
+          onCreate={handleCreateRoom}
+        />
+      )}
+
+      <Modal
+        open={!!removeTarget}
+        onClose={() => setRemoveRoomId(null)}
+        tone="danger"
+        size="sm"
+        title={t('Remove this room?', 'এই রুম সরবেন?', lang)}
+        footer={(
+          <>
+            <Button variant="secondary" size="sm" onClick={() => setRemoveRoomId(null)}>
+              {t('Keep room', 'রুম রাখুন', lang)}
+            </Button>
+            <Button variant="danger" size="sm" onClick={confirmRemoveRoom}>
+              {t('Remove room', 'রুম সরান', lang)}
+            </Button>
+          </>
+        )}
+      >
+        <p>
+          {t(
+            `${removeTarget?.name ?? 'This room'} will leave the list. Leaders will no longer see it. Messages stay in the record.`,
+            `${removeTarget?.name ?? 'এই রুম'} তালিকা থেকে যাবে। নেতারা আর দেখবেন না। বার্তা রেকর্ডে থাকবে।`,
+            lang,
+          )}
+        </p>
+      </Modal>
     </div>
   );
 }

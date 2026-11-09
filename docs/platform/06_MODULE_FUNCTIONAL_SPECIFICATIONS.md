@@ -1618,6 +1618,7 @@ Messages: `sent → edited (editedAt) | deleted (deletedAt, tombstone)`. Directi
 | BR-15-15 | Read-receipt label: channels show "Sent" (no readers) or "Read by N"; DMs show "Delivered" or "Read". |
 | BR-15-16 | The conversation details panel shows members with presence, pinned messages and files shared in that conversation (derived from messages, not a separate vault). |
 | BR-15-17 | UI copy states "encrypted in transit / at rest" only; never "end-to-end" or "AES-256" (see BR-15-05). |
+| BR-15-18 | `chat:create-channel` (CHAIRMAN) may open a leadership room (name 2–60, ≥1 other member; caller is admin) and archive an unlocked group room. `isLocked` standing rooms and DMs cannot be archived. Archive is a soft-delete (`archivedAt`); messages stay in the record. Membership changes post a system line and are audited. |
 
 ### 14.5 Calculations
 `ackRate(directive) = |acknowledgements| / |members at issue time|`. `responseTimeP50 = median(ackAt − issuedAt)`.

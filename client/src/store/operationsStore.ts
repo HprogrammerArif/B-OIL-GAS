@@ -2,7 +2,7 @@ import { loadPersisted, savePersisted } from '../lib/persist';
 import { useState, useEffect } from 'react';
 import { AppRole, ROLE_META, SYSTEM_TODAY } from '../types';
 import { nextRef } from '../lib/refs';
-import { nowStamp } from '../lib/clock';
+import { nowStamp, nowTime } from '../lib/clock';
 import type {
   ReturnDetails,
   ParcelItem,
@@ -1855,6 +1855,9 @@ export interface ChatChannel {
   membersCount: number;
   unread?: number;
   isLocked?: boolean;
+  memberIds?: string[];
+  createdBy?: string;
+  archivedAt?: string;
 }
 
 export interface ChatMessage {
@@ -2174,7 +2177,7 @@ interface OperationsSnapshot {
   profilePrefs: UserProfilePreferences;
 }
 const PERSIST_NAME = 'operations';
-const PERSIST_VERSION = 5;
+const PERSIST_VERSION = 6;
 
 class OperationsStore {
   private licenses: LicenseCard[] = [...INITIAL_LICENSES];
@@ -2242,7 +2245,9 @@ class OperationsStore {
   getVisitors() { return this.visitors; }
   getAttendanceRoster() { return this.attendanceRoster; }
   getLeaveRequests() { return this.leaveRequests; }
-  getChatChannels() { return this.chatChannels; }
+  getChatChannels() {
+    return this.chatChannels.filter((c) => !c.archivedAt);
+  }
   getChatMembers() { return this.chatMembers; }
   getChatMessages() { return this.chatMessages; }
   getProfilePrefs() { return this.profilePrefs; }
@@ -2476,6 +2481,61 @@ class OperationsStore {
     this.notify();
   }
 
+  /** BR-15-18 — Chairman opens a leadership room with chosen leaders. */
+  createChannel(args: {
+    name: string;
+    description: string;
+    memberIds: string[];
+    createdBy: string;
+    createdByName: string;
+    createdByRole: string;
+    createdByInitials: string;
+  }): ChatChannel | { error: 'name' | 'members' } {
+    const name = args.name.trim();
+    if (name.length < 2 || name.length > 60) return { error: 'name' };
+    const others = [...new Set(args.memberIds.filter((id) => id && id !== args.createdBy))];
+    if (others.length < 1) return { error: 'members' };
+    const memberIds = [args.createdBy, ...others];
+    const id = `ch_${nextRef('ROOM', 3).replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`;
+    const channel: ChatChannel = {
+      id,
+      name,
+      description: args.description.trim() || 'Leadership room',
+      membersCount: memberIds.length,
+      memberIds,
+      createdBy: args.createdBy,
+      unread: 0,
+    };
+    this.chatChannels = [channel, ...this.chatChannels];
+    const opened: ChatMessage = {
+      id: `m_${id}_open`,
+      senderId: args.createdBy,
+      senderName: args.createdByName,
+      senderRole: args.createdByRole,
+      senderInitials: args.createdByInitials,
+      senderColor: '#A51C30',
+      content: `Opened this room. ${memberIds.length} leaders are in.`,
+      timestamp: nowTime(),
+      type: 'text',
+      isChairman: args.createdBy === 'chairman',
+      readBy: [args.createdBy],
+    };
+    this.chatMessages = { ...this.chatMessages, [id]: [opened] };
+    this.notify();
+    return channel;
+  }
+
+  /** Soft-delete. Locked standing rooms cannot be removed. */
+  archiveChannel(id: string): { ok: true } | { ok: false; reason: 'locked' | 'missing' } {
+    const ch = this.chatChannels.find((c) => c.id === id && !c.archivedAt);
+    if (!ch) return { ok: false, reason: 'missing' };
+    if (ch.isLocked) return { ok: false, reason: 'locked' };
+    const at = nowStamp();
+    this.chatChannels = this.chatChannels.map((c) => (c.id === id ? { ...c, archivedAt: at, unread: 0 } : c));
+    this.notify();
+    return { ok: true };
+  }
+
   // ── 7. Profile Preferences Actions ──
   updateProfilePrefs(updates: Partial<UserProfilePreferences>) {
     this.profilePrefs = { ...this.profilePrefs, ...updates };
@@ -2541,6 +2601,8 @@ export function useOperationsStore() {
     updateLeaveStatus: operationsStore.updateLeaveStatus.bind(operationsStore),
     markConversationRead: operationsStore.markConversationRead.bind(operationsStore),
     setChatMessages: operationsStore.setChatMessages.bind(operationsStore),
+    createChannel: operationsStore.createChannel.bind(operationsStore),
+    archiveChannel: operationsStore.archiveChannel.bind(operationsStore),
     updateProfilePrefs: operationsStore.updateProfilePrefs.bind(operationsStore),
     revokeSession: operationsStore.revokeSession.bind(operationsStore),
   };

@@ -127,6 +127,35 @@ class ChatRepository {
       throwApi(e);
     }
   }
+
+  Future<ChatChannel> createChannel({
+    required String name,
+    required List<String> memberUserIds,
+    String? description,
+  }) async {
+    try {
+      final res = await _dio.post<Object?>(
+        '/chat/channels',
+        data: {
+          'name': name,
+          if (description != null && description.isNotEmpty)
+            'description': description,
+          'memberUserIds': memberUserIds,
+        },
+      );
+      return ChatChannel.fromJson(Envelope.object(res.data));
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
+  Future<void> archiveChannel(String id) async {
+    try {
+      await _dio.delete<Object?>('/chat/channels/$id');
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
 }
 
 @Riverpod(keepAlive: true)

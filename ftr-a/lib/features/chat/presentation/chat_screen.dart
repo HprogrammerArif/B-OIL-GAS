@@ -6,9 +6,11 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/chat/data/chat_repository.dart';
 import 'package:bogcl_oneops/features/chat/domain/chat_models.dart';
 import 'package:bogcl_oneops/features/chat/presentation/chat_providers.dart';
+import 'package:bogcl_oneops/features/chat/presentation/create_channel_sheet.dart';
 import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
@@ -46,6 +48,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     _poll?.cancel();
     super.dispose();
+  }
+
+  Future<void> _newRoom() async {
+    final l10n = context.l10n;
+    final ch = await showCreateChannelSheet(context);
+    if (ch == null || !mounted) return;
+    ref.invalidate(chatChannelsProvider);
+    AppToast.show(context, l10n.chRoomOpened, tone: StatusTone.success);
+    unawaited(context.push(AppRoutes.chatThread(ch.id)));
   }
 
   Future<void> _direct() async {
@@ -194,6 +205,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final bangla = context.isBangla;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final canCreateRoom =
+        ref
+            .watch(sessionControllerProvider)
+            .value
+            ?.can('chat:create-channel') ??
+        false;
     final rows = ref.watch(chatChannelsProvider);
 
     final allChannels = rows.asData?.value ?? const <ChatChannel>[];
@@ -207,6 +224,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: Text(bangla ? 'অভ্যন্তরীণ চ্যাট' : 'Messages & Channels'),
         actions: [
+          if (canCreateRoom)
+            IconButton(
+              tooltip: l10n.chNewRoom,
+              onPressed: () => unawaited(_newRoom()),
+              icon: const Icon(Icons.group_add_outlined),
+            ),
           IconButton(
             tooltip: bangla ? 'নতুন মেসেজ' : 'New Direct Message',
             onPressed: () => unawaited(_direct()),
