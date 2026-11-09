@@ -8,6 +8,7 @@ interface PaginationProps {
   pageSize: number;
   onPageChange: (newPage: number) => void;
   lang?: Lang;
+  alwaysShow?: boolean;
 }
 
 export default function Pagination({
@@ -16,9 +17,10 @@ export default function Pagination({
   pageSize,
   onPageChange,
   lang = 'en',
+  alwaysShow = false,
 }: PaginationProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  if (totalItems <= pageSize) return null; // No need for pagination if items fit on 1 page
+  if (!alwaysShow && totalItems <= pageSize) return null;
 
   const startIdx = (currentPage - 1) * pageSize + 1;
   const endIdx = Math.min(totalItems, currentPage * pageSize);

@@ -111,12 +111,13 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  width: max-content;
+  max-width: 100%;
   background: var(--brand-slate-100);
   padding: 4px;
   border-radius: var(--radius-md);
   border: 1px solid var(--brand-slate-200);
   overflow-x: auto;
-  max-width: 100%;
 }
 .pill-tab {
   border: 1px solid transparent;

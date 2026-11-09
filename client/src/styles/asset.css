@@ -204,9 +204,11 @@
 
 /* ─── 3. EXECUTIVE MODULE NAVIGATION BAR ─────────────────────────────────── */
 .eam-nav-bar {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  width: max-content;
+  max-width: 100%;
   background: var(--brand-card-bg);
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-md);
@@ -226,6 +228,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 7px;
   padding: 8px 12px;
   border-radius: 7px;

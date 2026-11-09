@@ -1074,7 +1074,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1 1 360px;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
@@ -1240,14 +1240,15 @@
 
 /* ─── PILL TABS TOUCH-FRIENDLY HORIZONTAL SCROLL ────────────────────────────── */
 .pill-tabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 6px;
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
 }
 
 .pill-tabs::-webkit-scrollbar {
