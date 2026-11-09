@@ -15,13 +15,12 @@ interface ApprovalCardProps {
   selected: boolean;
   onToggleSelect: (id: string) => void;
   onOpen: (id: string) => void;
-  onApprove: (item: ApprovalItem) => void;
   onReturn: (item: ApprovalItem) => void;
 }
 
 export default function ApprovalCard({
   item, mode, lang, canDecide, selectable, selected,
-  onToggleSelect, onOpen, onApprove, onReturn,
+  onToggleSelect, onOpen, onReturn,
 }: ApprovalCardProps) {
   const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const minutesLeft = slaMinutesLeft(item, useNow());
@@ -108,8 +107,8 @@ export default function ApprovalCard({
               <button type="button" className="apv-btn return" onClick={() => onReturn(item)}>
                 <RotateCcw size={13} /> {t('Return', 'ফেরত', lang)}
               </button>
-              <button type="button" className="apv-btn approve" onClick={() => onApprove(item)}>
-                <Check size={14} /> {t('Approve', 'অনুমোদন', lang)}
+              <button type="button" className="apv-btn review" onClick={() => onOpen(item.id)}>
+                <Eye size={13} /> {t('View', 'দেখুন', lang)}
               </button>
             </>
           ) : (
@@ -117,7 +116,14 @@ export default function ApprovalCard({
               <Eye size={13} /> {mode === 'pending' ? t('Review', 'পর্যালোচনা', lang) : t('View record', 'বিবরণ', lang)}
             </button>
           )}
-          <ChevronRight size={16} className="apv-chevron" aria-hidden />
+          <button
+            type="button"
+            className="apv-chevron"
+            onClick={() => onOpen(item.id)}
+            aria-label={t('View', 'দেখুন', lang)}
+          >
+            <ChevronRight size={16} aria-hidden />
+          </button>
         </div>
       </div>
     </article>

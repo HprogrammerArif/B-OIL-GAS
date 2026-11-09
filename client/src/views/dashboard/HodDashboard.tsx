@@ -22,7 +22,7 @@ export default function HodDashboard({ lang, activeTab, onOpenDetailDrawer }: Da
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { requestApprove, requestReturn, modals } = useApprovalDecisions(lang, (id) => {
+  const { requestReturn, modals } = useApprovalDecisions(lang, (id) => {
     setSelectedIds((prev) => prev.filter((x) => x !== id));
   });
 
@@ -108,7 +108,6 @@ export default function HodDashboard({ lang, activeTab, onOpenDetailDrawer }: Da
               selected={selectedIds.includes(item.id)}
               onToggleSelect={toggle}
               onOpen={(id) => onOpenDetailDrawer?.(id)}
-              onApprove={requestApprove}
               onReturn={requestReturn}
             />
           ))}

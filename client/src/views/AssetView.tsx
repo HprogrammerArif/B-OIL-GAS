@@ -609,41 +609,34 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     };
   };
 
+  const hasHeaderActions =
+    roleConfig.canScanTag || roleConfig.canRequestEquipment || roleConfig.canRegisterAsset;
+
   return (
     <div className="view-container">
-      <PageHeader
-        title={
-          roleConfig.isSelfServiceOnly
-            ? t('My assigned equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
-            : t('Assets & equipment', 'যন্ত্রপাতি ও সরঞ্জাম', lang)
-        }
-        description={
-          roleConfig.isSelfServiceOnly
-            ? t('Equipment in your custody, when it needs service, and your requests.', 'আপনার হেফাজতে থাকা সরঞ্জাম, সার্ভিসের সময়সূচী এবং আপনার আবেদন।', lang)
-            : roleConfig.canAuthorizeWriteOff && !roleConfig.canRequestEquipment
-              ? t('Company register, book value, and write-offs that need your authority. Departments raise purchase requests.', 'কোম্পানির সম্পদ তালিকা, বইমূল্য, এবং যে অবলোপন আপনার অনুমোদন চায়। ক্রয়ের আবেদন বিভাগগুলো করে।', lang)
-              : t('Machines and equipment across our sites, sorted with the ones that need attention first.', 'সব সাইটের যন্ত্রপাতি ও সরঞ্জাম — যেগুলোতে আগে নজর দরকার সেগুলো শুরুতে দেখানো।', lang)
-        }
-        actions={
-          <>
-            {roleConfig.canScanTag && (
-              <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
-                {t('Scan tag', 'ট্যাগ স্ক্যান', lang)}
-              </Button>
-            )}
-            {roleConfig.canRequestEquipment && (
-              <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
-                {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
-              </Button>
-            )}
-            {roleConfig.canRegisterAsset && (
-              <Button icon={<Plus size={14} />} onClick={() => setShowRegisterModal(true)}>
-                {t('Add machine', 'নতুন মেশিন যুক্ত', lang)}
-              </Button>
-            )}
-          </>
-        }
-      />
+      {hasHeaderActions && (
+        <PageHeader
+          actions={
+            <>
+              {roleConfig.canScanTag && (
+                <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
+                  {t('Scan tag', 'ট্যাগ স্ক্যান', lang)}
+                </Button>
+              )}
+              {roleConfig.canRequestEquipment && (
+                <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
+                  {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
+                </Button>
+              )}
+              {roleConfig.canRegisterAsset && (
+                <Button icon={<Plus size={14} />} onClick={() => setShowRegisterModal(true)}>
+                  {t('Add machine', 'নতুন মেশিন যুক্ত', lang)}
+                </Button>
+              )}
+            </>
+          }
+        />
+      )}
 
       <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
         {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}

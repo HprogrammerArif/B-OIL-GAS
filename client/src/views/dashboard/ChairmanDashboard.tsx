@@ -18,7 +18,7 @@ export default function ChairmanDashboard({
   const canDecide = useCan('approvals:decide');
   const now = useNow();
   const { pending } = useMyApprovalQueue();
-  const { requestApprove, requestReturn, modals } = useApprovalDecisions(lang);
+  const { requestReturn, modals } = useApprovalDecisions(lang);
   const queue = useMemo(
     () => [...pending].sort((a, b) => slaMinutesLeft(a, now) - slaMinutesLeft(b, now)),
     [pending, now],
@@ -57,7 +57,6 @@ export default function ChairmanDashboard({
                   selected={false}
                   onToggleSelect={() => undefined}
                   onOpen={(id) => onOpenDetailDrawer?.(id)}
-                  onApprove={requestApprove}
                   onReturn={requestReturn}
                 />
               ))}

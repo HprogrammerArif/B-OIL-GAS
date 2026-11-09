@@ -10932,6 +10932,132 @@ abstract class AppL10n {
   /// **'Message one person'**
   String get chDirect;
 
+  /// No description provided for @chNewRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'New room'**
+  String get chNewRoom;
+
+  /// No description provided for @chNewRoomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New leadership room'**
+  String get chNewRoomTitle;
+
+  /// No description provided for @chNewRoomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the room and pick who should be in it. You are added as admin.'**
+  String get chNewRoomHint;
+
+  /// No description provided for @chRoomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Room name'**
+  String get chRoomName;
+
+  /// No description provided for @chRoomNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Weekly tank review'**
+  String get chRoomNameHint;
+
+  /// No description provided for @chRoomPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Purpose'**
+  String get chRoomPurpose;
+
+  /// No description provided for @chRoomPurposeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily decisions among these leaders'**
+  String get chRoomPurposeHint;
+
+  /// No description provided for @chRoomLeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaders in this room'**
+  String get chRoomLeaders;
+
+  /// No description provided for @chRoomOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open room'**
+  String get chRoomOpen;
+
+  /// No description provided for @chRoomNameErr.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 2–60 characters.'**
+  String get chRoomNameErr;
+
+  /// No description provided for @chRoomMembersErr.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one other leader.'**
+  String get chRoomMembersErr;
+
+  /// No description provided for @chRoomOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Room opened.'**
+  String get chRoomOpened;
+
+  /// No description provided for @chPeopleSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get chPeopleSearch;
+
+  /// No description provided for @chNoPeopleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No people match'**
+  String get chNoPeopleTitle;
+
+  /// No description provided for @chNoPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another name.'**
+  String get chNoPeople;
+
+  /// No description provided for @chRemoveRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this room'**
+  String get chRemoveRoom;
+
+  /// No description provided for @chRemoveRoomConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this room?'**
+  String get chRemoveRoomConfirm;
+
+  /// No description provided for @chRemoveRoomBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaders will no longer see it. Messages stay in the record.'**
+  String get chRemoveRoomBody;
+
+  /// No description provided for @chKeepRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep room'**
+  String get chKeepRoom;
+
+  /// No description provided for @chRoomRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Room removed.'**
+  String get chRoomRemoved;
+
+  /// No description provided for @chRoomLockedStay.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a standing company room. It cannot be removed.'**
+  String get chRoomLockedStay;
+
   /// No description provided for @chHint.
   ///
   /// In en, this message translates to:

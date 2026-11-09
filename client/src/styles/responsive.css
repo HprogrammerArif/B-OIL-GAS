@@ -523,7 +523,19 @@
     margin-bottom: 10px !important;
   }
 
+  .cockpit-toolbar {
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .cockpit-toolbar .cockpit-tabs-container {
+    max-width: none !important;
+  }
+
   .cockpit-tabs-container {
+    display: inline-flex !important;
+    width: max-content !important;
+    max-width: 100% !important;
     padding: 4px !important;
     gap: 6px !important;
     margin-bottom: 16px !important;

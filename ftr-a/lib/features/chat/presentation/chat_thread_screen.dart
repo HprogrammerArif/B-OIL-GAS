@@ -21,6 +21,7 @@ import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatThreadScreen extends ConsumerStatefulWidget {
   const ChatThreadScreen({required this.id, super.key});
@@ -299,7 +300,43 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     );
   }
 
-  void _showChannelInfoSheet(ChatChannel channel, bool bangla) {
+  Future<void> _archiveRoom(ChatChannel channel) async {
+    final l10n = context.l10n;
+    if (channel.isLocked || channel.isDirect) {
+      AppToast.show(context, l10n.chRoomLockedStay, tone: StatusTone.warning);
+      return;
+    }
+    final ok = await showConfirmSheet(
+      context,
+      title: l10n.chRemoveRoomConfirm,
+      message: l10n.chRemoveRoomBody,
+      confirmLabel: l10n.chRemoveRoom,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(chatRepositoryProvider).archiveChannel(channel.id);
+      if (!mounted) return;
+      ref.invalidate(chatChannelsProvider);
+      AppToast.show(context, l10n.chRoomRemoved, tone: StatusTone.success);
+      context.go(AppRoutes.chat);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        e.code == ApiErrorCode.policyViolation
+            ? l10n.chRoomLockedStay
+            : e.message,
+        tone: StatusTone.danger,
+      );
+    }
+  }
+
+  void _showChannelInfoSheet(
+    ChatChannel channel,
+    bool bangla, {
+    required bool canManageRooms,
+  }) {
     Haptics.tap();
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -428,6 +465,16 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                     },
                   ),
                 ),
+                if (canManageRooms && !channel.isDirect) ...[
+                  const SizedBox(height: Space.md),
+                  PrimaryButton.danger(
+                    label: context.l10n.chRemoveRoom,
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      unawaited(_archiveRoom(channel));
+                    },
+                  ),
+                ],
               ],
             ),
           ),
@@ -672,6 +719,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     final scheme = theme.colorScheme;
     final session = ref.watch(sessionControllerProvider).value;
     final canDir = session?.can('chat:directive-issue') ?? false;
+    final canManageRooms = session?.can('chat:create-channel') ?? false;
     final chAsync = ref.watch(chatChannelProvider(widget.id));
     final msgs = ref.watch(chatMessagesProvider(widget.id));
     final channel = chAsync.asData?.value;
@@ -691,7 +739,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
             borderRadius: BorderRadius.circular(Corner.sm),
             onTap: channel == null
                 ? null
-                : () => _showChannelInfoSheet(channel, bangla),
+                : () => _showChannelInfoSheet(
+                    channel,
+                    bangla,
+                    canManageRooms: canManageRooms,
+                  ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: Space.xs,
@@ -737,7 +789,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
               IconButton(
                 tooltip: bangla ? 'সদস্য ও তথ্য' : 'Participants & Info',
                 icon: const Icon(Icons.info_outline),
-                onPressed: () => _showChannelInfoSheet(channel, bangla),
+                onPressed: () => _showChannelInfoSheet(
+                  channel,
+                  bangla,
+                  canManageRooms: canManageRooms,
+                ),
               ),
           ],
         ),

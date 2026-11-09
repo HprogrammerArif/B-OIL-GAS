@@ -244,17 +244,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     </Button>
   ) : undefined;
 
-  const header = (
-    <PageHeader
-      title={t('Note-Sheets', 'নোট-শীট', lang)}
-      description={t(
-        'A note-sheet is the official file where a request is explained, reviewed and approved by each officer in turn.',
-        'নোট-শীট হলো দাপ্তরিক ফাইল, যেখানে একটি আবেদন ব্যাখ্যা করা হয়, এবং প্রত্যেক কর্মকর্তা ক্রমানুসারে পর্যালোচনা ও অনুমোদন করেন।',
-        lang,
-      )}
-      actions={newButton}
-    />
-  );
+  const header = newButton ? <PageHeader actions={newButton} /> : null;
 
   if (!currentFile || !officialDocData) {
     return (

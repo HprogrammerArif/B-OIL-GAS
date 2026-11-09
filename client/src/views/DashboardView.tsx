@@ -5,7 +5,7 @@ import { showToast } from '../components/ToastManager';
 import AnimatedCounter from '../components/AnimatedCounter';
 import ApprovalReviewHost from './approvals/ApprovalReviewHost';
 import { useCan } from '../auth/session';
-import { Button, PageHeader } from '../components/ui';
+import { Button } from '../components/ui';
 
 import { DASHBOARD_CONFIG, type AttentionItem } from './dashboard/config';
 import { useDashboardData } from './dashboard/useDashboardData';
@@ -68,13 +68,10 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     else if (item.view) onNavigate?.(item.view);
   };
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12
-    ? t('Good morning', 'শুভ সকাল', lang)
-    : hour < 17
-      ? t('Good afternoon', 'শুভ অপরাহ্ণ', lang)
-      : t('Good evening', 'শুভ সন্ধ্যা', lang);
-
+  const showVoiceBriefing = role === 'chairman' && canBroadcast;
+  const hasHeaderActions =
+    showVoiceBriefing || role === 'plant_gm' || role === 'employee' || role === 'driver';
+  const showTabs = tabs.length > 1;
 
   const myRequisition = data.fleet.myRequisitions[0] ?? null;
   const myRecord = data.workforce.myRecord;
@@ -83,66 +80,63 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
   return (
     <div className="view-container page-enter-active">
-      <PageHeader
-        className="dash-page-header"
-        title={greeting}
-
-
-        actions={(
-          <>
-            {role === 'chairman' && canBroadcast && (
-              <Button variant="secondary" size="sm" icon={<Mic size={13} />} onClick={() => setShowVoiceBriefingModal(true)}>
-                {t('Send voice briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
-              </Button>
-            )}
-            {role === 'plant_gm' && (
-              <Button variant="gold" size="sm" onClick={() => setShowBatchReleaseModal(true)}>
-                {t('Release bitumen batch', 'বিটুমিন ব্যাচ রিলিজ', lang)}
-              </Button>
-            )}
-            {role === 'employee' && (
-              <Button variant="gold" size="sm" icon={<QrCode size={13} />} onClick={() => setShowGatePassModal(true)}>
-                {t('Digital gate pass', 'ডিজিটাল গেট পাস', lang)}
-              </Button>
-            )}
-            {role === 'driver' && (
-              <Button
-                variant="danger"
-                size="sm"
-                disabled={driverSosSent}
-                onClick={() => {
-                  setDriverSosSent(true);
-                  showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger');
-                }}
-              >
-                {driverSosSent
-                  ? t('Alert sent', 'সংকেত পাঠানো হয়েছে', lang)
-                  : t('Emergency SOS', 'জরুরি এসওএস', lang)}
-              </Button>
-            )}
-          </>
-        )}
-      />
-
-      {tabs.length > 1 && (
+      {(showTabs || hasHeaderActions) && (
         <div className="cockpit-tabs-sticky-wrapper">
-          <div className="cockpit-tabs-container" role="tablist">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.icon}
-                <span>{t(tab.label[0], tab.label[1], lang)}</span>
-                {tab.badge !== undefined && (
-                  <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>{tab.badge}</span>
+          <div className="cockpit-toolbar">
+            {showTabs && (
+              <div className="cockpit-tabs-container" role="tablist">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    className={`cockpit-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    {tab.icon}
+                    <span>{t(tab.label[0], tab.label[1], lang)}</span>
+                    {tab.badge !== undefined && (
+                      <span className={`cockpit-tab-badge ${tab.badgeType || ''}`}>{tab.badge}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+            {hasHeaderActions && (
+              <div className="cockpit-toolbar-actions">
+                {showVoiceBriefing && (
+                  <Button variant="gold" size="sm" icon={<Mic size={13} />} onClick={() => setShowVoiceBriefingModal(true)}>
+                    {t('Send voice briefing', 'ভয়েস ব্রিফিং পাঠান', lang)}
+                  </Button>
                 )}
-              </button>
-            ))}
+                {role === 'plant_gm' && (
+                  <Button variant="gold" size="sm" onClick={() => setShowBatchReleaseModal(true)}>
+                    {t('Release bitumen batch', 'বিটুমিন ব্যাচ রিলিজ', lang)}
+                  </Button>
+                )}
+                {role === 'employee' && (
+                  <Button variant="gold" size="sm" icon={<QrCode size={13} />} onClick={() => setShowGatePassModal(true)}>
+                    {t('Digital gate pass', 'ডিজিটাল গেট পাস', lang)}
+                  </Button>
+                )}
+                {role === 'driver' && (
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    disabled={driverSosSent}
+                    onClick={() => {
+                      setDriverSosSent(true);
+                      showToast(t('Emergency alert sent to the transport desk with your last known location.', 'জরুরি সংকেত আপনার সর্বশেষ অবস্থানসহ পরিবহন ডেস্কে পাঠানো হয়েছে।', lang), 'danger');
+                    }}
+                  >
+                    {driverSosSent
+                      ? t('Alert sent', 'সংকেত পাঠানো হয়েছে', lang)
+                      : t('Emergency SOS', 'জরুরি এসওএস', lang)}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

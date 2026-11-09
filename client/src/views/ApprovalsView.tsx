@@ -336,7 +336,6 @@ export default function ApprovalsView({ lang }: ViewProps) {
                 selected={selectedIds.includes(item.id)}
                 onToggleSelect={toggleSelect}
                 onOpen={setOpenId}
-                onApprove={requestApprove}
                 onReturn={requestReturn}
               />
             ))}

@@ -6063,6 +6063,70 @@ class AppL10nBn extends AppL10n {
   String get chDirect => 'একজনকে লিখুন';
 
   @override
+  String get chNewRoom => 'নতুন রুম';
+
+  @override
+  String get chNewRoomTitle => 'নতুন নেতৃত্ব রুম';
+
+  @override
+  String get chNewRoomHint =>
+      'রুমের নাম দিন এবং কারা থাকবেন তা বেছে নিন। আপনি অ্যাডমিন হিসেবে যুক্ত থাকবেন।';
+
+  @override
+  String get chRoomName => 'রুমের নাম';
+
+  @override
+  String get chRoomNameHint => 'যেমন সাপ্তাহিক ট্যাংক পর্যালোচনা';
+
+  @override
+  String get chRoomPurpose => 'উদ্দেশ্য';
+
+  @override
+  String get chRoomPurposeHint => 'এই নেতাদের দৈনিক সিদ্ধান্ত';
+
+  @override
+  String get chRoomLeaders => 'এই রুমের নেতৃবৃন্দ';
+
+  @override
+  String get chRoomOpen => 'রুম খুলুন';
+
+  @override
+  String get chRoomNameErr => '২–৬০ অক্ষর দিন।';
+
+  @override
+  String get chRoomMembersErr => 'অন্তত আর একজন নেতা বেছে নিন।';
+
+  @override
+  String get chRoomOpened => 'রুম খোলা হয়েছে।';
+
+  @override
+  String get chPeopleSearch => 'নাম খুঁজুন';
+
+  @override
+  String get chNoPeopleTitle => 'কেউ মেলেনি';
+
+  @override
+  String get chNoPeople => 'অন্য নাম দিয়ে খুঁজুন।';
+
+  @override
+  String get chRemoveRoom => 'এই রুম সরান';
+
+  @override
+  String get chRemoveRoomConfirm => 'এই রুম সরবেন?';
+
+  @override
+  String get chRemoveRoomBody => 'নেতারা আর দেখবেন না। বার্তা রেকর্ডে থাকবে।';
+
+  @override
+  String get chKeepRoom => 'রুম রাখুন';
+
+  @override
+  String get chRoomRemoved => 'রুম সরানো হয়েছে।';
+
+  @override
+  String get chRoomLockedStay => 'এটি স্থায়ী কোম্পানি রুম। সরানো যাবে না।';
+
+  @override
   String get chHint => 'বার্তা লিখুন';
 
   @override

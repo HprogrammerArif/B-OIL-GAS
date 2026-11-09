@@ -1331,8 +1331,9 @@ Module dir `chat`. Models `ChatChannel`, `ChatMember`, `ChatMessage`, `ChatReadR
 | Method | Path | Permission | Description |
 | :--- | :--- | :--- | :--- |
 | GET | `/chat/channels` | `chat:use` | My channels (+ public channels I may join) with `unreadCount`, `lastMessage`, `members[]` (presence from Redis), `isLocked`. `?type=CHANNEL\|DIRECT`. |
-| POST | `/chat/channels` | `chat:create-channel` (CHAIRMAN, EXECUTIVE_ASSISTANT, SUPER_ADMIN) | `{ name 2–60, key? (slug), memberUserIds 1–200, isLocked?, retentionDays? }`. Direct: `POST /chat/direct { userId }` (idempotent, returns existing). |
-| GET/PATCH | `/chat/channels/{id}` | member / channel admin | Rename, lock (`isLocked` = only admins post), retention. |
+| POST | `/chat/channels` | `chat:create-channel` (CHAIRMAN, EXECUTIVE_ASSISTANT, SUPER_ADMIN) | `{ name 2–60, key? (slug), memberUserIds 1–200, isLocked?, retentionDays? }`. Caller is always a member and admin. Direct: `POST /chat/direct { userId }` (idempotent, returns existing). |
+| DELETE | `/chat/channels/{id}` | `chat:create-channel` + member | Archive (`archivedAt`). Hidden from lists. Locked standing rooms and DMs return `POLICY_VIOLATION`. |
+| GET/PATCH | `/chat/channels/{id}` | member / channel admin | Rename, lock (`isLocked` = only admins post), retention. Archived channels 404. |
 | POST/DELETE | `/chat/channels/{id}/members[/{userId}]` | channel admin | Add/remove; `PATCH …/members/{userId} { isAdmin, mutedUntil }`. System message on join/leave. |
 | GET | `/chat/channels/{id}/messages` | member | Cursor (`?before=<msgId>&limit=50`, `?pinned=true`, `?q=`); includes `sender`, `replyTo` summary, `reactions`, `readBy` count, `file` meta, `directive`. Deleted messages return `{ id, deletedAt }` tombstones. |
 | POST | `/chat/channels/{id}/messages` | member, channel not locked (or admin) | `{ clientMsgId (uuid, dedupe), type: TEXT\|VOICE\|DOCUMENT, body? (≤ 4000), fileId?, voiceDurationSec? (≤ 300), replyToId?, isUrgent? }`; `TEXT` needs body; `VOICE/DOCUMENT` need `fileId`. `isUrgent` → push to members bypassing quiet hours (NORMAL priority, not ack). Mentions `@userId` → `CHAT_MENTION`. |
