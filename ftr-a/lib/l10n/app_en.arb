@@ -578,6 +578,7 @@
   "attStatusHoliday": "Holiday",
   "attStatusWeekend": "Weekend",
   "attStatusFieldDuty": "Field duty",
+  "attStatusNotIn": "Not in yet",
   "attStatusNone": "No record",
   "attDaysTitle": "Daily record",
   "attPrevMonth": "Previous month",
@@ -3187,6 +3188,77 @@
   "attTeamEmpty": "Nobody in this scope today.",
   "attTeamNothing": "Nothing for you to do.",
   "attTeamReviewHint": "Open regularisation or leave it.",
+  "attRosterNoneIn": "{notIn, plural, =1{1 person is not in yet.} other{{notIn} people are not in yet.}} {leave, plural, =0{Nothing for you to do.} other{{leave} are on leave. Nothing for you to do.}}",
+  "@attRosterNoneIn": {
+    "placeholders": {
+      "notIn": { "type": "int" },
+      "leave": { "type": "int" }
+    }
+  },
+  "attRosterLate": "{present} of {total} are in. {late, plural, =1{1 is late.} other{{late} are late.}} {notIn, plural, =0{Nothing for you to do.} other{{notIn} are not in yet.}}",
+  "@attRosterLate": {
+    "placeholders": {
+      "present": { "type": "int" },
+      "total": { "type": "int" },
+      "late": { "type": "int" },
+      "notIn": { "type": "int" }
+    }
+  },
+  "attRosterReview": "{present} of {total} are in. {review, plural, =1{1 check-in is outside the gate. Open it.} other{{review} check-ins are outside the gate. Open one.}}",
+  "@attRosterReview": {
+    "placeholders": {
+      "present": { "type": "int" },
+      "total": { "type": "int" },
+      "review": { "type": "int" }
+    }
+  },
+  "attRosterIn": "{present} of {total} are in. {notIn, plural, =0{Nothing for you to do.} other{{notIn} are not in yet.}}",
+  "@attRosterIn": {
+    "placeholders": {
+      "present": { "type": "int" },
+      "total": { "type": "int" },
+      "notIn": { "type": "int" }
+    }
+  },
+  "attRosterAll": "All {count}",
+  "@attRosterAll": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterInCount": "In {count}",
+  "@attRosterInCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterNotInCount": "Not in yet {count}",
+  "@attRosterNotInCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterLeaveCount": "On leave {count}",
+  "@attRosterLeaveCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterReviewCount": "To review {count}",
+  "@attRosterReviewCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterAbsentCount": "Absent {count}",
+  "@attRosterAbsentCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "attRosterRole": "{job} · {site}",
+  "@attRosterRole": {
+    "placeholders": {
+      "job": { "type": "String" },
+      "site": { "type": "String" }
+    }
+  },
+  "attRosterInAt": "In at {time}",
+  "@attRosterInAt": {
+    "placeholders": { "time": { "type": "String" } }
+  },
+  "attRosterOutside": "Checked in {distance} m outside the gate.",
+  "@attRosterOutside": {
+    "placeholders": { "distance": { "type": "int" } }
+  },
   "approvalRejectExplain": "Write one sentence the requester will see on the file and in Inbox.",
   "approvalRejectionSeen": "Why it was turned down",
   "flChat": "Trip chat",

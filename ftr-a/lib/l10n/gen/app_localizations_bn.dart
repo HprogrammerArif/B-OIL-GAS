@@ -1140,6 +1140,9 @@ class AppL10nBn extends AppL10n {
   String get attStatusFieldDuty => 'মাঠ দায়িত্ব';
 
   @override
+  String get attStatusNotIn => 'এখনও আসেননি';
+
+  @override
   String get attStatusNone => 'রেকর্ড নেই';
 
   @override
@@ -5967,6 +5970,107 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get attTeamReviewHint => 'নিয়মিতকরণ খুলুন, অথবা কিছু করবেন না।';
+
+  @override
+  String attRosterNoneIn(int notIn, int leave) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn জন এখনও আসেননি।',
+      one: '১ জন এখনও আসেননি।',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      leave,
+      locale: localeName,
+      other: '$leave জন ছুটিতে। আপনার করার কিছু নেই।',
+      zero: 'আপনার করার কিছু নেই।',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String attRosterLate(int present, int total, int late, int notIn) {
+    String _temp0 = intl.Intl.pluralLogic(
+      late,
+      locale: localeName,
+      other: '$late জন দেরিতে।',
+      one: '১ জন দেরিতে।',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn জন এখনও আসেননি।',
+      zero: 'আপনার করার কিছু নেই।',
+    );
+    return '$total জনের মধ্যে $present জন হাজির। $_temp0 $_temp1';
+  }
+
+  @override
+  String attRosterReview(int present, int total, int review) {
+    String _temp0 = intl.Intl.pluralLogic(
+      review,
+      locale: localeName,
+      other: '$review জনের চেক-ইন গেটের বাইরে। একটি খুলুন।',
+      one: '১ জনের চেক-ইন গেটের বাইরে। এটি খুলুন।',
+    );
+    return '$total জনের মধ্যে $present জন হাজির। $_temp0';
+  }
+
+  @override
+  String attRosterIn(int present, int total, int notIn) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn জন এখনও আসেননি।',
+      zero: 'আপনার করার কিছু নেই।',
+    );
+    return '$total জনের মধ্যে $present জন হাজির। $_temp0';
+  }
+
+  @override
+  String attRosterAll(int count) {
+    return 'সব $count';
+  }
+
+  @override
+  String attRosterInCount(int count) {
+    return 'হাজির $count';
+  }
+
+  @override
+  String attRosterNotInCount(int count) {
+    return 'এখনও আসেননি $count';
+  }
+
+  @override
+  String attRosterLeaveCount(int count) {
+    return 'ছুটিতে $count';
+  }
+
+  @override
+  String attRosterReviewCount(int count) {
+    return 'দেখতে হবে $count';
+  }
+
+  @override
+  String attRosterAbsentCount(int count) {
+    return 'অনুপস্থিত $count';
+  }
+
+  @override
+  String attRosterRole(String job, String site) {
+    return '$job · $site';
+  }
+
+  @override
+  String attRosterInAt(String time) {
+    return 'প্রবেশ $time';
+  }
+
+  @override
+  String attRosterOutside(int distance) {
+    return 'গেটের $distance মিটার বাইরে থেকে চেক-ইন।';
+  }
 
   @override
   String get approvalRejectExplain =>

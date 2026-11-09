@@ -2047,6 +2047,12 @@ abstract class AppL10n {
   /// **'Field duty'**
   String get attStatusFieldDuty;
 
+  /// No description provided for @attStatusNotIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in yet'**
+  String get attStatusNotIn;
+
   /// No description provided for @attStatusNone.
   ///
   /// In en, this message translates to:
@@ -10865,6 +10871,84 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Open regularisation or leave it.'**
   String get attTeamReviewHint;
+
+  /// No description provided for @attRosterNoneIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{notIn, plural, =1{1 person is not in yet.} other{{notIn} people are not in yet.}} {leave, plural, =0{Nothing for you to do.} other{{leave} are on leave. Nothing for you to do.}}'**
+  String attRosterNoneIn(int notIn, int leave);
+
+  /// No description provided for @attRosterLate.
+  ///
+  /// In en, this message translates to:
+  /// **'{present} of {total} are in. {late, plural, =1{1 is late.} other{{late} are late.}} {notIn, plural, =0{Nothing for you to do.} other{{notIn} are not in yet.}}'**
+  String attRosterLate(int present, int total, int late, int notIn);
+
+  /// No description provided for @attRosterReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{present} of {total} are in. {review, plural, =1{1 check-in is outside the gate. Open it.} other{{review} check-ins are outside the gate. Open one.}}'**
+  String attRosterReview(int present, int total, int review);
+
+  /// No description provided for @attRosterIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{present} of {total} are in. {notIn, plural, =0{Nothing for you to do.} other{{notIn} are not in yet.}}'**
+  String attRosterIn(int present, int total, int notIn);
+
+  /// No description provided for @attRosterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String attRosterAll(int count);
+
+  /// No description provided for @attRosterInCount.
+  ///
+  /// In en, this message translates to:
+  /// **'In {count}'**
+  String attRosterInCount(int count);
+
+  /// No description provided for @attRosterNotInCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in yet {count}'**
+  String attRosterNotInCount(int count);
+
+  /// No description provided for @attRosterLeaveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave {count}'**
+  String attRosterLeaveCount(int count);
+
+  /// No description provided for @attRosterReviewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'To review {count}'**
+  String attRosterReviewCount(int count);
+
+  /// No description provided for @attRosterAbsentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent {count}'**
+  String attRosterAbsentCount(int count);
+
+  /// No description provided for @attRosterRole.
+  ///
+  /// In en, this message translates to:
+  /// **'{job} · {site}'**
+  String attRosterRole(String job, String site);
+
+  /// No description provided for @attRosterInAt.
+  ///
+  /// In en, this message translates to:
+  /// **'In at {time}'**
+  String attRosterInAt(String time);
+
+  /// No description provided for @attRosterOutside.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked in {distance} m outside the gate.'**
+  String attRosterOutside(int distance);
 
   /// No description provided for @approvalRejectExplain.
   ///

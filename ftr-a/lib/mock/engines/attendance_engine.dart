@@ -349,6 +349,10 @@ abstract final class AttendanceEngine {
         day['status'] = 'FIELD_DUTY';
       } else if (date.compareTo(today) < 0) {
         day['status'] = 'ABSENT';
+      } else if (date == today) {
+        final start = WorkCalendar.atTime(date, shift.str('startTime'));
+        final cutoff = start.add(const Duration(hours: 2));
+        day['status'] = now.isBefore(cutoff) ? 'NOT_IN' : 'ABSENT';
       }
       return day;
     }
@@ -618,6 +622,11 @@ abstract final class AttendanceEngine {
         continue;
       }
       final day = computeDay(store, e, date);
+      final punches = punchesOn(store, e.str('id'), date);
+      int? distanceM;
+      for (final p in punches) {
+        if (p['type'] == 'IN') distanceM = p.intOrNull('distanceM');
+      }
       final pending = store
           .all(Col.regularisations)
           .where(
@@ -627,14 +636,26 @@ abstract final class AttendanceEngine {
                 r['status'] == 'PENDING',
           )
           .firstOrNull;
+      final designation = e.obj('designation');
+      final department = e.obj('department');
+      final site = e.obj('site');
       rows.add({
         'employeeId': e['id'],
         'empCode': e['empCode'],
         'name': e['fullName'],
         'nameBn': e['fullNameBn'] ?? e['fullName'],
+        'designation': designation.str('title'),
+        'designationBn':
+            designation.strOrNull('titleBn') ?? designation.str('title'),
+        'department': department.str('name'),
+        'departmentBn':
+            department.strOrNull('nameBn') ?? department.str('name'),
+        'siteName': site.str('name'),
+        'siteNameBn': site.strOrNull('nameBn') ?? site.str('name'),
         'status': day['status'],
         'firstInAt': day['firstInAt'],
         'lateMinutes': day['lateMinutes'],
+        'distanceM': distanceM,
         'needsReview': day.obj('flags')['pendingReview'] == true,
         'regularisationId': pending?['id'],
         'workflowInstanceId': pending?['workflowInstanceId'],
@@ -642,29 +663,36 @@ abstract final class AttendanceEngine {
     }
     var present = 0;
     var late = 0;
+    var notIn = 0;
     var onLeave = 0;
+    var absent = 0;
     var review = 0;
     for (final r in rows) {
       final st = r['status'];
+      final reviewing = r['needsReview'] == true;
       if (st == 'LATE') late++;
-      if (st == 'ON_LEAVE') onLeave++;
-      if (const {
-        'PRESENT',
-        'LATE',
-        'EARLY_LEAVE',
-        'HALF_DAY',
-        'FIELD_DUTY',
-      }.contains(st)) {
+      if (reviewing) {
+        review++;
+        continue;
+      }
+      if (st == 'ON_LEAVE') {
+        onLeave++;
+      } else if (st == 'NOT_IN') {
+        notIn++;
+      } else if (st == 'ABSENT') {
+        absent++;
+      } else if (_worked.contains(st)) {
         present++;
       }
-      if (r['needsReview'] == true) review++;
     }
     return {
       'date': date,
       'kpis': {
         'present': present,
         'late': late,
+        'notIn': notIn,
         'onLeave': onLeave,
+        'absent': absent,
         'toReview': review,
         'headcount': rows.length,
       },

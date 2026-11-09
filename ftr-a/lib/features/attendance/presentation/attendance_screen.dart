@@ -36,9 +36,9 @@ String _monthKey(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
 
 /// Unified Daily Attendance & Leave Screen (MOD-10):
-/// Tab 1: My Shift & Punch (Console + GeofenceMiniMap + Real Hardware GPS Verification)
-/// Tab 2: My Leave (Balances + Leave Requests + 1-Tap Apply)
-/// Tab 3: Team Roster & Leave (Filterable Roster + 1-Tap Outside Check-In Confirmation)
+/// Tab 1: My Shift & Punch
+/// Tab 2: My Leave
+/// Tab 3: Team roster — who is in, who is not, and what needs a look
 class AttendanceScreen extends ConsumerStatefulWidget {
   const AttendanceScreen({super.key});
 
@@ -51,7 +51,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   int _selectedTab = 0;
   late String _month = _monthKey(Dhaka.today());
   _Phase _phase = _Phase.idle;
-  bool _supervisorConfirmedLocally = false;
+  final bool _supervisorConfirmedLocally = false;
   bool _gpsHardwareReady = true;
   double _lastAccuracyM = 5.8;
 
@@ -358,64 +358,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     if (!canPunch && isSupervisor) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(
-            bangla
-                ? 'কোম্পানি হাজিরা ও রোস্টার তদারকি'
-                : 'Company Attendance & Roster Oversight',
-          ),
+          title: Text(context.l10n.attTitle),
           actions: const [AppBarActions()],
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              margin: const EdgeInsets.fromLTRB(
-                Space.lg,
-                Space.sm,
-                Space.lg,
-                Space.xs,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: Space.md,
-                vertical: Space.sm,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.teal.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(Corner.md),
-                border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.insights_rounded,
-                    size: 18,
-                    color: Colors.teal.shade700,
-                  ),
-                  const SizedBox(width: Space.xs),
-                  Expanded(
-                    child: Text(
-                      bangla
-                          ? 'বারিধারা প্রধান কার্যালয় ও কেরানীগঞ্জ রিফাইনারি প্ল্যান্টের সার্বিক উপস্থিতি ও ছুটি তদারকি।'
-                          : 'Executive oversight of live shift attendance, field duty, and leave across Baridhara HQ & Keraniganj Refinery.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.teal.shade800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: _TeamRosterTab(
-                onConfirmOutside: () {
-                  setState(() => _supervisorConfirmedLocally = true);
-                },
-              ),
-            ),
-          ],
-        ),
+        body: const _TeamRosterTab(),
       );
     }
 
@@ -557,11 +503,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               Expanded(
                 child: switch (_selectedTab) {
                   1 => const MyLeaveView(),
-                  2 => _TeamRosterTab(
-                    onConfirmOutside: () {
-                      setState(() => _supervisorConfirmedLocally = true);
-                    },
-                  ),
+                  2 => const _TeamRosterTab(),
                   _ => RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView(
@@ -1155,288 +1097,279 @@ class _LocationEnableSheet extends StatelessWidget {
 }
 
 class _TeamRosterTab extends ConsumerStatefulWidget {
-  const _TeamRosterTab({required this.onConfirmOutside});
-
-  final VoidCallback onConfirmOutside;
+  const _TeamRosterTab();
 
   @override
   ConsumerState<_TeamRosterTab> createState() => _TeamRosterTabState();
 }
 
+const _inStatuses = {
+  'PRESENT',
+  'LATE',
+  'EARLY_LEAVE',
+  'HALF_DAY',
+  'FIELD_DUTY',
+};
+
 class _TeamRosterTabState extends ConsumerState<_TeamRosterTab> {
   String _filter = 'ALL';
-  final Set<String> _locallyConfirmed = {};
+
+  bool _inBucket(TeamRosterRow r) =>
+      !r.needsReview && _inStatuses.contains(r.status);
 
   @override
   Widget build(BuildContext context) {
-    final bangla = context.isBangla;
+    final l10n = context.l10n;
+    final lang = Localizations.localeOf(context).languageCode;
+    final bangla = lang == 'bn';
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final async = ref.watch(teamAttendanceProvider);
-    final team = async.asData?.value;
 
-    if (team == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) =>
+          ErrorState(onRetry: () => ref.invalidate(teamAttendanceProvider)),
+      data: (team) {
+        if (team == null) {
+          return EmptyState(
+            icon: Icons.people_outline,
+            title: l10n.attTeamEmpty,
+            message: l10n.attTeamNothing,
+          );
+        }
+        final roster = [...team.roster]..sort(_rank);
+        final inCount = roster.where(_inBucket).length;
+        final notIn = roster
+            .where((r) => !r.needsReview && r.status == 'NOT_IN')
+            .length;
+        final onLeave = roster
+            .where((r) => !r.needsReview && r.status == 'ON_LEAVE')
+            .length;
+        final absent = roster
+            .where((r) => !r.needsReview && r.status == 'ABSENT')
+            .length;
+        final review = roster.where((r) => r.needsReview).length;
+        final late = roster.where((r) => r.status == 'LATE').length;
+        final filtered = roster.where(_matches).toList();
+        final chips = <(String, String)>[
+          ('ALL', _digits(l10n.attRosterAll(roster.length), lang)),
+          if (inCount > 0 || _filter == 'IN')
+            ('IN', _digits(l10n.attRosterInCount(inCount), lang)),
+          if (notIn > 0 || _filter == 'NOT_IN')
+            ('NOT_IN', _digits(l10n.attRosterNotInCount(notIn), lang)),
+          if (onLeave > 0 || _filter == 'LEAVE')
+            ('LEAVE', _digits(l10n.attRosterLeaveCount(onLeave), lang)),
+          if (review > 0 || _filter == 'REVIEW')
+            ('REVIEW', _digits(l10n.attRosterReviewCount(review), lang)),
+          if (absent > 0 || _filter == 'ABSENT')
+            ('ABSENT', _digits(l10n.attRosterAbsentCount(absent), lang)),
+        ];
 
-    final roster = team.roster;
-    final filtered = roster.where((r) {
-      if (_filter == 'ON_DUTY') {
-        return r.status == 'PRESENT' || r.status == 'LATE';
-      }
-      if (_filter == 'OUTSIDE') {
-        return r.needsReview;
-      }
-      if (_filter == 'LATE') {
-        return r.status == 'LATE';
-      }
-      if (_filter == 'LEAVE') {
-        return r.status == 'ON_LEAVE' || r.status == 'ABSENT';
-      }
-      return true;
-    }).toList();
-
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(teamAttendanceProvider),
-      child: ListView(
-        padding: const EdgeInsets.all(Space.lg),
-        children: [
-          // 4 Team KPIs
-          Row(
-            children: [
-              _kpiCell(
-                title: bangla ? 'উপস্থিত' : 'On Site',
-                val: '${team.present}',
-                color: Colors.green,
-                theme: theme,
-              ),
-              const SizedBox(width: Space.xs),
-              _kpiCell(
-                title: bangla ? 'দেরিতে' : 'Late',
-                val: '${team.late}',
-                color: Colors.orange,
-                theme: theme,
-              ),
-              const SizedBox(width: Space.xs),
-              _kpiCell(
-                title: bangla ? 'অনুমোদন প্রয়োজন' : 'Outside GPS',
-                val: '${team.toReview}',
-                color: const Color(0xFF7E22CE),
-                theme: theme,
-              ),
-              const SizedBox(width: Space.xs),
-              _kpiCell(
-                title: bangla ? 'ছুটিতে' : 'On Leave',
-                val: '${team.onLeave}',
-                color: Colors.blueGrey,
-                theme: theme,
-              ),
-            ],
-          ),
-          const SizedBox(height: Space.md),
-
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _filterChip(
-                  'ALL',
-                  bangla ? 'সকল (${roster.length})' : 'All (${roster.length})',
-                ),
-                const SizedBox(width: Space.xs),
-                _filterChip('ON_DUTY', bangla ? 'কর্মরত' : 'On Duty'),
-                const SizedBox(width: Space.xs),
-                _filterChip('OUTSIDE', bangla ? 'বাইরে চেক-ইন' : 'Outside GPS'),
-                const SizedBox(width: Space.xs),
-                _filterChip('LATE', bangla ? 'দেরিতে' : 'Late'),
-                const SizedBox(width: Space.xs),
-                _filterChip('LEAVE', bangla ? 'ছুটি / অনুপস্থিত' : 'On Leave'),
-              ],
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(teamAttendanceProvider),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              Space.lg,
+              Space.md,
+              Space.lg,
+              Space.xxxl,
             ),
-          ),
-          const SizedBox(height: Space.md),
-
-          // Staff Roster
-          if (filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.xxxl),
-              child: EmptyState(
-                icon: Icons.people_outline,
-                title: bangla
-                    ? 'কোন কর্মী পাওয়া যায়নি'
-                    : 'No staff in this view',
-                message: '',
-              ),
-            )
-          else
-            for (final r in filtered) ...[
-              Container(
-                padding: const EdgeInsets.all(Space.md),
-                decoration: BoxDecoration(
-                  color: scheme.surface,
-                  borderRadius: BorderRadius.circular(Corner.lg),
-                  border: Border.all(
-                    color:
-                        r.needsReview &&
-                            !_locallyConfirmed.contains(r.employeeId)
-                        ? const Color(0xFFC084FC)
-                        : scheme.outlineVariant.withValues(alpha: 0.6),
-                  ),
+            children: [
+              Text(
+                _verdict(
+                  l10n,
+                  lang,
+                  total: roster.length,
+                  present: inCount,
+                  notIn: notIn,
+                  onLeave: onLeave,
+                  late: late,
+                  review: review,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                style: theme.textTheme.bodyLarge,
+              ),
+              const SizedBox(height: Space.md),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.teal.shade700,
-                          child: Text(
-                            r.name.isNotEmpty ? r.name[0] : 'E',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: Space.sm),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                bangla ? r.nameBn : r.name,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                '${r.empCode} · ${r.status}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (r.needsReview &&
-                            !_locallyConfirmed.contains(r.employeeId))
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF3E8FF),
-                              borderRadius: BorderRadius.circular(Corner.sm),
-                            ),
-                            child: const Text(
-                              'OUTSIDE GEOFENCE',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF7E22CE),
-                              ),
-                            ),
-                          )
-                        else
-                          StatusPill(
-                            label: r.status,
-                            tone: r.status == 'PRESENT'
-                                ? StatusTone.success
-                                : (r.status == 'LATE'
-                                      ? StatusTone.warning
-                                      : StatusTone.info),
-                          ),
-                      ],
-                    ),
-                    if (r.needsReview &&
-                        !_locallyConfirmed.contains(r.employeeId)) ...[
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        bangla
-                            ? 'কর্মী ৪.২ কিমি দূর থেকে চেক-ইন করেছেন (কারণ: ক্লায়েন্ট ভিজিট)।'
-                            : 'Employee checked in 4.2 km from gate (Reason: Client visit).',
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          color: Color(0xFF6B21A8),
-                        ),
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: FilledButton.tonalIcon(
-                          style: FilledButton.styleFrom(
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          icon: const Icon(Icons.check, size: 16),
-                          label: Text(
-                            bangla ? 'চেক-ইন অনুমোদন করুন' : 'Confirm Check-In',
-                          ),
-                          onPressed: () {
-                            Haptics.tap();
-                            setState(() => _locallyConfirmed.add(r.employeeId));
-                            widget.onConfirmOutside();
-                            AppToast.show(
-                              context,
-                              bangla
-                                  ? 'চেক-ইন নিশ্চিত করা হয়েছে'
-                                  : 'Outside check-in confirmed successfully',
-                              tone: StatusTone.success,
-                            );
-                          },
-                        ),
-                      ),
+                    for (var i = 0; i < chips.length; i++) ...[
+                      if (i > 0) const SizedBox(width: Space.xs),
+                      _filterChip(chips[i].$1, chips[i].$2),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(height: Space.sm),
+              const SizedBox(height: Space.md),
+              if (filtered.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.xxl),
+                  child: EmptyState(
+                    icon: Icons.people_outline,
+                    title: l10n.attTeamEmpty,
+                    message: l10n.attTeamNothing,
+                  ),
+                )
+              else
+                for (final r in filtered) ...[
+                  _person(context, r, bangla: bangla, lang: lang, l10n: l10n),
+                  const SizedBox(height: Space.sm),
+                ],
             ],
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _kpiCell({
-    required String title,
-    required String val,
-    required Color color,
-    required ThemeData theme,
+  bool _matches(TeamRosterRow r) => switch (_filter) {
+    'IN' => _inBucket(r),
+    'NOT_IN' => !r.needsReview && r.status == 'NOT_IN',
+    'LEAVE' => !r.needsReview && r.status == 'ON_LEAVE',
+    'REVIEW' => r.needsReview,
+    'ABSENT' => !r.needsReview && r.status == 'ABSENT',
+    _ => true,
+  };
+
+  int _rank(TeamRosterRow a, TeamRosterRow b) {
+    int score(TeamRosterRow r) {
+      if (r.needsReview) return 0;
+      if (r.status == 'LATE') return 1;
+      if (r.status == 'ABSENT') return 2;
+      if (r.status == 'NOT_IN') return 3;
+      if (r.status == 'ON_LEAVE') return 4;
+      return 5;
+    }
+
+    final byScore = score(a).compareTo(score(b));
+    if (byScore != 0) return byScore;
+    return a.name.compareTo(b.name);
+  }
+
+  String _verdict(
+    AppL10n l10n,
+    String lang, {
+    required int total,
+    required int present,
+    required int notIn,
+    required int onLeave,
+    required int late,
+    required int review,
   }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: Space.sm,
-          horizontal: Space.xs,
-        ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(Corner.md),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Text(
-              val,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: color,
+    final text = review > 0
+        ? l10n.attRosterReview(present, total, review)
+        : late > 0
+        ? l10n.attRosterLate(present, total, late, notIn)
+        : present == 0
+        ? l10n.attRosterNoneIn(notIn, onLeave)
+        : l10n.attRosterIn(present, total, notIn);
+    return _digits(text, lang);
+  }
+
+  String _digits(String text, String lang) =>
+      lang == 'bn' ? toBengaliDigits(text) : text;
+
+  Widget _person(
+    BuildContext context,
+    TeamRosterRow r, {
+    required bool bangla,
+    required String lang,
+    required AppL10n l10n,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final name = bangla ? r.nameBn : r.name;
+    final job = bangla
+        ? (r.designationBn.isEmpty ? r.designation : r.designationBn)
+        : r.designation;
+    final site = bangla
+        ? (r.siteNameBn.isEmpty ? r.siteName : r.siteNameBn)
+        : r.siteName;
+    final initial = name.isNotEmpty ? name[0] : '?';
+    final parsed = r.firstInAt == null ? null : DateTime.tryParse(r.firstInAt!);
+    final inAt = parsed == null
+        ? null
+        : _digits(l10n.attRosterInAt(DateFmt.time(parsed, lang)), lang);
+    final outside = r.needsReview && r.distanceM != null
+        ? _digits(l10n.attRosterOutside(r.distanceM!), lang)
+        : null;
+    final approvalId = r.workflowInstanceId;
+    final openable = approvalId != null && approvalId.isNotEmpty;
+    final role = job.isEmpty
+        ? site
+        : site.isEmpty
+        ? job
+        : l10n.attRosterRole(job, site);
+
+    return Material(
+      color: scheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Corner.lg),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: openable
+            ? () {
+                Haptics.tap();
+                unawaited(context.push(AppRoutes.approvalDetail(approvalId)));
+              }
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: scheme.primaryContainer,
+                foregroundColor: scheme.onPrimaryContainer,
+                child: Text(initial),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 10,
-                color: theme.colorScheme.onSurfaceVariant,
+              const SizedBox(width: Space.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (role.isNotEmpty)
+                      Text(
+                        role,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    if (inAt != null)
+                      Text(
+                        inAt,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    if (outside != null) ...[
+                      const SizedBox(height: Space.xs),
+                      Text(outside, style: theme.textTheme.bodySmall),
+                    ],
+                  ],
+                ),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-            ),
-          ],
+              const SizedBox(width: Space.sm),
+              Flexible(
+                child: StatusPill(
+                  label: dayStatusLabel(l10n, r.dayStatus),
+                  tone: r.needsReview
+                      ? StatusTone.warning
+                      : dayStatusTone(r.dayStatus),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

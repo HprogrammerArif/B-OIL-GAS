@@ -1143,6 +1143,9 @@ class AppL10nEn extends AppL10n {
   String get attStatusFieldDuty => 'Field duty';
 
   @override
+  String get attStatusNotIn => 'Not in yet';
+
+  @override
   String get attStatusNone => 'No record';
 
   @override
@@ -5992,6 +5995,107 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get attTeamReviewHint => 'Open regularisation or leave it.';
+
+  @override
+  String attRosterNoneIn(int notIn, int leave) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn people are not in yet.',
+      one: '1 person is not in yet.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      leave,
+      locale: localeName,
+      other: '$leave are on leave. Nothing for you to do.',
+      zero: 'Nothing for you to do.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String attRosterLate(int present, int total, int late, int notIn) {
+    String _temp0 = intl.Intl.pluralLogic(
+      late,
+      locale: localeName,
+      other: '$late are late.',
+      one: '1 is late.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn are not in yet.',
+      zero: 'Nothing for you to do.',
+    );
+    return '$present of $total are in. $_temp0 $_temp1';
+  }
+
+  @override
+  String attRosterReview(int present, int total, int review) {
+    String _temp0 = intl.Intl.pluralLogic(
+      review,
+      locale: localeName,
+      other: '$review check-ins are outside the gate. Open one.',
+      one: '1 check-in is outside the gate. Open it.',
+    );
+    return '$present of $total are in. $_temp0';
+  }
+
+  @override
+  String attRosterIn(int present, int total, int notIn) {
+    String _temp0 = intl.Intl.pluralLogic(
+      notIn,
+      locale: localeName,
+      other: '$notIn are not in yet.',
+      zero: 'Nothing for you to do.',
+    );
+    return '$present of $total are in. $_temp0';
+  }
+
+  @override
+  String attRosterAll(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String attRosterInCount(int count) {
+    return 'In $count';
+  }
+
+  @override
+  String attRosterNotInCount(int count) {
+    return 'Not in yet $count';
+  }
+
+  @override
+  String attRosterLeaveCount(int count) {
+    return 'On leave $count';
+  }
+
+  @override
+  String attRosterReviewCount(int count) {
+    return 'To review $count';
+  }
+
+  @override
+  String attRosterAbsentCount(int count) {
+    return 'Absent $count';
+  }
+
+  @override
+  String attRosterRole(String job, String site) {
+    return '$job · $site';
+  }
+
+  @override
+  String attRosterInAt(String time) {
+    return 'In at $time';
+  }
+
+  @override
+  String attRosterOutside(int distance) {
+    return 'Checked in $distance m outside the gate.';
+  }
 
   @override
   String get approvalRejectExplain =>

@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/mock/engines/attendance_engine.dart';
 import 'package:bogcl_oneops/mock/engines/chat_engine.dart';
 import 'package:bogcl_oneops/mock/engines/licence_engine.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
@@ -135,16 +136,23 @@ abstract final class DashboardEngine {
 
   static int _punchedToday(MockStore store) {
     final day = _today();
-    final seen = <String>{};
-    for (final p in store.all(Col.punches)) {
-      final at = p.strOrNull('punchedAt') ?? '';
-      if (!at.startsWith(day)) continue;
-      seen.add(p.str('employeeId'));
+    var n = 0;
+    for (final e in store.all(Col.employees)) {
+      if (e['status'] == 'OFFBOARDED') continue;
+      final computed = AttendanceEngine.computeDay(store, e, day);
+      if (computed.obj('flags')['pendingReview'] == true) continue;
+      final st = computed.strOrNull('status');
+      if (const {
+        'PRESENT',
+        'LATE',
+        'EARLY_LEAVE',
+        'HALF_DAY',
+        'FIELD_DUTY',
+      }.contains(st)) {
+        n++;
+      }
     }
-    if (seen.isNotEmpty) return seen.length;
-    final active = _activeStaff(store);
-    final leave = _onLeave(store);
-    return (active - leave).clamp(1, 9999);
+    return n;
   }
 
   static int _openExits(MockStore store) =>
