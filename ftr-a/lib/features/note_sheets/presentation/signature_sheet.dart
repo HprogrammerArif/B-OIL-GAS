@@ -71,6 +71,38 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     }
   }
 
+  /// A phone photo is a JPEG. A signature upload must be a PNG under 1 MB.
+  Future<Uint8List> _signaturePng(Uint8List source) async {
+    const maxBytes = 1024 * 1024;
+    var width = 800;
+    while (true) {
+      final png = await _pngAtWidth(source, width);
+      if (png.lengthInBytes <= maxBytes || width <= 160) return png;
+      width = (width * 0.6).round();
+    }
+  }
+
+  Future<Uint8List> _pngAtWidth(Uint8List source, int maxWidth) async {
+    var codec = await ui.instantiateImageCodec(source);
+    var frame = await codec.getNextFrame();
+    if (frame.image.width > maxWidth) {
+      frame.image.dispose();
+      codec.dispose();
+      codec = await ui.instantiateImageCodec(source, targetWidth: maxWidth);
+      frame = await codec.getNextFrame();
+    }
+    try {
+      final data = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw const FormatException('Could not encode signature');
+      }
+      return data.buffer.asUint8List();
+    } finally {
+      frame.image.dispose();
+      codec.dispose();
+    }
+  }
+
   Future<Uint8List> _renderPng() async {
     const scale = 2.0;
     final recorder = ui.PictureRecorder();
@@ -121,7 +153,14 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
         imageId = meta.id;
       } else if (_method == _Method.uploaded) {
         final uploads = ref.read(uploadServiceProvider);
-        final meta = await uploads.upload(_uploaded!, purpose: 'SIGNATURE');
+        final meta = await uploads.upload(
+          PickedFile(
+            name: 'signature.png',
+            bytes: await _signaturePng(_uploaded!.bytes),
+            mime: 'image/png',
+          ),
+          purpose: 'SIGNATURE',
+        );
         await uploads.awaitClean(meta.id);
         imageId = meta.id;
       }
@@ -154,6 +193,9 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                 _ => l10n.nsSignErrFailed,
               };
       });
+    } on Object catch (_) {
+      if (!mounted) return;
+      setState(() => _error = l10n.nsSignErrFailed);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

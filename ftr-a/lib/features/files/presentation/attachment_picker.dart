@@ -19,12 +19,18 @@ Future<PickedFile?> pickAttachment(
   bool allowFiles = true,
 }) async {
   final l10n = context.l10n;
+  FocusScope.of(context).unfocus();
   final source = await showModalBottomSheet<_Source>(
     context: context,
     showDragHandle: true,
     builder: (ctx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          Space.lg,
+          0,
+          Space.lg,
+          Space.lg + MediaQuery.viewInsetsOf(ctx).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
