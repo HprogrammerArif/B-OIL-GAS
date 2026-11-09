@@ -798,7 +798,9 @@ export default function BusView({ role, lang }: ViewProps) {
             background: 'var(--brand-slate-100)',
             padding: '3px',
             borderRadius: '8px',
-            display: 'flex',
+            display: 'inline-flex',
+            width: 'max-content',
+            maxWidth: '100%',
             border: '1px solid var(--brand-slate-300)'
           }}>
             <button
@@ -858,7 +860,9 @@ export default function BusView({ role, lang }: ViewProps) {
               background: 'var(--brand-slate-100)',
               padding: '3px',
               borderRadius: '8px',
-              display: 'flex',
+              display: 'inline-flex',
+              width: 'max-content',
+              maxWidth: '100%',
               border: '1px solid var(--brand-slate-300)'
             }}>
               <button
@@ -911,7 +915,9 @@ export default function BusView({ role, lang }: ViewProps) {
               background: 'var(--brand-slate-100)',
               padding: '3px',
               borderRadius: '8px',
-              display: 'flex',
+              display: 'inline-flex',
+              width: 'max-content',
+              maxWidth: '100%',
               border: '1px solid var(--brand-slate-300)'
             }}>
               <button

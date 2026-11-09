@@ -1013,9 +1013,11 @@
 
 /* ─── 8. DOSSIER SUB-TABS & STRUCTURED CARDS ─────────────────────────────── */
 .eam-subtabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  width: max-content;
+  max-width: 100%;
   padding: 4px;
   background: var(--brand-slate-100);
   border-radius: 9px;
@@ -1024,7 +1026,7 @@
 }
 
 .eam-subtab {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
