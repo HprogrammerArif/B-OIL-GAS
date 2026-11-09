@@ -171,7 +171,11 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const awaitingList = visible.filter((c) => { const a = actionFor(c, user); return a !== null && a !== 'resubmit'; });
   const awaitingAmount = awaitingList.reduce((s, c) => s + c.amount, 0);
   const dueAmount = counts.paymentDue.reduce((s, c) => s + c.amount, 0);
-  const verdictWarn = isApprover ? counts.overdue > 0 : counts.returned > 0;
+  const verdictTone = (isApprover ? counts.overdue > 0 : counts.returned > 0)
+    ? 'danger'
+    : awaitingList.length > 0 || counts.openCount > 0 || counts.paymentDue.length > 0
+      ? 'info'
+      : 'ok';
   const verdict = isApprover
     ? awaitingList.length === 0
       ? t('Nothing is waiting for your decision.', 'আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই।', lang)
@@ -254,8 +258,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
       />
 
       {/* One sentence: where things stand and what to do */}
-      <p className={`lv-status ${verdictWarn ? 'warn' : ''}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <Info size={16} />}
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'danger' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <CheckCircle size={16} />}
         <span>{verdict}</span>
       </p>
       {/* Filter Tabs */}

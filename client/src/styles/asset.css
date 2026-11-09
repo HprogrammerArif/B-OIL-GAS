@@ -204,10 +204,10 @@
 
 /* ─── 3. EXECUTIVE MODULE NAVIGATION BAR ─────────────────────────────────── */
 .eam-nav-bar {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 4px;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   background: var(--brand-card-bg);
   border: 1px solid var(--brand-slate-200);
@@ -1013,10 +1013,10 @@
 
 /* ─── 8. DOSSIER SUB-TABS & STRUCTURED CARDS ─────────────────────────────── */
 .eam-subtabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   padding: 4px;
   background: var(--brand-slate-100);

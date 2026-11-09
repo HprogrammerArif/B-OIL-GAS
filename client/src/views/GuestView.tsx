@@ -671,8 +671,8 @@ export default function GuestView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 2. ONE-SENTENCE STATUS BANNER */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className={`lv-status ${stats.overdueCount > 0 ? 'lv-status--warn' : 'lv-status--ok'}`} style={{ marginBottom: '16px' }}>
-        <UserCheck size={16} style={{ flexShrink: 0 }} />
+      <div className={`lv-status ${stats.overdueCount > 0 ? 'warn' : 'info'}`} style={{ marginBottom: '16px' }}>
+        {stats.overdueCount > 0 ? <AlertTriangle size={16} /> : <UserCheck size={16} />}
         <span>{statusSummary}</span>
       </div>
 

@@ -20,7 +20,7 @@ import {
 import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Check, ArrowRight, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip,
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Check, ArrowRight, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip, Info,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -824,7 +824,13 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     closed: ['Closed', 'সমাপ্ত'],
   };
 
-  const verdictWarn = mode !== 'reporter' && (quickCounts.serious > 0 || quickCounts.statutory > 0);
+  const verdictTone = mode !== 'reporter' && quickCounts.statutory > 0
+    ? 'danger'
+    : mode !== 'reporter' && quickCounts.serious > 0
+      ? 'warn'
+      : quickCounts.open > 0
+        ? 'info'
+        : 'ok';
   const verdict = mode === 'reporter'
     ? quickCounts.all === 0
       ? t('You have not reported anything yet. If you see a hazard or something goes wrong, report it right away.', 'আপনি এখনও কিছু রিপোর্ট করেননি। কোনো বিপদ বা সমস্যা দেখলে সঙ্গে সঙ্গে রিপোর্ট করুন।', lang)
@@ -924,8 +930,8 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         />
       )}
 
-      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'danger' ? <Siren size={16} /> : verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
         <span>{verdict}</span>
       </p>
       {emergencyLine && (

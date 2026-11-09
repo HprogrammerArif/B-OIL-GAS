@@ -108,10 +108,10 @@
 
 /* ─── SEGMENTED PILL TABS ─── */
 .pill-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   background: var(--brand-slate-100);
   padding: 4px;
@@ -3590,8 +3590,9 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 .cockpit-toolbar .cockpit-tabs-container {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
+  width: auto;
 }
 
 .cockpit-toolbar-actions {
@@ -3602,10 +3603,10 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 .cockpit-tabs-container {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
   background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
@@ -3629,6 +3630,7 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 .cockpit-tab-btn {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 8px;
   padding: 9px 16px;
   border-radius: var(--radius-md);

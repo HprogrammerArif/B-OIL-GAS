@@ -799,7 +799,6 @@ export default function BusView({ role, lang }: ViewProps) {
             padding: '3px',
             borderRadius: '8px',
             display: 'inline-flex',
-            width: 'max-content',
             maxWidth: '100%',
             border: '1px solid var(--brand-slate-300)'
           }}>
@@ -861,7 +860,6 @@ export default function BusView({ role, lang }: ViewProps) {
               padding: '3px',
               borderRadius: '8px',
               display: 'inline-flex',
-              width: 'max-content',
               maxWidth: '100%',
               border: '1px solid var(--brand-slate-300)'
             }}>
@@ -916,7 +914,6 @@ export default function BusView({ role, lang }: ViewProps) {
               padding: '3px',
               borderRadius: '8px',
               display: 'inline-flex',
-              width: 'max-content',
               maxWidth: '100%',
               border: '1px solid var(--brand-slate-300)'
             }}>

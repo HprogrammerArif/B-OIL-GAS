@@ -585,8 +585,8 @@
 }
 
 .chart-tabs {
-  display: inline-flex;
-  width: max-content;
+  display: flex;
+  width: auto;
   max-width: 100%;
   background: var(--brand-slate-100);
   border: 1px solid var(--brand-slate-200);

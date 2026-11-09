@@ -1240,14 +1240,14 @@
 
 /* ─── PILL TABS TOUCH-FRIENDLY HORIZONTAL SCROLL ────────────────────────────── */
 .pill-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 6px;
-  width: max-content;
+  width: 100%;
   max-width: 100%;
 }
 

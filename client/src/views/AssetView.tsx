@@ -51,6 +51,7 @@ import {
   CheckSquare,
   Square,
   Eye,
+  Info,
   X,
   LayoutGrid,
   Table as TableIcon,
@@ -468,7 +469,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const openWoCount = baseWorkOrders.filter((w) => w.status !== 'completed').length;
   const openReqCount = visibleRequisitions.filter((r) => r.stage !== 'commissioned' && r.stage !== 'rejected').length;
 
-  const verdictWarn = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0 || decommissionedAssets.length > 0;
+  const verdictTone = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0
+    ? 'warn'
+    : decommissionedAssets.length > 0
+      ? 'info'
+      : 'ok';
   const verdict = roleConfig.isSelfServiceOnly
     ? activeOnlyCount === 0
       ? roleConfig.canRequestEquipment
@@ -638,8 +643,8 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         />
       )}
 
-      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
         <span>{verdict}</span>
       </p>
 

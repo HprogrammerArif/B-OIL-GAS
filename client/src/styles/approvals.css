@@ -25,9 +25,14 @@
 
 
 /* ─── One-sentence verdict ──────────────────────────────────────────────── */
-.apv-verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin: 0 0 12px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); }
-.apv-verdict p { margin: 0; flex: 1 1 260px; font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--text-1); }
+.apv-verdict { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; width: 100%; padding: 10px 14px; margin: 0 0 12px; background: var(--surface-1); border: 1px solid var(--border-1); border-radius: var(--radius-md); box-sizing: border-box; }
+.apv-verdict p { margin: 0; flex: 0 1 auto; font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--text-1); }
+.apv-verdict > .ui-btn { margin-left: auto; }
 .apv-verdict-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface-2); color: var(--text-2); }
+.apv-verdict.info { border-color: color-mix(in srgb, var(--status-info) 40%, var(--border-1)); background: color-mix(in srgb, var(--status-info) 10%, var(--surface-1)); }
+.apv-verdict.info .apv-verdict-icon { background: color-mix(in srgb, var(--status-info) 16%, var(--surface-1)); color: var(--status-info); }
+.apv-verdict.ok { border-color: color-mix(in srgb, var(--status-success) 40%, var(--border-1)); background: color-mix(in srgb, var(--status-success) 10%, var(--surface-1)); }
+.apv-verdict.ok .apv-verdict-icon { background: color-mix(in srgb, var(--status-success) 16%, var(--surface-1)); color: var(--status-success); }
 .apv-verdict.urgent { border-color: color-mix(in srgb, var(--status-warning) 45%, var(--border-1)); background: color-mix(in srgb, var(--status-warning) 8%, var(--surface-1)); }
 .apv-verdict.urgent .apv-verdict-icon { background: color-mix(in srgb, var(--status-warning) 18%, var(--surface-1)); color: var(--status-warning-text); }
 
