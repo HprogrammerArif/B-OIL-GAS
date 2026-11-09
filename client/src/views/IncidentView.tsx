@@ -950,6 +950,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         </div>
       )}
 
+      <div className="inc-sticky-chrome">
       <div className="card mb-4 inc-filters">
         <div className="inc-find">
           <select
@@ -1002,6 +1003,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
             ))}
           </select>
         </div>
+      </div>
       </div>
 
       {/* Risk grid: a tool for people who assess risk, hidden for reporters */}
