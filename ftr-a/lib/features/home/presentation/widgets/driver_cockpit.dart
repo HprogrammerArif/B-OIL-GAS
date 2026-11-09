@@ -1,28 +1,154 @@
 import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
+import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
+import 'package:bogcl_oneops/features/fleet/data/fleet_repository.dart';
+import 'package:bogcl_oneops/features/fleet/domain/fleet_models.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class DriverCockpit extends StatefulWidget {
+class DriverCockpit extends ConsumerStatefulWidget {
   const DriverCockpit({required this.dashboard, super.key});
 
   final Dashboard dashboard;
 
   @override
-  State<DriverCockpit> createState() => _DriverCockpitState();
+  ConsumerState<DriverCockpit> createState() => _DriverCockpitState();
 }
 
-class _DriverCockpitState extends State<DriverCockpit> {
+class _DriverCockpitState extends ConsumerState<DriverCockpit> {
   int _tabIndex = 0;
   bool _tripStarted = false;
   bool _tripCompleted = false;
   int _startOdometer = 48210;
   int _endOdometer = 48234;
+
+  FleetRepository get _fleet => ref.read(fleetRepositoryProvider);
+
+  Future<VehicleRequisition?> _assignedTrip() async {
+    final rows = await _fleet.list(view: 'driving');
+    for (final row in rows) {
+      if (row.trip != null) return row;
+    }
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  void _fail(String message) {
+    if (!mounted) return;
+    AppToast.show(context, message, tone: StatusTone.danger);
+  }
+
+  Future<void> _sendSos(String note) async {
+    try {
+      final trip = await _assignedTrip();
+      await _fleet.sendSos({
+        'note': note,
+        if (trip?.trip != null) 'tripId': trip!.trip!.id,
+        if (trip != null) 'requisitionId': trip.id,
+      });
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        'SOS sent to the transport desk.',
+        tone: StatusTone.danger,
+      );
+    } on ApiException catch (e) {
+      _fail(e.message);
+    }
+  }
+
+  Future<void> _notifyAtGate() async {
+    try {
+      final trip = await _assignedTrip();
+      if (trip == null) {
+        _fail('No trip is assigned to you.');
+        return;
+      }
+      await _fleet.sendTripChat(trip.id, 'Car is waiting at the gate.');
+      if (!mounted) return;
+      AppToast.show(context, 'Passenger notified that the car is at the gate.');
+    } on ApiException catch (e) {
+      _fail(e.message);
+    }
+  }
+
+  Future<void> _callPassenger() async {
+    try {
+      final trip = await _assignedTrip();
+      final phone = trip?.requester?.phone;
+      if (phone == null || phone.isEmpty) {
+        _fail('This passenger has no phone number.');
+        return;
+      }
+      final opened = await launchUrl(Uri.parse('tel:$phone'));
+      if (!mounted || opened) return;
+      _fail('This phone could not start the call.');
+    } on ApiException catch (e) {
+      _fail(e.message);
+    }
+  }
+
+  Future<void> _logToll() async {
+    final plaza = TextEditingController();
+    final amount = TextEditingController(text: '100');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log a toll'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: plaza,
+              decoration: const InputDecoration(labelText: 'Plaza'),
+            ),
+            TextField(
+              controller: amount,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Amount (৳)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    final plazaText = plaza.text.trim();
+    final amountValue = double.tryParse(amount.text.trim());
+    plaza.dispose();
+    amount.dispose();
+    if (ok != true || !mounted) return;
+    try {
+      final trip = await _assignedTrip();
+      final tripId = trip?.trip?.id;
+      if (tripId == null) {
+        _fail('No trip is assigned to you.');
+        return;
+      }
+      await _fleet.tripAct(tripId, 'tolls', {
+        'plaza': plazaText,
+        'amount': amountValue,
+      });
+      if (!mounted) return;
+      AppToast.show(context, 'Toll saved on this trip.');
+    } on ApiException catch (e) {
+      _fail(e.message);
+    }
+  }
 
   void _openSosSheet(BuildContext context) {
     unawaited(
@@ -33,7 +159,7 @@ class _DriverCockpitState extends State<DriverCockpit> {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(Corner.xl)),
         ),
-        builder: (_) => const _DriverSosSheet(),
+        builder: (_) => _DriverSosSheet(onSend: _sendSos),
       ),
     );
   }
@@ -391,10 +517,7 @@ class _DriverCockpitState extends State<DriverCockpit> {
                             ),
                             onPressed: () {
                               Haptics.tap();
-                              AppToast.show(
-                                context,
-                                'Notification sent to passenger: "Car is waiting at Baridhara Gate 1"',
-                              );
+                              unawaited(_notifyAtGate());
                             },
                           ),
                         ),
@@ -429,10 +552,10 @@ class _DriverCockpitState extends State<DriverCockpit> {
                               bangla ? 'কল করুন' : 'Call Passenger',
                               overflow: TextOverflow.ellipsis,
                             ),
-                            onPressed: () => AppToast.show(
-                              context,
-                              'Calling Tanvir Ahmed (+880 1711-001042)...',
-                            ),
+                            onPressed: () {
+                              Haptics.tap();
+                              unawaited(_callPassenger());
+                            },
                           ),
                         ),
                         const SizedBox(width: Space.xs),
@@ -508,10 +631,7 @@ class _DriverCockpitState extends State<DriverCockpit> {
                 OutlinedButton.icon(
                   onPressed: () {
                     Haptics.tap();
-                    AppToast.show(
-                      context,
-                      'Toll slip logged and charged to trip REQ-2026-089',
-                    );
+                    unawaited(_logToll());
                   },
                   icon: const Icon(Icons.add_a_photo, size: 18),
                   label: Text(
@@ -572,7 +692,9 @@ class _DriverCockpitState extends State<DriverCockpit> {
 }
 
 class _DriverSosSheet extends StatelessWidget {
-  const _DriverSosSheet();
+  const _DriverSosSheet({required this.onSend});
+
+  final Future<void> Function(String note) onSend;
 
   @override
   Widget build(BuildContext context) {
@@ -676,11 +798,7 @@ class _DriverSosSheet extends StatelessWidget {
         onTap: () {
           Haptics.heavy();
           Navigator.of(context).pop();
-          AppToast.show(
-            context,
-            'URGENT SOS broadcast sent to Transport Admin (Md. Kamruzzaman) and Security Desk.',
-            tone: StatusTone.danger,
-          );
+          unawaited(onSend(title));
         },
       ),
     );

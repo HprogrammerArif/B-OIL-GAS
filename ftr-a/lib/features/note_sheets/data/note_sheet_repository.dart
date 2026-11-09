@@ -27,6 +27,23 @@ class NoteSheetRepository {
     }
   }
 
+  /// Suggested signers for this amount. Empty amount is zero.
+  Future<List<RouteSigner>> routePreview(num amount) async {
+    try {
+      final res = await _dio.get<Object?>(
+        '/note-sheets/route-preview',
+        queryParameters: {'amount': amount},
+      );
+      final signers = Envelope.object(res.data)['signers'];
+      return [
+        for (final e in (signers as List? ?? const []))
+          if (e is Map) RouteSigner.fromJson(Map<String, Object?>.from(e)),
+      ];
+    } on DioException catch (e) {
+      throwApi(e);
+    }
+  }
+
   Future<NoteSheet> detail(String id) async {
     try {
       final res = await _dio.get<Object?>('/note-sheets/$id');

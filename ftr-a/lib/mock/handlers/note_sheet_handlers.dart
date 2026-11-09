@@ -101,6 +101,17 @@ List<RouteDef> noteSheetRoutes() => [
       for (final s in sorted) _out(ctx, s, detail: false),
     ], ctx.query);
   }, permission: ['note-sheets:read']),
+  RouteDef('GET', '/note-sheets/route-preview', (ctx) async {
+    final a = ctx.requireAuth();
+    final raw = ctx.query['amount'];
+    final amount = raw == null || raw.isEmpty ? 0 : num.tryParse(raw);
+    if (amount == null || amount < 0) {
+      throw validationError('amount', 'Enter a valid amount');
+    }
+    return ok({
+      'signers': NoteSheetEngine.suggestedSigners(ctx.store, a, amount),
+    });
+  }, permission: ['note-sheets:create']),
   RouteDef('POST', '/note-sheets', (ctx) async {
     final a = ctx.requireAuth();
     final s = NoteSheetEngine.create(ctx.store, a, ctx.bodyObject());

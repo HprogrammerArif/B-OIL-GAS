@@ -8,6 +8,7 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/assets/data/asset_repository.dart';
 import 'package:bogcl_oneops/features/assets/domain/asset_models.dart';
+import 'package:bogcl_oneops/features/assets/presentation/asset_plate.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_providers.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_ui.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
@@ -174,13 +175,7 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
             label: Text(bangla ? 'প্রিন্ট প্লেট' : 'Print Plate'),
             onPressed: () {
               Navigator.pop(ctx);
-              AppToast.show(
-                context,
-                bangla
-                    ? 'অ্যাসেট মেটালিক প্লেট কিউআর কোড পাঠানো হয়েছে।'
-                    : 'Asset plate QR sent to Zebra industrial printer.',
-                tone: StatusTone.success,
-              );
+              unawaited(printAssetPlate(e));
             },
           ),
         ],

@@ -151,7 +151,7 @@ List<RouteDef> claimRoutes() => [
     return paginate(
       [
         for (final c in sortBy(items, '-createdAt', '-createdAt'))
-          ClaimEngine.claimWire(ctx.store, c),
+          ClaimEngine.claimWire(ctx.store, c, viewerUserId: a.user.str('id')),
       ],
       ctx.query,
       defaultPageSize: 50,
@@ -161,31 +161,67 @@ List<RouteDef> claimRoutes() => [
     final a = ctx.requireAuth();
     final c = ClaimEngine.create(ctx.store, a, ctx.bodyObject());
     await ctx.store.commit();
-    return ok(ClaimEngine.claimWire(ctx.store, c, detail: true), status: 201);
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        c,
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+      status: 201,
+    );
   }, permission: ['claims:create']),
   RouteDef('GET', '/claims/:id', (ctx) async {
-    return ok(ClaimEngine.claimWire(ctx.store, _readable(ctx), detail: true));
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        _readable(ctx),
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+    );
   }, permission: ['claims:create', 'claims:read', 'claims:settle']),
   RouteDef('PUT', '/claims/:id', (ctx) async {
     final a = ctx.requireAuth();
     final c = _owned(ctx);
     ClaimEngine.apply(ctx.store, a, c, ctx.bodyObject());
     await ctx.store.commit();
-    return ok(ClaimEngine.claimWire(ctx.store, c, detail: true));
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        c,
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+    );
   }, permission: ['claims:create']),
   RouteDef('POST', '/claims/:id/submit', (ctx) async {
     final a = ctx.requireAuth();
     final c = _owned(ctx);
     ClaimEngine.submit(ctx.store, a, c);
     await ctx.store.commit();
-    return ok(ClaimEngine.claimWire(ctx.store, c, detail: true));
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        c,
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+    );
   }, permission: ['claims:submit']),
   RouteDef('POST', '/claims/:id/cancel', (ctx) async {
     final a = ctx.requireAuth();
     final c = _owned(ctx);
     ClaimEngine.cancel(ctx.store, a, c);
     await ctx.store.commit();
-    return ok(ClaimEngine.claimWire(ctx.store, c, detail: true));
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        c,
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+    );
   }, permission: ['claims:create']),
   RouteDef('POST', '/claims/:id/pay', (ctx) async {
     final a = ctx.requireAuth();
@@ -193,6 +229,13 @@ List<RouteDef> claimRoutes() => [
     if (c == null) throw notFound('Claim');
     ClaimEngine.pay(ctx.store, a, c);
     await ctx.store.commit();
-    return ok(ClaimEngine.claimWire(ctx.store, c, detail: true));
+    return ok(
+      ClaimEngine.claimWire(
+        ctx.store,
+        c,
+        detail: true,
+        viewerUserId: ctx.requireAuth().user.str('id'),
+      ),
+    );
   }, permission: ['claims:settle']),
 ];

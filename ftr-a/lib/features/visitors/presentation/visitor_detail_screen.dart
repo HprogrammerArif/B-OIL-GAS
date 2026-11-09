@@ -21,6 +21,7 @@ import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VisitorDetailScreen extends ConsumerStatefulWidget {
   const VisitorDetailScreen({required this.id, super.key});
@@ -381,13 +382,7 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
                 onTap: () {
                   Haptics.heavy();
                   Navigator.pop(ctx);
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'গেট পাস সফলভাবে হোয়াটসঅ্যাপে পাঠানো হয়েছে!'
-                        : 'Digital Gate Pass sent via WhatsApp!',
-                    tone: StatusTone.success,
-                  );
+                  unawaited(_openPassChannel(v, 'whatsapp'));
                 },
               ),
               const Divider(height: 1),
@@ -408,13 +403,7 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
                 onTap: () {
                   Haptics.heavy();
                   Navigator.pop(ctx);
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'এসএমএস গেটওয়ে মারফত পাস পাঠানো সম্পন্ন!'
-                        : 'Gate Pass link sent via SMS gateway!',
-                    tone: StatusTone.success,
-                  );
+                  unawaited(_openPassChannel(v, 'sms'));
                 },
               ),
               const Divider(height: 1),
@@ -433,13 +422,7 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
                 onTap: () {
                   Haptics.heavy();
                   Navigator.pop(ctx);
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'অতিথির ইমেইলে পিডিএফ গেট পাস পাঠানো হয়েছে!'
-                        : 'Official PDF Gate Pass dispatched via Email!',
-                    tone: StatusTone.success,
-                  );
+                  unawaited(_openPassChannel(v, 'email'));
                 },
               ),
             ],
@@ -447,6 +430,62 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _openPassChannel(Visit v, String channel) async {
+    final phone = (v.guest.phone ?? '').replaceAll(RegExp(r'\D'), '');
+    final text =
+        'BOGCL gate pass ${v.visitNo} for ${v.guest.fullName}. Site: ${v.site.name}.';
+    final Uri uri;
+    if (channel == 'email') {
+      uri = Uri.parse(
+        'mailto:?subject=${Uri.encodeComponent('Gate pass ${v.visitNo}')}&body=${Uri.encodeComponent(text)}',
+      );
+    } else {
+      if (phone.isEmpty) {
+        AppToast.show(
+          context,
+          context.isBangla
+              ? 'এই অতিথির ফোন নম্বর নেই।'
+              : 'This visitor has no phone number.',
+          tone: StatusTone.danger,
+        );
+        return;
+      }
+      uri = channel == 'whatsapp'
+          ? Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(text)}')
+          : Uri.parse('sms:$phone?body=${Uri.encodeComponent(text)}');
+    }
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!mounted || opened) return;
+    AppToast.show(
+      context,
+      context.isBangla
+          ? 'এই ফোনে সেই অ্যাপটি খোলা যায়নি।'
+          : 'This phone could not open that app.',
+      tone: StatusTone.danger,
+    );
+  }
+
+  Future<void> _logBarrier(Visit v, String plate, bool bangla) async {
+    try {
+      await _repo.act(v.id, 'findings', {
+        'area': 'Gate 1',
+        'finding': 'Vehicle $plate admitted at barrier 1.',
+        'status': 'OBSERVATION',
+      });
+      _refresh();
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        bangla
+            ? 'গেটে যানবাহন প্রবেশ লিপিবদ্ধ হয়েছে।'
+            : 'Vehicle entry written on the visit.',
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
   }
 
   Future<void> _escort(Visit v) async {
@@ -583,6 +622,8 @@ class _VisitorDetailScreenState extends ConsumerState<VisitorDetailScreen> {
                 l10n.visDoneFinding,
               ),
             ),
+            onBarrier: (plate) =>
+                unawaited(_logBarrier(v, plate, context.isBangla)),
           ),
         ),
       ),
@@ -690,11 +731,13 @@ class _Body extends StatelessWidget {
     required this.visit,
     required this.onPpeApprove,
     required this.onLogFinding,
+    required this.onBarrier,
   });
 
   final Visit visit;
   final VoidCallback onPpeApprove;
   final void Function(String area, String text, String status) onLogFinding;
+  final void Function(String plate) onBarrier;
 
   @override
   Widget build(BuildContext context) {
@@ -1131,13 +1174,7 @@ class _Body extends StatelessWidget {
                 icon: Icons.meeting_room,
                 onPressed: () {
                   Haptics.heavy();
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'বেরিয়ার #১ উন্মুক্ত! যানবাহন প্রবেশ অনুমোদিত।'
-                        : 'Barrier #1 Opened! Vehicle ($plate) admitted.',
-                    tone: StatusTone.success,
-                  );
+                  onBarrier(plate);
                 },
               ),
             ],

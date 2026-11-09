@@ -14,6 +14,7 @@ import 'package:bogcl_oneops/features/claims/data/claim_repository.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -24,7 +25,112 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-enum _Tab { claims, awaitingMe, advances, payable, policy }
+enum _Tab { claims, awaitingMe, scope, advances, payable, policy }
+
+enum _ClaimFilter { all, awaiting, others }
+
+({String text, Color color, IconData icon}) _claimVerdict({
+  required AppL10n l10n,
+  required bool bangla,
+  required _Tab tab,
+  required bool beyondSelf,
+  required AsyncValue<List<Claim>>? teamAsync,
+  required AsyncValue<List<Claim>>? mineAsync,
+  required List<Claim> awaiting,
+  required List<Claim> others,
+}) {
+  if (tab == _Tab.scope && beyondSelf) {
+    return (
+      text: _scopeSentence(l10n, bangla, teamAsync, others),
+      color: Colors.blueGrey,
+      icon: Icons.apartment_outlined,
+    );
+  }
+  if (beyondSelf && tab != _Tab.claims) {
+    return (
+      text: _awaitSentence(l10n, bangla, teamAsync, awaiting),
+      color: awaiting.isEmpty ? Colors.blueGrey : Colors.teal,
+      icon: Icons.fact_check_outlined,
+    );
+  }
+  return (
+    text: _mineSentence(l10n, bangla, mineAsync),
+    color: Colors.blueGrey,
+    icon: Icons.account_balance_wallet_outlined,
+  );
+}
+
+String _awaitSentence(
+  AppL10n l10n,
+  bool bangla,
+  AsyncValue<List<Claim>>? teamAsync,
+  List<Claim> awaiting,
+) {
+  if (teamAsync != null && teamAsync.hasError && teamAsync.value == null) {
+    return l10n.claimAwaitFailed;
+  }
+  if (teamAsync != null && teamAsync.value == null) {
+    return l10n.claimAwaitLoading;
+  }
+  final amount = awaiting.fold<double>(0, (sum, c) => sum + c.totalAmount);
+  return l10n.claimAwaitCount(awaiting.length, bdt(amount, bangla: bangla));
+}
+
+String _scopeSentence(
+  AppL10n l10n,
+  bool bangla,
+  AsyncValue<List<Claim>>? teamAsync,
+  List<Claim> others,
+) {
+  if (teamAsync != null && teamAsync.hasError && teamAsync.value == null) {
+    return l10n.claimAwaitFailed;
+  }
+  if (teamAsync != null && teamAsync.value == null) {
+    return l10n.claimAwaitLoading;
+  }
+  if (others.isEmpty) return l10n.claimScopeNone;
+  final names = <String>[
+    for (final c in others) ?c.waitingForName(bangla: bangla),
+  ];
+  final unique = names.toSet().toList();
+  if (unique.isEmpty) return l10n.claimScopeQuiet(others.length);
+  return l10n.claimScopeWaiting(others.length, unique.join(', '));
+}
+
+String _mineSentence(
+  AppL10n l10n,
+  bool bangla,
+  AsyncValue<List<Claim>>? mineAsync,
+) {
+  final items = mineAsync?.value;
+  if (mineAsync != null && mineAsync.hasError && items == null) {
+    return l10n.claimAwaitFailed;
+  }
+  if (items == null) return l10n.claimAwaitLoading;
+  final returned = items
+      .where((c) => c.status == ClaimStatus.returned)
+      .toList();
+  if (returned.isNotEmpty) return l10n.claimMineReturned(returned.length);
+  final checking = items
+      .where(
+        (c) =>
+            c.status == ClaimStatus.pendingManager ||
+            c.status == ClaimStatus.pendingFinance,
+      )
+      .toList();
+  if (checking.isNotEmpty) {
+    final amount = checking.fold<double>(0, (sum, c) => sum + c.totalAmount);
+    return l10n.claimMineChecking(checking.length, bdt(amount, bangla: bangla));
+  }
+  final approved = items
+      .where((c) => c.status == ClaimStatus.approved)
+      .toList();
+  if (approved.isNotEmpty) {
+    final amount = approved.fold<double>(0, (sum, c) => sum + c.totalAmount);
+    return l10n.claimMineApproved(approved.length, bdt(amount, bangla: bangla));
+  }
+  return l10n.claimMineClear;
+}
 
 /// Claims home: my claims, approver queue, advances, payables, and Grade 1-10 policy matrix.
 class ClaimsScreen extends ConsumerStatefulWidget {
@@ -102,26 +208,34 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canCreate = session?.can('claims:create') ?? false;
-    final isApprover =
-        (session?.can('claims:read', GrantScope.team) ?? false) ||
-        (session?.roleKeys.any(
-              (r) => const {
-                'HOD',
-                'HR_ADMIN',
-                'FINANCE',
-                'CHAIRMAN',
-                'PLANT_GM',
-                'LINE_MANAGER',
-              }.contains(r),
-            ) ??
-            false);
+    final beyondSelf = session?.can('claims:read', GrantScope.team) ?? false;
+    final readGrant = session?.grant('claims:read');
+    final readScope = readGrant == null
+        ? GrantScope.self
+        : Session.scopeOf(readGrant);
     final canSettle = session?.can('claims:settle') ?? false;
     final canAdvance = session?.can('claims:advance') ?? false;
+    final teamAsync = beyondSelf ? ref.watch(claimsProvider('team')) : null;
+    final mineAsync = canCreate ? ref.watch(claimsProvider('mine')) : null;
+    final teamItems = teamAsync?.value ?? const <Claim>[];
+    final awaiting = [
+      for (final c in teamItems)
+        if (c.awaitingYou) c,
+    ];
+    final others = [
+      for (final c in teamItems)
+        if (!c.awaitingYou) c,
+    ];
+    final scopeLabel = switch (readScope) {
+      GrantScope.site => l10n.claimTabPlant,
+      GrantScope.company => l10n.claimTabAll,
+      _ => l10n.claimTabTeam,
+    };
 
     final tabs = <(_Tab, String)>[
-      if (canCreate) (_Tab.claims, bangla ? 'আমার দাবি' : 'My Claims'),
-      if (isApprover)
-        (_Tab.awaitingMe, bangla ? 'অনুমোদনের অপেক্ষা (৩)' : 'Awaiting Me (3)'),
+      if (canCreate) (_Tab.claims, l10n.claimTabClaims),
+      if (beyondSelf) (_Tab.awaitingMe, l10n.claimTabAwaiting(awaiting.length)),
+      if (beyondSelf) (_Tab.scope, scopeLabel),
       if (canAdvance) (_Tab.advances, l10n.claimTabAdvances),
       if (canSettle) (_Tab.payable, l10n.claimTabPayable),
       (
@@ -132,24 +246,16 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
 
     final effectiveTab = tabs.any((t) => t.$1 == _tab) ? _tab : tabs.first.$1;
 
-    // One-Sentence Plain Language Verdict Banner
-    final String verdictText;
-    final Color verdictColor;
-    final IconData verdictIcon;
-
-    if (isApprover) {
-      verdictText = bangla
-          ? '৩টি দাবি (৳ ৪৮,৫০০) আপনার বিভাগীয় যাচাইকরণ বা স্যাপ ভাউচার অনুমোদনের অপেক্ষায় রয়েছে।'
-          : '3 claims (BDT 48,500) are waiting for your verification or SAP voucher approval.';
-      verdictColor = Colors.teal;
-      verdictIcon = Icons.fact_check_outlined;
-    } else {
-      verdictText = bangla
-          ? 'আপনার ২টি খরচ দাবি (৳ ১৪,৫০০) প্রক্রিয়াধীন রয়েছে এবং এই ত্রৈমাসিকে ৳ ৩২,০০০ নিষ্পত্তি হয়েছে।'
-          : 'You have 2 open expense claims (BDT 14,500) in progress and BDT 32,000 settled this quarter.';
-      verdictColor = Colors.blueGrey;
-      verdictIcon = Icons.account_balance_wallet_outlined;
-    }
+    final verdict = _claimVerdict(
+      l10n: l10n,
+      bangla: bangla,
+      tab: effectiveTab,
+      beyondSelf: beyondSelf,
+      teamAsync: teamAsync,
+      mineAsync: mineAsync,
+      awaiting: awaiting,
+      others: others,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -180,21 +286,21 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
               vertical: Space.sm,
             ),
             decoration: BoxDecoration(
-              color: verdictColor.withValues(alpha: 0.08),
+              color: verdict.color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(Corner.md),
-              border: Border.all(color: verdictColor.withValues(alpha: 0.3)),
+              border: Border.all(color: verdict.color.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                Icon(verdictIcon, size: 18, color: verdictColor),
+                Icon(verdict.icon, size: 18, color: verdict.color),
                 const SizedBox(width: Space.xs),
                 Expanded(
                   child: Text(
-                    verdictText,
+                    verdict.text,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: verdictColor,
+                      color: verdict.color,
                     ),
                   ),
                 ),
@@ -237,9 +343,19 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
                 _Tab.claims => const _ClaimList(scope: 'mine'),
                 _Tab.awaitingMe => _ClaimList(
                   scope: 'team',
+                  filter: _ClaimFilter.awaiting,
                   showOwner: true,
                   isApproverView: true,
+                  emptyTitle: l10n.claimAwaitEmptyTitle,
+                  emptyMessage: l10n.claimAwaitEmptyMessage,
                   onAction: _settle,
+                ),
+                _Tab.scope => _ClaimList(
+                  scope: 'team',
+                  filter: _ClaimFilter.others,
+                  showOwner: true,
+                  emptyTitle: l10n.claimScopeEmptyTitle,
+                  emptyMessage: l10n.claimScopeEmptyMessage,
                 ),
                 _Tab.advances => _AdvanceList(scope: 'mine', onAction: _settle),
                 _Tab.payable => _Payables(onAction: _settle),
@@ -256,14 +372,20 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
 class _ClaimList extends ConsumerWidget {
   const _ClaimList({
     required this.scope,
+    this.filter = _ClaimFilter.all,
     this.showOwner = false,
     this.isApproverView = false,
+    this.emptyTitle,
+    this.emptyMessage,
     this.onAction,
   });
 
   final String scope;
+  final _ClaimFilter filter;
   final bool showOwner;
   final bool isApproverView;
+  final String? emptyTitle;
+  final String? emptyMessage;
   final Future<void> Function(Future<Object?> Function(), String)? onAction;
 
   @override
@@ -274,35 +396,42 @@ class _ClaimList extends ConsumerWidget {
       loading: () => const SkeletonList(),
       error: (_, _) =>
           ErrorState(onRetry: () => ref.invalidate(claimsProvider)),
-      data: (items) => ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 96),
-        children: [
-          if (items.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.xxxl),
-              child: EmptyState(
-                icon: Icons.receipt_long_outlined,
-                title: l10n.claimEmptyTitle,
-                message: l10n.claimEmptyMessage,
-              ),
-            )
-          else
-            for (final c in items)
+      data: (items) {
+        final shown = switch (filter) {
+          _ClaimFilter.all => items,
+          _ClaimFilter.awaiting => items.where((c) => c.awaitingYou).toList(),
+          _ClaimFilter.others => items.where((c) => !c.awaitingYou).toList(),
+        };
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 96),
+          children: [
+            if (shown.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.lg,
-                  vertical: Space.xs,
+                padding: const EdgeInsets.only(top: Space.xxxl),
+                child: EmptyState(
+                  icon: Icons.receipt_long_outlined,
+                  title: emptyTitle ?? l10n.claimEmptyTitle,
+                  message: emptyMessage ?? l10n.claimEmptyMessage,
                 ),
-                child: ClaimCard(
-                  claim: c,
-                  showOwner: showOwner || scope != 'mine',
-                  isApproverView: isApproverView,
-                  onAction: onAction,
+              )
+            else
+              for (final c in shown)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Space.lg,
+                    vertical: Space.xs,
+                  ),
+                  child: ClaimCard(
+                    claim: c,
+                    showOwner: showOwner || scope != 'mine',
+                    isApproverView: isApproverView,
+                    onAction: onAction,
+                  ),
                 ),
-              ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
@@ -330,6 +459,40 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
   String? _localVoucher;
   bool _verifiedLocally = false;
   bool _paidLocally = false;
+
+  @override
+  void didUpdateWidget(ClaimCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.claim.status != widget.claim.status ||
+        oldWidget.claim.voucherNo != widget.claim.voucherNo) {
+      _localVoucher = null;
+      _verifiedLocally = false;
+      _paidLocally = false;
+    }
+  }
+
+  Future<void> _payClaim(BuildContext context, Claim c, bool bangla) async {
+    try {
+      final paid = await ref.read(claimRepositoryProvider).pay(c.id);
+      ref.invalidate(claimsProvider);
+      if (!mounted) return;
+      setState(() {
+        _localVoucher = paid.voucherNo;
+        _paidLocally = true;
+      });
+      if (!context.mounted) return;
+      AppToast.show(
+        context,
+        bangla
+            ? 'পরিশোধ হয়েছে। ভাউচার ${paid.voucherNo ?? ''}'
+            : 'Paid. Voucher ${paid.voucherNo ?? ''}',
+        tone: StatusTone.success,
+      );
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      AppToast.show(context, e.message, tone: StatusTone.danger);
+    }
+  }
 
   void _promptReturnQuery(BuildContext context) {
     final bangla = context.isBangla;
@@ -389,13 +552,40 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
                       borderRadius: BorderRadius.circular(Corner.md),
                       side: BorderSide(color: Colors.grey.shade300),
                     ),
-                    onTap: () {
+                    onTap: () async {
                       Navigator.of(ctx).pop();
-                      AppToast.show(
-                        context,
-                        bangla ? 'আপত্তি সহ দাবি ফেরত পাঠানো হয়েছে' : 'Claim returned to employee with observation query',
-                        tone: StatusTone.warning,
-                      );
+                      final instanceId = widget.claim.workflowInstanceId;
+                      if (instanceId == null || instanceId.isEmpty) {
+                        AppToast.show(
+                          context,
+                          bangla
+                              ? 'এই দাবির কোনো অনুমোদন খোলা নেই।'
+                              : 'This claim has no open approval to return.',
+                          tone: StatusTone.warning,
+                        );
+                        return;
+                      }
+                      try {
+                        await ref
+                            .read(approvalRepositoryProvider)
+                            .returnForChanges(instanceId, comment: p);
+                        ref.invalidate(claimsProvider);
+                        if (!context.mounted) return;
+                        AppToast.show(
+                          context,
+                          bangla
+                              ? 'দাবিটি এই আপত্তিসহ ফেরত গেছে।'
+                              : 'Claim returned with that query.',
+                          tone: StatusTone.warning,
+                        );
+                      } on ApiException catch (e) {
+                        if (!context.mounted) return;
+                        AppToast.show(
+                          context,
+                          e.message,
+                          tone: StatusTone.danger,
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: Space.xs),
@@ -475,6 +665,8 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
             Text(
               [
                 if (widget.showOwner) c.displayEmployee(bangla: bangla),
+                if (!c.awaitingYou && c.waitingForName(bangla: bangla) != null)
+                  l10n.claimWaitingFor(c.waitingForName(bangla: bangla)!),
                 ?period,
                 c.claimNo,
               ].join(' · '),
@@ -618,22 +810,39 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
                       ),
                       onPressed: () async {
                         Haptics.tap();
-                        if (c.workflowInstanceId != null) {
+                        final id = c.workflowInstanceId;
+                        if (id == null || id.isEmpty) {
+                          AppToast.show(
+                            context,
+                            bangla
+                                ? 'এই দাবির কোনো অনুমোদন খোলা নেই।'
+                                : 'This claim has no open approval.',
+                            tone: StatusTone.warning,
+                          );
+                          return;
+                        }
+                        try {
                           await ref
                               .read(approvalRepositoryProvider)
-                              .approve(c.workflowInstanceId!);
+                              .approve(id);
                           ref
                             ..invalidate(approvalInboxProvider)
                             ..invalidate(claimsProvider);
-                        }
-                        setState(() => _verifiedLocally = true);
-                        if (context.mounted) {
+                          if (!context.mounted) return;
+                          setState(() => _verifiedLocally = true);
                           AppToast.show(
                             context,
                             bangla
                                 ? 'দাবি যাচাই করে অর্থ বিভাগে পাঠানো হয়েছে'
-                                : 'Verified & Forwarded to Finance',
+                                : 'Verified and sent to finance.',
                             tone: StatusTone.success,
+                          );
+                        } on ApiException catch (e) {
+                          if (!context.mounted) return;
+                          AppToast.show(
+                            context,
+                            e.message,
+                            tone: StatusTone.danger,
                           );
                         }
                       },
@@ -646,18 +855,9 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
                       style: FilledButton.styleFrom(
                         visualDensity: VisualDensity.compact,
                       ),
-                      onPressed: () async {
+                      onPressed: () {
                         Haptics.tap();
-                        setState(() => _localVoucher = 'SAP-FI-2026-904');
-                        if (context.mounted) {
-                          AppToast.show(
-                            context,
-                            bangla
-                                ? 'স্যাপ ভাউচার #SAP-FI-2026-904 তৈরি হয়েছে'
-                                : 'SAP Voucher #SAP-FI-2026-904 Generated',
-                            tone: StatusTone.success,
-                          );
-                        }
+                        unawaited(_payClaim(context, c, bangla));
                       },
                       child: Text(
                         bangla
@@ -673,14 +873,7 @@ class _ClaimCardState extends ConsumerState<ClaimCard> {
                       ),
                       onPressed: () {
                         Haptics.tap();
-                        setState(() => _paidLocally = true);
-                        AppToast.show(
-                          context,
-                          bangla
-                              ? 'ব্যাংক ইএফটি নিষ্পত্তি নিশ্চিত করা হয়েছে'
-                              : 'Marked Paid (Bank EFT Disbursed)',
-                          tone: StatusTone.success,
-                        );
+                        unawaited(_payClaim(context, c, bangla));
                       },
                       child: Text(
                         bangla ? 'পরিশোধ সম্পন্ন' : 'Mark Paid (EFT)',

@@ -6,6 +6,7 @@ enum DayStatus {
   earlyLeave,
   halfDay,
   absent,
+  notIn,
   onLeave,
   holiday,
   weekend,
@@ -17,6 +18,7 @@ enum DayStatus {
     'EARLY_LEAVE' => earlyLeave,
     'HALF_DAY' => halfDay,
     'ABSENT' => absent,
+    'NOT_IN' => notIn,
     'ON_LEAVE' => onLeave,
     'HOLIDAY' => holiday,
     'WEEKEND' => weekend,
@@ -395,8 +397,15 @@ class TeamRosterRow {
     required this.nameBn,
     required this.status,
     required this.needsReview,
+    this.designation = '',
+    this.designationBn = '',
+    this.department = '',
+    this.departmentBn = '',
+    this.siteName = '',
+    this.siteNameBn = '',
     this.firstInAt,
     this.lateMinutes = 0,
+    this.distanceM,
     this.workflowInstanceId,
   });
 
@@ -407,8 +416,15 @@ class TeamRosterRow {
     nameBn: j['nameBn'] as String? ?? '',
     status: j['status'] as String? ?? '',
     needsReview: j['needsReview'] == true,
+    designation: j['designation'] as String? ?? '',
+    designationBn: j['designationBn'] as String? ?? '',
+    department: j['department'] as String? ?? '',
+    departmentBn: j['departmentBn'] as String? ?? '',
+    siteName: j['siteName'] as String? ?? '',
+    siteNameBn: j['siteNameBn'] as String? ?? '',
     firstInAt: j['firstInAt'] as String?,
     lateMinutes: (j['lateMinutes'] as num?)?.toInt() ?? 0,
+    distanceM: (j['distanceM'] as num?)?.toInt(),
     workflowInstanceId: j['workflowInstanceId'] as String?,
   );
 
@@ -418,9 +434,18 @@ class TeamRosterRow {
   final String nameBn;
   final String status;
   final bool needsReview;
+  final String designation;
+  final String designationBn;
+  final String department;
+  final String departmentBn;
+  final String siteName;
+  final String siteNameBn;
   final String? firstInAt;
   final int lateMinutes;
+  final int? distanceM;
   final String? workflowInstanceId;
+
+  DayStatus? get dayStatus => DayStatus.parse(status.isEmpty ? null : status);
 }
 
 @immutable
@@ -429,7 +454,9 @@ class TeamRoster {
     required this.date,
     required this.present,
     required this.late,
+    required this.notIn,
     required this.onLeave,
+    required this.absent,
     required this.toReview,
     required this.headcount,
     required this.roster,
@@ -443,7 +470,9 @@ class TeamRoster {
       date: j['date'] as String? ?? '',
       present: (k['present'] as num?)?.toInt() ?? 0,
       late: (k['late'] as num?)?.toInt() ?? 0,
+      notIn: (k['notIn'] as num?)?.toInt() ?? 0,
       onLeave: (k['onLeave'] as num?)?.toInt() ?? 0,
+      absent: (k['absent'] as num?)?.toInt() ?? 0,
       toReview: (k['toReview'] as num?)?.toInt() ?? 0,
       headcount: (k['headcount'] as num?)?.toInt() ?? 0,
       roster: [
@@ -456,7 +485,9 @@ class TeamRoster {
   final String date;
   final int present;
   final int late;
+  final int notIn;
   final int onLeave;
+  final int absent;
   final int toReview;
   final int headcount;
   final List<TeamRosterRow> roster;

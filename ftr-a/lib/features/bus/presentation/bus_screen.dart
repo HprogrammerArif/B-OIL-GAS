@@ -194,6 +194,131 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     ),
   ];
 
+  /// Inbound keeps the plant routes. Outbound keeps the rest.
+  List<
+    ({
+      String code,
+      String route,
+      String plate,
+      int occupied,
+      int vacated,
+      int capacity,
+      String status,
+      String driver,
+    })
+  >
+  get _visibleBuses {
+    final chosen = _fleetBuses.where((b) {
+      final toPlant = b.route.contains('Plant');
+      return _inbound ? toPlant : !toPlant;
+    }).toList();
+    return chosen.isEmpty ? _fleetBuses : chosen;
+  }
+
+  BusRepository get _bus => ref.read(busRepositoryProvider);
+
+  Future<BusRoute?> _selectedRoute() async {
+    final routes = await _bus.routes();
+    if (routes.isEmpty) return null;
+    return routes[_selectedBusIndex.clamp(0, routes.length - 1)];
+  }
+
+  void _busFail(String message) {
+    if (!mounted) return;
+    AppToast.show(context, message, tone: StatusTone.danger);
+  }
+
+  Future<void> _requestSwap(int seatNo) async {
+    try {
+      final route = await _selectedRoute();
+      if (route == null) {
+        _busFail('No bus route is loaded.');
+        return;
+      }
+      await _bus.requestSwap(route.id, seatNo);
+      if (!mounted) return;
+      AppToast.show(context, 'Swap request sent for seat $seatNo.');
+    } on ApiException catch (e) {
+      _busFail(e.message);
+    }
+  }
+
+  Future<void> _joinSelected() async {
+    try {
+      final route = await _selectedRoute();
+      if (route == null) {
+        _busFail('No bus route is loaded.');
+        return;
+      }
+      await _bus.join(route.id);
+      ref.invalidate(busRoutesProvider);
+      if (!mounted) return;
+      AppToast.show(context, 'You are on the waitlist for ${route.code}.');
+    } on ApiException catch (e) {
+      _busFail(e.message);
+    }
+  }
+
+  Future<void> _broadcast(String message) async {
+    if (message.length < 5) {
+      _busFail('Write at least a short sentence.');
+      return;
+    }
+    try {
+      final route = await _selectedRoute();
+      await _bus.broadcast(message: message, routeId: route?.id);
+      if (!mounted) return;
+      AppToast.show(context, 'Alert sent on ${route?.code ?? 'the route'}.');
+    } on ApiException catch (e) {
+      _busFail(e.message);
+    }
+  }
+
+  Future<void> _markBoarded() async {
+    final seat = [for (var n = 1; n <= 52; n++) n]
+        .where((n) => !_boardedSeats.contains(n))
+        .firstOrNull;
+    if (seat == null) {
+      _busFail('Every seat is already marked boarded.');
+      return;
+    }
+    try {
+      final route = await _selectedRoute();
+      if (route == null) {
+        _busFail('No bus route is loaded.');
+        return;
+      }
+      await _bus.setSeat(route.id, seat, boarded: true);
+      if (!mounted) return;
+      setState(() => _boardedSeats.add(seat));
+      AppToast.show(context, 'Seat $seat marked boarded on ${route.code}.');
+    } on ApiException catch (e) {
+      _busFail(e.message);
+    }
+  }
+
+  Future<void> _swapBus() async {
+    try {
+      final routes = await _bus.routes();
+      if (routes.length < 2) {
+        _busFail('There is no other bus to assign.');
+        return;
+      }
+      final index = _selectedBusIndex.clamp(0, routes.length - 1);
+      final current = routes[index];
+      final other = routes[(index + 1) % routes.length];
+      await _bus.reassignBus(current.id, other.busNo);
+      ref.invalidate(busRoutesProvider);
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        '${other.busNo} is now assigned to ${current.code}.',
+      );
+    } on ApiException catch (e) {
+      _busFail(e.message);
+    }
+  }
+
   Future<void> _refresh() async {
     ref
       ..invalidate(busRoutesProvider)
@@ -368,12 +493,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         : 'Request Seat Swap with Colleague',
                     onPressed: () {
                       Navigator.pop(ctx);
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'আসন বিনিময়ের অনুরোধ পাঠানো হয়েছে'
-                            : 'Seat swap request initiated',
-                      );
+                      unawaited(_requestSwap(seatNo));
                     },
                   ),
                   const SizedBox(height: Space.xs),
@@ -413,15 +533,9 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         ? 'একক শিফট-পাস বুক করুন (আজকের জন্য)'
                         : 'Book Single Shift Pass (Today Only)',
                     onPressed: () {
-                      Haptics.success();
+                      Haptics.tap();
                       Navigator.pop(ctx);
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'আসন $seatNo এর একক শিফট-পাস নিশ্চিত হয়েছে!'
-                            : 'Confirmed! Single shift pass booked for Seat $seatNo',
-                        tone: StatusTone.success,
-                      );
+                      unawaited(_joinSelected());
                     },
                   ),
                   const SizedBox(height: Space.xs),
@@ -431,12 +545,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         : 'Apply for Monthly Permanent Seat',
                     onPressed: () {
                       Navigator.pop(ctx);
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'মাসিক বরাদ্দের আবেদন জমা হয়েছে'
-                            : 'Monthly seat application submitted',
-                      );
+                      unawaited(_joinSelected());
                     },
                   ),
                 ] else ...[
@@ -458,12 +567,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         : 'Propose Mutual Seat Swap',
                     onPressed: () {
                       Navigator.pop(ctx);
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'আসন বিনিময়ের প্রস্তাব পাঠানো হয়েছে'
-                            : 'Seat swap proposal sent to occupant',
-                      );
+                      unawaited(_requestSwap(seatNo));
                     },
                   ),
                 ],
@@ -550,15 +654,10 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                     ? 'সকলকে নোটিফিকেশন পাঠান'
                     : 'Broadcast Alert Now',
                 onPressed: () {
+                  final message = msgCtrl.text.trim();
                   Haptics.heavy();
                   Navigator.pop(ctx);
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'রুটের ৪৮ জন যাত্রীকে বার্তা পাঠানো হয়েছে'
-                        : 'Alert broadcast to 48 route passengers!',
-                    tone: StatusTone.success,
-                  );
+                  unawaited(_broadcast(message));
                 },
               ),
             ],
@@ -574,16 +673,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canSeat = session?.can('bus:seat-self') ?? false;
-    final canManage =
-        (session?.can('bus:manage') ?? false) ||
-        (session?.roleKeys.any(
-              (r) =>
-                  r == 'TRANSPORT_ADMIN' ||
-                  r == 'HR_ADMIN' ||
-                  r == 'CHAIRMAN' ||
-                  r == 'PLANT_GM',
-            ) ??
-            false);
+    final canManage = session?.can('bus:manage') ?? false;
     final scheme = Theme.of(context).colorScheme;
     final effectiveTab = (!canSeat && _tab == _BusTab.mySeat)
         ? _BusTab.fleetAndDeck
@@ -634,7 +724,10 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   InkWell(
                     onTap: () {
                       Haptics.tap();
-                      setState(() => _inbound = !_inbound);
+                      setState(() {
+                        _inbound = !_inbound;
+                        _selectedBusIndex = 0;
+                      });
                     },
                     borderRadius: BorderRadius.circular(6),
                     child: Container(
@@ -762,7 +855,9 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
   Widget _buildFleetAndDeckTab(BuildContext context, bool bangla) {
     final scheme = Theme.of(context).colorScheme;
-    final activeBus = _fleetBuses[_selectedBusIndex];
+    final buses = _visibleBuses;
+    final index = _selectedBusIndex.clamp(0, buses.length - 1);
+    final activeBus = buses[index];
 
     return ListView(
       padding: const EdgeInsets.all(Space.md),
@@ -781,7 +876,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
             ),
             const SizedBox(width: Space.xs),
             Text(
-              '${_selectedBusIndex + 1} of 10',
+              '${index + 1} of ${buses.length}',
               style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
           ],
@@ -791,10 +886,10 @@ class _BusScreenState extends ConsumerState<BusScreen> {
           height: 80,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: _fleetBuses.length,
+            itemCount: buses.length,
             separatorBuilder: (_, _) => const SizedBox(width: Space.xs),
             itemBuilder: (context, i) {
-              final b = _fleetBuses[i];
+              final b = buses[i];
               final isSel = i == _selectedBusIndex;
               return InkWell(
                 onTap: () {
@@ -1220,16 +1315,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                     ),
                     onPressed: () {
                       Haptics.heavy();
-                      setState(
-                        () => _boardedSeats.add(_boardedSeats.length + 1),
-                      );
-                      AppToast.show(
-                        context,
-                        bangla
-                            ? 'যাত্রী কিউআর স্ক্যান সফল · বোর্ডিং সম্পন্ন'
-                            : 'Passenger QR scanned successfully · Boarded!',
-                        tone: StatusTone.success,
-                      );
+                      unawaited(_markBoarded());
                     },
                     icon: const Icon(Icons.qr_code_scanner, size: 16),
                     label: Text(
@@ -1369,13 +1455,8 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          AppToast.show(
-                            context,
-                            bangla
-                                ? 'বাস পুনরায় বরাদ্দ সফল'
-                                : 'Bus vehicle reassigned successfully',
-                            tone: StatusTone.success,
-                          );
+                          Haptics.tap();
+                          unawaited(_swapBus());
                         },
                         icon: const Icon(Icons.swap_horiz, size: 16),
                         label: Text(bangla ? 'বাস বদল' : 'Swap Bus'),

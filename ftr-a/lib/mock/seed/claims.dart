@@ -103,9 +103,36 @@ Json _claim({
   };
 }
 
-/// Claims and advances for the Employee persona (EMP-1042) plus a tour
-/// advance that is waiting for Finance. Pending ones go through the workflow.
+/// A plant officer who can file a claim, without joining the demo menu.
+void _ensureClaimant(MockStore store, String code) {
+  final emp = store.get(Col.employees, empId(code))!;
+  final uid = userIdFor(code);
+  emp['userId'] = uid;
+  store.put(Col.employees, emp);
+  if (store.get(Col.users, uid) != null) return;
+  store.put(Col.users, {
+    'id': uid,
+    'email': emp['email'],
+    'phone': normalisePhone(emp.str('phone')),
+    'employeeId': emp['id'],
+    'roles': ['EMPLOYEE'],
+    'passwordDigest': demoPasswordSha256,
+    'preferredLang': 'EN',
+    'mfaEnabled': false,
+    'lastLoginAt': null,
+    'failedAttempts': 0,
+    'lockedUntil': null,
+    'isActive': true,
+  });
+}
+
+/// Claims for the employee persona, plus three plant claims.
+/// Khadija and Nazmul report to the Plant GM, so their open step is his.
+/// Mizanur reports to the transport supervisor, so his stays on the plant list.
 void seedClaims(MockStore store) {
+  for (final code in ['EMP-0640', 'EMP-1104', 'EMP-0914']) {
+    _ensureClaimant(store, code);
+  }
   final claims = <Json>[
     _claim(
       id: 'clm_0031',
@@ -251,19 +278,79 @@ void seedClaims(MockStore store) {
       comment: 'Visit was not on the approved tour plan. Please resubmit with the plan attached.',
       lines: [_line('e1', 'TICKET', 56, 'AC bus', 1200, receipt: true)],
     ),
+    _claim(
+      id: 'clm_0064',
+      no: 'CNV-2026-0064',
+      type: 'CONVEYANCE',
+      emp: 'EMP-0640',
+      purpose: 'Quality lab sample run to the jetty',
+      status: 'PENDING_MANAGER',
+      startAgo: 3,
+      endAgo: 2,
+      createdDaysAgo: 2,
+      lines: [
+        _line('k1', 'CNG', 3, 'Lab to jetty, morning', 1800, declaration: true),
+        _line('k2', 'CNG', 2, 'Jetty back to the lab', 650, declaration: true),
+      ],
+    ),
+    _claim(
+      id: 'clm_0110',
+      no: 'CNV-2026-0110',
+      type: 'CONVEYANCE',
+      emp: 'EMP-1104',
+      purpose: 'Tank-farm safety inspection',
+      status: 'PENDING_MANAGER',
+      startAgo: 2,
+      endAgo: 1,
+      createdDaysAgo: 1,
+      lines: [
+        _line(
+          'n1',
+          'CNG',
+          2,
+          'Plant gate to tank farm',
+          1400,
+          declaration: true,
+        ),
+        _line(
+          'n2',
+          'CNG',
+          1,
+          'Return to the safety office',
+          800,
+          declaration: true,
+        ),
+      ],
+    ),
+    _claim(
+      id: 'clm_0091',
+      no: 'CNV-2026-0091',
+      type: 'CONVEYANCE',
+      emp: 'EMP-0914',
+      purpose: 'Evening gate-duty travel',
+      status: 'PENDING_MANAGER',
+      startAgo: 4,
+      endAgo: 4,
+      createdDaysAgo: 3,
+      lines: [
+        _line('m1', 'CNG', 4, 'Home to the main gate', 480, declaration: true),
+      ],
+    ),
   ];
   for (final c in claims) {
     ClaimEngine.recompute(store, c);
     store.put(Col.claims, c);
   }
 
-  final pending = store.get(Col.claims, 'clm_0034')!;
-  final owner = store.get(Col.employees, pending.str('employeeId'))!;
-  ClaimEngine.fileWorkflow(
-    store,
-    store.get(Col.users, owner.str('userId'))!,
-    pending,
-  );
+  for (final id in ['clm_0034', 'clm_0064', 'clm_0110', 'clm_0091']) {
+    final pending = store.get(Col.claims, id)!;
+    final owner = store.get(Col.employees, pending.str('employeeId'))!;
+    ClaimEngine.fileWorkflow(
+      store,
+      store.get(Col.users, owner.str('userId'))!,
+      pending,
+    );
+  }
 
   final today = WorkCalendar.today();
   String at(int daysAgo) => WorkCalendar.atTime(

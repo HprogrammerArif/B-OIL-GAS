@@ -1454,23 +1454,20 @@ class _OverviewTab extends ConsumerWidget {
                             style: FilledButton.styleFrom(
                               visualDensity: VisualDensity.compact,
                             ),
-                            onPressed: () async {
-                              Haptics.success();
-                              await ref
-                                  .read(approvalRepositoryProvider)
-                                  .approve(item.instanceId);
-                              ref
-                                ..invalidate(approvalInboxProvider)
-                                ..invalidate(dashboardMeProvider);
-                              if (context.mounted) {
-                                AppToast.show(
-                                  context,
-                                  bangla
-                                      ? 'ফাইলটি ডিজিটাল স্বাক্ষরসহ অনুমোদিত হয়েছে'
-                                      : 'File e-signed and approved',
-                                  tone: StatusTone.success,
-                                );
-                              }
+                            onPressed: () {
+                              Haptics.tap();
+                              unawaited(
+                                context.push(
+                                  item.objectType == 'NoteSheet'
+                                      ? AppRoutes.noteSheetDetail(
+                                          item.objectId,
+                                          sign: true,
+                                        )
+                                      : AppRoutes.approvalDetail(
+                                          item.instanceId,
+                                        ),
+                                ),
+                              );
                             },
                             child: Text(
                               bangla ? 'ডিজিটাল স্বাক্ষর' : 'E-Sign Now',

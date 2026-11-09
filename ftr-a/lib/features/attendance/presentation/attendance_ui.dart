@@ -9,6 +9,7 @@ String dayStatusLabel(AppL10n l10n, DayStatus? s) => switch (s) {
   DayStatus.earlyLeave => l10n.attStatusEarlyLeave,
   DayStatus.halfDay => l10n.attStatusHalfDay,
   DayStatus.absent => l10n.attStatusAbsent,
+  DayStatus.notIn => l10n.attStatusNotIn,
   DayStatus.onLeave => l10n.attStatusOnLeave,
   DayStatus.holiday => l10n.attStatusHoliday,
   DayStatus.weekend => l10n.attStatusWeekend,
@@ -23,7 +24,10 @@ StatusTone dayStatusTone(DayStatus? s) => switch (s) {
   DayStatus.halfDay => StatusTone.warning,
   DayStatus.absent => StatusTone.danger,
   DayStatus.onLeave => StatusTone.info,
-  DayStatus.holiday || DayStatus.weekend || null => StatusTone.neutral,
+  DayStatus.notIn ||
+  DayStatus.holiday ||
+  DayStatus.weekend ||
+  null => StatusTone.neutral,
 };
 
 String regTypeLabel(AppL10n l10n, RegularisationType t) => switch (t) {

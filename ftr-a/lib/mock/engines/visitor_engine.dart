@@ -1065,6 +1065,7 @@ abstract final class VisitEngine {
         'fullName': visitor['fullName'],
         'organisation': visitor['organisation'],
         'phoneMasked': _maskPhone(visitor.strOrNull('phone')),
+        'phone': visitor.strOrNull('phone'),
         'idProofType': visitor['idProofType'],
         'idProofLast4': visitor['idProofLast4'],
       },

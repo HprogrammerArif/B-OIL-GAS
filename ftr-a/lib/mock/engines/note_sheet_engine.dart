@@ -208,7 +208,156 @@ abstract final class NoteSheetEngine {
       ..['recommendationNote'] = (note as String?)?.trim()
       ..['quotes'] = quotes
       ..['updatedAt'] = store.nowIso();
+    if (status == 'DRAFT' && body.containsKey('signatoryUserIds')) {
+      sheet['signatoryUserIds'] = _signers(
+        store,
+        sheet,
+        body['signatoryUserIds'],
+      );
+    }
+    if (status == 'DRAFT' && body.containsKey('signatoryCustom')) {
+      sheet['signatoryCustom'] = body['signatoryCustom'] == true;
+    }
     store.put(Col.noteSheets, sheet);
+  }
+
+  /// The writer's order. Empty is allowed on a draft. Duplicates and the
+  /// writer themselves are refused.
+  static List<String> _signers(MockStore store, Json sheet, Object? raw) {
+    if (raw is! List) {
+      throw validationError('signatoryUserIds', 'Choose who should sign');
+    }
+    final me = sheet.str('initiatorUserId');
+    final ids = <String>[];
+    final seen = <String>{};
+    for (final e in raw) {
+      if (e is! String || e.isEmpty) {
+        throw validationError('signatoryUserIds', 'Choose who should sign');
+      }
+      if (e == me) {
+        throw policyViolation('SIGNER_SELF', 'You cannot sign your own file');
+      }
+      if (!seen.add(e)) {
+        throw policyViolation(
+          'SIGNER_DUPLICATE',
+          'Each person can sign only once',
+        );
+      }
+      final user = store.get(Col.users, e);
+      if (user == null || user['isActive'] != true) {
+        throw policyViolation(
+          'SIGNER_UNKNOWN',
+          'Choose someone who works here',
+        );
+      }
+      ids.add(e);
+    }
+    return ids;
+  }
+
+  /// Null keeps the amount template. A saved list, even an empty one, is the
+  /// writer's order and must name someone. A returned file keeps the people
+  /// already on its route.
+  static List<String>? _chosenSigners(
+    MockStore store,
+    Json sheet,
+    String status,
+  ) {
+    if (status == 'RETURNED') return _routeAlreadyFiled(store, sheet);
+    if (status != 'DRAFT' || !sheet.containsKey('signatoryUserIds')) {
+      return null;
+    }
+    final ids = sheet.strList('signatoryUserIds');
+    if (ids.isEmpty) {
+      throw policyViolation(
+        'SIGNERS_REQUIRED',
+        'Add at least one person to sign this',
+      );
+    }
+    return ids;
+  }
+
+  static List<String>? _routeAlreadyFiled(MockStore store, Json sheet) {
+    final instId = sheet.strOrNull('workflowInstanceId');
+    if (instId == null) return null;
+    final steps = store
+        .all(Col.workflowSteps)
+        .where((s) => s['instanceId'] == instId)
+        .toList();
+    if (steps.isEmpty) return null;
+    final round = steps
+        .map((s) => s.intVal('round'))
+        .reduce((a, b) => a > b ? a : b);
+    final current = steps.where((s) => s.intVal('round') == round).toList()
+      ..sort((a, b) => a.intVal('stepNo').compareTo(b.intVal('stepNo')));
+    final ids = <String>[];
+    for (final step in current) {
+      if (step['status'] == 'SKIPPED') continue;
+      final people = step.strList('approverUserIds');
+      if (people.isEmpty || ids.contains(people.first)) continue;
+      ids.add(people.first);
+    }
+    return ids.isEmpty ? null : ids;
+  }
+
+  /// Standard route for this writer and amount (doc 06 §4.6). One person per
+  /// step. The writer is left out, and the same person is not asked twice.
+  static List<Json> suggestedSigners(
+    MockStore store,
+    AuthContext auth,
+    num amount,
+  ) {
+    final me = auth.user.str('id');
+    final site = auth.employee.obj('site').str('id');
+    final ids = <String>[];
+    void take(List<String> found) {
+      for (final id in found) {
+        if (id == me || ids.contains(id)) continue;
+        ids.add(id);
+        return;
+      }
+    }
+
+    take(
+      WorkflowEngine.resolveApprovers(
+        store,
+        {'approverRule': 'DEPARTMENT_HEAD'},
+        me,
+        const <String, Object?>{},
+      ),
+    );
+    if (amount > 0) {
+      take(
+        WorkflowEngine.resolveApprovers(
+          store,
+          {'approverRule': 'ROLE', 'approverRef': 'FINANCE'},
+          me,
+          const <String, Object?>{},
+        ),
+      );
+    }
+    if (amount > 500000) {
+      final role = site == 'site_hq' ? 'DIRECTOR' : 'PLANT_GM';
+      take(
+        WorkflowEngine.resolveApprovers(
+          store,
+          {'approverRule': 'ROLE', 'approverRef': role},
+          me,
+          const <String, Object?>{},
+        ),
+      );
+    }
+    if (amount > 2500000) {
+      take(
+        WorkflowEngine.resolveApprovers(
+          store,
+          {'approverRule': 'ROLE', 'approverRef': 'CHAIRMAN'},
+          me,
+          const <String, Object?>{},
+        ),
+      );
+    }
+    return [for (final id in ids) _signerCard(store, id)];
   }
 
   // ---- Submit ----
@@ -298,6 +447,7 @@ abstract final class NoteSheetEngine {
         'urgency': sheet['urgency'],
         'category': 'PROCUREMENT',
       },
+      signerUserIds: _chosenSigners(store, sheet, status),
     );
     sheet
       ..['workflowInstanceId'] = inst['id']
@@ -524,6 +674,16 @@ abstract final class NoteSheetEngine {
       WorkflowEngine.personRef(store, userId) ??
       {'userId': userId, 'name': '', 'nameBn': '', 'title': null};
 
+  static Json _signerCard(MockStore store, String userId) {
+    final person = _person(store, userId);
+    return {
+      'userId': person['userId'],
+      'name': person['name'],
+      'nameBn': person['nameBn'],
+      'title': person['title'],
+    };
+  }
+
   static Json wire(
     MockStore store,
     Json s, {
@@ -603,7 +763,13 @@ abstract final class NoteSheetEngine {
         ]
         ..['signatures'] = s.objList('signatures')
         ..['verificationCode'] = s['verificationCode']
-        ..['finalHash'] = s['finalHash'];
+        ..['finalHash'] = s['finalHash']
+        ..['signatoryUserIds'] = s['signatoryUserIds'] ?? const <String>[]
+        ..['signatoryCustom'] = s['signatoryCustom'] == true
+        ..['plannedSigners'] = [
+          for (final id in s.strList('signatoryUserIds'))
+            _signerCard(store, id),
+        ];
     }
     return out;
   }

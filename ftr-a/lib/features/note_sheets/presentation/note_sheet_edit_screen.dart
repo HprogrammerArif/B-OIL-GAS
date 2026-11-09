@@ -9,6 +9,8 @@ import 'package:bogcl_oneops/features/note_sheets/data/note_sheet_repository.dar
 import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_providers.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/quote_sheet.dart';
+import 'package:bogcl_oneops/features/people/data/people_repository.dart';
+import 'package:bogcl_oneops/features/people/domain/person_pick.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
@@ -93,6 +95,11 @@ class _FormState extends ConsumerState<_Form> {
   late String _urgency = widget.existing?.urgency ?? 'NORMAL';
   late String _confidentiality = widget.existing?.confidentiality ?? 'INTERNAL';
   late List<Quote> _quotes = [...?widget.existing?.quotes];
+  late List<RouteSigner> _signers = widget.existing?.signatoryCustom == true
+      ? [...widget.existing!.plannedSigners]
+      : [];
+  late bool _signersCustom = widget.existing?.signatoryCustom ?? false;
+  Timer? _previewDebounce;
   bool _busy = false;
   String? _error;
 
@@ -109,10 +116,20 @@ class _FormState extends ConsumerState<_Form> {
       _title.text.trim().length >= 5 &&
       _subject.text.trim().length >= 3 &&
       (_returned || _justification.text.trim().length >= 10) &&
-      (!_quotesRequired || _quotes.length >= minQuotes);
+      (!_quotesRequired || _quotes.length >= minQuotes) &&
+      (_returned || _signers.isNotEmpty);
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_returned && !_signersCustom) {
+      unawaited(_loadPreview());
+    }
+  }
 
   @override
   void dispose() {
+    _previewDebounce?.cancel();
     _title.dispose();
     _subject.dispose();
     _amount.dispose();
@@ -130,6 +147,8 @@ class _FormState extends ConsumerState<_Form> {
     if (!_returned) 'justification': _justification.text.trim(),
     'recommendationNote': _needsReco ? _reco.text.trim() : '',
     'quotes': [for (final q in _quotes) q.toJson()],
+    if (!_returned) 'signatoryUserIds': [for (final s in _signers) s.userId],
+    if (!_returned) 'signatoryCustom': _signersCustom,
   };
 
   /// Quote rules, checked before sending (BR-03-06).
@@ -157,6 +176,14 @@ class _FormState extends ConsumerState<_Form> {
         return;
       }
     }
+    if (!_returned && !_signersCustom) {
+      _previewDebounce?.cancel();
+      await _loadPreview();
+    }
+    if (send && !_returned && _signers.isEmpty) {
+      setState(() => _error = l10n.nsRouteNeedOne);
+      return;
+    }
     setState(() => _busy = true);
     final repo = ref.read(noteSheetRepositoryProvider);
     try {
@@ -181,6 +208,10 @@ class _FormState extends ConsumerState<_Form> {
           'QUOTES_REQUIRED' => l10n.nsErrQuotesMin,
           'RECOMMENDATION_REQUIRED' => l10n.nsErrQuotesPick,
           'RECOMMENDATION_NOTE_REQUIRED' => l10n.nsErrQuotesNote,
+          'SIGNERS_REQUIRED' => l10n.nsRouteNeedOne,
+          'SIGNER_SELF' => l10n.nsErrSignerSelf,
+          'SIGNER_DUPLICATE' => l10n.nsErrSignerDup,
+          'SIGNER_UNKNOWN' => l10n.nsErrSignerMissing,
           _ =>
             e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
                 ? l10n.claimErrOffline
@@ -234,6 +265,212 @@ class _FormState extends ConsumerState<_Form> {
     });
   }
 
+  void _onAmountChanged() {
+    setState(() {});
+    if (_returned || _signersCustom) return;
+    _previewDebounce?.cancel();
+    _previewDebounce = Timer(const Duration(milliseconds: 350), () {
+      unawaited(_loadPreview());
+    });
+  }
+
+  Future<void> _loadPreview() async {
+    final amount = _amountValue;
+    try {
+      final list = await ref
+          .read(noteSheetRepositoryProvider)
+          .routePreview(amount);
+      if (!mounted || _signersCustom || _returned || amount != _amountValue) {
+        return;
+      }
+      setState(() => _signers = list);
+    } on ApiException {
+      // The writer can still add someone.
+    }
+  }
+
+  void _restoreSuggested() {
+    setState(() => _signersCustom = false);
+    unawaited(_loadPreview());
+  }
+
+  void _removeSigner(int index) {
+    if (_signers.length < 2) return;
+    setState(() {
+      _signers = [..._signers]..removeAt(index);
+      _signersCustom = true;
+    });
+  }
+
+  void _reorderSigners(int oldIndex, int newIndex) {
+    setState(() {
+      final next = [..._signers];
+      final moved = next.removeAt(oldIndex);
+      next.insert(newIndex, moved);
+      _signers = next;
+      _signersCustom = true;
+    });
+  }
+
+  Future<void> _addSigner() async {
+    final l10n = context.l10n;
+    final taken = {for (final s in _signers) s.userId};
+    final pick = await showModalBottomSheet<PersonPick>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => _AddSignerSheet(
+        taken: taken,
+        search: (q) => ref.read(peopleRepositoryProvider).search(q),
+      ),
+    );
+    if (!mounted || pick == null) return;
+    if (taken.contains(pick.person.userId)) {
+      AppToast.show(context, l10n.nsRouteDuplicate, tone: StatusTone.warning);
+      return;
+    }
+    setState(() {
+      _signers = [
+        ..._signers,
+        RouteSigner(
+          userId: pick.person.userId,
+          name: pick.person.name,
+          nameBn: pick.person.nameBn,
+          title: pick.person.title,
+        ),
+      ];
+      _signersCustom = true;
+    });
+  }
+
+  Widget _signersSection(AppL10n l10n, bool bangla) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return EnterpriseSectionCard(
+      stepNumber: 3,
+      icon: Icons.draw_outlined,
+      title: l10n.nsWhoTitle,
+      subtitle: _returned
+          ? l10n.nsRouteKept
+          : _signersCustom
+          ? l10n.nsRouteCustom
+          : l10n.nsRouteSuggested,
+      children: [
+        if (_returned)
+          const SizedBox.shrink()
+        else ...[
+          if (_signers.isEmpty)
+            Text(
+              l10n.nsRouteEmpty,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            )
+          else
+            ReorderableListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              onReorderItem: _reorderSigners,
+              children: [
+                for (var i = 0; i < _signers.length; i++)
+                  _signerRow(l10n, bangla, i),
+              ],
+            ),
+          if (_signersCustom)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: _restoreSuggested,
+                child: Text(l10n.nsRouteRestore),
+              ),
+            ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: () => unawaited(_addSigner()),
+              icon: const Icon(Icons.person_add_alt),
+              label: Text(l10n.nsRouteAdd),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _signerRow(AppL10n l10n, bool bangla, int index) {
+    final signer = _signers[index];
+    final last = index == _signers.length - 1;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final job = signer.title ?? '';
+    return Material(
+      key: ValueKey(signer.userId),
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Space.xs),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ReorderableDragStartListener(
+              index: index,
+              child: Padding(
+                padding: const EdgeInsets.only(top: Space.xs, right: Space.sm),
+                child: Icon(
+                  Icons.drag_handle,
+                  color: cs.onSurfaceVariant,
+                  semanticLabel: l10n.nsRouteDrag,
+                ),
+              ),
+            ),
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: cs.primaryContainer,
+              child: Text(
+                '${index + 1}',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: cs.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(width: Space.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    signer.display(bangla: bangla),
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  if (job.isNotEmpty)
+                    Text(
+                      job,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  if (last)
+                    Text(
+                      l10n.nsRouteCloses,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: cs.primary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (_signers.length > 1)
+              IconButton(
+                tooltip: l10n.nsRouteRemove,
+                onPressed: () => _removeSigner(index),
+                icon: const Icon(Icons.close),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -262,6 +499,9 @@ class _FormState extends ConsumerState<_Form> {
         loading: _busy,
         isReady: _isReady,
         errorMessage: _error,
+        missingMessage: !_returned && _signers.isEmpty
+            ? l10n.nsRouteNeedOne
+            : l10n.nsRouteFields,
         secondaryLabel: _returned ? l10n.nsSaveChanges : l10n.nsSaveDraft,
         onSecondaryPressed: () => unawaited(_save(send: false)),
         onPrimaryPressed: () => unawaited(_save(send: true)),
@@ -425,7 +665,7 @@ class _FormState extends ConsumerState<_Form> {
                   helper: l10n.nsFieldAmountHelp,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => _onAmountChanged(),
                 ),
                 if (!_returned) ...[
                   const SizedBox(height: Space.md),
@@ -564,32 +804,121 @@ class _FormState extends ConsumerState<_Form> {
               ],
             ),
             const SizedBox(height: Space.md),
-            EnterpriseWorkflowCard(
-              title: bangla
-                  ? 'অনুমোদন চেইন (ডিওএ রাউটিং)'
-                  : 'Approval Chain (DOA Financial Routing)',
-              steps: [
-                (
-                  Icons.edit_document,
-                  bangla ? 'উদ্যোক্তা' : 'Initiator',
-                  bangla ? 'প্রস্তাব দাখিল' : 'Draft & Sign',
-                ),
-                (
-                  Icons.supervisor_account_outlined,
-                  bangla ? 'বিভাগীয় প্রধান / জিএম' : 'HOD / Plant GM',
-                  bangla ? 'কারিগরি যাচাই' : 'Technical Review',
-                ),
-                (
-                  Icons.verified_outlined,
-                  _amountValue >= 500000
-                      ? (bangla ? 'চেয়ারম্যান' : 'Chairman')
-                      : (bangla ? 'অর্থ বিভাগ' : 'Finance Sanction'),
-                  bangla ? 'চূড়ান্ত অনুমোদন' : 'Final Sanction',
-                ),
-              ],
-              slaNote: bangla
-                  ? 'আর্থিক সীমা অনুযায়ী নোট শিটটি স্বয়ংক্রিয়ভাবে যথাযথ কর্তৃপক্ষের নিকট প্রেরিত হবে।'
-                  : 'Automatically routed by BOGCL Delegation of Authority (DOA) financial thresholds.',
+            _signersSection(l10n, bangla),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddSignerSheet extends StatefulWidget {
+  const _AddSignerSheet({required this.search, required this.taken});
+
+  final Future<List<PersonPick>> Function(String query) search;
+  final Set<String> taken;
+
+  @override
+  State<_AddSignerSheet> createState() => _AddSignerSheetState();
+}
+
+class _AddSignerSheetState extends State<_AddSignerSheet> {
+  final _query = TextEditingController();
+  Timer? _debounce;
+  List<PersonPick> _people = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_run(''));
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _query.dispose();
+    super.dispose();
+  }
+
+  Future<void> _run(String query) async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final people = await widget.search(query);
+      if (!mounted) return;
+      setState(() {
+        _people = [
+          for (final p in people)
+            if (!widget.taken.contains(p.person.userId)) p,
+        ];
+        _loading = false;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.message;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final theme = Theme.of(context);
+    final media = MediaQuery.of(context);
+    final height = (media.size.height - media.viewInsets.bottom) * 0.55;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Space.lg,
+        0,
+        Space.lg,
+        Space.lg + media.viewInsets.bottom,
+      ),
+      child: SizedBox(
+        height: height.clamp(240, 480),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.nsRouteAdd, style: theme.textTheme.titleMedium),
+            const SizedBox(height: Space.md),
+            AppTextField(
+              label: l10n.nsRouteAddHint,
+              controller: _query,
+              onChanged: (value) {
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 300), () {
+                  unawaited(_run(value.trim()));
+                });
+              },
+            ),
+            const SizedBox(height: Space.sm),
+            Expanded(
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Text(_error!)
+                  : _people.isEmpty
+                  ? Text(l10n.nsRouteNone)
+                  : ListView.builder(
+                      itemCount: _people.length,
+                      itemBuilder: (context, i) {
+                        final person = _people[i];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(person.person.display(bangla: bangla)),
+                          subtitle: Text(
+                            person.person.title ?? person.where(bangla: bangla),
+                          ),
+                          onTap: () => Navigator.pop(context, person),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
