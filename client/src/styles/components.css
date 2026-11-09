@@ -1243,7 +1243,7 @@
   align-items: stretch;
 }
 .guest-two-col-layout > * { min-width: 0; }
-.guest-page-head {
+.page-sticky-head {
   position: sticky;
   top: var(--topbar-height, 68px);
   z-index: 21;

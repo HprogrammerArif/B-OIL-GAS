@@ -614,7 +614,7 @@ export default function ParcelView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. TOP HEADER & INSTANT SEARCH HERO */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex-between mb-4" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
+      <div className="flex-between mb-4 page-sticky-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
