@@ -38,14 +38,18 @@ class AuthRepository {
     return {'id': id, 'name': 'Android device', 'platform': 'ANDROID'};
   }
 
-  Future<AuthTokens> login(String identifier, String password) async {
+  Future<AuthTokens> login(
+    String identifier,
+    String password, {
+    bool rememberMe = true,
+  }) async {
     try {
       final res = await _dio.post<Object?>(
         '/auth/login',
         data: {
           'identifier': identifier.trim(),
           'password': password,
-          'rememberMe': true,
+          'rememberMe': rememberMe,
           'device': await _device(),
         },
       );

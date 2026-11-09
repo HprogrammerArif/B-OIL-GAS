@@ -81,88 +81,90 @@ class HomeKpiGrid extends StatelessWidget {
     final displayKpis = kpis.take(4).toList();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Space.lg,
-        vertical: Space.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisExtent: 90,
-          crossAxisSpacing: Space.sm,
-          mainAxisSpacing: Space.sm,
+          mainAxisExtent: 96,
+          crossAxisSpacing: Space.md,
+          mainAxisSpacing: Space.md,
         ),
         itemCount: displayKpis.length,
         itemBuilder: (context, index) {
           final k = displayKpis[index];
           final meta = _meta(k.key, scheme);
-          return Material(
-            color: scheme.surface,
-            shape: RoundedRectangleBorder(
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.surface,
               borderRadius: BorderRadius.circular(Corner.lg),
-              side: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.6),
-              ),
+              boxShadow: cardShadow(scheme.shadow),
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(Corner.lg),
-              onTap: onTapKpi == null ? null : () => onTapKpi!(k),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.md,
-                  vertical: Space.sm,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: meta.color.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(Corner.sm),
-                          ),
-                          child: Icon(meta.icon, size: 15, color: meta.color),
-                        ),
-                        const SizedBox(width: Space.xs),
-                        Expanded(
-                          child: Text(
-                            _formatValue(k, bangla),
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: meta.color,
-                              fontSize: 21,
+            child: Material(
+              color: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Corner.lg),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(Corner.lg),
+                onTap: onTapKpi == null ? null : () => onTapKpi!(k),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Space.md,
+                    vertical: Space.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: meta.color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(Corner.sm),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            child: Icon(meta.icon, size: 15, color: meta.color),
                           ),
-                        ),
-                        if (onTapKpi != null)
-                          Icon(
-                            Icons.chevron_right,
-                            size: 16,
-                            color: scheme.onSurfaceVariant.withValues(
-                              alpha: 0.6,
+                          const SizedBox(width: Space.xs),
+                          Expanded(
+                            child: Text(
+                              _formatValue(k, bangla),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: meta.color,
+                                fontSize: 21,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      k.label(bangla: bangla),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
+                          if (onTapKpi != null)
+                            Icon(
+                              Icons.chevron_right,
+                              size: 16,
+                              color: scheme.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
+                            ),
+                        ],
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        k.label(bangla: bangla),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

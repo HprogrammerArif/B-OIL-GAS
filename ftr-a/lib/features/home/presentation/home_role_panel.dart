@@ -1,5 +1,6 @@
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/app/shell_scaffold.dart';
+import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/dashboards/domain/dashboard_models.dart';
@@ -70,6 +71,7 @@ class HomeRolePanel extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: Space.xl,
       children: [
         if (firstNeed != null) NeedsYouCard(need: firstNeed),
         if (dashboard.kpis.isNotEmpty)

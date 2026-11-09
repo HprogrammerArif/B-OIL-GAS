@@ -227,6 +227,7 @@ class _HomeScaffold extends ConsumerWidget {
     final bangla = context.isBangla;
     final shortcuts = _shortcuts(session);
     return Scaffold(
+      backgroundColor: BrandColors.canvas,
       appBar: const _HomeBar(),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -234,7 +235,7 @@ class _HomeScaffold extends ConsumerWidget {
           await ref.read(dashboardMeProvider.future);
         },
         child: ListView(
-          padding: const EdgeInsets.only(bottom: Space.xxxl),
+          padding: const EdgeInsets.only(top: Space.lg, bottom: Space.xxxl),
           children: [
             _HomeWork(session: session),
             if (shortcuts.isNotEmpty) ...[
@@ -276,6 +277,7 @@ class _HomeWork extends ConsumerWidget {
           ErrorState(onRetry: () => ref.invalidate(dashboardMeProvider)),
       data: (d) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: Space.xl,
         children: [
           if (d.broadcast != null) _Banner(broadcast: d.broadcast!),
           HomeRolePanel(dashboard: d, session: session),
@@ -368,9 +370,9 @@ class _BentoModuleGrid extends StatelessWidget {
         itemCount: shortcuts.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          mainAxisSpacing: Space.sm,
-          crossAxisSpacing: Space.sm,
-          childAspectRatio: 1.08,
+          mainAxisSpacing: Space.md,
+          crossAxisSpacing: Space.md,
+          childAspectRatio: 1.05,
         ),
         itemBuilder: (context, i) => _ShortcutTile(module: shortcuts[i]),
       ),
@@ -393,42 +395,49 @@ class _ShortcutTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: Material(
-        color: scheme.surface,
-        shape: RoundedRectangleBorder(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surface,
           borderRadius: BorderRadius.circular(Corner.lg),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+          boxShadow: cardShadow(scheme.shadow),
         ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(Corner.lg),
-          onTap: () {
-            Haptics.tap();
-            openAppRoute(context, module.route);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(Space.sm),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(Corner.md),
+        child: Material(
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Corner.lg),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(Corner.lg),
+            onTap: () {
+              Haptics.tap();
+              openAppRoute(context, module.route);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(Space.sm),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(Corner.md),
+                    ),
+                    child: Icon(module.icon, color: accent, size: 22),
                   ),
-                  child: Icon(module.icon, color: accent, size: 22),
-                ),
-                const SizedBox(height: Space.xs),
-                Text(
-                  label,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

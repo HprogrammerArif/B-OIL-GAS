@@ -21,7 +21,7 @@
 - **Visual Design (Clean Production App)**:
   - No `RolePill`, pitch persona switcher, or search icon appears in `AppBarActions` or `MoreScreen` while signed in; the top `AppBar` displays only the notification bell and unread badge.
   - On `MoreScreen`, the top card is a clean **Employee Identity Card** showing the employee's avatar, full name, employee code, designation, department, and site.
-  - Users switch roles/accounts by signing out (`Sign Out` on `MoreScreen`) and selecting a role on the `LoginScreen` (`Quick Role Sign-In` or `ID & Passkey`).
+  - Users switch roles by signing out (`Sign Out` on `MoreScreen`). The login page is a staff form (email or employee ID, password, remember me). Demo roles sit in a pill strip under that form and can be removed without changing the form.
 
 ---
 
