@@ -167,13 +167,21 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
     onSelect(fileId);
   };
 
-  // Auto-scroll active card into view if partially hidden
+  // Keep the active card visible inside the list without scrolling the page.
   useEffect(() => {
-    if (!activeId || !listRef.current) return;
-    const activeEl = listRef.current.querySelector<HTMLElement>(`[data-file-id="${activeId}"]`);
-    if (activeEl) {
-      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-    }
+    const list = listRef.current;
+    if (!activeId || !list) return;
+    const activeEl = list.querySelector<HTMLElement>(`[data-file-id="${activeId}"]`);
+    if (!activeEl) return;
+    const item = activeEl.getBoundingClientRect();
+    const track = list.getBoundingClientRect();
+    let dx = 0;
+    let dy = 0;
+    if (item.left < track.left) dx = item.left - track.left;
+    else if (item.right > track.right) dx = item.right - track.right;
+    if (item.top < track.top) dy = item.top - track.top;
+    else if (item.bottom > track.bottom) dy = item.bottom - track.bottom;
+    if (dx !== 0 || dy !== 0) list.scrollBy({ left: dx, top: dy, behavior: 'smooth' });
   }, [activeId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLUListElement>) => {
