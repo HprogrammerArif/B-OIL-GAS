@@ -765,7 +765,7 @@ export default function BusView({ role, lang }: ViewProps) {
   return (
     <div className="view-container view-transition-wrapper">
       {/* ─── Top Header with Perspective Switcher & Enterprise Quick Tools ── */}
-      <div className="section-header" style={{ marginBottom: '12px' }}>
+      <div className="section-header flex-between page-sticky-head" style={{ marginBottom: '12px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <h2 className="section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -776,19 +776,6 @@ export default function BusView({ role, lang }: ViewProps) {
               {selectedDate === SYSTEM_TODAY ? t('Today (29 Oct)', 'আজ (২৯ অক্টোবর)', lang) : selectedDate}
             </span>
           </div>
-          <p className="section-subtitle" style={{ marginTop: '4px' }}>
-            {fleetReadOnly
-              ? t(
-                  'Who holds a seat on each staff coach. Transport changes the buses, routes, and seats.',
-                  'কোন স্টাফ কোন কোচে আসন ধরে আছে। বাস, রুট ও আসন পরিবর্তন করেন পরিবহন।',
-                  lang,
-                )
-              : t(
-                  'Seat map for each staff coach, seat booking, standby waitlist, route timetable and gate manifest.',
-                  '৫২-সিটার বাস সিট ম্যাপ, তাৎক্ষণিক আসন বুকিং, স্বয়ংক্রিয় অপেক্ষমাণ তালিকা ও নিরাপত্তা গেট পাস।',
-                  lang,
-                )}
-          </p>
         </div>
 
         {/* Header Action Controls */}

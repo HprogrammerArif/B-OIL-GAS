@@ -51,20 +51,21 @@ export default function WorkforceView({ lang }: ViewProps) {
 
   return (
     <div>
-      {canManage && (
-        <div className="flex-between mb-4" style={{ justifyContent: 'flex-end' }}>
-          <div className="flex-gap">
-            <button
-              className="btn-primary"
-              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
-              onClick={() => setShowOnboardModal(true)}
-            >
-              <UserPlus size={15} />
-              {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="flex-between mb-4 page-sticky-head" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
+          {t('Staff Directory', 'কর্মী তালিকা', lang)}
+        </h2>
+        {canManage && (
+          <button
+            className="btn-primary"
+            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowOnboardModal(true)}
+          >
+            <UserPlus size={15} />
+            {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
+          </button>
+        )}
+      </div>
 
       {/* KPI Ribbon */}
       <div className="stats-grid mb-4">

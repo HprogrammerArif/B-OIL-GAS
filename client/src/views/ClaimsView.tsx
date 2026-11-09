@@ -239,6 +239,7 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   return (
     <div className="view-container">
       <PageHeader
+        className="page-sticky-head"
         title={t('Expense claims', 'ব্যয় দাবি', lang)}
         description={canViewAll
           ? t('Travel, local conveyance and event expenses, from submission to payment. The ones that need your decision come first.', 'ভ্রমণ, স্থানীয় যাতায়াত ও ইভেন্টের খরচ — জমা থেকে পরিশোধ পর্যন্ত। আপনার সিদ্ধান্তের অপেক্ষায় থাকাগুলো আগে দেখানো হয়।', lang)
