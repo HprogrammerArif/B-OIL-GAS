@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { Search, X, SearchX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { StatusPill } from '../../components/ui';
@@ -15,10 +15,11 @@ interface FileRailProps {
   canSign: boolean;
   stateOf: (file: NoteFile) => FileState;
   onSelect: (id: string) => void;
+  createAction?: ReactNode;
 }
 
 /** File switcher: searchable, filterable list that becomes an interactive horizontal carousel on narrow widths. */
-export default function FileRail({ files, activeId, lang, canSign, stateOf, onSelect }: FileRailProps) {
+export default function FileRail({ files, activeId, lang, canSign, stateOf, onSelect, createAction }: FileRailProps) {
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
@@ -198,7 +199,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
   };
 
   return (
-    <aside className="ns-rail" aria-label={t('Note-sheet files', 'নোট-শীট ফাইল', lang)}>
+    <>
       <div className="ns-rail-top">
         <div className="ns-search">
           <Search size={14} />
@@ -227,8 +228,10 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
             </button>
           ))}
         </div>
+        {createAction && <div className="ns-rail-create">{createAction}</div>}
       </div>
 
+      <aside className="ns-rail" aria-label={t('Note-sheet files', 'নোট-শীট ফাইল', lang)}>
       <div className={`ns-file-track-container ${canScrollLeft ? 'has-scroll-left' : ''} ${canScrollRight ? 'has-scroll-right' : ''}`}>
         {canScrollLeft && (
           <button
@@ -301,6 +304,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
           </button>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
