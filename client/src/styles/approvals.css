@@ -397,8 +397,27 @@
 .apv-sla-pill.done { background: var(--apv-ok-soft); color: var(--status-success-text); }
 
 .apv-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; }
-.apv-chevron { color: var(--text-muted); flex-shrink: 0; transition: transform 0.15s ease; }
-.apv-card:hover .apv-chevron { transform: translateX(2px); color: var(--text-3); }
+.apv-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.apv-chevron:hover {
+  background: var(--apv-hover);
+  color: var(--text-1);
+  transform: translateX(2px);
+}
+.apv-card:hover .apv-chevron { color: var(--text-3); }
 
 .apv-btn {
   display: inline-flex;
