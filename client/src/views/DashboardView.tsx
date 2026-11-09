@@ -82,7 +82,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     <div className="view-container page-enter-active">
       {(showTabs || hasHeaderActions) && (
         <div className="cockpit-tabs-sticky-wrapper">
-          <div className="cockpit-toolbar">
             {showTabs && (
               <div className="cockpit-tabs-container" role="tablist">
                 {tabs.map((tab) => (
@@ -137,7 +136,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 )}
               </div>
             )}
-          </div>
         </div>
       )}
 

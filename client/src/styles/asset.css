@@ -222,10 +222,10 @@
 }
 
 .eam-nav-bar {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   background: var(--brand-card-bg);
   border: 1px solid var(--brand-slate-200);
@@ -1072,10 +1072,10 @@
 
 /* ─── 8. DOSSIER SUB-TABS & STRUCTURED CARDS ─────────────────────────────── */
 .eam-subtabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   padding: 4px;
   background: var(--brand-slate-100);

@@ -518,18 +518,10 @@
 
   /* Cockpit Segmented Tabs Mobile Polish */
   .cockpit-tabs-sticky-wrapper {
+    flex-wrap: wrap !important;
     padding: 4px 0 6px !important;
     margin-top: -4px !important;
     margin-bottom: 10px !important;
-  }
-
-  .cockpit-toolbar {
-    gap: 8px !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .cockpit-toolbar .cockpit-tabs-container {
-    max-width: none !important;
   }
 
   .cockpit-tabs-container {
@@ -1240,14 +1232,14 @@
 
 /* ─── PILL TABS TOUCH-FRIENDLY HORIZONTAL SCROLL ────────────────────────────── */
 .pill-tabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 6px;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
 }
 

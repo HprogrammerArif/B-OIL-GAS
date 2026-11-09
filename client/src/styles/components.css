@@ -108,10 +108,10 @@
 
 /* ─── SEGMENTED PILL TABS ─── */
 .pill-tabs {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   background: var(--brand-slate-100);
   padding: 4px;
@@ -3570,6 +3570,12 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   position: sticky;
   top: var(--topbar-height, 68px);
   z-index: 40;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
   background: var(--surface-0);
   padding: 6px 0 8px;
   margin-top: -6px;
@@ -3580,21 +3586,6 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   background: var(--surface-0);
 }
 
-.cockpit-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  flex-wrap: nowrap;
-}
-
-.cockpit-toolbar .cockpit-tabs-container {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: auto;
-}
-
 .cockpit-toolbar-actions {
   display: flex;
   align-items: center;
@@ -3603,10 +3594,10 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 }
 
 .cockpit-tabs-container {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
