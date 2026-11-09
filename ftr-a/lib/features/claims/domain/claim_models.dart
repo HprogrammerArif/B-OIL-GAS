@@ -228,6 +228,9 @@ class Claim {
     this.advance,
     this.reviewComment,
     this.workflowInstanceId,
+    this.awaitingYou = false,
+    this.waitingFor,
+    this.waitingForBn,
   });
 
   factory Claim.fromJson(Map<String, Object?> j) {
@@ -269,6 +272,9 @@ class Claim {
           : Advance.fromJson(_map(j['advance'])),
       reviewComment: j['reviewComment'] as String?,
       workflowInstanceId: j['workflowInstanceId'] as String?,
+      awaitingYou: j['awaitingYou'] == true,
+      waitingFor: j['waitingFor'] as String?,
+      waitingForBn: j['waitingForBn'] as String?,
     );
   }
 
@@ -301,8 +307,18 @@ class Claim {
   final String? reviewComment;
   final String? workflowInstanceId;
 
+  /// This viewer is on the open approval step.
+  final bool awaitingYou;
+
+  /// Name of the person on the open step, when there is one.
+  final String? waitingFor;
+  final String? waitingForBn;
+
   String displayEmployee({required bool bangla}) =>
       bangla ? employeeNameBn : employeeName;
+
+  String? waitingForName({required bool bangla}) =>
+      bangla ? (waitingForBn ?? waitingFor) : waitingFor;
 }
 
 @immutable

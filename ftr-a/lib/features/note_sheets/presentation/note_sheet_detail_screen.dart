@@ -1177,14 +1177,10 @@ class _OfficialDocumentModal extends StatelessWidget {
                   : 'Print / Export Official Memorandum',
             ),
             onPressed: () {
+              final files = ProviderScope.containerOf(context)
+                  .read(filesRepositoryProvider);
               Navigator.of(context).pop();
-              AppToast.show(
-                context,
-                bangla
-                    ? 'অফিসিয়াল মেমোরেন্ডাম প্রিন্ট কিউতে পাঠানো হয়েছে'
-                    : 'Memorandum queued for PDF export',
-                tone: StatusTone.success,
-              );
+              unawaited(printNoteSheet(sheet, files: files));
             },
           ),
         ],

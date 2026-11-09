@@ -1596,6 +1596,125 @@ class AppL10nEn extends AppL10n {
       'Tap New claim to file travel, conveyance or event expenses.';
 
   @override
+  String get claimAwaitEmptyTitle => 'Nothing is waiting for you';
+
+  @override
+  String get claimAwaitEmptyMessage =>
+      'Claims sent to you for a decision will appear here.';
+
+  @override
+  String get claimScopeEmptyTitle => 'No other claims';
+
+  @override
+  String get claimScopeEmptyMessage =>
+      'Claims from people you can see will appear here.';
+
+  @override
+  String get claimAwaitLoading => 'Checking what is waiting for you.';
+
+  @override
+  String get claimAwaitFailed => 'Could not load the claims waiting for you.';
+
+  @override
+  String claimTabAwaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Awaiting me ($count)',
+      zero: 'Awaiting me',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get claimTabPlant => 'This plant';
+
+  @override
+  String get claimTabAll => 'All claims';
+
+  @override
+  String get claimTabTeam => 'My team';
+
+  @override
+  String claimAwaitCount(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count claims need your decision, $amount in total.',
+      one: '1 claim needs your decision, $amount in total.',
+      zero: 'Nothing is waiting for your decision.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get claimScopeNone => 'No other claims are moving through here.';
+
+  @override
+  String claimScopeQuiet(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count claims are here. None of them need a decision.',
+      one: '1 claim is here. None of them need a decision.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimScopeWaiting(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count claims are with $names.',
+      one: '1 claim is with $names.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimWaitingFor(String name) {
+    return 'Waiting for $name';
+  }
+
+  @override
+  String get claimMineClear => 'You have no open claims.';
+
+  @override
+  String claimMineReturned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count claims were sent back for you to fix.',
+      one: '1 claim was sent back for you to fix.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimMineChecking(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count claims are being checked, $amount in total.',
+      one: '1 claim is being checked, $amount in total.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimMineApproved(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count claims are approved and waiting to be paid, $amount in total.',
+      one: '1 claim is approved and waiting to be paid, $amount.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get claimTypeTada => 'Travel and DA';
 
   @override
@@ -2873,6 +2992,63 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsSend => 'Send for approval';
+
+  @override
+  String get nsWhoTitle => 'Who signs this';
+
+  @override
+  String get nsRouteSuggested =>
+      'This is the usual order for this amount. People sign from top to bottom. The last person closes the file.';
+
+  @override
+  String get nsRouteCustom =>
+      'You changed the order. People still sign from top to bottom. The last person closes the file.';
+
+  @override
+  String get nsRouteRestore => 'Use the suggested order';
+
+  @override
+  String get nsRouteCloses => 'Closes the file';
+
+  @override
+  String get nsRouteAdd => 'Add a person';
+
+  @override
+  String get nsRouteAddHint => 'Search by name';
+
+  @override
+  String get nsRouteEmpty =>
+      'No one was suggested. Add the person who should sign.';
+
+  @override
+  String get nsRouteNeedOne => 'Add at least one person to sign this file.';
+
+  @override
+  String get nsRouteKept => 'This file keeps the signing order it already has.';
+
+  @override
+  String get nsRouteDuplicate => 'That person is already on the list.';
+
+  @override
+  String get nsRouteDrag => 'Drag to change the order';
+
+  @override
+  String get nsRouteRemove => 'Remove';
+
+  @override
+  String get nsRouteFields => 'Complete the required fields above to proceed.';
+
+  @override
+  String get nsRouteNone => 'No one matches that name.';
+
+  @override
+  String get nsErrSignerSelf => 'You cannot sign your own file.';
+
+  @override
+  String get nsErrSignerDup => 'Each person can sign only once.';
+
+  @override
+  String get nsErrSignerMissing => 'Choose someone who works here.';
 
   @override
   String get nsSendAgain => 'Send again';

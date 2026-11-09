@@ -219,6 +219,7 @@ abstract final class WorkflowEngine {
     required String objectId,
     required String initiatorUserId,
     required Json summary,
+    List<String>? signerUserIds,
   }) {
     final template = latestTemplate(store, templateKey);
     if (template == null) throw notFound('Workflow template');
@@ -256,67 +257,102 @@ abstract final class WorkflowEngine {
 
     final defs = template.obj('definition').objList('steps');
     final steps = <Json>[];
-    var stepNo = 0;
-    final groups = <String, int>{};
-    for (final (i, def) in defs.indexed) {
-      final group = def.strOrNull('parallel');
-      final int no;
-      if (group != null && groups.containsKey(group)) {
-        no = groups[group]!;
-      } else {
-        no = ++stepNo;
-        if (group != null) groups[group] = no;
+    if (signerUserIds != null) {
+      for (final (i, uid) in signerUserIds.indexed) {
+        final person = personRef(store, uid);
+        final step = <String, Object?>{
+          'id': '${instance.str('id')}_r${instance['round']}_s${i + 1}',
+          'instanceId': instance['id'],
+          'round': instance['round'],
+          'stepNo': i + 1,
+          'key': 'SIGNER',
+          'name': person?['title'] ?? 'Approval',
+          'approverRule': 'USER',
+          'approverRef': uid,
+          'slaHours': 18,
+          'requiresSignature': true,
+          'isFinal': i == signerUserIds.length - 1,
+          'status': 'PENDING',
+          'decision': null,
+          'comment': null,
+          'remark': null,
+          'approverUserIds': [uid],
+          'delegatedToId': null,
+          'delegationMaxAmount': null,
+          'activatedAt': null,
+          'dueAt': null,
+          'decidedAt': null,
+          'decidedById': null,
+        };
+        steps.add(step);
+        store.put(Col.workflowSteps, step);
       }
-      final step = <String, Object?>{
-        'id': '${instance.str('id')}_r${instance['round']}_s${i + 1}',
-        'instanceId': instance['id'],
-        'round': instance['round'],
-        'stepNo': no,
-        'key': def['key'],
-        'name': def['name'],
-        'approverRule': def['approverRule'],
-        'approverRef': def['approverRef'],
-        'slaHours': def['slaHours'],
-        'requiresSignature': def['requiresSignature'] == true,
-        'isFinal': def['isFinal'] == true,
-        'status': 'PENDING',
-        'decision': null,
-        'comment': null,
-        'remark': null,
-        'approverUserIds': <String>[],
-        'delegatedToId': null,
-        'delegationMaxAmount': null,
-        'activatedAt': null,
-        'dueAt': null,
-        'decidedAt': null,
-        'decidedById': null,
-      };
-      if (!evalCondition(def.strOrNull('condition'), summary)) {
-        step
-          ..['status'] = 'SKIPPED'
-          ..['remark'] = 'CONDITION_FALSE';
-      } else {
-        var approvers = resolveApprovers(store, step, initiatorUserId, summary);
-        if (approvers.isEmpty && def['escalateTo'] != null) {
-          approvers = resolveApprovers(
+    } else {
+      var stepNo = 0;
+      final groups = <String, int>{};
+      for (final (i, def) in defs.indexed) {
+        final group = def.strOrNull('parallel');
+        final int no;
+        if (group != null && groups.containsKey(group)) {
+          no = groups[group]!;
+        } else {
+          no = ++stepNo;
+          if (group != null) groups[group] = no;
+        }
+        final step = <String, Object?>{
+          'id': '${instance.str('id')}_r${instance['round']}_s${i + 1}',
+          'instanceId': instance['id'],
+          'round': instance['round'],
+          'stepNo': no,
+          'key': def['key'],
+          'name': def['name'],
+          'approverRule': def['approverRule'],
+          'approverRef': def['approverRef'],
+          'slaHours': def['slaHours'],
+          'requiresSignature': def['requiresSignature'] == true,
+          'isFinal': def['isFinal'] == true,
+          'status': 'PENDING',
+          'decision': null,
+          'comment': null,
+          'remark': null,
+          'approverUserIds': <String>[],
+          'delegatedToId': null,
+          'delegationMaxAmount': null,
+          'activatedAt': null,
+          'dueAt': null,
+          'decidedAt': null,
+          'decidedById': null,
+        };
+        if (!evalCondition(def.strOrNull('condition'), summary)) {
+          step
+            ..['status'] = 'SKIPPED'
+            ..['remark'] = 'CONDITION_FALSE';
+        } else {
+          var approvers = resolveApprovers(
             store,
-            {'approverRule': 'ROLE', 'approverRef': def['escalateTo']},
+            step,
             initiatorUserId,
             summary,
           );
+          if (approvers.isEmpty && def['escalateTo'] != null) {
+            approvers = resolveApprovers(
+              store,
+              {'approverRule': 'ROLE', 'approverRef': def['escalateTo']},
+              initiatorUserId,
+              summary,
+            );
+          }
+          if (approvers.isEmpty) {
+            throw policyViolation(
+              'UNRESOLVED_APPROVER',
+              'No approver could be resolved for ${def['name']}',
+            );
+          }
+          step['approverUserIds'] = approvers;
         }
-        if (approvers.isEmpty) {
-          // Mock stand-in for WORKFLOW_UNRESOLVED_APPROVER: never auto-skip a
-          // step that must be approved.
-          throw policyViolation(
-            'UNRESOLVED_APPROVER',
-            'No approver could be resolved for ${def['name']}',
-          );
-        }
-        step['approverUserIds'] = approvers;
+        steps.add(step);
+        store.put(Col.workflowSteps, step);
       }
-      steps.add(step);
-      store.put(Col.workflowSteps, step);
     }
 
     store.put(Col.workflowInstances, instance);

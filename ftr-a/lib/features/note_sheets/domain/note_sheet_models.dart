@@ -148,6 +148,31 @@ class NoteSheetAccess {
   final bool canAppend;
 }
 
+@immutable
+class RouteSigner {
+  const RouteSigner({
+    required this.userId,
+    required this.name,
+    required this.nameBn,
+    this.title,
+  });
+
+  factory RouteSigner.fromJson(Map<String, Object?> j) => RouteSigner(
+    userId: j['userId']! as String,
+    name: (j['name'] as String?) ?? '',
+    nameBn: (j['nameBn'] as String?) ?? (j['name'] as String?) ?? '',
+    title: j['title'] as String?,
+  );
+
+  final String userId;
+  final String name;
+  final String nameBn;
+  final String? title;
+
+  String display({required bool bangla}) =>
+      bangla && nameBn.isNotEmpty ? nameBn : name;
+}
+
 /// List rows have no paragraphs, quotes or signatures (empty lists).
 @immutable
 class NoteSheet {
@@ -184,6 +209,8 @@ class NoteSheet {
     this.budgetHeadBn,
     this.budgetAccount,
     this.budgetAvailable,
+    this.signatoryCustom = false,
+    this.plannedSigners = const [],
   });
 
   factory NoteSheet.fromJson(Map<String, Object?> j) {
@@ -230,6 +257,10 @@ class NoteSheet {
       budgetHeadBn: budget?['headBn'] as String?,
       budgetAccount: budget?['accountCode'] as String?,
       budgetAvailable: (budget?['available'] as num?)?.toDouble(),
+      signatoryCustom: j['signatoryCustom'] == true,
+      plannedSigners: [
+        for (final p in _list(j['plannedSigners'])) RouteSigner.fromJson(p),
+      ],
     );
   }
 
@@ -265,6 +296,8 @@ class NoteSheet {
   final String? budgetHeadBn;
   final String? budgetAccount;
   final double? budgetAvailable;
+  final bool signatoryCustom;
+  final List<RouteSigner> plannedSigners;
 
   String budgetName({required bool bangla}) =>
       bangla ? (budgetHeadBn ?? budgetHead ?? '') : (budgetHead ?? '');

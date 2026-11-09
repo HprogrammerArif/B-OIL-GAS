@@ -2869,6 +2869,120 @@ abstract class AppL10n {
   /// **'Tap New claim to file travel, conveyance or event expenses.'**
   String get claimEmptyMessage;
 
+  /// No description provided for @claimAwaitEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is waiting for you'**
+  String get claimAwaitEmptyTitle;
+
+  /// No description provided for @claimAwaitEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims sent to you for a decision will appear here.'**
+  String get claimAwaitEmptyMessage;
+
+  /// No description provided for @claimScopeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No other claims'**
+  String get claimScopeEmptyTitle;
+
+  /// No description provided for @claimScopeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Claims from people you can see will appear here.'**
+  String get claimScopeEmptyMessage;
+
+  /// No description provided for @claimAwaitLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking what is waiting for you.'**
+  String get claimAwaitLoading;
+
+  /// No description provided for @claimAwaitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the claims waiting for you.'**
+  String get claimAwaitFailed;
+
+  /// No description provided for @claimTabAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Awaiting me} other{Awaiting me ({count})}}'**
+  String claimTabAwaiting(int count);
+
+  /// No description provided for @claimTabPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'This plant'**
+  String get claimTabPlant;
+
+  /// No description provided for @claimTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All claims'**
+  String get claimTabAll;
+
+  /// No description provided for @claimTabTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'My team'**
+  String get claimTabTeam;
+
+  /// No description provided for @claimAwaitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing is waiting for your decision.} =1{1 claim needs your decision, {amount} in total.} other{{count} claims need your decision, {amount} in total.}}'**
+  String claimAwaitCount(int count, String amount);
+
+  /// No description provided for @claimScopeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No other claims are moving through here.'**
+  String get claimScopeNone;
+
+  /// No description provided for @claimScopeQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 claim is here. None of them need a decision.} other{{count} claims are here. None of them need a decision.}}'**
+  String claimScopeQuiet(int count);
+
+  /// No description provided for @claimScopeWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 claim is with {names}.} other{{count} claims are with {names}.}}'**
+  String claimScopeWaiting(int count, String names);
+
+  /// No description provided for @claimWaitingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name}'**
+  String claimWaitingFor(String name);
+
+  /// No description provided for @claimMineClear.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no open claims.'**
+  String get claimMineClear;
+
+  /// No description provided for @claimMineReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 claim was sent back for you to fix.} other{{count} claims were sent back for you to fix.}}'**
+  String claimMineReturned(int count);
+
+  /// No description provided for @claimMineChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 claim is being checked, {amount} in total.} other{{count} claims are being checked, {amount} in total.}}'**
+  String claimMineChecking(int count, String amount);
+
+  /// No description provided for @claimMineApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 claim is approved and waiting to be paid, {amount}.} other{{count} claims are approved and waiting to be paid, {amount} in total.}}'**
+  String claimMineApproved(int count, String amount);
+
   /// No description provided for @claimTypeTada.
   ///
   /// In en, this message translates to:
@@ -5111,6 +5225,114 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Send for approval'**
   String get nsSend;
+
+  /// No description provided for @nsWhoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who signs this'**
+  String get nsWhoTitle;
+
+  /// No description provided for @nsRouteSuggested.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the usual order for this amount. People sign from top to bottom. The last person closes the file.'**
+  String get nsRouteSuggested;
+
+  /// No description provided for @nsRouteCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'You changed the order. People still sign from top to bottom. The last person closes the file.'**
+  String get nsRouteCustom;
+
+  /// No description provided for @nsRouteRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the suggested order'**
+  String get nsRouteRestore;
+
+  /// No description provided for @nsRouteCloses.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes the file'**
+  String get nsRouteCloses;
+
+  /// No description provided for @nsRouteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a person'**
+  String get nsRouteAdd;
+
+  /// No description provided for @nsRouteAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get nsRouteAddHint;
+
+  /// No description provided for @nsRouteEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No one was suggested. Add the person who should sign.'**
+  String get nsRouteEmpty;
+
+  /// No description provided for @nsRouteNeedOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one person to sign this file.'**
+  String get nsRouteNeedOne;
+
+  /// No description provided for @nsRouteKept.
+  ///
+  /// In en, this message translates to:
+  /// **'This file keeps the signing order it already has.'**
+  String get nsRouteKept;
+
+  /// No description provided for @nsRouteDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'That person is already on the list.'**
+  String get nsRouteDuplicate;
+
+  /// No description provided for @nsRouteDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to change the order'**
+  String get nsRouteDrag;
+
+  /// No description provided for @nsRouteRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get nsRouteRemove;
+
+  /// No description provided for @nsRouteFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the required fields above to proceed.'**
+  String get nsRouteFields;
+
+  /// No description provided for @nsRouteNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No one matches that name.'**
+  String get nsRouteNone;
+
+  /// No description provided for @nsErrSignerSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot sign your own file.'**
+  String get nsErrSignerSelf;
+
+  /// No description provided for @nsErrSignerDup.
+  ///
+  /// In en, this message translates to:
+  /// **'Each person can sign only once.'**
+  String get nsErrSignerDup;
+
+  /// No description provided for @nsErrSignerMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose someone who works here.'**
+  String get nsErrSignerMissing;
 
   /// No description provided for @nsSendAgain.
   ///

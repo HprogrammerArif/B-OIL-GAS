@@ -39,6 +39,7 @@ class VisitGuest {
     required this.fullName,
     this.organisation,
     this.phoneMasked,
+    this.phone,
     this.idProofType,
     this.idProofLast4,
   });
@@ -48,6 +49,7 @@ class VisitGuest {
     fullName: j['fullName']! as String,
     organisation: j['organisation'] as String?,
     phoneMasked: j['phoneMasked'] as String?,
+    phone: j['phone'] as String?,
     idProofType: j['idProofType'] as String?,
     idProofLast4: j['idProofLast4'] as String?,
   );
@@ -56,6 +58,7 @@ class VisitGuest {
   final String fullName;
   final String? organisation;
   final String? phoneMasked;
+  final String? phone;
   final String? idProofType;
   final String? idProofLast4;
 }

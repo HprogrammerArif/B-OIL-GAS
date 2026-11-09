@@ -1096,7 +1096,51 @@ abstract final class ClaimEngine {
     };
   }
 
-  static Json claimWire(MockStore store, Json c, {bool detail = false}) {
+  /// Open step for this claim: whether [viewerUserId] must decide, and who is.
+  static ({bool awaitingYou, String? name, String? nameBn}) _queue(
+    MockStore store,
+    Json c,
+    String? viewerUserId,
+  ) {
+    const none = (awaitingYou: false, name: null, nameBn: null);
+    final instId = c.strOrNull('workflowInstanceId');
+    if (instId == null) return none;
+    Json? active;
+    for (final s in store.all(Col.workflowSteps)) {
+      if (s['instanceId'] == instId && s['status'] == 'ACTIVE') {
+        active = s;
+        break;
+      }
+    }
+    if (active == null) return none;
+    final ids = {
+      ...active.strList('approverUserIds'),
+      ?active.strOrNull('delegatedToId'),
+    };
+    String? name;
+    String? nameBn;
+    for (final id in ids) {
+      final user = store.get(Col.users, id);
+      final empId = user?.strOrNull('employeeId');
+      final emp = empId == null ? null : store.get(Col.employees, empId);
+      name = emp?['fullName'] as String?;
+      nameBn = emp?['fullNameBn'] as String?;
+      if (name != null && name.isNotEmpty) break;
+    }
+    return (
+      awaitingYou: viewerUserId != null && ids.contains(viewerUserId),
+      name: name,
+      nameBn: nameBn,
+    );
+  }
+
+  static Json claimWire(
+    MockStore store,
+    Json c, {
+    bool detail = false,
+    String? viewerUserId,
+  }) {
+    final queue = _queue(store, c, viewerUserId);
     return {
       'id': c['id'],
       'claimNo': c['claimNo'],
@@ -1119,6 +1163,10 @@ abstract final class ClaimEngine {
           .length,
       'voucherNo': c['voucherNo'],
       'paidAt': c['paidAt'],
+      'workflowInstanceId': c['workflowInstanceId'],
+      'awaitingYou': queue.awaitingYou,
+      'waitingFor': queue.name,
+      'waitingForBn': queue.nameBn,
       'submittedAt': c['submittedAt'],
       'createdAt': c['createdAt'],
       if (detail) ...{
@@ -1134,7 +1182,6 @@ abstract final class ClaimEngine {
             : advanceWire(store, store.get(Col.advances, c.str('advanceId'))!),
         'reviewComment': c['reviewComment'],
         'resubmits': c['resubmits'],
-        'workflowInstanceId': c['workflowInstanceId'],
       },
     };
   }

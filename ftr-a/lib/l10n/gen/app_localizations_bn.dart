@@ -1592,6 +1592,124 @@ class AppL10nBn extends AppL10n {
       'ভ্রমণ, যাতায়াত বা অনুষ্ঠানের খরচের জন্য নতুন দাবি চাপুন।';
 
   @override
+  String get claimAwaitEmptyTitle => 'আপনার জন্য কিছু অপেক্ষায় নেই';
+
+  @override
+  String get claimAwaitEmptyMessage =>
+      'আপনার সিদ্ধান্তের জন্য পাঠানো দাবি এখানে দেখা যাবে।';
+
+  @override
+  String get claimScopeEmptyTitle => 'আর কোনো দাবি নেই';
+
+  @override
+  String get claimScopeEmptyMessage =>
+      'আপনি যাদের দাবি দেখতে পারেন, সেগুলো এখানে দেখা যাবে।';
+
+  @override
+  String get claimAwaitLoading => 'কী অপেক্ষায় আছে, তা দেখা হচ্ছে।';
+
+  @override
+  String get claimAwaitFailed => 'অপেক্ষমাণ দাবিগুলো লোড করা যায়নি।';
+
+  @override
+  String claimTabAwaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'আমার অপেক্ষায় ($count)',
+      zero: 'আমার অপেক্ষায়',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get claimTabPlant => 'এই প্ল্যান্ট';
+
+  @override
+  String get claimTabAll => 'সব দাবি';
+
+  @override
+  String get claimTabTeam => 'আমার দল';
+
+  @override
+  String claimAwaitCount(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবিতে আপনার সিদ্ধান্ত দরকার, মোট $amount।',
+      one: '১টি দাবিতে আপনার সিদ্ধান্ত দরকার, মোট $amount।',
+      zero: 'আপনার সিদ্ধান্তের জন্য কিছু অপেক্ষায় নেই।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get claimScopeNone => 'এখানে আর কোনো দাবি এগোচ্ছে না।';
+
+  @override
+  String claimScopeQuiet(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবি আছে। কোনোটিতে সিদ্ধান্ত বাকি নেই।',
+      one: '১টি দাবি আছে। কোনোটিতে সিদ্ধান্ত বাকি নেই।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimScopeWaiting(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবি $names-এর কাছে আছে।',
+      one: '১টি দাবি $names-এর কাছে আছে।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimWaitingFor(String name) {
+    return '$name-এর অপেক্ষায়';
+  }
+
+  @override
+  String get claimMineClear => 'আপনার কোনো খোলা দাবি নেই।';
+
+  @override
+  String claimMineReturned(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবি সংশোধনের জন্য ফেরত এসেছে।',
+      one: '১টি দাবি সংশোধনের জন্য ফেরত এসেছে।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimMineChecking(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবি যাচাই হচ্ছে, মোট $amount।',
+      one: '১টি দাবি যাচাই হচ্ছে, মোট $amount।',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String claimMineApproved(int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি দাবি অনুমোদিত এবং পরিশোধের অপেক্ষায়, মোট $amount।',
+      one: '১টি দাবি অনুমোদিত এবং পরিশোধের অপেক্ষায়, $amount।',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get claimTypeTada => 'ভ্রমণ ও ডিএ';
 
   @override
@@ -2865,6 +2983,64 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsSend => 'অনুমোদনের জন্য পাঠান';
+
+  @override
+  String get nsWhoTitle => 'কে স্বাক্ষর করবেন';
+
+  @override
+  String get nsRouteSuggested =>
+      'এই অঙ্কের জন্য স্বাভাবিক ক্রম। উপরে থেকে নিচে স্বাক্ষর হয়। শেষ ব্যক্তি ফাইলটি বন্ধ করেন।';
+
+  @override
+  String get nsRouteCustom =>
+      'আপনি ক্রম বদলেছেন। উপরে থেকে নিচে স্বাক্ষর হয়। শেষ ব্যক্তি ফাইলটি বন্ধ করেন।';
+
+  @override
+  String get nsRouteRestore => 'প্রস্তাবিত ক্রম ব্যবহার করুন';
+
+  @override
+  String get nsRouteCloses => 'ফাইলটি বন্ধ করেন';
+
+  @override
+  String get nsRouteAdd => 'একজন যোগ করুন';
+
+  @override
+  String get nsRouteAddHint => 'নাম দিয়ে খুঁজুন';
+
+  @override
+  String get nsRouteEmpty =>
+      'কাউকে প্রস্তাব করা হয়নি। যিনি স্বাক্ষর করবেন তাঁকে যোগ করুন।';
+
+  @override
+  String get nsRouteNeedOne =>
+      'এই ফাইলে স্বাক্ষরের জন্য অন্তত একজনকে যোগ করুন।';
+
+  @override
+  String get nsRouteKept => 'এই ফাইল আগের স্বাক্ষরের ক্রমই রাখে।';
+
+  @override
+  String get nsRouteDuplicate => 'এই ব্যক্তি ইতিমধ্যে তালিকায় আছেন।';
+
+  @override
+  String get nsRouteDrag => 'ক্রম বদলাতে টেনে আনুন';
+
+  @override
+  String get nsRouteRemove => 'সরিয়ে দিন';
+
+  @override
+  String get nsRouteFields => 'এগিয়ে যেতে উপরের প্রয়োজনীয় ঘরগুলো পূরণ করুন।';
+
+  @override
+  String get nsRouteNone => 'এই নামে কেউ মেলেনি।';
+
+  @override
+  String get nsErrSignerSelf => 'আপনি নিজের ফাইলে স্বাক্ষর করতে পারবেন না।';
+
+  @override
+  String get nsErrSignerDup => 'একজন একবারই স্বাক্ষর করতে পারেন।';
+
+  @override
+  String get nsErrSignerMissing => 'এখানে যিনি কাজ করেন তাঁকে বেছে নিন।';
 
   @override
   String get nsSendAgain => 'আবার পাঠান';

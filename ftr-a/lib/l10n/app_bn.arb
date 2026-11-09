@@ -573,6 +573,69 @@
   "claimDetailTitle": "দাবি",
   "claimEmptyTitle": "এখনও কোনো দাবি নেই",
   "claimEmptyMessage": "ভ্রমণ, যাতায়াত বা অনুষ্ঠানের খরচের জন্য নতুন দাবি চাপুন।",
+  "claimAwaitEmptyTitle": "আপনার জন্য কিছু অপেক্ষায় নেই",
+  "claimAwaitEmptyMessage": "আপনার সিদ্ধান্তের জন্য পাঠানো দাবি এখানে দেখা যাবে।",
+  "claimScopeEmptyTitle": "আর কোনো দাবি নেই",
+  "claimScopeEmptyMessage": "আপনি যাদের দাবি দেখতে পারেন, সেগুলো এখানে দেখা যাবে।",
+  "claimAwaitLoading": "কী অপেক্ষায় আছে, তা দেখা হচ্ছে।",
+  "claimAwaitFailed": "অপেক্ষমাণ দাবিগুলো লোড করা যায়নি।",
+  "claimTabAwaiting": "{count, plural, =0{আমার অপেক্ষায়} other{আমার অপেক্ষায় ({count})}}",
+  "@claimTabAwaiting": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "claimTabPlant": "এই প্ল্যান্ট",
+  "claimTabAll": "সব দাবি",
+  "claimTabTeam": "আমার দল",
+  "claimAwaitCount": "{count, plural, =0{আপনার সিদ্ধান্তের জন্য কিছু অপেক্ষায় নেই।} =1{১টি দাবিতে আপনার সিদ্ধান্ত দরকার, মোট {amount}।} other{{count}টি দাবিতে আপনার সিদ্ধান্ত দরকার, মোট {amount}।}}",
+  "@claimAwaitCount": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "amount": { "type": "String" }
+    }
+  },
+  "claimScopeNone": "এখানে আর কোনো দাবি এগোচ্ছে না।",
+  "claimScopeQuiet": "{count, plural, =1{১টি দাবি আছে। কোনোটিতে সিদ্ধান্ত বাকি নেই।} other{{count}টি দাবি আছে। কোনোটিতে সিদ্ধান্ত বাকি নেই।}}",
+  "@claimScopeQuiet": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "claimScopeWaiting": "{count, plural, =1{১টি দাবি {names}-এর কাছে আছে।} other{{count}টি দাবি {names}-এর কাছে আছে।}}",
+  "@claimScopeWaiting": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "names": { "type": "String" }
+    }
+  },
+  "claimWaitingFor": "{name}-এর অপেক্ষায়",
+  "@claimWaitingFor": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "claimMineClear": "আপনার কোনো খোলা দাবি নেই।",
+  "claimMineReturned": "{count, plural, =1{১টি দাবি সংশোধনের জন্য ফেরত এসেছে।} other{{count}টি দাবি সংশোধনের জন্য ফেরত এসেছে।}}",
+  "@claimMineReturned": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "claimMineChecking": "{count, plural, =1{১টি দাবি যাচাই হচ্ছে, মোট {amount}।} other{{count}টি দাবি যাচাই হচ্ছে, মোট {amount}।}}",
+  "@claimMineChecking": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "amount": { "type": "String" }
+    }
+  },
+  "claimMineApproved": "{count, plural, =1{১টি দাবি অনুমোদিত এবং পরিশোধের অপেক্ষায়, {amount}।} other{{count}টি দাবি অনুমোদিত এবং পরিশোধের অপেক্ষায়, মোট {amount}।}}",
+  "@claimMineApproved": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "amount": { "type": "String" }
+    }
+  },
   "claimTypeTada": "ভ্রমণ ও ডিএ",
   "claimTypeConveyance": "যাতায়াত বিল",
   "claimTypeTour": "সফর ও অনুষ্ঠান",
@@ -947,6 +1010,24 @@
   "nsSaveDraft": "খসড়া সংরক্ষণ",
   "nsSaveChanges": "শুধু পরিবর্তন সংরক্ষণ",
   "nsSend": "অনুমোদনের জন্য পাঠান",
+  "nsWhoTitle": "কে স্বাক্ষর করবেন",
+  "nsRouteSuggested": "এই অঙ্কের জন্য স্বাভাবিক ক্রম। উপরে থেকে নিচে স্বাক্ষর হয়। শেষ ব্যক্তি ফাইলটি বন্ধ করেন।",
+  "nsRouteCustom": "আপনি ক্রম বদলেছেন। উপরে থেকে নিচে স্বাক্ষর হয়। শেষ ব্যক্তি ফাইলটি বন্ধ করেন।",
+  "nsRouteRestore": "প্রস্তাবিত ক্রম ব্যবহার করুন",
+  "nsRouteCloses": "ফাইলটি বন্ধ করেন",
+  "nsRouteAdd": "একজন যোগ করুন",
+  "nsRouteAddHint": "নাম দিয়ে খুঁজুন",
+  "nsRouteEmpty": "কাউকে প্রস্তাব করা হয়নি। যিনি স্বাক্ষর করবেন তাঁকে যোগ করুন।",
+  "nsRouteNeedOne": "এই ফাইলে স্বাক্ষরের জন্য অন্তত একজনকে যোগ করুন।",
+  "nsRouteKept": "এই ফাইল আগের স্বাক্ষরের ক্রমই রাখে।",
+  "nsRouteDuplicate": "এই ব্যক্তি ইতিমধ্যে তালিকায় আছেন।",
+  "nsRouteDrag": "ক্রম বদলাতে টেনে আনুন",
+  "nsRouteRemove": "সরিয়ে দিন",
+  "nsRouteFields": "এগিয়ে যেতে উপরের প্রয়োজনীয় ঘরগুলো পূরণ করুন।",
+  "nsRouteNone": "এই নামে কেউ মেলেনি।",
+  "nsErrSignerSelf": "আপনি নিজের ফাইলে স্বাক্ষর করতে পারবেন না।",
+  "nsErrSignerDup": "একজন একবারই স্বাক্ষর করতে পারেন।",
+  "nsErrSignerMissing": "এখানে যিনি কাজ করেন তাঁকে বেছে নিন।",
   "nsSendAgain": "আবার পাঠান",
   "nsSaved": "সংরক্ষিত হয়েছে",
   "nsSent": "অনুমোদনের জন্য পাঠানো হয়েছে",
