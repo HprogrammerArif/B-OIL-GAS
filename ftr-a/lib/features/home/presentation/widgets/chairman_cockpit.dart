@@ -111,9 +111,72 @@ class _ChairmanCockpitState extends ConsumerState<ChairmanCockpit> {
 
         if (_showVoiceBar) _VoiceBriefingConsole(dashboard: widget.dashboard),
 
+        Padding(
+          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.md),
+          child: Container(
+            padding: const EdgeInsets.all(Space.md),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  scheme.primaryContainer.withValues(alpha: 0.5),
+                  scheme.surface,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(Corner.lg),
+              border: Border.all(color: scheme.primary.withValues(alpha: 0.25)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.auto_graph, color: Colors.teal, size: 20),
+                    const SizedBox(width: Space.xs),
+                    Expanded(
+                      child: Text(
+                        bangla
+                            ? 'অপারেশনাল সাশ্রয় ও কর্মদক্ষতা'
+                            : 'OPERATIONAL EFFICIENCY SAVINGS',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.teal,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: Space.xs),
+                Text(
+                  bangla
+                      ? '৳ ৪২.০ লক্ষ পরিবহন সাশ্রয়'
+                      : 'BDT 42.0 Lakhs Saved in Fleet Logistics',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  bangla
+                      ? 'ডিজিটাল স্মার্ট কারপুলিং ও নোট-শিট ই-স্বাক্ষরে সময় এবং জ্বালানি সাশ্রয়'
+                      : 'Through smart pooling & digital note-sheet sign-offs across corridor',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
         // Role Sub-Tabs
         Padding(
-          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.xs),
+          padding: const EdgeInsets.fromLTRB(
+            Space.lg,
+            Space.lg,
+            Space.lg,
+            Space.xs,
+          ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -1273,63 +1336,6 @@ class _OverviewTab extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ROI Savings Card
-          Container(
-            padding: const EdgeInsets.all(Space.md),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  scheme.primaryContainer.withValues(alpha: 0.5),
-                  scheme.surface,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(Corner.lg),
-              border: Border.all(color: scheme.primary.withValues(alpha: 0.25)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.auto_graph, color: Colors.teal, size: 20),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? 'অপারেশনাল সাশ্রয় ও কর্মদক্ষতা'
-                            : 'OPERATIONAL EFFICIENCY SAVINGS',
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.teal,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.xs),
-                Text(
-                  bangla
-                      ? '৳ ৪২.০ লক্ষ পরিবহন সাশ্রয়'
-                      : 'BDT 42.0 Lakhs Saved in Fleet Logistics',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  bangla
-                      ? 'ডিজিটাল স্মার্ট কারপুলিং ও নোট-শিট ই-স্বাক্ষরে সময় এবং জ্বালানি সাশ্রয়'
-                      : 'Through smart pooling & digital note-sheet sign-offs across corridor',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Space.md),
-
           // High-Value Files Awaiting Signature
           Row(
             children: [
