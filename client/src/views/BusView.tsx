@@ -1182,6 +1182,7 @@ export default function BusView({ role, lang }: ViewProps) {
             </label>
             <select
               id="shuttle-coach"
+              className="shuttle-coach-select"
               value={selectedRouteKey}
               onChange={e => handleSelectRoute(e.target.value)}
             >

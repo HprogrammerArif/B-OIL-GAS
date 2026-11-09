@@ -3996,6 +3996,13 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
 
 .bus-two-col-layout > * { min-width: 0; }
 
+.shuttle-coach-select {
+  display: inline-block;
+  width: auto;
+  min-width: 12rem;
+  max-width: min(100%, 20rem);
+}
+
 @media (max-width: 1024px) {
   .bus-two-col-layout {
     grid-template-columns: minmax(0, 1fr);

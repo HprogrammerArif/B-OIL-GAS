@@ -306,6 +306,7 @@ export default function FleetView({ role, lang }: ViewProps) {
     >
       {/* ─── View Header ────────────────────────────────────────────── */}
       <div
+        className="page-sticky-head"
         style={{
           display: 'flex',
           alignItems: 'center',

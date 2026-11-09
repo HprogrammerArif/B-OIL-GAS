@@ -893,22 +893,15 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
   return (
     <div>
-      {mode === 'oversight' && canReport && (
-        <div className="ui-page-header">
-          <div className="ui-page-actions" style={{ marginLeft: 'auto' }}>
-            <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
-              {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
-            </Button>
-            <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setWizardSpotFiles([]); setShowLogWizard(true); }}>
-              {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
-            </Button>
-          </div>
-        </div>
-      )}
-      {mode !== 'oversight' && (canReport || canInvestigate) && (
-        <PageHeader
-          title={mode === 'reporter' ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang) : t('Safety and incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
-          actions={
+      <PageHeader
+        className="page-sticky-head"
+        title={
+          mode === 'reporter'
+            ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang)
+            : t('Safety & Incident Reports', 'নিরাপত্তা ও দুর্ঘটনা প্রতিবেদন', lang)
+        }
+        actions={
+          (canReport || canInvestigate) ? (
             <>
               {canInvestigate && (
                 <Button variant="outline-danger" icon={<Siren size={14} />} onClick={() => setShowEmergencyModal(true)}>
@@ -926,9 +919,9 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 </>
               )}
             </>
-          }
-        />
-      )}
+          ) : undefined
+        }
+      />
 
       <p className={`lv-status ${verdictTone}`} role="status">
         {verdictTone === 'danger' ? <Siren size={16} /> : verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
