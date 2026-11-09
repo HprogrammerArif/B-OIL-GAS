@@ -3575,10 +3575,33 @@ html[data-presentation='on'] .telemetry-divider { display: none !important; }
   background: var(--surface-0);
 }
 
-.cockpit-tabs-container {
+.cockpit-toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.cockpit-toolbar .cockpit-tabs-container {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.cockpit-toolbar-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.cockpit-tabs-container {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  width: max-content;
+  max-width: 100%;
   background: var(--brand-card-bg, var(--surface-1));
   border: 1px solid var(--brand-slate-200);
   border-radius: var(--radius-lg);
