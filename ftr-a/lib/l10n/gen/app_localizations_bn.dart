@@ -2678,6 +2678,12 @@ class AppL10nBn extends AppL10n {
   String get approvalReasonHint => 'কারণ (কমপক্ষে ১০ অক্ষর)';
 
   @override
+  String get approvalAlreadySigned => 'যাঁরা আগে স্বাক্ষর করেছেন';
+
+  @override
+  String get approvalESign => 'অনুমোদন ও স্বাক্ষর';
+
+  @override
   String get approvalDoneApproved => 'অনুমোদিত হয়েছে';
 
   @override
@@ -3227,6 +3233,15 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsSignConfirm => 'স্বাক্ষর করে অনুমোদন দিন';
+
+  @override
+  String get nsSignReturnConfirm => 'স্বাক্ষর করে ফেরত পাঠান';
+
+  @override
+  String get nsSignRejectConfirm => 'স্বাক্ষর করে বাতিল করুন';
+
+  @override
+  String get nsSignErrReason => 'কারণ অন্তত ১০ অক্ষরের হতে হবে।';
 
   @override
   String get nsSignErrName => 'আপনার পূর্ণ নাম লিখুন।';

@@ -7,8 +7,6 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
-import 'package:bogcl_oneops/features/note_sheets/data/note_sheet_repository.dart';
-import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
@@ -16,24 +14,73 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Sign a note-sheet: pick how, confirm with the one-time code, done.
-/// Returns the updated sheet, or null when cancelled.
-Future<NoteSheet?> showSignatureSheet(
+/// What the signer drew, typed or uploaded. The caller records the decision.
+@immutable
+class SignatureDraft {
+  const SignatureDraft({
+    required this.method,
+    required this.otp,
+    this.typedName,
+    this.imageFileId,
+    this.comment,
+  });
+
+  final String method;
+  final String otp;
+  final String? typedName;
+  final String? imageFileId;
+  final String? comment;
+
+  Map<String, Object?> toJson() => {
+    'method': method,
+    'otp': otp,
+    'typedName': ?typedName,
+    'imageFileId': ?imageFileId,
+  };
+}
+
+/// Pick how to sign, confirm with the one-time code, and return the draft.
+/// Returns null when cancelled. Does not approve or return the file.
+Future<SignatureDraft?> showSignatureCapture(
   BuildContext context, {
-  required NoteSheet sheet,
-}) => showModalBottomSheet<NoteSheet>(
+  required String title,
+  required String subtitle,
+  String? initialComment,
+  bool reasonRequired = false,
+  List<String> reasonPresets = const [],
+  String? confirmLabel,
+}) => showModalBottomSheet<SignatureDraft>(
   context: context,
   isScrollControlled: true,
   showDragHandle: true,
-  builder: (_) => _SignatureSheet(sheet: sheet),
+  builder: (_) => _SignatureSheet(
+    title: title,
+    subtitle: subtitle,
+    initialComment: initialComment,
+    reasonRequired: reasonRequired,
+    reasonPresets: reasonPresets,
+    confirmLabel: confirmLabel,
+  ),
 );
 
 enum _Method { typed, drawn, stamp, uploaded }
 
 class _SignatureSheet extends ConsumerStatefulWidget {
-  const _SignatureSheet({required this.sheet});
+  const _SignatureSheet({
+    required this.title,
+    required this.subtitle,
+    required this.reasonRequired,
+    required this.reasonPresets,
+    this.initialComment,
+    this.confirmLabel,
+  });
 
-  final NoteSheet sheet;
+  final String title;
+  final String subtitle;
+  final String? initialComment;
+  final bool reasonRequired;
+  final List<String> reasonPresets;
+  final String? confirmLabel;
 
   @override
   ConsumerState<_SignatureSheet> createState() => _SignatureSheetState();
@@ -45,7 +92,9 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     text: ref.read(sessionControllerProvider).value?.profile.employee.fullName,
   );
   final _otp = TextEditingController();
-  final _comment = TextEditingController();
+  late final _comment = TextEditingController(
+    text: widget.initialComment ?? '',
+  );
   final List<List<Offset>> _strokes = [];
   PickedFile? _uploaded;
   bool _busy = false;
@@ -116,7 +165,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     return data!.buffer.asUint8List();
   }
 
-  Future<void> _sign() async {
+  Future<void> _capture() async {
     final l10n = context.l10n;
     setState(() => _error = null);
     final typed = _typed.text.trim();
@@ -130,6 +179,11 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
     }
     if (_method == _Method.uploaded && _uploaded == null) {
       setState(() => _error = l10n.nsSignErrUpload);
+      return;
+    }
+    final comment = _comment.text.trim();
+    if (widget.reasonRequired && comment.length < 10) {
+      setState(() => _error = l10n.nsSignErrReason);
       return;
     }
     if (_otp.text.trim().length != 6) {
@@ -164,34 +218,28 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
         await uploads.awaitClean(meta.id);
         imageId = meta.id;
       }
-      final comment = _comment.text.trim();
-      final updated = await ref
-          .read(noteSheetRepositoryProvider)
-          .sign(
-            widget.sheet.id,
-            method: switch (_method) {
-              _Method.typed => 'TYPED',
-              _Method.drawn => 'DRAWN',
-              _Method.stamp => 'STAMP',
-              _Method.uploaded => 'UPLOADED',
-            },
-            otp: _otp.text.trim(),
-            typedName: _method == _Method.typed ? typed : null,
-            imageFileId: imageId,
-            comment: comment.isEmpty ? null : comment,
-          );
       if (!mounted) return;
-      Navigator.of(context).pop(updated);
+      Navigator.of(context).pop(
+        SignatureDraft(
+          method: switch (_method) {
+            _Method.typed => 'TYPED',
+            _Method.drawn => 'DRAWN',
+            _Method.stamp => 'STAMP',
+            _Method.uploaded => 'UPLOADED',
+          },
+          otp: _otp.text.trim(),
+          typedName: _method == _Method.typed ? typed : null,
+          imageFileId: imageId,
+          comment: comment.isEmpty ? null : comment,
+        ),
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = e.fieldErrors.keys.any((k) => k.endsWith('otp'))
-            ? l10n.nsSignErrOtpWrong
-            : switch (e.code) {
-                ApiErrorCode.offline ||
-                ApiErrorCode.timeout => l10n.claimErrOffline,
-                _ => l10n.nsSignErrFailed,
-              };
+        _error = switch (e.code) {
+          ApiErrorCode.offline || ApiErrorCode.timeout => l10n.claimErrOffline,
+          _ => l10n.nsSignErrFailed,
+        };
       });
     } on Object catch (_) {
       if (!mounted) return;
@@ -218,10 +266,8 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             EnterpriseModalHeader(
-              title: l10n.nsSignTitle,
-              subtitle: l10n.nsSignIntro(
-                widget.sheet.fileNo ?? widget.sheet.title,
-              ),
+              title: widget.title,
+              subtitle: widget.subtitle,
               icon: Icons.draw_outlined,
             ),
             const SizedBox(height: Space.sm),
@@ -420,11 +466,31 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
                       ),
             },
             const SizedBox(height: Space.md),
+            if (widget.reasonPresets.isNotEmpty) ...[
+              Wrap(
+                spacing: Space.xs,
+                runSpacing: Space.xs,
+                children: [
+                  for (final preset in widget.reasonPresets)
+                    FilterChip(
+                      label: Text(preset),
+                      selected: _comment.text == preset,
+                      onSelected: (_) {
+                        _comment.text = preset;
+                        setState(() => _error = null);
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: Space.sm),
+            ],
             AppTextField(
-              label: l10n.nsSignComment,
+              label: widget.reasonRequired
+                  ? l10n.approvalReasonHint
+                  : l10n.nsSignComment,
               controller: _comment,
               maxLines: 2,
-              maxLength: 500,
+              maxLength: widget.reasonRequired ? 1000 : 500,
             ),
             const SizedBox(height: Space.sm),
             AppTextField(
@@ -447,10 +513,10 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               ),
             const SizedBox(height: Space.lg),
             PrimaryButton(
-              label: l10n.nsSignConfirm,
+              label: widget.confirmLabel ?? l10n.nsSignConfirm,
               icon: Icons.draw_outlined,
               loading: _busy,
-              onPressed: () => unawaited(_sign()),
+              onPressed: _busy ? null : () => unawaited(_capture()),
             ),
           ],
         ),

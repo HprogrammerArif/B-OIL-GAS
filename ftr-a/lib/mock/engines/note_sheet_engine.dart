@@ -562,6 +562,7 @@ abstract final class NoteSheetEngine {
     final signedAt = store.nowIso();
     final docHash = documentHash(sheet);
     final emp = auth.employee;
+    final dept = emp.objOrNull('department');
     final signature = <String, Object?>{
       'stepKey': step['key'],
       'stepName': step['name'],
@@ -569,6 +570,9 @@ abstract final class NoteSheetEngine {
       'signerName': emp['fullName'],
       'signerNameBn': emp['fullNameBn'],
       'roleTitle': emp.obj('designation')['title'],
+      'departmentName': dept?.strOrNull('name'),
+      'departmentNameBn': dept?.strOrNull('nameBn'),
+      'comment': (comment == null || comment.isEmpty) ? null : comment,
       'method': method,
       'typedName': body['typedName'],
       'imageFileId': body['imageFileId'],

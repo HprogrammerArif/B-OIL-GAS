@@ -89,6 +89,9 @@ class NoteSignature {
     required this.documentHash,
     required this.signedAt,
     this.roleTitle,
+    this.departmentName,
+    this.departmentNameBn,
+    this.comment,
     this.typedName,
     this.imageFileId,
   });
@@ -98,6 +101,9 @@ class NoteSignature {
     signerName: j['signerName']! as String,
     signerNameBn: (j['signerNameBn'] as String?) ?? j['signerName']! as String,
     roleTitle: j['roleTitle'] as String?,
+    departmentName: j['departmentName'] as String?,
+    departmentNameBn: j['departmentNameBn'] as String?,
+    comment: j['comment'] as String?,
     method: j['method']! as String,
     typedName: j['typedName'] as String?,
     imageFileId: j['imageFileId'] as String?,
@@ -110,6 +116,9 @@ class NoteSignature {
   final String signerName;
   final String signerNameBn;
   final String? roleTitle;
+  final String? departmentName;
+  final String? departmentNameBn;
+  final String? comment;
   final String method;
   final String? typedName;
   final String? imageFileId;
@@ -118,6 +127,14 @@ class NoteSignature {
   final DateTime signedAt;
 
   String name({required bool bangla}) => bangla ? signerNameBn : signerName;
+
+  String? department({required bool bangla}) {
+    final bn = departmentNameBn;
+    if (bangla && bn != null && bn.isNotEmpty) return bn;
+    final en = departmentName;
+    if (en == null || en.isEmpty) return null;
+    return en;
+  }
 }
 
 @immutable

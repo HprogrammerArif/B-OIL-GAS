@@ -1,3 +1,4 @@
+import 'package:bogcl_oneops/core/utils/hash.dart';
 import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
@@ -39,6 +40,10 @@ const Set<String> _terminal = {
   'CANCELLED',
 };
 const Set<String> _signatureMethods = {'DRAWN', 'TYPED', 'STAMP', 'UPLOADED'};
+
+// Same stand-in code as NoteSheetPolicy.demoOtp. Kept here so this engine
+// does not import the note-sheet engine.
+const _demoSignOtp = '123456';
 const int _hourMs = 60 * 60 * 1000;
 
 /// Generic approval engine (doc 00 §6.1, doc 06 MOD-17): routes any object
@@ -130,12 +135,15 @@ abstract final class WorkflowEngine {
         ? null
         : store.get(Col.employees, user.str('employeeId'));
     if (emp == null) return null;
+    final dept = emp.objOrNull('department');
     return {
       'userId': userId,
       'name': emp['fullName'],
       'nameBn': emp['fullNameBn'],
       'title': emp.obj('designation')['title'],
       'phone': emp['phone'],
+      'department': dept?.strOrNull('name'),
+      'departmentBn': dept?.strOrNull('nameBn'),
     };
   }
 
@@ -614,6 +622,10 @@ abstract final class WorkflowEngine {
         }
       case 'REJECT':
         _needComment(text, 10);
+        if (step['requiresSignature'] == true) {
+          _checkSignature(signature);
+          _checkDemoOtp(signature);
+        }
         _decide(
           store,
           instance,
@@ -632,6 +644,10 @@ abstract final class WorkflowEngine {
         _notifyInitiator(store, instance, actorUserId, 'REJECTED', text);
       case 'RETURN':
         _needComment(text, 10);
+        if (step['requiresSignature'] == true) {
+          _checkSignature(signature);
+          _checkDemoOtp(signature);
+        }
         _decide(
           store,
           instance,
@@ -686,6 +702,13 @@ abstract final class WorkflowEngine {
         'signature.imageFileId',
         'Signature image is required',
       );
+    }
+  }
+
+  static void _checkDemoOtp(Json? signature) {
+    final otp = signature?.strOrNull('otp');
+    if (otp == null || !Hash.constantTimeEquals(otp, _demoSignOtp)) {
+      throw validationError('otp', 'The code is not correct');
     }
   }
 

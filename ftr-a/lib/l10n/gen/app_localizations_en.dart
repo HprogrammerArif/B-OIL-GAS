@@ -2687,6 +2687,12 @@ class AppL10nEn extends AppL10n {
   String get approvalReasonHint => 'Reason (at least 10 characters)';
 
   @override
+  String get approvalAlreadySigned => 'Already signed';
+
+  @override
+  String get approvalESign => 'Approve & E-Sign';
+
+  @override
   String get approvalDoneApproved => 'Approved';
 
   @override
@@ -3235,6 +3241,15 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsSignConfirm => 'Sign and approve';
+
+  @override
+  String get nsSignReturnConfirm => 'Sign and return';
+
+  @override
+  String get nsSignRejectConfirm => 'Sign and reject';
+
+  @override
+  String get nsSignErrReason => 'Write a reason of at least 10 characters.';
 
   @override
   String get nsSignErrName => 'Type your full name.';

@@ -9,7 +9,10 @@ import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
 import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_ui.dart';
-import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/note_sheets/data/note_sheet_repository.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_providers.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/signature_sheet.dart';
+import 'package:bogcl_oneops/features/workflow/data/workflow_trail.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -815,7 +818,7 @@ class _ApprovalDetailModal extends ConsumerStatefulWidget {
 class _ApprovalDetailModalState extends ConsumerState<_ApprovalDetailModal> {
   late int _curIndex = widget.initialIndex;
   String? _selectedRemark;
-  bool _approving = false;
+  bool _acting = false;
 
   List<String> _remarkPresets(bool bangla) => bangla
       ? const [
@@ -845,172 +848,115 @@ class _ApprovalDetailModalState extends ConsumerState<_ApprovalDetailModal> {
           'Defer to Next Quarter',
         ];
 
-  // ── Approve & E-Sign ────────────────────────────────────────────────────
-  Future<void> _doApprove(BuildContext ctx, InboxItem item) async {
-    final bangla = ctx.isBangla;
-    // Capture navigator before any async gap.
-    final navigator = Navigator.of(ctx);
-    final emp = ref.read(sessionControllerProvider).value?.profile.employee;
-    final signerName =
-        emp?.fullName ?? (bangla ? 'অনুমোদনকারী' : 'Digital Signer');
-    final signerTitle =
-        emp?.designation ?? (bangla ? 'চেয়ারম্যান ও সিইও' : 'Chairman & CEO');
-
-    setState(() => _approving = true);
+  Future<void> _decide(
+    BuildContext host,
+    InboxItem item,
+    _DeskIntent intent,
+  ) async {
+    final l10n = host.l10n;
+    final bangla = host.isBangla;
+    final refLabel = item.summary.refNo.isNotEmpty
+        ? item.summary.refNo
+        : item.summary.displayTitle(bangla: bangla);
+    final navigator = Navigator.of(host);
+    final draft = await showSignatureCapture(
+      host,
+      title: switch (intent) {
+        _DeskIntent.approve => l10n.nsSignTitle,
+        _DeskIntent.returnForChanges => l10n.nsReturnTitle,
+        _DeskIntent.reject => l10n.nsRejectTitle,
+      },
+      subtitle: l10n.nsSignIntro(refLabel),
+      initialComment: intent == _DeskIntent.approve ? _selectedRemark : null,
+      reasonRequired: intent != _DeskIntent.approve,
+      reasonPresets: intent == _DeskIntent.approve
+          ? const []
+          : _returnReasons(bangla),
+      confirmLabel: switch (intent) {
+        _DeskIntent.approve => l10n.nsSignConfirm,
+        _DeskIntent.returnForChanges => l10n.nsSignReturnConfirm,
+        _DeskIntent.reject => l10n.nsSignRejectConfirm,
+      },
+    );
+    if (draft == null || !mounted || !host.mounted) return;
+    setState(() => _acting = true);
     try {
-      await ref
-          .read(approvalRepositoryProvider)
-          .approve(
-            item.instanceId,
-            comment: _selectedRemark,
-            signature: {
-              'method': 'TYPED',
-              'typedName': '$signerName ($signerTitle)',
-            },
-          );
+      final approvals = ref.read(approvalRepositoryProvider);
+      if (intent == _DeskIntent.approve && item.objectType == 'NoteSheet') {
+        await ref
+            .read(noteSheetRepositoryProvider)
+            .sign(
+              item.objectId,
+              method: draft.method,
+              otp: draft.otp,
+              typedName: draft.typedName,
+              imageFileId: draft.imageFileId,
+              comment: draft.comment,
+            );
+      } else if (intent == _DeskIntent.approve) {
+        await approvals.approve(
+          item.instanceId,
+          comment: draft.comment,
+          signature: draft.toJson(),
+        );
+      } else if (intent == _DeskIntent.returnForChanges) {
+        await approvals.returnForChanges(
+          item.instanceId,
+          comment: draft.comment ?? '',
+          signature: draft.toJson(),
+        );
+      } else {
+        await approvals.reject(
+          item.instanceId,
+          comment: draft.comment ?? '',
+          signature: draft.toJson(),
+        );
+      }
       ref
         ..invalidate(approvalInboxProvider)
-        ..invalidate(approvalHistoryProvider);
+        ..invalidate(approvalHistoryProvider)
+        ..invalidate(approvalSummaryProvider)
+        ..invalidate(approvalDetailProvider)
+        ..invalidate(workflowTrailProvider)
+        ..invalidate(noteSheetDetailProvider)
+        ..invalidate(noteSheetsProvider);
       if (!mounted) return;
       navigator.pop();
       Haptics.tap();
-      AppToast.show(
-        context,
-        bangla
-            ? 'ডিজিটালভাবে অনুমোদিত ও স্বাক্ষরিত ✓'
-            : 'Approved & Digitally Signed ✓',
-        tone: StatusTone.success,
-      );
+      final (message, tone) = switch (intent) {
+        _DeskIntent.approve => (
+          item.objectType == 'NoteSheet'
+              ? l10n.nsSignedFinal
+              : l10n.approvalDoneApproved,
+          StatusTone.success,
+        ),
+        _DeskIntent.returnForChanges => (
+          l10n.approvalDoneReturned,
+          StatusTone.warning,
+        ),
+        _DeskIntent.reject => (l10n.approvalDoneRejected, StatusTone.danger),
+      };
+      AppToast.show(context, message, tone: tone);
     } on ApiException catch (e) {
       if (!mounted) return;
+      final otpWrong = e.fieldErrors.keys.any((k) => k.endsWith('otp'));
       AppToast.show(
         context,
-        e.message.isNotEmpty
+        otpWrong
+            ? l10n.nsSignErrOtpWrong
+            : e.message.isNotEmpty
             ? e.message
-            : (bangla ? 'অনুমোদন ব্যর্থ হয়েছে।' : 'Approval failed.'),
+            : l10n.approvalErrFailed,
         tone: StatusTone.danger,
       );
     } finally {
-      if (mounted) setState(() => _approving = false);
+      if (mounted) setState(() => _acting = false);
     }
-  }
-
-  // ── Return / Reject ─────────────────────────────────────────────────────
-  void _openReturnSheet(BuildContext ctx, InboxItem item) {
-    final bangla = ctx.isBangla;
-    final reasons = _returnReasons(bangla);
-
-    unawaited(
-      showModalBottomSheet<void>(
-        context: ctx,
-        showDragHandle: true,
-        isScrollControlled: true,
-        builder: (sheetCtx) => SafeArea(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              Space.lg,
-              0,
-              Space.lg,
-              MediaQuery.viewInsetsOf(sheetCtx).bottom + Space.lg,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Sheet header
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.undo_rounded,
-                        color: Colors.red.shade700,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            bangla
-                                ? 'আপত্তি সহ ফেরত পাঠান'
-                                : 'Return / Reject with Query',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            bangla
-                                ? 'নিচের কারণগুলির একটি নির্বাচন করুন'
-                                : 'Select one of the reasons below',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.md),
-                const Divider(height: 1),
-                const SizedBox(height: Space.sm),
-                for (final reason in reasons)
-                  _ReturnReasonTile(
-                    label: reason,
-                    onTap: () async {
-                      // Capture navigators before any async gap.
-                      final sheetNav = Navigator.of(sheetCtx);
-                      final modalNav = Navigator.of(ctx);
-                      sheetNav.pop(); // close reason sheet
-                      try {
-                        await ref
-                            .read(approvalRepositoryProvider)
-                            .returnForChanges(item.instanceId, comment: reason);
-                        ref
-                          ..invalidate(approvalInboxProvider)
-                          ..invalidate(approvalHistoryProvider);
-                        if (!mounted) return;
-                        modalNav.pop(); // close detail modal
-                        AppToast.show(
-                          context,
-                          bangla
-                              ? 'আপত্তি সহ ফেরত পাঠানো হয়েছে'
-                              : 'Returned with structured query',
-                          tone: StatusTone.warning,
-                        );
-                      } on ApiException catch (e) {
-                        if (!mounted) return;
-                        AppToast.show(
-                          context,
-                          e.message.isNotEmpty
-                              ? e.message
-                              : (bangla
-                                    ? 'ফেরত পাঠানো ব্যর্থ।'
-                                    : 'Return failed.'),
-                          tone: StatusTone.danger,
-                        );
-                      }
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final bangla = context.isBangla;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -1200,7 +1146,9 @@ class _ApprovalDetailModalState extends ConsumerState<_ApprovalDetailModal> {
               },
             ),
           ),
-          const SizedBox(height: Space.xs),
+          const SizedBox(height: Space.sm),
+          _AlreadySigned(instanceId: item.instanceId),
+          const SizedBox(height: Space.sm),
 
           // ── Digital Signature Assurance Banner ───────────────────────
           Container(
@@ -1290,59 +1238,74 @@ class _ApprovalDetailModalState extends ConsumerState<_ApprovalDetailModal> {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red.shade700,
-                    side: BorderSide(color: Colors.red.shade200),
                     padding: const EdgeInsets.symmetric(vertical: Space.md),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Corner.md),
                     ),
                   ),
-                  icon: Icon(
-                    Icons.undo_rounded,
-                    size: 18,
-                    color: Colors.red.shade700,
-                  ),
-                  onPressed: _approving
+                  onPressed: _acting
                       ? null
-                      : () => _openReturnSheet(context, item),
-                  label: Text(
-                    bangla ? 'ফেরত পাঠান' : 'Return / Reject',
+                      : () => unawaited(
+                          _decide(context, item, _DeskIntent.returnForChanges),
+                        ),
+                  child: Text(
+                    l10n.approvalActReturn,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
               const SizedBox(width: Space.md),
               Expanded(
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: BrandColors.crimson,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.error,
+                    side: BorderSide(color: scheme.error),
                     padding: const EdgeInsets.symmetric(vertical: Space.md),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Corner.md),
                     ),
                   ),
-                  icon: _approving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.draw_rounded, size: 18),
-                  label: Text(
-                    bangla ? 'অনুমোদন ও স্বাক্ষর' : 'Approve & E-Sign',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: _approving
+                  onPressed: _acting
                       ? null
-                      : () => unawaited(_doApprove(context, item)),
+                      : () => unawaited(
+                          _decide(context, item, _DeskIntent.reject),
+                        ),
+                  child: Text(
+                    l10n.approvalActReject,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: Space.sm),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: BrandColors.crimson,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Corner.md),
+              ),
+            ),
+            icon: _acting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.draw_rounded, size: 18),
+            label: Text(
+              l10n.approvalESign,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            onPressed: _acting
+                ? null
+                : () => unawaited(_decide(context, item, _DeskIntent.approve)),
           ),
         ],
       ),
@@ -1478,53 +1441,78 @@ class _RemarkChip extends StatelessWidget {
   }
 }
 
-class _ReturnReasonTile extends StatelessWidget {
-  const _ReturnReasonTile({required this.label, required this.onTap});
-  final String label;
-  final VoidCallback onTap;
+enum _DeskIntent { approve, returnForChanges, reject }
+
+class _AlreadySigned extends ConsumerWidget {
+  const _AlreadySigned({required this.instanceId});
+
+  final String instanceId;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: Space.xs),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Corner.md),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Space.md,
-            vertical: 12,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Corner.md),
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(alpha: 0.7),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final trail = ref.watch(workflowTrailProvider(instanceId));
+    return trail.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: Space.sm),
+        child: LinearProgressIndicator(),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (t) {
+        final signed = [
+          for (final step in t.steps)
+            if (step.state == TrailState.approved) step,
+        ];
+        if (signed.isEmpty) return const SizedBox.shrink();
+        final theme = Theme.of(context);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SectionLabel(
+              icon: Icons.verified_outlined,
+              label: l10n.approvalAlreadySigned,
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.help_outline, size: 17, color: Colors.red.shade600),
-              const SizedBox(width: Space.sm),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+            const SizedBox(height: Space.sm),
+            for (final step in signed)
+              Padding(
+                padding: const EdgeInsets.only(bottom: Space.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _signerLine(step, bangla: bangla),
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    Text(
+                      step.name,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (step.comment != null && step.comment!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: Space.xs),
+                        child: Text(
+                          '“${step.comment}”',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: scheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
+          ],
+        );
+      },
     );
+  }
+
+  String _signerLine(TrailStep step, {required bool bangla}) {
+    final who = step.decidedBy?.displayName(bangla: bangla) ?? '';
+    final dept = step.decidedBy?.departmentName(bangla: bangla);
+    if (who.isEmpty) return step.name;
+    if (dept == null) return who;
+    return '$who · $dept';
   }
 }
 

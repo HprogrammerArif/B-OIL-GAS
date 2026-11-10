@@ -11,6 +11,8 @@ import 'package:bogcl_oneops/features/approvals/presentation/approval_ui.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_providers.dart';
+import 'package:bogcl_oneops/features/note_sheets/presentation/signature_sheet.dart';
 import 'package:bogcl_oneops/features/workflow/data/workflow_trail.dart';
 import 'package:bogcl_oneops/features/workflow/presentation/approval_timeline.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
@@ -46,7 +48,9 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
       ..invalidate(approvalHistoryProvider)
       ..invalidate(claimsProvider)
       ..invalidate(advancesProvider)
-      ..invalidate(myLeaveRequestsProvider);
+      ..invalidate(myLeaveRequestsProvider)
+      ..invalidate(noteSheetDetailProvider)
+      ..invalidate(noteSheetsProvider);
   }
 
   Future<void> _run(Future<void> Function() action, String done) async {
@@ -64,7 +68,9 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
         'SELF_APPROVAL' => l10n.approvalErrSelf,
         'DELEGATION_AMOUNT_EXCEEDED' => l10n.approvalErrLimit,
         _ =>
-          e.code == ApiErrorCode.invalidStateTransition
+          e.fieldErrors.keys.any((k) => k.endsWith('otp'))
+              ? l10n.nsSignErrOtpWrong
+              : e.code == ApiErrorCode.invalidStateTransition
               ? l10n.approvalErrClosed
               : l10n.approvalErrFailed,
       }, tone: StatusTone.danger);
@@ -97,6 +103,39 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
 
   Future<void> _negative(InboxItem item, {required bool reject}) async {
     final l10n = context.l10n;
+    if (item.requiresSignature) {
+      final bangla = context.isBangla;
+      final refLabel = item.summary.refNo.isNotEmpty
+          ? item.summary.refNo
+          : item.summary.displayTitle(bangla: bangla);
+      final draft = await showSignatureCapture(
+        context,
+        title: reject ? l10n.nsRejectTitle : l10n.nsReturnTitle,
+        subtitle: l10n.nsSignIntro(refLabel),
+        reasonRequired: true,
+        confirmLabel: reject
+            ? l10n.nsSignRejectConfirm
+            : l10n.nsSignReturnConfirm,
+      );
+      if (draft == null || !mounted) return;
+      final repo = ref.read(approvalRepositoryProvider);
+      final reason = draft.comment ?? '';
+      await _run(
+        () => reject
+            ? repo.reject(
+                item.instanceId,
+                comment: reason,
+                signature: draft.toJson(),
+              )
+            : repo.returnForChanges(
+                item.instanceId,
+                comment: reason,
+                signature: draft.toJson(),
+              ),
+        reject ? l10n.approvalDoneRejected : l10n.approvalDoneReturned,
+      );
+      return;
+    }
     final note = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,

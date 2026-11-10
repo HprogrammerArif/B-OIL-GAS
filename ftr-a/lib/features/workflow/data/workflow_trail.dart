@@ -11,19 +11,37 @@ enum TrailState { pending, active, approved, rejected, skipped, returned }
 
 @immutable
 class TrailPerson {
-  const TrailPerson({required this.name, required this.nameBn, this.title});
+  const TrailPerson({
+    required this.name,
+    required this.nameBn,
+    this.title,
+    this.department,
+    this.departmentBn,
+  });
 
   factory TrailPerson.fromJson(Map<String, Object?> json) => TrailPerson(
     name: json['name']! as String,
     nameBn: (json['nameBn'] as String?) ?? json['name']! as String,
     title: json['title'] as String?,
+    department: json['department'] as String?,
+    departmentBn: json['departmentBn'] as String?,
   );
 
   final String name;
   final String nameBn;
   final String? title;
+  final String? department;
+  final String? departmentBn;
 
   String displayName({required bool bangla}) => bangla ? nameBn : name;
+
+  String? departmentName({required bool bangla}) {
+    final bn = departmentBn;
+    if (bangla && bn != null && bn.isNotEmpty) return bn;
+    final en = department;
+    if (en == null || en.isEmpty) return null;
+    return en;
+  }
 }
 
 @immutable

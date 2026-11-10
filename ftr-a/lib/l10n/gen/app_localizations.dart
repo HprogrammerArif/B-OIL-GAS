@@ -4711,6 +4711,18 @@ abstract class AppL10n {
   /// **'Reason (at least 10 characters)'**
   String get approvalReasonHint;
 
+  /// No description provided for @approvalAlreadySigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Already signed'**
+  String get approvalAlreadySigned;
+
+  /// No description provided for @approvalESign.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve & E-Sign'**
+  String get approvalESign;
+
   /// No description provided for @approvalDoneApproved.
   ///
   /// In en, this message translates to:
@@ -5687,6 +5699,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Sign and approve'**
   String get nsSignConfirm;
+
+  /// No description provided for @nsSignReturnConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign and return'**
+  String get nsSignReturnConfirm;
+
+  /// No description provided for @nsSignRejectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign and reject'**
+  String get nsSignRejectConfirm;
+
+  /// No description provided for @nsSignErrReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reason of at least 10 characters.'**
+  String get nsSignErrReason;
 
   /// No description provided for @nsSignErrName.
   ///

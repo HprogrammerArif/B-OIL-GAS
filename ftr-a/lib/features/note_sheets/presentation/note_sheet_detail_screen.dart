@@ -18,6 +18,7 @@ import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_provid
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_ui.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/signature_sheet.dart';
 import 'package:bogcl_oneops/features/workflow/presentation/approval_timeline.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -85,35 +86,64 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
 
   Future<void> _sign(NoteSheet s) async {
     final l10n = context.l10n;
-    final updated = await showSignatureSheet(context, sheet: s);
-    if (updated == null || !mounted) return;
-    _refreshAll();
-    AppToast.show(
+    final draft = await showSignatureCapture(
       context,
-      updated.isApproved ? l10n.nsSignedFinal : l10n.nsSignedToast,
-      tone: StatusTone.success,
+      title: l10n.nsSignTitle,
+      subtitle: l10n.nsSignIntro(s.fileNo ?? s.title),
     );
+    if (draft == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await ref
+          .read(noteSheetRepositoryProvider)
+          .sign(
+            s.id,
+            method: draft.method,
+            otp: draft.otp,
+            typedName: draft.typedName,
+            imageFileId: draft.imageFileId,
+            comment: draft.comment,
+          );
+      _refreshAll();
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        updated.isApproved ? l10n.nsSignedFinal : l10n.nsSignedToast,
+        tone: StatusTone.success,
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(context, _signError(l10n, e), tone: StatusTone.danger);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
-  /// Return or reject: both need a reason of at least 10 characters.
+  /// Return or reject: a reason and, on a signature step, the signature.
   Future<void> _decide(NoteSheet s, {required bool reject}) async {
     final l10n = context.l10n;
-    final reason = await _askText(
+    final draft = await showSignatureCapture(
       context,
       title: reject ? l10n.nsRejectTitle : l10n.nsReturnTitle,
-      hint: l10n.approvalReasonHint,
-      confirm: reject ? l10n.approvalActReject : l10n.approvalActReturn,
-      minLength: 10,
-      destructive: reject,
+      subtitle: l10n.nsSignIntro(s.fileNo ?? s.title),
+      reasonRequired: true,
+      confirmLabel: reject
+          ? l10n.nsSignRejectConfirm
+          : l10n.nsSignReturnConfirm,
     );
-    if (reason == null || !mounted) return;
+    if (draft == null || !mounted) return;
+    final reason = draft.comment ?? '';
     await _run(() async {
       final repo = ref.read(approvalRepositoryProvider);
       final inst = s.workflowInstanceId!;
       if (reject) {
-        await repo.reject(inst, comment: reason);
+        await repo.reject(inst, comment: reason, signature: draft.toJson());
       } else {
-        await repo.returnForChanges(inst, comment: reason);
+        await repo.returnForChanges(
+          inst,
+          comment: reason,
+          signature: draft.toJson(),
+        );
       }
     }, done: reject ? l10n.nsRejectedToast : l10n.nsReturnedToast);
   }
@@ -160,13 +190,7 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
       AppToast.show(context, done, tone: StatusTone.success);
     } on ApiException catch (e) {
       if (!mounted) return;
-      AppToast.show(
-        context,
-        e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
-            ? l10n.claimErrOffline
-            : l10n.nsErrFailed,
-        tone: StatusTone.danger,
-      );
+      AppToast.show(context, _signError(l10n, e), tone: StatusTone.danger);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -486,9 +510,7 @@ class _Body extends StatelessWidget {
             ListRow(
               leading: const Icon(Icons.verified_outlined),
               title: g.name(bangla: bangla),
-              subtitle:
-                  '${g.stepName}${g.roleTitle == null ? '' : ' · ${g.roleTitle}'}'
-                  '\n${DateFmt.dateTime(g.signedAt, lang)}',
+              subtitle: _signedLine(g, bangla: bangla, lang: lang),
             ),
         ],
         if (s.paragraphs.isNotEmpty || s.signatures.isNotEmpty)
@@ -600,96 +622,31 @@ class _Details extends StatelessWidget {
   }
 }
 
-Future<String?> _askText(
-  BuildContext context, {
-  required String title,
-  required String hint,
-  required String confirm,
-  required int minLength,
-  bool destructive = false,
-}) => showModalBottomSheet<String>(
-  context: context,
-  isScrollControlled: true,
-  showDragHandle: true,
-  builder: (_) => _TextSheet(
-    title: title,
-    hint: hint,
-    confirm: confirm,
-    minLength: minLength,
-    destructive: destructive,
-  ),
-);
-
-class _TextSheet extends StatefulWidget {
-  const _TextSheet({
-    required this.title,
-    required this.hint,
-    required this.confirm,
-    required this.minLength,
-    required this.destructive,
-  });
-
-  final String title;
-  final String hint;
-  final String confirm;
-  final int minLength;
-  final bool destructive;
-
-  @override
-  State<_TextSheet> createState() => _TextSheetState();
+String _signError(AppL10n l10n, ApiException e) {
+  if (e.fieldErrors.keys.any((k) => k.endsWith('otp'))) {
+    return l10n.nsSignErrOtpWrong;
+  }
+  return e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
+      ? l10n.claimErrOffline
+      : l10n.nsErrFailed;
 }
 
-class _TextSheetState extends State<_TextSheet> {
-  final _c = TextEditingController();
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ok = _c.text.trim().length >= widget.minLength;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        Space.lg,
-        0,
-        Space.lg,
-        MediaQuery.viewInsetsOf(context).bottom + Space.lg,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: Space.md),
-          AppTextField(
-            label: widget.hint,
-            controller: _c,
-            maxLines: 4,
-            maxLength: 1000,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: Space.md),
-          if (widget.destructive)
-            PrimaryButton.danger(
-              label: widget.confirm,
-              onPressed: ok
-                  ? () => Navigator.of(context).pop(_c.text.trim())
-                  : null,
-            )
-          else
-            PrimaryButton(
-              label: widget.confirm,
-              onPressed: ok
-                  ? () => Navigator.of(context).pop(_c.text.trim())
-                  : null,
-            ),
-        ],
-      ),
-    );
-  }
+String _signedLine(
+  NoteSignature g, {
+  required bool bangla,
+  required String lang,
+}) {
+  final dept = g.department(bangla: bangla);
+  final desk = [
+    g.stepName,
+    if (dept != null) dept else if (g.roleTitle != null) g.roleTitle!,
+  ].join(' · ');
+  final comment = g.comment;
+  return [
+    desk,
+    DateFmt.dateTime(g.signedAt, lang),
+    if (comment != null && comment.isNotEmpty) '“$comment”',
+  ].join('\n');
 }
 
 class _BudgetLine extends StatelessWidget {

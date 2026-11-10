@@ -85,6 +85,11 @@ void seedNoteSheets(MockStore store) {
     actorUserId: hod.user.str('id'),
     type: 'RETURN',
     comment: 'Please add the failure dates and the part numbers.',
+    signature: {
+      'method': 'TYPED',
+      'typedName': hod.employee.str('fullName'),
+      'otp': NoteSheetPolicy.demoOtp,
+    },
   );
 
   final gm = seedAuthFor(store, 'EMP-0012');
@@ -221,6 +226,14 @@ void _queueForChairman(
   );
 }
 
+/// What each earlier desk writes when the file is seeded already signed.
+String? _deskRemark(String key) => switch (key) {
+  'HOD' => 'I recommend this request against the department plan.',
+  'FINANCE' => 'This is inside the capital budget.',
+  'GM' => 'The plant can take the work. No safety objection.',
+  _ => null,
+};
+
 /// Signs every step these people can sign, and stops before the Chairman.
 void _signUntil(MockStore store, Json sheet, List<AuthContext> signers) {
   for (final who in signers) {
@@ -240,6 +253,7 @@ void _signUntil(MockStore store, Json sheet, List<AuthContext> signers) {
       NoteSheetEngine.sign(store, who, sheet, {
         'method': 'TYPED',
         'typedName': who.employee.str('fullName'),
+        'comment': _deskRemark(step.str('key')),
       }, skipOtp: true);
     }
   }

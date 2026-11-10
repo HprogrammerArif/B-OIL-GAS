@@ -90,11 +90,25 @@ class ApprovalRepository {
         signature ?? {'method': 'TYPED', 'typedName': 'Digital E-Sign'},
   });
 
-  Future<void> reject(String instanceId, {required String comment}) =>
-      _act(instanceId, {'type': 'REJECT', 'comment': comment});
+  Future<void> reject(
+    String instanceId, {
+    required String comment,
+    Map<String, Object?>? signature,
+  }) => _act(instanceId, {
+    'type': 'REJECT',
+    'comment': comment,
+    'signature': ?signature,
+  });
 
-  Future<void> returnForChanges(String instanceId, {required String comment}) =>
-      _act(instanceId, {'type': 'RETURN', 'comment': comment});
+  Future<void> returnForChanges(
+    String instanceId, {
+    required String comment,
+    Map<String, Object?>? signature,
+  }) => _act(instanceId, {
+    'type': 'RETURN',
+    'comment': comment,
+    'signature': ?signature,
+  });
 
   Future<void> delegate(String instanceId, {required String toUserId}) =>
       _act(instanceId, {'type': 'DELEGATE', 'delegateToUserId': toUserId});
