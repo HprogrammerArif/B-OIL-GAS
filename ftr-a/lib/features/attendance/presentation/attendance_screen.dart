@@ -372,6 +372,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         if (bangla) 'টিম হাজিরা ও ছুটি' else 'Team Roster & Leave',
     ];
 
+    final l10n = context.l10n;
+    final canRequestLeave = session?.can('leave:request') ?? false;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -379,6 +382,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         ),
         actions: const [AppBarActions()],
       ),
+      floatingActionButton: _selectedTab == 1 && canRequestLeave
+          ? FloatingActionButton.extended(
+              onPressed: () => unawaited(context.push(AppRoutes.leaveNew)),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.leaveApply),
+            )
+          : null,
       body: today.when(
         loading: () => const SkeletonList(),
         error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),

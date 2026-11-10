@@ -44,16 +44,14 @@ class LeaveScreen extends ConsumerWidget {
               label: Text(l10n.leaveApply),
             )
           : null,
-      body: const MyLeaveView(showHeaderAction: false),
+      body: const MyLeaveView(),
     );
   }
 }
 
 /// Reusable view embedded into both LeaveScreen and the unified AttendanceScreen.
 class MyLeaveView extends ConsumerStatefulWidget {
-  const MyLeaveView({this.showHeaderAction = true, super.key});
-
-  final bool showHeaderAction;
+  const MyLeaveView({super.key});
 
   @override
   ConsumerState<MyLeaveView> createState() => _MyLeaveViewState();
@@ -138,7 +136,6 @@ class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
                 onFilter: (f) => setState(() => _filter = f),
                 showOwner: false,
                 balances: showBalances ? balances : null,
-                showApply: widget.showHeaderAction && canRequest,
               ),
               _Tab.awaiting => _RequestList(
                 scope: 'team',
@@ -171,7 +168,6 @@ class _RequestList extends ConsumerWidget {
     this.onlyAwaiting = false,
     this.hideAwaiting = false,
     this.balances,
-    this.showApply = false,
     this.emptyTitle,
     this.emptyMessage,
   });
@@ -183,7 +179,6 @@ class _RequestList extends ConsumerWidget {
   final bool onlyAwaiting;
   final bool hideAwaiting;
   final AsyncValue<List<LeaveBalance>>? balances;
-  final bool showApply;
   final String? emptyTitle;
   final String? emptyMessage;
 
@@ -225,20 +220,6 @@ class _RequestList extends ConsumerWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 96),
           children: [
-            if (showApply)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  Space.lg,
-                  Space.md,
-                  Space.lg,
-                  Space.xs,
-                ),
-                child: FilledButton.tonalIcon(
-                  icon: const Icon(Icons.add, size: 20),
-                  label: Text(l10n.leaveApply),
-                  onPressed: () => unawaited(context.push(AppRoutes.leaveNew)),
-                ),
-              ),
             if (balances != null) ...[
               SectionHeader(title: l10n.leaveBalancesTitle),
               balances!.when(
@@ -404,17 +385,25 @@ class LeaveRequestRow extends StatelessWidget {
       DateFmt.range(item.startDate, item.endDate, lang),
       if (showOwner) item.employee.displayName(bangla: bangla),
     ];
-    return ListRow(
-      title:
-          '${item.type.displayName(bangla: bangla)} · '
-          '${daysText(l10n, item.days, lang)}',
-      subtitle:
-          '${bits.join(' · ')}\n${leaveNextLine(l10n, item, bangla: bangla)}',
-      trailing: StatusPill(
-        label: leaveStatusLabel(l10n, item.status),
-        tone: leaveStatusTone(item.status),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Space.lg,
+        Space.sm,
+        Space.lg,
+        Space.sm,
       ),
-      onTap: () => unawaited(context.push(AppRoutes.leaveDetail(item.id))),
+      child: ListRow(
+        title:
+            '${item.type.displayName(bangla: bangla)} · '
+            '${daysText(l10n, item.days, lang)}',
+        subtitle:
+            '${bits.join(' · ')}\n${leaveNextLine(l10n, item, bangla: bangla)}',
+        trailing: StatusPill(
+          label: leaveStatusLabel(l10n, item.status),
+          tone: leaveStatusTone(item.status),
+        ),
+        onTap: () => unawaited(context.push(AppRoutes.leaveDetail(item.id))),
+      ),
     );
   }
 }
