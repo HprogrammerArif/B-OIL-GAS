@@ -2747,12 +2747,6 @@ class AppL10nBn extends AppL10n {
   String get approvalRoute => 'অনুমোদনের ধাপ';
 
   @override
-  String get approvalDiscussion => 'মন্তব্য';
-
-  @override
-  String get approvalNeedsSignature => 'এই ধাপে আপনার স্বাক্ষর দরকার।';
-
-  @override
   String get commonSave => 'সংরক্ষণ করুন';
 
   @override
@@ -2915,22 +2909,7 @@ class AppL10nBn extends AppL10n {
   String get nsRouteTitle => 'অনুমোদনের ধাপ';
 
   @override
-  String get nsSignedBy => 'স্বাক্ষর করেছেন';
-
-  @override
-  String get nsSignedVerified => 'স্বাক্ষরিত ও যাচাইকৃত';
-
-  @override
   String get nsDetails => 'বিস্তারিত';
-
-  @override
-  String get nsDetailsHelp =>
-      'প্রতিটি নোট ও স্বাক্ষরের একটি ফিঙ্গারপ্রিন্ট (SHA-256) আছে। আগের কোনো নোট বদলালে ফিঙ্গারপ্রিন্ট আর মিলবে না।';
-
-  @override
-  String nsVerifyCode(String code) {
-    return 'যাচাই কোড $code';
-  }
 
   @override
   String get nsKindNote => 'নোট';
@@ -3224,6 +3203,9 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get nsSignComment => 'মন্তব্য (ঐচ্ছিক)';
+
+  @override
+  String get nsSignReasonPick => 'কারণ বেছে নিন';
 
   @override
   String get nsSignOtp => 'ওয়ান-টাইম কোড';

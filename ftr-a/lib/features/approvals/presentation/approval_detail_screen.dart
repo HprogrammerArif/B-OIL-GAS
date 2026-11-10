@@ -161,23 +161,6 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
     );
   }
 
-  Future<void> _delegate(InboxItem item) async {
-    final l10n = context.l10n;
-    final to = await showModalBottomSheet<Person>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => const _DelegateSheet(),
-    );
-    if (to == null || !mounted) return;
-    await _run(
-      () => ref
-          .read(approvalRepositoryProvider)
-          .delegate(item.instanceId, toUserId: to.userId),
-      l10n.approvalDoneDelegated(to.display(bangla: context.isBangla)),
-    );
-  }
-
   Future<void> _comment() async {
     final l10n = context.l10n;
     final text = await showModalBottomSheet<String>(
@@ -248,9 +231,6 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
               onReturn: mine == null
                   ? null
                   : () => unawaited(_negative(mine, reject: false)),
-              onDelegate: mine == null
-                  ? null
-                  : () => unawaited(_delegate(mine)),
               onComment: () => unawaited(_comment()),
               onWithdraw: () => unawaited(_withdraw()),
             ),
@@ -297,11 +277,6 @@ class _Body extends ConsumerWidget {
       'NoteSheet' => AppRoutes.noteSheetDetail(d.objectId),
       _ => null,
     };
-    final comments = [
-      for (final a in d.actions)
-        if (a.comment != null && a.comment!.isNotEmpty) a,
-    ];
-
     return ListView(
       padding: const EdgeInsets.only(bottom: Space.xxl),
       children: [
@@ -399,17 +374,6 @@ class _Body extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: Space.xl),
           child: ApprovalTimeline(instanceId: d.id, submittedAt: d.submittedAt),
         ),
-        if (comments.isNotEmpty) ...[
-          SectionHeader(title: l10n.approvalDiscussion),
-          for (final a in comments)
-            ListRow(
-              title: a.actor.display(bangla: bangla),
-              subtitle:
-                  '${actionLabel(l10n, a.type)} · '
-                  '${relativeTime(l10n, a.createdAt, lang)}\n“${a.comment}”',
-              leading: const Icon(Icons.chat_bubble_outline, size: 20),
-            ),
-        ],
       ],
     );
   }
@@ -423,7 +387,6 @@ class _ActionBar extends ConsumerWidget {
     required this.onApprove,
     required this.onReject,
     required this.onReturn,
-    required this.onDelegate,
     required this.onComment,
     required this.onWithdraw,
   });
@@ -434,7 +397,6 @@ class _ActionBar extends ConsumerWidget {
   final VoidCallback? onApprove;
   final VoidCallback? onReject;
   final VoidCallback? onReturn;
-  final VoidCallback? onDelegate;
   final VoidCallback onComment;
   final VoidCallback onWithdraw;
 
@@ -453,14 +415,6 @@ class _ActionBar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (mine != null) ...[
-              if (mine!.requiresSignature)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: Space.sm),
-                  child: Text(
-                    l10n.approvalNeedsSignature,
-                    style: TextStyle(color: context.bogcl.warning),
-                  ),
-                ),
               if (mine!.requiresSignature)
                 PrimaryButton(
                   label: l10n.nsSignAction,
@@ -495,21 +449,6 @@ class _ActionBar extends ConsumerWidget {
                       label: l10n.approvalActReject,
                       onPressed: busy ? null : onReject,
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton.icon(
-                    onPressed: busy ? null : onDelegate,
-                    icon: const Icon(Icons.forward_to_inbox_outlined, size: 18),
-                    label: Text(l10n.approvalActDelegate),
-                  ),
-                  TextButton.icon(
-                    onPressed: busy ? null : onComment,
-                    icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                    label: Text(l10n.approvalActComment),
                   ),
                 ],
               ),
@@ -624,58 +563,6 @@ class _DecisionSheetState extends State<_DecisionSheet> {
                 PrimaryButton(label: widget.confirmLabel, onPressed: _confirm),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DelegateSheet extends ConsumerWidget {
-  const _DelegateSheet();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final bangla = context.isBangla;
-    final people = ref.watch(approvalDelegatesProvider);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.approvalDelegateTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: Space.xs),
-            Text(l10n.approvalDelegateMessage),
-            const SizedBox(height: Space.md),
-            people.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.all(Space.xl),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (_, _) => ErrorState(
-                onRetry: () => ref.invalidate(approvalDelegatesProvider),
-              ),
-              data: (list) => Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    for (final p in list)
-                      ListRow(
-                        title: p.display(bangla: bangla),
-                        subtitle: p.title,
-                        leading: const Icon(Icons.person_outline),
-                        onTap: () => Navigator.of(context).pop(p),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

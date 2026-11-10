@@ -504,17 +504,6 @@ class _Body extends StatelessWidget {
             submittedAt: s.submittedAt!,
           ),
         ],
-        if (s.signatures.isNotEmpty) ...[
-          SectionHeader(title: l10n.nsSignedBy),
-          for (final g in s.signatures)
-            ListRow(
-              leading: const Icon(Icons.verified_outlined),
-              title: g.name(bangla: bangla),
-              subtitle: _signedLine(g, bangla: bangla, lang: lang),
-            ),
-        ],
-        if (s.paragraphs.isNotEmpty || s.signatures.isNotEmpty)
-          _Details(sheet: s),
       ],
     );
   }
@@ -568,60 +557,6 @@ class _ParagraphTile extends StatelessWidget {
   }
 }
 
-/// Technical proof, kept out of the way (clarity rule).
-class _Details extends StatelessWidget {
-  const _Details({required this.sheet});
-
-  final NoteSheet sheet;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final mono = theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace');
-    return Padding(
-      padding: const EdgeInsets.only(top: Space.lg),
-      child: ExpansionTile(
-        title: Text(sheet.isApproved ? l10n.nsSignedVerified : l10n.nsDetails),
-        childrenPadding: const EdgeInsets.fromLTRB(
-          Space.lg,
-          0,
-          Space.lg,
-          Space.lg,
-        ),
-        expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.nsDetailsHelp, style: theme.textTheme.bodySmall),
-          const SizedBox(height: Space.sm),
-          if (sheet.verificationCode != null)
-            SelectableText(
-              l10n.nsVerifyCode(sheet.verificationCode!),
-              style: theme.textTheme.titleSmall,
-            ),
-          if (sheet.finalHash != null)
-            SelectableText(sheet.finalHash!, style: mono),
-          for (final g in sheet.signatures)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.sm),
-              child: SelectableText(
-                '${g.stampCode}\n${g.documentHash}',
-                style: mono,
-              ),
-            ),
-          for (final p in sheet.paragraphs)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.sm),
-              child: SelectableText(
-                '#${p.seqNo}  ${p.contentHash}',
-                style: mono,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 String _signError(AppL10n l10n, ApiException e) {
   if (e.fieldErrors.keys.any((k) => k.endsWith('otp'))) {
     return l10n.nsSignErrOtpWrong;
@@ -629,24 +564,6 @@ String _signError(AppL10n l10n, ApiException e) {
   return e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
       ? l10n.claimErrOffline
       : l10n.nsErrFailed;
-}
-
-String _signedLine(
-  NoteSignature g, {
-  required bool bangla,
-  required String lang,
-}) {
-  final dept = g.department(bangla: bangla);
-  final desk = [
-    g.stepName,
-    if (dept != null) dept else if (g.roleTitle != null) g.roleTitle!,
-  ].join(' · ');
-  final comment = g.comment;
-  return [
-    desk,
-    DateFmt.dateTime(g.signedAt, lang),
-    if (comment != null && comment.isNotEmpty) '“$comment”',
-  ].join('\n');
 }
 
 class _BudgetLine extends StatelessWidget {

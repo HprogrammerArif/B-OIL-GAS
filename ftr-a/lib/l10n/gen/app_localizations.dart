@@ -4831,18 +4831,6 @@ abstract class AppL10n {
   /// **'Approval route'**
   String get approvalRoute;
 
-  /// No description provided for @approvalDiscussion.
-  ///
-  /// In en, this message translates to:
-  /// **'Comments'**
-  String get approvalDiscussion;
-
-  /// No description provided for @approvalNeedsSignature.
-  ///
-  /// In en, this message translates to:
-  /// **'This step needs your signature.'**
-  String get approvalNeedsSignature;
-
   /// No description provided for @commonSave.
   ///
   /// In en, this message translates to:
@@ -5094,35 +5082,11 @@ abstract class AppL10n {
   /// **'Approval route'**
   String get nsRouteTitle;
 
-  /// No description provided for @nsSignedBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed by'**
-  String get nsSignedBy;
-
-  /// No description provided for @nsSignedVerified.
-  ///
-  /// In en, this message translates to:
-  /// **'Signed and verified'**
-  String get nsSignedVerified;
-
   /// No description provided for @nsDetails.
   ///
   /// In en, this message translates to:
   /// **'Details'**
   String get nsDetails;
-
-  /// No description provided for @nsDetailsHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.'**
-  String get nsDetailsHelp;
-
-  /// No description provided for @nsVerifyCode.
-  ///
-  /// In en, this message translates to:
-  /// **'Verification code {code}'**
-  String nsVerifyCode(String code);
 
   /// No description provided for @nsKindNote.
   ///
@@ -5681,6 +5645,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Comment (optional)'**
   String get nsSignComment;
+
+  /// Hint for the reject/return reason dropdown on the signature sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select a reason'**
+  String get nsSignReasonPick;
 
   /// No description provided for @nsSignOtp.
   ///

@@ -2756,12 +2756,6 @@ class AppL10nEn extends AppL10n {
   String get approvalRoute => 'Approval route';
 
   @override
-  String get approvalDiscussion => 'Comments';
-
-  @override
-  String get approvalNeedsSignature => 'This step needs your signature.';
-
-  @override
   String get commonSave => 'Save';
 
   @override
@@ -2924,22 +2918,7 @@ class AppL10nEn extends AppL10n {
   String get nsRouteTitle => 'Approval route';
 
   @override
-  String get nsSignedBy => 'Signed by';
-
-  @override
-  String get nsSignedVerified => 'Signed and verified';
-
-  @override
   String get nsDetails => 'Details';
-
-  @override
-  String get nsDetailsHelp =>
-      'Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.';
-
-  @override
-  String nsVerifyCode(String code) {
-    return 'Verification code $code';
-  }
 
   @override
   String get nsKindNote => 'Note';
@@ -3232,6 +3211,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get nsSignComment => 'Comment (optional)';
+
+  @override
+  String get nsSignReasonPick => 'Select a reason';
 
   @override
   String get nsSignOtp => 'One-time code';

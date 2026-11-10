@@ -1542,8 +1542,6 @@
   },
   "approvalViewRequest": "See the full request",
   "approvalRoute": "Approval route",
-  "approvalDiscussion": "Comments",
-  "approvalNeedsSignature": "This step needs your signature.",
   "commonSave": "Save",
   "moduleNoteSheets": "Note-sheets",
   "nsIntro": "A note-sheet is a formal file note that asks for a decision or for money to be spent. It goes to each officer in turn and each one signs.",
@@ -1686,18 +1684,7 @@
   },
   "nsNotesTitle": "Notes",
   "nsRouteTitle": "Approval route",
-  "nsSignedBy": "Signed by",
-  "nsSignedVerified": "Signed and verified",
   "nsDetails": "Details",
-  "nsDetailsHelp": "Each note and signature carries a fingerprint (SHA-256). If anyone changed an earlier note, the fingerprints would no longer match.",
-  "nsVerifyCode": "Verification code {code}",
-  "@nsVerifyCode": {
-    "placeholders": {
-      "code": {
-        "type": "String"
-      }
-    }
-  },
   "nsKindNote": "Note",
   "nsKindQuery": "Question",
   "nsKindReturn": "Sent back",
@@ -1805,6 +1792,10 @@
   "nsSignDrawHint": "Draw your signature here",
   "nsSignClear": "Clear",
   "nsSignComment": "Comment (optional)",
+  "nsSignReasonPick": "Select a reason",
+  "@nsSignReasonPick": {
+    "description": "Hint for the reject/return reason dropdown on the signature sheet"
+  },
   "nsSignOtp": "One-time code",
   "nsSignOtpHelp": "Demo app: the code is 123456.",
   "nsSignConfirm": "Sign and approve",

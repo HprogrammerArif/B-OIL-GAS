@@ -467,20 +467,44 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
             },
             const SizedBox(height: Space.md),
             if (widget.reasonPresets.isNotEmpty) ...[
-              Wrap(
-                spacing: Space.xs,
-                runSpacing: Space.xs,
-                children: [
+              DropdownButtonFormField<String>(
+                key: ValueKey(
+                  widget.reasonPresets.contains(_comment.text)
+                      ? _comment.text
+                      : 'reason-none',
+                ),
+                initialValue: widget.reasonPresets.contains(_comment.text)
+                    ? _comment.text
+                    : null,
+                isExpanded: true,
+                hint: Text(
+                  l10n.nsSignReasonPick,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.nsSignReasonPick,
+                  border: const OutlineInputBorder(),
+                ),
+                selectedItemBuilder: (context) => [
                   for (final preset in widget.reasonPresets)
-                    FilterChip(
-                      label: Text(preset),
-                      selected: _comment.text == preset,
-                      onSelected: (_) {
-                        _comment.text = preset;
-                        setState(() => _error = null);
-                      },
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        preset,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
+                items: [
+                  for (final preset in widget.reasonPresets)
+                    DropdownMenuItem(value: preset, child: Text(preset)),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  _comment.text = value;
+                  setState(() => _error = null);
+                },
               ),
               const SizedBox(height: Space.sm),
             ],
@@ -491,6 +515,7 @@ class _SignatureSheetState extends ConsumerState<_SignatureSheet> {
               controller: _comment,
               maxLines: 2,
               maxLength: widget.reasonRequired ? 1000 : 500,
+              onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: Space.sm),
             AppTextField(
