@@ -317,45 +317,31 @@ class _FormState extends ConsumerState<_Form> {
             key: _formKey,
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
-                Space.lg,
+                Space.md,
+                Space.sm,
                 Space.md,
                 Space.lg,
-                Space.xxl,
               ),
               children: [
                 _Card(
                   title: l10n.claimFormWhy,
                   children: [
+                    EnterpriseTemplateDropdown(
+                      presets: _claimPurposePresets,
+                      controller: _purpose,
+                      onPicked: () => setState(() {}),
+                    ),
+                    const SizedBox(height: Space.sm),
                     AppTextField(
                       label: l10n.claimFieldPurpose,
                       controller: _purpose,
                       required: true,
                       maxLength: 200,
-                      maxLines: 3,
+                      maxLines: 2,
                       onChanged: (_) => setState(() {}),
                       validator: (v) => (v ?? '').trim().length < 3
                           ? l10n.claimErrPurpose
                           : null,
-                    ),
-                    const SizedBox(height: Space.sm),
-                    Wrap(
-                      spacing: Space.xs,
-                      runSpacing: Space.xs,
-                      children: [
-                        for (final p in _claimPurposePresets)
-                          FilterChip(
-                            visualDensity: VisualDensity.compact,
-                            label: Text(
-                              bangla ? p.$2 : p.$1,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            selected: _purpose.text == (bangla ? p.$2 : p.$1),
-                            onSelected: (_) => setState(() {
-                              _purpose.text = bangla ? p.$2 : p.$1;
-                            }),
-                          ),
-                      ],
                     ),
                     if (_type == ClaimType.tourEvent &&
                         openAdvances.isNotEmpty) ...[
@@ -446,50 +432,40 @@ class _FormState extends ConsumerState<_Form> {
                             : null,
                         onTap: () => unawaited(_pickMoment(depart: false)),
                       ),
-                      const SizedBox(height: Space.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: EnterpriseDropdownField<String>(
-                              label: l10n.claimFieldDestination,
-                              icon: Icons.location_city_outlined,
-                              value: _destination,
-                              items: [
-                                DropdownMenuItem(
-                                  value: 'DHAKA',
-                                  child: Text(l10n.claimDestDhaka),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'OTHER',
-                                  child: Text(l10n.claimDestOther),
-                                ),
-                              ],
-                              onChanged: (v) => setState(
-                                () => _destination = v ?? _destination,
-                              ),
-                            ),
+                      const SizedBox(height: Space.sm),
+                      EnterpriseDropdownField<String>(
+                        label: l10n.claimFieldDestination,
+                        icon: Icons.location_city_outlined,
+                        value: _destination,
+                        items: [
+                          DropdownMenuItem(
+                            value: 'DHAKA',
+                            child: Text(l10n.claimDestDhaka),
                           ),
-                          const SizedBox(width: Space.sm),
-                          Expanded(
-                            child: EnterpriseDropdownField<String?>(
-                              label: l10n.claimFieldMode,
-                              icon: Icons.commute_outlined,
-                              value: _mode,
-                              items: [
-                                DropdownMenuItem<String?>(
-                                  child: Text(l10n.claimModeNone),
-                                ),
-                                for (final m
-                                    in widget.policy.allowedTravelModes)
-                                  DropdownMenuItem(
-                                    value: m,
-                                    child: Text(travelModeLabel(l10n, m)),
-                                  ),
-                              ],
-                              onChanged: (v) => setState(() => _mode = v),
-                            ),
+                          DropdownMenuItem(
+                            value: 'OTHER',
+                            child: Text(l10n.claimDestOther),
                           ),
                         ],
+                        onChanged: (v) =>
+                            setState(() => _destination = v ?? _destination),
+                      ),
+                      const SizedBox(height: Space.sm),
+                      EnterpriseDropdownField<String?>(
+                        label: l10n.claimFieldMode,
+                        icon: Icons.commute_outlined,
+                        value: _mode,
+                        items: [
+                          DropdownMenuItem<String?>(
+                            child: Text(l10n.claimModeNone),
+                          ),
+                          for (final m in widget.policy.allowedTravelModes)
+                            DropdownMenuItem(
+                              value: m,
+                              child: Text(travelModeLabel(l10n, m)),
+                            ),
+                        ],
+                        onChanged: (v) => setState(() => _mode = v),
                       ),
                       const SizedBox(height: Space.md),
                       AppTextField(
@@ -590,16 +566,16 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Space.lg),
+      padding: const EdgeInsets.only(bottom: Space.md),
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(Space.lg),
+          padding: const EdgeInsets.all(Space.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               ...children,
             ],
           ),

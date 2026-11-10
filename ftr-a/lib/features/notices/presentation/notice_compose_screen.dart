@@ -149,11 +149,6 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
     );
   }
 
-  Widget _sectionLabel(String text) => Padding(
-    padding: const EdgeInsets.only(bottom: Space.xs),
-    child: Text(text, style: Theme.of(context).textTheme.titleSmall),
-  );
-
   String _draftLabel(AppL10n l10n, int i) => switch (i) {
     0 => l10n.noticeDraftPpe,
     1 => l10n.noticeDraftHoliday,
@@ -196,145 +191,164 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
-              Space.lg,
+              Space.md,
+              Space.sm,
               Space.md,
               Space.lg,
-              Space.xxl,
             ),
             children: [
-              AppTextField(
-                label: l10n.noticeFieldTitle,
-                controller: _title,
-                maxLength: 200,
-                required: true,
-                textInputAction: TextInputAction.next,
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: Space.md),
-              AppTextField(
-                label: l10n.noticeFieldBody,
-                controller: _body,
-                maxLines: 6,
-                maxLength: 5000,
-                required: true,
-                textInputAction: TextInputAction.newline,
-                keyboardType: TextInputType.multiline,
-                onChanged: (_) => setState(() => _draftIndex = null),
-              ),
-              const SizedBox(height: Space.md),
-              _sectionLabel(l10n.noticeUseDraft),
-              Wrap(
-                spacing: Space.sm,
-                runSpacing: Space.xs,
+              _Card(
+                title: l10n.noticeFieldTitle,
                 children: [
-                  for (var i = 0; i < _noticeBodyPresets.length; i++)
-                    ChoiceChip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(_draftLabel(l10n, i)),
-                      selected: _draftIndex == i,
-                      onSelected: (_) {
-                        final preset = _noticeBodyPresets[i];
-                        setState(() {
-                          _draftIndex = i;
-                          _body.text = bangla ? preset.$2 : preset.$1;
-                        });
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: Space.lg),
-              _sectionLabel(l10n.noticeFieldAudience),
-              Wrap(
-                spacing: Space.sm,
-                runSpacing: Space.xs,
-                children: [
-                  for (final a in audiences)
-                    ChoiceChip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(_audienceLabel(l10n, a)),
-                      selected: _audience == a,
-                      onSelected: (_) => _pickAudience(a, o),
-                    ),
-                ],
-              ),
-              if (choices.isNotEmpty) ...[
-                const SizedBox(height: Space.sm),
-                Wrap(
-                  spacing: Space.sm,
-                  runSpacing: Space.xs,
-                  children: [
-                    for (final c in choices)
-                      FilterChip(
-                        visualDensity: VisualDensity.compact,
-                        label: Text(c.displayName(bangla: bangla)),
-                        selected: _ids.contains(c.id),
-                        onSelected: restricted && c.id != ownId
-                            ? null
-                            : (v) => setState(() {
-                                if (v) {
-                                  _ids.add(c.id);
-                                } else {
-                                  _ids.remove(c.id);
-                                }
-                              }),
-                      ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: Space.lg),
-              _sectionLabel(l10n.noticeFieldCategory),
-              Wrap(
-                spacing: Space.sm,
-                runSpacing: Space.xs,
-                children: [
-                  for (final c in o.categories)
-                    FilterChip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(noticeCategoryLabel(l10n, c)),
-                      selected: category == c,
-                      onSelected: (_) => setState(() => _category = c),
-                    ),
-                ],
-              ),
-              const SizedBox(height: Space.lg),
-              _sectionLabel(l10n.noticeFieldPriority),
-              Wrap(
-                spacing: Space.sm,
-                runSpacing: Space.xs,
-                children: [
-                  for (final p in NoticePriority.values)
-                    ChoiceChip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(noticePriorityLabel(l10n, p)),
-                      selected: _priority == p,
-                      onSelected: (_) => setState(() => _priority = p),
-                    ),
-                ],
-              ),
-              if (_priority == NoticePriority.critical)
-                Padding(
-                  padding: const EdgeInsets.only(top: Space.sm),
-                  child: Text(
-                    l10n.noticeCriticalHint,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: context.bogcl.danger,
-                    ),
+                  AppTextField(
+                    label: l10n.noticeFieldTitle,
+                    controller: _title,
+                    maxLength: 200,
+                    required: true,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) => setState(() {}),
                   ),
-                ),
-              const SizedBox(height: Space.md),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.noticeFieldRequireAck),
-                value: _ack || _priority == NoticePriority.critical,
-                onChanged: _priority == NoticePriority.critical
-                    ? null
-                    : (v) => setState(() => _ack = v),
+                  const SizedBox(height: Space.sm),
+                  EnterpriseDropdownField<int?>(
+                    label: l10n.noticeUseDraft,
+                    icon: Icons.auto_fix_high_outlined,
+                    value: _draftIndex,
+                    items: [
+                      const DropdownMenuItem<int?>(child: Text('—')),
+                      for (var i = 0; i < _noticeBodyPresets.length; i++)
+                        DropdownMenuItem(
+                          value: i,
+                          child: Text(_draftLabel(l10n, i)),
+                        ),
+                    ],
+                    onChanged: (i) {
+                      if (i == null) {
+                        setState(() => _draftIndex = null);
+                        return;
+                      }
+                      final preset = _noticeBodyPresets[i];
+                      setState(() {
+                        _draftIndex = i;
+                        _body.text = bangla ? preset.$2 : preset.$1;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: Space.sm),
+                  AppTextField(
+                    label: l10n.noticeFieldBody,
+                    controller: _body,
+                    maxLines: 4,
+                    maxLength: 5000,
+                    required: true,
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
+                    onChanged: (_) => setState(() => _draftIndex = null),
+                  ),
+                ],
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.noticeFieldPin),
-                value: _pin,
-                onChanged: (v) => setState(() => _pin = v),
+              _Card(
+                title: l10n.noticeFieldAudience,
+                children: [
+                  EnterpriseDropdownField<_Audience>(
+                    label: l10n.noticeFieldAudience,
+                    icon: Icons.groups_outlined,
+                    value: _audience,
+                    items: [
+                      for (final a in audiences)
+                        DropdownMenuItem(
+                          value: a,
+                          child: Text(_audienceLabel(l10n, a)),
+                        ),
+                    ],
+                    onChanged: (a) {
+                      if (a != null) _pickAudience(a, o);
+                    },
+                  ),
+                  if (choices.isNotEmpty) ...[
+                    const SizedBox(height: Space.sm),
+                    Wrap(
+                      spacing: Space.sm,
+                      runSpacing: Space.xs,
+                      children: [
+                        for (final c in choices)
+                          FilterChip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(c.displayName(bangla: bangla)),
+                            selected: _ids.contains(c.id),
+                            onSelected: restricted && c.id != ownId
+                                ? null
+                                : (v) => setState(() {
+                                    if (v) {
+                                      _ids.add(c.id);
+                                    } else {
+                                      _ids.remove(c.id);
+                                    }
+                                  }),
+                          ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: Space.sm),
+                  EnterpriseDropdownField<NoticeCategory>(
+                    label: l10n.noticeFieldCategory,
+                    icon: Icons.category_outlined,
+                    value: category,
+                    items: [
+                      for (final c in o.categories)
+                        DropdownMenuItem(
+                          value: c,
+                          child: Text(noticeCategoryLabel(l10n, c)),
+                        ),
+                    ],
+                    onChanged: (c) {
+                      if (c != null) setState(() => _category = c);
+                    },
+                  ),
+                  const SizedBox(height: Space.sm),
+                  EnterpriseDropdownField<NoticePriority>(
+                    label: l10n.noticeFieldPriority,
+                    icon: Icons.flag_outlined,
+                    value: _priority,
+                    items: [
+                      for (final p in NoticePriority.values)
+                        DropdownMenuItem(
+                          value: p,
+                          child: Text(noticePriorityLabel(l10n, p)),
+                        ),
+                    ],
+                    onChanged: (p) {
+                      if (p != null) setState(() => _priority = p);
+                    },
+                  ),
+                  if (_priority == NoticePriority.critical)
+                    Padding(
+                      padding: const EdgeInsets.only(top: Space.sm),
+                      child: Text(
+                        l10n.noticeCriticalHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: context.bogcl.danger,
+                        ),
+                      ),
+                    ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(l10n.noticeFieldRequireAck),
+                    value: _ack || _priority == NoticePriority.critical,
+                    onChanged: _priority == NoticePriority.critical
+                        ? null
+                        : (v) => setState(() => _ack = v),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(l10n.noticeFieldPin),
+                    value: _pin,
+                    onChanged: (v) => setState(() => _pin = v),
+                  ),
+                ],
               ),
             ],
           ),
@@ -349,6 +363,35 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
               : null,
         ),
       ],
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.md),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              const SizedBox(height: Space.sm),
+              ...children,
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/notices/domain/notice_models.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_providers.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_ui.dart';
+import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
@@ -72,15 +73,16 @@ class _NoticesScreenState extends ConsumerState<NoticesScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(
-              Space.lg,
               Space.md,
-              Space.lg,
+              Space.md,
+              Space.md,
               Space.sm,
             ),
             child: Row(
               children: [
                 for (final f in filters) ...[
                   ChoiceChip(
+                    visualDensity: VisualDensity.compact,
                     label: Text(f.$2),
                     selected: _filter == f.$1,
                     onSelected: (_) => setState(() => _filter = f.$1),
@@ -112,13 +114,7 @@ class _NoticesScreenState extends ConsumerState<NoticesScreen> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.only(bottom: 96),
                         itemCount: items.length,
-                        itemBuilder: (_, i) => Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Space.lg,
-                            vertical: Space.xs,
-                          ),
-                          child: _NoticeCard(notice: items[i]),
-                        ),
+                        itemBuilder: (_, i) => _NoticeRow(notice: items[i]),
                       ),
               ),
             ),
@@ -129,8 +125,8 @@ class _NoticesScreenState extends ConsumerState<NoticesScreen> {
   }
 }
 
-class _NoticeCard extends StatelessWidget {
-  const _NoticeCard({required this.notice});
+class _NoticeRow extends StatelessWidget {
+  const _NoticeRow({required this.notice});
 
   final Notice notice;
 
@@ -140,105 +136,52 @@ class _NoticeCard extends StatelessWidget {
     final theme = Theme.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final bangla = context.isBangla;
-    final unread = notice.unread;
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(Corner.md),
-        onTap: () => unawaited(context.push(AppRoutes.noticeDetail(notice.id))),
-        child: Padding(
-          padding: const EdgeInsets.all(Space.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                noticeCategoryIcon(notice.category),
-                color: notice.priority == NoticePriority.critical
-                    ? context.bogcl.danger
-                    : theme.colorScheme.primary,
-              ),
-              const SizedBox(width: Space.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        if (unread)
-                          Padding(
-                            padding: const EdgeInsets.only(right: Space.sm),
-                            child: Semantics(
-                              label: l10n.noticeUnread,
-                              child: Icon(
-                                Icons.circle,
-                                size: 10,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        Expanded(
-                          child: Text(
-                            notice.displayTitle(bangla: bangla),
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: unread
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (notice.isPinned)
-                          Padding(
-                            padding: const EdgeInsets.only(left: Space.xs),
-                            child: Icon(
-                              Icons.push_pin,
-                              size: 16,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: Space.xs),
-                    Text(
-                      notice.excerpt,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: Space.sm),
-                    Wrap(
-                      spacing: Space.sm,
-                      runSpacing: Space.xs,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        StatusPill(
-                          label: noticeCategoryLabel(l10n, notice.category),
-                        ),
-                        if (notice.priority != NoticePriority.normal)
-                          StatusPill(
-                            label: noticePriorityLabel(l10n, notice.priority),
-                            tone: noticePriorityTone(notice.priority),
-                          ),
-                        if (notice.awaitingAck)
-                          StatusPill(
-                            label: l10n.noticeNeedsAck,
-                            tone: StatusTone.warning,
-                            icon: Icons.task_alt,
-                          ),
-                        Text(
-                          DateFmt.date(notice.publishedAt, lang),
-                          style: theme.textTheme.labelSmall,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    final next = notice.awaitingAck
+        ? l10n.noticeNeedsAck
+        : notice.unread
+        ? l10n.noticeUnread
+        : null;
+    final meta =
+        '${noticeCategoryLabel(l10n, notice.category)} · '
+        '${DateFmt.date(notice.publishedAt, lang)}';
+    final Widget? trailing;
+    if (notice.awaitingAck) {
+      trailing = StatusPill(
+        label: l10n.noticeNeedsAck,
+        tone: StatusTone.warning,
+      );
+    } else if (notice.priority != NoticePriority.normal) {
+      trailing = StatusPill(
+        label: noticePriorityLabel(l10n, notice.priority),
+        tone: noticePriorityTone(notice.priority),
+      );
+    } else if (notice.isPinned) {
+      trailing = Icon(
+        Icons.push_pin,
+        size: 16,
+        color: theme.colorScheme.onSurfaceVariant,
+      );
+    } else {
+      trailing = null;
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Space.lg,
+        Space.sm,
+        Space.lg,
+        Space.sm,
+      ),
+      child: ListRow(
+        leading: Icon(
+          noticeCategoryIcon(notice.category),
+          color: notice.priority == NoticePriority.critical
+              ? context.bogcl.danger
+              : theme.colorScheme.primary,
         ),
+        title: notice.displayTitle(bangla: bangla),
+        subtitle: next == null ? meta : '$meta\n$next',
+        trailing: trailing,
+        onTap: () => unawaited(context.push(AppRoutes.noticeDetail(notice.id))),
       ),
     );
   }
