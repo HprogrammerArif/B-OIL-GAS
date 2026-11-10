@@ -1,17 +1,12 @@
-import 'dart:async';
-
 import 'package:bogcl_oneops/app/l10n_ext.dart';
-import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
-import 'package:bogcl_oneops/features/files/application/upload_service.dart';
-import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_providers.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_ui.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
-import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,11 +54,9 @@ class _SheetState extends ConsumerState<_Sheet> {
   final _receivedBy = TextEditingController();
   Person? _courier;
   String? _photoId;
-  String? _photoName;
   String _reason = 'TAMPER_BROKEN';
   String _exceptionKind = 'LOST';
   bool _sealIntact = true;
-  bool _uploading = false;
   String? _error;
 
   String _returnPick = parcelReturnReasons.first;
@@ -76,36 +69,6 @@ class _SheetState extends ConsumerState<_Sheet> {
     _otp.dispose();
     _receivedBy.dispose();
     super.dispose();
-  }
-
-  Future<void> _takePhoto() async {
-    final l10n = context.l10n;
-    final picked = await pickAttachment(context, allowFiles: false);
-    if (picked == null || !mounted) return;
-    setState(() {
-      _uploading = true;
-      _error = null;
-    });
-    try {
-      final uploads = ref.read(uploadServiceProvider);
-      final meta = await uploads.upload(picked, purpose: 'PHOTO');
-      await uploads.awaitClean(meta.id);
-      if (!mounted) return;
-      setState(() {
-        _photoId = meta.id;
-        _photoName = picked.name;
-      });
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(
-        () => _error =
-            e.code == ApiErrorCode.offline || e.code == ApiErrorCode.timeout
-            ? l10n.uploadNeedsConnection
-            : l10n.pcErrPhoto,
-      );
-    } finally {
-      if (mounted) setState(() => _uploading = false);
-    }
   }
 
   bool get _photoNeeded => switch (widget.kind) {
@@ -181,7 +144,11 @@ class _SheetState extends ConsumerState<_Sheet> {
           body = {'reason': _reason, 'note': note, 'photoFileId': _photoId};
         }
       case ParcelSheet.returnBack:
-        body = {'reason': _returnPick, if (note.isNotEmpty) 'details': note};
+        if (note.length < 20) {
+          problem = l10n.pcErrExceptionNote;
+        } else {
+          body = {'reason': _returnPick, 'details': note};
+        }
       case ParcelSheet.exception:
         if (note.length < 20) {
           problem = l10n.pcErrExceptionNote;
@@ -287,15 +254,10 @@ class _SheetState extends ConsumerState<_Sheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            EnterpriseModalHeader(
-              title: title,
-              subtitle: intro,
-              icon: destructive
-                  ? Icons.warning_amber_rounded
-                  : Icons.local_shipping_outlined,
-              accentColor: destructive ? context.bogcl.danger : null,
-            ),
-            const SizedBox(height: Space.sm),
+            Text(title, style: theme.textTheme.titleLarge),
+            const SizedBox(height: Space.xs),
+            Text(intro, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: Space.md),
             if (k == ParcelSheet.dispatch) ...[
               Text(l10n.pcFieldCourier, style: theme.textTheme.labelLarge),
               couriers!.when(
@@ -366,18 +328,21 @@ class _SheetState extends ConsumerState<_Sheet> {
                 onSelectionChanged: (s) => setState(() => _reason = s.first),
               ),
             if (k == ParcelSheet.returnBack)
-              RadioGroup<String>(
-                groupValue: _returnPick,
-                onChanged: (v) => setState(() => _returnPick = v!),
-                child: Column(
-                  children: [
-                    for (final r in parcelReturnReasons)
-                      RadioListTile<String>(
-                        value: r,
-                        title: Text(parcelReturnReasonLabel(l10n, r)),
-                      ),
-                  ],
-                ),
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.xs,
+                children: [
+                  for (final r in parcelReturnReasons)
+                    FilterChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(parcelReturnReasonLabel(l10n, r)),
+                      selected: _returnPick == r,
+                      onSelected: (_) => setState(() {
+                        _returnPick = r;
+                        _note.text = parcelReturnReasonLabel(l10n, r);
+                      }),
+                    ),
+                ],
               ),
             if (k == ParcelSheet.exception)
               SegmentedButton<String>(
@@ -393,48 +358,6 @@ class _SheetState extends ConsumerState<_Sheet> {
                     setState(() => _exceptionKind = s.first),
               ),
             if (k == ParcelSheet.verify) ...[
-              Container(
-                margin: const EdgeInsets.only(bottom: Space.sm),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.md,
-                  vertical: Space.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.pin, size: 16, color: Colors.blue),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: Text(
-                        'Demo PIN: ${widget.parcel.status.startsWith('RETURN') ? (widget.parcel.demoReturnOtp ?? '9104') : (widget.parcel.demoOtp ?? '4829')}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      onPressed: () {
-                        _otp.text = widget.parcel.status.startsWith('RETURN')
-                            ? (widget.parcel.demoReturnOtp ?? '9104')
-                            : (widget.parcel.demoOtp ?? '4829');
-                      },
-                      child: const Text(
-                        'Auto-Fill',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               AppTextField(
                 label: l10n.pcFieldCode,
                 controller: _otp,
@@ -457,6 +380,7 @@ class _SheetState extends ConsumerState<_Sheet> {
                 label: switch (k) {
                   ParcelSheet.flag ||
                   ParcelSheet.exception => l10n.pcFieldWhatHappened,
+                  ParcelSheet.returnBack => l10n.pcReturnHint,
                   ParcelSheet.gateIn =>
                     _sealIntact
                         ? l10n.pcFieldNoteOptional
@@ -471,25 +395,14 @@ class _SheetState extends ConsumerState<_Sheet> {
             ],
             if (_photoOffered) ...[
               const SizedBox(height: Space.sm),
-              OutlinedButton.icon(
-                onPressed: _uploading ? null : () => unawaited(_takePhoto()),
-                icon: _uploading
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        _photoId == null
-                            ? Icons.photo_camera_outlined
-                            : Icons.check_circle_outline,
-                      ),
-                label: Text(
-                  _photoId == null
-                      ? (_photoNeeded
-                            ? l10n.pcPhotoRequired
-                            : l10n.pcPhotoOptional)
-                      : l10n.pcPhotoAdded(_photoName ?? ''),
-                ),
+              EvidenceStrip(
+                fileIds: [?_photoId],
+                canAdd: _photoId == null,
+                max: 1,
+                onAdded: (id) async {
+                  if (!mounted) return;
+                  setState(() => _photoId = id);
+                },
               ),
             ],
             if (_error != null)

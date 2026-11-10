@@ -14,6 +14,7 @@ import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
+import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -334,8 +335,10 @@ class _FormState extends ConsumerState<_Form> {
                                   ),
                                   if (recipient != null)
                                     Text(
-                                      [?recipient.title, ?_recipientWhere]
-                                          .join(' · '),
+                                      [
+                                        ?recipient.title,
+                                        ?_recipientWhere,
+                                      ].join(' · '),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: cs.onSurfaceVariant,
@@ -365,7 +368,6 @@ class _FormState extends ConsumerState<_Form> {
                     EvidenceStrip(
                       fileIds: _photos,
                       canAdd: true,
-                      max: 6,
                       onAdded: (id) async {
                         if (!mounted) return;
                         setState(() => _photos.add(id));
@@ -378,7 +380,10 @@ class _FormState extends ConsumerState<_Form> {
                   tilePadding: EdgeInsets.zero,
                   childrenPadding: const EdgeInsets.only(bottom: Space.md),
                   children: [
-                    Text(l10n.pcFieldUrgency, style: theme.textTheme.titleSmall),
+                    Text(
+                      l10n.pcFieldUrgency,
+                      style: theme.textTheme.titleSmall,
+                    ),
                     const SizedBox(height: Space.xs),
                     Wrap(
                       spacing: Space.sm,
@@ -449,9 +454,7 @@ class _FormState extends ConsumerState<_Form> {
                             label: Text(parcelHandlingLabel(l10n, h)),
                             selected: _handling.contains(h),
                             onSelected: (on) => setState(
-                              () => on
-                                  ? _handling.add(h)
-                                  : _handling.remove(h),
+                              () => on ? _handling.add(h) : _handling.remove(h),
                             ),
                           ),
                       ],

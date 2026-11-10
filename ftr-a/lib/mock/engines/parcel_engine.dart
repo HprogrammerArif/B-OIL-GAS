@@ -204,17 +204,26 @@ abstract final class ParcelEngine {
     final ids = <String>[];
     for (final id in raw) {
       if (id is! String) {
-        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+        throw validationError(
+          'photoFileIds',
+          'Photo not found. Upload it again.',
+        );
       }
       final file = store.get(Col.files, id);
       if (file == null) {
-        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+        throw validationError(
+          'photoFileIds',
+          'Photo not found. Upload it again.',
+        );
       }
       FileEngine.scanStatus(store, file);
       if (file['uploaderUserId'] != me ||
           file.strOrNull('purpose') != 'PHOTO' ||
           file.str('scanStatus') != 'CLEAN') {
-        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+        throw validationError(
+          'photoFileIds',
+          'Photo not found. Upload it again.',
+        );
       }
       ids.add(id);
     }
@@ -355,12 +364,7 @@ abstract final class ParcelEngine {
       final photos = _photoIds(store, auth, b);
       p['photoFileIds'] = photos;
       for (final id in photos) {
-        FileEngine.attach(
-          store,
-          id,
-          ownerType: 'Parcel',
-          ownerId: p.str('id'),
-        );
+        FileEngine.attach(store, id, ownerType: 'Parcel', ownerId: p.str('id'));
       }
     }
     store.put(Col.parcels, p);
@@ -1091,7 +1095,7 @@ abstract final class ParcelEngine {
       'description': hidden ? null : p['description'],
       'photoFileIds': hidden
           ? const <String>[]
-          : (p['photoFileIds'] as List<Object?>? ?? const []),
+          : (p['photoFileIds'] ?? const <String>[]),
       'declaredValue': hidden ? null : p['declaredValue'],
       'isConfidential': p['isConfidential'],
       'hidden': hidden,

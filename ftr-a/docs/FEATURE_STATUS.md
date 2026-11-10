@@ -27,7 +27,7 @@ Legend: Done = complete in EN+BN, light+dark, all states · WIP · Todo
 | MOD-11/12/13 Claims | 3 | Done (claimant + Finance pay/disburse) | Approver actions in Phase 4 (Approvals Center); Finance can copy today's bank transfer file from Pay |
 | MOD-14 Bus | 3 | Done (rider + Transport admin) | Register, reassign, seat type (lady, executive, senior, regular) and boarding mark shipped; shift passes deferred |
 | MOD-03 Note-Sheets | 4 | Done | Signed-by rows show the desk remark; public verify and confidentiality hiding deferred |
-| MOD-04 Parcels | 5 | Done (5a) | Ported and extended |
+| MOD-04 Parcels | 5 | Done (5a) | Slim list by role, send with up to 6 photos, record photos and next step; fake hash corridor and OTP-lock theatre dropped |
 | MOD-08 Visitors | 5 | Done (5b) | Ported and extended |
 | MOD-09 Fleet | 5 | Done (5c/5d) | Trip chat, pooling card, `tel:` call shipped; vehicle/driver CRUD deferred |
 | MOD-07 Incidents | 6 | Done (6a) | GPS on report + CAPA close-guard shipped; Form B-12 deferred |

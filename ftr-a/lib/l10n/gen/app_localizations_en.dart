@@ -3497,6 +3497,11 @@ class AppL10nEn extends AppL10n {
   String get pcTabIncoming => 'Coming to me';
 
   @override
+  String pcTabWaiting(int count) {
+    return 'Waiting for you ($count)';
+  }
+
+  @override
   String get pcTabSent => 'Sent by me';
 
   @override
@@ -3996,6 +4001,10 @@ class AppL10nEn extends AppL10n {
   String get pcSheetReturn => 'Send back';
 
   @override
+  String get pcReturnHint =>
+      'Write why it is going back (at least 20 characters). The chips only start the note.';
+
+  @override
   String pcSheetReturnHelp(String name) {
     return 'The parcel goes back to $name with a new code.';
   }
@@ -4090,6 +4099,9 @@ class AppL10nEn extends AppL10n {
   String get pcViewPhoto => 'View photo';
 
   @override
+  String get pcDetTracking => 'Tracking no';
+
+  @override
   String get pcDetCategory => 'Type';
 
   @override
@@ -4122,6 +4134,18 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get pcEditTitle => 'Edit parcel';
+
+  @override
+  String get pcFormWhat => 'What';
+
+  @override
+  String get pcFormWho => 'Who';
+
+  @override
+  String get pcFormPhotos => 'Photos';
+
+  @override
+  String get pcFormMore => 'More';
 
   @override
   String get pcFormIntro =>

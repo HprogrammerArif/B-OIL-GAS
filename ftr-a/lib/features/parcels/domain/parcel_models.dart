@@ -123,8 +123,7 @@ class ParcelAccess {
   final bool photoRequiredForDelivery;
   final bool sealRequired;
 
-  bool get waitingOnMe =>
-      canAccept || canVerifyOtp || canDispatch || canGateIn;
+  bool get waitingOnMe => canAccept || canVerifyOtp || canDispatch || canGateIn;
 }
 
 @immutable

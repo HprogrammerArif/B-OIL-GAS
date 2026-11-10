@@ -314,7 +314,17 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
             ),
           ),
           const SizedBox(height: Space.xs),
-          Expanded(child: _list(bangla: bangla, waiting: waiting, rows: rows)),
+          Expanded(
+            child: _list(
+              bangla: bangla,
+              waiting: waiting,
+              waitingLoading:
+                  incoming.isLoading ||
+                  carrying.isLoading ||
+                  (site?.isLoading ?? false),
+              rows: rows,
+            ),
+          ),
         ],
       ),
     );
@@ -323,10 +333,12 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
   Widget _list({
     required bool bangla,
     required List<Parcel> waiting,
+    required bool waitingLoading,
     required AsyncValue<List<Parcel>>? rows,
   }) {
     final l10n = context.l10n;
     if (_view == 'waiting') {
+      if (waitingLoading && waiting.isEmpty) return const SkeletonList();
       final list = waiting.where(_matchesFilters).toList();
       if (list.isEmpty) {
         return EmptyState(

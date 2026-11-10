@@ -3488,6 +3488,11 @@ class AppL10nBn extends AppL10n {
   String get pcTabIncoming => 'আমার জন্য';
 
   @override
+  String pcTabWaiting(int count) {
+    return 'আপনার অপেক্ষায় ($count)';
+  }
+
+  @override
   String get pcTabSent => 'আমার পাঠানো';
 
   @override
@@ -3981,6 +3986,10 @@ class AppL10nBn extends AppL10n {
   String get pcSheetReturn => 'ফেরত পাঠান';
 
   @override
+  String get pcReturnHint =>
+      'কেন ফেরত যাচ্ছে লিখুন (কমপক্ষে ২০ অক্ষর)। চিপ শুধু খসড়া শুরু করে।';
+
+  @override
   String pcSheetReturnHelp(String name) {
     return 'পার্সেলটি নতুন কোডসহ $name-এর কাছে ফেরত যাবে।';
   }
@@ -4076,6 +4085,9 @@ class AppL10nBn extends AppL10n {
   String get pcViewPhoto => 'ছবি দেখুন';
 
   @override
+  String get pcDetTracking => 'ট্র্যাকিং নম্বর';
+
+  @override
   String get pcDetCategory => 'ধরন';
 
   @override
@@ -4107,6 +4119,18 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get pcEditTitle => 'পার্সেল সম্পাদনা';
+
+  @override
+  String get pcFormWhat => 'কী';
+
+  @override
+  String get pcFormWho => 'কার কাছে';
+
+  @override
+  String get pcFormPhotos => 'ছবি';
+
+  @override
+  String get pcFormMore => 'আরও';
 
   @override
   String get pcFormIntro =>

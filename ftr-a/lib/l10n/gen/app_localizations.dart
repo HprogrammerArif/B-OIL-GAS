@@ -6186,6 +6186,12 @@ abstract class AppL10n {
   /// **'Coming to me'**
   String get pcTabIncoming;
 
+  /// No description provided for @pcTabWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you ({count})'**
+  String pcTabWaiting(int count);
+
   /// No description provided for @pcTabSent.
   ///
   /// In en, this message translates to:
@@ -7092,6 +7098,12 @@ abstract class AppL10n {
   /// **'Send back'**
   String get pcSheetReturn;
 
+  /// No description provided for @pcReturnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write why it is going back (at least 20 characters). The chips only start the note.'**
+  String get pcReturnHint;
+
   /// No description provided for @pcSheetReturnHelp.
   ///
   /// In en, this message translates to:
@@ -7260,6 +7272,12 @@ abstract class AppL10n {
   /// **'View photo'**
   String get pcViewPhoto;
 
+  /// No description provided for @pcDetTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking no'**
+  String get pcDetTracking;
+
   /// No description provided for @pcDetCategory.
   ///
   /// In en, this message translates to:
@@ -7325,6 +7343,30 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Edit parcel'**
   String get pcEditTitle;
+
+  /// No description provided for @pcFormWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What'**
+  String get pcFormWhat;
+
+  /// No description provided for @pcFormWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Who'**
+  String get pcFormWho;
+
+  /// No description provided for @pcFormPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get pcFormPhotos;
+
+  /// No description provided for @pcFormMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get pcFormMore;
 
   /// No description provided for @pcFormIntro.
   ///
