@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ViewProps, t } from '../types';
 import { showToast } from '../components/ToastManager';
 import {
-  ClipboardCheck, Check, Search, Inbox, X, Clock, History, SearchX, ListChecks,
+  ClipboardCheck, Check, Search, Inbox, X, Clock, SearchX, ListChecks,
 } from 'lucide-react';
 
 import { useApprovalStore } from '../store/approvalStore';
@@ -187,8 +187,8 @@ export default function ApprovalsView({ lang }: ViewProps) {
   return (
     <div className="apv-page">
       {/* One-sentence verdict: what is waiting and how urgent */}
-      <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : ''}`} role="status">
-        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Clock size={16} /> : <ClipboardCheck size={16} />) : <History size={16} />}</span>
+      <div className={`apv-verdict ${isPending && dueSoonItems.length > 0 ? 'urgent' : isPending && approvalItems.length > 0 ? 'info' : 'ok'}`} role="status">
+        <span className="apv-verdict-icon">{isPending ? (dueSoonItems.length > 0 ? <Clock size={16} /> : <ClipboardCheck size={16} />) : <Check size={16} />}</span>
         <p>{verdict}</p>
         {isPending && dueSoonItems.length > 0 && (
           <Button variant="secondary" size="sm" onClick={() => setDueSoonOnly((v) => !v)}>
@@ -197,6 +197,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
         )}
       </div>
 
+      <div className="apv-sticky-chrome">
       <div className="workforce-toolbar apv-find">
         <div className="workforce-tabs" role="group" aria-label={t('Approval list', 'অনুমোদনের তালিকা', lang)}>
           <button
@@ -287,6 +288,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
             <option value="requester_desc">{t('Requester Z–A', 'আবেদনকারী Z–A', lang)}</option>
           </select>
         </div>
+      </div>
       </div>
 
       {/* List */}

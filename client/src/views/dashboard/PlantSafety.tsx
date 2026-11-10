@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { CheckCircle2, Clock, Eye, Key, Lock, Plus, PenLine, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, ChevronDown, Clock, Eye, Key, Lock, Plus, PenLine, ArrowRight } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { nowTime } from '../../lib/clock';
 import { showToast } from '../../components/ToastManager';
+import Pagination from '../../components/Pagination';
 import { Button, EmptyState, StatusPill } from '../../components/ui';
 import type { LotoPermitItem, ShiftHandoverItem } from './types';
 import { addPermit, addShift, deIsolatePermit, signShift, usePlantSafety } from './plantSafetyState';
@@ -20,7 +21,18 @@ const TYPE_DEFAULTS: Record<PermitType, { prefix: string; offset: number; label:
   confined_space: { prefix: 'CONF-0', offset: 10, label: 'Inside Tank Entry Permit' },
 };
 
+const PAGE_SIZE = 4;
+
 const isOpen = (p: LotoPermitItem) => p.status !== 'DE-ISOLATED';
+
+function toggleId(id: string, set: (fn: (prev: Set<string>) => Set<string>) => void) {
+  set((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+}
 
 function personName(raw: string | undefined): string {
   if (!raw) return '';
@@ -37,9 +49,25 @@ export default function PlantSafety({ lang, mode = 'watch' }: { lang: Lang; mode
   const [detail, setDetail] = useState<LotoPermitItem | null>(null);
   const [showNewPermit, setShowNewPermit] = useState(false);
   const [showNewShift, setShowNewShift] = useState(false);
+  const [permitPage, setPermitPage] = useState(1);
+  const [shiftPage, setShiftPage] = useState(1);
+  const [openPermits, setOpenPermits] = useState<Set<string>>(() => new Set());
+  const [openShifts, setOpenShifts] = useState<Set<string>>(() => new Set());
   const crew = mode === 'crew';
 
   const visible = permits.filter((p) => filter === 'all' || (p.type ?? 'loto') === filter);
+
+  useEffect(() => {
+    setPermitPage(1);
+  }, [filter]);
+
+  const permitPageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  const safePermitPage = Math.min(permitPage, permitPageCount);
+  const pagedPermits = visible.slice((safePermitPage - 1) * PAGE_SIZE, safePermitPage * PAGE_SIZE);
+
+  const shiftPageCount = Math.max(1, Math.ceil(shifts.length / PAGE_SIZE));
+  const safeShiftPage = Math.min(shiftPage, shiftPageCount);
+  const pagedShifts = shifts.slice((safeShiftPage - 1) * PAGE_SIZE, safeShiftPage * PAGE_SIZE);
   const countOf = (f: Filter) => permits.filter((p) => f === 'all' || (p.type ?? 'loto') === f).length;
   const openCount = permits.filter(isOpen).length;
   const filters: Filter[] = ['all', 'loto', 'hot_work', 'confined_space'];
@@ -145,7 +173,7 @@ export default function PlantSafety({ lang, mode = 'watch' }: { lang: Lang; mode
               type="button"
               className={`psf-filter ${filter === f ? 'active' : ''}`}
               aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
+              onClick={() => { setFilter(f); setPermitPage(1); }}
             >
               {f === 'all' ? t('All', 'সব', lang) : t(PERMIT_TYPE_LABEL[f][0], PERMIT_TYPE_LABEL[f][1], lang)}
               <b>{countOf(f)}</b>
@@ -156,44 +184,68 @@ export default function PlantSafety({ lang, mode = 'watch' }: { lang: Lang; mode
         {visible.length === 0 ? (
           <EmptyState compact icon={<Lock size={20} />} title={t('No permits here', 'এখানে কোনো অনুমতি নেই', lang)} />
         ) : (
+          <>
           <ul className="psf-list">
-            {visible.map((p) => {
+            {pagedPermits.map((p) => {
               const locked = p.status === 'LOCKED OUT';
               const typeKey = p.type ?? 'loto';
               const holder = personName(p.issuedTo);
+              const expanded = openPermits.has(p.id);
               return (
-                <li key={p.id} className={`psf-item ${locked ? 'is-locked' : p.status === 'DE-ISOLATED' ? 'is-done' : ''}`}>
-                  <div className="psf-item-top">
-                    <div>
-                      <h4>{p.equipment}</h4>
-                      <span className="psf-sub">{t(PERMIT_TYPE_LABEL[typeKey][0], PERMIT_TYPE_LABEL[typeKey][1], lang)} · <code>{p.id}</code></span>
+                <li key={p.id} className={`psf-item ${locked ? 'is-locked' : p.status === 'DE-ISOLATED' ? 'is-done' : ''}${expanded ? ' is-open' : ''}`}>
+                  <button
+                    type="button"
+                    className="psf-item-toggle"
+                    aria-expanded={expanded}
+                    onClick={() => toggleId(p.id, setOpenPermits)}
+                  >
+                    <div className="psf-item-top">
+                      <div>
+                        <h4>{p.equipment}</h4>
+                        <span className="psf-sub">{t(PERMIT_TYPE_LABEL[typeKey][0], PERMIT_TYPE_LABEL[typeKey][1], lang)} · <code>{p.id}</code></span>
+                      </div>
+                      <div className="psf-item-end">
+                        <PermitStatusPill status={p.status} lang={lang} />
+                        <ChevronDown size={16} className="psf-chevron" aria-hidden />
+                      </div>
                     </div>
-                    <PermitStatusPill status={p.status} lang={lang} />
-                  </div>
-                  {p.plainSummary && <p className="psf-why">{p.plainSummary}</p>}
-                  <div className="psf-meta">
-                    <span>{t('Worker', 'কর্মী', lang)}: <strong>{p.issuedTo}</strong></span>
-                    {p.validUntil && <span><Clock size={12} /> {t('Until', 'মেয়াদ', lang)} {p.validUntil}</span>}
-                  </div>
-                  {!crew && locked && (
-                    <p className="psf-wait">
-                      {t(`${holder} holds this lock. Nothing for you to remove.`, `${holder} এই লক ধরে আছেন। আপনার খোলার কিছু নেই।`, lang)}
-                    </p>
+                  </button>
+                  {expanded && (
+                    <div className="psf-item-body">
+                      {p.plainSummary && <p className="psf-why">{p.plainSummary}</p>}
+                      <div className="psf-meta">
+                        <span>{t('Worker', 'কর্মী', lang)}: <strong>{p.issuedTo}</strong></span>
+                        {p.validUntil && <span><Clock size={12} /> {t('Until', 'মেয়াদ', lang)} {p.validUntil}</span>}
+                      </div>
+                      {!crew && locked && (
+                        <p className="psf-wait">
+                          {t(`${holder} holds this lock. Nothing for you to remove.`, `${holder} এই লক ধরে আছেন। আপনার খোলার কিছু নেই।`, lang)}
+                        </p>
+                      )}
+                      <div className="psf-actions">
+                        <Button variant="secondary" size="sm" icon={<Eye size={12} />} onClick={() => setDetail(p)}>
+                          {t('Details and checks', 'বিস্তারিত ও পরীক্ষা', lang)}
+                        </Button>
+                        {crew && locked && (
+                          <Button variant="outline-danger" size="sm" icon={<Key size={12} />} onClick={() => handleDeIsolate(p.id)}>
+                            {t('Remove lock', 'লক খুলুন', lang)}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   )}
-                  <div className="psf-actions">
-                    <Button variant="secondary" size="sm" icon={<Eye size={12} />} onClick={() => setDetail(p)}>
-                      {t('Details and checks', 'বিস্তারিত ও পরীক্ষা', lang)}
-                    </Button>
-                    {crew && locked && (
-                      <Button variant="outline-danger" size="sm" icon={<Key size={12} />} onClick={() => handleDeIsolate(p.id)}>
-                        {t('Remove lock', 'লক খুলুন', lang)}
-                      </Button>
-                    )}
-                  </div>
                 </li>
               );
             })}
           </ul>
+          <Pagination
+            currentPage={safePermitPage}
+            totalItems={visible.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPermitPage}
+            lang={lang}
+          />
+          </>
         )}
       </section>
 
@@ -224,47 +276,71 @@ export default function PlantSafety({ lang, mode = 'watch' }: { lang: Lang; mode
         </header>
 
         <ul className="psf-list">
-          {shifts.map((s, i) => {
+          {pagedShifts.map((s, i) => {
             const arriving = personName(s.incomingEngineer) || t('the arriving engineer', 'নতুন প্রকৌশলী', lang);
+            const shiftKey = s.id ?? `shift-${(safeShiftPage - 1) * PAGE_SIZE + i}`;
+            const expanded = openShifts.has(shiftKey);
+            const fullIndex = shifts.findIndex((row) => (row.id && s.id ? row.id === s.id : row === s));
             return (
-              <li key={s.id ?? i} className={`psf-item ${s.safetyChecklistSigned ? 'is-done' : ''}`}>
-                <div className="psf-item-top">
-                  <div>
-                    <h4>{s.shift}</h4>
-                    <span className="psf-sub">
-                      {s.outgoingEngineer ?? s.handover.split('➔')[0].trim()} <ArrowRight size={11} /> {s.incomingEngineer ?? s.handover.split('➔')[1]?.trim()} · {s.time}
-                    </span>
+              <li key={shiftKey} className={`psf-item ${s.safetyChecklistSigned ? 'is-done' : ''}${expanded ? ' is-open' : ''}`}>
+                <button
+                  type="button"
+                  className="psf-item-toggle"
+                  aria-expanded={expanded}
+                  onClick={() => toggleId(shiftKey, setOpenShifts)}
+                >
+                  <div className="psf-item-top">
+                    <div>
+                      <h4>{s.shift}</h4>
+                      <span className="psf-sub">
+                        {s.outgoingEngineer ?? s.handover.split('➔')[0].trim()} <ArrowRight size={11} /> {s.incomingEngineer ?? s.handover.split('➔')[1]?.trim()} · {s.time}
+                      </span>
+                    </div>
+                    <div className="psf-item-end">
+                      {s.safetyChecklistSigned
+                        ? <StatusPill tone="success">{t('Signed', 'স্বাক্ষরিত', lang)}</StatusPill>
+                        : <StatusPill tone="warn">{t('Waiting for signature', 'স্বাক্ষরের অপেক্ষায়', lang)}</StatusPill>}
+                      <ChevronDown size={16} className="psf-chevron" aria-hidden />
+                    </div>
                   </div>
-                  {s.safetyChecklistSigned
-                    ? <StatusPill tone="success">{t('Signed', 'স্বাক্ষরিত', lang)}</StatusPill>
-                    : <StatusPill tone="warn">{t('Waiting for signature', 'স্বাক্ষরের অপেক্ষায়', lang)}</StatusPill>}
-                </div>
-                <p className="psf-why">{s.notes}</p>
-                {s.criticalWatchItems && s.criticalWatchItems.length > 0 && (
-                  <div className="psf-watch">
-                    <span>{t('Watch', 'নজরে রাখুন', lang)}</span>
-                    <ul>{s.criticalWatchItems.map((w) => <li key={w}>{w}</li>)}</ul>
+                </button>
+                {expanded && (
+                  <div className="psf-item-body">
+                    <p className="psf-why">{s.notes}</p>
+                    {s.criticalWatchItems && s.criticalWatchItems.length > 0 && (
+                      <div className="psf-watch">
+                        <span>{t('Watch', 'নজরে রাখুন', lang)}</span>
+                        <ul>{s.criticalWatchItems.map((w) => <li key={w}>{w}</li>)}</ul>
+                      </div>
+                    )}
+                    {!s.safetyChecklistSigned && !crew && (
+                      <p className="psf-wait">
+                        {t(`Waiting for ${arriving} to accept. Nothing for you to sign.`, `${arriving}-এর গ্রহণের অপেক্ষায়। আপনার স্বাক্ষরের কিছু নেই।`, lang)}
+                      </p>
+                    )}
+                    {crew && !s.safetyChecklistSigned && (
+                      <div className="psf-actions">
+                        <Button size="sm" icon={<PenLine size={12} />} onClick={() => handleSignShift(s, fullIndex < 0 ? i : fullIndex)}>
+                          {t('Sign to accept', 'স্বাক্ষর করে গ্রহণ করুন', lang)}
+                        </Button>
+                      </div>
+                    )}
+                    {s.safetyChecklistSigned && (
+                      <div className="psf-signed"><CheckCircle2 size={13} /> {t(`Accepted by ${arriving}`, `${arriving} গ্রহণ করেছেন`, lang)}</div>
+                    )}
                   </div>
-                )}
-                {!s.safetyChecklistSigned && !crew && (
-                  <p className="psf-wait">
-                    {t(`Waiting for ${arriving} to accept. Nothing for you to sign.`, `${arriving}-এর গ্রহণের অপেক্ষায়। আপনার স্বাক্ষরের কিছু নেই।`, lang)}
-                  </p>
-                )}
-                {crew && !s.safetyChecklistSigned && (
-                  <div className="psf-actions">
-                    <Button size="sm" icon={<PenLine size={12} />} onClick={() => handleSignShift(s, i)}>
-                      {t('Sign to accept', 'স্বাক্ষর করে গ্রহণ করুন', lang)}
-                    </Button>
-                  </div>
-                )}
-                {s.safetyChecklistSigned && (
-                  <div className="psf-signed"><CheckCircle2 size={13} /> {t(`Accepted by ${arriving}`, `${arriving} গ্রহণ করেছেন`, lang)}</div>
                 )}
               </li>
             );
           })}
         </ul>
+        <Pagination
+          currentPage={safeShiftPage}
+          totalItems={shifts.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setShiftPage}
+          lang={lang}
+        />
       </section>
 
       <PermitDetailModal

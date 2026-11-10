@@ -51,6 +51,7 @@ import {
   CheckSquare,
   Square,
   Eye,
+  Info,
   X,
   LayoutGrid,
   Table as TableIcon,
@@ -235,6 +236,18 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
     setStageFilter('active_all');
     setKpiFilter('none');
     setSearchTerm('');
+  };
+
+  const statusFilterValue = kpiFilter !== 'none' ? kpiFilter : stageFilter;
+
+  const applyStatusFilter = (value: string) => {
+    if (value === 'cal_alerts' || value === 'pending_signoff') {
+      setStageFilter('active_all');
+      setKpiFilter(value);
+      return;
+    }
+    setKpiFilter('none');
+    setStageFilter(value);
   };
 
   // Keep selectedAsset synchronized with live store updates & current filtered results
@@ -468,7 +481,11 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
   const openWoCount = baseWorkOrders.filter((w) => w.status !== 'completed').length;
   const openReqCount = visibleRequisitions.filter((r) => r.stage !== 'commissioned' && r.stage !== 'rejected').length;
 
-  const verdictWarn = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0 || decommissionedAssets.length > 0;
+  const verdictTone = portfolioStats.calAlerts > 0 || portfolioStats.pendingSignOffs > 0
+    ? 'warn'
+    : decommissionedAssets.length > 0
+      ? 'info'
+      : 'ok';
   const verdict = roleConfig.isSelfServiceOnly
     ? activeOnlyCount === 0
       ? roleConfig.canRequestEquipment
@@ -614,9 +631,20 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
   return (
     <div className="view-container">
-      {hasHeaderActions && (
-        <PageHeader
-          actions={
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
+        <span>{verdict}</span>
+      </p>
+
+      <div className="eam-sticky-chrome">
+      <PageHeader
+        title={
+          roleConfig.isSelfServiceOnly
+            ? t('My Assigned Equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
+            : t('Company Assets & Equipment', 'কোম্পানির সম্পদ ও যন্ত্রপাতি', lang)
+        }
+        actions={
+          hasHeaderActions ? (
             <>
               {roleConfig.canScanTag && (
                 <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
@@ -624,7 +652,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 </Button>
               )}
               {roleConfig.canRequestEquipment && (
-                <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
+                <Button icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
                   {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
                 </Button>
               )}
@@ -634,15 +662,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 </Button>
               )}
             </>
-          }
-        />
-      )}
-
-      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
-        <span>{verdict}</span>
-      </p>
-
+          ) : undefined
+        }
+      />
       {/* Main module tabs */}
       <div className="eam-nav-bar">
         <button
@@ -705,46 +727,67 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
         )}
       </div>
 
-      {/* TAB 1: MACHINES REGISTER & DETAIL PANEL */}
       {activeTab === 'register' && (
-        <>
-          <div className="card mb-4">
-            <div className="workforce-toolbar roster-toolbar asset-toolbar">
-              <div className="workforce-tabs" role="group" aria-label={t('Machine status', 'মেশিনের অবস্থা', lang)}>
-                <button
-                  type="button"
-                  className={`workforce-tab${kpiFilter === 'none' && stageFilter === 'active_all' ? ' active' : ''}`}
-                  aria-pressed={kpiFilter === 'none' && stageFilter === 'active_all'}
-                  onClick={() => { setKpiFilter('none'); setStageFilter('active_all'); }}
+            <div className="card workforce-toolbar roster-toolbar asset-toolbar">
+              <div className="workforce-filter-row">
+                <div className="workforce-search-wrap">
+                  <Search size={14} className="workforce-search-icon" aria-hidden />
+                  <input
+                    type="search"
+                    className="workforce-search-input"
+                    placeholder={t('Search by machine name, place, operator or tag…', 'মেশিনের নাম, স্থান, অপারেটর বা ট্যাগ দিয়ে খুঁজুন…', lang)}
+                    aria-label={t('Search machines', 'মেশিন খুঁজুন', lang)}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button type="button" className="workforce-search-clear" onClick={() => setSearchTerm('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+
+                <select
+                  className="workforce-select"
+                  value={statusFilterValue}
+                  onChange={(e) => applyStatusFilter(e.target.value)}
+                  aria-label={t('Status', 'অবস্থা', lang)}
                 >
-                  {t('All active', 'সব সক্রিয়', lang)} <b>{activeOnlyCount}</b>
-                </button>
-                <button
-                  type="button"
-                  className={`workforce-tab${kpiFilter === 'cal_alerts' ? ' active' : ''}`}
-                  aria-pressed={kpiFilter === 'cal_alerts'}
-                  onClick={() => { setStageFilter('active_all'); setKpiFilter((prev) => (prev === 'cal_alerts' ? 'none' : 'cal_alerts')); }}
-                >
-                  {t('Service due or in repair', 'সার্ভিস বাকি বা মেরামতাধীন', lang)} <b>{portfolioStats.calAlerts}</b>
-                </button>
-                {portfolioStats.pendingSignOffs > 0 && (
-                  <button
-                    type="button"
-                    className={`workforce-tab${kpiFilter === 'pending_signoff' ? ' active' : ''}`}
-                    aria-pressed={kpiFilter === 'pending_signoff'}
-                    onClick={() => { setStageFilter('active_all'); setKpiFilter((prev) => (prev === 'pending_signoff' ? 'none' : 'pending_signoff')); }}
-                  >
-                    {t('Awaiting sign-off', 'স্বাক্ষর বাকি', lang)} <b>{portfolioStats.pendingSignOffs}</b>
-                  </button>
+                  <option value="active_all">{t('All active', 'সব সক্রিয়', lang)}</option>
+                  <option value="cal_alerts">{t('Service due or in repair', 'সার্ভিস বাকি বা মেরামতাধীন', lang)}</option>
+                  <option value="pending_signoff">{t('Awaiting sign-off', 'স্বাক্ষর বাকি', lang)}</option>
+                  <option value="operational">{t('In service', 'সক্রিয় চালু', lang)}</option>
+                  <option value="in_stock">{t('In warehouse', 'স্টোরে রাখা', lang)}</option>
+                  <option value="in_transfer">{t('In transit', 'স্থানান্তরধীন', lang)}</option>
+                  <option value="decommissioned">{t('Ready to retire', 'অবসরের অপেক্ষায়', lang)}</option>
+                  <option value="disposed">{t('Archived', 'আর্কাইভ', lang)}</option>
+                  <option value="all">{t('All (including archived)', 'সব (আর্কাইভসহ)', lang)}</option>
+                </select>
+
+                {!roleConfig.isSelfServiceOnly && (
+                  <>
+                    <select className="workforce-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as 'all' | AssetCategory)} aria-label={t('Category', 'ধরন', lang)}>
+                      <option value="all">{t('Every category', 'সব ধরন', lang)} ({categoryCounts.all ?? 0})</option>
+                      <option value="plant">{t('Refinery plant', 'রিফাইনারি প্ল্যান্ট', lang)} ({categoryCounts.plant ?? 0})</option>
+                      <option value="vehicle">{t('Tankers & fleet', 'ট্যাংকার ও ফ্লিট', lang)} ({categoryCounts.vehicle ?? 0})</option>
+                      <option value="it">{t('Control & IT', 'নিয়ন্ত্রণ ও আইটি', lang)} ({categoryCounts.it ?? 0})</option>
+                      <option value="safety">{t('Safety gear', 'নিরাপত্তা সরঞ্জাম', lang)} ({categoryCounts.safety ?? 0})</option>
+                      <option value="lab">{t('Lab instruments', 'পরীক্ষাগার যন্ত্র', lang)} ({categoryCounts.lab ?? 0})</option>
+                      {(categoryCounts.corporate ?? 0) > 0 && (
+                        <option value="corporate">{t('Corporate office', 'করপোরেট অফিস', lang)} ({categoryCounts.corporate ?? 0})</option>
+                      )}
+                    </select>
+                    <select className="workforce-select" value={facilityFilter} onChange={(e) => setFacilityFilter(e.target.value)} aria-label={t('Site', 'স্থাপনা', lang)}>
+                      <option value="all">{t('Every site', 'সব স্থাপনা', lang)}</option>
+                      <option value="Keraniganj Bitumen Refinery">{t('Keraniganj Refinery', 'কেরানীগঞ্জ রিফাইনারি', lang)}</option>
+                      <option value="Bashundhara Corporate HQ, Baridhara">{t('Baridhara Corporate HQ', 'বারিধারা করপোরেট সদর দপ্তর', lang)}</option>
+                      <option value="Chattogram Patenga Terminal">{t('Chattogram Marine Terminal', 'চট্টগ্রাম সামুদ্রিক টার্মিনাল', lang)}</option>
+                    </select>
+                  </>
                 )}
-                {!roleConfig.isSelfServiceOnly && decommissionedAssets.length > 0 && (
-                  <button
-                    type="button"
-                    className={`workforce-tab${stageFilter === 'decommissioned' ? ' active' : ''}`}
-                    aria-pressed={stageFilter === 'decommissioned'}
-                    onClick={() => { setKpiFilter('none'); setStageFilter((prev) => (prev === 'decommissioned' ? 'active_all' : 'decommissioned')); }}
-                  >
-                    {t('Ready to retire', 'অবসরের অপেক্ষায়', lang)} <b>{decommissionedAssets.length}</b>
+                {hasActiveFilters && (
+                  <button type="button" className="eam-reset-btn" onClick={resetAllFilters}>
+                    {t('Clear filters', 'ফিল্টার মুছুন', lang)}
                   </button>
                 )}
               </div>
@@ -767,66 +810,13 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                   </button>
                 </div>
               )}
-
-              <div className="workforce-filter-row">
-                <div className="workforce-search-wrap">
-                  <Search size={14} className="workforce-search-icon" aria-hidden />
-                  <input
-                    type="search"
-                    className="workforce-search-input"
-                    placeholder={t('Search by machine name, place, operator or tag…', 'মেশিনের নাম, স্থান, অপারেটর বা ট্যাগ দিয়ে খুঁজুন…', lang)}
-                    aria-label={t('Search machines', 'মেশিন খুঁজুন', lang)}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  {searchTerm && (
-                    <button type="button" className="workforce-search-clear" onClick={() => setSearchTerm('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}>
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-
-                {!roleConfig.isSelfServiceOnly && (
-                  <>
-                    <select className="workforce-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value as 'all' | AssetCategory)} aria-label={t('Category', 'ধরন', lang)}>
-                      <option value="all">{t('Every category', 'সব ধরন', lang)} ({categoryCounts.all ?? 0})</option>
-                      <option value="plant">{t('Refinery plant', 'রিফাইনারি প্ল্যান্ট', lang)} ({categoryCounts.plant ?? 0})</option>
-                      <option value="vehicle">{t('Tankers & fleet', 'ট্যাংকার ও ফ্লিট', lang)} ({categoryCounts.vehicle ?? 0})</option>
-                      <option value="it">{t('Control & IT', 'নিয়ন্ত্রণ ও আইটি', lang)} ({categoryCounts.it ?? 0})</option>
-                      <option value="safety">{t('Safety gear', 'নিরাপত্তা সরঞ্জাম', lang)} ({categoryCounts.safety ?? 0})</option>
-                      <option value="lab">{t('Lab instruments', 'পরীক্ষাগার যন্ত্র', lang)} ({categoryCounts.lab ?? 0})</option>
-                      {(categoryCounts.corporate ?? 0) > 0 && (
-                        <option value="corporate">{t('Corporate office', 'করপোরেট অফিস', lang)} ({categoryCounts.corporate ?? 0})</option>
-                      )}
-                    </select>
-                    <select className="workforce-select" value={facilityFilter} onChange={(e) => setFacilityFilter(e.target.value)} aria-label={t('Site', 'স্থাপনা', lang)}>
-                      <option value="all">{t('Every site', 'সব স্থাপনা', lang)}</option>
-                      <option value="Keraniganj Bitumen Refinery">{t('Keraniganj Refinery', 'কেরানীগঞ্জ রিফাইনারি', lang)}</option>
-                      <option value="Bashundhara Corporate HQ, Baridhara">{t('Baridhara Corporate HQ', 'বারিধারা করপোরেট সদর দপ্তর', lang)}</option>
-                      <option value="Chattogram Patenga Terminal">{t('Chattogram Marine Terminal', 'চট্টগ্রাম সামুদ্রিক টার্মিনাল', lang)}</option>
-                    </select>
-                    <select className="workforce-select" value={stageFilter} onChange={(e) => setStageFilter(e.target.value)} aria-label={t('Stage', 'ধাপ', lang)}>
-                      <option value="active_all">{t('Active (excluding archived)', 'সক্রিয় (আর্কাইভ বাদে)', lang)}</option>
-                      <option value="operational">{t('In service', 'সক্রিয় চালু', lang)}</option>
-                      <option value="in_stock">{t('In warehouse', 'স্টোরে রাখা', lang)}</option>
-                      <option value="in_transfer">{t('In transit', 'স্থানান্তরধীন', lang)}</option>
-                      <option value="calibration_due">{t('Service due', 'সার্ভিস বাকি', lang)}</option>
-                      <option value="maintenance">{t('In repair', 'মেরামতাধীন', lang)}</option>
-                      <option value="decommissioned">{t('Ready to retire', 'অবসরের অপেক্ষায়', lang)}</option>
-                      <option value="disposed">{t('Archived', 'আর্কাইভ', lang)}</option>
-                      <option value="all">{t('All (including archived)', 'সব (আর্কাইভসহ)', lang)}</option>
-                    </select>
-                    {hasActiveFilters && (
-                      <button type="button" className="eam-reset-btn" onClick={resetAllFilters}>
-                        {t('Clear filters', 'ফিল্টার মুছুন', lang)}
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
             </div>
-          </div>
+      )}
+      </div>
 
+      {/* TAB 1: MACHINES REGISTER & DETAIL PANEL */}
+      {activeTab === 'register' && (
+        <>
           {viewMode === 'cockpit' && (
             <div className="mobile-view-toggle">
               <button type="button" className={mobileTab === 'list' ? 'active' : ''} onClick={() => setMobileTab('list')}>
@@ -931,14 +921,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               <div className={`eam-feed-panel ${mobileTab === 'detail' ? 'eam-mobile-hidden' : ''}`}>
                 <div className="eam-feed-hd">
                   <div>
-                    <div className="eam-feed-title">
-                      <Layers size={15} style={{ color: 'var(--brand-crimson)' }} />
-                      <span>
-                        {roleConfig.isSelfServiceOnly
-                          ? t('My equipment', 'আমার সরঞ্জাম', lang)
-                          : t('Machines (needs attention first)', 'মেশিন তালিকা (জরুরি আগে)', lang)}
-                      </span>
-                    </div>
+                    {!roleConfig.isSelfServiceOnly && (
+                      <div className="eam-feed-title">
+                        <Layers size={15} style={{ color: 'var(--brand-crimson)' }} />
+                        <span>{t('Machines (needs attention first)', 'মেশিন তালিকা (জরুরি আগে)', lang)}</span>
+                      </div>
+                    )}
                     <div className="eam-feed-count">
                       {t(`Showing ${sortedAssets.length} of ${roleScopedAssets.length}`, `${bn(roleScopedAssets.length)}টির মধ্যে ${bn(sortedAssets.length)}টি`, lang)}
                     </div>

@@ -51,32 +51,19 @@ export default function WorkforceView({ lang }: ViewProps) {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex-between mb-4">
-        <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--brand-slate-900)' }}>
-            {t('Employee Directory & HR Management', 'জনবল ডিরেক্টরি ও মানবসম্পদ ব্যবস্থাপনা', lang)}
-          </h2>
-          <p className="text-muted">
-            {t(
-              'Company Staff Directory • Department Clearance • Site Allocation • Payroll & System Records',
-              'কোম্পানি কর্মী তালিকা • বিভাগীয় ছাড়পত্র • কর্মস্থল বণ্টন • পেরোল ও সিস্টেম রেকর্ড',
-              lang
-            )}
-          </p>
-        </div>
-
+      <div className="flex-between mb-4 page-sticky-head" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
+          {t('Staff Directory', 'কর্মী তালিকা', lang)}
+        </h2>
         {canManage && (
-          <div className="flex-gap">
-            <button
-              className="btn-primary"
-              style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
-              onClick={() => setShowOnboardModal(true)}
-            >
-              <UserPlus size={15} />
-              {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
-            </button>
-          </div>
+          <button
+            className="btn-primary"
+            style={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}
+            onClick={() => setShowOnboardModal(true)}
+          >
+            <UserPlus size={15} />
+            {t('Add New Employee', 'নতুন কর্মচারী যোগ করুন', lang)}
+          </button>
         )}
       </div>
 

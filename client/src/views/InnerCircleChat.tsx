@@ -828,7 +828,7 @@ export default function InnerCircleChat({ role, lang }: ViewProps) {
             <Lock size={12} />
             <span>{t('Private', 'ব্যক্তিগত', lang)}</span>
           </div>
-          <h3 className="ic-hub-heading">{t("Chairman's Inner Circle", 'চেয়ারম্যানের ইনার সার্কেল', lang)}</h3>
+          <h3 className="ic-hub-heading">{t('Leadership Decision Circle', 'নেতৃত্বের সিদ্ধান্ত সার্কেল', lang)}</h3>
         </div>
 
         <div className="ic-hub-search">

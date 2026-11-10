@@ -82,7 +82,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
     <div className="view-container page-enter-active">
       {(showTabs || hasHeaderActions) && (
         <div className="cockpit-tabs-sticky-wrapper">
-          <div className="cockpit-toolbar">
             {showTabs && (
               <div className="cockpit-tabs-container" role="tablist">
                 {tabs.map((tab) => (
@@ -137,7 +136,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                 )}
               </div>
             )}
-          </div>
         </div>
       )}
 
@@ -149,15 +147,6 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
 
           {role === 'employee' && (
             <>
-              <EmployeeDashboard
-                role={role}
-                lang={lang}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                showGatePassModal={showGatePassModal}
-                setShowGatePassModal={setShowGatePassModal}
-                onNavigate={onNavigate}
-              />
               <div className="dash-tiles">
                 <ActionTile
                   tone="info" icon={<MapPin size={20} />}
@@ -220,6 +209,16 @@ export default function DashboardView({ role, lang, onNavigate }: DashboardViewP
                   </div>
                 </section>
               )}
+
+              <EmployeeDashboard
+                role={role}
+                lang={lang}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                showGatePassModal={showGatePassModal}
+                setShowGatePassModal={setShowGatePassModal}
+                onNavigate={onNavigate}
+              />
             </>
           )}
 

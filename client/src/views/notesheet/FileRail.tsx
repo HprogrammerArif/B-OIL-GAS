@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from 'react';
 import { Search, X, SearchX, ChevronLeft, ChevronRight } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { StatusPill } from '../../components/ui';
@@ -15,10 +15,11 @@ interface FileRailProps {
   canSign: boolean;
   stateOf: (file: NoteFile) => FileState;
   onSelect: (id: string) => void;
+  createAction?: ReactNode;
 }
 
 /** File switcher: searchable, filterable list that becomes an interactive horizontal carousel on narrow widths. */
-export default function FileRail({ files, activeId, lang, canSign, stateOf, onSelect }: FileRailProps) {
+export default function FileRail({ files, activeId, lang, canSign, stateOf, onSelect, createAction }: FileRailProps) {
   const [filter, setFilter] = useState<Filter>('all');
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
@@ -198,7 +199,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
   };
 
   return (
-    <aside className="ns-rail" aria-label={t('Note-sheet files', 'নোট-শীট ফাইল', lang)}>
+    <>
       <div className="ns-rail-top">
         <div className="ns-search">
           <Search size={14} />
@@ -214,21 +215,22 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
             <button type="button" onClick={() => setQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={13} /></button>
           )}
         </div>
-        <div className="ns-filters" role="group" aria-label={t('Filter files', 'ফাইল ফিল্টার', lang)}>
+        <select
+          className="ns-status-select"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as Filter)}
+          aria-label={t('Filter files', 'ফাইল ফিল্টার', lang)}
+        >
           {filters.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              className={`ns-filter ${filter === f.key ? 'active' : ''}`}
-              aria-pressed={filter === f.key}
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label} <b>{f.count}</b>
-            </button>
+            <option key={f.key} value={f.key}>
+              {f.label} ({f.count})
+            </option>
           ))}
-        </div>
+        </select>
+        {createAction && <div className="ns-rail-create">{createAction}</div>}
       </div>
 
+      <aside className="ns-rail" aria-label={t('Note-sheet files', 'নোট-শীট ফাইল', lang)}>
       <div className={`ns-file-track-container ${canScrollLeft ? 'has-scroll-left' : ''} ${canScrollRight ? 'has-scroll-right' : ''}`}>
         {canScrollLeft && (
           <button
@@ -301,6 +303,7 @@ export default function FileRail({ files, activeId, lang, canSign, stateOf, onSe
           </button>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

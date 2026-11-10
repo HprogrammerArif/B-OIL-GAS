@@ -11,7 +11,7 @@ import InitiateNotesheetModal, {
   AVAILABLE_OFFICERS,
 } from '../components/notesheet/InitiateNotesheetModal';
 import RejectionExplanationModal, { RejectionData } from '../components/RejectionExplanationModal';
-import { Button, EmptyState, PageHeader } from '../components/ui';
+import { Button, EmptyState } from '../components/ui';
 import { approvalStore } from '../store/approvalStore';
 import { useNotesheetStore, NoteFile, isTurnOf, pendingStepOf } from '../store/notesheetStore';
 import FileRail from './notesheet/FileRail';
@@ -244,17 +244,15 @@ export default function NotesheetView({ role, lang }: ViewProps) {
     </Button>
   ) : undefined;
 
-  const header = newButton ? <PageHeader actions={newButton} /> : null;
-
   if (!currentFile || !officialDocData) {
     return (
       <div className="ns-page">
-        {header}
         <div className="card">
           <EmptyState
             icon={<Inbox size={28} />}
             title={t('No note-sheets in your scope', 'আপনার আওতায় কোনো নোট-শীট নেই', lang)}
             description={t('Files you initiate or are asked to sign will appear here.', 'আপনি যে ফাইল শুরু করবেন বা স্বাক্ষরের জন্য পাবেন তা এখানে দেখা যাবে।', lang)}
+            action={newButton}
           />
         </div>
         {initiateModal}
@@ -264,8 +262,6 @@ export default function NotesheetView({ role, lang }: ViewProps) {
 
   return (
     <div className="ns-page">
-      {header}
-
       <div className="ns-workspace">
         <FileRail
           files={visibleFiles}
@@ -274,6 +270,7 @@ export default function NotesheetView({ role, lang }: ViewProps) {
           canSign={canSign}
           stateOf={stateOf}
           onSelect={setActiveFileId}
+          createAction={newButton}
         />
 
         <div className="ns-main">

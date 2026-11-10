@@ -387,7 +387,7 @@ export default function ComplianceView({ lang }: ViewProps) {
         : t('Status of statutory permits for the Keraniganj plant. Nothing to approve here.', 'কেরানীগঞ্জ প্ল্যান্টের বিধিবদ্ধ লাইসেন্সের অবস্থা। এখানে আপনার অনুমোদনের কিছু নেই।', lang);
 
   return (
-    <div style={{ maxWidth: '1440px', margin: '0 auto', paddingBottom: '40px' }}>
+    <div className="view-container" style={{ paddingBottom: '40px' }}>
       <PageHeader
         title={t('Permits & Licenses', 'লাইসেন্স ও অনুমোদনপত্র', lang)}
         description={pageDesc}

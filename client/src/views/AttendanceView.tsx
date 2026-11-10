@@ -558,7 +558,7 @@ export default function AttendanceView({ role, lang, onNavigate }: ViewProps) {
         />
       )}
 
-      <p className={`lv-status ${onDuty ? 'ok' : ''}`} role="status">
+      <p className={`lv-status ${onDuty ? 'ok' : 'info'}`} role="status">
         {onLeaveToday ? <CalendarDays size={16} /> : onDuty ? <LogIn size={16} /> : <Clock size={16} />}
         <span>{dayStatus}{leaveStatus}</span>
       </p>

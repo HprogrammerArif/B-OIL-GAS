@@ -171,7 +171,11 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   const awaitingList = visible.filter((c) => { const a = actionFor(c, user); return a !== null && a !== 'resubmit'; });
   const awaitingAmount = awaitingList.reduce((s, c) => s + c.amount, 0);
   const dueAmount = counts.paymentDue.reduce((s, c) => s + c.amount, 0);
-  const verdictWarn = isApprover ? counts.overdue > 0 : counts.returned > 0;
+  const verdictTone = (isApprover ? counts.overdue > 0 : counts.returned > 0)
+    ? 'danger'
+    : awaitingList.length > 0 || counts.openCount > 0 || counts.paymentDue.length > 0
+      ? 'info'
+      : 'ok';
   const verdict = isApprover
     ? awaitingList.length === 0
       ? t('Nothing is waiting for your decision.', 'আপনার সিদ্ধান্তের অপেক্ষায় কিছু নেই।', lang)
@@ -235,10 +239,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
   return (
     <div className="view-container">
       <PageHeader
+        className="page-sticky-head"
         title={t('Expense claims', 'ব্যয় দাবি', lang)}
-        description={canViewAll
-          ? t('Travel, local conveyance and event expenses, from submission to payment. The ones that need your decision come first.', 'ভ্রমণ, স্থানীয় যাতায়াত ও ইভেন্টের খরচ — জমা থেকে পরিশোধ পর্যন্ত। আপনার সিদ্ধান্তের অপেক্ষায় থাকাগুলো আগে দেখানো হয়।', lang)
-          : t('Your travel, conveyance and event expenses, from submission to payment.', 'আপনার ভ্রমণ, যাতায়াত ও ইভেন্টের খরচ — জমা থেকে পরিশোধ পর্যন্ত।', lang)}
         actions={
           <>
             {canViewAll && (
@@ -254,8 +256,8 @@ export default function ClaimsView({ role, lang }: ViewProps) {
       />
 
       {/* One sentence: where things stand and what to do */}
-      <p className={`lv-status ${verdictWarn ? 'warn' : ''}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <Info size={16} />}
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'danger' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <CheckCircle size={16} />}
         <span>{verdict}</span>
       </p>
       {/* Filter Tabs */}

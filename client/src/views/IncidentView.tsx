@@ -20,7 +20,7 @@ import {
 import { useEmployeeStore } from '../store/employeeStore';
 import { Button, EmptyState, FormField, Modal, PageHeader, StatusPill } from '../components/ui';
 import {
-  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Filter, Check, ArrowRight, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip,
+  AlertTriangle, ShieldAlert, CheckCircle, FileText, Plus, ShieldCheck, Activity, Camera, HelpCircle, Siren, Download, Check, ArrowRight, Send, Search, X, CheckSquare, MapPin, HeartPulse, ChevronDown, ChevronUp, SearchX, Paperclip, Info,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -53,7 +53,7 @@ export const INCIDENT_TYPE_META: Record<IncidentType, { label: string; labelBn: 
 };
 
 const CAPA_PAGE = 4;
-const INCIDENT_PAGE = 6;
+const INCIDENT_PAGE = 4;
 const MAX_SPOT_FILES = 6;
 const MAX_SPOT_BYTES = 8 * 1024 * 1024;
 
@@ -824,7 +824,13 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
     closed: ['Closed', 'সমাপ্ত'],
   };
 
-  const verdictWarn = mode !== 'reporter' && (quickCounts.serious > 0 || quickCounts.statutory > 0);
+  const verdictTone = mode !== 'reporter' && quickCounts.statutory > 0
+    ? 'danger'
+    : mode !== 'reporter' && quickCounts.serious > 0
+      ? 'warn'
+      : quickCounts.open > 0
+        ? 'info'
+        : 'ok';
   const verdict = mode === 'reporter'
     ? quickCounts.all === 0
       ? t('You have not reported anything yet. If you see a hazard or something goes wrong, report it right away.', 'আপনি এখনও কিছু রিপোর্ট করেননি। কোনো বিপদ বা সমস্যা দেখলে সঙ্গে সঙ্গে রিপোর্ট করুন।', lang)
@@ -887,22 +893,15 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
 
   return (
     <div>
-      {mode === 'oversight' && canReport && (
-        <div className="ui-page-header">
-          <div className="ui-page-actions" style={{ marginLeft: 'auto' }}>
-            <Button variant="secondary" icon={<AlertTriangle size={14} />} onClick={() => setShowQuickHazardModal(true)}>
-              {t('Quick hazard report', 'দ্রুত বিপদ রিপোর্ট', lang)}
-            </Button>
-            <Button icon={<Plus size={14} />} onClick={() => { setWizardStep(1); setWizardSpotFiles([]); setShowLogWizard(true); }}>
-              {t('Report an incident', 'ঘটনা রিপোর্ট করুন', lang)}
-            </Button>
-          </div>
-        </div>
-      )}
-      {mode !== 'oversight' && (canReport || canInvestigate) && (
-        <PageHeader
-          title={mode === 'reporter' ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang) : t('Safety and incidents', 'নিরাপত্তা ও দুর্ঘটনা', lang)}
-          actions={
+      <PageHeader
+        className="page-sticky-head"
+        title={
+          mode === 'reporter'
+            ? t('My safety reports', 'আমার নিরাপত্তা রিপোর্ট', lang)
+            : t('Safety & Incident Reports', 'নিরাপত্তা ও দুর্ঘটনা প্রতিবেদন', lang)
+        }
+        actions={
+          (canReport || canInvestigate) ? (
             <>
               {canInvestigate && (
                 <Button variant="outline-danger" icon={<Siren size={14} />} onClick={() => setShowEmergencyModal(true)}>
@@ -920,12 +919,12 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
                 </>
               )}
             </>
-          }
-        />
-      )}
+          ) : undefined
+        }
+      />
 
-      <p className={`lv-status ${verdictWarn ? 'warn' : 'ok'}`} role="status">
-        {verdictWarn ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'danger' ? <Siren size={16} /> : verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
         <span>{verdict}</span>
       </p>
       {emergencyLine && (
@@ -944,7 +943,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
         </div>
       )}
 
-      {/* Find what you need: status chips, search, and the less-used filters */}
+      <div className="inc-sticky-chrome">
       <div className="card mb-4 inc-filters">
         <div className="inc-find">
           <select
@@ -971,37 +970,33 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
             <button type="button" onClick={() => setSearchQuery('')} aria-label={t('Clear search', 'অনুসন্ধান মুছুন', lang)}><X size={15} /></button>
           )}
           </div>
+          <select className="form-input" value={activeTab} onChange={(e) => { setActiveTab(e.target.value as typeof activeTab); setMatrixFilter(null); }} aria-label={t('Kind of incident', 'ঘটনার ধরন', lang)}>
+            <option value="all">{t('Every kind of incident', 'সব ধরনের ঘটনা', lang)}</option>
+            <option value="spill_leak">{t('Oil and fuel spills', 'তেল / বিটুমিন নিঃসরণ', lang)}</option>
+            <option value="near_miss">{t('Near-misses and hazards', 'নিয়ার-মিস ও বিপদ', lang)}</option>
+            <option value="first_aid">{t('Injuries and first aid', 'আঘাত ও প্রাথমিক চিকিৎসা', lang)}</option>
+            <option value="pressure_piping">{t('Pipes and pressure', 'চাপ ও পাইপলাইন', lang)}</option>
+            <option value="electrical_arc">{t('Electrical and machinery', 'বৈদ্যুতিক ও যান্ত্রিক', lang)}</option>
+          </select>
+          <select className="form-input" value={selectedZone} onChange={(e) => setSelectedZone(e.target.value)} aria-label={t('Plant area', 'প্ল্যান্ট এলাকা', lang)}>
+            {PLANT_ZONES.map((zone) => (
+              <option key={zone} value={zone}>{zone === 'All Plant Zones' ? t('Every plant area', 'সব প্ল্যান্ট এলাকা', lang) : zone}</option>
+            ))}
+          </select>
+          <select className="form-input" value={selectedSeverity} onChange={(e) => setSelectedSeverity(Number(e.target.value))} aria-label={t('Severity', 'তীব্রতা', lang)}>
+            <option value={0}>{t('Any severity', 'যেকোনো তীব্রতা', lang)}</option>
+            {[1, 2, 3, 4, 5].map((l) => (
+              <option key={l} value={l}>{t(`${l} · ${LEVEL_LABEL[l][0]}`, `${bn(l)} · ${LEVEL_LABEL[l][1]}`, lang)}</option>
+            ))}
+          </select>
+          <select className="form-input" value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as 'all' | IncidentWorkflowStage)} aria-label={t('Stage', 'ধাপ', lang)}>
+            <option value="all">{t('Any stage', 'যেকোনো ধাপ', lang)}</option>
+            {STAGES.map((s) => (
+              <option key={s} value={s}>{t(...STAGE_LABEL[s], lang)}</option>
+            ))}
+          </select>
         </div>
-        <details className="inc-more">
-          <summary><Filter size={13} /> {t('More filters', 'আরও ফিল্টার', lang)}</summary>
-          <div className="inc-more-grid">
-            <select className="form-input" value={activeTab} onChange={(e) => { setActiveTab(e.target.value as typeof activeTab); setMatrixFilter(null); }} aria-label={t('Kind of incident', 'ঘটনার ধরন', lang)}>
-              <option value="all">{t('Every kind of incident', 'সব ধরনের ঘটনা', lang)}</option>
-              <option value="spill_leak">{t('Oil and fuel spills', 'তেল / বিটুমিন নিঃসরণ', lang)}</option>
-              <option value="near_miss">{t('Near-misses and hazards', 'নিয়ার-মিস ও বিপদ', lang)}</option>
-              <option value="first_aid">{t('Injuries and first aid', 'আঘাত ও প্রাথমিক চিকিৎসা', lang)}</option>
-              <option value="pressure_piping">{t('Pipes and pressure', 'চাপ ও পাইপলাইন', lang)}</option>
-              <option value="electrical_arc">{t('Electrical and machinery', 'বৈদ্যুতিক ও যান্ত্রিক', lang)}</option>
-            </select>
-            <select className="form-input" value={selectedZone} onChange={(e) => setSelectedZone(e.target.value)} aria-label={t('Plant area', 'প্ল্যান্ট এলাকা', lang)}>
-              {PLANT_ZONES.map((zone) => (
-                <option key={zone} value={zone}>{zone === 'All Plant Zones' ? t('Every plant area', 'সব প্ল্যান্ট এলাকা', lang) : zone}</option>
-              ))}
-            </select>
-            <select className="form-input" value={selectedSeverity} onChange={(e) => setSelectedSeverity(Number(e.target.value))} aria-label={t('Severity', 'তীব্রতা', lang)}>
-              <option value={0}>{t('Any severity', 'যেকোনো তীব্রতা', lang)}</option>
-              {[1, 2, 3, 4, 5].map((l) => (
-                <option key={l} value={l}>{t(`${l} · ${LEVEL_LABEL[l][0]}`, `${bn(l)} · ${LEVEL_LABEL[l][1]}`, lang)}</option>
-              ))}
-            </select>
-            <select className="form-input" value={selectedStage} onChange={(e) => setSelectedStage(e.target.value as 'all' | IncidentWorkflowStage)} aria-label={t('Stage', 'ধাপ', lang)}>
-              <option value="all">{t('Any stage', 'যেকোনো ধাপ', lang)}</option>
-              {STAGES.map((s) => (
-                <option key={s} value={s}>{t(...STAGE_LABEL[s], lang)}</option>
-              ))}
-            </select>
-          </div>
-        </details>
+      </div>
       </div>
 
       {/* Risk grid: a tool for people who assess risk, hidden for reporters */}
@@ -1232,7 +1227,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
           })
         )}
       </div>
-      {quickFiltered.length > INCIDENT_PAGE && (
+      {quickFiltered.length > 0 && (
         <div style={{ marginTop: 12 }}>
           <Pagination
             currentPage={safeIncPage}
@@ -1240,6 +1235,7 @@ export default function IncidentView({ lang, onNavigate }: ViewProps) {
             pageSize={INCIDENT_PAGE}
             onPageChange={setIncListPage}
             lang={lang}
+            alwaysShow
           />
         </div>
       )}

@@ -111,14 +111,6 @@ export default function LoginPage({ lang, onLangToggle }: LoginPageProps) {
     setIdentifier(meta.email);
     setPassword('bogcl2026');
     if (error) setError(null);
-    showToast(
-      t(
-        `Credentials loaded for ${meta.name} (${t(meta.label, meta.labelBn, lang)}). Click "Enter Command Centre" to proceed.`,
-        `${meta.nameBn} (${meta.labelBn})-এর তথ্য লোড করা হয়েছে। "কমান্ড সেন্টারে প্রবেশ" চাপুন।`,
-        lang
-      ),
-      'info'
-    );
   };
 
   return (
