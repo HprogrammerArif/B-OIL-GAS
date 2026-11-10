@@ -197,6 +197,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
         )}
       </div>
 
+      <div className="apv-sticky-chrome">
       <div className="workforce-toolbar apv-find">
         <div className="workforce-tabs" role="group" aria-label={t('Approval list', 'অনুমোদনের তালিকা', lang)}>
           <button
@@ -287,6 +288,7 @@ export default function ApprovalsView({ lang }: ViewProps) {
             <option value="requester_desc">{t('Requester Z–A', 'আবেদনকারী Z–A', lang)}</option>
           </select>
         </div>
+      </div>
       </div>
 
       {/* List */}

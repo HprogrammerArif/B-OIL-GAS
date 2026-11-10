@@ -588,23 +588,14 @@ export default function GuestView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. TOP HEADER & EMERGENCY MUSTER ACTIONS */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex-between mb-3 page-sticky-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
-            {isGate
-              ? t('Visitor Gate', 'ভিজিটর গেট', lang)
-              : mode === 'oversight'
-              ? t('Visitors on Site', 'সাইটে অতিথি', lang)
-              : t('My Guests', 'আমার অতিথি', lang)}
-          </h2>
-          <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
-            {isGate
-              ? t('Check visitors in and out, issue badges, clear safety gear, and run the evacuation roll-call.', 'অতিথি চেক-ইন/আউট, ব্যাজ, পিপিই ছাড়পত্র ও ইভাকুয়েশন রোল-কল।', lang)
-              : mode === 'oversight'
-              ? t('Live visitor register and gate passes across Dhaka HQ and Keraniganj Refinery.', 'প্রধান কার্যালয় ও প্ল্যান্টের সকল গেট পাস।', lang)
-              : t('Invite a visitor and track their gate pass.', 'অতিথি আমন্ত্রণ জানান ও গেট পাস অনুসরণ করুন।', lang)}
-          </p>
-        </div>
+      <div className="flex-between mb-3 page-sticky-head" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
+          {isGate
+            ? t('Visitor Gate Passes', 'ভিজিটর গেট পাস', lang)
+            : mode === 'oversight'
+            ? t('Visitor Gate Passes', 'ভিজিটর গেট পাস', lang)
+            : t('My Guests', 'আমার অতিথি', lang)}
+        </h2>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           {mode !== 'host' && (
