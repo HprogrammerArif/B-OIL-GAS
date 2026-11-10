@@ -631,9 +631,20 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
 
   return (
     <div className="view-container">
-      {hasHeaderActions && (
-        <PageHeader
-          actions={
+      <p className={`lv-status ${verdictTone}`} role="status">
+        {verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
+        <span>{verdict}</span>
+      </p>
+
+      <div className="eam-sticky-chrome">
+      <PageHeader
+        title={
+          roleConfig.isSelfServiceOnly
+            ? t('My Assigned Equipment', 'আমার বরাদ্দকৃত সরঞ্জাম', lang)
+            : t('Company Assets & Equipment', 'কোম্পানির সম্পদ ও যন্ত্রপাতি', lang)
+        }
+        actions={
+          hasHeaderActions ? (
             <>
               {roleConfig.canScanTag && (
                 <Button variant="secondary" icon={<Barcode size={14} />} onClick={() => setShowScanModal(true)}>
@@ -641,7 +652,7 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 </Button>
               )}
               {roleConfig.canRequestEquipment && (
-                <Button variant="secondary" icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
+                <Button icon={<FilePlus size={14} />} onClick={() => setShowRequisitionModal(true)}>
                   {t('Request equipment', 'যন্ত্রপাতির আবেদন', lang)}
                 </Button>
               )}
@@ -651,16 +662,9 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
                 </Button>
               )}
             </>
-          }
-        />
-      )}
-
-      <p className={`lv-status ${verdictTone}`} role="status">
-        {verdictTone === 'warn' ? <AlertTriangle size={16} /> : verdictTone === 'info' ? <Info size={16} /> : <ShieldCheck size={16} />}
-        <span>{verdict}</span>
-      </p>
-
-      <div className="eam-sticky-chrome">
+          ) : undefined
+        }
+      />
       {/* Main module tabs */}
       <div className="eam-nav-bar">
         <button
@@ -917,14 +921,12 @@ export default function AssetView({ role, lang, onNavigate }: ViewProps) {
               <div className={`eam-feed-panel ${mobileTab === 'detail' ? 'eam-mobile-hidden' : ''}`}>
                 <div className="eam-feed-hd">
                   <div>
-                    <div className="eam-feed-title">
-                      <Layers size={15} style={{ color: 'var(--brand-crimson)' }} />
-                      <span>
-                        {roleConfig.isSelfServiceOnly
-                          ? t('My equipment', 'আমার সরঞ্জাম', lang)
-                          : t('Machines (needs attention first)', 'মেশিন তালিকা (জরুরি আগে)', lang)}
-                      </span>
-                    </div>
+                    {!roleConfig.isSelfServiceOnly && (
+                      <div className="eam-feed-title">
+                        <Layers size={15} style={{ color: 'var(--brand-crimson)' }} />
+                        <span>{t('Machines (needs attention first)', 'মেশিন তালিকা (জরুরি আগে)', lang)}</span>
+                      </div>
+                    )}
                     <div className="eam-feed-count">
                       {t(`Showing ${sortedAssets.length} of ${roleScopedAssets.length}`, `${bn(roleScopedAssets.length)}টির মধ্যে ${bn(sortedAssets.length)}টি`, lang)}
                     </div>

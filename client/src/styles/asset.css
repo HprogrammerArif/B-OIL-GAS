@@ -213,6 +213,10 @@
   box-shadow: 0 10px 12px -10px rgba(11, 19, 43, 0.14);
 }
 
+.eam-sticky-chrome .ui-page-header {
+  margin-bottom: 10px;
+}
+
 .eam-sticky-chrome .eam-nav-bar {
   margin-bottom: 8px;
 }
