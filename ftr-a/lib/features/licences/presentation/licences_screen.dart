@@ -73,10 +73,12 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     Haptics.tap();
+    final sheetWidth = MediaQuery.sizeOf(context).width;
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
+      constraints: BoxConstraints(minWidth: sheetWidth, maxWidth: sheetWidth),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheet) {
@@ -84,79 +86,83 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
               required bool selected,
               required String label,
               required VoidCallback onTap,
-            }) => Padding(
-              padding: const EdgeInsets.only(right: Space.xs, bottom: Space.xs),
-              child: FilterChip(
-                visualDensity: VisualDensity.compact,
-                label: Text(label, style: const TextStyle(fontSize: 12)),
-                selected: selected,
-                onSelected: (_) {
-                  Haptics.tap();
-                  onTap();
-                  setSheet(() {});
-                  setState(() {});
-                },
-              ),
+            }) => FilterChip(
+              visualDensity: VisualDensity.compact,
+              label: Text(label, style: const TextStyle(fontSize: 12)),
+              selected: selected,
+              onSelected: (_) {
+                Haptics.tap();
+                onTap();
+                setSheet(() {});
+                setState(() {});
+              },
             );
 
             return SafeArea(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.7,
-                ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    Space.md,
-                    0,
-                    Space.md,
-                    Space.md + MediaQuery.viewInsetsOf(ctx).bottom,
+              child: SizedBox(
+                width: double.infinity,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.sizeOf(ctx).height * 0.7,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.cpFilter,
-                        style: Theme.of(ctx).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: Space.md),
-                      Text(
-                        l10n.cpFilterAgencies,
-                        style: Theme.of(ctx).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Wrap(
-                        children: [
-                          for (final a in _agencies)
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      Space.md,
+                      0,
+                      Space.md,
+                      Space.md + MediaQuery.viewInsetsOf(ctx).bottom,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.cpFilter,
+                          style: Theme.of(ctx).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: Space.md),
+                        Text(
+                          l10n.cpFilterAgencies,
+                          style: Theme.of(ctx).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: Space.xs),
+                        Wrap(
+                          spacing: Space.xs,
+                          runSpacing: Space.xs,
+                          children: [
+                            for (final a in _agencies)
+                              chip(
+                                selected: _selectedAgency == a.$1,
+                                label: bangla ? a.$3 : a.$2,
+                                onTap: () => _selectedAgency = a.$1,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: Space.md),
+                        Text(
+                          l10n.cpFilterStages,
+                          style: Theme.of(ctx).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: Space.xs),
+                        Wrap(
+                          spacing: Space.xs,
+                          runSpacing: Space.xs,
+                          children: [
                             chip(
-                              selected: _selectedAgency == a.$1,
-                              label: bangla ? a.$3 : a.$2,
-                              onTap: () => _selectedAgency = a.$1,
+                              selected: _selectedStage == 'ALL',
+                              label: l10n.cpFilterAllStages,
+                              onTap: () => _selectedStage = 'ALL',
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: Space.md),
-                      Text(
-                        l10n.cpFilterStages,
-                        style: Theme.of(ctx).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Wrap(
-                        children: [
-                          chip(
-                            selected: _selectedStage == 'ALL',
-                            label: l10n.cpFilterAllStages,
-                            onTap: () => _selectedStage = 'ALL',
-                          ),
-                          for (final s in _stageCodes)
-                            chip(
-                              selected: _selectedStage == s,
-                              label: licenceStageLabel(l10n, s),
-                              onTap: () => _selectedStage = s,
-                            ),
-                        ],
-                      ),
-                    ],
+                            for (final s in _stageCodes)
+                              chip(
+                                selected: _selectedStage == s,
+                                label: licenceStageLabel(l10n, s),
+                                onTap: () => _selectedStage = s,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

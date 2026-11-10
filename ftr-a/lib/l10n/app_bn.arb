@@ -2238,6 +2238,8 @@
   "busSwapHint": "অন্যজনকে মানতে হবে।",
   "busSwapDone": "বদলের অনুরোধ পাঠানো হয়েছে।",
   "busSwapAccept": "আসন বদল মানুন",
+  "chAttach": "ফাইল সংযুক্ত করুন",
+  "chFileSaved": "ফাইল এই চ্যাটে আছে।",
   "chVoice": "ভয়েস নোট",
   "chVoiceRecord": "ধরতে ধরে রাখুন",
   "chVoiceStop": "থামান ও পাঠান",

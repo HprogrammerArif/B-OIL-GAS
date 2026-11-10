@@ -1356,7 +1356,7 @@ Retention job deletes messages older than `retentionDays` (hard delete + file ob
 The in-app mock (`ftr-a/lib/mock/engines/chat_engine.dart`) implements a subset with these differences:
 
 - Four seeded rooms: Leadership (locked), Plant operations, Finance, Permits (locked). Members are Chairman, Plant GM, HR and Finance HOD only. Employee, driver and transport personas have no `chat:use`. Copy never claims end-to-end encryption (BR-15-05/17).
-- Send, read, react, DM, issue/ack/execute directive. A send in Plant operations gets a scripted Plant GM reply. Voice, files, calls, retention job and channel admin UI are deferred.
+- Send, read, react, DM, issue/ack/execute directive. A send in Plant operations gets a scripted Plant GM reply. Device file attach (`DOCUMENT` + `fileId`) and simulated voice notes are in the composer. Calls, retention job and channel admin UI stay deferred.
 
 ---
 

@@ -172,6 +172,9 @@ class ChatMessage {
     this.directive,
     this.reactions = const [],
     this.reactionCounts = const {},
+    this.fileId,
+    this.fileName,
+    this.mime,
   });
 
   factory ChatMessage.fromJson(Map<String, Object?> j, {required String me}) {
@@ -192,6 +195,7 @@ class ChatMessage {
       counts[emoji] = (counts[emoji] ?? 0) + 1;
     }
     final senderMap = j['sender'] is Map ? _map(j['sender']) : null;
+    final file = j['file'] is Map ? _map(j['file']) : null;
 
     return ChatMessage(
       id: j['id']! as String,
@@ -208,6 +212,9 @@ class ChatMessage {
           : null,
       reactions: rawReactions,
       reactionCounts: counts,
+      fileId: file?['id'] as String?,
+      fileName: file?['fileName'] as String?,
+      mime: file?['mime'] as String?,
     );
   }
 
@@ -224,4 +231,7 @@ class ChatMessage {
   final ChatDirective? directive;
   final List<String> reactions;
   final Map<String, int> reactionCounts;
+  final String? fileId;
+  final String? fileName;
+  final String? mime;
 }

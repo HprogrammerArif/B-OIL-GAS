@@ -6953,6 +6953,12 @@ class AppL10nEn extends AppL10n {
   String get busSwapAccept => 'Accept seat swap';
 
   @override
+  String get chAttach => 'Attach a file';
+
+  @override
+  String get chFileSaved => 'File is in this chat.';
+
+  @override
   String get chVoice => 'Voice note';
 
   @override

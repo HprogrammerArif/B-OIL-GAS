@@ -12,6 +12,11 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/chat/data/chat_repository.dart';
 import 'package:bogcl_oneops/features/chat/domain/chat_models.dart';
 import 'package:bogcl_oneops/features/chat/presentation/chat_providers.dart';
+import 'package:bogcl_oneops/features/files/application/upload_service.dart';
+import 'package:bogcl_oneops/features/files/data/files_repository.dart';
+import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
+import 'package:bogcl_oneops/features/files/presentation/file_image.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -83,6 +88,11 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
     return s;
   }
 
+  String _replySnippet(ChatMessage m, bool bangla) {
+    if (m.fileName != null && m.fileName!.isNotEmpty) return m.fileName!;
+    return _cleanSnippet(m.body, bangla);
+  }
+
   Future<void> _send() async {
     final rawText = _text.text.trim();
     if (rawText.isEmpty) return;
@@ -93,7 +103,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
       final senderName =
           _replyingTo!.sender?.display(bangla: bangla) ??
           (bangla ? 'আপনি' : 'You');
-      final quoted = _cleanSnippet(_replyingTo!.body, bangla);
+      final quoted = _replySnippet(_replyingTo!, bangla);
       body = '> $senderName: $quoted\n$rawText';
     }
 
@@ -484,98 +494,38 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
   }
 
   Future<void> _attachDocument() async {
-    final bangla = context.isBangla;
-    final scheme = Theme.of(context).colorScheme;
-    final pick = await showModalBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(Space.md),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                bangla
-                    ? 'অফিসিয়াল নথি সংযুক্ত করুন'
-                    : 'Attach Official Record',
-                style: Theme.of(ctx).textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: Space.xs),
-              Text(
-                bangla
-                    ? 'চ্যাটে নোট-শিট, ল্যাব রিপোর্ট বা নিরাপত্তা নথি শেয়ার করুন'
-                    : 'Share a reference card linking to the operational record',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
-              const SizedBox(height: Space.sm),
-              ListTile(
-                leading: Icon(
-                  Icons.description_outlined,
-                  color: scheme.onSurfaceVariant,
-                ),
-                title: const Text('Note-Sheet NS-2026-0042'),
-                subtitle: const Text(
-                  'New Bitumen Storage Tank TK-109 · BDT 32.0 Lakhs',
-                ),
-                onTap: () => Navigator.pop(
-                  ctx,
-                  'Attached Note-Sheet: NS-2026-0042 | New Bitumen Storage Tank TK-109 (BDT 32.0 Lakhs)',
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.science_outlined,
-                  color: scheme.onSurfaceVariant,
-                ),
-                title: const Text('Bitumen Lab QC Batch B-88'),
-                subtitle: const Text(
-                  'BDS 1238:2020 Penetration Grade 60/70 Test Certificate',
-                ),
-                onTap: () => Navigator.pop(
-                  ctx,
-                  'Attached QC Report: BDS 1238:2020 | Grade 60/70 Batch B-88 Verified (450 MT)',
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.report_problem_outlined,
-                  color: scheme.onSurfaceVariant,
-                ),
-                title: const Text('HSE Incident INC-2026-003'),
-                subtitle: const Text('Flange Joint Gasket Weep at Tank TK-102'),
-                onTap: () => Navigator.pop(
-                  ctx,
-                  'Attached HSE Incident: INC-2026-003 | Tank TK-102 Flange Gasket Inspection',
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.gavel_outlined,
-                  color: scheme.onSurfaceVariant,
-                ),
-                title: const Text('Explosives & Boiler Licence File'),
-                subtitle: const Text(
-                  'Keraniganj Refinery Statutory Renewal Package',
-                ),
-                onTap: () => Navigator.pop(
-                  ctx,
-                  'Attached Permit File: LIC-2026-019 | Keraniganj Refinery Statutory Renewal',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (pick != null) {
-      await _repo.send(widget.id, pick);
+    if (_busy) return;
+    final l10n = context.l10n;
+    final picked = await pickAttachment(context);
+    if (picked == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final uploads = ref.read(uploadServiceProvider);
+      final purpose = picked.mime.startsWith('image/') ? 'PHOTO' : 'DOCUMENT';
+      final meta = await uploads.upload(picked, purpose: purpose);
+      await uploads.awaitClean(meta.id);
+      if (!mounted) return;
+      await _repo.send(
+        widget.id,
+        picked.name,
+        fileId: meta.id,
+        fileName: picked.name,
+        mime: picked.mime,
+      );
+      Haptics.tap();
       ref
         ..invalidate(chatMessagesProvider(widget.id))
         ..invalidate(chatChannelsProvider);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      AppToast.show(context, switch (e.code) {
+        ApiErrorCode.offline ||
+        ApiErrorCode.timeout => l10n.uploadNeedsConnection,
+        ApiErrorCode.forbidden => l10n.uploadBlocked,
+        _ => l10n.uploadRejected,
+      }, tone: StatusTone.danger);
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -1004,7 +954,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                             ),
                           ),
                           Text(
-                            _cleanSnippet(_replyingTo!.body, bangla),
+                            _replySnippet(_replyingTo!, bangla),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1037,6 +987,7 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                 controller: _text,
                 busy: _busy,
                 hint: l10n.chHint,
+                attachTooltip: l10n.chAttach,
                 canDirect: canDir && !(channel?.isDirect ?? false),
                 onSend: _send,
                 onAttach: _attachDocument,
@@ -1098,6 +1049,10 @@ class _EnhancedBubble extends StatelessWidget {
         message.type == 'VOICE' ||
         mainBody.startsWith('VOICE:') ||
         mainBody.startsWith('[VOICE BRIEFING');
+    final isDocument =
+        message.type == 'DOCUMENT' &&
+        message.fileId != null &&
+        message.fileId!.isNotEmpty;
     final isAttachedRecord = mainBody.startsWith('Attached ');
 
     // Calm neutral bubble backgrounds
@@ -1193,6 +1148,8 @@ class _EnhancedBubble extends StatelessWidget {
                     // Message Content by Kind
                     if (isVoice)
                       _VoiceWaveformBubble(body: mainBody, bangla: bangla)
+                    else if (isDocument)
+                      _DocumentBubble(message: message)
                     else if (isAttachedRecord)
                       _OfficialRecordCard(raw: mainBody, bangla: bangla)
                     else if (isDirective) ...[
@@ -1553,6 +1510,79 @@ class _OfficialRecordCard extends StatelessWidget {
   }
 }
 
+class _DocumentBubble extends ConsumerWidget {
+  const _DocumentBubble({required this.message});
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fileId = message.fileId!;
+    final name = message.fileName ?? message.body ?? 'File';
+    final mime = message.mime ?? '';
+    final isImage = mime.startsWith('image/');
+    if (isImage) {
+      final bytes = ref.watch(fileBytesProvider(fileId)).value;
+      return InkWell(
+        onTap: () => unawaited(showFileImage(context, ref, fileId)),
+        borderRadius: BorderRadius.circular(Corner.md),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(Corner.md),
+          child: SizedBox(
+            width: 180,
+            height: 120,
+            child: bytes == null
+                ? ColoredBox(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    child: const Icon(Icons.photo_outlined),
+                  )
+                : Image.memory(bytes, fit: BoxFit.cover),
+          ),
+        ),
+      );
+    }
+    return InkWell(
+      onTap: () => unawaited(_openDoc(context, ref, fileId)),
+      child: Row(
+        children: [
+          Icon(
+            Icons.insert_drive_file_outlined,
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: Space.sm),
+          Expanded(
+            child: Text(
+              name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openDoc(
+    BuildContext context,
+    WidgetRef ref,
+    String fileId,
+  ) async {
+    final l10n = context.l10n;
+    try {
+      await ref.read(filesRepositoryProvider).download(fileId);
+      if (!context.mounted) return;
+      AppToast.show(context, l10n.chFileSaved);
+    } on ApiException {
+      if (!context.mounted) return;
+      AppToast.show(context, l10n.uploadRejected, tone: StatusTone.danger);
+    }
+  }
+}
+
 class _VoiceWaveformBubble extends StatefulWidget {
   const _VoiceWaveformBubble({required this.body, required this.bangla});
 
@@ -1771,6 +1801,7 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.busy,
     required this.hint,
+    required this.attachTooltip,
     required this.canDirect,
     required this.onSend,
     required this.onAttach,
@@ -1781,6 +1812,7 @@ class _Composer extends StatelessWidget {
   final TextEditingController controller;
   final bool busy;
   final String hint;
+  final String attachTooltip;
   final bool canDirect;
   final VoidCallback onSend;
   final VoidCallback onAttach;
@@ -1806,7 +1838,7 @@ class _Composer extends StatelessWidget {
             children: [
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'Attach Official Record',
+                tooltip: attachTooltip,
                 icon: Icon(
                   Icons.attach_file,
                   size: 20,

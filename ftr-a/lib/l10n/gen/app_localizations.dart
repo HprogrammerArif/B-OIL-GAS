@@ -12468,6 +12468,18 @@ abstract class AppL10n {
   /// **'Accept seat swap'**
   String get busSwapAccept;
 
+  /// No description provided for @chAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a file'**
+  String get chAttach;
+
+  /// No description provided for @chFileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'File is in this chat.'**
+  String get chFileSaved;
+
   /// No description provided for @chVoice.
   ///
   /// In en, this message translates to:

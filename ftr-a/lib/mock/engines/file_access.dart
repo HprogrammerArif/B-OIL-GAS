@@ -1,3 +1,4 @@
+import 'package:bogcl_oneops/mock/engines/chat_engine.dart';
 import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
@@ -92,6 +93,12 @@ abstract final class FileAccess {
           _widerThanSelf(user, 'fleet:dispatch') ||
           _widerThanSelf(user, 'fleet:gate') ||
           _widerThanSelf(user, 'fleet:read');
+    });
+    FileEngine.registerOwnerAccess('ChatMessage', (store, user, id) {
+      final m = store.get(Col.chatMessages, id);
+      if (m == null) return false;
+      final ch = store.get(Col.chatChannels, m.str('channelId'));
+      return ch != null && ChatEngine.isMember(ch, user.str('id'));
     });
     FileEngine.registerOwnerAccess('Parcel', (store, user, id) {
       final p = store.get(Col.parcels, id);

@@ -3623,6 +3623,8 @@
   "busSwapHint": "The other person must accept.",
   "busSwapDone": "Swap request sent.",
   "busSwapAccept": "Accept seat swap",
+  "chAttach": "Attach a file",
+  "chFileSaved": "File is in this chat.",
   "chVoice": "Voice note",
   "chVoiceRecord": "Hold to record",
   "chVoiceStop": "Stop and send",

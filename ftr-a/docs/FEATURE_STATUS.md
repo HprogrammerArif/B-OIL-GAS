@@ -35,7 +35,7 @@ Legend: Done = complete in EN+BN, light+dark, all states · WIP · Todo
 | MOD-06 Compliance | 6 | Done (6c) | Fund workflow, certificate files, regulator sync deferred |
 | MOD-16 Workforce | 6 | Done (6d) | Who they report to, and who reports to them, is on the person; set-password mail and session revoke deferred |
 | MOD-02 Dashboards | 7 | Done (on Home) | Plant Home shows this week's output and the bitumen batch release; a live SCADA feed and ROI PDF stay off the phone |
-| MOD-15 Chat | 7 | Done | Voice notes + fleet trip chat shipped; live calls stay `tel:`. Chairman can open a leadership room and archive an unlocked room (BR-15-18). |
+| MOD-15 Chat | 7 | Done | Voice notes + device file attach (camera/gallery/files) + fleet trip chat shipped; live calls stay `tel:`. Chairman can open a leadership room and archive an unlocked room (BR-15-18). |
 
 ## Environment
 
@@ -44,7 +44,7 @@ Legend: Done = complete in EN+BN, light+dark, all states · WIP · Todo
 
 ## BN translation review queue
 
-Review in `app_bn.arb`: previous keys plus chat room create/remove (`chNewRoom*`, `chRoom*`, `chRemoveRoom*`, `chKeepRoom`, `chPeopleSearch`, `chNoPeople*`) and pre-hardening `search*`, `lock*Password*`, `dbListen*`, `dbActRestore`, `attTeam*`, `flChat*`, `flPool*`, `busConductor*`, `busSwap*`, `chVoice*`, `inGps*`, `emFieldNid`, `homeFilesCount`, `homeLocksCount`, `nsWhoTitle`, `nsRouteSuggested`, `nsRouteCustom`, `nsRouteRestore`, `nsRouteCloses`, `nsRouteAdd`, `nsRouteAddHint`, `nsRouteEmpty`, `nsRouteNeedOne`, `nsRouteKept`, `nsRouteDuplicate`, `nsRouteDrag`, `nsRouteRemove`, `nsRouteFields`, `nsRouteNone`, `nsErrSignerSelf`, `nsErrSignerDup`, `nsErrSignerMissing`, `loginWelcome`, `loginEmailLabel`, `loginEmailHint`, `loginPasswordHint`, `loginRemember`, `loginOr`, `loginDemoAs`, `loginSubtitle`, `loginLangEn`, `loginLangBn`, `loginLangSwitch`.
+Review in `app_bn.arb`: previous keys plus chat attach (`chAttach`, `chFileSaved`), chat room create/remove (`chNewRoom*`, `chRoom*`, `chRemoveRoom*`, `chKeepRoom`, `chPeopleSearch`, `chNoPeople*`) and pre-hardening `search*`, `lock*Password*`, `dbListen*`, `dbActRestore`, `attTeam*`, `flChat*`, `flPool*`, `busConductor*`, `busSwap*`, `chVoice*`, `inGps*`, `emFieldNid`, `homeFilesCount`, `homeLocksCount`, `nsWhoTitle`, `nsRouteSuggested`, `nsRouteCustom`, `nsRouteRestore`, `nsRouteCloses`, `nsRouteAdd`, `nsRouteAddHint`, `nsRouteEmpty`, `nsRouteNeedOne`, `nsRouteKept`, `nsRouteDuplicate`, `nsRouteDrag`, `nsRouteRemove`, `nsRouteFields`, `nsRouteNone`, `nsErrSignerSelf`, `nsErrSignerDup`, `nsErrSignerMissing`, `loginWelcome`, `loginEmailLabel`, `loginEmailHint`, `loginPasswordHint`, `loginRemember`, `loginOr`, `loginDemoAs`, `loginSubtitle`, `loginLangEn`, `loginLangBn`, `loginLangSwitch`.
 
 ## Persona walk-through (no dead buttons)
 

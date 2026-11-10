@@ -1,4 +1,5 @@
 import 'package:bogcl_oneops/mock/engines/audit_engine.dart';
+import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
@@ -175,6 +176,7 @@ abstract final class ChatEngine {
     final senderId = m.strOrNull('senderUserId');
     final info = _employeeInfo(store, senderId);
     final baseSender = WorkflowEngine.personRef(store, senderId);
+    final fileId = m.strOrNull('fileId');
     return {
       'id': m['id'],
       'channelId': m['channelId'],
@@ -193,6 +195,12 @@ abstract final class ChatEngine {
             },
       'reactions': m['reactions'] ?? const <Json>[],
       'directive': dir == null ? null : store.get(Col.chatDirectives, dir),
+      if (fileId != null)
+        'file': {
+          'id': fileId,
+          'fileName': m['fileName'] ?? 'File',
+          'mime': m['mime'] ?? 'application/octet-stream',
+        },
     };
   }
 
@@ -290,7 +298,21 @@ abstract final class ChatEngine {
     if (ch['isLocked'] == true && !isAdmin(ch, a.user.str('id'))) {
       throw policyViolation('LOCKED', 'Only an admin can write here.');
     }
-    final text = (body['body'] as String? ?? '').trim();
+    final fileId = body['fileId'] as String?;
+    Json? file;
+    if (fileId != null) {
+      file = store.get(Col.files, fileId);
+      if (file == null ||
+          file['uploaderUserId'] != a.user['id'] ||
+          file['status'] != 'UPLOADED' ||
+          FileEngine.scanStatus(store, file) != 'CLEAN') {
+        throw validationError('fileId', 'File is not usable');
+      }
+    }
+    var text = (body['body'] as String? ?? '').trim();
+    if (file != null && text.isEmpty) {
+      text = file.str('fileName');
+    }
     if (text.isEmpty) throw validationError('body', 'Write a message');
     if (text.length > 4000) throw validationError('body', 'Too long');
     final client = body['clientMsgId'] as String?;
@@ -300,11 +322,16 @@ abstract final class ChatEngine {
       }
     }
     final n = store.all(Col.chatMessages).length + 1;
+    final type = file != null
+        ? 'DOCUMENT'
+        : (text.startsWith('VOICE:') ? 'VOICE' : 'TEXT');
+    final named = (body['fileName'] as String?)?.trim();
+    final mime = (body['mime'] as String?)?.trim();
     final rec = <String, Object?>{
       'id': 'cm_$n',
       'channelId': ch['id'],
       'senderUserId': a.user['id'],
-      'type': text.startsWith('VOICE:') ? 'VOICE' : 'TEXT',
+      'type': type,
       'body': text,
       'createdAt': store.nowIso(),
       'editedAt': null,
@@ -314,8 +341,23 @@ abstract final class ChatEngine {
       'clientMsgId': client,
       'reactions': <Json>[],
       'directiveId': null,
+      if (file != null) 'fileId': file['id'],
+      if (file != null)
+        'fileName': (named != null && named.isNotEmpty)
+            ? named
+            : file.str('fileName'),
+      if (file != null)
+        'mime': (mime != null && mime.isNotEmpty) ? mime : file.str('mime'),
     };
     store.put(Col.chatMessages, rec);
+    if (file != null) {
+      FileEngine.attach(
+        store,
+        file.str('id'),
+        ownerType: 'ChatMessage',
+        ownerId: rec.str('id'),
+      );
+    }
     markRead(store, a, ch, rec.str('id'));
     for (final m in ch.objList('members')) {
       final uid = m.str('userId');

@@ -56,11 +56,24 @@ class ChatRepository {
     }
   }
 
-  Future<void> send(String id, String body, {bool urgent = false}) async {
+  Future<void> send(
+    String id,
+    String body, {
+    bool urgent = false,
+    String? fileId,
+    String? fileName,
+    String? mime,
+  }) async {
     try {
       await _dio.post<Object?>(
         '/chat/channels/$id/messages',
-        data: {'body': body, 'isUrgent': urgent},
+        data: {
+          'body': body,
+          'isUrgent': urgent,
+          ?fileId: fileId,
+          ?fileName: fileName,
+          ?mime: mime,
+        },
       );
     } on DioException catch (e) {
       throwApi(e);

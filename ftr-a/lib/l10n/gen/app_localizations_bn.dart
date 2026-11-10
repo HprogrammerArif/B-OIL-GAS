@@ -6923,6 +6923,12 @@ class AppL10nBn extends AppL10n {
   String get busSwapAccept => 'আসন বদল মানুন';
 
   @override
+  String get chAttach => 'ফাইল সংযুক্ত করুন';
+
+  @override
+  String get chFileSaved => 'ফাইল এই চ্যাটে আছে।';
+
+  @override
   String get chVoice => 'ভয়েস নোট';
 
   @override
