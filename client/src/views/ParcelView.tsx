@@ -614,25 +614,14 @@ export default function ParcelView({ lang }: ViewProps) {
       {/* ─────────────────────────────────────────────────────────────────── */}
       {/* 1. TOP HEADER & INSTANT SEARCH HERO */}
       {/* ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex-between mb-4 page-sticky-head" style={{ alignItems: 'flex-start', flexWrap: 'wrap', gap: '14px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
-              {isDesk
-                ? t('Parcel Desk', 'পার্সেল ডেস্ক', lang)
-                : mode === 'courier'
-                ? t('My Deliveries', 'আমার ডেলিভারি', lang)
-                : t('My Parcels', 'আমার পার্সেল', lang)}
-            </h2>
-          </div>
-          <p className="text-muted" style={{ margin: '4px 0 0', fontSize: '12.5px' }}>
-            {isDesk
-              ? t('Sealed inter-office consignments, hand-offs and returns', 'সিলকৃত আন্তঃঅফিস পার্সেল, হস্তান্তর ও ফেরত', lang)
-              : mode === 'courier'
-              ? t('Pouches assigned to you — scan each hand-off and take the recipient’s PIN at delivery', 'আপনার বরাদ্দকৃত পাউচ — প্রতিটি হস্তান্তর স্ক্যান করুন ও ডেলিভারিতে প্রাপকের পিন নিন', lang)
-              : t('Parcels you sent or are receiving', 'আপনার পাঠানো বা প্রাপ্য পার্সেল', lang)}
-          </p>
-        </div>
+      <div className="flex-between mb-4 page-sticky-head" style={{ alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+        <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-1)', margin: 0 }}>
+          {isDesk
+            ? t('Parcel Desk', 'পার্সেল ডেস্ক', lang)
+            : mode === 'courier'
+            ? t('My Deliveries', 'আমার ডেলিভারি', lang)
+            : t('My Parcels', 'আমার পার্সেল', lang)}
+        </h2>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {isDesk && (
