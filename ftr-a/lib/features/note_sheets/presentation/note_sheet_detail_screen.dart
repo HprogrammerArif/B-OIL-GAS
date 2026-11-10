@@ -17,6 +17,7 @@ import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_pdf.da
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_providers.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_ui.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/signature_sheet.dart';
+import 'package:bogcl_oneops/features/workflow/data/workflow_trail.dart';
 import 'package:bogcl_oneops/features/workflow/presentation/approval_timeline.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
@@ -81,7 +82,8 @@ class _NoteSheetDetailScreenState extends ConsumerState<NoteSheetDetailScreen> {
       ..invalidate(approvalInboxProvider)
       ..invalidate(approvalSummaryProvider)
       ..invalidate(approvalHistoryProvider)
-      ..invalidate(approvalDetailProvider);
+      ..invalidate(approvalDetailProvider)
+      ..invalidate(workflowTrailProvider);
   }
 
   Future<void> _sign(NoteSheet s) async {

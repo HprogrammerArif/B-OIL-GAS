@@ -114,7 +114,9 @@ class WorkflowTrail {
   final List<TrailStep> steps;
 }
 
-@riverpod
+Duration? _noRetry(int retryCount, Object error) => null;
+
+@Riverpod(retry: _noRetry)
 Future<WorkflowTrail> workflowTrail(Ref ref, String instanceId) async {
   final dio = ref.watch(dioProvider);
   try {
@@ -122,5 +124,7 @@ Future<WorkflowTrail> workflowTrail(Ref ref, String instanceId) async {
     return WorkflowTrail.fromJson(Envelope.object(res.data));
   } on DioException catch (e) {
     throwApi(e);
+  } catch (e, st) {
+    Error.throwWithStackTrace(e, st);
   }
 }

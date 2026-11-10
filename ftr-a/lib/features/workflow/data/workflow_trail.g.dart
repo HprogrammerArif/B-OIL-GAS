@@ -24,7 +24,7 @@ final class WorkflowTrailProvider
     required WorkflowTrailFamily super.from,
     required String super.argument,
   }) : super(
-         retry: null,
+         retry: _noRetry,
          name: r'workflowTrailProvider',
          isAutoDispose: true,
          dependencies: null,
@@ -64,13 +64,13 @@ final class WorkflowTrailProvider
   }
 }
 
-String _$workflowTrailHash() => r'd0bc14daf15e04e7df9410689a1b21225f6a8362';
+String _$workflowTrailHash() => r'83030e11373a6d9a47241267f6f94deb6b024269';
 
 final class WorkflowTrailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<WorkflowTrail>, String> {
   WorkflowTrailFamily._()
     : super(
-        retry: null,
+        retry: _noRetry,
         name: r'workflowTrailProvider',
         dependencies: null,
         $allTransitiveDependencies: null,

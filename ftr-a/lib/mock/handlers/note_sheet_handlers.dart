@@ -13,41 +13,11 @@ const _statuses = {
   'WITHDRAWN',
 };
 
-bool _participant(HandlerContext ctx, Json sheet) {
-  final id = sheet.strOrNull('workflowInstanceId');
-  final inst = id == null ? null : ctx.store.get(Col.workflowInstances, id);
-  return inst != null &&
-      WorkflowEngine.isParticipant(
-        ctx.store,
-        inst,
-        ctx.requireAuth().user.str('id'),
-      );
-}
-
-bool _inScope(HandlerContext ctx, Json sheet) {
-  final owner = ctx.store.get(Col.employees, sheet.str('initiatorEmployeeId'));
-  if (owner == null) return false;
-  return ctx.inScope(
-    'note-sheets:read',
-    ownerEmployeeId: owner.str('id'),
-    departmentId: owner.obj('department').str('id'),
-    siteId: owner.obj('site').str('id'),
-    teamManagerId: owner.objOrNull('lineManager')?.strOrNull('id'),
-  );
-}
-
-/// Initiator, workflow participant or `note-sheets:read` scope. Drafts are
-/// private to their author. Everyone else gets 404.
-bool _canRead(HandlerContext ctx, Json sheet) {
-  final me = ctx.requireAuth().user.str('id');
-  if (sheet['initiatorUserId'] == me) return true;
-  if (sheet['status'] == 'DRAFT') return false;
-  return _participant(ctx, sheet) || _inScope(ctx, sheet);
-}
-
 Json _readable(HandlerContext ctx) {
   final s = ctx.store.get(Col.noteSheets, ctx.params['id']!);
-  if (s == null || !_canRead(ctx, s)) throw notFound('Note-sheet');
+  if (s == null || !NoteSheetEngine.canRead(ctx, s)) {
+    throw notFound('Note-sheet');
+  }
   return s;
 }
 
@@ -93,7 +63,7 @@ List<RouteDef> noteSheetRoutes() => [
               inst != null &&
               WorkflowEngine.actionableStep(ctx.store, inst, me) != null;
         default:
-          return _canRead(ctx, s);
+          return NoteSheetEngine.canRead(ctx, s);
       }
     }).toList();
     final sorted = sortBy(items, ctx.query['sort'], '-updatedAt');

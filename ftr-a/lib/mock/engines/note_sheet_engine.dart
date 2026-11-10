@@ -29,6 +29,31 @@ abstract final class NoteSheetEngine {
   static void registerHooks() =>
       WorkflowHooks.register(noteSheetObject, _onEvent);
 
+  /// Initiator, workflow participant or `note-sheets:read` in scope.
+  /// Drafts are private to their author.
+  static bool canRead(HandlerContext ctx, Json sheet) {
+    final me = ctx.requireAuth().user.str('id');
+    if (sheet['initiatorUserId'] == me) return true;
+    if (sheet['status'] == 'DRAFT') return false;
+    final id = sheet.strOrNull('workflowInstanceId');
+    final inst = id == null ? null : ctx.store.get(Col.workflowInstances, id);
+    if (inst != null && WorkflowEngine.isParticipant(ctx.store, inst, me)) {
+      return true;
+    }
+    final owner = ctx.store.get(
+      Col.employees,
+      sheet.str('initiatorEmployeeId'),
+    );
+    if (owner == null) return false;
+    return ctx.inScope(
+      'note-sheets:read',
+      ownerEmployeeId: owner.str('id'),
+      departmentId: owner.obj('department').str('id'),
+      siteId: owner.obj('site').str('id'),
+      teamManagerId: owner.objOrNull('lineManager')?.strOrNull('id'),
+    );
+  }
+
   // ---- Numbers and hashes ----
 
   static String nextFileNo(MockStore store, String deptCode, int year) {

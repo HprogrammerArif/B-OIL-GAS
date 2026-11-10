@@ -1,3 +1,4 @@
+import 'package:bogcl_oneops/mock/engines/note_sheet_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
@@ -27,6 +28,13 @@ Json _instanceOr404(HandlerContext ctx) {
   final i = ctx.store.get(Col.workflowInstances, ctx.params['id']!);
   if (i == null) throw notFound('Workflow instance');
   return i;
+}
+
+/// Doc 03: GET instance uses read permission of the underlying object.
+bool _canReadUnderlying(HandlerContext ctx, Json inst) {
+  if (inst.str('objectType') != noteSheetObject) return false;
+  final sheet = ctx.store.get(Col.noteSheets, inst.str('objectId'));
+  return sheet != null && NoteSheetEngine.canRead(ctx, sheet);
 }
 
 Json _stepWire(MockStore store, Json s) => {
@@ -250,7 +258,8 @@ List<RouteDef> workflowRoutes() => [
     final inst = _instanceOr404(ctx);
     final me = _me(ctx);
     if (!WorkflowEngine.isParticipant(ctx.store, inst, me) &&
-        !ctx.can('workflow:view-all')) {
+        !ctx.can('workflow:view-all') &&
+        !_canReadUnderlying(ctx, inst)) {
       throw forbidden();
     }
     return ok({

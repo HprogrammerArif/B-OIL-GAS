@@ -29,6 +29,7 @@ class ApprovalTimeline extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trail = ref.watch(workflowTrailProvider(instanceId));
     return trail.when(
+      skipLoadingOnReload: true,
       loading: () => const Padding(
         padding: EdgeInsets.all(Space.lg),
         child: Center(child: CircularProgressIndicator()),

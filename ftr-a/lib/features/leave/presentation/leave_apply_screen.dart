@@ -15,6 +15,7 @@ import 'package:bogcl_oneops/features/leave/presentation/leave_ui.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
+import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
@@ -324,7 +325,10 @@ class _FormState extends ConsumerState<_Form> {
           'Hospital tests and a specialist appointment.',
       ],
       'EL' => [
-        if (bangla) 'পরিবারের সাথে বার্ষিক ভ্রমণ।' else 'Annual family vacation.',
+        if (bangla)
+          'পরিবারের সাথে বার্ষিক ভ্রমণ।'
+        else
+          'Annual family vacation.',
         if (bangla)
           'পারিবারিক অনুষ্ঠানের জন্য ঢাকার বাইরে।'
         else
@@ -381,24 +385,29 @@ class _FormState extends ConsumerState<_Form> {
             ),
             children: [
               _Card(
-                title: l10n.leaveFormKind,
                 children: [
-                  Wrap(
-                    spacing: Space.xs,
-                    runSpacing: Space.xs,
-                    children: [
+                  EnterpriseDropdownField<String>(
+                    label: l10n.leaveFormKind,
+                    icon: Icons.event_available_outlined,
+                    value: type?.id ?? widget.types.first.id,
+                    items: [
                       for (final t in widget.types)
-                        FilterChip(
-                          visualDensity: VisualDensity.compact,
-                          label: Text(t.displayName(bangla: bangla)),
-                          selected: type?.id == t.id,
-                          onSelected: (_) => setState(() {
-                            _type = t;
-                            if (!t.requiresDoc) _attachment = null;
-                            if (!t.halfDayAllowed) _half = null;
-                          }),
+                        DropdownMenuItem(
+                          value: t.id,
+                          child: Text(t.displayName(bangla: bangla)),
                         ),
                     ],
+                    onChanged: (id) {
+                      final t = widget.types
+                          .where((x) => x.id == id)
+                          .firstOrNull;
+                      if (t == null) return;
+                      setState(() {
+                        _type = t;
+                        if (!t.requiresDoc) _attachment = null;
+                        if (!t.halfDayAllowed) _half = null;
+                      });
+                    },
                   ),
                   if (days > 0) ...[
                     const SizedBox(height: Space.md),
@@ -624,9 +633,9 @@ class _FormState extends ConsumerState<_Form> {
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.children});
+  const _Card({required this.children, this.title});
 
-  final String title;
+  final String? title;
   final List<Widget> children;
 
   @override
@@ -641,8 +650,10 @@ class _Card extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: Space.md),
+              if (title != null) ...[
+                Text(title!, style: theme.textTheme.titleSmall),
+                const SizedBox(height: Space.md),
+              ],
               ...children,
             ],
           ),
