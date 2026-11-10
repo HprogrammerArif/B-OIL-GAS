@@ -299,45 +299,6 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
           : null,
       body: Column(
         children: [
-          // Plain-Language Verdict Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.sm),
-              decoration: BoxDecoration(
-                color: Colors.blueGrey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blueGrey.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.inventory_2_outlined,
-                    color: Colors.blueGrey.shade800,
-                    size: 20,
-                  ),
-                  const SizedBox(width: Space.xs),
-                  Expanded(
-                    child: Text(
-                      canMailroom
-                          ? (bangla
-                                ? 'হেড অফিস ও প্ল্যান্টের মধ্যে ৩টি গোপনীয় পাউচ ট্রানজিটে রয়েছে · ১টি পার্সেল ডেস্কে পিন হস্তান্তরের অপেক্ষায়।'
-                                : '3 confidential pouches in transit between HQ & Plant · 1 parcel at desk awaiting 4-digit PIN handover.')
-                          : (bangla
-                                ? 'আপনার প্রেরিত ও আগত অফিসিয়াল নথি এবং গোপনীয় পাউচসমূহ এখানে ট্র্যাক করুন।'
-                                : 'Track your sent and incoming inter-site documents and confidential pouches.'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blueGrey.shade900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // Scope Switcher: Personal vs Mailroom Master Desk
           if (canMailroom)
             Padding(

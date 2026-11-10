@@ -20,7 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// MOD-07: HSE Refinery Safety & Incident Reports
-/// Implements Safety KPI Strip, 10 Plant Zones, Collapsible 5×5 Risk Matrix,
+/// Implements 10 Plant Zones, Collapsible 5×5 Risk Matrix,
 /// 30-Second Quick Hazard Spot Reporting and 3-Step Full Incident Wizard.
 class IncidentsScreen extends ConsumerStatefulWidget {
   const IncidentsScreen({super.key});
@@ -753,57 +753,6 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
           : null,
       body: Column(
         children: [
-          // Safety KPI Strip
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Space.sm,
-                vertical: Space.xs,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade200),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildKpiTile(
-                      label: bangla ? 'এলটিআই মুক্ত দিন' : 'Days Since LTI',
-                      value: '418 Days',
-                      color: Colors.green.shade800,
-                    ),
-                  ),
-                  Container(width: 1, height: 28, color: Colors.green.shade300),
-                  Expanded(
-                    child: _buildKpiTile(
-                      label: bangla ? 'তদন্তাধীন' : 'Open Inquiries',
-                      value: '2 Active',
-                      color: Colors.blueGrey.shade800,
-                    ),
-                  ),
-                  Container(width: 1, height: 28, color: Colors.green.shade300),
-                  Expanded(
-                    child: _buildKpiTile(
-                      label: bangla ? 'উচ্চ ঝুঁকি' : 'High / Crit Risk',
-                      value: '1 Case',
-                      color: Colors.red.shade800,
-                    ),
-                  ),
-                  Container(width: 1, height: 28, color: Colors.green.shade300),
-                  Expanded(
-                    child: _buildKpiTile(
-                      label: bangla ? 'কাপা সম্পন্ন' : 'CAPA Clsd %',
-                      value: '86%',
-                      color: Colors.teal.shade800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // Quick Hazard Reporting Action Button Bar
           if (canReport)
             Padding(
@@ -1070,29 +1019,6 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildKpiTile({
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 9, color: Colors.blueGrey),
-        ),
-      ],
     );
   }
 

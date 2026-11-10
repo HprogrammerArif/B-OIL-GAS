@@ -383,96 +383,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         loading: () => const SkeletonList(),
         error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
         data: (t) {
-          final lang = Localizations.localeOf(context).languageCode;
-          final isPunchedIn = t.day.firstInAt != null;
-          final isPunchedOut = t.day.lastOutAt != null;
           final mockLoc = ref.watch(mockConfigControllerProvider).location;
           final isOutside =
               mockLoc == DemoLocation.outside || t.day.pendingReview;
-          final isPlant = mockLoc == DemoLocation.plant;
-
-          // Verdict Banner
-          final String verdictText;
-          final Color verdictColor;
-          final IconData verdictIcon;
-
-          if (!isPunchedIn) {
-            verdictText = bangla
-                ? 'আজ আপনি এখনও চেক-ইন করেননি। শিফট: ${t.shift.displayName(bangla: true)} (${t.shift.startTime} – ${t.shift.endTime})।'
-                : 'You have not punched in yet today. Shift: ${t.shift.displayName(bangla: false)} (${t.shift.startTime} – ${t.shift.endTime}).';
-            verdictColor = Colors.blueGrey.shade700;
-            verdictIcon = Icons.schedule_rounded;
-          } else if (isPunchedOut) {
-            final inTime = DateFmt.time(t.day.firstInAt!, lang);
-            final outTime = DateFmt.time(t.day.lastOutAt!, lang);
-            verdictText = bangla
-                ? 'আজকের শিফট সম্পন্ন হয়েছে (চেক-ইন $inTime · চেক-আউট $outTime)।'
-                : 'Shift attendance completed for today (In $inTime · Out $outTime).';
-            verdictColor = Colors.teal.shade700;
-            verdictIcon = Icons.verified_rounded;
-          } else if (isOutside && !_supervisorConfirmedLocally) {
-            final inTime = DateFmt.time(t.day.firstInAt!, lang);
-            verdictText = bangla
-                ? 'আপনি $inTime এ মাঠ পর্যায়ে চেক-ইন করেছেন (৪.২ কিমি দূরে)। সুপারভাইজারের অনুমোদনের অপেক্ষায়।'
-                : 'Checked in at $inTime on Field Duty (4.2 km from gate). Pending supervisor confirmation.';
-            verdictColor = const Color(0xFF6B21A8);
-            verdictIcon = Icons.shield_outlined;
-          } else {
-            final inTime = DateFmt.time(t.day.firstInAt!, lang);
-            final siteText = isPlant
-                ? (bangla
-                      ? 'কেরানীগঞ্জ রিফাইনারি প্ল্যান্ট'
-                      : 'Keraniganj Refinery')
-                : (bangla
-                      ? 'বারিধারা প্রধান কার্যালয়'
-                      : 'Head Office, Baridhara');
-            verdictText = bangla
-                ? 'আপনি $inTime এ $siteText-এ চেক-ইন করেছেন। শিফট শেষে পাঞ্চ-আউট করুন।'
-                : 'Checked in at $inTime at $siteText. Punch out when your shift concludes.';
-            verdictColor = Colors.teal.shade700;
-            verdictIcon = Icons.check_circle_outline;
-          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Plain-Language Verdict Banner
-              Container(
-                margin: const EdgeInsets.fromLTRB(
-                  Space.lg,
-                  Space.sm,
-                  Space.lg,
-                  0,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Space.md,
-                  vertical: Space.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: verdictColor.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(Corner.md),
-                  border: Border.all(
-                    color: verdictColor.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(verdictIcon, size: 18, color: verdictColor),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: Text(
-                        verdictText,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: verdictColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               // Segmented Sub-Tabs
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

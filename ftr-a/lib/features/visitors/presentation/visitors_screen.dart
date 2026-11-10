@@ -160,57 +160,6 @@ class _VisitorsScreenState extends ConsumerState<VisitorsScreen> {
           : null,
       body: Column(
         children: [
-          // Plain-Language Verdict Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.sm),
-              decoration: BoxDecoration(
-                color: _musterMode ? Colors.red.shade50 : Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: _musterMode
-                      ? Colors.red.shade300
-                      : Colors.teal.shade200,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _musterMode
-                        ? Icons.warning_amber_rounded
-                        : Icons.shield_outlined,
-                    color: _musterMode ? Colors.red : Colors.teal.shade800,
-                    size: 20,
-                  ),
-                  const SizedBox(width: Space.xs),
-                  Expanded(
-                    child: Text(
-                      _musterMode
-                          ? (bangla
-                                ? 'জরুরি অ্যালার্ম: প্ল্যান্ট সাইটের ভেতরের সকল ভিজিটরকে অ্যাসেম্বলি পয়েন্টে হিসাব করুন।'
-                                : 'Emergency Alarm: Verify all on-site plant visitors at Assembly Point #3.')
-                          : (canGate || canSite)
-                          ? (bangla
-                                ? '৪ জন অতিথি বর্তমানে কেরানীগঞ্জ রিফাইনারি ও হেড অফিসে অবস্থান করছেন · ১১:৩০ টায় বিএসটিআই অডিট টিম আসছেন (ভিআইপি প্রোটোকল)।'
-                                : '4 visitors currently inside Keraniganj & HQ · 1 BSTI Regulator team arriving at 11:30 AM (VIP Protocol).')
-                          : (bangla
-                                ? 'আপনার আমন্ত্রিত অতিথিদের গেট পাস এবং নিরাপত্তা পিপিই ক্লিয়ারেন্স এখানে পরিচালনা করুন।'
-                                : 'Manage gate passes and safety PPE clearance for your invited guests.'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: _musterMode
-                            ? Colors.red.shade900
-                            : Colors.teal.shade900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // Host View vs Security Gate Console Scope Switch
           if (canGate || canSite)
             Padding(

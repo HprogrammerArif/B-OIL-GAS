@@ -14,7 +14,6 @@ import 'package:bogcl_oneops/features/claims/data/claim_repository.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
-import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -28,109 +27,6 @@ import 'package:go_router/go_router.dart';
 enum _Tab { claims, awaitingMe, scope, advances, payable, policy }
 
 enum _ClaimFilter { all, awaiting, others }
-
-({String text, Color color, IconData icon}) _claimVerdict({
-  required AppL10n l10n,
-  required bool bangla,
-  required _Tab tab,
-  required bool beyondSelf,
-  required AsyncValue<List<Claim>>? teamAsync,
-  required AsyncValue<List<Claim>>? mineAsync,
-  required List<Claim> awaiting,
-  required List<Claim> others,
-}) {
-  if (tab == _Tab.scope && beyondSelf) {
-    return (
-      text: _scopeSentence(l10n, bangla, teamAsync, others),
-      color: Colors.blueGrey,
-      icon: Icons.apartment_outlined,
-    );
-  }
-  if (beyondSelf && tab != _Tab.claims) {
-    return (
-      text: _awaitSentence(l10n, bangla, teamAsync, awaiting),
-      color: awaiting.isEmpty ? Colors.blueGrey : Colors.teal,
-      icon: Icons.fact_check_outlined,
-    );
-  }
-  return (
-    text: _mineSentence(l10n, bangla, mineAsync),
-    color: Colors.blueGrey,
-    icon: Icons.account_balance_wallet_outlined,
-  );
-}
-
-String _awaitSentence(
-  AppL10n l10n,
-  bool bangla,
-  AsyncValue<List<Claim>>? teamAsync,
-  List<Claim> awaiting,
-) {
-  if (teamAsync != null && teamAsync.hasError && teamAsync.value == null) {
-    return l10n.claimAwaitFailed;
-  }
-  if (teamAsync != null && teamAsync.value == null) {
-    return l10n.claimAwaitLoading;
-  }
-  final amount = awaiting.fold<double>(0, (sum, c) => sum + c.totalAmount);
-  return l10n.claimAwaitCount(awaiting.length, bdt(amount, bangla: bangla));
-}
-
-String _scopeSentence(
-  AppL10n l10n,
-  bool bangla,
-  AsyncValue<List<Claim>>? teamAsync,
-  List<Claim> others,
-) {
-  if (teamAsync != null && teamAsync.hasError && teamAsync.value == null) {
-    return l10n.claimAwaitFailed;
-  }
-  if (teamAsync != null && teamAsync.value == null) {
-    return l10n.claimAwaitLoading;
-  }
-  if (others.isEmpty) return l10n.claimScopeNone;
-  final names = <String>[
-    for (final c in others) ?c.waitingForName(bangla: bangla),
-  ];
-  final unique = names.toSet().toList();
-  if (unique.isEmpty) return l10n.claimScopeQuiet(others.length);
-  return l10n.claimScopeWaiting(others.length, unique.join(', '));
-}
-
-String _mineSentence(
-  AppL10n l10n,
-  bool bangla,
-  AsyncValue<List<Claim>>? mineAsync,
-) {
-  final items = mineAsync?.value;
-  if (mineAsync != null && mineAsync.hasError && items == null) {
-    return l10n.claimAwaitFailed;
-  }
-  if (items == null) return l10n.claimAwaitLoading;
-  final returned = items
-      .where((c) => c.status == ClaimStatus.returned)
-      .toList();
-  if (returned.isNotEmpty) return l10n.claimMineReturned(returned.length);
-  final checking = items
-      .where(
-        (c) =>
-            c.status == ClaimStatus.pendingManager ||
-            c.status == ClaimStatus.pendingFinance,
-      )
-      .toList();
-  if (checking.isNotEmpty) {
-    final amount = checking.fold<double>(0, (sum, c) => sum + c.totalAmount);
-    return l10n.claimMineChecking(checking.length, bdt(amount, bangla: bangla));
-  }
-  final approved = items
-      .where((c) => c.status == ClaimStatus.approved)
-      .toList();
-  if (approved.isNotEmpty) {
-    final amount = approved.fold<double>(0, (sum, c) => sum + c.totalAmount);
-    return l10n.claimMineApproved(approved.length, bdt(amount, bangla: bangla));
-  }
-  return l10n.claimMineClear;
-}
 
 /// Claims home: my claims, approver queue, advances, payables, and Grade 1-10 policy matrix.
 class ClaimsScreen extends ConsumerStatefulWidget {
@@ -216,15 +112,10 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
     final canSettle = session?.can('claims:settle') ?? false;
     final canAdvance = session?.can('claims:advance') ?? false;
     final teamAsync = beyondSelf ? ref.watch(claimsProvider('team')) : null;
-    final mineAsync = canCreate ? ref.watch(claimsProvider('mine')) : null;
     final teamItems = teamAsync?.value ?? const <Claim>[];
     final awaiting = [
       for (final c in teamItems)
         if (c.awaitingYou) c,
-    ];
-    final others = [
-      for (final c in teamItems)
-        if (!c.awaitingYou) c,
     ];
     final scopeLabel = switch (readScope) {
       GrantScope.site => l10n.claimTabPlant,
@@ -245,17 +136,6 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
     ];
 
     final effectiveTab = tabs.any((t) => t.$1 == _tab) ? _tab : tabs.first.$1;
-
-    final verdict = _claimVerdict(
-      l10n: l10n,
-      bangla: bangla,
-      tab: effectiveTab,
-      beyondSelf: beyondSelf,
-      teamAsync: teamAsync,
-      mineAsync: mineAsync,
-      awaiting: awaiting,
-      others: others,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -278,36 +158,6 @@ class _ClaimsScreenState extends ConsumerState<ClaimsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Verdict Banner
-          Container(
-            margin: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.md,
-              vertical: Space.sm,
-            ),
-            decoration: BoxDecoration(
-              color: verdict.color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(Corner.md),
-              border: Border.all(color: verdict.color.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(verdict.icon, size: 18, color: verdict.color),
-                const SizedBox(width: Space.xs),
-                Expanded(
-                  child: Text(
-                    verdict.text,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: verdict.color,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
           // Sub-Tabs
           if (tabs.length > 1)
             SingleChildScrollView(

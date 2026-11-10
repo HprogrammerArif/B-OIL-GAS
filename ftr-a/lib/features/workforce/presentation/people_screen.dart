@@ -109,106 +109,11 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
           : null,
       body: Column(
         children: [
-          // Plain-Language Verdict Banner & KPI Strip
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(Space.md),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.badge,
-                        color: BrandColors.crimson,
-                        size: 28,
-                      ),
-                      const SizedBox(width: Space.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              bangla
-                                  ? '৪১২ জন কর্মকর্তা-কর্মচারী বারিধারা হেড অফিস ও কেরানীগঞ্জ রিফাইনারিতে কর্মরত'
-                                  : '412 active staff across Baridhara HQ & Keraniganj Refinery',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (canManageHr) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                bangla
-                                    ? '২ জন কর্মকর্তার ৭-বিভাগের প্রস্থান ছাড়পত্র (Exit Clearance) প্রক্রিয়াধীন।'
-                                    : '2 exiting employees are undergoing 7-department clearance.',
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: Space.sm),
-
-                // Workforce KPI Tiles
-                Row(
-                  children: [
-                    Expanded(
-                      child: _kpiTile(
-                        '412',
-                        bangla ? 'সক্রিয় কর্মী' : 'Active Staff',
-                        BrandColors.slate900,
-                      ),
-                    ),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: _kpiTile(
-                        '286',
-                        bangla ? 'কেরানীগঞ্জ প্ল্যান্ট' : 'Plant (KER)',
-                        BrandColors.crimson,
-                      ),
-                    ),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: _kpiTile(
-                        '126',
-                        bangla ? 'বারিধারা হেড অফিস' : 'HQ (Baridhara)',
-                        BrandColors.success,
-                      ),
-                    ),
-                    if (canManageHr) ...[
-                      const SizedBox(width: Space.xs),
-                      Expanded(
-                        child: _kpiTile(
-                          '2',
-                          bangla ? 'ছাড়পত্র চলমান' : 'Exit Clear',
-                          BrandColors.warning,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: Space.sm),
-
-                // Search Bar
                 TextField(
                   decoration: InputDecoration(
                     hintText: bangla
@@ -375,34 +280,6 @@ class _PeopleScreenState extends ConsumerState<PeopleScreen>
           ),
         );
       },
-    );
-  }
-
-  Widget _kpiTile(String value, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
     );
   }
 

@@ -19,6 +19,7 @@ Applies to every screen, in every app (`ftr-a/`, `client/`, `app/`). A first-tim
 - Hide technical detail (hash codes, internal IDs, account codes, audit metadata) behind a disclosure ("Details"). Never as default body text.
 - Do not show the same data twice on one screen (no summary tab that repeats the main tab, no Comments list that repeats the approval route/timeline). Remove the duplicate instead of adding a toggle.
 - No decorative fields, badges or banners that do not change a decision. If a label never varies, delete it.
+- Do not put a summary, alert, or notification banner at the top of a list screen. Counts belong on tabs or chips; the next action belongs on the record.
 - Do not add captions or banners that only restate a visible button (for example “This step needs your signature” above Review and sign).
 - Do not add extra actions that do not change the current decision.
 - Group by the user's task and order top to bottom as a story (what, who, why, evidence, decision), not by database table.

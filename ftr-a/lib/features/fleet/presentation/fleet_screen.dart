@@ -754,27 +754,6 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
     final rows = ref.watch(
       fleetRequisitionsProvider(view: _view, query: _query),
     );
-    final scheme = Theme.of(context).colorScheme;
-
-    // Verdict message computation
-    final String verdictMessage;
-    if (canDispatch) {
-      verdictMessage = bangla
-          ? '৩টি অনুমোদিত গাড়ির আবেদন বরাদ্দ অপেক্ষমাণ · কেরানীগঞ্জ করিডোরে ১টি স্মার্ট পুলিংয়ে ১,৮৫০ টাকা সাশ্রয় সম্ভব'
-          : '3 approved car requisitions need vehicle & driver dispatch · 1 smart pooling opportunity saves BDT 1,850 on the Keraniganj corridor';
-    } else if (canDrive) {
-      verdictMessage = bangla
-          ? '১টি সক্রিয় ট্রিপ নির্ধারিত · বারিধারা → কেরানীগঞ্জ রিফাইনারি রিটার্ন রুট · প্রারম্ভিক ওডো: ৪৮,২১০ কিমি'
-          : '1 active trip dispatched · Baridhara HQ → Keraniganj Refinery return route · Opening Odo: 48,210 km';
-    } else if (canSite) {
-      verdictMessage = bangla
-          ? 'কোম্পানি যানবাহন বহর, চালক ও আন্তঃসাইট ট্রিপ মুভমেন্টের রিয়েল-টাইম তদারকি।'
-          : 'Live executive oversight of company fleet vehicles, drivers, and inter-site trip movements.';
-    } else {
-      verdictMessage = bangla
-          ? 'আপনার REQ-2026-089 ট্রিপে টয়োটা করোলা ক্রস (ঢাকা মেট্রো-গ-১৮-৪৪২১) বরাদ্দকৃত · চালক: মোঃ রফিকুল ইসলাম'
-          : 'Your trip REQ-2026-089 is assigned to Toyota Corolla Cross (Dhaka Metro-Ga-18-4421) · Driver: Md. Rafiqul Islam';
-    }
 
     Widget subTabChip(_FleetTab tab, String label, IconData icon) => Padding(
       padding: const EdgeInsets.only(right: Space.xs),
@@ -824,36 +803,6 @@ class _FleetScreenState extends ConsumerState<FleetScreen> {
           : null,
       body: Column(
         children: [
-          // Top Plain-Language Verdict Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.md),
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: scheme.primary.withValues(alpha: 0.35),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.directions_car, color: scheme.primary, size: 22),
-                  const SizedBox(width: Space.sm),
-                  Expanded(
-                    child: Text(
-                      verdictMessage,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           // Role-Scoped Sub-Tabs
           if (canSeeDriversAndGate || canSeeVehicles)
             Padding(

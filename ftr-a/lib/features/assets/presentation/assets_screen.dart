@@ -374,50 +374,6 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
       child: ListView(
         padding: const EdgeInsets.all(Space.md),
         children: [
-          // Top Plain-Language Verdict Banner
-          Container(
-            padding: const EdgeInsets.all(Space.md),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.precision_manufacturing,
-                  color: BrandColors.crimson,
-                  size: 28,
-                ),
-                const SizedBox(width: Space.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bangla
-                            ? '১৮টি রিফাইনারি ও আইটি যন্ত্রপাতি নিবন্ধিত (নেট বুক ভ্যালু: ৳১৪.৮ কোটি)'
-                            : '18 critical refinery & IT assets tracked (Net Book Value: BDT 14.8 Cr)',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        bangla
-                            ? '২টি বিএসটিআই ক্যালিব্রেশন নবায়ন এবং ১টি জিম্মাদার প্রাপ্তিস্বীকার আবশ্যক।'
-                            : '2 BSTI calibration renewals and 1 custody confirmation need action.',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: Space.md),
-
           // Search Field
           TextField(
             decoration: InputDecoration(

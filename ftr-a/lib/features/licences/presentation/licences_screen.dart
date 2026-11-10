@@ -125,77 +125,6 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
           : null,
       body: Column(
         children: [
-          // Plain-Language Verdict Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.md),
-              decoration: BoxDecoration(
-                color: scheme.errorContainer.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: scheme.error.withValues(alpha: 0.35)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.shield_outlined,
-                        color: scheme.error,
-                        size: 22,
-                      ),
-                      const SizedBox(width: Space.sm),
-                      Expanded(
-                        child: Text(
-                          bangla
-                              ? '২টি সংবিধিবদ্ধ লাইসেন্স নবায়ন প্রক্রিয়াধীন · মেয়াদোত্তীর্ণ হলে দৈনিক রিফাইনারি উৎপাদন ঝুঁকি: ৳১.২৫ কোটি/দিন'
-                              : '2 statutory permits require renewal action · Daily plant shutdown exposure if expired: BDT 1.25 Cr/day',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: scheme.onSurface,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Space.xs),
-                  Text(
-                    bangla
-                        ? 'আইনগত বাধ্যবাধকতা: বিস্ফোরক ও পরিবেশ লাইসেন্স ব্যতিরেকে প্ল্যান্ট পরিচালনা রাষ্ট্রীয় আইনে দণ্ডনীয়।'
-                        : 'Statutory compliance: Operating refinery units without valid DoE & Explosives permits exposes plant to immediate shutdown.',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  Row(
-                    children: [
-                      _StatChip(
-                        label: bangla ? 'মোট লাইসেন্স' : 'Total Permits',
-                        value: '6',
-                        color: scheme.primary,
-                      ),
-                      const SizedBox(width: Space.sm),
-                      _StatChip(
-                        label: bangla ? 'জরুরি নবায়ন' : 'Critical Action',
-                        value: '2',
-                        color: scheme.error,
-                      ),
-                      const SizedBox(width: Space.sm),
-                      _StatChip(
-                        label: bangla ? 'দৈনিক এক্সপোজার' : 'Daily Risk',
-                        value: 'BDT 1.25 Cr',
-                        color: Colors.amber.shade800,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
             child: Column(
@@ -341,51 +270,6 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
                   ),
                 );
               },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: color,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: color,
             ),
           ),
         ],
