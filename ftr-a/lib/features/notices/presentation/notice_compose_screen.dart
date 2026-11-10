@@ -7,6 +7,7 @@ import 'package:bogcl_oneops/features/notices/data/notice_repository.dart';
 import 'package:bogcl_oneops/features/notices/domain/notice_models.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_providers.dart';
 import 'package:bogcl_oneops/features/notices/presentation/notice_ui.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -54,6 +55,7 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
   bool _pin = false;
   bool _submitting = false;
   String? _error;
+  int? _draftIndex;
 
   @override
   void dispose() {
@@ -63,10 +65,19 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
   }
 
   bool _valid() =>
-      _category != null &&
       _title.text.trim().length >= 3 &&
       _body.text.trim().length >= 5 &&
       (_audience == _Audience.all || _ids.isNotEmpty);
+
+  void _pickAudience(_Audience a, NoticeOptions o) {
+    setState(() {
+      _audience = a;
+      _ids.clear();
+      if (a != _Audience.all && o.scope != 'COMPANY') {
+        _ids.add(a == _Audience.department ? o.ownDepartmentId : o.ownSiteId);
+      }
+    });
+  }
 
   Future<void> _submit(NoticeOptions options) async {
     final l10n = context.l10n;
@@ -87,7 +98,7 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
           .publish(
             title: _title.text.trim(),
             body: _body.text.trim(),
-            category: _category!,
+            category: _category ?? options.categories.first,
             priority: _priority,
             requiresAck: _ack || _priority == NoticePriority.critical,
             isPinned: _pin,
@@ -138,17 +149,36 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
     );
   }
 
+  Widget _sectionLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: Space.xs),
+    child: Text(text, style: Theme.of(context).textTheme.titleSmall),
+  );
+
+  String _draftLabel(AppL10n l10n, int i) => switch (i) {
+    0 => l10n.noticeDraftPpe,
+    1 => l10n.noticeDraftHoliday,
+    _ => l10n.noticeDraftQuarter,
+  };
+
+  String _audienceLabel(AppL10n l10n, _Audience a) => switch (a) {
+    _Audience.all => l10n.noticeAudAll,
+    _Audience.department => l10n.noticeAudDepartment,
+    _Audience.site => l10n.noticeAudSite,
+  };
+
   Widget _form(BuildContext context, NoticeOptions o) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final bangla = context.isBangla;
-    _category ??= o.categories.first;
+    final category = _category ?? o.categories.first;
     final audiences = <_Audience>[
       if (o.company) _Audience.all,
       _Audience.department,
       if (o.scope != 'DEPARTMENT') _Audience.site,
     ];
-    if (!audiences.contains(_audience)) _audience = audiences.first;
+    if (!audiences.contains(_audience)) {
+      _audience = audiences.first;
+    }
     final choices = _audience == _Audience.department
         ? o.departments
         : _audience == _Audience.site
@@ -172,211 +202,139 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
               Space.xxl,
             ),
             children: [
-              EnterpriseApplicantStrip(
-                badgeLabel: bangla ? 'দাপ্তরিক বিজ্ঞপ্তি' : 'OFFICIAL CIRCULAR',
-                badgeIcon: Icons.campaign_outlined,
+              AppTextField(
+                label: l10n.noticeFieldTitle,
+                controller: _title,
+                maxLength: 200,
+                required: true,
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: Space.md),
-              EnterpriseSectionCard(
-                stepNumber: 1,
-                icon: Icons.category_outlined,
-                title: bangla
-                    ? 'বিজ্ঞপ্তির শ্রেণি ও অগ্রাধিকার'
-                    : 'Notice Category & Priority Tier',
-                subtitle: bangla
-                    ? 'বিজ্ঞপ্তির ধরন এবং গুরুত্বের মাত্রা নির্বাচন করুন'
-                    : 'Select circular classification and broadcast urgency level',
+              AppTextField(
+                label: l10n.noticeFieldBody,
+                controller: _body,
+                maxLines: 6,
+                maxLength: 5000,
+                required: true,
+                textInputAction: TextInputAction.newline,
+                keyboardType: TextInputType.multiline,
+                onChanged: (_) => setState(() => _draftIndex = null),
+              ),
+              const SizedBox(height: Space.md),
+              _sectionLabel(l10n.noticeUseDraft),
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.xs,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: EnterpriseDropdownField<NoticeCategory>(
-                          label: l10n.noticeFieldCategory,
-                          icon: Icons.folder_outlined,
-                          value: _category!,
-                          items: [
-                            for (final c in o.categories)
-                              DropdownMenuItem(
-                                value: c,
-                                child: Text(noticeCategoryLabel(l10n, c)),
-                              ),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _category = v ?? _category),
-                        ),
-                      ),
-                      const SizedBox(width: Space.sm),
-                      Expanded(
-                        child: EnterpriseDropdownField<NoticePriority>(
-                          label: l10n.noticeFieldPriority,
-                          icon: Icons.priority_high_outlined,
-                          value: _priority,
-                          items: [
-                            for (final p in NoticePriority.values)
-                              DropdownMenuItem(
-                                value: p,
-                                child: Text(noticePriorityLabel(l10n, p)),
-                              ),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _priority = v ?? _priority),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_priority == NoticePriority.critical)
-                    Padding(
-                      padding: const EdgeInsets.only(top: Space.sm),
-                      child: Text(
-                        l10n.noticeCriticalHint,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: context.bogcl.danger,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  for (var i = 0; i < _noticeBodyPresets.length; i++)
+                    ChoiceChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(_draftLabel(l10n, i)),
+                      selected: _draftIndex == i,
+                      onSelected: (_) {
+                        final preset = _noticeBodyPresets[i];
+                        setState(() {
+                          _draftIndex = i;
+                          _body.text = bangla ? preset.$2 : preset.$1;
+                        });
+                      },
                     ),
                 ],
               ),
-              const SizedBox(height: Space.md),
-              EnterpriseSectionCard(
-                stepNumber: 2,
-                icon: Icons.article_outlined,
-                title: bangla
-                    ? 'বিজ্ঞপ্তির শিরোনাম ও মূল বার্তা'
-                    : 'Circular Subject & Official Body',
-                subtitle: bangla
-                    ? 'স্ট্যান্ডার্ড খসড়া বাছাই করুন অথবা বিজ্ঞপ্তির বিবরণ লিখুন'
-                    : 'Use a standard BOGCL circular template or compose custom text',
+              const SizedBox(height: Space.lg),
+              _sectionLabel(l10n.noticeFieldAudience),
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.xs,
                 children: [
-                  AppTextField(
-                    label: l10n.noticeFieldTitle,
-                    controller: _title,
-                    maxLength: 200,
-                    required: true,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: Space.md),
-                  EnterpriseTemplateDropdown(
-                    presets: _noticeBodyPresets,
-                    controller: _body,
-                    onPicked: () => setState(() {}),
-                    labelEn: 'Standard BOGCL Circular Template (Quick Fill)',
-                    labelBn: 'স্ট্যান্ডার্ড বিজ্ঞপ্তি টেমপ্লেট (দ্রুত পূরণ)',
-                  ),
-                  const SizedBox(height: Space.sm),
-                  AppTextField(
-                    label: l10n.noticeFieldBody,
-                    controller: _body,
-                    maxLines: 6,
-                    maxLength: 5000,
-                    required: true,
-                    onChanged: (_) => setState(() {}),
-                  ),
+                  for (final a in audiences)
+                    ChoiceChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(_audienceLabel(l10n, a)),
+                      selected: _audience == a,
+                      onSelected: (_) => _pickAudience(a, o),
+                    ),
                 ],
               ),
-              const SizedBox(height: Space.md),
-              EnterpriseSectionCard(
-                stepNumber: 3,
-                icon: Icons.groups_outlined,
-                title: bangla
-                    ? 'প্রাপক পরিধি ও প্রাপ্তিস্বীকার'
-                    : 'Target Audience & Read Receipt Controls',
-                subtitle: bangla
-                    ? 'কোন বিভাগ বা স্থাপনায় বিজ্ঞপ্তিটি পৌঁছাবে তা নির্ধারণ করুন'
-                    : 'Choose target scope, board pinning, and mandatory read acknowledgement',
-                children: [
-                  EnterpriseDropdownField<_Audience>(
-                    label: l10n.noticeFieldAudience,
-                    icon: Icons.radar_outlined,
-                    value: _audience,
-                    items: [
-                      for (final a in audiences)
-                        DropdownMenuItem(
-                          value: a,
-                          child: Text(switch (a) {
-                            _Audience.all => l10n.noticeAudAll,
-                            _Audience.department => l10n.noticeAudDepartment,
-                            _Audience.site => l10n.noticeAudSite,
-                          }),
-                        ),
-                    ],
-                    onChanged: (a) {
-                      if (a == null) return;
-                      setState(() {
-                        _audience = a;
-                        _ids.clear();
-                        if (a != _Audience.all && o.scope != 'COMPANY') {
-                          _ids.add(
-                            a == _Audience.department
-                                ? o.ownDepartmentId
-                                : o.ownSiteId,
-                          );
-                        }
-                      });
-                    },
-                  ),
-                  if (choices.isNotEmpty) ...[
-                    const SizedBox(height: Space.sm),
-                    Wrap(
-                      spacing: Space.sm,
-                      runSpacing: Space.xs,
-                      children: [
-                        for (final c in choices)
-                          FilterChip(
-                            label: Text(c.displayName(bangla: bangla)),
-                            selected: _ids.contains(c.id),
-                            onSelected: restricted && c.id != ownId
-                                ? null
-                                : (v) => setState(() {
-                                    if (v) {
-                                      _ids.add(c.id);
-                                    } else {
-                                      _ids.remove(c.id);
-                                    }
-                                  }),
-                          ),
-                      ],
-                    ),
+              if (choices.isNotEmpty) ...[
+                const SizedBox(height: Space.sm),
+                Wrap(
+                  spacing: Space.sm,
+                  runSpacing: Space.xs,
+                  children: [
+                    for (final c in choices)
+                      FilterChip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(c.displayName(bangla: bangla)),
+                        selected: _ids.contains(c.id),
+                        onSelected: restricted && c.id != ownId
+                            ? null
+                            : (v) => setState(() {
+                                if (v) {
+                                  _ids.add(c.id);
+                                } else {
+                                  _ids.remove(c.id);
+                                }
+                              }),
+                      ),
                   ],
-                  const SizedBox(height: Space.xs),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.noticeFieldRequireAck),
-                    value: _ack || _priority == NoticePriority.critical,
-                    onChanged: _priority == NoticePriority.critical
-                        ? null
-                        : (v) => setState(() => _ack = v),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.noticeFieldPin),
-                    value: _pin,
-                    onChanged: (v) => setState(() => _pin = v),
-                  ),
+                ),
+              ],
+              const SizedBox(height: Space.lg),
+              _sectionLabel(l10n.noticeFieldCategory),
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.xs,
+                children: [
+                  for (final c in o.categories)
+                    FilterChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(noticeCategoryLabel(l10n, c)),
+                      selected: category == c,
+                      onSelected: (_) => setState(() => _category = c),
+                    ),
                 ],
               ),
-              const SizedBox(height: Space.md),
-              EnterpriseWorkflowCard(
-                title: bangla
-                    ? 'বিজ্ঞপ্তি সম্প্রচার ও প্রাপ্তিস্বীকার ট্র্যাকিং'
-                    : 'Broadcast Delivery & Read-Receipt Audit',
-                steps: [
-                  (
-                    Icons.campaign_outlined,
-                    bangla ? 'প্রকাশক' : 'Publisher',
-                    bangla ? 'স্বাক্ষর ও প্রকাশ' : 'Signed & Sent',
-                  ),
-                  (
-                    Icons.notifications_active_outlined,
-                    bangla ? 'পুশ নোটিফিকেশন' : 'Instant Push',
-                    bangla ? 'টার্গেট কর্মী' : 'Scoped Staff',
-                  ),
-                  (
-                    Icons.done_all_outlined,
-                    bangla ? 'প্রাপ্তিস্বীকার লগ' : 'Read Ledger',
-                    bangla ? 'কমপ্লায়েন্স অডিট' : 'Ack Tracked',
-                  ),
+              const SizedBox(height: Space.lg),
+              _sectionLabel(l10n.noticeFieldPriority),
+              Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.xs,
+                children: [
+                  for (final p in NoticePriority.values)
+                    ChoiceChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(noticePriorityLabel(l10n, p)),
+                      selected: _priority == p,
+                      onSelected: (_) => setState(() => _priority = p),
+                    ),
                 ],
+              ),
+              if (_priority == NoticePriority.critical)
+                Padding(
+                  padding: const EdgeInsets.only(top: Space.sm),
+                  child: Text(
+                    l10n.noticeCriticalHint,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: context.bogcl.danger,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: Space.md),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.noticeFieldRequireAck),
+                value: _ack || _priority == NoticePriority.critical,
+                onChanged: _priority == NoticePriority.critical
+                    ? null
+                    : (v) => setState(() => _ack = v),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.noticeFieldPin),
+                value: _pin,
+                onChanged: (v) => setState(() => _pin = v),
               ),
             ],
           ),

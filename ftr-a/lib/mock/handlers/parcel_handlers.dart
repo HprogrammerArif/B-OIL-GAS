@@ -103,7 +103,14 @@ List<RouteDef> parcelRoutes() => [
     final me = a.user.str('id');
     ParcelEngine.tick(ctx.store);
     final view = ctx.query['view'] ?? 'mine';
-    if (!const {'sent', 'incoming', 'carrying', 'site', 'all'}.contains(view)) {
+    if (!const {
+      'mine',
+      'sent',
+      'incoming',
+      'carrying',
+      'site',
+      'all',
+    }.contains(view)) {
       throw validationError('view', 'Unknown view');
     }
     final status = ctx.query['status'];
@@ -118,6 +125,10 @@ List<RouteDef> parcelRoutes() => [
         return false;
       }
       final scoped = switch (view) {
+        'mine' =>
+          p['senderUserId'] == me ||
+              p['recipientUserId'] == me ||
+              p['courierUserId'] == me,
         'sent' => p['senderUserId'] == me,
         'incoming' => p['recipientUserId'] == me,
         'carrying' => p['courierUserId'] == me,

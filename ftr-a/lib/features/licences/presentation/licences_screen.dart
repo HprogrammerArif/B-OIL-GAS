@@ -76,6 +76,7 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheet) {
@@ -99,12 +100,12 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
             );
 
             return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
                   Space.lg,
                   0,
                   Space.lg,
-                  Space.lg,
+                  Space.lg + MediaQuery.viewInsetsOf(ctx).bottom,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

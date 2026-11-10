@@ -2773,6 +2773,30 @@ abstract class AppL10n {
   /// **'Category'**
   String get noticeFieldCategory;
 
+  /// No description provided for @noticeUseDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a draft'**
+  String get noticeUseDraft;
+
+  /// No description provided for @noticeDraftPpe.
+  ///
+  /// In en, this message translates to:
+  /// **'PPE before charging'**
+  String get noticeDraftPpe;
+
+  /// No description provided for @noticeDraftHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday hours'**
+  String get noticeDraftHoliday;
+
+  /// No description provided for @noticeDraftQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly reports'**
+  String get noticeDraftQuarter;
+
   /// No description provided for @noticeFieldTitle.
   ///
   /// In en, this message translates to:
@@ -5802,6 +5826,48 @@ abstract class AppL10n {
   /// **'Everything at my site'**
   String get pcTabSite;
 
+  /// No description provided for @pcTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pcTabAll;
+
+  /// No description provided for @pcFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get pcFilter;
+
+  /// No description provided for @pcFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get pcFilterStatus;
+
+  /// No description provided for @pcFilterAllStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get pcFilterAllStatuses;
+
+  /// No description provided for @pcDirHqPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'HQ to plant'**
+  String get pcDirHqPlant;
+
+  /// No description provided for @pcDirPlantHq.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant to HQ'**
+  String get pcDirPlantHq;
+
+  /// No description provided for @pcDirExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the company'**
+  String get pcDirExternal;
+
   /// No description provided for @pcStuckOnly.
   ///
   /// In en, this message translates to:
@@ -6906,6 +6972,36 @@ abstract class AppL10n {
   /// **'What kind of parcel'**
   String get pcFieldCategory;
 
+  /// No description provided for @pcUseDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a draft'**
+  String get pcUseDraft;
+
+  /// No description provided for @pcDraftTender.
+  ///
+  /// In en, this message translates to:
+  /// **'Tender papers'**
+  String get pcDraftTender;
+
+  /// No description provided for @pcDraftSpares.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant spares'**
+  String get pcDraftSpares;
+
+  /// No description provided for @pcDraftLicence.
+  ///
+  /// In en, this message translates to:
+  /// **'Licence files'**
+  String get pcDraftLicence;
+
+  /// No description provided for @pcDraftIt.
+  ///
+  /// In en, this message translates to:
+  /// **'IT kit'**
+  String get pcDraftIt;
+
   /// No description provided for @pcFieldDescription.
   ///
   /// In en, this message translates to:
@@ -7065,8 +7161,26 @@ abstract class AppL10n {
   /// No description provided for @visTabAll.
   ///
   /// In en, this message translates to:
-  /// **'Everything I can see'**
+  /// **'All'**
   String get visTabAll;
+
+  /// No description provided for @visFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get visFilter;
+
+  /// No description provided for @visFilterCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind of guest'**
+  String get visFilterCategories;
+
+  /// No description provided for @visFilterAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All kinds'**
+  String get visFilterAllCategories;
 
   /// No description provided for @visEmpty.
   ///
@@ -7325,6 +7439,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'What was seen'**
   String get visFindings;
+
+  /// No description provided for @visDetPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass number'**
+  String get visDetPass;
 
   /// No description provided for @visDetPhone.
   ///

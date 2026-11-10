@@ -1545,6 +1545,18 @@ class AppL10nEn extends AppL10n {
   String get noticeFieldCategory => 'Category';
 
   @override
+  String get noticeUseDraft => 'Use a draft';
+
+  @override
+  String get noticeDraftPpe => 'PPE before charging';
+
+  @override
+  String get noticeDraftHoliday => 'Holiday hours';
+
+  @override
+  String get noticeDraftQuarter => 'Quarterly reports';
+
+  @override
   String get noticeFieldTitle => 'Title';
 
   @override
@@ -3292,6 +3304,27 @@ class AppL10nEn extends AppL10n {
   String get pcTabSite => 'Everything at my site';
 
   @override
+  String get pcTabAll => 'All';
+
+  @override
+  String get pcFilter => 'Filters';
+
+  @override
+  String get pcFilterStatus => 'Status';
+
+  @override
+  String get pcFilterAllStatuses => 'All statuses';
+
+  @override
+  String get pcDirHqPlant => 'HQ to plant';
+
+  @override
+  String get pcDirPlantHq => 'Plant to HQ';
+
+  @override
+  String get pcDirExternal => 'Outside the company';
+
+  @override
   String get pcStuckOnly => 'Stuck only';
 
   @override
@@ -3902,6 +3935,21 @@ class AppL10nEn extends AppL10n {
   String get pcFieldCategory => 'What kind of parcel';
 
   @override
+  String get pcUseDraft => 'Use a draft';
+
+  @override
+  String get pcDraftTender => 'Tender papers';
+
+  @override
+  String get pcDraftSpares => 'Plant spares';
+
+  @override
+  String get pcDraftLicence => 'Licence files';
+
+  @override
+  String get pcDraftIt => 'IT kit';
+
+  @override
   String get pcFieldDescription => 'What is inside';
 
   @override
@@ -3984,7 +4032,16 @@ class AppL10nEn extends AppL10n {
   String get visTabApprove => 'Waiting for you';
 
   @override
-  String get visTabAll => 'Everything I can see';
+  String get visTabAll => 'All';
+
+  @override
+  String get visFilter => 'Filters';
+
+  @override
+  String get visFilterCategories => 'Kind of guest';
+
+  @override
+  String get visFilterAllCategories => 'All kinds';
 
   @override
   String get visEmpty => 'No guests yet.';
@@ -4140,6 +4197,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get visFindings => 'What was seen';
+
+  @override
+  String get visDetPass => 'Pass number';
 
   @override
   String get visDetPhone => 'Phone';

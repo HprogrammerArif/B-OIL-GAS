@@ -11,7 +11,6 @@ import 'package:bogcl_oneops/features/parcels/data/parcel_repository.dart';
 import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_providers.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_ui.dart';
-import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
 import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
@@ -20,8 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// MOD-04: Inter-Site Mailroom & Confidential Pouches
-/// Implements Personal vs Mailroom Desk switch, Pouch Manifest, RTO and Tamper filters.
 class ParcelsScreen extends ConsumerStatefulWidget {
   const ParcelsScreen({super.key});
 
@@ -30,8 +27,6 @@ class ParcelsScreen extends ConsumerStatefulWidget {
 }
 
 class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
-  // Scope: 'personal' vs 'mailroom'
-  String _scope = 'personal';
   String _view = 'mine';
   String _query = '';
   bool _stuckOnly = false;
@@ -47,7 +42,6 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
         (s.hasRole('MAILROOM') ||
             s.hasRole('TRANSPORT_ADMIN') ||
             s.hasRole('CHAIRMAN'))) {
-      _scope = 'mailroom';
       _view = 'all';
     }
   }
@@ -58,6 +52,12 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     super.dispose();
   }
 
+  bool get _filtersActive =>
+      _stuckOnly || _statusFilter != 'ALL' || _directionFilter != 'ALL';
+
+  int _viewCount(String view) =>
+      ref.watch(parcelsProvider(view, query: _query)).value?.length ?? 0;
+
   Future<void> _refresh() async {
     ref.invalidate(parcelsProvider);
     await ref.read(
@@ -65,7 +65,6 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     );
   }
 
-  /// Exact tracking number typed or pasted: open it straight away.
   Future<void> _open(String text) async {
     final l10n = context.l10n;
     final no = text.trim().toUpperCase();
@@ -80,213 +79,206 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     }
   }
 
-  void _showPouchManifestSheet(List<Parcel> parcels) {
-    final bangla = context.isBangla;
-    final inTransit = parcels
-        .where((p) => p.status == 'IN_TRANSIT' || p.status == 'DISPATCHED')
-        .toList();
-
-    unawaited(
-      showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        showDragHandle: true,
-        builder: (ctx) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.inventory_2, color: Colors.blue),
-                  const SizedBox(width: Space.xs),
-                  Expanded(
-                    child: Text(
-                      bangla
-                          ? 'করিডোর পাউচ মেনিফেস্ট: POUCH-DHAKA-KER-01'
-                          : 'Corridor Pouch Manifest: POUCH-DHAKA-KER-01',
-                      style: Theme.of(ctx).textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+  Future<void> _openFilters() async {
+    final l10n = context.l10n;
+    Haptics.tap();
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setSheet) {
+            Widget chip({
+              required bool selected,
+              required String label,
+              required VoidCallback onTap,
+            }) => Padding(
+              padding: const EdgeInsets.only(right: Space.xs, bottom: Space.xs),
+              child: FilterChip(
+                visualDensity: VisualDensity.compact,
+                label: Text(label, style: const TextStyle(fontSize: 12)),
+                selected: selected,
+                onSelected: (_) {
+                  Haptics.tap();
+                  onTap();
+                  setSheet(() {});
+                  setState(() {});
+                },
               ),
-              const SizedBox(height: Space.xs),
-              Text(
-                bangla
-                    ? 'বারিধারা হেড অফিস ↔ কেরানীগঞ্জ রিফাইনারি দৈনিক শাটল রান'
-                    : 'Baridhara HQ ↔ Keraniganj Refinery Plant Daily Shuttle Run',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
-              const SizedBox(height: Space.md),
+            );
 
-              // Telematics / Security Seals
-              Container(
-                padding: const EdgeInsets.all(Space.sm),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  Space.lg,
+                  0,
+                  Space.lg,
+                  Space.lg + MediaQuery.viewInsetsOf(ctx).bottom,
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Text(
+                      l10n.pcFilter,
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: Space.md),
+                    Text(
+                      l10n.pcFilterStatus,
+                      style: Theme.of(ctx).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Wrap(
                       children: [
-                        Expanded(
-                          child: Text(
-                            bangla
-                                ? 'শাটল ভ্যান: ঢাকা মেট্রো-চ-৫৩-৮৮২১'
-                                : 'Shuttle Van: Dhaka Metro-Cha-53-8821',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
+                        chip(
+                          selected: _statusFilter == 'ALL',
+                          label: l10n.pcFilterAllStatuses,
+                          onTap: () => _statusFilter = 'ALL',
                         ),
-                        const SizedBox(width: Space.xs),
-                        const StatusPill(
-                          label: 'SEALED & LOCKED',
-                          tone: StatusTone.success,
+                        chip(
+                          selected: _statusFilter == 'IN_TRANSIT',
+                          label: l10n.pcStatusInTransit,
+                          onTap: () => _statusFilter = 'IN_TRANSIT',
+                        ),
+                        chip(
+                          selected: _statusFilter == 'READY_OTP',
+                          label: l10n.pcStatusOut,
+                          onTap: () => _statusFilter = 'READY_OTP',
+                        ),
+                        chip(
+                          selected: _statusFilter == 'DELIVERED',
+                          label: l10n.pcStatusDelivered,
+                          onTap: () => _statusFilter = 'DELIVERED',
+                        ),
+                        chip(
+                          selected: _statusFilter == 'RETURNING',
+                          label: l10n.pcStatusReturning,
+                          onTap: () => _statusFilter = 'RETURNING',
+                        ),
+                        chip(
+                          selected: _statusFilter == 'QUARANTINED',
+                          label: l10n.pcStatusHeld,
+                          onTap: () => _statusFilter = 'QUARANTINED',
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Row(
+                    const SizedBox(height: Space.md),
+                    Wrap(
                       children: [
-                        Expanded(
-                          child: Text(
-                            bangla
-                                ? 'কুরিয়ার: রফিকুল ইসলাম (EMP-0821)'
-                                : 'Courier: Md. Rafiqul Islam (EMP-0821)',
-                            style: const TextStyle(fontSize: 11),
-                          ),
+                        chip(
+                          selected: _directionFilter == 'HQ_TO_PLANT',
+                          label: l10n.pcDirHqPlant,
+                          onTap: () => _directionFilter =
+                              _directionFilter == 'HQ_TO_PLANT'
+                              ? 'ALL'
+                              : 'HQ_TO_PLANT',
                         ),
-                        const SizedBox(width: Space.xs),
-                        Text(
-                          bangla
-                              ? 'সিল নম্বর: SL-BOGCL-8842'
-                              : 'Seal: SL-BOGCL-8842',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        chip(
+                          selected: _directionFilter == 'PLANT_TO_HQ',
+                          label: l10n.pcDirPlantHq,
+                          onTap: () => _directionFilter =
+                              _directionFilter == 'PLANT_TO_HQ'
+                              ? 'ALL'
+                              : 'PLANT_TO_HQ',
+                        ),
+                        chip(
+                          selected: _directionFilter == 'EXTERNAL',
+                          label: l10n.pcDirExternal,
+                          onTap: () =>
+                              _directionFilter = _directionFilter == 'EXTERNAL'
+                              ? 'ALL'
+                              : 'EXTERNAL',
+                        ),
+                        chip(
+                          selected: _stuckOnly,
+                          label: l10n.pcStuckOnly,
+                          onTap: () => _stuckOnly = !_stuckOnly,
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: Space.md),
-              Text(
-                bangla
-                    ? 'পাউচের অভ্যন্তরীণ পার্সেল তালিকা (${inTransit.length} টি):'
-                    : 'Pouches & Enclosures in this Bag (${inTransit.length}):',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: Space.xs),
-
-              if (inTransit.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: Space.md),
-                  child: Center(
-                    child: Text(
-                      bangla
-                          ? 'কোন সক্রিয় পাউচ ট্রানজিটে নেই'
-                          : 'No active pouches currently in transit.',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                )
-              else
-                for (final p in inTransit.take(4))
-                  ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      p.isConfidential ? Icons.lock : Icons.mail_outline,
-                      color: p.isConfidential
-                          ? Colors.amber.shade800
-                          : Colors.blueGrey,
-                    ),
-                    title: Text(
-                      '${p.trackingNo} · ${p.description ?? "Confidential Pouch"}',
-                    ),
-                    subtitle: Text('${p.sender.name} → ${p.recipient.name}'),
-                    trailing: StatusPill(
-                      label: p.status,
-                      tone: StatusTone.info,
-                    ),
-                  ),
-
-              const SizedBox(height: Space.md),
-              PrimaryButton(
-                label: bangla
-                    ? 'গেটে সম্পূর্ণ পাউচ হস্তান্তর গ্রহণ করুন'
-                    : 'Hand Over Entire Pouch at Destination Gate',
-                icon: Icons.check_circle_outline,
-                onPressed: () {
-                  Haptics.heavy();
-                  Navigator.pop(ctx);
-                  AppToast.show(
-                    context,
-                    bangla
-                        ? 'সম্পূর্ণ পাউচ (POUCH-DHAKA-KER-01) গন্তব্য গেটে গ্রহণ সম্পন্ন!'
-                        : 'Entire Corridor Pouch Handed Over at Destination Gate!',
-                    tone: StatusTone.success,
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  bool _matchesFilters(Parcel p) {
+    if (_statusFilter == 'IN_TRANSIT' &&
+        p.status != 'IN_TRANSIT' &&
+        p.status != 'DISPATCHED' &&
+        p.status != 'AT_GATE') {
+      return false;
+    }
+    if (_statusFilter == 'READY_OTP' && p.status != 'OUT_FOR_DELIVERY') {
+      return false;
+    }
+    if (_statusFilter == 'DELIVERED' && p.status != 'DELIVERED') {
+      return false;
+    }
+    if (_statusFilter == 'RETURNING' && !p.status.startsWith('RETURN')) {
+      return false;
+    }
+    if (_statusFilter == 'QUARANTINED' &&
+        p.status != 'QUARANTINED' &&
+        p.tamperStatus != 'FLAGGED') {
+      return false;
+    }
+    if (_directionFilter == 'HQ_TO_PLANT' &&
+        (p.origin.id != 'site_hq' || p.dest.id != 'site_plant')) {
+      return false;
+    }
+    if (_directionFilter == 'PLANT_TO_HQ' &&
+        (p.origin.id != 'site_plant' || p.dest.id != 'site_hq')) {
+      return false;
+    }
+    if (_directionFilter == 'EXTERNAL' && p.intraSite) {
+      return false;
+    }
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bangla = context.isBangla;
-    final theme = Theme.of(context);
     final session = ref.watch(sessionControllerProvider).value;
     final canCreate = session?.can('parcels:create') ?? false;
-    final canMailroom =
-        (session?.can('parcels:dispatch') ?? false) ||
+    final canWide =
         (session?.can('parcels:manage') ?? false) ||
-        (session?.can('parcels:scan') ?? false) ||
         (session?.can('parcels:read', GrantScope.site) ?? false);
-
-    final effectiveScope = canMailroom ? _scope : 'personal';
-    final effectiveView = effectiveScope == 'mailroom' ? 'all' : _view;
     final rows = ref.watch(
-      parcelsProvider(effectiveView, query: _query, stuckOnly: _stuckOnly),
+      parcelsProvider(_view, query: _query, stuckOnly: _stuckOnly),
     );
+
+    Widget viewChip(String view, String label) {
+      final count = _viewCount(view);
+      return Padding(
+        padding: const EdgeInsets.only(right: Space.sm),
+        child: ChoiceChip(
+          visualDensity: VisualDensity.compact,
+          label: Text('$label ($count)', style: const TextStyle(fontSize: 12)),
+          selected: _view == view,
+          onSelected: (_) {
+            Haptics.tap();
+            setState(() => _view = view);
+          },
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.moduleParcels),
         actions: [
-          if (canMailroom)
-            IconButton(
-              tooltip: bangla
-                  ? 'করিডোর পাউচ মেনিফেস্ট'
-                  : 'Corridor Pouch Manifest',
-              icon: const Icon(Icons.workspaces_outlined, color: Colors.blue),
-              onPressed: () {
-                rows.whenData(_showPouchManifestSheet);
-              },
-            ),
           IconButton(
-            tooltip: bangla ? 'রিফ্রেশ' : 'Refresh',
             icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
+            onPressed: () => unawaited(_refresh()),
           ),
         ],
       ),
@@ -299,292 +291,78 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
           : null,
       body: Column(
         children: [
-          // Scope Switcher: Personal vs Mailroom Master Desk
-          if (canMailroom)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                Space.md,
-                Space.xs,
-                Space.md,
-                0,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment(
-                          value: 'personal',
-                          icon: const Icon(Icons.person_outline, size: 16),
-                          label: Text(
-                            bangla ? 'আমার পার্সেল' : 'My Parcels',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                        ButtonSegment(
-                          value: 'mailroom',
-                          icon: const Icon(
-                            Icons.markunread_mailbox_outlined,
-                            size: 16,
-                          ),
-                          label: Text(
-                            bangla
-                                ? 'মেইলরুম মাস্টার ডেস্ক'
-                                : 'Mailroom Desk (All)',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ],
-                      selected: {effectiveScope},
-                      onSelectionChanged: (s) {
-                        setState(() {
-                          _scope = s.first;
-                          if (_scope == 'mailroom') {
-                            _view = 'all';
-                          } else {
-                            _view = 'mine';
-                          }
-                        });
-                      },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  onChanged: (v) {
+                    _debounce?.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 300), () {
+                      if (mounted) setState(() => _query = v.trim());
+                    });
+                  },
+                  onSubmitted: (v) => unawaited(_open(v)),
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: l10n.pcSearchHint,
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: Space.md,
+                      vertical: Space.sm,
+                    ),
+                    suffixIcon: IconButton(
+                      tooltip: l10n.pcFilter,
+                      onPressed: () => unawaited(_openFilters()),
+                      icon: Badge(
+                        isLabelVisible: _filtersActive,
+                        child: const Icon(Icons.tune),
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: TextField(
-              onChanged: (v) {
-                _debounce?.cancel();
-                _debounce = Timer(const Duration(milliseconds: 300), () {
-                  if (mounted) setState(() => _query = v.trim());
-                });
-              },
-              onSubmitted: (v) => unawaited(_open(v)),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: bangla
-                    ? 'ট্র্যাকিং নং (PKG-...) বা প্রাপক খুঁজুন'
-                    : l10n.pcSearchHint,
-                prefixIcon: const Icon(Icons.search, size: 20),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
                 ),
-              ),
+                const SizedBox(height: Space.xs),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      viewChip('mine', l10n.pcTabMine),
+                      viewChip('incoming', l10n.pcTabIncoming),
+                      viewChip('sent', l10n.pcTabSent),
+                      viewChip('carrying', l10n.pcTabCarrying),
+                      if (canWide) viewChip('site', l10n.pcTabSite),
+                      if (canWide) viewChip('all', l10n.pcTabAll),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-
-          // Primary Status & Category Filter Chips
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.md,
-              vertical: Space.xs,
-            ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(bangla ? 'সব পার্সেল' : 'All'),
-                    selected: _statusFilter == 'ALL',
-                    onSelected: (_) => setState(() => _statusFilter = 'ALL'),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  ChoiceChip(
-                    label: Text(bangla ? 'ট্রানজিটে (চলমান)' : 'In Transit'),
-                    selected: _statusFilter == 'IN_TRANSIT',
-                    onSelected: (_) =>
-                        setState(() => _statusFilter = 'IN_TRANSIT'),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  ChoiceChip(
-                    label: Text(
-                      bangla
-                          ? 'হস্তান্তর প্রস্তুত (PIN)'
-                          : 'Ready for Handover',
-                    ),
-                    selected: _statusFilter == 'READY_OTP',
-                    onSelected: (_) =>
-                        setState(() => _statusFilter = 'READY_OTP'),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  ChoiceChip(
-                    label: Text(bangla ? 'পৌঁছেছে (ডেলিভার্ড)' : 'Delivered'),
-                    selected: _statusFilter == 'DELIVERED',
-                    onSelected: (_) =>
-                        setState(() => _statusFilter = 'DELIVERED'),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  ChoiceChip(
-                    label: Text(
-                      bangla ? 'ফেরত প্রক্রিয়া (RTO)' : 'Returning (RTO)',
-                    ),
-                    selected: _statusFilter == 'RETURNING',
-                    onSelected: (_) =>
-                        setState(() => _statusFilter = 'RETURNING'),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  ChoiceChip(
-                    label: Text(
-                      bangla ? 'কোয়ারেন্টাইন (সিল ত্রুটি)' : 'Quarantined',
-                    ),
-                    selected: _statusFilter == 'QUARANTINED',
-                    onSelected: (_) =>
-                        setState(() => _statusFilter = 'QUARANTINED'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Corridor Direction Filter Chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Space.md),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  FilterChip(
-                    avatar: const Icon(Icons.alt_route, size: 14),
-                    label: Text(
-                      bangla ? 'হেড অফিস → প্ল্যান্ট' : 'HQ → Keraniganj',
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _directionFilter == 'HQ_TO_PLANT',
-                    onSelected: (sel) => setState(
-                      () => _directionFilter = sel ? 'HQ_TO_PLANT' : 'ALL',
-                    ),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  FilterChip(
-                    avatar: const Icon(Icons.alt_route, size: 14),
-                    label: Text(
-                      bangla ? 'প্ল্যান্ট → হেড অফিস' : 'Keraniganj → HQ',
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _directionFilter == 'PLANT_TO_HQ',
-                    onSelected: (sel) => setState(
-                      () => _directionFilter = sel ? 'PLANT_TO_HQ' : 'ALL',
-                    ),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  FilterChip(
-                    avatar: const Icon(Icons.account_balance, size: 14),
-                    label: Text(
-                      bangla ? 'ব্যাংক / বহিঃসংস্থা' : 'External / Regulatory',
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _directionFilter == 'EXTERNAL',
-                    onSelected: (sel) => setState(
-                      () => _directionFilter = sel ? 'EXTERNAL' : 'ALL',
-                    ),
-                  ),
-                  const SizedBox(width: Space.xs),
-                  FilterChip(
-                    label: Text(
-                      l10n.pcStuckOnly,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    selected: _stuckOnly,
-                    onSelected: (v) => setState(() => _stuckOnly = v),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
           const SizedBox(height: Space.xs),
-
-          // List Body
           Expanded(
             child: rows.when(
               loading: () => const SkeletonList(),
               error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
               data: (rawList) {
-                // Apply filters
-                final list = rawList.where((p) {
-                  // Status filter
-                  if (_statusFilter == 'IN_TRANSIT' &&
-                      p.status != 'IN_TRANSIT' &&
-                      p.status != 'DISPATCHED' &&
-                      p.status != 'AT_GATE') {
-                    return false;
-                  }
-                  if (_statusFilter == 'READY_OTP' &&
-                      p.status != 'OUT_FOR_DELIVERY') {
-                    return false;
-                  }
-                  if (_statusFilter == 'DELIVERED' && p.status != 'DELIVERED') {
-                    return false;
-                  }
-                  if (_statusFilter == 'RETURNING' &&
-                      !p.status.startsWith('RETURN')) {
-                    return false;
-                  }
-                  if (_statusFilter == 'QUARANTINED' &&
-                      p.status != 'QUARANTINED' &&
-                      p.tamperStatus != 'FLAGGED') {
-                    return false;
-                  }
-
-                  // Direction filter
-                  if (_directionFilter == 'HQ_TO_PLANT' &&
-                      (p.origin.id != 'site_hq' || p.dest.id != 'site_plant')) {
-                    return false;
-                  }
-                  if (_directionFilter == 'PLANT_TO_HQ' &&
-                      (p.origin.id != 'site_plant' || p.dest.id != 'site_hq')) {
-                    return false;
-                  }
-                  if (_directionFilter == 'EXTERNAL' && p.intraSite) {
-                    return false;
-                  }
-
-                  return true;
-                }).toList();
-
+                final list = rawList.where(_matchesFilters).toList();
                 if (list.isEmpty) {
                   return EmptyState(
                     icon: Icons.inventory_2_outlined,
-                    title:
-                        _query.isNotEmpty ||
-                            _stuckOnly ||
-                            _statusFilter != 'ALL'
+                    title: _query.isNotEmpty || _filtersActive
                         ? l10n.pcEmptyFiltered
                         : l10n.pcEmpty,
                   );
                 }
-
-                final needMe = list.where(parcelNeedsMe).length;
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView.separated(
                     padding: const EdgeInsets.only(bottom: 96),
-                    itemCount: list.length + 1,
+                    itemCount: list.length,
                     separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (_, i) {
-                      if (i == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            Space.lg,
-                            Space.xs,
-                            Space.lg,
-                            Space.xs,
-                          ),
-                          child: Text(
-                            needMe == 0
-                                ? l10n.pcVerdictNone
-                                : l10n.pcVerdictNeed(needMe),
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        );
-                      }
-                      return _Row(parcel: list[i - 1], bangla: bangla);
-                    },
+                    itemBuilder: (_, i) =>
+                        _Row(parcel: list[i], bangla: bangla),
                   ),
                 );
               },
@@ -609,30 +387,14 @@ class _Row extends StatelessWidget {
     final title = p.hidden || p.description == null
         ? l10n.pcConfidentialTitle
         : p.description!;
+    final meta =
+        '${p.origin.label(bangla: bangla)} → ${p.dest.label(bangla: bangla)}';
     return ListRow(
       leading: Icon(
-        p.tamperStatus == 'FLAGGED'
-            ? Icons.warning_amber_rounded
-            : p.isConfidential
-            ? Icons.lock_outline
-            : Icons.inventory_2_outlined,
-        color: p.tamperStatus == 'FLAGGED'
-            ? Colors.red
-            : p.isConfidential
-            ? Colors.amber.shade800
-            : null,
+        p.isConfidential ? Icons.lock_outline : Icons.inventory_2_outlined,
       ),
       title: title,
-      subtitle: [
-        [
-          p.trackingNo,
-          p.origin.label(bangla: bangla),
-          p.dest.label(bangla: bangla),
-        ].join(' → '),
-        if (p.courier != null)
-          '${bangla ? "বাহক" : "Courier"}: ${p.courier!.name}',
-        parcelNextLine(l10n, p, bangla: bangla),
-      ].join('\n'),
+      subtitle: '$meta\n${parcelNextLine(l10n, p, bangla: bangla)}',
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -641,19 +403,6 @@ class _Row extends StatelessWidget {
             label: parcelStatusLabel(l10n, p.status),
             tone: parcelStatusTone(p.status),
           ),
-          if (p.tamperStatus == 'FLAGGED')
-            const Padding(
-              padding: EdgeInsets.only(top: Space.xs),
-              child: StatusPill(
-                label: 'SEAL TAMPERED',
-                tone: StatusTone.danger,
-              ),
-            ),
-          if (p.status.startsWith('RETURN'))
-            const Padding(
-              padding: EdgeInsets.only(top: Space.xs),
-              child: StatusPill(label: 'RTO REVERSE', tone: StatusTone.warning),
-            ),
           if (p.stuck)
             Padding(
               padding: const EdgeInsets.only(top: Space.xs),

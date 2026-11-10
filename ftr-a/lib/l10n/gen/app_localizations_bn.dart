@@ -1541,6 +1541,18 @@ class AppL10nBn extends AppL10n {
   String get noticeFieldCategory => 'বিভাগ';
 
   @override
+  String get noticeUseDraft => 'খসড়া ব্যবহার করুন';
+
+  @override
+  String get noticeDraftPpe => 'চার্জের আগে পিপিই';
+
+  @override
+  String get noticeDraftHoliday => 'ছুটির সময়সূচি';
+
+  @override
+  String get noticeDraftQuarter => 'ত্রৈমাসিক প্রতিবেদন';
+
+  @override
   String get noticeFieldTitle => 'শিরোনাম';
 
   @override
@@ -3286,6 +3298,27 @@ class AppL10nBn extends AppL10n {
   String get pcTabSite => 'আমার সাইটের সব';
 
   @override
+  String get pcTabAll => 'সব';
+
+  @override
+  String get pcFilter => 'ফিল্টার';
+
+  @override
+  String get pcFilterStatus => 'অবস্থা';
+
+  @override
+  String get pcFilterAllStatuses => 'সকল অবস্থা';
+
+  @override
+  String get pcDirHqPlant => 'প্রধান কার্যালয় থেকে প্ল্যান্ট';
+
+  @override
+  String get pcDirPlantHq => 'প্ল্যান্ট থেকে প্রধান কার্যালয়';
+
+  @override
+  String get pcDirExternal => 'কোম্পানির বাইরে';
+
+  @override
   String get pcStuckOnly => 'শুধু আটকে থাকা';
 
   @override
@@ -3890,6 +3923,21 @@ class AppL10nBn extends AppL10n {
   String get pcFieldCategory => 'পার্সেলের ধরন';
 
   @override
+  String get pcUseDraft => 'খসড়া ব্যবহার করুন';
+
+  @override
+  String get pcDraftTender => 'দরপত্রের কাগজ';
+
+  @override
+  String get pcDraftSpares => 'প্ল্যান্ট স্পেয়ার';
+
+  @override
+  String get pcDraftLicence => 'লাইসেন্স ফাইল';
+
+  @override
+  String get pcDraftIt => 'আইটি কিট';
+
+  @override
   String get pcFieldDescription => 'ভেতরে কী আছে';
 
   @override
@@ -3971,7 +4019,16 @@ class AppL10nBn extends AppL10n {
   String get visTabApprove => 'আপনার অনুমোদন';
 
   @override
-  String get visTabAll => 'আমি যা দেখতে পারি';
+  String get visTabAll => 'সব';
+
+  @override
+  String get visFilter => 'ফিল্টার';
+
+  @override
+  String get visFilterCategories => 'অতিথির ধরন';
+
+  @override
+  String get visFilterAllCategories => 'সকল ধরন';
 
   @override
   String get visEmpty => 'এখনো কোনো অতিথি নেই।';
@@ -4126,6 +4183,9 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get visFindings => 'যা দেখা গেছে';
+
+  @override
+  String get visDetPass => 'পাস নম্বর';
 
   @override
   String get visDetPhone => 'ফোন';
