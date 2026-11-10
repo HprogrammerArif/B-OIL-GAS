@@ -29,7 +29,7 @@ IconData _kindIcon(NotificationKind k) => switch (k) {
   NotificationKind.other => Icons.notifications_none,
 };
 
-/// Actionable Notification Centre: summary banner, filter chips, swipe-to-read, and inline actions.
+/// Actionable Notification Centre: filter chips, swipe-to-read, and inline actions.
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
 
@@ -98,14 +98,10 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final bangla = context.isBangla;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final inbox = ref.watch(inboxControllerProvider);
     final controller = ref.read(inboxControllerProvider.notifier);
     final state = inbox.value;
     final unread = ref.watch(unreadSummaryControllerProvider).value?.total ?? 0;
-    final ackPendingCount = state?.items.where((i) => i.needsAck).length ?? 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -120,63 +116,6 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       ),
       body: Column(
         children: [
-          // Plain-Language Verdict & Gesture Hint Banner
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.lg, Space.xs, Space.lg, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.md),
-              decoration: BoxDecoration(
-                color: ackPendingCount > 0
-                    ? scheme.errorContainer.withValues(alpha: 0.25)
-                    : scheme.primaryContainer.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(Corner.md),
-                border: Border.all(
-                  color: ackPendingCount > 0
-                      ? scheme.error.withValues(alpha: 0.35)
-                      : scheme.primary.withValues(alpha: 0.25),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    ackPendingCount > 0
-                        ? Icons.notification_important_outlined
-                        : Icons.notifications_active_outlined,
-                    size: 20,
-                    color: ackPendingCount > 0 ? scheme.error : scheme.primary,
-                  ),
-                  const SizedBox(width: Space.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          unread == 0 && ackPendingCount == 0
-                              ? (bangla
-                                    ? 'সকল বিজ্ঞপ্তি পড়া হয়েছে · কোনো জরুরি স্বীকৃতি বাকি নেই'
-                                    : 'All caught up · No unread alerts or pending acknowledgments')
-                              : (bangla
-                                    ? '$unreadটি অপঠিত বিজ্ঞপ্তি · $ackPendingCountটিতে জরুরি স্বীকৃতি প্রয়োজন'
-                                    : '$unread unread alerts · $ackPendingCount require your acknowledgment'),
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          bangla
-                              ? 'টিপস: বামে সোয়াইপ করে পঠিত হিসেবে চিহ্নিত করুন অথবা কার্ডের বাটনে সরাসরি কাজ সম্পন্ন করুন।'
-                              : 'Tip: Swipe left on any unread card to mark read, or use inline action buttons below.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           _FilterBar(
             category: state?.category ?? NotificationCategory.all,
             unreadOnly: state?.unreadOnly ?? false,
@@ -334,7 +273,8 @@ class _NotificationTile extends ConsumerWidget {
                     .markRead(item.id, label: l10n.inboxReadLabel)
                     .catchError((Object _) {}),
               );
-              unawaited(context.push(item.route!));
+              // Inbox is a root overlay; shell destinations must replace it.
+              context.go(item.route!);
               return;
             }
             unawaited(_openDetail(context, ref));
@@ -480,7 +420,7 @@ class _NotificationTile extends ConsumerWidget {
                                   .markRead(item.id, label: l10n.inboxReadLabel)
                                   .catchError((Object _) {}),
                             );
-                            unawaited(context.push(item.route!));
+                            context.go(item.route!);
                           },
                           icon: const Icon(Icons.open_in_new, size: 15),
                           label: Text(
@@ -647,7 +587,7 @@ class _DetailSheet extends ConsumerWidget {
                 onPressed: () {
                   final router = GoRouter.of(context);
                   Navigator.of(context).pop();
-                  unawaited(router.push(item.route!));
+                  router.go(item.route!);
                 },
               ),
               const SizedBox(height: Space.sm),

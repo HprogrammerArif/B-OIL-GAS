@@ -28,8 +28,8 @@ enum _Tab { pending, history }
 enum _SortMode { sla, amount, date, requester }
 
 /// Approvals Center (MOD-17):
-/// Plain-Language Verdict Banner, SLA <12h toggle, search, category live counts,
-/// 4-way sorting, multi-select batch approval, and structured return/reject modal.
+/// Search, category live counts, 4-way sorting, multi-select batch approval,
+/// and structured return/reject modal.
 class ApprovalsScreen extends ConsumerStatefulWidget {
   const ApprovalsScreen({super.key});
 
@@ -41,7 +41,6 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
   _Tab _tab = _Tab.pending;
   ApprovalCategory? _category;
   String _search = '';
-  bool _onlyDueSoon = false;
   _SortMode _sort = _SortMode.sla;
   final Set<String> _selected = {};
   bool _busy = false;
@@ -106,21 +105,6 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
     final selecting = _selected.isNotEmpty;
     final inbox = ref.watch(approvalInboxProvider).value ?? const [];
 
-    // Calculate total value & due soon count
-    var totalAmount = 0.0;
-    var dueSoonCount = 0;
-    for (final item in inbox) {
-      if (item.summary.amount != null) {
-        totalAmount += item.summary.amount!;
-      }
-      if (item.sla == SlaState.danger || item.sla == SlaState.overdue) {
-        dueSoonCount++;
-      }
-    }
-    if (dueSoonCount == 0 && inbox.isNotEmpty) {
-      dueSoonCount = 4; // Seeded SLA demo presence
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -153,119 +137,6 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Plain-Language Urgency Verdict Banner ─────────────────────
-          Container(
-            margin: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.md,
-              vertical: Space.sm,
-            ),
-            decoration: BoxDecoration(
-              color: dueSoonCount > 0
-                  ? Colors.deepOrange.shade50.withValues(alpha: 0.6)
-                  : scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(Corner.lg),
-              border: Border.all(
-                color: dueSoonCount > 0
-                    ? Colors.deepOrange.withValues(alpha: 0.35)
-                    : scheme.outlineVariant,
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Icon(
-                    dueSoonCount > 0 ? Icons.timer_outlined : Icons.task_alt,
-                    color: dueSoonCount > 0 ? Colors.deepOrange : Colors.teal,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: Space.xs),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bangla
-                            ? '${inbox.length}টি অনুরোধ আপনার সিদ্ধান্তের অপেক্ষায়'
-                            : '${inbox.length} items waiting for your decision',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.5,
-                          color: dueSoonCount > 0
-                              ? Colors.deepOrange.shade900
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        bangla
-                            ? 'মোট: ${taka(totalAmount > 0 ? totalAmount : 13650000, bangla: true)}'
-                            : 'Total: ${taka(totalAmount > 0 ? totalAmount : 13650000, bangla: false)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: Space.xs),
-                // Due-soon toggle chip — constrained so it never overflows
-                GestureDetector(
-                  onTap: () {
-                    Haptics.tap();
-                    setState(() => _onlyDueSoon = !_onlyDueSoon);
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _onlyDueSoon
-                          ? Colors.deepOrange
-                          : Colors.deepOrange.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.deepOrange.shade200),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_onlyDueSoon)
-                          const Icon(
-                            Icons.check,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                        if (_onlyDueSoon) const SizedBox(width: 3),
-                        Text(
-                          bangla
-                              ? '<১২ঘণ্টা ($dueSoonCount)'
-                              : '<12h ($dueSoonCount)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: _onlyDueSoon
-                                ? Colors.white
-                                : Colors.deepOrange.shade900,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
           // ── Primary Mode Tabs (Pending vs History) ───────────────────
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -394,7 +265,6 @@ class _ApprovalsScreenState extends ConsumerState<ApprovalsScreen> {
                   ? _PendingList(
                       category: _category,
                       search: _search,
-                      onlyDueSoon: _onlyDueSoon,
                       sort: _sort,
                       onCategory: (c) => setState(() => _category = c),
                       selected: _selected,
@@ -427,7 +297,6 @@ class _PendingList extends ConsumerWidget {
   const _PendingList({
     required this.category,
     required this.search,
-    required this.onlyDueSoon,
     required this.sort,
     required this.onCategory,
     required this.selected,
@@ -437,7 +306,6 @@ class _PendingList extends ConsumerWidget {
 
   final ApprovalCategory? category;
   final String search;
-  final bool onlyDueSoon;
   final _SortMode sort;
   final ValueChanged<ApprovalCategory?> onCategory;
   final Set<String> selected;
@@ -477,12 +345,6 @@ class _PendingList extends ConsumerWidget {
         // Filter
         final items = all.where((i) {
           if (category != null && i.category != category) return false;
-          if (onlyDueSoon &&
-              i.sla != SlaState.danger &&
-              i.sla != SlaState.overdue &&
-              !i.summary.urgent) {
-            return false;
-          }
           if (search.isNotEmpty) {
             final t = i.summary.displayTitle(bangla: bangla).toLowerCase();
             final req = i.initiator.display(bangla: bangla).toLowerCase();
