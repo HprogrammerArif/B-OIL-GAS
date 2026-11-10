@@ -476,41 +476,26 @@ class _FormState extends ConsumerState<_Form> {
                     ],
                   ),
                   const SizedBox(height: Space.md),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.leaveFormFrom),
-                          subtitle: Text(
-                            _start == null
-                                ? '—'
-                                : DateFmt.range(
-                                    dateKey(_start!),
-                                    dateKey(_start!),
-                                    lang,
-                                  ),
+                  EnterpriseDateTile(
+                    label: l10n.leaveFormFrom,
+                    icon: Icons.event_outlined,
+                    valueText: _start == null
+                        ? '—'
+                        : DateFmt.range(
+                            dateKey(_start!),
+                            dateKey(_start!),
+                            lang,
                           ),
-                          onTap: () => unawaited(_pickDate(start: true)),
-                        ),
-                      ),
-                      Expanded(
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.leaveFormTo),
-                          subtitle: Text(
-                            _end == null
-                                ? '—'
-                                : DateFmt.range(
-                                    dateKey(_end!),
-                                    dateKey(_end!),
-                                    lang,
-                                  ),
-                          ),
-                          onTap: () => unawaited(_pickDate(start: false)),
-                        ),
-                      ),
-                    ],
+                    onTap: () => unawaited(_pickDate(start: true)),
+                  ),
+                  const SizedBox(height: Space.sm),
+                  EnterpriseDateTile(
+                    label: l10n.leaveFormTo,
+                    icon: Icons.event_outlined,
+                    valueText: _end == null
+                        ? '—'
+                        : DateFmt.range(dateKey(_end!), dateKey(_end!), lang),
+                    onTap: () => unawaited(_pickDate(start: false)),
                   ),
                   if (_halfAllowed)
                     SwitchListTile(

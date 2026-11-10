@@ -132,19 +132,19 @@ class _LicenceActionSheetState extends State<_LicenceActionSheet> {
       _SheetKind.letter => l10n.cpActLetter,
     };
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        Space.lg,
-        0,
-        Space.lg,
+          padding: EdgeInsets.fromLTRB(
+            Space.lg,
+            0,
+            Space.lg,
         MediaQuery.viewInsetsOf(context).bottom + Space.lg,
-      ),
+          ),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: Space.md),
+              const SizedBox(height: Space.md),
             if (k == _SheetKind.letter) ...[
               Wrap(
                 spacing: Space.xs,
@@ -168,7 +168,7 @@ class _LicenceActionSheetState extends State<_LicenceActionSheet> {
               ),
               const SizedBox(height: Space.sm),
             ],
-            AppTextField(
+              AppTextField(
               label: switch (k) {
                 _SheetKind.inspect => l10n.cpFieldInspector,
                 _SheetKind.findings => l10n.cpFieldFindings,
@@ -198,7 +198,7 @@ class _LicenceActionSheetState extends State<_LicenceActionSheet> {
             ],
             if (k == _SheetKind.certificate &&
                 widget.licence.feeAmount > 0) ...[
-              const SizedBox(height: Space.sm),
+                const SizedBox(height: Space.sm),
               AppTextField(label: l10n.cpFieldChalan, controller: _tertiary),
             ],
             if (_error != null)
@@ -210,10 +210,10 @@ class _LicenceActionSheetState extends State<_LicenceActionSheet> {
                     color: context.bogcl.danger,
                   ),
                 ),
-              ),
+            ),
             const SizedBox(height: Space.md),
             if (k == _SheetKind.back)
-              PrimaryButton.secondary(
+            PrimaryButton.secondary(
                 label: title,
                 onPressed: () => _submit(l10n),
               )
@@ -399,16 +399,16 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(Space.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
                             child: Text(
-                              l.heading(bangla: bangla),
-                              style: Theme.of(context).textTheme.titleMedium
+                                l.heading(bangla: bangla),
+                                style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -420,13 +420,13 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        [
-                          l.bodyCode,
-                          l.licenceNo,
-                          l.siteLabel(bangla: bangla),
-                        ].join(' · '),
-                        style: Theme.of(context).textTheme.bodySmall
+                              Text(
+                                [
+                                  l.bodyCode,
+                                  l.licenceNo,
+                                  l.siteLabel(bangla: bangla),
+                                ].join(' · '),
+                                style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
                       if (statute.isNotEmpty) ...[
@@ -457,12 +457,12 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                       ],
                       const SizedBox(height: Space.sm),
                       Text(
-                        licenceNextLine(l10n, l, bangla: bangla),
+                            licenceNextLine(l10n, l, bangla: bangla),
                         style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                 ),
               ),
 
@@ -485,7 +485,7 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                       l10n.cpWhyMatters,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    children: [
+                          children: [
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -497,15 +497,15 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                         const SizedBox(height: Space.xs),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(
+                              child: Text(
                             l10n.cpExposureDay(
                               licenceTaka(riskTk, bangla: bangla),
                             ),
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: scheme.onSurfaceVariant),
-                          ),
-                        ),
-                      ],
+                              ),
+                            ),
+                          ],
                     ],
                   ),
                 ),
@@ -555,34 +555,34 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                   m.canBack ||
                   (r != null && r.stage != 'RENEWED') ||
                   (r?.certificateNo != null))
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: scheme.outlineVariant),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(Space.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (r == null) ...[
-                          if (m.canRenew)
-                            PrimaryButton(
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: scheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(Space.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (r == null) ...[
+                        if (m.canRenew)
+                          PrimaryButton(
                               label: l10n.cpActRenew,
                               loading: _busy,
-                              onPressed: _busy
-                                  ? null
-                                  : () => unawaited(
-                                      _run(
-                                        () => _repo.act(l.id, 'renewals'),
+                            onPressed: _busy
+                                ? null
+                                : () => unawaited(
+                                    _run(
+                                      () => _repo.act(l.id, 'renewals'),
                                         l10n.cpDoneRenew,
-                                      ),
                                     ),
-                            ),
-                        ],
+                                  ),
+                          ),
+                      ],
 
-                        if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
+                      if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
                           Text(
                             l10n.cpChecklist,
                             style: Theme.of(context).textTheme.titleSmall,
@@ -603,8 +603,8 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                               PrimaryButton(
                                 label: l10n.cpActFund,
                                 loading: _busy,
-                                onPressed: _busy
-                                    ? null
+                              onPressed: _busy
+                                  ? null
                                     : () => unawaited(
                                         _run(
                                           () => _repo.act(l.id, 'fund'),
@@ -614,28 +614,28 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                               ),
                             if (m.canFund) const SizedBox(height: Space.sm),
                           ],
-                          for (final c in r.checklist)
-                            CheckboxListTile(
-                              contentPadding: EdgeInsets.zero,
+                        for (final c in r.checklist)
+                          CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
                               title: Text(c.display(bangla: bangla)),
-                              value: c.status == 'PASSED',
+                            value: c.status == 'PASSED',
                               subtitle: c.note != null ? Text(c.note!) : null,
-                              onChanged:
+                            onChanged:
                                   !m.canChecklist ||
                                       c.status == 'PASSED' ||
                                       _busy
-                                  ? null
-                                  : (_) => unawaited(
-                                      _run(
-                                        () => _repo.tickItem(l.id, c.id, {
-                                          'status': 'PASSED',
-                                        }),
+                                ? null
+                                : (_) => unawaited(
+                                    _run(
+                                      () => _repo.tickItem(l.id, c.id, {
+                                        'status': 'PASSED',
+                                      }),
                                         l10n.cpDoneTick,
-                                      ),
                                     ),
-                            ),
-                          const SizedBox(height: Space.sm),
-                          PrimaryButton(
+                                  ),
+                          ),
+                        const SizedBox(height: Space.sm),
+                        PrimaryButton(
                             label: l10n.cpActFile,
                             loading: _busy,
                             onPressed:
@@ -645,17 +645,17 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                                       (c) => c.status == 'PENDING',
                                     ) ||
                                     (r.feeAmount > 0 && !r.fundApproved)
-                                ? null
-                                : () => unawaited(
-                                    _run(
-                                      () => _repo.act(l.id, 'advance'),
+                              ? null
+                              : () => unawaited(
+                                  _run(
+                                    () => _repo.act(l.id, 'advance'),
                                       l10n.cpDoneAdvance,
-                                    ),
                                   ),
-                          ),
-                        ],
+                                ),
+                        ),
+                      ],
 
-                        if (r != null && r.stage == 'APPLICATION_FILED') ...[
+                      if (r != null && r.stage == 'APPLICATION_FILED') ...[
                           PrimaryButton(
                             label: l10n.cpActInspect,
                             loading: _busy,
@@ -665,29 +665,29 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                           ),
                         ],
 
-                        if (r != null && r.stage == 'FIELD_INSPECTION') ...[
-                          if (r.inspectorName != null) ...[
-                            Text(
+                      if (r != null && r.stage == 'FIELD_INSPECTION') ...[
+                        if (r.inspectorName != null) ...[
+                          Text(
                               r.inspectorName!,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: Space.sm),
                           ],
-                          PrimaryButton(
+                        PrimaryButton(
                             label: l10n.cpActFindings,
                             loading: _busy,
                             onPressed: _busy || !m.canAdvance
-                                ? null
+                              ? null
                                 : () => unawaited(_openFindings(l)),
-                          ),
-                        ],
+                        ),
+                      ],
 
-                        if (r != null && r.stage == 'MINISTRY_VETTING') ...[
-                          PrimaryButton(
+                      if (r != null && r.stage == 'MINISTRY_VETTING') ...[
+                        PrimaryButton(
                             label: l10n.cpActComplete,
                             loading: _busy,
                             onPressed: _busy || !m.canAdvance
-                                ? null
+                              ? null
                                 : () => unawaited(_openCertificate(l)),
                           ),
                         ],
@@ -695,30 +695,30 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                         if (r != null &&
                             r.stage == 'RENEWED' &&
                             r.certificateNo != null)
-                          Text(
+                                  Text(
                             r.certificateNo!,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
 
                         if (m.canBack) ...[
-                          const SizedBox(height: Space.md),
-                          Center(
+                        const SizedBox(height: Space.md),
+                        Center(
                             child: TextButton(
                               onPressed: _busy
                                   ? null
                                   : () => unawaited(_openRevert(l)),
                               child: Text(l10n.cpActBack),
-                            ),
                           ),
-                        ],
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
+              ),
 
               if (m.canLetter) ...[
-                const SizedBox(height: Space.md),
-                PrimaryButton.secondary(
+              const SizedBox(height: Space.md),
+                      PrimaryButton.secondary(
                   label: l10n.cpActLetter,
                   loading: _busy,
                   onPressed: _busy ? null : () => unawaited(_openLetter(l)),
@@ -731,51 +731,51 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: Space.sm),
                     child: Card(
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: scheme.outlineVariant),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(Space.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(Space.md),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
                                 Expanded(
                                   child: Text(
-                                    letter.memoNo,
+                                      letter.memoNo,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleSmall,
-                                  ),
-                                ),
-                                StatusPill(
+                                      ),
+                                    ),
+                                    StatusPill(
                                   label: _channelLabel(l10n, letter.channel),
-                                  tone: StatusTone.info,
+                                      tone: StatusTone.info,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              letter.subject,
+                                const SizedBox(height: 4),
+                                Text(
+                                  letter.subject,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             if (letter.parcelId != null)
                               TextButton(
                                 onPressed: () => unawaited(
                                   context.push(
-                                    AppRoutes.parcelDetail(letter.parcelId!),
-                                  ),
+                                      AppRoutes.parcelDetail(letter.parcelId!),
+                                    ),
                                 ),
                                 child: Text(l10n.cpTrackParcel),
                               ),
                           ],
                         ),
-                      ),
                     ),
                   ),
+                ),
               ],
             ],
           );

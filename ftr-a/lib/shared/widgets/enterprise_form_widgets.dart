@@ -450,6 +450,8 @@ class EnterpriseDateTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     valueText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
