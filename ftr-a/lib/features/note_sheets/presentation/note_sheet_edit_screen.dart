@@ -346,23 +346,25 @@ class _FormState extends ConsumerState<_Form> {
   Widget _signersSection(AppL10n l10n, bool bangla) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    return EnterpriseSectionCard(
-      stepNumber: 3,
-      icon: Icons.draw_outlined,
+    return _Card(
       title: l10n.nsWhoTitle,
-      subtitle: _returned
-          ? l10n.nsRouteKept
-          : _signersCustom
-          ? l10n.nsRouteCustom
-          : l10n.nsRouteSuggested,
       children: [
-        if (_returned)
-          const SizedBox.shrink()
-        else ...[
+        Text(
+          _returned
+              ? l10n.nsRouteKept
+              : _signersCustom
+              ? l10n.nsRouteCustom
+              : l10n.nsRouteSuggested,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        if (!_returned) ...[
+          const SizedBox(height: Space.sm),
           if (_signers.isEmpty)
             Text(
               l10n.nsRouteEmpty,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
               ),
             )
@@ -389,7 +391,7 @@ class _FormState extends ConsumerState<_Form> {
             alignment: AlignmentDirectional.centerStart,
             child: TextButton.icon(
               onPressed: () => unawaited(_addSigner()),
-              icon: const Icon(Icons.person_add_alt),
+              icon: const Icon(Icons.person_add_alt, size: 18),
               label: Text(l10n.nsRouteAdd),
             ),
           ),
@@ -424,7 +426,7 @@ class _FormState extends ConsumerState<_Form> {
               ),
             ),
             CircleAvatar(
-              radius: 14,
+              radius: 12,
               backgroundColor: cs.primaryContainer,
               child: Text(
                 '${index + 1}',
@@ -510,20 +512,12 @@ class _FormState extends ConsumerState<_Form> {
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
-            Space.lg,
+            Space.md,
+            Space.sm,
             Space.md,
             Space.lg,
-            Space.xxl,
           ),
           children: [
-            EnterpriseApplicantStrip(
-              badgeLabel: _returned
-                  ? (bangla ? 'ফেরত পাঠানো' : 'RETURNED')
-                  : existing == null
-                  ? (bangla ? 'নতুন নোট শিট' : 'NEW NOTE SHEET')
-                  : (bangla ? 'খসড়া সম্পাদনা' : 'EDITING DRAFT'),
-            ),
-            const SizedBox(height: Space.md),
             if (returnedWhy != null) ...[
               Container(
                 padding: const EdgeInsets.all(Space.md),
@@ -564,15 +558,8 @@ class _FormState extends ConsumerState<_Form> {
               ),
               const SizedBox(height: Space.md),
             ],
-            EnterpriseSectionCard(
-              stepNumber: 1,
-              icon: Icons.description_outlined,
-              title: bangla
-                  ? 'শিরোনাম ও নথির শ্রেণিবিন্যাস'
-                  : 'Subject & Document Classification',
-              subtitle: bangla
-                  ? 'নোট শিটের শিরোনাম, জরুরিতা এবং গোপনীয়তার স্তর নির্ধারণ করুন'
-                  : 'Set the note sheet title, urgency tier, and confidentiality level',
+            _Card(
+              title: l10n.nsFieldTitle,
               children: [
                 AppTextField(
                   label: l10n.nsFieldTitle,
@@ -583,7 +570,7 @@ class _FormState extends ConsumerState<_Form> {
                   validator: (v) =>
                       (v ?? '').trim().length < 5 ? l10n.nsErrTitle : null,
                 ),
-                const SizedBox(height: Space.md),
+                const SizedBox(height: Space.sm),
                 AppTextField(
                   label: l10n.nsFieldSubject,
                   controller: _subject,
@@ -593,72 +580,50 @@ class _FormState extends ConsumerState<_Form> {
                   validator: (v) =>
                       (v ?? '').trim().length < 3 ? l10n.nsErrSubject : null,
                 ),
-                const SizedBox(height: Space.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: EnterpriseDropdownField<String>(
-                        label: l10n.nsFieldUrgency,
-                        icon: Icons.bolt_outlined,
-                        value: _urgency,
-                        items: [
-                          DropdownMenuItem(
-                            value: 'NORMAL',
-                            child: Text(l10n.nsUrgNormal),
-                          ),
-                          DropdownMenuItem(
-                            value: 'HIGH',
-                            child: Text(l10n.nsUrgHigh),
-                          ),
-                          DropdownMenuItem(
-                            value: 'CRITICAL',
-                            child: Text(l10n.nsUrgCritical),
-                          ),
-                        ],
-                        onChanged: (v) =>
-                            setState(() => _urgency = v ?? _urgency),
-                      ),
+                const SizedBox(height: Space.sm),
+                EnterpriseDropdownField<String>(
+                  label: l10n.nsFieldUrgency,
+                  icon: Icons.bolt_outlined,
+                  value: _urgency,
+                  items: [
+                    DropdownMenuItem(
+                      value: 'NORMAL',
+                      child: Text(l10n.nsUrgNormal),
                     ),
-                    const SizedBox(width: Space.sm),
-                    Expanded(
-                      child: EnterpriseDropdownField<String>(
-                        label: l10n.nsFieldConfidentiality,
-                        icon: Icons.lock_outline,
-                        value: _confidentiality,
-                        items: [
-                          DropdownMenuItem(
-                            value: 'INTERNAL',
-                            child: Text(l10n.nsConfInternal),
-                          ),
-                          DropdownMenuItem(
-                            value: 'CONFIDENTIAL',
-                            child: Text(l10n.nsConfConfidential),
-                          ),
-                          DropdownMenuItem(
-                            value: 'SECRET',
-                            child: Text(l10n.nsConfSecret),
-                          ),
-                        ],
-                        onChanged: (v) => setState(
-                          () => _confidentiality = v ?? _confidentiality,
-                        ),
-                      ),
+                    DropdownMenuItem(
+                      value: 'HIGH',
+                      child: Text(l10n.nsUrgHigh),
+                    ),
+                    DropdownMenuItem(
+                      value: 'CRITICAL',
+                      child: Text(l10n.nsUrgCritical),
                     ),
                   ],
+                  onChanged: (v) => setState(() => _urgency = v ?? _urgency),
                 ),
-              ],
-            ),
-            const SizedBox(height: Space.md),
-            EnterpriseSectionCard(
-              stepNumber: 2,
-              icon: Icons.payments_outlined,
-              title: bangla
-                  ? 'আর্থিক মূল্যমান ও প্রস্তাবের যৌক্তিকতা'
-                  : 'Financial Sanction & Justification',
-              subtitle: bangla
-                  ? 'প্রস্তাবিত ব্যয়ের পরিমাণ ও বিস্তারিত যৌক্তিকতা উল্লেখ করুন'
-                  : 'Specify estimated expenditure and background justification',
-              children: [
+                const SizedBox(height: Space.sm),
+                EnterpriseDropdownField<String>(
+                  label: l10n.nsFieldConfidentiality,
+                  icon: Icons.lock_outline,
+                  value: _confidentiality,
+                  items: [
+                    DropdownMenuItem(
+                      value: 'INTERNAL',
+                      child: Text(l10n.nsConfInternal),
+                    ),
+                    DropdownMenuItem(
+                      value: 'CONFIDENTIAL',
+                      child: Text(l10n.nsConfConfidential),
+                    ),
+                    DropdownMenuItem(
+                      value: 'SECRET',
+                      child: Text(l10n.nsConfSecret),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      setState(() => _confidentiality = v ?? _confidentiality),
+                ),
+                const SizedBox(height: Space.sm),
                 AppTextField(
                   label: l10n.nsFieldAmount,
                   controller: _amount,
@@ -668,20 +633,18 @@ class _FormState extends ConsumerState<_Form> {
                   onChanged: (_) => _onAmountChanged(),
                 ),
                 if (!_returned) ...[
-                  const SizedBox(height: Space.md),
+                  const SizedBox(height: Space.sm),
                   EnterpriseTemplateDropdown(
                     presets: _nsTemplates,
                     controller: _justification,
                     onPicked: () => setState(() {}),
-                    labelEn: 'Standard BOGCL Note Sheet Template (Quick Fill)',
-                    labelBn: 'স্ট্যান্ডার্ড নোট শিট টেমপ্লেট (দ্রুত পূরণ)',
                   ),
                   const SizedBox(height: Space.sm),
                   AppTextField(
                     label: l10n.nsFieldJustification,
                     controller: _justification,
                     required: true,
-                    maxLines: 5,
+                    maxLines: 3,
                     maxLength: 10000,
                     onChanged: (_) => setState(() {}),
                     validator: (v) => (v ?? '').trim().length < 10
@@ -691,58 +654,26 @@ class _FormState extends ConsumerState<_Form> {
                 ],
               ],
             ),
-            const SizedBox(height: Space.md),
-            EnterpriseSectionCard(
-              stepNumber: 3,
-              icon: Icons.request_quote_outlined,
+            _Card(
               title: l10n.nsQuotesTitle,
-              subtitle: _quotesRequired
-                  ? l10n.nsQuotesNeeded
-                  : l10n.nsQuotesOptional,
-              trailing: FilledButton.tonalIcon(
-                onPressed: _quotes.length >= 6
-                    ? null
-                    : () => unawaited(_editQuote()),
-                icon: const Icon(Icons.add, size: 16),
-                label: Text(l10n.nsQuoteAdd),
-              ),
               children: [
-                if (_quotes.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(Space.md),
-                    decoration: BoxDecoration(
-                      color: cs.surface,
-                      borderRadius: BorderRadius.circular(Radii.sm),
-                      border: Border.all(
-                        color: _quotesRequired
-                            ? context.bogcl.warning.withValues(alpha: 0.5)
-                            : cs.outlineVariant,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _quotesRequired
-                              ? Icons.warning_amber_rounded
-                              : Icons.info_outline,
-                          size: 18,
-                          color: _quotesRequired
-                              ? context.bogcl.warning
-                              : cs.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: Space.sm),
-                        Expanded(
-                          child: Text(
-                            _quotesRequired
-                                ? l10n.nsQuotesNeeded
-                                : l10n.nsQuotesOptional,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
+                Text(
+                  _quotesRequired ? l10n.nsQuotesNeeded : l10n.nsQuotesOptional,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: _quotes.length >= 6
+                        ? null
+                        : () => unawaited(_editQuote()),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(l10n.nsQuoteAdd),
+                  ),
+                ),
+                if (_quotes.isNotEmpty)
                   RadioGroup<int>(
                     groupValue: _quotes.indexWhere((q) => q.isRecommended),
                     onChanged: (i) => setState(() {
@@ -754,29 +685,24 @@ class _FormState extends ConsumerState<_Form> {
                     child: Column(
                       children: [
                         for (final (i, q) in _quotes.indexed)
-                          Card(
-                            margin: const EdgeInsets.only(bottom: Space.xs),
-                            child: ListTile(
-                              leading: Radio<int>(value: i),
-                              title: Text(
-                                q.vendorName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              subtitle: Text(
-                                '${taka(q.amount, bangla: bangla)}\n'
-                                '${l10n.nsQuoteMeta(q.deliveryDays, q.warrantyMonths)}',
-                              ),
-                              isThreeLine: true,
-                              onTap: () => unawaited(_editQuote(i)),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.close),
-                                tooltip: l10n.commonCancel,
-                                onPressed: () => setState(() {
-                                  _quotes = [..._quotes]..removeAt(i);
-                                }),
-                              ),
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            leading: Radio<int>(value: i),
+                            title: Text(
+                              q.vendorName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(taka(q.amount, bangla: bangla)),
+                            onTap: () => unawaited(_editQuote(i)),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.close, size: 18),
+                              tooltip: l10n.commonCancel,
+                              onPressed: () => setState(() {
+                                _quotes = [..._quotes]..removeAt(i);
+                              }),
                             ),
                           ),
                       ],
@@ -792,20 +718,48 @@ class _FormState extends ConsumerState<_Form> {
                   ),
                 ],
                 if (_needsReco) ...[
-                  const SizedBox(height: Space.md),
+                  const SizedBox(height: Space.sm),
                   AppTextField(
                     label: l10n.nsRecoNote,
                     controller: _reco,
-                    maxLines: 3,
+                    maxLines: 2,
                     maxLength: 1000,
                     onChanged: (_) => setState(() {}),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: Space.md),
             _signersSection(l10n, bangla),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.md),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(Space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              const SizedBox(height: Space.sm),
+              ...children,
+            ],
+          ),
         ),
       ),
     );

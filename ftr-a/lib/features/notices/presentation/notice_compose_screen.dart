@@ -198,7 +198,6 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
             ),
             children: [
               _Card(
-                title: l10n.noticeFieldTitle,
                 children: [
                   AppTextField(
                     label: l10n.noticeFieldTitle,
@@ -237,18 +236,14 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
                   AppTextField(
                     label: l10n.noticeFieldBody,
                     controller: _body,
-                    maxLines: 4,
+                    maxLines: 3,
                     maxLength: 5000,
                     required: true,
                     textInputAction: TextInputAction.newline,
                     keyboardType: TextInputType.multiline,
                     onChanged: (_) => setState(() => _draftIndex = null),
                   ),
-                ],
-              ),
-              _Card(
-                title: l10n.noticeFieldAudience,
-                children: [
+                  const SizedBox(height: Space.sm),
                   EnterpriseDropdownField<_Audience>(
                     label: l10n.noticeFieldAudience,
                     icon: Icons.groups_outlined,
@@ -368,14 +363,12 @@ class _NoticeComposeScreenState extends ConsumerState<NoticeComposeScreen> {
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.title, required this.children});
+  const _Card({required this.children});
 
-  final String title;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: Space.md),
       child: Card(
@@ -384,11 +377,7 @@ class _Card extends StatelessWidget {
           padding: const EdgeInsets.all(Space.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: Space.sm),
-              ...children,
-            ],
+            children: children,
           ),
         ),
       ),
