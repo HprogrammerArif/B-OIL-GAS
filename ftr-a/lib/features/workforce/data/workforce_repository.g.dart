@@ -45,6 +45,7 @@ final class WorkforceRepositoryProvider
     return workforceRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(WorkforceRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -54,4 +55,4 @@ final class WorkforceRepositoryProvider
 }
 
 String _$workforceRepositoryHash() =>
-    r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    r'dba5d52b6080e3c0bdda6796443061ac6360e936';

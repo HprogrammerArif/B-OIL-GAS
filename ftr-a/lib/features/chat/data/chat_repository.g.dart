@@ -39,6 +39,7 @@ final class ChatRepositoryProvider
     return chatRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(ChatRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -47,4 +48,4 @@ final class ChatRepositoryProvider
   }
 }
 
-String _$chatRepositoryHash() => r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+String _$chatRepositoryHash() => r'b7eb0543018e3e6e6fed48214bc71fa07eb32f5b';

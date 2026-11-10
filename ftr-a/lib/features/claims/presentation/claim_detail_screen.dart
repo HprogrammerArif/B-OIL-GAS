@@ -6,6 +6,8 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/security/secure_flag.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/features/approvals/data/approval_repository.dart';
+import 'package:bogcl_oneops/features/approvals/presentation/approval_providers.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/claims/data/claim_repository.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
@@ -13,6 +15,7 @@ import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
 import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/workflow/presentation/approval_timeline.dart';
+import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -40,13 +43,16 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
       ..invalidate(claimDetailProvider(widget.id))
       ..invalidate(claimsProvider)
       ..invalidate(advancesProvider)
-      ..invalidate(claimPolicyProvider);
+      ..invalidate(claimPolicyProvider)
+      ..invalidate(approvalInboxProvider)
+      ..invalidate(approvalDetailProvider);
   }
 
   Future<void> _run(
     Future<Object?> Function() action,
     String done, {
     required String failed,
+    bool apiMessage = false,
   }) async {
     setState(() => _busy = true);
     try {
@@ -60,8 +66,10 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
       final l10n = context.l10n;
       AppToast.show(
         context,
-        e.code == ApiErrorCode.policyViolation ||
-                e.code == ApiErrorCode.validationError
+        apiMessage && e.message.isNotEmpty
+            ? e.message
+            : e.code == ApiErrorCode.policyViolation ||
+                  e.code == ApiErrorCode.validationError
             ? l10n.claimErrBlocked
             : failed,
         tone: StatusTone.danger,
@@ -103,6 +111,39 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
     );
   }
 
+  Future<void> _verify(Claim c) async {
+    final l10n = context.l10n;
+    final id = c.workflowInstanceId;
+    if (!c.awaitingYou || id == null) return;
+    await _run(
+      () => ref.read(approvalRepositoryProvider).approve(id),
+      l10n.claimVerified,
+      failed: l10n.claimErrFailed,
+      apiMessage: true,
+    );
+  }
+
+  Future<void> _returnClaim(Claim c) async {
+    final id = c.workflowInstanceId;
+    if (!c.awaitingYou || id == null) return;
+    final note = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => const _ReturnSheet(),
+    );
+    if (note == null || !mounted) return;
+    final l10n = context.l10n;
+    await _run(
+      () => ref
+          .read(approvalRepositoryProvider)
+          .returnForChanges(id, comment: note),
+      l10n.claimReturnedToast,
+      failed: l10n.claimErrFailed,
+      apiMessage: true,
+    );
+  }
+
   Future<void> _pay(Claim c) async {
     final l10n = context.l10n;
     final net = c.netSettlement ?? c.totalAmount;
@@ -138,6 +179,8 @@ class _ClaimDetailScreenState extends ConsumerState<ClaimDetailScreen> {
             onSubmit: () => unawaited(_submit(c)),
             onCancel: () => unawaited(_cancel(c)),
             onPay: () => unawaited(_pay(c)),
+            onVerify: () => unawaited(_verify(c)),
+            onReturn: () => unawaited(_returnClaim(c)),
           ),
         ),
       ),
@@ -152,6 +195,8 @@ class _Body extends ConsumerWidget {
     required this.onSubmit,
     required this.onCancel,
     required this.onPay,
+    required this.onVerify,
+    required this.onReturn,
   });
 
   final Claim claim;
@@ -159,6 +204,8 @@ class _Body extends ConsumerWidget {
   final VoidCallback onSubmit;
   final VoidCallback onCancel;
   final VoidCallback onPay;
+  final VoidCallback onVerify;
+  final VoidCallback onReturn;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -176,6 +223,20 @@ class _Body extends ConsumerWidget {
     final period = c.periodStart == null
         ? null
         : DateFmt.range(c.periodStart!, c.periodEnd ?? c.periodStart!, lang);
+    final receipts = [
+      for (final l in c.lines)
+        if (l.receiptFileId != null) l.receiptFileId!,
+    ];
+    final next = claimNextLine(
+      l10n,
+      c,
+      bangla: bangla,
+      awaitingYou: c.awaitingYou,
+    );
+    final showBar =
+        (isOwner && (c.status.editable || c.status.pending)) ||
+        c.awaitingYou ||
+        canPay;
 
     return Column(
       children: [
@@ -192,12 +253,11 @@ class _Body extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(claimTypeIcon(c.type)),
-                            const SizedBox(width: Space.sm),
                             Expanded(
                               child: Text(
-                                claimTypeLabel(l10n, c.type),
+                                c.purpose,
                                 style: theme.textTheme.titleLarge,
                               ),
                             ),
@@ -207,35 +267,28 @@ class _Body extends ConsumerWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: Space.xs),
                         Text(
-                          c.claimNo,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
+                          '${claimTypeLabel(l10n, c.type)} · '
+                          '${bdt(c.totalAmount, bangla: bangla)}',
+                          style: theme.textTheme.titleMedium,
                         ),
+                        if (!isOwner) ...[
+                          const SizedBox(height: Space.xs),
+                          Text(c.displayEmployee(bangla: bangla)),
+                        ],
+                        if (period != null) ...[
+                          const SizedBox(height: Space.xs),
+                          Text(period),
+                        ],
+                        if (c.destinationName != null) ...[
+                          const SizedBox(height: Space.xs),
+                          Text(c.destinationName!),
+                        ],
                         const SizedBox(height: Space.md),
-                        if (!isOwner)
-                          _Fact(
-                            l10n.claimFieldEmployee,
-                            c.displayEmployee(bangla: bangla),
-                          ),
-                        _Fact(l10n.claimFieldPurpose, c.purpose),
-                        if (period != null)
-                          _Fact(l10n.claimFieldPeriod, period),
-                        if (c.destinationName != null)
-                          _Fact(l10n.claimFieldDestination, c.destinationName!),
-                        if (c.travelMode != null)
-                          _Fact(
-                            l10n.claimFieldMode,
-                            travelModeLabel(l10n, c.travelMode!),
-                          ),
-                        const Divider(height: Space.xl),
-                        _Fact(
-                          l10n.claimTotal,
-                          bdt(c.totalAmount, bangla: bangla),
-                          strong: true,
-                        ),
+                        Text(next, style: theme.textTheme.bodyMedium),
                         if (c.advance != null) ...[
+                          const Divider(height: Space.xl),
                           _Fact(
                             l10n.claimAdvanceAdjusted,
                             '− ${bdt(c.advance!.amount, bangla: bangla)}',
@@ -248,13 +301,21 @@ class _Body extends ConsumerWidget {
                             strong: true,
                           ),
                         ],
-                        if (c.voucherNo != null)
-                          _Fact(l10n.claimVoucher, c.voucherNo!),
                       ],
                     ),
                   ),
                 ),
               ),
+              if (receipts.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    Space.lg,
+                    0,
+                    Space.lg,
+                    Space.md,
+                  ),
+                  child: EvidenceStrip(fileIds: receipts),
+                ),
               if (c.flags.isNotEmpty) _Flags(flags: c.flags),
               if (c.reviewComment != null &&
                   (c.status == ClaimStatus.rejected ||
@@ -292,16 +353,6 @@ class _Body extends ConsumerWidget {
                     if (l.distanceKm != null)
                       l10n.claimKm(l.distanceKm!.toStringAsFixed(0)),
                   ].join('\n'),
-                  leading: Icon(
-                    l.system
-                        ? Icons.auto_awesome
-                        : l.receiptFileId != null
-                        ? Icons.receipt_long_outlined
-                        : l.isDeclaration
-                        ? Icons.edit_note
-                        : Icons.notes_outlined,
-                    size: 20,
-                  ),
                   trailing: l.system
                       ? StatusPill(
                           label: l10n.claimLineAuto,
@@ -310,11 +361,6 @@ class _Body extends ConsumerWidget {
                       : l.isDeclaration
                       ? StatusPill(label: l10n.claimLineDeclared)
                       : null,
-                  onTap: l.receiptFileId == null
-                      ? null
-                      : () => unawaited(
-                          showFileImage(context, ref, l.receiptFileId!),
-                        ),
                 ),
               if (c.workflowInstanceId != null) ...[
                 SectionHeader(title: l10n.claimRoute),
@@ -326,10 +372,35 @@ class _Body extends ConsumerWidget {
                   ),
                 ),
               ],
+              ExpansionTile(
+                title: Text(l10n.nsDetails),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Space.lg,
+                      0,
+                      Space.lg,
+                      Space.md,
+                    ),
+                    child: Column(
+                      children: [
+                        _Fact(l10n.claimNumber, c.claimNo),
+                        if (c.voucherNo != null)
+                          _Fact(l10n.claimVoucher, c.voucherNo!),
+                        if (c.travelMode != null)
+                          _Fact(
+                            l10n.claimFieldMode,
+                            travelModeLabel(l10n, c.travelMode!),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-        if ((isOwner && (c.status.editable || c.status.pending)) || canPay)
+        if (showBar)
           SafeArea(
             top: false,
             child: Padding(
@@ -371,6 +442,18 @@ class _Body extends ConsumerWidget {
                       label: l10n.claimWithdraw,
                       onPressed: busy ? null : onCancel,
                     ),
+                  if (c.awaitingYou) ...[
+                    PrimaryButton(
+                      label: l10n.claimVerify,
+                      loading: busy,
+                      onPressed: onVerify,
+                    ),
+                    const SizedBox(height: Space.sm),
+                    PrimaryButton.secondary(
+                      label: l10n.claimReturn,
+                      onPressed: busy ? null : onReturn,
+                    ),
+                  ],
                   if (canPay)
                     PrimaryButton(
                       label: l10n.claimPay,
@@ -422,6 +505,94 @@ class _Flags extends StatelessWidget {
                     ],
                   ),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReturnSheet extends StatefulWidget {
+  const _ReturnSheet();
+
+  @override
+  State<_ReturnSheet> createState() => _ReturnSheetState();
+}
+
+class _ReturnSheetState extends State<_ReturnSheet> {
+  final _text = TextEditingController();
+  bool _showError = false;
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _confirm() {
+    final value = _text.text.trim();
+    if (value.length < 20) {
+      setState(() => _showError = true);
+      return;
+    }
+    Navigator.of(context).pop(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final presets = [
+      l10n.claimReturnPreset1,
+      l10n.claimReturnPreset2,
+      l10n.claimReturnPreset3,
+      l10n.claimReturnPreset4,
+    ];
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.claimReturnTitle, style: theme.textTheme.titleLarge),
+              const SizedBox(height: Space.md),
+              AppTextField(
+                label: l10n.claimReturnHint,
+                controller: _text,
+                maxLines: 4,
+                maxLength: 1000,
+                required: true,
+                errorText: _showError && _text.text.trim().length < 20
+                    ? l10n.approvalErrMinChars(20)
+                    : null,
+                onChanged: (_) => setState(() => _showError = false),
+              ),
+              const SizedBox(height: Space.sm),
+              Wrap(
+                spacing: Space.xs,
+                runSpacing: Space.xs,
+                children: [
+                  for (final p in presets)
+                    FilterChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(
+                        p,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      selected: _text.text.trim() == p,
+                      onSelected: (_) => setState(() {
+                        _text.text = p;
+                        _showError = false;
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: Space.lg),
+              PrimaryButton(label: l10n.claimReturn, onPressed: _confirm),
             ],
           ),
         ),

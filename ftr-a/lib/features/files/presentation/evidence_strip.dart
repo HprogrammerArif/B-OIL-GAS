@@ -44,12 +44,14 @@ class EvidenceStrip extends ConsumerStatefulWidget {
     this.onAdded,
     this.canAdd = false,
     this.max = 6,
+    this.purpose = 'PHOTO',
   });
 
   final List<String> fileIds;
   final Future<void> Function(String fileId)? onAdded;
   final bool canAdd;
   final int max;
+  final String purpose;
 
   @override
   ConsumerState<EvidenceStrip> createState() => _EvidenceStripState();
@@ -65,7 +67,7 @@ class _EvidenceStripState extends ConsumerState<EvidenceStrip> {
     setState(() => _busy = true);
     try {
       final up = ref.read(uploadServiceProvider);
-      final meta = await up.upload(picked, purpose: 'PHOTO');
+      final meta = await up.upload(picked, purpose: widget.purpose);
       await up.awaitClean(meta.id);
       await widget.onAdded?.call(meta.id);
     } on ApiException catch (e) {

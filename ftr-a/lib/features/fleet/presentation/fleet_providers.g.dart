@@ -38,7 +38,9 @@ final class FleetRequisitionsProvider
 
   @override
   String toString() {
-    return r'fleetRequisitionsProvider$argument';
+    return r'fleetRequisitionsProvider'
+        ''
+        '$argument';
   }
 
   @$internal
@@ -64,7 +66,7 @@ final class FleetRequisitionsProvider
   }
 }
 
-String _$fleetRequisitionsHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$fleetRequisitionsHash() => r'0370eebb84031cb457336dca3657dcd4a653aecc';
 
 final class FleetRequisitionsFamily extends $Family
     with
@@ -120,7 +122,9 @@ final class FleetDetailProvider
 
   @override
   String toString() {
-    return r'fleetDetailProvider($argument)';
+    return r'fleetDetailProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -146,7 +150,7 @@ final class FleetDetailProvider
   }
 }
 
-String _$fleetDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$fleetDetailHash() => r'994adefd28a53ebee4d8d3e8f2cf61d8f9626831';
 
 final class FleetDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<VehicleRequisition>, String> {
@@ -203,4 +207,4 @@ final class FleetSosProvider
   }
 }
 
-String _$fleetSosHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$fleetSosHash() => r'f474e51fc6514f85672d17d3e96319b7f552843d';

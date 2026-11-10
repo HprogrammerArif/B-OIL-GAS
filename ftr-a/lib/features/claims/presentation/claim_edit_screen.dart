@@ -10,6 +10,7 @@ import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_line_sheet.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
@@ -104,6 +105,11 @@ class _FormState extends ConsumerState<_Form> {
 
   ClaimType get _type => widget.type;
   bool get _isConveyance => _type == ClaimType.conveyance;
+
+  List<String> get _receiptIds => [
+    for (final l in _lines)
+      if (l.receiptFileId != null) l.receiptFileId!,
+  ];
 
   @override
   void initState() {
@@ -317,26 +323,66 @@ class _FormState extends ConsumerState<_Form> {
                 Space.xxl,
               ),
               children: [
-                EnterpriseApplicantStrip(
-                  badgeLabel: claimTypeLabel(l10n, _type).toUpperCase(),
-                  badgeIcon: claimTypeIcon(_type),
+                _Card(
+                  title: l10n.claimFormWhy,
+                  children: [
+                    AppTextField(
+                      label: l10n.claimFieldPurpose,
+                      controller: _purpose,
+                      required: true,
+                      maxLength: 200,
+                      maxLines: 3,
+                      onChanged: (_) => setState(() {}),
+                      validator: (v) => (v ?? '').trim().length < 3
+                          ? l10n.claimErrPurpose
+                          : null,
+                    ),
+                    const SizedBox(height: Space.sm),
+                    Wrap(
+                      spacing: Space.xs,
+                      runSpacing: Space.xs,
+                      children: [
+                        for (final p in _claimPurposePresets)
+                          FilterChip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(
+                              bangla ? p.$2 : p.$1,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            selected: _purpose.text == (bangla ? p.$2 : p.$1),
+                            onSelected: (_) => setState(() {
+                              _purpose.text = bangla ? p.$2 : p.$1;
+                            }),
+                          ),
+                      ],
+                    ),
+                    if (_type == ClaimType.tourEvent &&
+                        openAdvances.isNotEmpty) ...[
+                      const SizedBox(height: Space.md),
+                      EnterpriseDropdownField<String?>(
+                        label: l10n.claimFieldAdvance,
+                        icon: Icons.account_balance_wallet_outlined,
+                        value: _advanceId,
+                        items: [
+                          DropdownMenuItem<String?>(
+                            child: Text(l10n.claimAdvanceNone),
+                          ),
+                          for (final a in openAdvances)
+                            DropdownMenuItem(
+                              value: a.id,
+                              child: Text(
+                                '${bdt(a.amount, bangla: bangla)} · ${a.advanceNo}',
+                              ),
+                            ),
+                        ],
+                        onChanged: (v) => setState(() => _advanceId = v),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: Space.md),
-                EnterpriseSectionCard(
-                  stepNumber: 1,
-                  icon: Icons.date_range_outlined,
-                  title: _isConveyance
-                      ? (bangla
-                            ? 'যাতায়াত বিলের সময়কাল'
-                            : 'Conveyance Claim Period')
-                      : (bangla
-                            ? 'ভ্রমণের সময়সূচি ও গন্তব্য'
-                            : 'Travel Schedule & Destination'),
-                  subtitle: _isConveyance
-                      ? (bangla
-                            ? 'বিলের শুরুর এবং শেষের তারিখ নির্বাচন করুন'
-                            : 'Select start and end dates for local conveyance')
-                      : l10n.claimDaAuto,
+                _Card(
+                  title: l10n.claimFormWhen,
                   children: [
                     if (_isConveyance) ...[
                       Row(
@@ -405,9 +451,7 @@ class _FormState extends ConsumerState<_Form> {
                         children: [
                           Expanded(
                             child: EnterpriseDropdownField<String>(
-                              label: bangla
-                                  ? 'গন্তব্য অঞ্চল'
-                                  : 'Destination Zone',
+                              label: l10n.claimFieldDestination,
                               icon: Icons.location_city_outlined,
                               value: _destination,
                               items: [
@@ -456,189 +500,67 @@ class _FormState extends ConsumerState<_Form> {
                     ],
                   ],
                 ),
-                const SizedBox(height: Space.md),
-                EnterpriseSectionCard(
-                  stepNumber: 2,
-                  icon: Icons.assignment_outlined,
-                  title: bangla
-                      ? 'দাপ্তরিক উদ্দেশ্য ও অগ্রিম সমন্বয়'
-                      : 'Official Purpose & Advance Adjustment',
-                  subtitle: bangla
-                      ? 'স্ট্যান্ডার্ড টেমপ্লেট বাছাই করুন অথবা ভ্রমণের উদ্দেশ্য লিখুন'
-                      : 'Select a standard BOGCL claim template or enter custom purpose',
+                _Card(
+                  title: l10n.claimFormLines,
                   children: [
-                    EnterpriseTemplateDropdown(
-                      presets: _claimPurposePresets,
-                      controller: _purpose,
-                      onPicked: () => setState(() {}),
-                      labelEn: 'Standard Claim Purpose (Quick Fill)',
-                      labelBn: 'স্ট্যান্ডার্ড বিলের উদ্দেশ্য (দ্রুত পূরণ)',
-                    ),
-                    const SizedBox(height: Space.sm),
-                    AppTextField(
-                      label: l10n.claimFieldPurpose,
-                      controller: _purpose,
-                      required: true,
-                      maxLength: 200,
-                      onChanged: (_) => setState(() {}),
-                      validator: (v) => (v ?? '').trim().length < 3
-                          ? l10n.claimErrPurpose
-                          : null,
-                    ),
-                    if (_type == ClaimType.tourEvent &&
-                        openAdvances.isNotEmpty) ...[
-                      const SizedBox(height: Space.md),
-                      EnterpriseDropdownField<String?>(
-                        label: l10n.claimFieldAdvance,
-                        icon: Icons.account_balance_wallet_outlined,
-                        value: _advanceId,
-                        items: [
-                          DropdownMenuItem<String?>(
-                            child: Text(l10n.claimAdvanceNone),
-                          ),
-                          for (final a in openAdvances)
-                            DropdownMenuItem(
-                              value: a.id,
-                              child: Text(
-                                '${bdt(a.amount, bangla: bangla)} · ${a.advanceNo}',
-                              ),
-                            ),
-                        ],
-                        onChanged: (v) => setState(() => _advanceId = v),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: TextButton.icon(
+                        onPressed: () => unawaited(_editLine()),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: Text(l10n.claimLineAdd),
                       ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: Space.md),
-                EnterpriseSectionCard(
-                  stepNumber: 3,
-                  icon: Icons.receipt_long_outlined,
-                  title: l10n.claimLines(_lines.length),
-                  subtitle: bangla
-                      ? 'ভাউচার ও রসিদসহ খরচের আইটেমসমূহ যুক্ত করুন'
-                      : 'Add itemised expense lines with receipts or self-declaration',
-                  trailing: FilledButton.tonalIcon(
-                    onPressed: () => unawaited(_editLine()),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: Text(l10n.claimLineAdd),
-                  ),
-                  children: [
+                    ),
                     if (_lines.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(Space.md),
-                        decoration: BoxDecoration(
-                          color: cs.surface,
-                          borderRadius: BorderRadius.circular(Radii.sm),
-                          border: Border.all(color: cs.outlineVariant),
+                      Text(
+                        l10n.claimNoLinesYet,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
                         ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.playlist_add_outlined,
-                              color: cs.onSurfaceVariant,
+                      )
+                    else
+                      for (final (i, l) in _lines.indexed)
+                        Dismissible(
+                          key: ValueKey('${l.id}_$i'),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            alignment: AlignmentDirectional.centerEnd,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Space.lg,
                             ),
-                            const SizedBox(width: Space.sm),
-                            Expanded(
-                              child: Text(
-                                l10n.claimNoLinesYet,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
+                            color: context.bogcl.danger,
+                            child: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
                             ),
-                          ],
-                        ),
-                      ),
-                    for (final (i, l) in _lines.indexed)
-                      Dismissible(
-                        key: ValueKey('${l.id}_$i'),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          alignment: AlignmentDirectional.centerEnd,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Space.lg,
                           ),
-                          color: context.bogcl.danger,
-                          child: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.white,
+                          onDismissed: (_) =>
+                              setState(() => _lines = [..._lines]..removeAt(i)),
+                          child: ListRow(
+                            title: l.category == 'MILEAGE'
+                                ? '${claimCategoryLabel(l10n, l.category)} · '
+                                      '${l10n.claimKm(l.distanceKm!.toStringAsFixed(0))}'
+                                : '${claimCategoryLabel(l10n, l.category)} · '
+                                      '${bdt(l.amount, bangla: bangla)}',
+                            subtitle: [
+                              DateFmt.range(l.date, l.date, lang),
+                              if (l.description.isNotEmpty) l.description,
+                            ].join(' · '),
+                            trailing: const Icon(Icons.edit_outlined, size: 18),
+                            onTap: () => unawaited(_editLine(i)),
                           ),
                         ),
-                        onDismissed: (_) =>
-                            setState(() => _lines = [..._lines]..removeAt(i)),
-                        child: ListRow(
-                          title: l.category == 'MILEAGE'
-                              ? '${claimCategoryLabel(l10n, l.category)} · '
-                                    '${l10n.claimKm(l.distanceKm!.toStringAsFixed(0))}'
-                              : '${claimCategoryLabel(l10n, l.category)} · '
-                                    '${bdt(l.amount, bangla: bangla)}',
-                          subtitle: [
-                            DateFmt.range(l.date, l.date, lang),
-                            if (l.description.isNotEmpty) l.description,
-                          ].join(' · '),
-                          leading: Icon(
-                            l.receiptFileId != null
-                                ? Icons.receipt_long_outlined
-                                : Icons.notes_outlined,
-                            size: 20,
-                          ),
-                          trailing: const Icon(Icons.edit_outlined, size: 18),
-                          onTap: () => unawaited(_editLine(i)),
-                        ),
-                      ),
+                    if (_receiptIds.isNotEmpty) ...[
+                      const SizedBox(height: Space.md),
+                      EvidenceStrip(fileIds: _receiptIds),
+                    ],
                     if (_lines.isNotEmpty) ...[
                       const SizedBox(height: Space.sm),
-                      Container(
-                        padding: const EdgeInsets.all(Space.md),
-                        decoration: BoxDecoration(
-                          color: cs.primaryContainer.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(Radii.sm),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              bangla
-                                  ? 'মোট দাখিলকৃত বিল'
-                                  : 'Entered Line Total',
-                              style: theme.textTheme.labelLarge,
-                            ),
-                            Text(
-                              l10n.claimEnteredTotal(
-                                bdt(total, bangla: bangla),
-                              ),
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: cs.primary,
-                              ),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        l10n.claimEnteredTotal(bdt(total, bangla: bangla)),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ],
-                  ],
-                ),
-                const SizedBox(height: Space.md),
-                EnterpriseWorkflowCard(
-                  title: bangla
-                      ? 'বিল যাচাই ও অর্থ পরিশোধ প্রক্রিয়া'
-                      : 'Claim Audit & Reimbursement Workflow',
-                  steps: [
-                    (
-                      Icons.receipt_long_outlined,
-                      bangla ? 'বিল দাখিল' : 'Claimant',
-                      bangla ? 'রসিদ সংযুক্ত' : 'Receipts Filed',
-                    ),
-                    (
-                      Icons.supervisor_account_outlined,
-                      bangla ? 'লাইন ম্যানেজার' : 'Line Manager',
-                      bangla ? 'সফর অনুমোদন' : 'Tour Verified',
-                    ),
-                    (
-                      Icons.account_balance_outlined,
-                      bangla ? 'অর্থ ও অডিট' : 'Finance Audit',
-                      bangla ? 'ব্যাংক পেআউট' : 'BDT Payout',
-                    ),
                   ],
                 ),
               ],
@@ -654,6 +576,35 @@ class _FormState extends ConsumerState<_Form> {
           onPrimaryPressed: () => unawaited(_save()),
         ),
       ],
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.lg),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              const SizedBox(height: Space.md),
+              ...children,
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

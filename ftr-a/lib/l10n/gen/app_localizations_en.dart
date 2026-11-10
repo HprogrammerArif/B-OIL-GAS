@@ -885,16 +885,129 @@ class AppL10nEn extends AppL10n {
   String get leaveFilterAll => 'All';
 
   @override
-  String get leaveStatusPending => 'Pending';
+  String get leaveStatusPending => 'Waiting';
+
+  @override
+  String get leaveStatusReturned => 'Needs changes';
 
   @override
   String get leaveStatusApproved => 'Approved';
 
   @override
-  String get leaveStatusRejected => 'Rejected';
+  String get leaveStatusRejected => 'Declined';
 
   @override
   String get leaveStatusCancelled => 'Cancelled';
+
+  @override
+  String get leaveTabMine => 'Mine';
+
+  @override
+  String leaveTabAwaiting(int count) {
+    return 'Waiting for you ($count)';
+  }
+
+  @override
+  String get leaveTabTeam => 'Team';
+
+  @override
+  String get leaveFilterWaiting => 'Waiting';
+
+  @override
+  String leaveWaitingFor(String name) {
+    return 'Waiting for $name';
+  }
+
+  @override
+  String get leaveNextReturned => 'Fix what was asked and send again.';
+
+  @override
+  String get leaveNextWait => 'Waiting for your manager to check this.';
+
+  @override
+  String get leaveNextAwaitingYou => 'Check the dates. Verify or send back.';
+
+  @override
+  String get leaveNextApproved => 'Approved.';
+
+  @override
+  String get leaveNextRejected => 'This leave was declined.';
+
+  @override
+  String get leaveNextCancelled => 'This leave was cancelled.';
+
+  @override
+  String get leaveVerify => 'Verify';
+
+  @override
+  String get leaveReturn => 'Send back';
+
+  @override
+  String get leaveReturnTitle => 'What should they fix?';
+
+  @override
+  String get leaveReturnHint => 'Write the reason';
+
+  @override
+  String get leaveVerified => 'Verified. Sent on.';
+
+  @override
+  String get leaveReturnedToast => 'Sent back with your note.';
+
+  @override
+  String get leaveReturnPreset1 =>
+      'The dates overlap another request. Change them.';
+
+  @override
+  String get leaveReturnPreset2 => 'Attach the medical certificate.';
+
+  @override
+  String get leaveReturnPreset3 => 'Write a clearer reason for this leave.';
+
+  @override
+  String get leaveReturnPreset4 => 'This needs to be sick leave, not casual.';
+
+  @override
+  String get leaveFormKind => 'Type';
+
+  @override
+  String get leaveFormWhen => 'When';
+
+  @override
+  String get leaveFormWhy => 'Why';
+
+  @override
+  String leaveFormRemain(String days) {
+    return '$days would remain';
+  }
+
+  @override
+  String get leaveChipToday => 'Today';
+
+  @override
+  String get leaveChipTomorrow => 'Tomorrow';
+
+  @override
+  String get leaveChipHalfAm => 'This morning';
+
+  @override
+  String get leaveChipHalfPm => 'This afternoon';
+
+  @override
+  String get leaveEditTitle => 'Fix leave request';
+
+  @override
+  String get leaveAwaitEmptyTitle => 'Nothing waiting for you';
+
+  @override
+  String get leaveAwaitEmptyMessage =>
+      'Team leave you need to check will show here.';
+
+  @override
+  String get leaveScopeEmptyTitle => 'No other leave here';
+
+  @override
+  String get leaveScopeEmptyMessage => 'Requests that are not waiting for you.';
 
   @override
   String get leaveEmptyTitle => 'No leave requests';
@@ -2014,6 +2127,81 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get claimReceiptAttached => 'Receipt attached';
+
+  @override
+  String get claimReceipts => 'Receipts';
+
+  @override
+  String get claimNumber => 'Claim number';
+
+  @override
+  String get claimFormWhy => 'Why';
+
+  @override
+  String get claimFormWhen => 'When';
+
+  @override
+  String get claimFormLines => 'Expenses';
+
+  @override
+  String get claimNextDraft => 'Save, add expenses, then send.';
+
+  @override
+  String get claimNextReturned => 'Fix what was asked and send again.';
+
+  @override
+  String get claimNextWaitManager => 'Waiting for your manager to check this.';
+
+  @override
+  String get claimNextWaitFinance => 'Waiting for finance to check this.';
+
+  @override
+  String get claimNextAwaitingYou => 'Check the bills. Verify or send back.';
+
+  @override
+  String get claimNextApproved => 'Approved. Finance will pay.';
+
+  @override
+  String get claimNextSettled => 'Paid.';
+
+  @override
+  String get claimNextRejected => 'This claim was refused.';
+
+  @override
+  String get claimNextCancelled => 'This claim was cancelled.';
+
+  @override
+  String get claimVerify => 'Verify';
+
+  @override
+  String get claimReturn => 'Send back';
+
+  @override
+  String get claimReturnTitle => 'What should they fix?';
+
+  @override
+  String get claimReturnHint => 'Write the reason';
+
+  @override
+  String get claimVerified => 'Verified. Sent on.';
+
+  @override
+  String get claimReturnedToast => 'Sent back with your note.';
+
+  @override
+  String get claimReturnPreset1 =>
+      'Attach the original receipt or VAT challan.';
+
+  @override
+  String get claimReturnPreset2 =>
+      'This amount is over the grade cap. Reduce it.';
+
+  @override
+  String get claimReturnPreset3 =>
+      'The dates or destination do not match the trip.';
+
+  @override
+  String get claimReturnPreset4 => 'Need the tour approval letter.';
 
   @override
   String get claimDeclaration => 'No receipt, I declare this expense';
@@ -4871,6 +5059,9 @@ class AppL10nEn extends AppL10n {
   String get inFilter => 'Filters';
 
   @override
+  String get inFilterViews => 'Which list';
+
+  @override
   String get inFilterZones => 'Plant area';
 
   @override
@@ -4922,6 +5113,48 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get inEmptyFiltered => 'Nothing matches that search.';
+
+  @override
+  String get inEmptyRca => 'Cause not written yet.';
+
+  @override
+  String get inEmptyCapa => 'No fixes yet.';
+
+  @override
+  String get inCapaImmediate => 'Stop it now';
+
+  @override
+  String get inCapaCorrective => 'Corrective';
+
+  @override
+  String get inCapaPreventive => 'Preventive';
+
+  @override
+  String get inCapaPending => 'Not started';
+
+  @override
+  String get inCapaProgress => 'In progress';
+
+  @override
+  String get inCapaDone => 'Done';
+
+  @override
+  String get inCapaVerified => 'Confirmed';
+
+  @override
+  String get inCapaOverdue => 'Overdue';
+
+  @override
+  String get inCapaUnassigned => 'No one named';
+
+  @override
+  String get inFieldWhy4 => 'Why 4';
+
+  @override
+  String get inFieldWhy5 => 'Why 5';
+
+  @override
+  String get inGovBody => 'Who must be told';
 
   @override
   String get inVerdictNone => 'Nothing waiting on you.';
@@ -5055,6 +5288,64 @@ class AppL10nEn extends AppL10n {
       'Say what happened, where, and how bad it could have been. Safety sees it at once. You may hide your name.';
 
   @override
+  String get inFormWhat => 'What happened';
+
+  @override
+  String get inFormWhere => 'Where and when';
+
+  @override
+  String get inFormHowBad => 'How serious';
+
+  @override
+  String get inTitleHint => 'For example: valve drip on filling carousel';
+
+  @override
+  String get inDescHint => 'What you saw, who was there, and what you did.';
+
+  @override
+  String get inSevScale => 'How bad if it happens again';
+
+  @override
+  String get inLikeScale => 'Chance it happens again';
+
+  @override
+  String get inSev1 => 'Slight';
+
+  @override
+  String get inSev2 => 'Minor';
+
+  @override
+  String get inSev3 => 'Moderate';
+
+  @override
+  String get inSev4 => 'Serious';
+
+  @override
+  String get inSev5 => 'Severe';
+
+  @override
+  String get inLike1 => 'Rare';
+
+  @override
+  String get inLike2 => 'Unlikely';
+
+  @override
+  String get inLike3 => 'Possible';
+
+  @override
+  String get inLike4 => 'Likely';
+
+  @override
+  String get inLike5 => 'Almost certain';
+
+  @override
+  String get inRiskAlert =>
+      'The plant head and safety lead will be told as soon as you send.';
+
+  @override
+  String get inChangeTime => 'Change';
+
+  @override
   String get inFieldType => 'What kind of event';
 
   @override
@@ -5093,7 +5384,7 @@ class AppL10nEn extends AppL10n {
   String get inCreate => 'Send report';
 
   @override
-  String get inUseDraft => 'Use a draft';
+  String get inUseDraft => 'Start from an example';
 
   @override
   String get inDraftValve => 'Valve drip';
@@ -5144,6 +5435,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get inActInvest => 'Start investigation';
+
+  @override
+  String get inActReview => 'Send for close';
 
   @override
   String get inActRca => 'Write the cause';
@@ -5210,6 +5504,9 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get inDoneInvest => 'Investigation started.';
+
+  @override
+  String get inDoneReview => 'Sent for close.';
 
   @override
   String get inDoneRca => 'Root cause recorded.';

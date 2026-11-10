@@ -89,6 +89,31 @@ String travelModeLabel(AppL10n l10n, String m) => switch (m) {
   _ => l10n.claimCatRickshaw,
 };
 
+String claimNextLine(
+  AppL10n l10n,
+  Claim c, {
+  required bool bangla,
+  required bool awaitingYou,
+}) {
+  if (awaitingYou) return l10n.claimNextAwaitingYou;
+  return switch (c.status) {
+    ClaimStatus.draft => l10n.claimNextDraft,
+    ClaimStatus.returned => l10n.claimNextReturned,
+    ClaimStatus.pendingManager =>
+      c.waitingForName(bangla: bangla) == null
+          ? l10n.claimNextWaitManager
+          : l10n.claimWaitingFor(c.waitingForName(bangla: bangla)!),
+    ClaimStatus.pendingFinance =>
+      c.waitingForName(bangla: bangla) == null
+          ? l10n.claimNextWaitFinance
+          : l10n.claimWaitingFor(c.waitingForName(bangla: bangla)!),
+    ClaimStatus.approved => l10n.claimNextApproved,
+    ClaimStatus.settled => l10n.claimNextSettled,
+    ClaimStatus.rejected => l10n.claimNextRejected,
+    ClaimStatus.cancelled => l10n.claimNextCancelled,
+  };
+}
+
 String claimFlagLabel(AppL10n l10n, ClaimFlag f, {required bool bangla}) {
   final amount = f.amount == null ? '' : bdt(f.amount!, bangla: bangla);
   return switch (f.code) {

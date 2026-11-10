@@ -144,3 +144,25 @@ String incidentNextLine(
 
 String incidentWhen(SafetyIncident i, String lang) =>
     DateFmt.dateTime(i.occurredAt, lang);
+
+String capaTypeLabel(AppL10n l10n, String type) => switch (type) {
+  'IMMEDIATE_CONTAINMENT' => l10n.inCapaImmediate,
+  'PREVENTIVE' => l10n.inCapaPreventive,
+  _ => l10n.inCapaCorrective,
+};
+
+String capaStatusLabel(AppL10n l10n, String status) => switch (status) {
+  'IN_PROGRESS' => l10n.inCapaProgress,
+  'COMPLETED' => l10n.inCapaDone,
+  'VERIFIED' => l10n.inCapaVerified,
+  'OVERDUE' => l10n.inCapaOverdue,
+  _ => l10n.inCapaPending,
+};
+
+StatusTone capaStatusTone(String status) => switch (status) {
+  'VERIFIED' => StatusTone.success,
+  'COMPLETED' => StatusTone.info,
+  'IN_PROGRESS' => StatusTone.warning,
+  'OVERDUE' => StatusTone.danger,
+  _ => StatusTone.neutral,
+};

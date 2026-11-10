@@ -1,20 +1,16 @@
 import 'dart:async';
 
 import 'package:bogcl_oneops/app/l10n_ext.dart';
-import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
-import 'package:bogcl_oneops/features/files/application/upload_service.dart';
-import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
-import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
-import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,8 +84,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
   late String _category;
   late DateTime _date;
   bool _declaration = false;
-  ({String id, String name})? _receipt;
-  bool _uploading = false;
+  String? _receiptId;
 
   late final List<String> _categories = [
     for (final c
@@ -119,9 +114,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
       }
       _nights.text = e.nights?.toString() ?? '';
       _declaration = e.isDeclaration;
-      if (e.receiptFileId != null) {
-        _receipt = (id: e.receiptFileId!, name: '');
-      }
+      _receiptId = e.receiptFileId;
     }
   }
 
@@ -154,33 +147,6 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
     }
   }
 
-  Future<void> _attach() async {
-    final l10n = context.l10n;
-    final picked = await pickAttachment(context, allowFiles: false);
-    if (picked == null || !mounted) return;
-    setState(() => _uploading = true);
-    try {
-      final uploads = ref.read(uploadServiceProvider);
-      final meta = await uploads.upload(picked, purpose: 'CLAIM_RECEIPT');
-      await uploads.awaitClean(meta.id);
-      if (!mounted) return;
-      setState(() {
-        _receipt = (id: meta.id, name: picked.name);
-        _declaration = false;
-      });
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      AppToast.show(context, switch (e.code) {
-        ApiErrorCode.offline ||
-        ApiErrorCode.timeout => l10n.uploadNeedsConnection,
-        ApiErrorCode.forbidden => l10n.uploadBlocked,
-        _ => l10n.uploadRejected,
-      }, tone: StatusTone.danger);
-    } finally {
-      if (mounted) setState(() => _uploading = false);
-    }
-  }
-
   void _save() {
     if (!_form.currentState!.validate()) return;
     final mileage = _category == 'MILEAGE';
@@ -194,12 +160,12 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
         description: _desc.text.trim(),
         amount: amount,
         system: false,
-        isDeclaration: _declaration && _receipt == null,
+        isDeclaration: _declaration && _receiptId == null,
         nights: _category == 'HOTEL' ? int.parse(_nights.text.trim()) : null,
         distanceKm: mileage ? double.parse(_km.text.trim()) : null,
         fromPlace: mileage ? _from.text.trim() : null,
         toPlace: mileage ? _to.text.trim() : null,
-        receiptFileId: _receipt?.id,
+        receiptFileId: _receiptId,
       ),
     );
   }
@@ -224,15 +190,13 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EnterpriseModalHeader(
-                  title: widget.existing == null
+                Text(
+                  widget.existing == null
                       ? l10n.claimLineAdd
                       : l10n.claimLineEdit,
-                  subtitle: bangla
-                      ? 'খরচের খাত, তারিখ ও ভাউচার সংযুক্ত করুন'
-                      : 'Specify expense category, date, amount, and voucher',
-                  icon: Icons.receipt_long_outlined,
+                  style: theme.textTheme.titleLarge,
                 ),
+                const SizedBox(height: Space.md),
                 Row(
                   children: [
                     Expanded(
@@ -343,12 +307,24 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                   ],
                 ],
                 const SizedBox(height: Space.md),
-                EnterpriseTemplateDropdown(
-                  presets: _lineDescPresets,
-                  controller: _desc,
-                  onPicked: () => setState(() {}),
-                  labelEn: 'Standard Expense Note (Quick Fill)',
-                  labelBn: 'স্ট্যান্ডার্ড খরচের বিবরণ (দ্রুত পূরণ)',
+                Wrap(
+                  spacing: Space.xs,
+                  runSpacing: Space.xs,
+                  children: [
+                    for (final p in _lineDescPresets)
+                      FilterChip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(
+                          bangla ? p.$2 : p.$1,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        selected: _desc.text == (bangla ? p.$2 : p.$1),
+                        onSelected: (_) => setState(() {
+                          _desc.text = bangla ? p.$2 : p.$1;
+                        }),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: Space.sm),
                 AppTextField(
@@ -366,25 +342,28 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                     ),
                   ),
                   const SizedBox(height: Space.sm),
-                  if (_receipt != null)
-                    InputChip(
-                      avatar: const Icon(Icons.receipt_long_outlined, size: 18),
-                      label: Text(
-                        _receipt!.name.isEmpty
-                            ? l10n.claimReceiptAttached
-                            : _receipt!.name,
-                        overflow: TextOverflow.ellipsis,
+                  EvidenceStrip(
+                    fileIds: [?_receiptId],
+                    canAdd: _receiptId == null,
+                    max: 1,
+                    purpose: 'CLAIM_RECEIPT',
+                    onAdded: (id) async {
+                      setState(() {
+                        _receiptId = id;
+                        _declaration = false;
+                      });
+                    },
+                  ),
+                  if (_receiptId != null)
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: IconButton(
+                        tooltip: l10n.claimReceiptAttached,
+                        onPressed: () => setState(() => _receiptId = null),
+                        icon: const Icon(Icons.delete_outline),
                       ),
-                      onDeleted: () => setState(() => _receipt = null),
-                    )
-                  else
-                    PrimaryButton.secondary(
-                      label: l10n.claimReceiptAdd,
-                      icon: Icons.attach_file,
-                      loading: _uploading,
-                      onPressed: _attach,
                     ),
-                  if (_canDeclare && _receipt == null)
+                  if (_canDeclare && _receiptId == null)
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.claimDeclaration),
@@ -404,7 +383,7 @@ class _LineSheetState extends ConsumerState<_LineSheet> {
                 PrimaryButton(
                   label: l10n.claimLineSave,
                   icon: Icons.check_circle_outline,
-                  onPressed: _uploading ? null : _save,
+                  onPressed: _save,
                 ),
               ],
             ),

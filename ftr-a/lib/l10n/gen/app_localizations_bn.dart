@@ -888,6 +888,9 @@ class AppL10nBn extends AppL10n {
   String get leaveStatusPending => 'অপেক্ষমাণ';
 
   @override
+  String get leaveStatusReturned => 'ঠিক করতে হবে';
+
+  @override
   String get leaveStatusApproved => 'অনুমোদিত';
 
   @override
@@ -895,6 +898,116 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get leaveStatusCancelled => 'বাতিল';
+
+  @override
+  String get leaveTabMine => 'আমার';
+
+  @override
+  String leaveTabAwaiting(int count) {
+    return 'আপনার অপেক্ষায় ($count)';
+  }
+
+  @override
+  String get leaveTabTeam => 'দল';
+
+  @override
+  String get leaveFilterWaiting => 'অপেক্ষমাণ';
+
+  @override
+  String leaveWaitingFor(String name) {
+    return '$name-এর অপেক্ষায়';
+  }
+
+  @override
+  String get leaveNextReturned => 'যা চাওয়া হয়েছে তা ঠিক করে আবার পাঠান।';
+
+  @override
+  String get leaveNextWait => 'আপনার ম্যানেজারের যাচাইয়ের অপেক্ষা।';
+
+  @override
+  String get leaveNextAwaitingYou => 'তারিখ দেখুন। যাচাই করুন বা ফেরত পাঠান।';
+
+  @override
+  String get leaveNextApproved => 'অনুমোদিত।';
+
+  @override
+  String get leaveNextRejected => 'এই ছুটি প্রত্যাখ্যান হয়েছে।';
+
+  @override
+  String get leaveNextCancelled => 'এই ছুটি বাতিল হয়েছে।';
+
+  @override
+  String get leaveVerify => 'যাচাই করুন';
+
+  @override
+  String get leaveReturn => 'ফেরত পাঠান';
+
+  @override
+  String get leaveReturnTitle => 'তাদের কী ঠিক করতে হবে?';
+
+  @override
+  String get leaveReturnHint => 'কারণ লিখুন';
+
+  @override
+  String get leaveVerified => 'যাচাই হয়েছে। পাঠানো হয়েছে।';
+
+  @override
+  String get leaveReturnedToast => 'আপনার নোটসহ ফেরত গেছে।';
+
+  @override
+  String get leaveReturnPreset1 =>
+      'তারিখ অন্য আবেদনের সাথে মিলে যাচ্ছে। পরিবর্তন করুন।';
+
+  @override
+  String get leaveReturnPreset2 => 'চিকিৎসা সনদ সংযুক্ত করুন।';
+
+  @override
+  String get leaveReturnPreset3 => 'ছুটির কারণ আরও স্পষ্ট করে লিখুন।';
+
+  @override
+  String get leaveReturnPreset4 =>
+      'এটি নৈমিত্তিক নয়, অসুস্থতার ছুটি হওয়া উচিত।';
+
+  @override
+  String get leaveFormKind => 'ধরন';
+
+  @override
+  String get leaveFormWhen => 'কখন';
+
+  @override
+  String get leaveFormWhy => 'কেন';
+
+  @override
+  String leaveFormRemain(String days) {
+    return 'পরে থাকবে $days';
+  }
+
+  @override
+  String get leaveChipToday => 'আজ';
+
+  @override
+  String get leaveChipTomorrow => 'আগামীকাল';
+
+  @override
+  String get leaveChipHalfAm => 'আজ সকাল';
+
+  @override
+  String get leaveChipHalfPm => 'আজ বিকাল';
+
+  @override
+  String get leaveEditTitle => 'ছুটির আবেদন ঠিক করুন';
+
+  @override
+  String get leaveAwaitEmptyTitle => 'আপনার জন্য কিছু নেই';
+
+  @override
+  String get leaveAwaitEmptyMessage => 'যাচাইয়ের জন্য দলের ছুটি এখানে দেখাবে।';
+
+  @override
+  String get leaveScopeEmptyTitle => 'অন্য কোনো ছুটি নেই';
+
+  @override
+  String get leaveScopeEmptyMessage => 'যে আবেদনগুলো আপনার অপেক্ষায় নয়।';
 
   @override
   String get leaveEmptyTitle => 'কোনো ছুটির আবেদন নেই';
@@ -2008,6 +2121,78 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get claimReceiptAttached => 'রসিদ সংযুক্ত';
+
+  @override
+  String get claimReceipts => 'রসিদ';
+
+  @override
+  String get claimNumber => 'দাবি নম্বর';
+
+  @override
+  String get claimFormWhy => 'কেন';
+
+  @override
+  String get claimFormWhen => 'কখন';
+
+  @override
+  String get claimFormLines => 'খরচ';
+
+  @override
+  String get claimNextDraft => 'সংরক্ষণ করুন, খরচ যোগ করুন, তারপর পাঠান।';
+
+  @override
+  String get claimNextReturned => 'যা চাওয়া হয়েছে তা ঠিক করে আবার পাঠান।';
+
+  @override
+  String get claimNextWaitManager => 'আপনার ম্যানেজারের যাচাইয়ের অপেক্ষা।';
+
+  @override
+  String get claimNextWaitFinance => 'অর্থ বিভাগের যাচাইয়ের অপেক্ষা।';
+
+  @override
+  String get claimNextAwaitingYou => 'বিল দেখুন। যাচাই করুন বা ফেরত পাঠান।';
+
+  @override
+  String get claimNextApproved => 'অনুমোদিত। অর্থ বিভাগ পরিশোধ করবে।';
+
+  @override
+  String get claimNextSettled => 'পরিশোধ হয়েছে।';
+
+  @override
+  String get claimNextRejected => 'এই দাবি প্রত্যাখ্যান হয়েছে।';
+
+  @override
+  String get claimNextCancelled => 'এই দাবি বাতিল হয়েছে।';
+
+  @override
+  String get claimVerify => 'যাচাই করুন';
+
+  @override
+  String get claimReturn => 'ফেরত পাঠান';
+
+  @override
+  String get claimReturnTitle => 'তাদের কী ঠিক করতে হবে?';
+
+  @override
+  String get claimReturnHint => 'কারণ লিখুন';
+
+  @override
+  String get claimVerified => 'যাচাই হয়েছে। পাঠানো হয়েছে।';
+
+  @override
+  String get claimReturnedToast => 'আপনার নোটসহ ফেরত গেছে।';
+
+  @override
+  String get claimReturnPreset1 => 'মূল রসিদ বা ভ্যাট চালান সংযুক্ত করুন।';
+
+  @override
+  String get claimReturnPreset2 => 'এই পরিমাণ গ্রেড সীমার বেশি। কমান।';
+
+  @override
+  String get claimReturnPreset3 => 'তারিখ বা গন্তব্য সফরের সাথে মেলে না।';
+
+  @override
+  String get claimReturnPreset4 => 'সফর অনুমোদন পত্র প্রয়োজন।';
 
   @override
   String get claimDeclaration => 'রসিদ নেই, আমি খরচটি ঘোষণা করছি';
@@ -4854,6 +5039,9 @@ class AppL10nBn extends AppL10n {
   String get inFilter => 'ফিল্টার';
 
   @override
+  String get inFilterViews => 'কোন তালিকা';
+
+  @override
   String get inFilterZones => 'প্ল্যান্ট এলাকা';
 
   @override
@@ -4905,6 +5093,48 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get inEmptyFiltered => 'এই খোঁজার সাথে কিছু মেলেনি।';
+
+  @override
+  String get inEmptyRca => 'কারণ এখনো লেখা হয়নি।';
+
+  @override
+  String get inEmptyCapa => 'এখনো কোনো সংশোধন নেই।';
+
+  @override
+  String get inCapaImmediate => 'এখনই থামান';
+
+  @override
+  String get inCapaCorrective => 'সংশোধনমূলক';
+
+  @override
+  String get inCapaPreventive => 'নিবারণমূলক';
+
+  @override
+  String get inCapaPending => 'শুরু হয়নি';
+
+  @override
+  String get inCapaProgress => 'চলছে';
+
+  @override
+  String get inCapaDone => 'শেষ';
+
+  @override
+  String get inCapaVerified => 'নিশ্চিত';
+
+  @override
+  String get inCapaOverdue => 'সময় পেরিয়েছে';
+
+  @override
+  String get inCapaUnassigned => 'কাউকে নাম করা হয়নি';
+
+  @override
+  String get inFieldWhy4 => 'কেন ৪';
+
+  @override
+  String get inFieldWhy5 => 'কেন ৫';
+
+  @override
+  String get inGovBody => 'কাকে জানাতে হবে';
 
   @override
   String get inVerdictNone => 'আপনার করার কিছু নেই।';
@@ -5038,6 +5268,64 @@ class AppL10nBn extends AppL10n {
       'কী হয়েছে, কোথায়, এবং কতটা খারাপ হতে পারত তা লিখুন। নিরাপত্তা সাথে সাথে দেখবে। আপনি নাম লুকাতে পারেন।';
 
   @override
+  String get inFormWhat => 'কী হয়েছে';
+
+  @override
+  String get inFormWhere => 'কোথায় ও কখন';
+
+  @override
+  String get inFormHowBad => 'কতটা গুরুতর';
+
+  @override
+  String get inTitleHint => 'যেমন: ফিলিং ক্যারোসেলে ভালভ লিক';
+
+  @override
+  String get inDescHint => 'কী দেখেছেন, কে ছিলেন, এবং আপনি কী করেছেন।';
+
+  @override
+  String get inSevScale => 'আবার হলে কতটা খারাপ';
+
+  @override
+  String get inLikeScale => 'আবার হওয়ার সম্ভাবনা';
+
+  @override
+  String get inSev1 => 'খুব কম';
+
+  @override
+  String get inSev2 => 'সামান্য';
+
+  @override
+  String get inSev3 => 'মাঝারি';
+
+  @override
+  String get inSev4 => 'গুরুতর';
+
+  @override
+  String get inSev5 => 'অত্যন্ত গুরুতর';
+
+  @override
+  String get inLike1 => 'বিরল';
+
+  @override
+  String get inLike2 => 'কম সম্ভাবনা';
+
+  @override
+  String get inLike3 => 'হতে পারে';
+
+  @override
+  String get inLike4 => 'সম্ভাবনা বেশি';
+
+  @override
+  String get inLike5 => 'প্রায় নিশ্চিত';
+
+  @override
+  String get inRiskAlert =>
+      'পাঠানোর সাথে সাথে প্ল্যান্ট প্রধান ও নিরাপত্তা প্রধানকে জানানো হবে।';
+
+  @override
+  String get inChangeTime => 'বদলান';
+
+  @override
   String get inFieldType => 'কী ধরনের ঘটনা';
 
   @override
@@ -5076,7 +5364,7 @@ class AppL10nBn extends AppL10n {
   String get inCreate => 'রিপোর্ট পাঠান';
 
   @override
-  String get inUseDraft => 'খসড়া ব্যবহার করুন';
+  String get inUseDraft => 'একটি উদাহরণ দিয়ে শুরু করুন';
 
   @override
   String get inDraftValve => 'ভালভ লিক';
@@ -5127,6 +5415,9 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get inActInvest => 'তদন্ত শুরু করুন';
+
+  @override
+  String get inActReview => 'বন্ধের জন্য পাঠান';
 
   @override
   String get inActRca => 'কারণ লিখুন';
@@ -5193,6 +5484,9 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get inDoneInvest => 'তদন্ত শুরু হয়েছে।';
+
+  @override
+  String get inDoneReview => 'বন্ধের জন্য পাঠানো হয়েছে।';
 
   @override
   String get inDoneRca => 'মূল কারণ নথিভুক্ত হয়েছে।';

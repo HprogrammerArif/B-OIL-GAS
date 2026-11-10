@@ -38,7 +38,9 @@ final class IncidentsProvider
 
   @override
   String toString() {
-    return r'incidentsProvider$argument';
+    return r'incidentsProvider'
+        ''
+        '$argument';
   }
 
   @$internal
@@ -64,7 +66,7 @@ final class IncidentsProvider
   }
 }
 
-String _$incidentsHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$incidentsHash() => r'5355d93e39449779e9a145323500a2168a43083d';
 
 final class IncidentsFamily extends $Family
     with
@@ -115,7 +117,9 @@ final class IncidentDetailProvider
 
   @override
   String toString() {
-    return r'incidentDetailProvider($argument)';
+    return r'incidentDetailProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -141,7 +145,7 @@ final class IncidentDetailProvider
   }
 }
 
-String _$incidentDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$incidentDetailHash() => r'd601b57325e8f4fb1ec3e2341b688391690c305a';
 
 final class IncidentDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SafetyIncident>, String> {
@@ -190,7 +194,9 @@ final class IncidentZonesProvider
 
   @override
   String toString() {
-    return r'incidentZonesProvider($argument)';
+    return r'incidentZonesProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -216,7 +222,7 @@ final class IncidentZonesProvider
   }
 }
 
-String _$incidentZonesHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$incidentZonesHash() => r'ae3231a5a2624411df6d08a08c1322bddbcd87b7';
 
 final class IncidentZonesFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<IncidentZone>>, String?> {

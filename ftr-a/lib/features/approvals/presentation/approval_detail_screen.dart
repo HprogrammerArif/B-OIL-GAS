@@ -49,6 +49,7 @@ class _ApprovalDetailScreenState extends ConsumerState<ApprovalDetailScreen> {
       ..invalidate(claimsProvider)
       ..invalidate(advancesProvider)
       ..invalidate(myLeaveRequestsProvider)
+      ..invalidate(leaveRequestsProvider)
       ..invalidate(noteSheetDetailProvider)
       ..invalidate(noteSheetsProvider);
   }

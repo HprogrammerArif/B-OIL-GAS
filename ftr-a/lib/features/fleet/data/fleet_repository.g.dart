@@ -40,6 +40,7 @@ final class FleetRepositoryProvider
     return fleetRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(FleetRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -48,4 +49,4 @@ final class FleetRepositoryProvider
   }
 }
 
-String _$fleetRepositoryHash() => r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+String _$fleetRepositoryHash() => r'8623d4fd7baf8e9997387c99fcb06d5000913143';

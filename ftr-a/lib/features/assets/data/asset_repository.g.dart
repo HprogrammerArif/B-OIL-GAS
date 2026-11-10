@@ -40,6 +40,7 @@ final class AssetRepositoryProvider
     return assetRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(AssetRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -48,4 +49,4 @@ final class AssetRepositoryProvider
   }
 }
 
-String _$assetRepositoryHash() => r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+String _$assetRepositoryHash() => r'17b4cecbab2f56642eadf4dabe0ef749f1fda598';

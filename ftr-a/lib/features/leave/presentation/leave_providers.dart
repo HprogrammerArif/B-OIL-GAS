@@ -17,6 +17,12 @@ Future<List<LeaveBalance>> leaveBalances(Ref ref) {
 }
 
 @riverpod
+Future<List<LeaveRequestItem>> leaveRequests(Ref ref, String scope) {
+  _watchUser(ref);
+  return ref.watch(leaveRepositoryProvider).requests(scope: scope);
+}
+
+@riverpod
 Future<List<LeaveRequestItem>> myLeaveRequests(Ref ref) {
   _watchUser(ref);
   return ref.watch(leaveRepositoryProvider).requests();

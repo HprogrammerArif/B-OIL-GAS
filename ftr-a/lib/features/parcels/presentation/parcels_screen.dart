@@ -27,22 +27,20 @@ class ParcelsScreen extends ConsumerStatefulWidget {
 }
 
 class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
-  String _view = 'mine';
+  String _view = 'incoming';
   String _query = '';
   bool _stuckOnly = false;
   String _statusFilter = 'ALL';
-  String _directionFilter = 'ALL';
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     final s = ref.read(sessionControllerProvider).value;
-    if (s != null &&
-        (s.hasRole('MAILROOM') ||
-            s.hasRole('TRANSPORT_ADMIN') ||
-            s.hasRole('CHAIRMAN'))) {
-      _view = 'all';
+    if (s != null && s.hasRole('MAILROOM')) {
+      _view = 'site';
+    } else if (s != null && s.hasRole('DRIVER')) {
+      _view = 'carrying';
     }
   }
 
@@ -52,14 +50,11 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     super.dispose();
   }
 
-  bool get _filtersActive =>
-      _stuckOnly || _statusFilter != 'ALL' || _directionFilter != 'ALL';
-
-  int _viewCount(String view) =>
-      ref.watch(parcelsProvider(view, query: _query)).value?.length ?? 0;
+  bool get _filtersActive => _stuckOnly || _statusFilter != 'ALL';
 
   Future<void> _refresh() async {
     ref.invalidate(parcelsProvider);
+    if (_view == 'waiting') return;
     await ref.read(
       parcelsProvider(_view, query: _query, stuckOnly: _stuckOnly).future,
     );
@@ -125,17 +120,15 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                       style: Theme.of(ctx).textTheme.titleMedium,
                     ),
                     const SizedBox(height: Space.md),
-                    Text(
-                      l10n.pcFilterStatus,
-                      style: Theme.of(ctx).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: Space.xs),
                     Wrap(
                       children: [
                         chip(
-                          selected: _statusFilter == 'ALL',
+                          selected: _statusFilter == 'ALL' && !_stuckOnly,
                           label: l10n.pcFilterAllStatuses,
-                          onTap: () => _statusFilter = 'ALL',
+                          onTap: () {
+                            _statusFilter = 'ALL';
+                            _stuckOnly = false;
+                          },
                         ),
                         chip(
                           selected: _statusFilter == 'IN_TRANSIT',
@@ -143,53 +136,9 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                           onTap: () => _statusFilter = 'IN_TRANSIT',
                         ),
                         chip(
-                          selected: _statusFilter == 'READY_OTP',
-                          label: l10n.pcStatusOut,
-                          onTap: () => _statusFilter = 'READY_OTP',
-                        ),
-                        chip(
-                          selected: _statusFilter == 'DELIVERED',
-                          label: l10n.pcStatusDelivered,
-                          onTap: () => _statusFilter = 'DELIVERED',
-                        ),
-                        chip(
-                          selected: _statusFilter == 'RETURNING',
+                          selected: _statusFilter == 'RETURNS',
                           label: l10n.pcStatusReturning,
-                          onTap: () => _statusFilter = 'RETURNING',
-                        ),
-                        chip(
-                          selected: _statusFilter == 'QUARANTINED',
-                          label: l10n.pcStatusHeld,
-                          onTap: () => _statusFilter = 'QUARANTINED',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: Space.md),
-                    Wrap(
-                      children: [
-                        chip(
-                          selected: _directionFilter == 'HQ_TO_PLANT',
-                          label: l10n.pcDirHqPlant,
-                          onTap: () => _directionFilter =
-                              _directionFilter == 'HQ_TO_PLANT'
-                              ? 'ALL'
-                              : 'HQ_TO_PLANT',
-                        ),
-                        chip(
-                          selected: _directionFilter == 'PLANT_TO_HQ',
-                          label: l10n.pcDirPlantHq,
-                          onTap: () => _directionFilter =
-                              _directionFilter == 'PLANT_TO_HQ'
-                              ? 'ALL'
-                              : 'PLANT_TO_HQ',
-                        ),
-                        chip(
-                          selected: _directionFilter == 'EXTERNAL',
-                          label: l10n.pcDirExternal,
-                          onTap: () =>
-                              _directionFilter = _directionFilter == 'EXTERNAL'
-                              ? 'ALL'
-                              : 'EXTERNAL',
+                          onTap: () => _statusFilter = 'RETURNS',
                         ),
                         chip(
                           selected: _stuckOnly,
@@ -209,38 +158,30 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
   }
 
   bool _matchesFilters(Parcel p) {
+    if (_stuckOnly && !p.stuck) return false;
     if (_statusFilter == 'IN_TRANSIT' &&
         p.status != 'IN_TRANSIT' &&
         p.status != 'DISPATCHED' &&
-        p.status != 'AT_GATE') {
+        p.status != 'AT_GATE' &&
+        p.status != 'OUT_FOR_DELIVERY') {
       return false;
     }
-    if (_statusFilter == 'READY_OTP' && p.status != 'OUT_FOR_DELIVERY') {
-      return false;
-    }
-    if (_statusFilter == 'DELIVERED' && p.status != 'DELIVERED') {
-      return false;
-    }
-    if (_statusFilter == 'RETURNING' && !p.status.startsWith('RETURN')) {
-      return false;
-    }
-    if (_statusFilter == 'QUARANTINED' &&
-        p.status != 'QUARANTINED' &&
-        p.tamperStatus != 'FLAGGED') {
-      return false;
-    }
-    if (_directionFilter == 'HQ_TO_PLANT' &&
-        (p.origin.id != 'site_hq' || p.dest.id != 'site_plant')) {
-      return false;
-    }
-    if (_directionFilter == 'PLANT_TO_HQ' &&
-        (p.origin.id != 'site_plant' || p.dest.id != 'site_hq')) {
-      return false;
-    }
-    if (_directionFilter == 'EXTERNAL' && p.intraSite) {
+    if (_statusFilter == 'RETURNS' && !p.status.startsWith('RETURN')) {
       return false;
     }
     return true;
+  }
+
+  List<Parcel> _waitingOf(Iterable<List<Parcel>?> sources) {
+    final seen = <String>{};
+    final out = <Parcel>[];
+    for (final src in sources) {
+      if (src == null) continue;
+      for (final p in src) {
+        if (p.me.waitingOnMe && seen.add(p.id)) out.add(p);
+      }
+    }
+    return out;
   }
 
   @override
@@ -249,39 +190,51 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
     final bangla = context.isBangla;
     final session = ref.watch(sessionControllerProvider).value;
     final canCreate = session?.can('parcels:create') ?? false;
+    final canRead = session?.can('parcels:read') ?? false;
     final canWide =
         (session?.can('parcels:manage') ?? false) ||
         (session?.can('parcels:read', GrantScope.site) ?? false);
-    final rows = ref.watch(
-      parcelsProvider(_view, query: _query, stuckOnly: _stuckOnly),
+    final isDriver = session?.hasRole('DRIVER') ?? false;
+    final isMailroom = session?.hasRole('MAILROOM') ?? false;
+
+    final incoming = ref.watch(parcelsProvider('incoming', query: _query));
+    final sent = ref.watch(parcelsProvider('sent', query: _query));
+    final carrying = ref.watch(parcelsProvider('carrying', query: _query));
+    final site = canWide
+        ? ref.watch(parcelsProvider('site', query: _query))
+        : null;
+    final all = canWide
+        ? ref.watch(parcelsProvider('all', query: _query))
+        : null;
+    final waiting = _waitingOf([
+      incoming.value,
+      carrying.value,
+      if (canWide) site?.value,
+    ]);
+    final showCarrying =
+        isDriver || isMailroom || (carrying.value?.isNotEmpty ?? false);
+
+    final rows = _view == 'waiting'
+        ? null
+        : ref.watch(
+            parcelsProvider(_view, query: _query, stuckOnly: _stuckOnly),
+          );
+
+    Widget viewChip(String view, String label) => Padding(
+      padding: const EdgeInsets.only(right: Space.sm),
+      child: ChoiceChip(
+        visualDensity: VisualDensity.compact,
+        label: Text(label, style: const TextStyle(fontSize: 12)),
+        selected: _view == view,
+        onSelected: (_) {
+          Haptics.tap();
+          setState(() => _view = view);
+        },
+      ),
     );
 
-    Widget viewChip(String view, String label) {
-      final count = _viewCount(view);
-      return Padding(
-        padding: const EdgeInsets.only(right: Space.sm),
-        child: ChoiceChip(
-          visualDensity: VisualDensity.compact,
-          label: Text('$label ($count)', style: const TextStyle(fontSize: 12)),
-          selected: _view == view,
-          onSelected: (_) {
-            Haptics.tap();
-            setState(() => _view = view);
-          },
-        ),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.moduleParcels),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => unawaited(_refresh()),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.moduleParcels)),
       floatingActionButton: canCreate
           ? FloatingActionButton.extended(
               onPressed: () => unawaited(context.push(AppRoutes.parcelNew)),
@@ -328,12 +281,32 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      viewChip('mine', l10n.pcTabMine),
-                      viewChip('incoming', l10n.pcTabIncoming),
-                      viewChip('sent', l10n.pcTabSent),
-                      viewChip('carrying', l10n.pcTabCarrying),
-                      if (canWide) viewChip('site', l10n.pcTabSite),
-                      if (canWide) viewChip('all', l10n.pcTabAll),
+                      if (canRead || canCreate) ...[
+                        viewChip(
+                          'incoming',
+                          '${l10n.pcTabIncoming} (${incoming.value?.length ?? 0})',
+                        ),
+                        viewChip(
+                          'sent',
+                          '${l10n.pcTabSent} (${sent.value?.length ?? 0})',
+                        ),
+                      ],
+                      viewChip('waiting', l10n.pcTabWaiting(waiting.length)),
+                      if (showCarrying)
+                        viewChip(
+                          'carrying',
+                          '${l10n.pcTabCarrying} (${carrying.value?.length ?? 0})',
+                        ),
+                      if (canWide) ...[
+                        viewChip(
+                          'site',
+                          '${l10n.pcTabSite} (${site?.value?.length ?? 0})',
+                        ),
+                        viewChip(
+                          'all',
+                          '${l10n.pcTabAll} (${all?.value?.length ?? 0})',
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -341,35 +314,61 @@ class _ParcelsScreenState extends ConsumerState<ParcelsScreen> {
             ),
           ),
           const SizedBox(height: Space.xs),
-          Expanded(
-            child: rows.when(
-              loading: () => const SkeletonList(),
-              error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
-              data: (rawList) {
-                final list = rawList.where(_matchesFilters).toList();
-                if (list.isEmpty) {
-                  return EmptyState(
-                    icon: Icons.inventory_2_outlined,
-                    title: _query.isNotEmpty || _filtersActive
-                        ? l10n.pcEmptyFiltered
-                        : l10n.pcEmpty,
-                  );
-                }
-                return RefreshIndicator(
-                  onRefresh: _refresh,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 96),
-                    itemCount: list.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (_, i) =>
-                        _Row(parcel: list[i], bangla: bangla),
-                  ),
-                );
-              },
-            ),
-          ),
+          Expanded(child: _list(bangla: bangla, waiting: waiting, rows: rows)),
         ],
       ),
+    );
+  }
+
+  Widget _list({
+    required bool bangla,
+    required List<Parcel> waiting,
+    required AsyncValue<List<Parcel>>? rows,
+  }) {
+    final l10n = context.l10n;
+    if (_view == 'waiting') {
+      final list = waiting.where(_matchesFilters).toList();
+      if (list.isEmpty) {
+        return EmptyState(
+          icon: Icons.inventory_2_outlined,
+          title: _query.isNotEmpty || _filtersActive
+              ? l10n.pcEmptyFiltered
+              : l10n.pcEmpty,
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView.separated(
+          padding: const EdgeInsets.only(bottom: 96),
+          itemCount: list.length,
+          separatorBuilder: (_, _) => const Divider(height: 1),
+          itemBuilder: (_, i) => _Row(parcel: list[i], bangla: bangla),
+        ),
+      );
+    }
+    return rows!.when(
+      loading: () => const SkeletonList(),
+      error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
+      data: (rawList) {
+        final list = rawList.where(_matchesFilters).toList();
+        if (list.isEmpty) {
+          return EmptyState(
+            icon: Icons.inventory_2_outlined,
+            title: _query.isNotEmpty || _filtersActive
+                ? l10n.pcEmptyFiltered
+                : l10n.pcEmpty,
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: _refresh,
+          child: ListView.separated(
+            padding: const EdgeInsets.only(bottom: 96),
+            itemCount: list.length,
+            separatorBuilder: (_, _) => const Divider(height: 1),
+            itemBuilder: (_, i) => _Row(parcel: list[i], bangla: bangla),
+          ),
+        );
+      },
     );
   }
 }
@@ -387,31 +386,20 @@ class _Row extends StatelessWidget {
     final title = p.hidden || p.description == null
         ? l10n.pcConfidentialTitle
         : p.description!;
+    final who = p.me.isRecipient
+        ? p.sender.display(bangla: bangla)
+        : p.recipient.display(bangla: bangla);
     final meta =
-        '${p.origin.label(bangla: bangla)} → ${p.dest.label(bangla: bangla)}';
+        '${p.origin.label(bangla: bangla)} → ${p.dest.label(bangla: bangla)} · $who';
     return ListRow(
       leading: Icon(
         p.isConfidential ? Icons.lock_outline : Icons.inventory_2_outlined,
       ),
       title: title,
       subtitle: '$meta\n${parcelNextLine(l10n, p, bangla: bangla)}',
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          StatusPill(
-            label: parcelStatusLabel(l10n, p.status),
-            tone: parcelStatusTone(p.status),
-          ),
-          if (p.stuck)
-            Padding(
-              padding: const EdgeInsets.only(top: Space.xs),
-              child: StatusPill(
-                label: l10n.pcStuckPill(p.dwellHours),
-                tone: StatusTone.danger,
-              ),
-            ),
-        ],
+      trailing: StatusPill(
+        label: parcelStatusLabel(l10n, p.status),
+        tone: parcelStatusTone(p.status),
       ),
       onTap: () => unawaited(context.push(AppRoutes.parcelDetail(p.id))),
     );

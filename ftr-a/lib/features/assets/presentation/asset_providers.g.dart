@@ -36,7 +36,9 @@ final class AssetsProvider
 
   @override
   String toString() {
-    return r'assetsProvider$argument';
+    return r'assetsProvider'
+        ''
+        '$argument';
   }
 
   @$internal
@@ -62,7 +64,7 @@ final class AssetsProvider
   }
 }
 
-String _$assetsHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$assetsHash() => r'9da35eca3ff20d4603e780444161ca2228db5952';
 
 final class AssetsFamily extends $Family
     with
@@ -113,7 +115,9 @@ final class AssetDetailProvider
 
   @override
   String toString() {
-    return r'assetDetailProvider($argument)';
+    return r'assetDetailProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -138,7 +142,7 @@ final class AssetDetailProvider
   }
 }
 
-String _$assetDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$assetDetailHash() => r'0f883451ed4420e5e15a936de0156cba3948be40';
 
 final class AssetDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Equipment>, String> {
@@ -197,4 +201,4 @@ final class AssetCategoriesProvider
   }
 }
 
-String _$assetCategoriesHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$assetCategoriesHash() => r'e19b1ab5c6eb683e398b0adc026136abd655cbd9';

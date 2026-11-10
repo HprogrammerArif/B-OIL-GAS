@@ -4,6 +4,8 @@ import 'package:bogcl_oneops/app/l10n_ext.dart';
 import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/auth/domain/session_models.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
@@ -16,19 +18,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Leave home: balances, filter and the caller's requests.
-class LeaveScreen extends StatelessWidget {
+enum _Tab { mine, awaiting, team }
+
+enum _Filter { all, waiting, approved }
+
+/// Leave home: balances, role-gated lists, request FAB.
+class LeaveScreen extends ConsumerWidget {
   const LeaveScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final canRequest =
+        ref.watch(sessionControllerProvider).value?.can('leave:request') ??
+        false;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.leaveTitle),
         actions: const [AppBarActions()],
       ),
-      body: const MyLeaveView(),
+      floatingActionButton: canRequest
+          ? FloatingActionButton.extended(
+              onPressed: () => unawaited(context.push(AppRoutes.leaveNew)),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.leaveApply),
+            )
+          : null,
+      body: const MyLeaveView(showHeaderAction: false),
     );
   }
 }
@@ -44,65 +60,188 @@ class MyLeaveView extends ConsumerStatefulWidget {
 }
 
 class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
-  LeaveStatus? _filter;
+  _Tab _tab = _Tab.mine;
+  _Filter _filter = _Filter.all;
 
   Future<void> _refresh() async {
     ref
       ..invalidate(leaveBalancesProvider)
+      ..invalidate(leaveRequestsProvider)
       ..invalidate(myLeaveRequestsProvider);
-    await ref.read(myLeaveRequestsProvider.future);
+    await ref.read(leaveRequestsProvider('mine').future);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final bangla = context.isBangla;
-    final canRequest =
-        ref.watch(sessionControllerProvider).value?.can('leave:request') ??
-        false;
-    final requests = ref.watch(myLeaveRequestsProvider);
+    final session = ref.watch(sessionControllerProvider).value;
+    final canRequest = session?.can('leave:request') ?? false;
+    final beyondSelf = session?.can('leave:read', GrantScope.team) ?? false;
+    final canApprove = session?.can('leave:approve') ?? false;
+    final teamAsync = (beyondSelf || canApprove)
+        ? ref.watch(leaveRequestsProvider('team'))
+        : null;
+    final teamItems = teamAsync?.value ?? const <LeaveRequestItem>[];
+    final awaiting = [
+      for (final r in teamItems)
+        if (r.awaitingYou) r,
+    ];
+
+    final tabs = <(_Tab, String)>[
+      if (canRequest) (_Tab.mine, l10n.leaveTabMine),
+      if (beyondSelf || canApprove)
+        (_Tab.awaiting, l10n.leaveTabAwaiting(awaiting.length)),
+      if (beyondSelf) (_Tab.team, l10n.leaveTabTeam),
+    ];
+    final effective = tabs.any((t) => t.$1 == _tab)
+        ? _tab
+        : (tabs.isEmpty ? _Tab.mine : tabs.first.$1);
+
     final balances = ref.watch(leaveBalancesProvider);
+    final showBalances = effective == _Tab.mine && canRequest;
 
-    return requests.when(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (tabs.length > 1)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(
+              Space.lg,
+              Space.sm,
+              Space.lg,
+              Space.xs,
+            ),
+            child: Row(
+              children: [
+                for (final t in tabs) ...[
+                  ChoiceChip(
+                    label: Text(t.$2),
+                    selected: effective == t.$1,
+                    onSelected: (_) {
+                      Haptics.tap();
+                      setState(() => _tab = t.$1);
+                    },
+                  ),
+                  const SizedBox(width: Space.xs),
+                ],
+              ],
+            ),
+          ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: switch (effective) {
+              _Tab.mine => _RequestList(
+                scope: 'mine',
+                filter: _filter,
+                onFilter: (f) => setState(() => _filter = f),
+                showOwner: false,
+                balances: showBalances ? balances : null,
+                showApply: widget.showHeaderAction && canRequest,
+              ),
+              _Tab.awaiting => _RequestList(
+                scope: 'team',
+                onlyAwaiting: true,
+                showOwner: true,
+                emptyTitle: l10n.leaveAwaitEmptyTitle,
+                emptyMessage: l10n.leaveAwaitEmptyMessage,
+              ),
+              _Tab.team => _RequestList(
+                scope: 'team',
+                hideAwaiting: true,
+                showOwner: true,
+                emptyTitle: l10n.leaveScopeEmptyTitle,
+                emptyMessage: l10n.leaveScopeEmptyMessage,
+              ),
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RequestList extends ConsumerWidget {
+  const _RequestList({
+    required this.scope,
+    required this.showOwner,
+    this.filter,
+    this.onFilter,
+    this.onlyAwaiting = false,
+    this.hideAwaiting = false,
+    this.balances,
+    this.showApply = false,
+    this.emptyTitle,
+    this.emptyMessage,
+  });
+
+  final String scope;
+  final bool showOwner;
+  final _Filter? filter;
+  final ValueChanged<_Filter>? onFilter;
+  final bool onlyAwaiting;
+  final bool hideAwaiting;
+  final AsyncValue<List<LeaveBalance>>? balances;
+  final bool showApply;
+  final String? emptyTitle;
+  final String? emptyMessage;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final list = ref.watch(leaveRequestsProvider(scope));
+    return list.when(
       loading: () => const SkeletonList(),
-      error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
-      data: (all) {
-        final items = _filter == null
-            ? all
-            : all.where((r) => r.status == _filter).toList();
-        return RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 96),
-            children: [
-              // CTA Banner to Apply
-              if (widget.showHeaderAction && canRequest)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    Space.lg,
-                    Space.md,
-                    Space.lg,
-                    Space.xs,
-                  ),
-                  child: FilledButton.tonalIcon(
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: Space.md),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Corner.lg),
-                      ),
-                    ),
-                    icon: const Icon(Icons.add, size: 20),
-                    label: Text(
-                      bangla ? '+ নতুন ছুটির আবেদন করুন' : '+ Request Leave',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                    onPressed: () => context.push(AppRoutes.leaveNew),
-                  ),
+      error: (_, _) =>
+          ErrorState(onRetry: () => ref.invalidate(leaveRequestsProvider)),
+      data: (items) {
+        var shown = items;
+        if (onlyAwaiting) {
+          shown = [
+            for (final r in items)
+              if (r.awaitingYou) r,
+          ];
+        } else if (hideAwaiting) {
+          shown = [
+            for (final r in items)
+              if (!r.awaitingYou) r,
+          ];
+        }
+        shown = switch (filter) {
+          null || _Filter.all => shown,
+          _Filter.waiting => [
+            for (final r in shown)
+              if (r.status == LeaveStatus.pending ||
+                  r.status == LeaveStatus.returned)
+                r,
+          ],
+          _Filter.approved => [
+            for (final r in shown)
+              if (r.status == LeaveStatus.approved) r,
+          ],
+        };
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 96),
+          children: [
+            if (showApply)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  Space.lg,
+                  Space.md,
+                  Space.lg,
+                  Space.xs,
                 ),
-
+                child: FilledButton.tonalIcon(
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text(l10n.leaveApply),
+                  onPressed: () => unawaited(context.push(AppRoutes.leaveNew)),
+                ),
+              ),
+            if (balances != null) ...[
               SectionHeader(title: l10n.leaveBalancesTitle),
-              balances.when(
+              balances!.when(
                 loading: () => const SizedBox(
                   height: 120,
                   child: Center(child: CircularProgressIndicator()),
@@ -112,32 +251,48 @@ class _MyLeaveViewState extends ConsumerState<MyLeaveView> {
                 ),
                 data: (b) => BalanceStrip(balances: b),
               ),
-              SectionHeader(title: l10n.leaveRequestsTitle),
-              LeaveFilterBar(
-                selected: _filter,
-                onSelected: (s) => setState(() => _filter = s),
-              ),
-              const SizedBox(height: Space.xs),
-              if (items.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: Space.xxxl),
-                  child: EmptyState(
-                    icon: Icons.beach_access_outlined,
-                    title: l10n.leaveEmptyTitle,
-                    message: l10n.leaveEmptyMessage,
-                  ),
-                )
-              else
-                for (final r in items)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Space.lg,
-                      vertical: Space.xs,
-                    ),
-                    child: LeaveRequestRow(item: r),
-                  ),
             ],
-          ),
+            if (onFilter != null) ...[
+              const SizedBox(height: Space.sm),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: Space.lg),
+                child: Row(
+                  children: [
+                    ChoiceChip(
+                      label: Text(l10n.leaveFilterAll),
+                      selected: filter == _Filter.all,
+                      onSelected: (_) => onFilter!(_Filter.all),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    ChoiceChip(
+                      label: Text(l10n.leaveFilterWaiting),
+                      selected: filter == _Filter.waiting,
+                      onSelected: (_) => onFilter!(_Filter.waiting),
+                    ),
+                    const SizedBox(width: Space.xs),
+                    ChoiceChip(
+                      label: Text(l10n.leaveStatusApproved),
+                      selected: filter == _Filter.approved,
+                      onSelected: (_) => onFilter!(_Filter.approved),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (shown.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: Space.xxxl),
+                child: EmptyState(
+                  icon: Icons.beach_access_outlined,
+                  title: emptyTitle ?? l10n.leaveEmptyTitle,
+                  message: emptyMessage ?? l10n.leaveEmptyMessage,
+                ),
+              )
+            else
+              for (final r in shown)
+                LeaveRequestRow(item: r, showOwner: showOwner),
+          ],
         );
       },
     );
@@ -230,58 +385,31 @@ class BalanceCard extends StatelessWidget {
   }
 }
 
-class LeaveFilterBar extends StatelessWidget {
-  const LeaveFilterBar({
-    required this.selected,
-    required this.onSelected,
+class LeaveRequestRow extends StatelessWidget {
+  const LeaveRequestRow({
+    required this.item,
+    this.showOwner = false,
     super.key,
   });
 
-  final LeaveStatus? selected;
-  final ValueChanged<LeaveStatus?> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: Space.lg),
-      child: Row(
-        children: [
-          ChoiceChip(
-            label: Text(l10n.leaveFilterAll),
-            selected: selected == null,
-            onSelected: (_) => onSelected(null),
-          ),
-          for (final s in LeaveStatus.values) ...[
-            const SizedBox(width: Space.sm),
-            ChoiceChip(
-              label: Text(leaveStatusLabel(l10n, s)),
-              selected: selected == s,
-              onSelected: (_) => onSelected(s),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class LeaveRequestRow extends StatelessWidget {
-  const LeaveRequestRow({required this.item, super.key});
-
   final LeaveRequestItem item;
+  final bool showOwner;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bangla = context.isBangla;
     final lang = Localizations.localeOf(context).languageCode;
+    final bits = [
+      DateFmt.range(item.startDate, item.endDate, lang),
+      if (showOwner) item.employee.displayName(bangla: bangla),
+    ];
     return ListRow(
       title:
-          '${item.type.displayName(bangla: context.isBangla)} · '
+          '${item.type.displayName(bangla: bangla)} · '
           '${daysText(l10n, item.days, lang)}',
       subtitle:
-          '${DateFmt.range(item.startDate, item.endDate, lang)}\n${item.refNo}',
+          '${bits.join(' · ')}\n${leaveNextLine(l10n, item, bangla: bangla)}',
       trailing: StatusPill(
         label: leaveStatusLabel(l10n, item.status),
         tone: leaveStatusTone(item.status),

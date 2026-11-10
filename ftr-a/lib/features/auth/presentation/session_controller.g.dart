@@ -45,7 +45,7 @@ final class SessionControllerProvider
   SessionController create() => SessionController();
 }
 
-String _$sessionControllerHash() => r'1bc9cbb7456fd1cffddf76206d8f8d858907c901';
+String _$sessionControllerHash() => r'4c760986e17dacdfdcf8c5bac93bc1c9d0f23373';
 
 /// Current session. `null` data means signed out.
 ///

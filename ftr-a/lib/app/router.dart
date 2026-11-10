@@ -363,6 +363,14 @@ GoRouter router(Ref ref) {
                         path: ':id',
                         builder: (context, state) =>
                             LeaveDetailScreen(id: state.pathParameters['id']!),
+                        routes: [
+                          GoRoute(
+                            path: 'edit',
+                            builder: (context, state) => LeaveApplyScreen(
+                              id: state.pathParameters['id'],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -37,7 +37,11 @@ final class StaffListProvider
   String debugGetCreateSourceHash() => _$staffListHash();
 
   @override
-  String toString() => r'staffListProvider$argument';
+  String toString() {
+    return r'staffListProvider'
+        ''
+        '$argument';
+  }
 
   @$internal
   @override
@@ -57,10 +61,12 @@ final class StaffListProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$staffListHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$staffListHash() => r'd3dd55f0e7646acc38e89a567e6c0eb2760bab7f';
 
 final class StaffListFamily extends $Family
     with
@@ -110,7 +116,11 @@ final class StaffDetailProvider
   String debugGetCreateSourceHash() => _$staffDetailHash();
 
   @override
-  String toString() => r'staffDetailProvider($argument)';
+  String toString() {
+    return r'staffDetailProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -120,7 +130,8 @@ final class StaffDetailProvider
 
   @override
   FutureOr<StaffMember> create(Ref ref) {
-    return staffDetail(ref, this.argument as String);
+    final argument = this.argument as String;
+    return staffDetail(ref, argument);
   }
 
   @override
@@ -129,10 +140,12 @@ final class StaffDetailProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$staffDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$staffDetailHash() => r'1b548045029604621f88e9ccbc378942b62c358a';
 
 final class StaffDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<StaffMember>, String> {

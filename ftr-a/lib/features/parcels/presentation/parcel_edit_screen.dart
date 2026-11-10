@@ -5,15 +5,15 @@ import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/parcels/data/parcel_repository.dart';
 import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_providers.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_ui.dart';
 import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
-import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
+import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
-import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
 import 'package:bogcl_oneops/shared/widgets/toast_and_sheets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -94,6 +94,7 @@ class _FormState extends ConsumerState<_Form> {
   late String? _recipientWhere = widget.parcel?.dest.label(
     bangla: context.isBangla,
   );
+  late final List<String> _photos = [...?widget.parcel?.photoFileIds];
   Map<String, String> _errors = {};
   bool _saving = false;
   int? _draftIndex;
@@ -109,9 +110,6 @@ class _FormState extends ConsumerState<_Form> {
 
   bool get _forcedConfidential =>
       const {'CONFIDENTIAL', 'LEGAL_DOCS', 'TENDER_BID'}.contains(_category);
-
-  bool get _isReady =>
-      _recipient != null && _description.text.trim().length >= 5;
 
   Future<void> _pickRecipient() async {
     final pick = await showPersonPicker(
@@ -173,6 +171,7 @@ class _FormState extends ConsumerState<_Form> {
                   : _waybill.text.trim(),
               'specialHandling': _handling.toList(),
               'isConfidential': _confidential || _forcedConfidential,
+              'photoFileIds': _photos,
             },
           );
       ref
@@ -216,223 +215,317 @@ class _FormState extends ConsumerState<_Form> {
     final bangla = context.isBangla;
     final editing = widget.parcel != null;
     final recipient = _recipient;
+    final err = _errors.values.firstOrNull;
 
     return Scaffold(
       appBar: AppBar(title: Text(editing ? l10n.pcEditTitle : l10n.pcSend)),
-      bottomNavigationBar: EnterpriseFormBottomBar(
-        primaryLabel: editing ? l10n.pcSaveChanges : l10n.pcCreate,
-        primaryIcon: Icons.local_shipping_outlined,
-        loading: _saving,
-        isReady: _isReady,
-        errorMessage: _errors.values.firstOrNull,
-        onPrimaryPressed: () => unawaited(_save()),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          Space.lg,
-          Space.md,
-          Space.lg,
-          Space.xxl,
-        ),
+      body: Column(
         children: [
-          AppTextField(
-            label: l10n.pcFieldDescription,
-            controller: _description,
-            maxLines: 3,
-            maxLength: 500,
-            required: true,
-            textInputAction: TextInputAction.newline,
-            keyboardType: TextInputType.multiline,
-            onChanged: (_) => setState(() {
-              _draftIndex = null;
-              _errors.remove('description');
-            }),
-            errorText: _errors['description'],
-          ),
-          const SizedBox(height: Space.md),
-          Text(l10n.pcUseDraft, style: theme.textTheme.titleSmall),
-          const SizedBox(height: Space.xs),
-          Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.xs,
-            children: [
-              for (var i = 0; i < _parcelTemplates.length; i++)
-                ChoiceChip(
-                  visualDensity: VisualDensity.compact,
-                  label: Text(switch (i) {
-                    0 => l10n.pcDraftTender,
-                    1 => l10n.pcDraftSpares,
-                    2 => l10n.pcDraftLicence,
-                    _ => l10n.pcDraftIt,
-                  }),
-                  selected: _draftIndex == i,
-                  onSelected: (_) {
-                    final preset = _parcelTemplates[i];
-                    setState(() {
-                      _draftIndex = i;
-                      _description.text = bangla ? preset.$2 : preset.$1;
-                      _errors.remove('description');
-                    });
-                  },
-                ),
-            ],
-          ),
-          const SizedBox(height: Space.lg),
-          Text(l10n.pcFieldRecipient, style: theme.textTheme.titleSmall),
-          const SizedBox(height: Space.xs),
-          InkWell(
-            borderRadius: BorderRadius.circular(Radii.md),
-            onTap: () => unawaited(_pickRecipient()),
-            child: Container(
-              padding: const EdgeInsets.all(Space.md),
-              decoration: BoxDecoration(
-                color: cs.surface,
-                borderRadius: BorderRadius.circular(Radii.md),
-                border: Border.all(
-                  color: _errors['recipient'] != null
-                      ? context.bogcl.danger
-                      : cs.outlineVariant,
-                ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                Space.lg,
+                Space.md,
+                Space.lg,
+                Space.xxl,
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.person_outline, color: cs.onSurfaceVariant),
-                  const SizedBox(width: Space.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Card(
+                  title: l10n.pcFormWhat,
+                  children: [
+                    AppTextField(
+                      label: l10n.pcFieldDescription,
+                      controller: _description,
+                      maxLines: 3,
+                      maxLength: 500,
+                      required: true,
+                      textInputAction: TextInputAction.newline,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (_) => setState(() {
+                        _draftIndex = null;
+                        _errors.remove('description');
+                      }),
+                      errorText: _errors['description'],
+                    ),
+                    const SizedBox(height: Space.md),
+                    Wrap(
+                      spacing: Space.sm,
+                      runSpacing: Space.xs,
                       children: [
-                        Text(
-                          recipient == null
-                              ? l10n.pcPickRecipient
-                              : recipient.display(bangla: bangla),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                        for (var i = 0; i < _parcelTemplates.length; i++)
+                          FilterChip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(switch (i) {
+                              0 => l10n.pcDraftTender,
+                              1 => l10n.pcDraftSpares,
+                              2 => l10n.pcDraftLicence,
+                              _ => l10n.pcDraftIt,
+                            }),
+                            selected: _draftIndex == i,
+                            onSelected: (_) {
+                              final preset = _parcelTemplates[i];
+                              setState(() {
+                                _draftIndex = i;
+                                _description.text = bangla
+                                    ? preset.$2
+                                    : preset.$1;
+                                _errors.remove('description');
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: Space.md),
+                    Text(
+                      l10n.pcFieldCategory,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Wrap(
+                      spacing: Space.sm,
+                      runSpacing: Space.xs,
+                      children: [
+                        for (final c in parcelCategories)
+                          FilterChip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(parcelCategoryLabel(l10n, c)),
+                            selected: _category == c,
+                            onSelected: (_) => setState(() => _category = c),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                _Card(
+                  title: l10n.pcFormWho,
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(Radii.md),
+                      onTap: () => unawaited(_pickRecipient()),
+                      child: Container(
+                        padding: const EdgeInsets.all(Space.md),
+                        decoration: BoxDecoration(
+                          color: cs.surface,
+                          borderRadius: BorderRadius.circular(Radii.md),
+                          border: Border.all(
+                            color: _errors['recipient'] != null
+                                ? context.bogcl.danger
+                                : cs.outlineVariant,
                           ),
                         ),
-                        if (recipient != null)
-                          Text(
-                            [?recipient.title, ?_recipientWhere].join(' · '),
-                            style: theme.textTheme.bodySmall?.copyWith(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.person_outline,
                               color: cs.onSurfaceVariant,
                             ),
-                          )
-                        else if (_errors['recipient'] != null)
-                          Text(
-                            _errors['recipient']!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: context.bogcl.danger,
+                            const SizedBox(width: Space.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    recipient == null
+                                        ? l10n.pcPickRecipient
+                                        : recipient.display(bangla: bangla),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (recipient != null)
+                                    Text(
+                                      [?recipient.title, ?_recipientWhere]
+                                          .join(' · '),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                    )
+                                  else if (_errors['recipient'] != null)
+                                    Text(
+                                      _errors['recipient']!,
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: context.bogcl.danger,
+                                          ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.search, color: cs.onSurfaceVariant),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                _Card(
+                  title: l10n.pcFormPhotos,
+                  children: [
+                    EvidenceStrip(
+                      fileIds: _photos,
+                      canAdd: true,
+                      max: 6,
+                      onAdded: (id) async {
+                        if (!mounted) return;
+                        setState(() => _photos.add(id));
+                      },
+                    ),
+                  ],
+                ),
+                ExpansionTile(
+                  title: Text(l10n.pcFormMore),
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: const EdgeInsets.only(bottom: Space.md),
+                  children: [
+                    Text(l10n.pcFieldUrgency, style: theme.textTheme.titleSmall),
+                    const SizedBox(height: Space.xs),
+                    Wrap(
+                      spacing: Space.sm,
+                      runSpacing: Space.xs,
+                      children: [
+                        ChoiceChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(l10n.pcUrgNormal),
+                          selected: _urgency == 'NORMAL',
+                          onSelected: (_) =>
+                              setState(() => _urgency = 'NORMAL'),
+                        ),
+                        ChoiceChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(l10n.nsUrgHigh),
+                          selected: _urgency == 'HIGH',
+                          onSelected: (_) => setState(() => _urgency = 'HIGH'),
+                        ),
+                        ChoiceChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(l10n.nsUrgCritical),
+                          selected: _urgency == 'CRITICAL',
+                          onSelected: (_) =>
+                              setState(() => _urgency = 'CRITICAL'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Space.lg),
+                    AppTextField(
+                      label: l10n.pcFieldValue,
+                      helper: l10n.pcValueHelp,
+                      controller: _value,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      errorText: _errors['value'] ?? _errors['declaredValue'],
+                    ),
+                    const SizedBox(height: Space.md),
+                    AppTextField(
+                      label: l10n.pcFieldWeight,
+                      controller: _weight,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
+                      errorText: _errors['weight'] ?? _errors['weightKg'],
+                    ),
+                    const SizedBox(height: Space.md),
+                    AppTextField(
+                      label: l10n.pcFieldWaybill,
+                      controller: _waybill,
+                      maxLength: 40,
+                      errorText: _errors['waybill'] ?? _errors['waybillNo'],
+                    ),
+                    const SizedBox(height: Space.lg),
+                    Text(
+                      l10n.pcFieldHandling,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Wrap(
+                      spacing: Space.sm,
+                      runSpacing: Space.xs,
+                      children: [
+                        for (final h in _handlings)
+                          FilterChip(
+                            visualDensity: VisualDensity.compact,
+                            label: Text(parcelHandlingLabel(l10n, h)),
+                            selected: _handling.contains(h),
+                            onSelected: (on) => setState(
+                              () => on
+                                  ? _handling.add(h)
+                                  : _handling.remove(h),
                             ),
                           ),
                       ],
                     ),
+                    const SizedBox(height: Space.sm),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.pcFieldConfidential),
+                      subtitle: Text(
+                        _forcedConfidential
+                            ? l10n.pcConfidentialAuto
+                            : l10n.pcConfidentialHelp,
+                      ),
+                      value: _confidential || _forcedConfidential,
+                      onChanged: _forcedConfidential
+                          ? null
+                          : (v) => setState(() => _confidential = v),
+                    ),
+                  ],
+                ),
+                if (err != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Space.md),
+                    child: Text(
+                      err,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: context.bogcl.danger,
+                      ),
+                    ),
                   ),
-                  Icon(Icons.search, color: cs.onSurfaceVariant),
-                ],
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: Space.lg),
-          Text(l10n.pcFieldCategory, style: theme.textTheme.titleSmall),
-          const SizedBox(height: Space.xs),
-          Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.xs,
-            children: [
-              for (final c in parcelCategories)
-                FilterChip(
-                  visualDensity: VisualDensity.compact,
-                  label: Text(parcelCategoryLabel(l10n, c)),
-                  selected: _category == c,
-                  onSelected: (_) => setState(() => _category = c),
-                ),
-            ],
-          ),
-          const SizedBox(height: Space.lg),
-          Text(l10n.pcFieldUrgency, style: theme.textTheme.titleSmall),
-          const SizedBox(height: Space.xs),
-          Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.xs,
-            children: [
-              ChoiceChip(
-                visualDensity: VisualDensity.compact,
-                label: Text(l10n.pcUrgNormal),
-                selected: _urgency == 'NORMAL',
-                onSelected: (_) => setState(() => _urgency = 'NORMAL'),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(Space.lg),
+              child: PrimaryButton(
+                label: editing ? l10n.pcSaveChanges : l10n.pcCreate,
+                loading: _saving,
+                onPressed: _saving ? null : () => unawaited(_save()),
               ),
-              ChoiceChip(
-                visualDensity: VisualDensity.compact,
-                label: Text(l10n.nsUrgHigh),
-                selected: _urgency == 'HIGH',
-                onSelected: (_) => setState(() => _urgency = 'HIGH'),
-              ),
-              ChoiceChip(
-                visualDensity: VisualDensity.compact,
-                label: Text(l10n.nsUrgCritical),
-                selected: _urgency == 'CRITICAL',
-                onSelected: (_) => setState(() => _urgency = 'CRITICAL'),
-              ),
-            ],
-          ),
-          const SizedBox(height: Space.lg),
-          AppTextField(
-            label: l10n.pcFieldValue,
-            helper: l10n.pcValueHelp,
-            controller: _value,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            errorText: _errors['value'] ?? _errors['declaredValue'],
-          ),
-          const SizedBox(height: Space.md),
-          AppTextField(
-            label: l10n.pcFieldWeight,
-            controller: _weight,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.next,
-            errorText: _errors['weight'] ?? _errors['weightKg'],
-          ),
-          const SizedBox(height: Space.md),
-          AppTextField(
-            label: l10n.pcFieldWaybill,
-            controller: _waybill,
-            maxLength: 40,
-            errorText: _errors['waybill'] ?? _errors['waybillNo'],
-          ),
-          const SizedBox(height: Space.lg),
-          Text(l10n.pcFieldHandling, style: theme.textTheme.titleSmall),
-          const SizedBox(height: Space.xs),
-          Wrap(
-            spacing: Space.sm,
-            runSpacing: Space.xs,
-            children: [
-              for (final h in _handlings)
-                FilterChip(
-                  visualDensity: VisualDensity.compact,
-                  label: Text(parcelHandlingLabel(l10n, h)),
-                  selected: _handling.contains(h),
-                  onSelected: (on) => setState(
-                    () => on ? _handling.add(h) : _handling.remove(h),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: Space.sm),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.pcFieldConfidential),
-            subtitle: Text(
-              _forcedConfidential
-                  ? l10n.pcConfidentialAuto
-                  : l10n.pcConfidentialHelp,
             ),
-            value: _confidential || _forcedConfidential,
-            onChanged: _forcedConfidential
-                ? null
-                : (v) => setState(() => _confidential = v),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Space.lg),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(Space.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              const SizedBox(height: Space.md),
+              ...children,
+            ],
+          ),
+        ),
       ),
     );
   }

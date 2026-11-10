@@ -193,6 +193,34 @@ abstract final class ParcelEngine {
     return id;
   }
 
+  /// Contents photos on create / edit while CREATED (max 6, CLEAN PHOTO, sender).
+  static List<String> _photoIds(MockStore store, AuthContext auth, Json b) {
+    final raw = b['photoFileIds'];
+    if (raw == null) return const [];
+    if (raw is! List || raw.length > 6) {
+      throw validationError('photoFileIds', 'Add at most 6 photos');
+    }
+    final me = _me(auth);
+    final ids = <String>[];
+    for (final id in raw) {
+      if (id is! String) {
+        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+      }
+      final file = store.get(Col.files, id);
+      if (file == null) {
+        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+      }
+      FileEngine.scanStatus(store, file);
+      if (file['uploaderUserId'] != me ||
+          file.strOrNull('purpose') != 'PHOTO' ||
+          file.str('scanStatus') != 'CLEAN') {
+        throw validationError('photoFileIds', 'Photo not found. Upload it again.');
+      }
+      ids.add(id);
+    }
+    return ids;
+  }
+
   static String? _text(Json b, String key, int min, int max) {
     final v = b[key];
     if (v == null) return null;
@@ -220,6 +248,7 @@ abstract final class ParcelEngine {
       'deliveredAt': null,
       'deliveredMethod': null,
       'events': <Json>[],
+      'photoFileIds': <String>[],
       'return': null,
       'dwellAlerted': false,
       'createdAt': now,
@@ -322,6 +351,18 @@ abstract final class ParcelEngine {
       ..['weightKg'] = weight
       ..['waybillNo'] = wb
       ..['updatedAt'] = _stamp(store);
+    if (creating || b.containsKey('photoFileIds')) {
+      final photos = _photoIds(store, auth, b);
+      p['photoFileIds'] = photos;
+      for (final id in photos) {
+        FileEngine.attach(
+          store,
+          id,
+          ownerType: 'Parcel',
+          ownerId: p.str('id'),
+        );
+      }
+    }
     store.put(Col.parcels, p);
   }
 
@@ -1048,6 +1089,9 @@ abstract final class ParcelEngine {
       'status': status,
       'tamperStatus': p['tamperStatus'],
       'description': hidden ? null : p['description'],
+      'photoFileIds': hidden
+          ? const <String>[]
+          : (p['photoFileIds'] as List<Object?>? ?? const []),
       'declaredValue': hidden ? null : p['declaredValue'],
       'isConfidential': p['isConfidential'],
       'hidden': hidden,

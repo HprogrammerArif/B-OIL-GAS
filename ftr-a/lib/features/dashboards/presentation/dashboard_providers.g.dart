@@ -40,7 +40,9 @@ final class DashboardMeProvider
       $FutureProviderElement(pointer);
 
   @override
-  FutureOr<Dashboard> create(Ref ref) => dashboardMe(ref);
+  FutureOr<Dashboard> create(Ref ref) {
+    return dashboardMe(ref);
+  }
 }
 
-String _$dashboardMeHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$dashboardMeHash() => r'bde216d555e36b38e98566cd84b9e627508a69bf';

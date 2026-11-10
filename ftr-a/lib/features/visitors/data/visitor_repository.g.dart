@@ -45,6 +45,7 @@ final class VisitorRepositoryProvider
     return visitorRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(VisitorRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -53,4 +54,4 @@ final class VisitorRepositoryProvider
   }
 }
 
-String _$visitorRepositoryHash() => r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+String _$visitorRepositoryHash() => r'96fe2ed3c279c8a46a5481a798d6bcb3dda40001';

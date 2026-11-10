@@ -122,6 +122,9 @@ class ParcelAccess {
   final bool canNote;
   final bool photoRequiredForDelivery;
   final bool sealRequired;
+
+  bool get waitingOnMe =>
+      canAccept || canVerifyOtp || canDispatch || canGateIn;
 }
 
 @immutable
@@ -157,6 +160,7 @@ class Parcel {
     this.returnNo,
     this.returnReason,
     this.returnDetails,
+    this.photoFileIds = const [],
     this.events = const [],
     this.chainValid = true,
     this.demoOtp,
@@ -204,6 +208,10 @@ class Parcel {
       returnNo: ret?['returnNo'] as String?,
       returnReason: ret?['reason'] as String?,
       returnDetails: ret?['details'] as String?,
+      photoFileIds: [
+        for (final id in (j['photoFileIds'] as List<Object?>? ?? const []))
+          id! as String,
+      ],
       events: [
         for (final e in (j['events'] as List<Object?>? ?? const []))
           ParcelEvent.fromJson(Map<String, Object?>.from(e! as Map)),
@@ -245,6 +253,7 @@ class Parcel {
   final String? returnNo;
   final String? returnReason;
   final String? returnDetails;
+  final List<String> photoFileIds;
   final List<ParcelEvent> events;
   final bool chainValid;
   final String? demoOtp;

@@ -45,6 +45,7 @@ final class IncidentRepositoryProvider
     return incidentRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(IncidentRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -54,4 +55,4 @@ final class IncidentRepositoryProvider
 }
 
 String _$incidentRepositoryHash() =>
-    r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    r'608c5773ab1765969d86be15a0ce0d78eb228c95';

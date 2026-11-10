@@ -46,7 +46,7 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
     super.dispose();
   }
 
-  bool get _filtersActive => _zoneFilter != 'ALL';
+  bool get _filtersActive => _zoneFilter != 'ALL' || _view == 'statutory';
 
   int _viewCount(String view) =>
       ref.watch(incidentsProvider(view: view, query: _query)).value?.length ??
@@ -96,6 +96,21 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                     Text(
                       l10n.inFilter,
                       style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: Space.md),
+                    Text(
+                      l10n.inFilterViews,
+                      style: Theme.of(ctx).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Wrap(
+                      children: [
+                        chip(
+                          selected: _view == 'statutory',
+                          label: l10n.inTabStatutory,
+                          onTap: () => _view = 'statutory',
+                        ),
+                      ],
                     ),
                     const SizedBox(height: Space.md),
                     Text(
@@ -211,13 +226,18 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      if (canReport) viewChip('mine', l10n.inTabMine),
-                      if (canTriage) viewChip('to-triage', l10n.inTabTriage),
-                      if (canWide) viewChip('open', l10n.inTabOpen),
-                      if (canWide) viewChip('serious', l10n.inTabSerious),
-                      if (canTriage) viewChip('statutory', l10n.inTabStatutory),
-                      viewChip('my-capa', l10n.inTabCapa),
-                      if (canWide) viewChip('all', l10n.inTabAll),
+                      if (canTriage) ...[
+                        viewChip('to-triage', l10n.inTabTriage),
+                        viewChip('open', l10n.inTabOpen),
+                        viewChip('my-capa', l10n.inTabCapa),
+                      ] else if (canWide) ...[
+                        viewChip('open', l10n.inTabOpen),
+                        viewChip('serious', l10n.inTabSerious),
+                        viewChip('all', l10n.inTabAll),
+                      ] else ...[
+                        if (canReport) viewChip('mine', l10n.inTabMine),
+                        viewChip('my-capa', l10n.inTabCapa),
+                      ],
                     ],
                   ),
                 ),

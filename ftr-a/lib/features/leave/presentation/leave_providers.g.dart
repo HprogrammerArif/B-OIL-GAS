@@ -50,6 +50,83 @@ final class LeaveBalancesProvider
 
 String _$leaveBalancesHash() => r'117b4fe964ceb91cf87087bfb16b57fd85ef1ec2';
 
+@ProviderFor(leaveRequests)
+final leaveRequestsProvider = LeaveRequestsFamily._();
+
+final class LeaveRequestsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LeaveRequestItem>>,
+          List<LeaveRequestItem>,
+          FutureOr<List<LeaveRequestItem>>
+        >
+    with
+        $FutureModifier<List<LeaveRequestItem>>,
+        $FutureProvider<List<LeaveRequestItem>> {
+  LeaveRequestsProvider._({
+    required LeaveRequestsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'leaveRequestsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$leaveRequestsHash();
+
+  @override
+  String toString() {
+    return r'leaveRequestsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LeaveRequestItem>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LeaveRequestItem>> create(Ref ref) {
+    final argument = this.argument as String;
+    return leaveRequests(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LeaveRequestsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$leaveRequestsHash() => r'd18d39d4f13db98fe0fa1673dcb5dccf30abc692';
+
+final class LeaveRequestsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<LeaveRequestItem>>, String> {
+  LeaveRequestsFamily._()
+    : super(
+        retry: null,
+        name: r'leaveRequestsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  LeaveRequestsProvider call(String scope) =>
+      LeaveRequestsProvider._(argument: scope, from: this);
+
+  @override
+  String toString() => r'leaveRequestsProvider';
+}
+
 @ProviderFor(myLeaveRequests)
 final myLeaveRequestsProvider = MyLeaveRequestsProvider._();
 

@@ -87,11 +87,12 @@ class LeaveRepository {
     required String endDate,
     required String reason,
     required String label,
+    String? id,
     HalfDay? halfDay,
     String? attachmentFileId,
   }) => _outbox.sendOrQueue(
-    method: 'POST',
-    endpoint: '/leave/requests',
+    method: id == null ? 'POST' : 'PUT',
+    endpoint: id == null ? '/leave/requests' : '/leave/requests/$id',
     label: label,
     payload: {
       'leaveTypeId': leaveTypeId,

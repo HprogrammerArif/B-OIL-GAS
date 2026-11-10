@@ -45,6 +45,7 @@ final class DashboardRepositoryProvider
     return dashboardRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(DashboardRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -54,4 +55,4 @@ final class DashboardRepositoryProvider
 }
 
 String _$dashboardRepositoryHash() =>
-    r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    r'a31d6ed699e4c8d6e14d414b429e5f4a0d63580f';

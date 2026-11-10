@@ -115,9 +115,47 @@ abstract final class LeaveEngine {
     };
   }
 
-  static Json requestWire(MockStore store, Json l) {
+  static ({bool awaitingYou, String? name, String? nameBn}) _queue(
+    MockStore store,
+    Json l,
+    String? viewerUserId,
+  ) {
+    const none = (awaitingYou: false, name: null, nameBn: null);
+    final instId = l.strOrNull('workflowInstanceId');
+    if (instId == null || l['status'] != 'PENDING') return none;
+    Json? active;
+    for (final s in store.all(Col.workflowSteps)) {
+      if (s['instanceId'] == instId && s['status'] == 'ACTIVE') {
+        active = s;
+        break;
+      }
+    }
+    if (active == null) return none;
+    final ids = {
+      ...active.strList('approverUserIds'),
+      ?active.strOrNull('delegatedToId'),
+    };
+    String? name;
+    String? nameBn;
+    for (final id in ids) {
+      final user = store.get(Col.users, id);
+      final empId = user?.strOrNull('employeeId');
+      final emp = empId == null ? null : store.get(Col.employees, empId);
+      name = emp?['fullName'] as String?;
+      nameBn = emp?['fullNameBn'] as String?;
+      if (name != null && name.isNotEmpty) break;
+    }
+    return (
+      awaitingYou: viewerUserId != null && ids.contains(viewerUserId),
+      name: name,
+      nameBn: nameBn,
+    );
+  }
+
+  static Json requestWire(MockStore store, Json l, {String? viewerUserId}) {
     final type = store.get(Col.leaveTypes, l.str('leaveTypeId'));
     final reviewer = l.strOrNull('reviewedById');
+    final queue = _queue(store, l, viewerUserId);
     return {
       'id': l['id'],
       'refNo': l['refNo'],
@@ -140,20 +178,29 @@ abstract final class LeaveEngine {
       'reviewedAt': l['reviewedAt'],
       'reviewComment': l['reviewComment'],
       'workflowInstanceId': l['workflowInstanceId'],
+      'attachmentFileId': l['attachmentFileId'],
+      'awaitingYou': queue.awaitingYou,
+      'waitingFor': queue.name,
+      'waitingForBn': queue.nameBn,
     };
   }
 
-  /// PENDING can always be withdrawn; APPROVED only before the start date.
+  /// PENDING/RETURNED can be withdrawn; APPROVED only before the start date.
   static bool canCancel(Json l, String employeeId, {String? today}) {
     if (l['employeeId'] != employeeId) return false;
     final status = l.str('status');
-    if (status == 'PENDING') return true;
+    if (status == 'PENDING' || status == 'RETURNED') return true;
     return status == 'APPROVED' &&
         l.str('startDate').compareTo(today ?? WorkCalendar.today()) > 0;
   }
 
-  static Json detailWire(MockStore store, Json l, String viewerEmployeeId) => {
-    ...requestWire(store, l),
+  static Json detailWire(
+    MockStore store,
+    Json l, {
+    required String viewerEmployeeId,
+    String? viewerUserId,
+  }) => {
+    ...requestWire(store, l, viewerUserId: viewerUserId),
     'cancelReason': l['cancelReason'],
     'attachmentFileId': l['attachmentFileId'],
     'viewer': {
@@ -197,7 +244,12 @@ abstract final class LeaveEngine {
   /// Validates and files a request (doc 06 BR-10-10, doc 03 §16.2). Returns
   /// the stored record: PENDING with a workflow, or APPROVED when nobody sits
   /// above the requester (chairman).
-  static Json create(MockStore store, AuthContext auth, Json body) {
+  static Json create(
+    MockStore store,
+    AuthContext auth,
+    Json body, {
+    Json? existing,
+  }) {
     final me = auth.employeeId;
     final typeId = body['leaveTypeId'];
     final type = typeId is String ? store.get(Col.leaveTypes, typeId) : null;
@@ -304,16 +356,13 @@ abstract final class LeaveEngine {
         fileId is! String) {
       throw validationError('attachmentFileId', 'Attach a supporting document');
     }
-    final overlap = store
-        .all(Col.leaveRequests)
-        .where(
-          (l) =>
-              l['employeeId'] == me &&
-              (l['status'] == 'PENDING' || l['status'] == 'APPROVED') &&
-              l.str('startDate').compareTo(end) <= 0 &&
-              start.compareTo(l.str('endDate')) <= 0,
-        )
-        .firstOrNull;
+    final overlap = _overlap(
+      store,
+      employeeId: me,
+      start: start,
+      end: end,
+      ignoreId: existing?.str('id'),
+    );
     if (overlap != null) {
       throw HttpError(
         ApiErrorCode.conflict,
@@ -336,6 +385,46 @@ abstract final class LeaveEngine {
     }
 
     final now = store.nowIso();
+    if (existing != null) {
+      existing
+        ..['leaveTypeId'] = type['id']
+        ..['startDate'] = start
+        ..['endDate'] = end
+        ..['halfDay'] = halfDay
+        ..['days'] = days
+        ..['reason'] = reason
+        ..['status'] = 'PENDING'
+        ..['isInformed'] = isInformed(code, start)
+        ..['reviewedById'] = null
+        ..['reviewedAt'] = null
+        ..['reviewComment'] = null
+        ..['attachmentFileId'] = fileId
+        ..['updatedAt'] = now;
+      store.put(Col.leaveRequests, existing);
+      if (file != null) {
+        FileEngine.attach(
+          store,
+          file.str('id'),
+          ownerType: 'LeaveRequest',
+          ownerId: existing.str('id'),
+        );
+      }
+      if (auth.employee['lineManager'] == null) {
+        _approve(store, existing, null, null);
+      } else {
+        submitWorkflow(store, auth.user, existing, type);
+      }
+      AuditEngine.log(
+        store,
+        action: 'LEAVE_RESUBMITTED',
+        entityType: 'LeaveRequest',
+        actorUserId: auth.user.str('id'),
+        entityId: existing.str('id'),
+        after: {'refNo': existing['refNo'], 'days': days, 'type': code},
+      );
+      return existing;
+    }
+
     final id =
         'lv_${store.collection(Col.leaveRequests).length + 1}_${store.nowMs()}';
     final leave = <String, Object?>{
@@ -383,6 +472,40 @@ abstract final class LeaveEngine {
       after: {'refNo': leave['refNo'], 'days': days, 'type': code},
     );
     return leave;
+  }
+
+  static Json? _overlap(
+    MockStore store, {
+    required String employeeId,
+    required String start,
+    required String end,
+    String? ignoreId,
+  }) => store
+      .all(Col.leaveRequests)
+      .where(
+        (l) =>
+            l['employeeId'] == employeeId &&
+            l['id'] != ignoreId &&
+            (l['status'] == 'PENDING' || l['status'] == 'APPROVED') &&
+            l.str('startDate').compareTo(end) <= 0 &&
+            start.compareTo(l.str('endDate')) <= 0,
+      )
+      .firstOrNull;
+
+  /// Owner resubmit after RETURN. Restarts the leave workflow.
+  static Json update(
+    MockStore store,
+    AuthContext auth,
+    Json existing,
+    Json body,
+  ) {
+    if (existing['employeeId'] != auth.employeeId) {
+      throw forbidden('Only the requester can update this leave');
+    }
+    if (existing['status'] != 'RETURNED') {
+      throw invalidTransition('Only a returned request can be edited');
+    }
+    return create(store, auth, body, existing: existing);
   }
 
   /// Files the `LEAVE_REQUEST` workflow for a stored request.
@@ -545,9 +668,16 @@ abstract final class LeaveEngine {
           ..['status'] = 'CANCELLED'
           ..['updatedAt'] = store.nowIso();
         store.put(Col.leaveRequests, l);
-      case WorkflowEvent.submitted ||
-          WorkflowEvent.stepApproved ||
-          WorkflowEvent.returned:
+      case WorkflowEvent.returned:
+        final now = store.nowIso();
+        l
+          ..['status'] = 'RETURNED'
+          ..['reviewedById'] = reviewerEmp
+          ..['reviewedAt'] = now
+          ..['reviewComment'] = last?.strOrNull('comment')
+          ..['updatedAt'] = now;
+        store.put(Col.leaveRequests, l);
+      case WorkflowEvent.submitted || WorkflowEvent.stepApproved:
         break;
     }
   }

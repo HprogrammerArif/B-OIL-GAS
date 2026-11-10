@@ -190,10 +190,6 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
           PopupMenuItem(value: _Menu.note, child: Text(l10n.pcActAddNote)),
         if (m.canResendOtp)
           PopupMenuItem(value: _Menu.resend, child: Text(l10n.pcActResend)),
-        if (m.canEdit)
-          PopupMenuItem(value: _Menu.edit, child: Text(l10n.pcActEdit)),
-        if (m.canCancel)
-          PopupMenuItem(value: _Menu.cancel, child: Text(l10n.pcActCancel)),
         if (!p.hidden || m.isSender)
           PopupMenuItem(value: _Menu.label, child: Text(l10n.pcActLabel)),
       ],
@@ -222,27 +218,7 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
             _refresh();
             await ref.read(parcelDetailProvider(widget.id).future);
           },
-          child: _Body(
-            parcel: p,
-            onReissueOtp: () => unawaited(
-              _run(
-                () => _repo.act(p.id, 'resend-otp'),
-                done: l10n.pcDoneResend,
-              ),
-            ),
-            onVerifyOtp: () => unawaited(
-              _withSheet(
-                p,
-                ParcelSheet.verify,
-                'verify-otp',
-                l10n.pcDoneVerify,
-              ),
-            ),
-            onReportProblem: () => unawaited(
-              _withSheet(p, ParcelSheet.flag, 'flag', l10n.pcDoneProblem),
-            ),
-            busy: _busy,
-          ),
+          child: _Body(parcel: p),
         ),
       ),
     );
@@ -323,6 +299,27 @@ class _ParcelDetailScreenState extends ConsumerState<ParcelDetailScreen> {
                   : ParcelSheet.checkpoint,
               'checkpoint',
               l10n.pcDoneCheckpoint,
+            ),
+          ),
+        ),
+      if (m.canEdit)
+        (
+          l10n.pcActEdit,
+          Icons.edit_outlined,
+          () => unawaited(context.push(AppRoutes.parcelEdit(p.id))),
+        ),
+      if (m.canCancel)
+        (
+          l10n.pcActCancel,
+          Icons.cancel_outlined,
+          () => unawaited(
+            _confirmed(
+              p,
+              'cancel',
+              l10n.pcActCancel,
+              l10n.pcCancelMessage,
+              l10n.pcDoneCancel,
+              destructive: true,
             ),
           ),
         ),

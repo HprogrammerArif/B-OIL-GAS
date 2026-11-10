@@ -43,10 +43,12 @@ final class ChatChannelsProvider
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<ChatChannel>> create(Ref ref) => chatChannels(ref);
+  FutureOr<List<ChatChannel>> create(Ref ref) {
+    return chatChannels(ref);
+  }
 }
 
-String _$chatChannelsHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$chatChannelsHash() => r'f8fe9484ed72917cded76317f6deb25ae1007f3f';
 
 @ProviderFor(chatChannel)
 final chatChannelProvider = ChatChannelFamily._();
@@ -74,7 +76,11 @@ final class ChatChannelProvider
   String debugGetCreateSourceHash() => _$chatChannelHash();
 
   @override
-  String toString() => r'chatChannelProvider($argument)';
+  String toString() {
+    return r'chatChannelProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -84,7 +90,8 @@ final class ChatChannelProvider
 
   @override
   FutureOr<ChatChannel> create(Ref ref) {
-    return chatChannel(ref, this.argument as String);
+    final argument = this.argument as String;
+    return chatChannel(ref, argument);
   }
 
   @override
@@ -93,10 +100,12 @@ final class ChatChannelProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$chatChannelHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$chatChannelHash() => r'c825310a3e0451441c9a085e395db9e7bc15f57e';
 
 final class ChatChannelFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<ChatChannel>, String> {
@@ -144,7 +153,11 @@ final class ChatMessagesProvider
   String debugGetCreateSourceHash() => _$chatMessagesHash();
 
   @override
-  String toString() => r'chatMessagesProvider($argument)';
+  String toString() {
+    return r'chatMessagesProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -154,7 +167,8 @@ final class ChatMessagesProvider
 
   @override
   FutureOr<List<ChatMessage>> create(Ref ref) {
-    return chatMessages(ref, this.argument as String);
+    final argument = this.argument as String;
+    return chatMessages(ref, argument);
   }
 
   @override
@@ -163,10 +177,12 @@ final class ChatMessagesProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$chatMessagesHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$chatMessagesHash() => r'a3f69dc7383a21fcbd32d8ff47d6cc0e76b482ba';
 
 final class ChatMessagesFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<ChatMessage>>, String> {

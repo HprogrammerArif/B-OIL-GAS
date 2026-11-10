@@ -119,7 +119,7 @@ String parcelNextLine(AppL10n l10n, Parcel p, {required bool bangla}) {
   final to = p.recipient.display(bangla: bangla);
   final from = p.sender.display(bangla: bangla);
   final dest = p.dest.label(bangla: bangla);
-  return switch (p.status) {
+  final line = switch (p.status) {
     'CREATED' when m.canDispatch => l10n.pcNextDispatch,
     'CREATED' when m.isSender => l10n.pcNextCreatedSender,
     'CREATED' => l10n.pcNextCreated,
@@ -155,4 +155,6 @@ String parcelNextLine(AppL10n l10n, Parcel p, {required bool bangla}) {
     'LOST' => l10n.pcNextLost,
     _ => l10n.pcNextCancelled,
   };
+  if (!p.stuck) return line;
+  return '${l10n.pcStuckPill(p.dwellHours)}. $line';
 }

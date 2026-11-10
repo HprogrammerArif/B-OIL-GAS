@@ -35,7 +35,11 @@ final class LicencesProvider
   String debugGetCreateSourceHash() => _$licencesHash();
 
   @override
-  String toString() => r'licencesProvider$argument';
+  String toString() {
+    return r'licencesProvider'
+        ''
+        '$argument';
+  }
 
   @$internal
   @override
@@ -55,10 +59,12 @@ final class LicencesProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$licencesHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$licencesHash() => r'10cf332be96f0a83c4f2e1189031b3e84c48699f';
 
 final class LicencesFamily extends $Family
     with
@@ -103,7 +109,11 @@ final class LicenceDetailProvider
   String debugGetCreateSourceHash() => _$licenceDetailHash();
 
   @override
-  String toString() => r'licenceDetailProvider($argument)';
+  String toString() {
+    return r'licenceDetailProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -112,7 +122,8 @@ final class LicenceDetailProvider
 
   @override
   FutureOr<Licence> create(Ref ref) {
-    return licenceDetail(ref, this.argument as String);
+    final argument = this.argument as String;
+    return licenceDetail(ref, argument);
   }
 
   @override
@@ -121,10 +132,12 @@ final class LicenceDetailProvider
   }
 
   @override
-  int get hashCode => argument.hashCode;
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
-String _$licenceDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$licenceDetailHash() => r'd76a3290a54fb6aade1f09f3359f0a2368eb9aa2';
 
 final class LicenceDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Licence>, String> {
@@ -178,7 +191,9 @@ final class LicenceTypesProvider
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<LicenceType>> create(Ref ref) => licenceTypes(ref);
+  FutureOr<List<LicenceType>> create(Ref ref) {
+    return licenceTypes(ref);
+  }
 }
 
-String _$licenceTypesHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$licenceTypesHash() => r'5e0fddc48e398a6943118f9a8f52a51771a0447c';

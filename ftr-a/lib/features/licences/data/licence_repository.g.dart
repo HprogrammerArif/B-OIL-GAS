@@ -45,6 +45,7 @@ final class LicenceRepositoryProvider
     return licenceRepository(ref);
   }
 
+  /// {@macro riverpod.override_with_value}
   Override overrideWithValue(LicenceRepository value) {
     return $ProviderOverride(
       origin: this,
@@ -53,4 +54,4 @@ final class LicenceRepositoryProvider
   }
 }
 
-String _$licenceRepositoryHash() => r'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+String _$licenceRepositoryHash() => r'64e76288265980f74a13e1b2f8c0b38d2fd7188f';

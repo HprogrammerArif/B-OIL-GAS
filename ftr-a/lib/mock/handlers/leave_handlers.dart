@@ -4,7 +4,7 @@ import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 
-const _statuses = {'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'};
+const _statuses = {'PENDING', 'RETURNED', 'APPROVED', 'REJECTED', 'CANCELLED'};
 
 /// Owner, a participant of its workflow, or anyone `leave:read` reaches.
 /// Everyone else gets 404 so ids do not leak.
@@ -83,7 +83,7 @@ List<RouteDef> leaveRoutes() => [
     return paginate(
       [
         for (final l in sortBy(items, '-createdAt', '-createdAt'))
-          LeaveEngine.requestWire(ctx.store, l),
+          LeaveEngine.requestWire(ctx.store, l, viewerUserId: a.user.str('id')),
       ],
       ctx.query,
       defaultPageSize: 30,
@@ -94,14 +94,40 @@ List<RouteDef> leaveRoutes() => [
     final leave = LeaveEngine.create(ctx.store, a, ctx.bodyObject());
     await ctx.store.commit();
     return ok(
-      LeaveEngine.detailWire(ctx.store, leave, a.employeeId),
+      LeaveEngine.detailWire(
+        ctx.store,
+        leave,
+        viewerEmployeeId: a.employeeId,
+        viewerUserId: a.user.str('id'),
+      ),
       status: 201,
     );
   }, permission: ['leave:request']),
   RouteDef('GET', '/leave/requests/:id', (ctx) async {
     final a = ctx.requireAuth();
-    return ok(LeaveEngine.detailWire(ctx.store, _readable(ctx), a.employeeId));
+    return ok(
+      LeaveEngine.detailWire(
+        ctx.store,
+        _readable(ctx),
+        viewerEmployeeId: a.employeeId,
+        viewerUserId: a.user.str('id'),
+      ),
+    );
   }, permission: ['leave:request', 'leave:read', 'leave:approve']),
+  RouteDef('PUT', '/leave/requests/:id', (ctx) async {
+    final a = ctx.requireAuth();
+    final l = _readable(ctx);
+    final leave = LeaveEngine.update(ctx.store, a, l, ctx.bodyObject());
+    await ctx.store.commit();
+    return ok(
+      LeaveEngine.detailWire(
+        ctx.store,
+        leave,
+        viewerEmployeeId: a.employeeId,
+        viewerUserId: a.user.str('id'),
+      ),
+    );
+  }, permission: ['leave:request']),
   RouteDef('POST', '/leave/requests/:id/cancel', (ctx) async {
     final a = ctx.requireAuth();
     final l = _readable(ctx);
@@ -118,6 +144,13 @@ List<RouteDef> leaveRoutes() => [
     }
     LeaveEngine.cancel(ctx.store, a, l, reason);
     await ctx.store.commit();
-    return ok(LeaveEngine.detailWire(ctx.store, l, a.employeeId));
+    return ok(
+      LeaveEngine.detailWire(
+        ctx.store,
+        l,
+        viewerEmployeeId: a.employeeId,
+        viewerUserId: a.user.str('id'),
+      ),
+    );
   }, permission: ['leave:request']),
 ];

@@ -36,7 +36,9 @@ final class VisitsProvider
 
   @override
   String toString() {
-    return r'visitsProvider$argument';
+    return r'visitsProvider'
+        ''
+        '$argument';
   }
 
   @$internal
@@ -62,7 +64,7 @@ final class VisitsProvider
   }
 }
 
-String _$visitsHash() => r'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+String _$visitsHash() => r'50844f2a9927c1475e56d31947cf2252c8a9ea8d';
 
 final class VisitsFamily extends $Family
     with
@@ -108,7 +110,9 @@ final class VisitDetailProvider
 
   @override
   String toString() {
-    return r'visitDetailProvider($argument)';
+    return r'visitDetailProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -133,7 +137,7 @@ final class VisitDetailProvider
   }
 }
 
-String _$visitDetailHash() => r'cccccccccccccccccccccccccccccccccccccccc';
+String _$visitDetailHash() => r'a49de354d1a37b41b997c93f9ac2c7432c5be7b8';
 
 final class VisitDetailFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Visit>, String> {
@@ -180,7 +184,9 @@ final class VisitZonesProvider
 
   @override
   String toString() {
-    return r'visitZonesProvider($argument)';
+    return r'visitZonesProvider'
+        ''
+        '($argument)';
   }
 
   @$internal
@@ -206,7 +212,7 @@ final class VisitZonesProvider
   }
 }
 
-String _$visitZonesHash() => r'dddddddddddddddddddddddddddddddddddddddd';
+String _$visitZonesHash() => r'45f13e3c7cbf3569c5699b10ee1fb47268ab52d9';
 
 final class VisitZonesFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<VisitZone>>, String?> {
@@ -263,4 +269,4 @@ final class VisitMusterProvider
   }
 }
 
-String _$visitMusterHash() => r'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+String _$visitMusterHash() => r'29bccea9d650643d3feea3af04bc9c50cef2d29f';

@@ -12,6 +12,7 @@ abstract final class AppRoutes {
   static const leave = '/home/leave';
   static const leaveNew = '/home/leave/new';
   static String leaveDetail(String id) => '/home/leave/$id';
+  static String leaveEdit(String id) => '/home/leave/$id/edit';
   static const notices = '/home/notices';
   static const noticeNew = '/home/notices/new';
   static String noticeDetail(String id) => '/home/notices/$id';

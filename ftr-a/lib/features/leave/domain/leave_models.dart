@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 enum LeaveStatus {
   pending('PENDING'),
+  returned('RETURNED'),
   approved('APPROVED'),
   rejected('REJECTED'),
   cancelled('CANCELLED');
@@ -131,6 +132,9 @@ class LeaveRequestItem {
     this.attachmentFileId,
     this.isOwner = true,
     this.canCancel = false,
+    this.awaitingYou = false,
+    this.waitingFor,
+    this.waitingForBn,
   });
 
   factory LeaveRequestItem.fromJson(Map<String, Object?> json) {
@@ -167,6 +171,9 @@ class LeaveRequestItem {
       attachmentFileId: json['attachmentFileId'] as String?,
       isOwner: viewer?['isOwner'] != false,
       canCancel: viewer?['canCancel'] == true,
+      awaitingYou: json['awaitingYou'] == true,
+      waitingFor: json['waitingFor'] as String?,
+      waitingForBn: json['waitingForBn'] as String?,
     );
   }
 
@@ -190,8 +197,14 @@ class LeaveRequestItem {
   final String? attachmentFileId;
   final bool isOwner;
   final bool canCancel;
+  final bool awaitingYou;
+  final String? waitingFor;
+  final String? waitingForBn;
 
   bool get singleDay => startDate == endDate;
+
+  String? waitingForName({required bool bangla}) =>
+      bangla ? (waitingForBn ?? waitingFor) : waitingFor;
 }
 
 @immutable

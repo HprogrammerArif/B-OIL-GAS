@@ -1618,8 +1618,14 @@ abstract class AppL10n {
   /// No description provided for @leaveStatusPending.
   ///
   /// In en, this message translates to:
-  /// **'Pending'**
+  /// **'Waiting'**
   String get leaveStatusPending;
+
+  /// No description provided for @leaveStatusReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs changes'**
+  String get leaveStatusReturned;
 
   /// No description provided for @leaveStatusApproved.
   ///
@@ -1630,7 +1636,7 @@ abstract class AppL10n {
   /// No description provided for @leaveStatusRejected.
   ///
   /// In en, this message translates to:
-  /// **'Rejected'**
+  /// **'Declined'**
   String get leaveStatusRejected;
 
   /// No description provided for @leaveStatusCancelled.
@@ -1638,6 +1644,210 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get leaveStatusCancelled;
+
+  /// No description provided for @leaveTabMine.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get leaveTabMine;
+
+  /// No description provided for @leaveTabAwaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you ({count})'**
+  String leaveTabAwaiting(int count);
+
+  /// No description provided for @leaveTabTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get leaveTabTeam;
+
+  /// No description provided for @leaveFilterWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get leaveFilterWaiting;
+
+  /// No description provided for @leaveWaitingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name}'**
+  String leaveWaitingFor(String name);
+
+  /// No description provided for @leaveNextReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix what was asked and send again.'**
+  String get leaveNextReturned;
+
+  /// No description provided for @leaveNextWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your manager to check this.'**
+  String get leaveNextWait;
+
+  /// No description provided for @leaveNextAwaitingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the dates. Verify or send back.'**
+  String get leaveNextAwaitingYou;
+
+  /// No description provided for @leaveNextApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved.'**
+  String get leaveNextApproved;
+
+  /// No description provided for @leaveNextRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This leave was declined.'**
+  String get leaveNextRejected;
+
+  /// No description provided for @leaveNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This leave was cancelled.'**
+  String get leaveNextCancelled;
+
+  /// No description provided for @leaveVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get leaveVerify;
+
+  /// No description provided for @leaveReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back'**
+  String get leaveReturn;
+
+  /// No description provided for @leaveReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should they fix?'**
+  String get leaveReturnTitle;
+
+  /// No description provided for @leaveReturnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the reason'**
+  String get leaveReturnHint;
+
+  /// No description provided for @leaveVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified. Sent on.'**
+  String get leaveVerified;
+
+  /// No description provided for @leaveReturnedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back with your note.'**
+  String get leaveReturnedToast;
+
+  /// No description provided for @leaveReturnPreset1.
+  ///
+  /// In en, this message translates to:
+  /// **'The dates overlap another request. Change them.'**
+  String get leaveReturnPreset1;
+
+  /// No description provided for @leaveReturnPreset2.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach the medical certificate.'**
+  String get leaveReturnPreset2;
+
+  /// No description provided for @leaveReturnPreset3.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a clearer reason for this leave.'**
+  String get leaveReturnPreset3;
+
+  /// No description provided for @leaveReturnPreset4.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs to be sick leave, not casual.'**
+  String get leaveReturnPreset4;
+
+  /// No description provided for @leaveFormKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get leaveFormKind;
+
+  /// No description provided for @leaveFormWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get leaveFormWhen;
+
+  /// No description provided for @leaveFormWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get leaveFormWhy;
+
+  /// No description provided for @leaveFormRemain.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} would remain'**
+  String leaveFormRemain(String days);
+
+  /// No description provided for @leaveChipToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get leaveChipToday;
+
+  /// No description provided for @leaveChipTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get leaveChipTomorrow;
+
+  /// No description provided for @leaveChipHalfAm.
+  ///
+  /// In en, this message translates to:
+  /// **'This morning'**
+  String get leaveChipHalfAm;
+
+  /// No description provided for @leaveChipHalfPm.
+  ///
+  /// In en, this message translates to:
+  /// **'This afternoon'**
+  String get leaveChipHalfPm;
+
+  /// No description provided for @leaveEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix leave request'**
+  String get leaveEditTitle;
+
+  /// No description provided for @leaveAwaitEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting for you'**
+  String get leaveAwaitEmptyTitle;
+
+  /// No description provided for @leaveAwaitEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leave you need to check will show here.'**
+  String get leaveAwaitEmptyMessage;
+
+  /// No description provided for @leaveScopeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No other leave here'**
+  String get leaveScopeEmptyTitle;
+
+  /// No description provided for @leaveScopeEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests that are not waiting for you.'**
+  String get leaveScopeEmptyMessage;
 
   /// No description provided for @leaveEmptyTitle.
   ///
@@ -3534,6 +3744,150 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Receipt attached'**
   String get claimReceiptAttached;
+
+  /// No description provided for @claimReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get claimReceipts;
+
+  /// No description provided for @claimNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim number'**
+  String get claimNumber;
+
+  /// No description provided for @claimFormWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get claimFormWhy;
+
+  /// No description provided for @claimFormWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get claimFormWhen;
+
+  /// No description provided for @claimFormLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get claimFormLines;
+
+  /// No description provided for @claimNextDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save, add expenses, then send.'**
+  String get claimNextDraft;
+
+  /// No description provided for @claimNextReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix what was asked and send again.'**
+  String get claimNextReturned;
+
+  /// No description provided for @claimNextWaitManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your manager to check this.'**
+  String get claimNextWaitManager;
+
+  /// No description provided for @claimNextWaitFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for finance to check this.'**
+  String get claimNextWaitFinance;
+
+  /// No description provided for @claimNextAwaitingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the bills. Verify or send back.'**
+  String get claimNextAwaitingYou;
+
+  /// No description provided for @claimNextApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved. Finance will pay.'**
+  String get claimNextApproved;
+
+  /// No description provided for @claimNextSettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid.'**
+  String get claimNextSettled;
+
+  /// No description provided for @claimNextRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This claim was refused.'**
+  String get claimNextRejected;
+
+  /// No description provided for @claimNextCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This claim was cancelled.'**
+  String get claimNextCancelled;
+
+  /// No description provided for @claimVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get claimVerify;
+
+  /// No description provided for @claimReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send back'**
+  String get claimReturn;
+
+  /// No description provided for @claimReturnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What should they fix?'**
+  String get claimReturnTitle;
+
+  /// No description provided for @claimReturnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the reason'**
+  String get claimReturnHint;
+
+  /// No description provided for @claimVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified. Sent on.'**
+  String get claimVerified;
+
+  /// No description provided for @claimReturnedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent back with your note.'**
+  String get claimReturnedToast;
+
+  /// No description provided for @claimReturnPreset1.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach the original receipt or VAT challan.'**
+  String get claimReturnPreset1;
+
+  /// No description provided for @claimReturnPreset2.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is over the grade cap. Reduce it.'**
+  String get claimReturnPreset2;
+
+  /// No description provided for @claimReturnPreset3.
+  ///
+  /// In en, this message translates to:
+  /// **'The dates or destination do not match the trip.'**
+  String get claimReturnPreset3;
+
+  /// No description provided for @claimReturnPreset4.
+  ///
+  /// In en, this message translates to:
+  /// **'Need the tour approval letter.'**
+  String get claimReturnPreset4;
 
   /// No description provided for @claimDeclaration.
   ///
@@ -8706,6 +9060,12 @@ abstract class AppL10n {
   /// **'Filters'**
   String get inFilter;
 
+  /// No description provided for @inFilterViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Which list'**
+  String get inFilterViews;
+
   /// No description provided for @inFilterZones.
   ///
   /// In en, this message translates to:
@@ -8807,6 +9167,90 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Nothing matches that search.'**
   String get inEmptyFiltered;
+
+  /// No description provided for @inEmptyRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Cause not written yet.'**
+  String get inEmptyRca;
+
+  /// No description provided for @inEmptyCapa.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixes yet.'**
+  String get inEmptyCapa;
+
+  /// No description provided for @inCapaImmediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop it now'**
+  String get inCapaImmediate;
+
+  /// No description provided for @inCapaCorrective.
+  ///
+  /// In en, this message translates to:
+  /// **'Corrective'**
+  String get inCapaCorrective;
+
+  /// No description provided for @inCapaPreventive.
+  ///
+  /// In en, this message translates to:
+  /// **'Preventive'**
+  String get inCapaPreventive;
+
+  /// No description provided for @inCapaPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get inCapaPending;
+
+  /// No description provided for @inCapaProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get inCapaProgress;
+
+  /// No description provided for @inCapaDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get inCapaDone;
+
+  /// No description provided for @inCapaVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get inCapaVerified;
+
+  /// No description provided for @inCapaOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get inCapaOverdue;
+
+  /// No description provided for @inCapaUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No one named'**
+  String get inCapaUnassigned;
+
+  /// No description provided for @inFieldWhy4.
+  ///
+  /// In en, this message translates to:
+  /// **'Why 4'**
+  String get inFieldWhy4;
+
+  /// No description provided for @inFieldWhy5.
+  ///
+  /// In en, this message translates to:
+  /// **'Why 5'**
+  String get inFieldWhy5;
+
+  /// No description provided for @inGovBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Who must be told'**
+  String get inGovBody;
 
   /// No description provided for @inVerdictNone.
   ///
@@ -9054,6 +9498,120 @@ abstract class AppL10n {
   /// **'Say what happened, where, and how bad it could have been. Safety sees it at once. You may hide your name.'**
   String get inFormIntro;
 
+  /// No description provided for @inFormWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get inFormWhat;
+
+  /// No description provided for @inFormWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Where and when'**
+  String get inFormWhere;
+
+  /// No description provided for @inFormHowBad.
+  ///
+  /// In en, this message translates to:
+  /// **'How serious'**
+  String get inFormHowBad;
+
+  /// No description provided for @inTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: valve drip on filling carousel'**
+  String get inTitleHint;
+
+  /// No description provided for @inDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you saw, who was there, and what you did.'**
+  String get inDescHint;
+
+  /// No description provided for @inSevScale.
+  ///
+  /// In en, this message translates to:
+  /// **'How bad if it happens again'**
+  String get inSevScale;
+
+  /// No description provided for @inLikeScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance it happens again'**
+  String get inLikeScale;
+
+  /// No description provided for @inSev1.
+  ///
+  /// In en, this message translates to:
+  /// **'Slight'**
+  String get inSev1;
+
+  /// No description provided for @inSev2.
+  ///
+  /// In en, this message translates to:
+  /// **'Minor'**
+  String get inSev2;
+
+  /// No description provided for @inSev3.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get inSev3;
+
+  /// No description provided for @inSev4.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious'**
+  String get inSev4;
+
+  /// No description provided for @inSev5.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe'**
+  String get inSev5;
+
+  /// No description provided for @inLike1.
+  ///
+  /// In en, this message translates to:
+  /// **'Rare'**
+  String get inLike1;
+
+  /// No description provided for @inLike2.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlikely'**
+  String get inLike2;
+
+  /// No description provided for @inLike3.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible'**
+  String get inLike3;
+
+  /// No description provided for @inLike4.
+  ///
+  /// In en, this message translates to:
+  /// **'Likely'**
+  String get inLike4;
+
+  /// No description provided for @inLike5.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost certain'**
+  String get inLike5;
+
+  /// No description provided for @inRiskAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'The plant head and safety lead will be told as soon as you send.'**
+  String get inRiskAlert;
+
+  /// No description provided for @inChangeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get inChangeTime;
+
   /// No description provided for @inFieldType.
   ///
   /// In en, this message translates to:
@@ -9123,7 +9681,7 @@ abstract class AppL10n {
   /// No description provided for @inUseDraft.
   ///
   /// In en, this message translates to:
-  /// **'Use a draft'**
+  /// **'Start from an example'**
   String get inUseDraft;
 
   /// No description provided for @inDraftValve.
@@ -9203,6 +9761,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Start investigation'**
   String get inActInvest;
+
+  /// No description provided for @inActReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Send for close'**
+  String get inActReview;
 
   /// No description provided for @inActRca.
   ///
@@ -9335,6 +9899,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Investigation started.'**
   String get inDoneInvest;
+
+  /// No description provided for @inDoneReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent for close.'**
+  String get inDoneReview;
 
   /// No description provided for @inDoneRca.
   ///
