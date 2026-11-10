@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:bogcl_oneops/core/utils/hash.dart';
+import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/notification_engine.dart';
 import 'package:bogcl_oneops/mock/engines/workflow_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
@@ -116,6 +117,25 @@ abstract final class AssetEngine {
   static DateTime _now(MockStore s) => DateTime.parse(_stamp(s));
 
   static String _me(AuthContext a) => a.user.str('id');
+
+  static String? _photoId(MockStore store, AuthContext auth, Json b) {
+    final id = b['photoFileId'];
+    if (id == null) return null;
+    if (id is! String) {
+      throw validationError('photoFileId', 'Photo not found. Upload it again.');
+    }
+    final file = store.get(Col.files, id);
+    if (file == null) {
+      throw validationError('photoFileId', 'Photo not found. Upload it again.');
+    }
+    FileEngine.scanStatus(store, file);
+    if (file['uploaderUserId'] != _me(auth) ||
+        file.strOrNull('purpose') != 'PHOTO' ||
+        file.str('scanStatus') != 'CLEAN') {
+      throw validationError('photoFileId', 'Photo not found. Upload it again.');
+    }
+    return id;
+  }
 
   static num _n(Object? v, [num fallback = 0]) => v is num ? v : fallback;
 
@@ -381,10 +401,15 @@ abstract final class AssetEngine {
       'lotoReleasedAt': now,
       'vehicleId': body['vehicleId'],
       'qrPayload': body['qrPayload'] ?? 'QR-$id',
+      'photoFileId': _photoId(store, auth, body),
       'createdAt': now,
       'updatedAt': now,
     };
     store.put(Col.assets, a);
+    final photo = a.strOrNull('photoFileId');
+    if (photo != null) {
+      FileEngine.attach(store, photo, ownerType: 'Asset', ownerId: id);
+    }
     _event(store, auth, a, 'CAPITALIZED', null, 'IN_STOCK', 'Registered');
     final custodian = body['custodianUserId'] as String?;
     if (body['commissionNow'] == true) {
@@ -1324,6 +1349,7 @@ abstract final class AssetEngine {
       'oem': a['oem'],
       'modelNo': a['modelNo'],
       'serialNo': a['serialNo'],
+      'photoFileId': a['photoFileId'],
       'purchaseCost': a['purchaseCost'],
       'usefulLifeYears': a['usefulLifeYears'],
       'depreciationMethod': a['depreciationMethod'],

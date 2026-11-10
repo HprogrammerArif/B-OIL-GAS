@@ -12,6 +12,7 @@ import 'package:bogcl_oneops/features/assets/presentation/asset_plate.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_providers.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_ui.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/files/presentation/file_image.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -444,100 +445,123 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
                     unawaited(context.push(AppRoutes.assetDetail(e.id))),
                 child: Padding(
                   padding: const EdgeInsets.all(Space.md),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                      _AssetThumb(fileId: e.photoFileId),
+                      const SizedBox(width: Space.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: BrandColors.slate900.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      e.tag,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: Space.xs),
+                                Flexible(
+                                  child: _criticalityPill(e.criticality),
+                                ),
+                                const SizedBox(width: Space.xs),
+                                Flexible(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: StatusPill(
+                                      label: assetStageLabel(l10n, e.stage),
+                                      tone: assetStageTone(e.stage),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            decoration: BoxDecoration(
-                              color: BrandColors.slate900.withValues(
-                                alpha: 0.08,
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              e.tag,
-                              style: const TextStyle(
-                                fontSize: 11,
+                            const SizedBox(height: Space.xs),
+                            Text(
+                              e.title(bangla: bangla),
+                              style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: Space.xs),
-                          _criticalityPill(e.criticality),
-                          const Spacer(),
-                          StatusPill(
-                            label: assetStageLabel(l10n, e.stage),
-                            tone: assetStageTone(e.stage),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        e.title(bangla: bangla),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        [
-                          e.siteLabel(bangla: bangla),
-                          if (e.location != null) e.location!,
-                          if (e.custody?.holder != null)
-                            e.custody!.holder!.display(bangla: bangla),
-                        ].join(' · '),
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: Space.xs),
-
-                      // 8-Stage Lifecycle Progress Stepper Bar
-                      _build8StageStepper(e.stage, bangla),
-
-                      const SizedBox(height: Space.xs),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${bangla ? "বুক ভ্যালু" : "NBV"}: ${assetTaka(e.financials.nbv, bangla: bangla)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                            const SizedBox(height: 2),
+                            Text(
+                              [
+                                e.siteLabel(bangla: bangla),
+                                if (e.location != null) e.location!,
+                                if (e.custody?.holder != null)
+                                  e.custody!.holder!.display(bangla: bangla),
+                              ].join(' · '),
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
                                 fontSize: 12,
                               ),
                             ),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '${bangla ? "স্বাস্থ্য" : "Health"}: ${e.healthScore}%',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: e.healthScore >= 80
-                                      ? BrandColors.success
-                                      : BrandColors.warning,
+                            const SizedBox(height: Space.xs),
+
+                            // 8-Stage Lifecycle Progress Stepper Bar
+                            _build8StageStepper(e.stage, bangla),
+
+                            const SizedBox(height: Space.xs),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '${bangla ? "বুক ভ্যালু" : "NBV"}: ${assetTaka(e.financials.nbv, bangla: bangla)}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: Space.xs),
-                              IconButton(
-                                tooltip: bangla
-                                    ? 'কিউআর পাসপোর্ট'
-                                    : 'QR Passport',
-                                icon: const Icon(Icons.qr_code_2, size: 20),
-                                onPressed: () =>
-                                    unawaited(_showQrPassportDialog(e)),
-                              ),
-                            ],
-                          ),
-                        ],
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${bangla ? "স্বাস্থ্য" : "Health"}: ${e.healthScore}%',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: e.healthScore >= 80
+                                            ? BrandColors.success
+                                            : BrandColors.warning,
+                                      ),
+                                    ),
+                                    const SizedBox(width: Space.xs),
+                                    IconButton(
+                                      tooltip: bangla
+                                          ? 'কিউআর পাসপোর্ট'
+                                          : 'QR Passport',
+                                      icon: const Icon(
+                                        Icons.qr_code_2,
+                                        size: 20,
+                                      ),
+                                      onPressed: () =>
+                                          unawaited(_showQrPassportDialog(e)),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -610,6 +634,8 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
       ),
       child: Text(
         isCrit ? 'CRITICAL A' : 'ESSENTIAL B',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.bold,
@@ -1597,6 +1623,32 @@ class _ScanTagSheetState extends State<_ScanTagSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AssetThumb extends ConsumerWidget {
+  const _AssetThumb({this.fileId});
+
+  final String? fileId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bytes = fileId == null
+        ? null
+        : ref.watch(fileBytesProvider(fileId!)).value;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        width: 64,
+        height: 64,
+        child: bytes == null
+            ? ColoredBox(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: const Icon(Icons.precision_manufacturing_outlined),
+              )
+            : Image.memory(bytes, fit: BoxFit.cover),
       ),
     );
   }

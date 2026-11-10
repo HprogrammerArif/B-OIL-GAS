@@ -244,6 +244,7 @@ class Equipment {
     this.usefulLifeYears,
     this.serialNo,
     this.oem,
+    this.photoFileId,
   });
 
   factory Equipment.fromJson(Map<String, Object?> j) {
@@ -288,6 +289,7 @@ class Equipment {
       usefulLifeYears: (j['usefulLifeYears'] as num?)?.toInt(),
       serialNo: j['serialNo'] as String?,
       oem: j['oem'] as String?,
+      photoFileId: j['photoFileId'] as String?,
     );
   }
 
@@ -319,6 +321,7 @@ class Equipment {
   final int? usefulLifeYears;
   final String? serialNo;
   final String? oem;
+  final String? photoFileId;
 
   String title({required bool bangla}) => bangla ? nameBn : name;
 

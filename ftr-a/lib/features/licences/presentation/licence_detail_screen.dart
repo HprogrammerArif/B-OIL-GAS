@@ -19,6 +19,213 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+enum _SheetKind { inspect, findings, certificate, back, letter }
+
+class _LicenceActionSheet extends StatefulWidget {
+  const _LicenceActionSheet({
+    required this.kind,
+    required this.licence,
+    this.subjectSeed,
+    this.bodySeed,
+  });
+
+  final _SheetKind kind;
+  final Licence licence;
+  final String? subjectSeed;
+  final String? bodySeed;
+
+  @override
+  State<_LicenceActionSheet> createState() => _LicenceActionSheetState();
+}
+
+class _LicenceActionSheetState extends State<_LicenceActionSheet> {
+  late final TextEditingController _primary;
+  late final TextEditingController _secondary;
+  late final TextEditingController _tertiary;
+  String _channel = 'EMAIL';
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final l = widget.licence;
+    final now = DateTime.now();
+    final neu = DateTime(now.year, now.month + l.validityMonths, now.day);
+    _primary = TextEditingController(
+      text: switch (widget.kind) {
+        _SheetKind.certificate => l.licenceNo,
+        _SheetKind.letter => widget.subjectSeed ?? '',
+        _ => '',
+      },
+    );
+    _secondary = TextEditingController(
+      text: switch (widget.kind) {
+        _SheetKind.certificate =>
+          '${neu.year.toString().padLeft(4, '0')}-'
+              '${neu.month.toString().padLeft(2, '0')}-'
+              '${neu.day.toString().padLeft(2, '0')}',
+        _SheetKind.letter => widget.bodySeed ?? '',
+        _ => '',
+      },
+    );
+    _tertiary = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _primary.dispose();
+    _secondary.dispose();
+    _tertiary.dispose();
+    super.dispose();
+  }
+
+  void _submit(AppL10n l10n) {
+    final a = _primary.text.trim();
+    final b = _secondary.text.trim();
+    final c = _tertiary.text.trim();
+    final (err, body) = switch (widget.kind) {
+      _SheetKind.inspect =>
+        a.length < 3
+            ? (l10n.cpErrInspector, null)
+            : (null, <String, Object?>{'inspectorName': a}),
+      _SheetKind.findings =>
+        a.length < 10
+            ? (l10n.cpErrSentence, null)
+            : (null, <String, Object?>{'auditFindings': a}),
+      _SheetKind.certificate =>
+        a.isEmpty || b.isEmpty
+            ? (l10n.cpErrNo, null)
+            : (
+                null,
+                <String, Object?>{
+                  'certificateNo': a,
+                  'newExpiresAt': b.contains('T') ? b : '${b}T00:00:00.000Z',
+                  if (widget.licence.feeAmount > 0) 'chalanNo': c,
+                },
+              ),
+      _SheetKind.back =>
+        a.length < 10
+            ? (l10n.cpErrSentence, null)
+            : (null, <String, Object?>{'reason': a}),
+      _SheetKind.letter => (
+        null,
+        <String, Object?>{'subject': a, 'body': b, 'channel': _channel},
+      ),
+    };
+    if (body == null) {
+      setState(() => _error = err);
+      return;
+    }
+    Navigator.of(context).pop(body);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final k = widget.kind;
+    final title = switch (k) {
+      _SheetKind.inspect => l10n.cpActInspect,
+      _SheetKind.findings => l10n.cpActFindings,
+      _SheetKind.certificate => l10n.cpActComplete,
+      _SheetKind.back => l10n.cpActBack,
+      _SheetKind.letter => l10n.cpActLetter,
+    };
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Space.lg,
+        0,
+        Space.lg,
+        MediaQuery.viewInsetsOf(context).bottom + Space.lg,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: theme.textTheme.titleLarge),
+            const SizedBox(height: Space.md),
+            if (k == _SheetKind.letter) ...[
+              Wrap(
+                spacing: Space.xs,
+                children: [
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelEmail),
+                    selected: _channel == 'EMAIL',
+                    onSelected: (_) => setState(() => _channel = 'EMAIL'),
+                  ),
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelCourier),
+                    selected: _channel == 'COURIER',
+                    onSelected: (_) => setState(() => _channel = 'COURIER'),
+                  ),
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelHand),
+                    selected: _channel == 'HAND',
+                    onSelected: (_) => setState(() => _channel = 'HAND'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Space.sm),
+            ],
+            AppTextField(
+              label: switch (k) {
+                _SheetKind.inspect => l10n.cpFieldInspector,
+                _SheetKind.findings => l10n.cpFieldFindings,
+                _SheetKind.certificate => l10n.cpFieldCert,
+                _SheetKind.back => l10n.cpFieldReason,
+                _SheetKind.letter => l10n.cpFieldSubject,
+              },
+              controller: _primary,
+              maxLines: switch (k) {
+                _SheetKind.findings => 4,
+                _SheetKind.back => 3,
+                _ => 1,
+              },
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
+            ),
+            if (k == _SheetKind.certificate || k == _SheetKind.letter) ...[
+              const SizedBox(height: Space.sm),
+              AppTextField(
+                label: k == _SheetKind.certificate
+                    ? l10n.cpFieldNewExpiry
+                    : l10n.cpFieldLetter,
+                controller: _secondary,
+                maxLines: k == _SheetKind.letter ? 4 : 1,
+              ),
+            ],
+            if (k == _SheetKind.certificate &&
+                widget.licence.feeAmount > 0) ...[
+              const SizedBox(height: Space.sm),
+              AppTextField(label: l10n.cpFieldChalan, controller: _tertiary),
+            ],
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: Space.sm),
+                child: Text(
+                  _error!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: context.bogcl.danger,
+                  ),
+                ),
+              ),
+            const SizedBox(height: Space.md),
+            if (k == _SheetKind.back)
+              PrimaryButton.secondary(
+                label: title,
+                onPressed: () => _submit(l10n),
+              )
+            else
+              PrimaryButton(label: title, onPressed: () => _submit(l10n)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class LicenceDetailScreen extends ConsumerStatefulWidget {
   const LicenceDetailScreen({required this.id, super.key});
 
@@ -69,260 +276,72 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
     }
   }
 
-  EdgeInsets _sheetPad(BuildContext ctx) => EdgeInsets.fromLTRB(
-    Space.lg,
-    0,
-    Space.lg,
-    MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-  );
-
-  Future<bool?> _sheet({required Widget Function(BuildContext) builder}) {
-    return showModalBottomSheet<bool>(
+  Future<Map<String, Object?>?> _showActionSheet({
+    required _SheetKind kind,
+    required Licence licence,
+    String? subjectSeed,
+    String? bodySeed,
+  }) {
+    return showModalBottomSheet<Map<String, Object?>>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (ctx) => Padding(padding: _sheetPad(ctx), child: builder(ctx)),
+      builder: (ctx) => _LicenceActionSheet(
+        kind: kind,
+        licence: licence,
+        subjectSeed: subjectSeed,
+        bodySeed: bodySeed,
+      ),
     );
   }
 
   Future<void> _openBookInspection(Licence l) async {
     final l10n = context.l10n;
-    final nameCtrl = TextEditingController();
-    final confirmed = await _sheet(
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.cpActInspect, style: Theme.of(ctx).textTheme.titleLarge),
-          const SizedBox(height: Space.md),
-          AppTextField(label: l10n.cpFieldInspector, controller: nameCtrl),
-          const SizedBox(height: Space.md),
-          PrimaryButton(
-            label: l10n.cpActInspect,
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
-      ),
-    );
-    final name = nameCtrl.text.trim();
-    nameCtrl.dispose();
-    if (confirmed != true || !mounted) return;
-    if (name.length < 3) {
-      AppToast.show(context, l10n.cpErrInspector, tone: StatusTone.warning);
-      return;
-    }
-    await _run(
-      () => _repo.act(l.id, 'advance', {'inspectorName': name}),
-      l10n.cpDoneAdvance,
-    );
+    final body = await _showActionSheet(kind: _SheetKind.inspect, licence: l);
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(l.id, 'advance', body), l10n.cpDoneAdvance);
   }
 
   Future<void> _openFindings(Licence l) async {
     final l10n = context.l10n;
-    final findingsCtrl = TextEditingController();
-    final confirmed = await _sheet(
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.cpActFindings, style: Theme.of(ctx).textTheme.titleLarge),
-          const SizedBox(height: Space.md),
-          AppTextField(
-            label: l10n.cpFieldFindings,
-            controller: findingsCtrl,
-            maxLines: 4,
-          ),
-          const SizedBox(height: Space.md),
-          PrimaryButton(
-            label: l10n.cpActFindings,
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
-      ),
-    );
-    final findings = findingsCtrl.text.trim();
-    findingsCtrl.dispose();
-    if (confirmed != true || !mounted) return;
-    if (findings.length < 10) {
-      AppToast.show(context, l10n.cpErrSentence, tone: StatusTone.warning);
-      return;
-    }
-    await _run(
-      () => _repo.act(l.id, 'advance', {'auditFindings': findings}),
-      l10n.cpDoneAdvance,
-    );
+    final body = await _showActionSheet(kind: _SheetKind.findings, licence: l);
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(l.id, 'advance', body), l10n.cpDoneAdvance);
   }
 
   Future<void> _openCertificate(Licence l) async {
     final l10n = context.l10n;
-    final now = DateTime.now();
-    final neu = DateTime(now.year, now.month + l.validityMonths, now.day);
-    final certCtrl = TextEditingController(text: l.licenceNo);
-    final expiryCtrl = TextEditingController(
-      text:
-          '${neu.year.toString().padLeft(4, '0')}-'
-          '${neu.month.toString().padLeft(2, '0')}-'
-          '${neu.day.toString().padLeft(2, '0')}',
+    final body = await _showActionSheet(
+      kind: _SheetKind.certificate,
+      licence: l,
     );
-    final chalanCtrl = TextEditingController();
-    final confirmed = await _sheet(
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.cpActComplete, style: Theme.of(ctx).textTheme.titleLarge),
-          const SizedBox(height: Space.md),
-          AppTextField(label: l10n.cpFieldCert, controller: certCtrl),
-          const SizedBox(height: Space.sm),
-          AppTextField(label: l10n.cpFieldNewExpiry, controller: expiryCtrl),
-          if (l.feeAmount > 0) ...[
-            const SizedBox(height: Space.sm),
-            AppTextField(label: l10n.cpFieldChalan, controller: chalanCtrl),
-          ],
-          const SizedBox(height: Space.md),
-          PrimaryButton(
-            label: l10n.cpActComplete,
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
-      ),
-    );
-    final cert = certCtrl.text.trim();
-    final exp = expiryCtrl.text.trim();
-    final chalan = chalanCtrl.text.trim();
-    certCtrl.dispose();
-    expiryCtrl.dispose();
-    chalanCtrl.dispose();
-    if (confirmed != true || !mounted) return;
-    if (cert.isEmpty || exp.isEmpty) {
-      AppToast.show(context, l10n.cpErrNo, tone: StatusTone.warning);
-      return;
-    }
-    await _run(
-      () => _repo.act(l.id, 'advance', {
-        'certificateNo': cert,
-        'newExpiresAt': exp.contains('T') ? exp : '${exp}T00:00:00.000Z',
-        if (l.feeAmount > 0) 'chalanNo': chalan,
-      }),
-      l10n.cpDoneAdvance,
-    );
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(l.id, 'advance', body), l10n.cpDoneAdvance);
   }
 
   Future<void> _openRevert(Licence l) async {
     final l10n = context.l10n;
-    final reasonCtrl = TextEditingController();
-    final confirmed = await _sheet(
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.cpActBack, style: Theme.of(ctx).textTheme.titleLarge),
-          const SizedBox(height: Space.md),
-          AppTextField(
-            label: l10n.cpFieldReason,
-            controller: reasonCtrl,
-            maxLines: 3,
-          ),
-          const SizedBox(height: Space.md),
-          PrimaryButton.secondary(
-            label: l10n.cpActBack,
-            onPressed: () => Navigator.pop(ctx, true),
-          ),
-        ],
-      ),
-    );
-    final reason = reasonCtrl.text.trim();
-    reasonCtrl.dispose();
-    if (confirmed != true || !mounted) return;
-    if (reason.length < 10) {
-      AppToast.show(context, l10n.cpErrSentence, tone: StatusTone.warning);
-      return;
-    }
-    await _run(
-      () => _repo.act(l.id, 'back', {'reason': reason}),
-      l10n.cpDoneBack,
-    );
+    final body = await _showActionSheet(kind: _SheetKind.back, licence: l);
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(l.id, 'back', body), l10n.cpDoneBack);
   }
 
   Future<void> _openLetter(Licence l) async {
     final l10n = context.l10n;
     final bangla = context.isBangla;
     final heading = l.heading(bangla: bangla);
-    final subjectCtrl = TextEditingController(
-      text: bangla
+    final body = await _showActionSheet(
+      kind: _SheetKind.letter,
+      licence: l,
+      subjectSeed: bangla
           ? '$heading নবায়ন দ্রুত ইস্যুর অনুরোধ।'
           : 'Request to expedite renewal of $heading.',
-    );
-    final bodyCtrl = TextEditingController(
-      text: bangla
+      bodySeed: bangla
           ? '${l.licenceNo} নবায়নের প্রস্তুতি শেষ। সনদ ইস্যুর অনুরোধ।'
           : 'Renewal preparations for ${l.licenceNo} are complete. Please issue the certificate.',
     );
-    var channel = 'EMAIL';
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModal) => Padding(
-          padding: _sheetPad(ctx),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.cpActLetter, style: Theme.of(ctx).textTheme.titleLarge),
-              const SizedBox(height: Space.md),
-              Wrap(
-                spacing: Space.xs,
-                children: [
-                  ChoiceChip(
-                    label: Text(l10n.cpChannelEmail),
-                    selected: channel == 'EMAIL',
-                    onSelected: (_) => setModal(() => channel = 'EMAIL'),
-                  ),
-                  ChoiceChip(
-                    label: Text(l10n.cpChannelCourier),
-                    selected: channel == 'COURIER',
-                    onSelected: (_) => setModal(() => channel = 'COURIER'),
-                  ),
-                  ChoiceChip(
-                    label: Text(l10n.cpChannelHand),
-                    selected: channel == 'HAND',
-                    onSelected: (_) => setModal(() => channel = 'HAND'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: Space.sm),
-              AppTextField(label: l10n.cpFieldSubject, controller: subjectCtrl),
-              const SizedBox(height: Space.sm),
-              AppTextField(
-                label: l10n.cpFieldLetter,
-                controller: bodyCtrl,
-                maxLines: 4,
-              ),
-              const SizedBox(height: Space.md),
-              PrimaryButton(
-                label: l10n.cpActLetter,
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    final subject = subjectCtrl.text.trim();
-    final body = bodyCtrl.text.trim();
-    subjectCtrl.dispose();
-    bodyCtrl.dispose();
-    if (confirmed != true || !mounted) return;
-    await _run(
-      () => _repo.act(l.id, 'letters', {
-        'subject': subject,
-        'body': body,
-        'channel': channel,
-      }),
-      l10n.cpDoneLetter,
-    );
+    if (body == null || !mounted) return;
+    await _run(() => _repo.act(l.id, 'letters', body), l10n.cpDoneLetter);
   }
 
   String _channelLabel(AppL10n l10n, String channel) => switch (channel) {

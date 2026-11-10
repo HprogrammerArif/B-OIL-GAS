@@ -1398,6 +1398,7 @@ model Asset {
   lotoPermitNo      String?  @map("loto_permit_no")
   custodianEmployeeId String? @map("custodian_employee_id") @db.Uuid
   qrPayload         String?  @map("qr_payload")
+  photoFileId       String?  @map("photo_file_id") @db.Uuid
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt         DateTime? @map("deleted_at") @db.Timestamptz

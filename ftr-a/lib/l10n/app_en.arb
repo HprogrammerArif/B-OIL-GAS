@@ -3015,6 +3015,7 @@
   "asNextOk": "{who} holds it. Nothing for you to do.",
   "asNextIdle": "In use. Report a fault if something is wrong.",
   "asFieldName": "What is it called?",
+  "asFieldPhoto": "Photo of the equipment",
   "asFieldCategory": "Kind",
   "asFieldSite": "Site",
   "asFieldCost": "What did it cost? (taka)",

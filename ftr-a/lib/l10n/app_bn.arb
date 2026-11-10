@@ -1882,6 +1882,7 @@
   "asNextOk": "{who} ধরে আছেন। আপনার কিছু করার নেই।",
   "asNextIdle": "ব্যবহারে আছে। কিছু খারাপ হলে জানান।",
   "asFieldName": "নাম কী?",
+  "asFieldPhoto": "যন্ত্রের ছবি",
   "asFieldCategory": "ধরন",
   "asFieldSite": "সাইট",
   "asFieldCost": "কেনা হয়েছিল কত টাকায়?",

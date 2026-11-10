@@ -755,7 +755,7 @@ Module dir `assets`. Models `AssetCategory`, `Asset`, `AssetEvent`, `AssetCustod
 | Method | Path | Permission | Scope | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | GET | `/assets` | `assets:read` | SELF = my custody · SITE · COMPANY | Filters `?categoryId=`, `?assetClass=`, `?siteId=`, `?stage=`, `?criticality=`, `?custodianEmployeeId=me`, `?dueWithinDays=30` (any of calibration/service/warranty/AMC/insurance), `?healthBelow=`, `?q=` (tag, name, serialNo, oem). Sort `tag`, `name`, `-healthScore`, `nextCalibrationAt`, `nbv`. Embeds `financials { gross, accumulatedDepreciation, nbv, annualDepreciation, tco, repairRatio, remainingLifeYears, isEolCandidate }` from the view. |
-| POST | `/assets` | `assets:create` | — | Register asset (IN_STOCK or OPERATIONAL). |
+| POST | `/assets` | `assets:create` | — | Register asset (IN_STOCK or OPERATIONAL). Optional `photoFileId` (CLEAN PHOTO owned by the caller). |
 | GET | `/assets/{id}` | `assets:read` | — | Full record + financials + `currentCustody` + `openWorkOrders` + `nextAction` (server-computed smart banner, enum `ACK_CUSTODY\|COMPLETE_WO\|CALIBRATE\|RETIRE_REVIEW\|RESTOCK_SPARES\|NONE`). |
 | PATCH | `/assets/{id}` | `assets:update` | — | Descriptive fields, dates, `location`, `ratedLifeHours`, `runtimeHours` (monotonic non-decreasing); versioned. |
 | GET | `/assets/{id}/events` | `assets:read` | — | Cursor; `?verify=true`. |

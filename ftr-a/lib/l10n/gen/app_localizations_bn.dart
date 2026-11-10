@@ -5725,6 +5725,9 @@ class AppL10nBn extends AppL10n {
   String get asFieldName => 'নাম কী?';
 
   @override
+  String get asFieldPhoto => 'যন্ত্রের ছবি';
+
+  @override
   String get asFieldCategory => 'ধরন';
 
   @override

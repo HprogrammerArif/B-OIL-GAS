@@ -10332,6 +10332,12 @@ abstract class AppL10n {
   /// **'What is it called?'**
   String get asFieldName;
 
+  /// No description provided for @asFieldPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo of the equipment'**
+  String get asFieldPhoto;
+
   /// No description provided for @asFieldCategory.
   ///
   /// In en, this message translates to:

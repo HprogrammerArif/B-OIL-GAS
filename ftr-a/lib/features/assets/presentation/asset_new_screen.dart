@@ -7,6 +7,7 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/features/assets/data/asset_repository.dart';
 import 'package:bogcl_oneops/features/assets/presentation/asset_providers.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/enterprise_form_widgets.dart';
@@ -53,6 +54,7 @@ class _AssetNewScreenState extends ConsumerState<AssetNewScreen> {
   bool _commission = true;
   String? _custodianUserId;
   String? _custodianName;
+  String? _photoId;
   bool _saving = false;
 
   @override
@@ -113,6 +115,7 @@ class _AssetNewScreenState extends ConsumerState<AssetNewScreen> {
             : _location.text.trim(),
         'commissionNow': _commission,
         'custodianUserId': ?_custodianUserId,
+        'photoFileId': ?_photoId,
       });
       ref.invalidate(assetsProvider);
       if (!mounted) return;
@@ -227,6 +230,18 @@ class _AssetNewScreenState extends ConsumerState<AssetNewScreen> {
                 label: l10n.asFieldName,
                 controller: _name,
                 onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: Space.md),
+              Text(l10n.asFieldPhoto, style: theme.textTheme.titleSmall),
+              const SizedBox(height: Space.sm),
+              EvidenceStrip(
+                fileIds: [?_photoId],
+                canAdd: _photoId == null,
+                max: 1,
+                onAdded: (id) async {
+                  if (!mounted) return;
+                  setState(() => _photoId = id);
+                },
               ),
             ],
           ),

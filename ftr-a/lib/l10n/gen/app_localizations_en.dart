@@ -5749,6 +5749,9 @@ class AppL10nEn extends AppL10n {
   String get asFieldName => 'What is it called?';
 
   @override
+  String get asFieldPhoto => 'Photo of the equipment';
+
+  @override
   String get asFieldCategory => 'Kind';
 
   @override

@@ -8,7 +8,7 @@ import 'package:bogcl_oneops/mock/http.dart';
 typedef Seeder = void Function(MockStore store);
 
 /// Bump when seed data changes shape: the store re-seeds on mismatch.
-const mockSeedVersion = 22;
+const mockSeedVersion = 24;
 
 /// Persisted document store backing the mock server.
 ///

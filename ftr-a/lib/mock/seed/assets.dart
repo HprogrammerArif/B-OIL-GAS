@@ -3,6 +3,7 @@ import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 void seedAssets(MockStore store) {
@@ -46,7 +47,15 @@ void seedAssets(MockStore store) {
     AuthContext? who,
   }) {
     // Finance can register/commission; only Plant GM / HR can hand over.
-    final rec = AssetEngine.register(store, who ?? gm, {
+    final registrar = who ?? gm;
+    final photos = putSeedPhotos(
+      store,
+      prefix: 'file_ast_$id',
+      uploaderUserId: registrar.user.str('id'),
+      createdAt: AssetEngine.seedClock ?? store.nowIso(),
+      count: 1,
+    );
+    final rec = AssetEngine.register(store, registrar, {
       'id': id,
       'categoryId': categoryId,
       'name': name,
@@ -68,6 +77,7 @@ void seedAssets(MockStore store) {
       'nextCalibrationAt': ?nextCal,
       'nextServiceAt': nextService,
       'commissionNow': commissionNow,
+      'photoFileId': photos.first,
     });
     if (custodian != null) {
       AssetEngine.assignCustody(store, gm, rec, {'employeeUserId': custodian});

@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/mock/engines/incident_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 void seedIncidents(MockStore store) {
@@ -28,19 +29,29 @@ void seedIncidents(MockStore store) {
     String? id,
     bool anonymous = false,
     List<Json> people = const [],
-  }) => IncidentEngine.create(store, who, {
-    'id': ?id,
-    'type': type,
-    'title': title,
-    'description': description,
-    'siteId': siteId,
-    'zone': zone,
-    'occurredAt': when.toIso8601String(),
-    'severity': severity,
-    'likelihood': likelihood,
-    'isAnonymous': anonymous,
-    'people': people,
-  });
+  }) {
+    final recId = id ?? 'inc_${store.nowMs()}';
+    final photos = putSeedPhotos(
+      store,
+      prefix: 'file_inc_$recId',
+      uploaderUserId: who.user.str('id'),
+      createdAt: IncidentEngine.seedClock ?? store.nowIso(),
+    );
+    return IncidentEngine.create(store, who, {
+      'id': recId,
+      'type': type,
+      'title': title,
+      'description': description,
+      'siteId': siteId,
+      'zone': zone,
+      'occurredAt': when.toIso8601String(),
+      'severity': severity,
+      'likelihood': likelihood,
+      'isAnonymous': anonymous,
+      'people': people,
+      'attachmentFileIds': photos,
+    });
+  }
 
   // 1. Waiting for Harunur to triage (Tanvir, HQ near-miss).
   at(const Duration(hours: 3));

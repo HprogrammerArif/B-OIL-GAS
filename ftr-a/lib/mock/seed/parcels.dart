@@ -1,7 +1,9 @@
 import 'package:bogcl_oneops/mock/engines/parcel_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
+import 'package:bogcl_oneops/mock/router.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 /// Parcels through the real engine, with history placed in the past so the
@@ -20,6 +22,13 @@ void seedParcels(MockStore store) {
   void at(Duration ago) =>
       ParcelEngine.seedClock = now().subtract(ago).toIso8601String();
 
+  List<String> photos(AuthContext who, String key) => putSeedPhotos(
+    store,
+    prefix: 'file_pkg_$key',
+    uploaderUserId: who.user.str('id'),
+    createdAt: ParcelEngine.seedClock ?? store.nowIso(),
+  );
+
   // 1. Sealed tender bid, HQ to Plant: at the plant mailroom, code sent.
   at(const Duration(hours: 20));
   final bid = ParcelEngine.create(store, sender, {
@@ -30,6 +39,7 @@ void seedParcels(MockStore store) {
     'weightKg': 1.2,
     'recipientUserId': gm.user.str('id'),
     'specialHandling': ['KEEP_UPRIGHT'],
+    'photoFileIds': photos(sender, 'bid'),
   });
   at(const Duration(hours: 19));
   ParcelEngine.dispatch(store, mailroom, bid, {
@@ -53,6 +63,7 @@ void seedParcels(MockStore store) {
     'description': 'Replacement laptop for the finance team',
     'declaredValue': 85000,
     'recipientUserId': hod.user.str('id'),
+    'photoFileIds': photos(sender, 'laptop'),
   });
   ParcelEngine.dispatch(store, mailroom, laptop, {
     'courierUserId': driverId,
@@ -66,6 +77,7 @@ void seedParcels(MockStore store) {
     'urgency': 'HIGH',
     'description': 'Signed land lease papers for the chairman',
     'recipientUserId': chairman.user.str('id'),
+    'photoFileIds': photos(gm, 'legal'),
   });
   at(const Duration(hours: 30));
   ParcelEngine.dispatch(store, mailroom, legal, {
@@ -83,6 +95,7 @@ void seedParcels(MockStore store) {
     'category': 'GENERAL',
     'description': 'Signed vendor agreements, 3 copies',
     'recipientUserId': hod.user.str('id'),
+    'photoFileIds': photos(sender, 'draft'),
   });
 
   // 5. History: delivered three days ago, accepted in the app.
@@ -91,6 +104,7 @@ void seedParcels(MockStore store) {
     'category': 'SPARES',
     'description': 'Printer toner cartridges, 4 boxes',
     'recipientUserId': sender.user.str('id'),
+    'photoFileIds': photos(hod, 'toner'),
   });
   at(const Duration(days: 3, hours: 3));
   ParcelEngine.dispatch(store, mailroom, done, {'courierUserId': driverId});
