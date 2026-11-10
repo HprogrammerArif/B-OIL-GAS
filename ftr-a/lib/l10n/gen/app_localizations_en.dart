@@ -2772,7 +2772,13 @@ class AppL10nEn extends AppL10n {
   String get nsTabToSign => 'To sign';
 
   @override
-  String get nsTabAll => 'All I can see';
+  String get nsTabAll => 'All files';
+
+  @override
+  String get nsFilterAllStatuses => 'All';
+
+  @override
+  String get nsSearchHint => 'Search title, file number, or officer...';
 
   @override
   String get nsNew => 'New note-sheet';

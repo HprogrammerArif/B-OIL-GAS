@@ -2763,7 +2763,13 @@ class AppL10nBn extends AppL10n {
   String get nsTabToSign => 'স্বাক্ষরের অপেক্ষায়';
 
   @override
-  String get nsTabAll => 'আমি যা দেখতে পারি';
+  String get nsTabAll => 'সকল ফাইল';
+
+  @override
+  String get nsFilterAllStatuses => 'সকল';
+
+  @override
+  String get nsSearchHint => 'শিরোনাম, ফাইল নম্বর বা কর্মকর্তা খুঁজুন...';
 
   @override
   String get nsNew => 'নতুন নোট-শিট';

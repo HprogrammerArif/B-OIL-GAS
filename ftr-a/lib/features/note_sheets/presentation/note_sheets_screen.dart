@@ -9,6 +9,7 @@ import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart'
 import 'package:bogcl_oneops/features/note_sheets/domain/note_sheet_models.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_providers.dart';
 import 'package:bogcl_oneops/features/note_sheets/presentation/note_sheet_ui.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_bar_actions.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -17,8 +18,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Note-Sheets Home (MOD-03):
-/// Top Verdict Banner, Category Filters, Signatory Queue, and Multi-Level Dossier
+const _statusCodes = <String>[
+  'ALL',
+  'DRAFT',
+  'IN_REVIEW',
+  'RETURNED',
+  'APPROVED',
+  'REJECTED',
+];
+
+/// Note-sheets list: view tabs with counts, search, and status filters.
 class NoteSheetsScreen extends ConsumerStatefulWidget {
   const NoteSheetsScreen({super.key});
 
@@ -28,11 +37,27 @@ class NoteSheetsScreen extends ConsumerStatefulWidget {
 
 class _NoteSheetsScreenState extends ConsumerState<NoteSheetsScreen> {
   String _view = 'mine';
-  String _category = 'ALL';
+  String _status = 'ALL';
+  String _search = '';
 
   Future<void> _refresh() async {
     ref.invalidate(noteSheetsProvider);
     await ref.read(noteSheetsProvider(_view).future);
+  }
+
+  String _statusLabel(AppL10n l10n, String code) => switch (code) {
+    'ALL' => l10n.nsFilterAllStatuses,
+    _ => nsStatusLabel(l10n, code),
+  };
+
+  bool _matchesSearch(NoteSheet r, {required bool bangla}) {
+    if (_search.isEmpty) return true;
+    final hay =
+        '${r.title} ${r.subject} ${r.fileNo ?? ''} '
+                '${r.departmentName} ${r.departmentNameBn} '
+                '${r.initiator.display(bangla: bangla)}'
+            .toLowerCase();
+    return hay.contains(_search);
   }
 
   @override
@@ -44,22 +69,20 @@ class _NoteSheetsScreenState extends ConsumerState<NoteSheetsScreen> {
     final canAll = session?.can('note-sheets:read', GrantScope.team) ?? false;
     final canCreate = session?.can('note-sheets:create') ?? false;
     final sheets = ref.watch(noteSheetsProvider(_view));
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
+    final mineCount = ref.watch(noteSheetsProvider('mine')).value?.length ?? 0;
+    final toSignCount = canSign
+        ? (ref.watch(noteSheetsProvider('to-sign')).value?.length ?? 0)
+        : 0;
+    final allCount = canAll
+        ? (ref.watch(noteSheetsProvider('all')).value?.length ?? 0)
+        : 0;
 
-    final categories = [
-      ('ALL', bangla ? 'সকল' : 'All'),
-      ('CAPEX', bangla ? 'ক্যাপেক্স' : 'CAPEX'),
-      ('OPEX', bangla ? 'ওপেক্স' : 'OPEX'),
-      ('PROCUREMENT', bangla ? 'ক্রয়' : 'Procurement'),
-      ('HR_POLICY', bangla ? 'এইচআর পলিসি' : 'HR Policy'),
-      ('EMERGENCY', bangla ? 'প্ল্যান্ট জরুরি' : 'Emergency Plant'),
-    ];
-
-    Widget chip(String view, String label) => Padding(
+    Widget viewChip(String view, String label, int count) => Padding(
       padding: const EdgeInsets.only(right: Space.sm),
       child: ChoiceChip(
-        label: Text(label),
+        visualDensity: VisualDensity.compact,
+        label: Text('$label ($count)', style: const TextStyle(fontSize: 12)),
         selected: _view == view,
         onSelected: (_) {
           Haptics.tap();
@@ -83,54 +106,43 @@ class _NoteSheetsScreenState extends ConsumerState<NoteSheetsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Plain-Language Verdict Banner
-          Container(
-            margin: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
-            padding: const EdgeInsets.symmetric(
-              horizontal: Space.md,
-              vertical: Space.sm,
-            ),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(Corner.lg),
-              border: Border.all(color: scheme.outlineVariant),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.edit_document, color: Colors.teal, size: 20),
-                const SizedBox(width: Space.xs),
-                Expanded(
-                  child: Text(
-                    bangla
-                        ? '২টি নোট-শীট আপনার ডিজিটাল স্বাক্ষরের জন্য প্রস্তুত রয়েছে · ১টি ফেরত ফাইল সংশোধনের অপেক্ষায়।'
-                        : '2 note-sheets are waiting at your desk for digital signature · 1 returned file needs revision.',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.teal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Primary View Tabs
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 0),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  chip('mine', l10n.nsTabMine),
-                  if (canSign) chip('to-sign', l10n.nsTabToSign),
-                  if (canAll) chip('all', l10n.nsTabAll),
+                  viewChip('mine', l10n.nsTabMine, mineCount),
+                  if (canSign)
+                    viewChip('to-sign', l10n.nsTabToSign, toSignCount),
+                  if (canAll) viewChip('all', l10n.nsTabAll, allCount),
                 ],
               ),
             ),
           ),
-
-          // Category Filter Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Space.lg,
+              vertical: 2,
+            ),
+            child: SizedBox(
+              height: 40,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: l10n.nsSearchHint,
+                  hintStyle: const TextStyle(fontSize: 12),
+                  prefixIcon: const Icon(Icons.search, size: 18),
+                  contentPadding: EdgeInsets.zero,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(Corner.md),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                ),
+                onChanged: (v) =>
+                    setState(() => _search = v.trim().toLowerCase()),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               Space.lg,
@@ -138,57 +150,45 @@ class _NoteSheetsScreenState extends ConsumerState<NoteSheetsScreen> {
               Space.lg,
               Space.xs,
             ),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final c in categories) ...[
-                    FilterChip(
-                      label: Text(c.$2),
-                      selected: _category == c.$1,
-                      onSelected: (_) {
-                        Haptics.tap();
-                        setState(() => _category = c.$1);
-                      },
-                    ),
-                    const SizedBox(width: Space.xs),
-                  ],
-                ],
-              ),
+            child: sheets.maybeWhen(
+              data: (rows) {
+                final searched = rows
+                    .where((r) => _matchesSearch(r, bangla: bangla))
+                    .toList();
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final code in _statusCodes) ...[
+                        FilterChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(
+                            '${_statusLabel(l10n, code)} (${code == 'ALL' ? searched.length : searched.where((r) => r.status == code).length})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          selected: _status == code,
+                          onSelected: (_) {
+                            Haptics.tap();
+                            setState(() => _status = code);
+                          },
+                        ),
+                        const SizedBox(width: Space.xs),
+                      ],
+                    ],
+                  ),
+                );
+              },
+              orElse: () => const SizedBox(height: 32),
             ),
           ),
-
           Expanded(
             child: sheets.when(
               loading: SkeletonList.new,
               error: (_, _) => ErrorState(onRetry: () => unawaited(_refresh())),
               data: (rows) {
                 final filtered = rows.where((r) {
-                  if (_category == 'ALL') return true;
-                  final text = '${r.title} ${r.subject} ${r.departmentName}'
-                      .toUpperCase();
-                  return switch (_category) {
-                    'CAPEX' =>
-                      text.contains('CAPEX') ||
-                          (r.amount != null && r.amount! > 1000000),
-                    'OPEX' =>
-                      text.contains('OPEX') ||
-                          (r.amount != null && r.amount! <= 1000000),
-                    'PROCUREMENT' =>
-                      text.contains('PROCUREMENT') ||
-                          text.contains('PURCHASE') ||
-                          text.contains('SUPPLY') ||
-                          r.quoteCount > 0,
-                    'HR_POLICY' =>
-                      text.contains('HR') ||
-                          text.contains('POLICY') ||
-                          text.contains('PERSONNEL'),
-                    'EMERGENCY' =>
-                      text.contains('EMERGENCY') ||
-                          text.contains('CRITICAL') ||
-                          r.urgency == 'URGENT',
-                    _ => true,
-                  };
+                  if (_status != 'ALL' && r.status != _status) return false;
+                  return _matchesSearch(r, bangla: bangla);
                 }).toList();
 
                 if (filtered.isEmpty) {

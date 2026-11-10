@@ -4864,8 +4864,20 @@ abstract class AppL10n {
   /// No description provided for @nsTabAll.
   ///
   /// In en, this message translates to:
-  /// **'All I can see'**
+  /// **'All files'**
   String get nsTabAll;
+
+  /// No description provided for @nsFilterAllStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get nsFilterAllStatuses;
+
+  /// No description provided for @nsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title, file number, or officer...'**
+  String get nsSearchHint;
 
   /// No description provided for @nsNew.
   ///
