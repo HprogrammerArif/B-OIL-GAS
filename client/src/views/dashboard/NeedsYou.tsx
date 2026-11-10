@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2, Info } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Info } from 'lucide-react';
 import { t, type Lang } from '../../types';
 import { Button } from '../../components/ui';
 import type { AttentionItem } from './config';
@@ -17,17 +17,7 @@ interface NeedsYouProps {
 
 /** Plain-language list of what needs the signed-in user, most urgent first. */
 export default function NeedsYou({ items, lang, onOpen }: NeedsYouProps) {
-  if (items.length === 0) {
-    return (
-      <section className="dash-needs is-clear" aria-labelledby="dash-needs-title">
-        <CheckCircle2 size={20} aria-hidden />
-        <div>
-          <h3 id="dash-needs-title">{t('All clear', 'সব ঠিক আছে', lang)}</h3>
-          <p>{t('Nothing needs you right now.', 'এই মুহূর্তে আপনার করণীয় কিছু নেই।', lang)}</p>
-        </div>
-      </section>
-    );
-  }
+  if (items.length === 0) return null;
 
   const rank = { danger: 0, warning: 1, info: 2 } as const;
   const sorted = [...items].sort((a, b) => rank[a.tone] - rank[b.tone]);
