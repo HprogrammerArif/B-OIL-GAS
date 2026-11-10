@@ -6,6 +6,7 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/incidents/data/incident_repository.dart';
 import 'package:bogcl_oneops/features/incidents/domain/incident_models.dart';
 import 'package:bogcl_oneops/features/incidents/presentation/incident_providers.dart';
@@ -620,6 +621,18 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen>
                       Text(i.investigator!.display(bangla: bangla)),
                     const SizedBox(height: Space.md),
                     Text(i.description, style: theme.textTheme.bodyMedium),
+                    const SizedBox(height: Space.md),
+                    EvidenceStrip(
+                      fileIds: i.photoFileIds,
+                      canAdd: i.me.isReporter || i.me.isInvestigator,
+                      onAdded: (fileId) async {
+                        await _repo.act(widget.id, 'attachments', {
+                          'fileId': fileId,
+                          'kind': 'PHOTO',
+                        });
+                        _refresh();
+                      },
+                    ),
                     const SizedBox(height: Space.md),
                     Text(
                       l10n.inRiskLine(

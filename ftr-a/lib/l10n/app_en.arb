@@ -353,6 +353,15 @@
   "pickerCamera": "Take a photo",
   "pickerGallery": "Choose from gallery",
   "pickerFiles": "Browse files",
+  "evAddPhoto": "Add",
+  "evPhotos": "Photos",
+  "evPhotoCount": "{count} photos",
+  "@evPhotoCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "evPhotoOpenFailed": "Could not open the photo.",
   "moreChangePhoto": "Change profile photo",
   "photoUpdated": "Profile photo updated",
   "uploadNeedsConnection": "Connect to the internet to upload this file.",
@@ -2734,6 +2743,10 @@
   "inFieldAnon": "Hide my name",
   "inFieldAnonHelp": "Safety still sees the report. Your name is not shown to others.",
   "inCreate": "Send report",
+  "inUseDraft": "Use a draft",
+  "inDraftValve": "Valve drip",
+  "inDraftForklift": "Forklift alarm",
+  "inDraftEarthing": "Earthing clamp",
   "inConfirmSerious": "This will page the plant head now",
   "inConfirmSeriousMsg": "High or extreme scores notify the safety lead and the chairman at once.",
   "inWhat": "What is this",

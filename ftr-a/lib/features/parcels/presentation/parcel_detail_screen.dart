@@ -7,7 +7,7 @@ import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/features/approvals/domain/approval_models.dart';
 import 'package:bogcl_oneops/features/approvals/presentation/approval_ui.dart';
-import 'package:bogcl_oneops/features/files/data/files_repository.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/parcels/data/parcel_repository.dart';
 import 'package:bogcl_oneops/features/parcels/domain/parcel_models.dart';
 import 'package:bogcl_oneops/features/parcels/presentation/parcel_label.dart';
@@ -948,29 +948,9 @@ class _EventTile extends ConsumerWidget {
               ),
               tooltip: l10n.pcViewPhoto,
               onPressed: () =>
-                  unawaited(_showPhoto(context, ref, e.photoFileId!)),
+                  unawaited(showFileImage(context, ref, e.photoFileId!)),
             ),
     );
-  }
-
-  Future<void> _showPhoto(
-    BuildContext context,
-    WidgetRef ref,
-    String id,
-  ) async {
-    final l10n = context.l10n;
-    try {
-      final bytes = await ref.read(filesRepositoryProvider).download(id);
-      if (!context.mounted || bytes == null) return;
-      await showDialog<void>(
-        context: context,
-        builder: (_) =>
-            Dialog(child: InteractiveViewer(child: Image.memory(bytes))),
-      );
-    } on ApiException {
-      if (!context.mounted) return;
-      AppToast.show(context, l10n.pcErrPhotoOpen, tone: StatusTone.danger);
-    }
   }
 }
 

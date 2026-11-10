@@ -293,7 +293,7 @@ abstract final class IncidentEngine {
       'photoFileIds': [
         for (final id in (body['attachmentFileIds'] as List?) ?? const [])
           if (id is String) id,
-      ],
+      ].take(6).toList(),
       'createdAt': nowIso,
       'updatedAt': nowIso,
     };
@@ -348,6 +348,44 @@ abstract final class IncidentEngine {
         data: _data(i),
       );
     }
+    return i;
+  }
+
+  static Json addAttachment(
+    MockStore store,
+    AuthContext auth,
+    Json i,
+    Json body,
+  ) {
+    final mine = i['reporterUserId'] == _me(auth);
+    final investigator = i['investigatorUserId'] == _me(auth);
+    if (!mine && !investigator && !_can(auth, 'incidents:manage')) {
+      throw forbidden();
+    }
+    final fileId = body['fileId'];
+    if (fileId is! String || fileId.isEmpty) {
+      throw validationError('fileId', 'Choose a photo');
+    }
+    final kind = (body['kind'] as String?) ?? 'PHOTO';
+    if (kind != 'PHOTO') {
+      throw validationError('kind', 'Photos only');
+    }
+    final ids = [...i.strList('photoFileIds')];
+    if (ids.contains(fileId)) return i;
+    if (ids.length >= 6) {
+      throw validationError('fileId', 'At most 6 photos');
+    }
+    FileEngine.attach(
+      store,
+      fileId,
+      ownerType: 'Incident',
+      ownerId: i.str('id'),
+    );
+    ids.add(fileId);
+    i
+      ..['photoFileIds'] = ids
+      ..['updatedAt'] = _stamp(store);
+    store.put(Col.incidents, i);
     return i;
   }
 

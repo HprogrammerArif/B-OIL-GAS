@@ -9,6 +9,7 @@ import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/auth/presentation/session_controller.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/leave/data/leave_repository.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
@@ -44,7 +45,7 @@ class _LeaveApplyScreenState extends ConsumerState<LeaveApplyScreen> {
   String _handoverReliever = 'ROSTER_DEFAULT';
   String _stationStatus = 'IN_STATION';
   String? _selectedReasonTemplate;
-  ({String id, String name})? _attachment;
+  ({String id, String name, String mime})? _attachment;
   bool _uploading = false;
   bool _submitting = false;
   bool _touched = false;
@@ -345,7 +346,9 @@ class _LeaveApplyScreenState extends ConsumerState<LeaveApplyScreen> {
       final meta = await uploads.upload(picked, purpose: purpose);
       await uploads.awaitClean(meta.id);
       if (!mounted) return;
-      setState(() => _attachment = (id: meta.id, name: picked.name));
+      setState(
+        () => _attachment = (id: meta.id, name: picked.name, mime: picked.mime),
+      );
     } on ApiException catch (e) {
       if (!mounted) return;
       AppToast.show(context, switch (e.code) {
@@ -1201,36 +1204,43 @@ class _LeaveApplyScreenState extends ConsumerState<LeaveApplyScreen> {
                     ),
                     const SizedBox(height: Space.xs),
                     if (_attachment != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: Space.sm,
-                          vertical: Space.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(Corner.md),
-                          border: Border.all(color: scheme.outlineVariant),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.attach_file, size: 18),
-                            const SizedBox(width: Space.xs),
-                            Expanded(
-                              child: Text(
-                                _attachment!.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_attachment!.mime.startsWith('image/'))
+                            EvidenceStrip(fileIds: [_attachment!.id]),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Space.sm,
+                              vertical: Space.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(Corner.md),
+                              border: Border.all(color: scheme.outlineVariant),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.attach_file, size: 18),
+                                const SizedBox(width: Space.xs),
+                                Expanded(
+                                  child: Text(
+                                    _attachment!.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                TextButton(
+                                  onPressed: () =>
+                                      setState(() => _attachment = null),
+                                  child: Text(l10n.leaveFormRemove),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () =>
-                                  setState(() => _attachment = null),
-                              child: Text(l10n.leaveFormRemove),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       )
                     else
                       PrimaryButton.secondary(

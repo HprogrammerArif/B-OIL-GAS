@@ -7,6 +7,7 @@ import 'package:bogcl_oneops/core/utils/dates.dart';
 import 'package:bogcl_oneops/core/utils/haptics.dart';
 import 'package:bogcl_oneops/features/files/application/upload_service.dart';
 import 'package:bogcl_oneops/features/files/presentation/attachment_picker.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/people/presentation/person_picker.dart';
 import 'package:bogcl_oneops/features/visitors/data/visitor_repository.dart';
 import 'package:bogcl_oneops/features/visitors/domain/visitor_models.dart';
@@ -708,6 +709,10 @@ class _Body extends StatelessWidget {
                     Text(cat),
                   const SizedBox(height: Space.xs),
                   Text(v.purpose, style: theme.textTheme.bodyMedium),
+                  if (v.photoFileId != null) ...[
+                    const SizedBox(height: Space.md),
+                    EvidenceStrip(fileIds: [v.photoFileId!]),
+                  ],
                   const SizedBox(height: Space.md),
                   Text(
                     l10n.visHostLine(

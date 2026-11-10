@@ -234,6 +234,15 @@
   "pickerCamera": "ছবি তুলুন",
   "pickerGallery": "গ্যালারি থেকে বেছে নিন",
   "pickerFiles": "ফাইল ব্রাউজ করুন",
+  "evAddPhoto": "যোগ",
+  "evPhotos": "ছবি",
+  "evPhotoCount": "{count}টি ছবি",
+  "@evPhotoCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "evPhotoOpenFailed": "ছবি খোলা যায়নি।",
   "moreChangePhoto": "প্রোফাইল ছবি পরিবর্তন করুন",
   "photoUpdated": "প্রোফাইল ছবি হালনাগাদ হয়েছে",
   "uploadNeedsConnection": "এই ফাইল আপলোড করতে ইন্টারনেটে সংযুক্ত হন।",
@@ -1656,6 +1665,10 @@
   "inFieldAnon": "আমার নাম লুকান",
   "inFieldAnonHelp": "নিরাপত্তা রিপোর্ট দেখবে। অন্যরা আপনার নাম দেখবে না।",
   "inCreate": "রিপোর্ট পাঠান",
+  "inUseDraft": "খসড়া ব্যবহার করুন",
+  "inDraftValve": "ভালভ লিক",
+  "inDraftForklift": "ফর্কলিফট অ্যালার্ম",
+  "inDraftEarthing": "আর্থিং ক্ল্যাম্প",
   "inConfirmSerious": "এতে প্ল্যান্ট প্রধানকে এখনই জানানো হবে",
   "inConfirmSeriousMsg": "উচ্চ বা চরম স্কোর নিরাপত্তা প্রধান ও চেয়ারম্যানকে সাথে সাথে জানায়।",
   "inWhat": "এটি কী",

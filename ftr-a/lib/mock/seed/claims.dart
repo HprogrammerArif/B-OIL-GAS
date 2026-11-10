@@ -1,7 +1,9 @@
 import 'package:bogcl_oneops/mock/engines/claim_engine.dart';
+import 'package:bogcl_oneops/mock/engines/file_engine.dart';
 import 'package:bogcl_oneops/mock/engines/work_calendar.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 Json _line(
@@ -340,6 +342,24 @@ void seedClaims(MockStore store) {
   for (final c in claims) {
     ClaimEngine.recompute(store, c);
     store.put(Col.claims, c);
+    final emp = store.get(Col.employees, c.str('employeeId'));
+    final uid = emp?.strOrNull('userId') ?? '';
+    for (final raw in (c['lines'] as List?) ?? const []) {
+      if (raw is! Map) continue;
+      final rid = raw['receiptFileId'];
+      if (rid is! String) continue;
+      store.put(
+        Col.files,
+        seedPhotoFile(
+          id: rid,
+          uploaderUserId: uid,
+          createdAt: c.str('createdAt'),
+          fileName: 'receipt.png',
+          purpose: 'CLAIM_RECEIPT',
+        ),
+      );
+      FileEngine.attach(store, rid, ownerType: 'Claim', ownerId: c.str('id'));
+    }
   }
 
   for (final id in ['clm_0034', 'clm_0064', 'clm_0110', 'clm_0091']) {

@@ -818,6 +818,20 @@ class AppL10nEn extends AppL10n {
   String get pickerFiles => 'Browse files';
 
   @override
+  String get evAddPhoto => 'Add';
+
+  @override
+  String get evPhotos => 'Photos';
+
+  @override
+  String evPhotoCount(int count) {
+    return '$count photos';
+  }
+
+  @override
+  String get evPhotoOpenFailed => 'Could not open the photo.';
+
+  @override
   String get moreChangePhoto => 'Change profile photo';
 
   @override
@@ -5077,6 +5091,18 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get inCreate => 'Send report';
+
+  @override
+  String get inUseDraft => 'Use a draft';
+
+  @override
+  String get inDraftValve => 'Valve drip';
+
+  @override
+  String get inDraftForklift => 'Forklift alarm';
+
+  @override
+  String get inDraftEarthing => 'Earthing clamp';
 
   @override
   String get inConfirmSerious => 'This will page the plant head now';

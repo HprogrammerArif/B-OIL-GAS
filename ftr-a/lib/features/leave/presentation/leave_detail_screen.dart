@@ -5,6 +5,7 @@ import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/offline/outbox_service.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/leave/data/leave_repository.dart';
 import 'package:bogcl_oneops/features/leave/domain/leave_models.dart';
 import 'package:bogcl_oneops/features/leave/presentation/leave_providers.dart';
@@ -159,6 +160,10 @@ class _Body extends StatelessWidget {
                   ),
                   _Fact(l10n.leaveDetailReason, item.reason),
                   if (!item.isInformed) _Fact('', l10n.leaveFormUninformed),
+                  if (item.attachmentFileId != null) ...[
+                    const SizedBox(height: Space.md),
+                    EvidenceStrip(fileIds: [item.attachmentFileId!]),
+                  ],
                 ],
               ),
             ),

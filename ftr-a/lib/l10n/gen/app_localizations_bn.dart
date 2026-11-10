@@ -818,6 +818,20 @@ class AppL10nBn extends AppL10n {
   String get pickerFiles => 'ফাইল ব্রাউজ করুন';
 
   @override
+  String get evAddPhoto => 'যোগ';
+
+  @override
+  String get evPhotos => 'ছবি';
+
+  @override
+  String evPhotoCount(int count) {
+    return '$countটি ছবি';
+  }
+
+  @override
+  String get evPhotoOpenFailed => 'ছবি খোলা যায়নি।';
+
+  @override
   String get moreChangePhoto => 'প্রোফাইল ছবি পরিবর্তন করুন';
 
   @override
@@ -5060,6 +5074,18 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get inCreate => 'রিপোর্ট পাঠান';
+
+  @override
+  String get inUseDraft => 'খসড়া ব্যবহার করুন';
+
+  @override
+  String get inDraftValve => 'ভালভ লিক';
+
+  @override
+  String get inDraftForklift => 'ফর্কলিফট অ্যালার্ম';
+
+  @override
+  String get inDraftEarthing => 'আর্থিং ক্ল্যাম্প';
 
   @override
   String get inConfirmSerious => 'এতে প্ল্যান্ট প্রধানকে এখনই জানানো হবে';

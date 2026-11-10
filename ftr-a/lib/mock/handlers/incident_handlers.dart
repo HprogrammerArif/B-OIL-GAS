@@ -78,6 +78,17 @@ List<RouteDef> incidentRoutes() => [
   RouteDef('GET', '/incidents/:id', (ctx) async {
     return ok(_out(ctx, _inc(ctx)));
   }, permission: _read),
+  RouteDef('POST', '/incidents/:id/attachments', (ctx) async {
+    final i = _inc(ctx);
+    IncidentEngine.addAttachment(
+      ctx.store,
+      ctx.requireAuth(),
+      i,
+      ctx.bodyObject(),
+    );
+    await ctx.store.commit();
+    return ok(_out(ctx, i));
+  }, permission: ['incidents:report', 'incidents:read', 'incidents:manage']),
   RouteDef('POST', '/incidents/:id/triage', (ctx) async {
     final i = _inc(ctx);
     IncidentEngine.triage(ctx.store, ctx.requireAuth(), i, ctx.bodyObject());

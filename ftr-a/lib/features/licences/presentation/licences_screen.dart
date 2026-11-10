@@ -100,59 +100,64 @@ class _LicencesScreenState extends ConsumerState<LicencesScreen> {
             );
 
             return SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  Space.lg,
-                  0,
-                  Space.lg,
-                  Space.lg + MediaQuery.viewInsetsOf(ctx).bottom,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.7,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.cpFilter,
-                      style: Theme.of(ctx).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(
-                      l10n.cpFilterAgencies,
-                      style: Theme.of(ctx).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: Space.xs),
-                    Wrap(
-                      children: [
-                        for (final a in _agencies)
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    Space.md,
+                    0,
+                    Space.md,
+                    Space.md + MediaQuery.viewInsetsOf(ctx).bottom,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.cpFilter,
+                        style: Theme.of(ctx).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: Space.md),
+                      Text(
+                        l10n.cpFilterAgencies,
+                        style: Theme.of(ctx).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: Space.xs),
+                      Wrap(
+                        children: [
+                          for (final a in _agencies)
+                            chip(
+                              selected: _selectedAgency == a.$1,
+                              label: bangla ? a.$3 : a.$2,
+                              onTap: () => _selectedAgency = a.$1,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: Space.md),
+                      Text(
+                        l10n.cpFilterStages,
+                        style: Theme.of(ctx).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: Space.xs),
+                      Wrap(
+                        children: [
                           chip(
-                            selected: _selectedAgency == a.$1,
-                            label: bangla ? a.$3 : a.$2,
-                            onTap: () => _selectedAgency = a.$1,
+                            selected: _selectedStage == 'ALL',
+                            label: l10n.cpFilterAllStages,
+                            onTap: () => _selectedStage = 'ALL',
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(
-                      l10n.cpFilterStages,
-                      style: Theme.of(ctx).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: Space.xs),
-                    Wrap(
-                      children: [
-                        chip(
-                          selected: _selectedStage == 'ALL',
-                          label: l10n.cpFilterAllStages,
-                          onTap: () => _selectedStage = 'ALL',
-                        ),
-                        for (final s in _stageCodes)
-                          chip(
-                            selected: _selectedStage == s,
-                            label: licenceStageLabel(l10n, s),
-                            onTap: () => _selectedStage = s,
-                          ),
-                      ],
-                    ),
-                  ],
+                          for (final s in _stageCodes)
+                            chip(
+                              selected: _selectedStage == s,
+                              label: licenceStageLabel(l10n, s),
+                              onTap: () => _selectedStage = s,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

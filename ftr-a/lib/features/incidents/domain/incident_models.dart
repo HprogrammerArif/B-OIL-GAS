@@ -173,6 +173,7 @@ class SafetyIncident {
     required this.capas,
     required this.createdAt,
     required this.me,
+    this.photoFileIds = const [],
     this.zone,
     this.siteName,
     this.siteNameBn,
@@ -219,6 +220,10 @@ class SafetyIncident {
       ],
       createdAt: DateTime.parse(j['createdAt']! as String),
       me: IncidentMe.fromJson(_map(j['me'] ?? const <String, Object?>{})),
+      photoFileIds: [
+        for (final e in (j['photoFileIds'] as List?) ?? const [])
+          if (e is String) e,
+      ],
     );
   }
 
@@ -248,6 +253,7 @@ class SafetyIncident {
   final List<IncidentCapa> capas;
   final DateTime createdAt;
   final IncidentMe me;
+  final List<String> photoFileIds;
 
   String siteLabel({required bool bangla}) =>
       bangla ? (siteNameBn ?? siteName ?? '') : (siteName ?? '');

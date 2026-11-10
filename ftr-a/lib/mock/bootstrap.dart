@@ -26,6 +26,7 @@ import 'package:bogcl_oneops/mock/seed/notices.dart';
 import 'package:bogcl_oneops/mock/seed/notifications.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/seed/parcels.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/seed/visitors.dart';
 import 'package:bogcl_oneops/mock/seed/workflow.dart';
 import 'package:bogcl_oneops/mock/seed/workforce.dart';
@@ -78,6 +79,7 @@ Future<ProviderContainer> bootstrapMock({
   await store.init();
 
   final blobs = DirectoryBlobStore();
+  await writeMissingSeedPhotoBlobs(store, blobs);
   await FileEngine.sweepOrphans(store, blobs);
   // Profile photos are visible to every signed-in colleague.
   LeaveEngine.registerHooks();

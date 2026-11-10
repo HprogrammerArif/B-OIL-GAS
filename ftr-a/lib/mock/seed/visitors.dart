@@ -2,6 +2,7 @@ import 'package:bogcl_oneops/mock/engines/visitor_engine.dart';
 import 'package:bogcl_oneops/mock/http.dart';
 import 'package:bogcl_oneops/mock/seed/org.dart';
 import 'package:bogcl_oneops/mock/seed/seed_auth.dart';
+import 'package:bogcl_oneops/mock/seed/seed_photo.dart';
 import 'package:bogcl_oneops/mock/store.dart';
 
 /// Visits through the real engine so the list shows every stage a persona
@@ -86,15 +87,14 @@ void seedVisits(MockStore store) {
     'shoes': true,
     'hiVisVest': true,
   });
-  store.put(Col.files, {
-    'id': 'file_vis_seed_1',
-    'purpose': 'PHOTO',
-    'status': 'CLEAN',
-    'mime': 'image/jpeg',
-    'size': 12000,
-    'originalName': 'gate.jpg',
-    'createdAt': store.nowIso(),
-  });
+  store.put(
+    Col.files,
+    seedPhotoFile(
+      id: 'file_vis_seed_1',
+      uploaderUserId: gate.user.str('id'),
+      createdAt: store.nowIso(),
+    ),
+  );
   VisitEngine.checkIn(store, gate, inside, {
     'photoFileId': 'file_vis_seed_1',
     'ndaSigned': true,
@@ -115,15 +115,15 @@ void seedVisits(MockStore store) {
       {'id': 'z_hq_board'},
     ],
   });
-  store.put(Col.files, {
-    'id': 'file_vis_seed_2',
-    'purpose': 'PHOTO',
-    'status': 'CLEAN',
-    'mime': 'image/jpeg',
-    'size': 11000,
-    'originalName': 'gate2.jpg',
-    'createdAt': store.nowIso(),
-  });
+  store.put(
+    Col.files,
+    seedPhotoFile(
+      id: 'file_vis_seed_2',
+      uploaderUserId: hr.user.str('id'),
+      createdAt: store.nowIso(),
+      fileName: 'gate2.png',
+    ),
+  );
   at(const Duration(hours: 27));
   VisitEngine.checkIn(store, hr, left, {
     'photoFileId': 'file_vis_seed_2',

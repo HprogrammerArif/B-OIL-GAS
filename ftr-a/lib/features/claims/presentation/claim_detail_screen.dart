@@ -11,6 +11,7 @@ import 'package:bogcl_oneops/features/claims/data/claim_repository.dart';
 import 'package:bogcl_oneops/features/claims/domain/claim_models.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_providers.dart';
 import 'package:bogcl_oneops/features/claims/presentation/claim_ui.dart';
+import 'package:bogcl_oneops/features/files/presentation/evidence_strip.dart';
 import 'package:bogcl_oneops/features/workflow/presentation/approval_timeline.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/layout_widgets.dart';
@@ -309,6 +310,11 @@ class _Body extends ConsumerWidget {
                       : l.isDeclaration
                       ? StatusPill(label: l10n.claimLineDeclared)
                       : null,
+                  onTap: l.receiptFileId == null
+                      ? null
+                      : () => unawaited(
+                          showFileImage(context, ref, l.receiptFileId!),
+                        ),
                 ),
               if (c.workflowInstanceId != null) ...[
                 SectionHeader(title: l10n.claimRoute),

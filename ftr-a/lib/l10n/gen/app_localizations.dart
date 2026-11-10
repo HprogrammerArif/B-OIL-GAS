@@ -1501,6 +1501,30 @@ abstract class AppL10n {
   /// **'Browse files'**
   String get pickerFiles;
 
+  /// No description provided for @evAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get evAddPhoto;
+
+  /// No description provided for @evPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get evPhotos;
+
+  /// No description provided for @evPhotoCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} photos'**
+  String evPhotoCount(int count);
+
+  /// No description provided for @evPhotoOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo.'**
+  String get evPhotoOpenFailed;
+
   /// No description provided for @moreChangePhoto.
   ///
   /// In en, this message translates to:
@@ -9095,6 +9119,30 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Send report'**
   String get inCreate;
+
+  /// No description provided for @inUseDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a draft'**
+  String get inUseDraft;
+
+  /// No description provided for @inDraftValve.
+  ///
+  /// In en, this message translates to:
+  /// **'Valve drip'**
+  String get inDraftValve;
+
+  /// No description provided for @inDraftForklift.
+  ///
+  /// In en, this message translates to:
+  /// **'Forklift alarm'**
+  String get inDraftForklift;
+
+  /// No description provided for @inDraftEarthing.
+  ///
+  /// In en, this message translates to:
+  /// **'Earthing clamp'**
+  String get inDraftEarthing;
 
   /// No description provided for @inConfirmSerious.
   ///
