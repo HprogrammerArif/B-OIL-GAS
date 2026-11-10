@@ -15,6 +15,33 @@ import 'package:bogcl_oneops/shared/widgets/status_pill.dart';
   return (score, category);
 }
 
+const incidentPlantZones = [
+  'Zone 1',
+  'Zone 2',
+  'Zone 3',
+  'Zone 4',
+  'Zone 5',
+  'Zone 6',
+  'Zone 7',
+  'Zone 8',
+  'Zone 9',
+  'Zone 10',
+];
+
+String incidentZoneLabel(AppL10n l10n, String? zone) => switch (zone) {
+  'Zone 1' => l10n.inZone1,
+  'Zone 2' => l10n.inZone2,
+  'Zone 3' => l10n.inZone3,
+  'Zone 4' => l10n.inZone4,
+  'Zone 5' => l10n.inZone5,
+  'Zone 6' => l10n.inZone6,
+  'Zone 7' => l10n.inZone7,
+  'Zone 8' => l10n.inZone8,
+  'Zone 9' => l10n.inZone9,
+  'Zone 10' => l10n.inZone10,
+  _ => l10n.inZoneUnassigned,
+};
+
 const incidentTypes = [
   'NEAR_MISS',
   'HAZARD',

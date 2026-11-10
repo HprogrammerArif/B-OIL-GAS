@@ -491,36 +491,26 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen>
     final lang = bangla ? 'bn' : 'en';
     final async = ref.watch(incidentDetailProvider(widget.id));
 
+    final i = async.value;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.moduleIncidents),
-        actions: [
-          IconButton(
-            tooltip: bangla ? 'রিফ্রেশ করুন' : 'Refresh',
-            icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
-          ),
-        ],
+        title: Text(
+          i?.title ?? l10n.moduleIncidents,
+          overflow: TextOverflow.ellipsis,
+        ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           tabs: [
-            Tab(
-              text: bangla
-                  ? 'সারসংক্ষেপ ও নিয়ন্ত্রণ'
-                  : 'Overview & Containment',
-            ),
-            Tab(text: bangla ? '৫-হোয়াই ও আরসিএ' : 'RCA (5-Whys & 6M)'),
-            Tab(text: bangla ? 'ক্যাপা ট্র্যাকার' : 'CAPA Tracker'),
-            Tab(
-              text: bangla
-                  ? 'সংবিধিবদ্ধ ফাইল (Form B-12)'
-                  : 'Statutory Dossier',
-            ),
+            Tab(text: l10n.inTabOverview),
+            Tab(text: l10n.inTabRca),
+            Tab(text: l10n.inTabFixes),
+            Tab(text: l10n.inTabGov),
           ],
         ),
       ),
+      bottomNavigationBar: i == null ? null : _bar(i),
       body: async.when(
         loading: () => const SkeletonList(),
         error: (_, _) => ErrorState(
@@ -541,6 +531,46 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen>
     );
   }
 
+  Widget? _bar(SafetyIncident i) {
+    final l10n = context.l10n;
+    final m = i.me;
+    final actions = <(String, VoidCallback)>[
+      if (m.canTriage) (l10n.inActTriage, () => unawaited(_triage(i))),
+      if (m.canInvestigate)
+        (
+          l10n.inActInvest,
+          () => unawaited(
+            _run(() => _repo.act(i.id, 'investigate'), l10n.inDoneInvest),
+          ),
+        ),
+    ];
+    if (actions.isEmpty) return null;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(Space.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (idx, a) in actions.indexed)
+              Padding(
+                padding: EdgeInsets.only(top: idx == 0 ? 0 : Space.sm),
+                child: idx == 0
+                    ? PrimaryButton(
+                        label: a.$1,
+                        loading: _busy,
+                        onPressed: a.$2,
+                      )
+                    : PrimaryButton.secondary(
+                        label: a.$1,
+                        onPressed: _busy ? null : a.$2,
+                      ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // TAB 1: OVERVIEW & CONTAINMENT
   // ---------------------------------------------------------------------------
@@ -551,335 +581,73 @@ class _IncidentDetailScreenState extends ConsumerState<IncidentDetailScreen>
     String lang,
   ) {
     final l10n = context.l10n;
-    final m = i.me;
     final who = i.reporter?.display(bangla: bangla) ?? l10n.inAnonymous;
     final theme = Theme.of(context);
+    final place = [
+      incidentTypeLabel(l10n, i.type),
+      incidentZoneLabel(l10n, i.zone),
+      if (i.siteLabel(bangla: bangla).isNotEmpty) i.siteLabel(bangla: bangla),
+    ].join(' · ');
 
-    return ListView(
-      padding: const EdgeInsets.all(Space.md),
-      children: [
-        // Plain-Language Verdict Banner
-        Container(
-          padding: const EdgeInsets.all(Space.md),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.security_update_warning,
-                    color: incidentRiskTone(i.riskCategory) == StatusTone.danger
-                        ? BrandColors.danger
-                        : BrandColors.warning,
-                  ),
-                  const SizedBox(width: Space.sm),
-                  Expanded(
-                    child: Text(
-                      '${i.incidentNo} · ${i.title}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  StatusPill(
-                    label: incidentStageLabel(l10n, i.stage),
-                    tone: incidentStageTone(i.stage),
-                  ),
-                ],
-              ),
-              const SizedBox(height: Space.xs),
-              Text(
-                incidentNextLine(l10n, i, bangla: bangla),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: Space.md),
-
-        // 5x5 Risk Assessment Pill Card
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(Space.md),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(Space.sm),
-                  decoration: BoxDecoration(
-                    color: incidentRiskTone(i.riskCategory) == StatusTone.danger
-                        ? BrandColors.danger.withValues(alpha: 0.12)
-                        : BrandColors.warning.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${i.riskScore}',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          incidentRiskTone(i.riskCategory) == StatusTone.danger
-                          ? BrandColors.danger
-                          : BrandColors.warning,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: Space.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            bangla ? 'ঝুঁকি স্কোর' : 'Risk Assessment',
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(width: Space.xs),
-                          StatusPill(
-                            label: incidentRiskLabel(l10n, i.riskCategory),
-                            tone: incidentRiskTone(i.riskCategory),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${bangla ? "তীব্রতা" : "Severity"}: ${i.severity}/5  ×  ${bangla ? "সম্ভাবনা" : "Likelihood"}: ${i.likelihood}/5',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: Space.md),
-
-        // Incident Description & Metadata
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(Space.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  bangla
-                      ? 'ঘটনার বিবরণ (What Happened)'
-                      : 'Incident Description',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: Space.xs),
-                Text(i.description, style: theme.textTheme.bodyMedium),
-                const Divider(height: Space.xl),
-                _metaRow(
-                  context,
-                  Icons.category_outlined,
-                  bangla ? 'ধরণ' : 'Type',
-                  incidentTypeLabel(l10n, i.type),
-                ),
-                const SizedBox(height: Space.sm),
-                _metaRow(
-                  context,
-                  Icons.location_on_outlined,
-                  bangla ? 'প্ল্যান্ট জোন' : 'Plant Zone',
-                  '${i.siteLabel(bangla: bangla)} · ${i.zone ?? (bangla ? "অনির্দিষ্ট জোন" : "Unassigned Zone")}',
-                ),
-                const SizedBox(height: Space.sm),
-                _metaRow(
-                  context,
-                  Icons.schedule_outlined,
-                  bangla ? 'সংঘটিত সময়' : 'Occurred At',
-                  DateFmt.dateTime(i.occurredAt, lang),
-                ),
-                const SizedBox(height: Space.sm),
-                _metaRow(
-                  context,
-                  Icons.person_outline,
-                  bangla ? 'প্রতিবেদনকারী' : 'Reported By',
-                  who,
-                ),
-                if (i.investigator != null) ...[
-                  const SizedBox(height: Space.sm),
-                  _metaRow(
-                    context,
-                    Icons.policy_outlined,
-                    bangla ? 'তদন্তকারী কর্মকর্তা' : 'Lead Investigator',
-                    i.investigator!.display(bangla: bangla),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: Space.md),
-
-        // Immediate Containment Log
-        Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(Space.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return RefreshIndicator(
+      onRefresh: () async {
+        _refresh();
+        await ref.read(incidentDetailProvider(widget.id).future);
+      },
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: Space.xxl),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(Space.lg),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(Space.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.flash_on,
-                      color: BrandColors.warning,
-                      size: 20,
+                    StatusPill(
+                      label: incidentStageLabel(l10n, i.stage),
+                      tone: incidentStageTone(i.stage),
                     ),
-                    const SizedBox(width: Space.xs),
+                    const SizedBox(height: Space.md),
+                    Text(i.title, style: theme.textTheme.titleLarge),
+                    const SizedBox(height: Space.xs),
+                    Text(place),
                     Text(
-                      bangla
-                          ? 'তাৎক্ষণিক ঘটনাস্থল নিয়ন্ত্রণ'
-                          : 'Immediate Containment Log',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      l10n.inWhenBy(DateFmt.dateTime(i.occurredAt, lang), who),
+                    ),
+                    if (i.investigator != null)
+                      Text(i.investigator!.display(bangla: bangla)),
+                    const SizedBox(height: Space.md),
+                    Text(i.description, style: theme.textTheme.bodyMedium),
+                    const SizedBox(height: Space.md),
+                    Text(
+                      l10n.inRiskLine(
+                        i.riskScore,
+                        incidentRiskLabel(l10n, i.riskCategory),
                       ),
+                    ),
+                    const Divider(height: Space.xl),
+                    Text(
+                      incidentNextLine(l10n, i, bangla: bangla),
+                      style: theme.textTheme.titleSmall,
                     ),
                   ],
                 ),
-                const SizedBox(height: Space.xs),
-                Text(
-                  bangla
-                      ? 'ঘটনাস্থলে তাৎক্ষণিকভাবে পাম্প ফিড আইসোলেশন ভালভ BV-402 বন্ধ করা হয়েছে, ফেনা ব্যারিকেড স্থাপন এবং ট্রাফিক ব্যারিকেড নিশ্চিত করা হয়েছে।'
-                      : 'Emergency isolation valve BV-402 actuated, aqueous film-forming foam (AFFF) deployed on drip pan, perimeter tape cordoned off.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: Space.md),
-
-        // Statutory Alert Banner if applicable
-        if (i.statutoryReportable)
-          Container(
-            padding: const EdgeInsets.all(Space.md),
-            decoration: BoxDecoration(
-              color: BrandColors.danger.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: BrandColors.danger.withValues(alpha: 0.3),
               ),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.gavel, color: BrandColors.danger),
-                const SizedBox(width: Space.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bangla
-                            ? 'সংবিধিবদ্ধ নোটিশ বাধ্যতামূলক'
-                            : 'Statutory Regulatory Reporting Required',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: BrandColors.danger,
-                        ),
-                      ),
-                      Text(
-                        i.statutoryReceiptNo == null
-                            ? (bangla
-                                  ? 'কলকারখানা ও প্রতিষ্ঠান পরিদর্শন অধিদপ্তর (DIFE) / বিস্ফোরক দপ্তরে ২৪ ঘণ্টার মধ্যে নোটিশ পাঠানো আবশ্যক।'
-                                  : 'Notice required under Factory Rules / Explosives Dept within statutory deadline.')
-                            : '${bangla ? "প্রাপ্তি নম্বর" : "Receipt"}: ${i.statutoryReceiptNo}',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ),
-        const SizedBox(height: Space.lg),
-
-        // Action Buttons Bar
-        Wrap(
-          spacing: Space.sm,
-          runSpacing: Space.sm,
-          children: [
-            if (m.canTriage)
-              PrimaryButton(
-                expand: false,
-                label: l10n.inActTriage,
-                onPressed: _busy ? null : () => unawaited(_triage(i)),
-              ),
-            if (m.canInvestigate)
-              PrimaryButton(
-                expand: false,
-                label: l10n.inActInvest,
-                onPressed: _busy
-                    ? null
-                    : () => unawaited(
-                        _run(
-                          () => _repo.act(i.id, 'investigate'),
-                          l10n.inDoneInvest,
-                        ),
-                      ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _metaRow(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
-    final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: Space.xs),
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+          ExpansionTile(
+            title: Text(l10n.nsDetails),
+            childrenPadding: const EdgeInsets.all(Space.lg),
+            children: [
+              Text('${l10n.inDetNo}: ${i.incidentNo}'),
+              if (i.statutoryReceiptNo != null)
+                Text('${l10n.inFieldReceipt}: ${i.statutoryReceiptNo}'),
+            ],
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

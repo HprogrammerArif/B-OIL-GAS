@@ -8652,6 +8652,126 @@ abstract class AppL10n {
   /// **'All'**
   String get inTabAll;
 
+  /// No description provided for @inTabOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get inTabOverview;
+
+  /// No description provided for @inTabRca.
+  ///
+  /// In en, this message translates to:
+  /// **'Cause'**
+  String get inTabRca;
+
+  /// No description provided for @inTabFixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixes'**
+  String get inTabFixes;
+
+  /// No description provided for @inTabGov.
+  ///
+  /// In en, this message translates to:
+  /// **'Government'**
+  String get inTabGov;
+
+  /// No description provided for @inFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get inFilter;
+
+  /// No description provided for @inFilterZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant area'**
+  String get inFilterZones;
+
+  /// No description provided for @inFilterAllZones.
+  ///
+  /// In en, this message translates to:
+  /// **'All areas'**
+  String get inFilterAllZones;
+
+  /// No description provided for @inZone1.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 1: Crude distillation'**
+  String get inZone1;
+
+  /// No description provided for @inZone2.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 2: Vacuum distillation'**
+  String get inZone2;
+
+  /// No description provided for @inZone3.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 3: Bitumen blowing'**
+  String get inZone3;
+
+  /// No description provided for @inZone4.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 4: Tank farm'**
+  String get inZone4;
+
+  /// No description provided for @inZone5.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 5: River jetty'**
+  String get inZone5;
+
+  /// No description provided for @inZone6.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 6: Boiler house'**
+  String get inZone6;
+
+  /// No description provided for @inZone7.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 7: QC lab'**
+  String get inZone7;
+
+  /// No description provided for @inZone8.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 8: Drum yard'**
+  String get inZone8;
+
+  /// No description provided for @inZone9.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 9: Substation 3'**
+  String get inZone9;
+
+  /// No description provided for @inZone10.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone 10: Baridhara HQ'**
+  String get inZone10;
+
+  /// No description provided for @inZoneUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Area not set'**
+  String get inZoneUnassigned;
+
+  /// No description provided for @inDetNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Report number'**
+  String get inDetNo;
+
+  /// No description provided for @inWhenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{when} · {name}'**
+  String inWhenBy(String when, String name);
+
   /// No description provided for @inEmpty.
   ///
   /// In en, this message translates to:
@@ -11729,6 +11849,18 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Scan a tag'**
   String get asScanTag;
+
+  /// No description provided for @asScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag, name or serial'**
+  String get asScanHint;
+
+  /// No description provided for @asScanSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find'**
+  String get asScanSearch;
 
   /// No description provided for @emErrNid.
   ///

@@ -4842,6 +4842,68 @@ class AppL10nEn extends AppL10n {
   String get inTabAll => 'All';
 
   @override
+  String get inTabOverview => 'Overview';
+
+  @override
+  String get inTabRca => 'Cause';
+
+  @override
+  String get inTabFixes => 'Fixes';
+
+  @override
+  String get inTabGov => 'Government';
+
+  @override
+  String get inFilter => 'Filters';
+
+  @override
+  String get inFilterZones => 'Plant area';
+
+  @override
+  String get inFilterAllZones => 'All areas';
+
+  @override
+  String get inZone1 => 'Zone 1: Crude distillation';
+
+  @override
+  String get inZone2 => 'Zone 2: Vacuum distillation';
+
+  @override
+  String get inZone3 => 'Zone 3: Bitumen blowing';
+
+  @override
+  String get inZone4 => 'Zone 4: Tank farm';
+
+  @override
+  String get inZone5 => 'Zone 5: River jetty';
+
+  @override
+  String get inZone6 => 'Zone 6: Boiler house';
+
+  @override
+  String get inZone7 => 'Zone 7: QC lab';
+
+  @override
+  String get inZone8 => 'Zone 8: Drum yard';
+
+  @override
+  String get inZone9 => 'Zone 9: Substation 3';
+
+  @override
+  String get inZone10 => 'Zone 10: Baridhara HQ';
+
+  @override
+  String get inZoneUnassigned => 'Area not set';
+
+  @override
+  String get inDetNo => 'Report number';
+
+  @override
+  String inWhenBy(String when, String name) {
+    return '$when · $name';
+  }
+
+  @override
   String get inEmpty => 'No safety reports here.';
 
   @override
@@ -6564,6 +6626,12 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get asScanTag => 'Scan a tag';
+
+  @override
+  String get asScanHint => 'Tag, name or serial';
+
+  @override
+  String get asScanSearch => 'Find';
 
   @override
   String get emErrNid => 'NID must be 10, 13 or 17 digits.';

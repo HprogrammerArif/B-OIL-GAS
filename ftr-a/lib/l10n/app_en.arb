@@ -2616,6 +2616,32 @@
   "inTabStatutory": "Government report",
   "inTabCapa": "My fixes",
   "inTabAll": "All",
+  "inTabOverview": "Overview",
+  "inTabRca": "Cause",
+  "inTabFixes": "Fixes",
+  "inTabGov": "Government",
+  "inFilter": "Filters",
+  "inFilterZones": "Plant area",
+  "inFilterAllZones": "All areas",
+  "inZone1": "Zone 1: Crude distillation",
+  "inZone2": "Zone 2: Vacuum distillation",
+  "inZone3": "Zone 3: Bitumen blowing",
+  "inZone4": "Zone 4: Tank farm",
+  "inZone5": "Zone 5: River jetty",
+  "inZone6": "Zone 6: Boiler house",
+  "inZone7": "Zone 7: QC lab",
+  "inZone8": "Zone 8: Drum yard",
+  "inZone9": "Zone 9: Substation 3",
+  "inZone10": "Zone 10: Baridhara HQ",
+  "inZoneUnassigned": "Area not set",
+  "inDetNo": "Report number",
+  "inWhenBy": "{when} · {name}",
+  "@inWhenBy": {
+    "placeholders": {
+      "when": { "type": "String" },
+      "name": { "type": "String" }
+    }
+  },
   "inEmpty": "No safety reports here.",
   "inEmptyFiltered": "Nothing matches that search.",
   "inVerdictNone": "Nothing waiting on you.",
@@ -3469,6 +3495,8 @@
   "inGpsOn": "Location attached",
   "inCloseBlocked": "Every fix must be confirmed before this file can close.",
   "asScanTag": "Scan a tag",
+  "asScanHint": "Tag, name or serial",
+  "asScanSearch": "Find",
   "emFieldNid": "National ID (10, 13 or 17 digits)",
   "emErrNid": "NID must be 10, 13 or 17 digits."
 }

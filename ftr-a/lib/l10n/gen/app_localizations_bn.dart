@@ -4825,6 +4825,68 @@ class AppL10nBn extends AppL10n {
   String get inTabAll => 'সব';
 
   @override
+  String get inTabOverview => 'সারসংক্ষেপ';
+
+  @override
+  String get inTabRca => 'কারণ';
+
+  @override
+  String get inTabFixes => 'সংশোধন';
+
+  @override
+  String get inTabGov => 'সরকারি';
+
+  @override
+  String get inFilter => 'ফিল্টার';
+
+  @override
+  String get inFilterZones => 'প্ল্যান্ট এলাকা';
+
+  @override
+  String get inFilterAllZones => 'সকল এলাকা';
+
+  @override
+  String get inZone1 => 'জোন ১: ক্রুড ডিস্টিলেশন';
+
+  @override
+  String get inZone2 => 'জোন ২: ভ্যাকিউম ইউনিট';
+
+  @override
+  String get inZone3 => 'জোন ৩: বিটুমিন ব্লোয়িং';
+
+  @override
+  String get inZone4 => 'জোন ৪: ট্যাংক ফার্ম';
+
+  @override
+  String get inZone5 => 'জোন ৫: রিভার জেটি';
+
+  @override
+  String get inZone6 => 'জোন ৬: বয়লার হাউস';
+
+  @override
+  String get inZone7 => 'জোন ৭: কিউসি ল্যাব';
+
+  @override
+  String get inZone8 => 'জোন ৮: ড্রাম ইয়ার্ড';
+
+  @override
+  String get inZone9 => 'জোন ৯: সাবস্টেশন ৩';
+
+  @override
+  String get inZone10 => 'জোন ১০: বারিধারা সদর';
+
+  @override
+  String get inZoneUnassigned => 'এলাকা নির্ধারিত নয়';
+
+  @override
+  String get inDetNo => 'রিপোর্ট নম্বর';
+
+  @override
+  String inWhenBy(String when, String name) {
+    return '$when · $name';
+  }
+
+  @override
   String get inEmpty => 'এখানে কোনো নিরাপত্তা রিপোর্ট নেই।';
 
   @override
@@ -6537,6 +6599,12 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get asScanTag => 'ট্যাগ স্ক্যান';
+
+  @override
+  String get asScanHint => 'ট্যাগ, নাম বা সিরিয়াল';
+
+  @override
+  String get asScanSearch => 'খুঁজুন';
 
   @override
   String get emErrNid => 'এনআইডি ১০, ১৩ বা ১৭ অঙ্কের হতে হবে।';

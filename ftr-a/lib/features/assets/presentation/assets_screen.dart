@@ -1529,35 +1529,75 @@ class _AssetsScreenState extends ConsumerState<AssetsScreen>
   }
 
   Future<void> _showScanTagSheet() async {
-    final l10n = context.l10n;
-    final tagCtrl = TextEditingController();
     final tag = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(Space.lg),
+      builder: (ctx) => const _ScanTagSheet(),
+    );
+    if (tag != null && tag.isNotEmpty && mounted) {
+      setState(() => _query = tag);
+    }
+  }
+}
+
+class _ScanTagSheet extends StatefulWidget {
+  const _ScanTagSheet();
+
+  @override
+  State<_ScanTagSheet> createState() => _ScanTagSheetState();
+}
+
+class _ScanTagSheetState extends State<_ScanTagSheet> {
+  late final TextEditingController _tag;
+
+  @override
+  void initState() {
+    super.initState();
+    _tag = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _tag.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          Space.lg,
+          0,
+          Space.lg,
+          Space.lg + MediaQuery.viewInsetsOf(context).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(l10n.asScanTag, style: Theme.of(ctx).textTheme.titleMedium),
+            Text(
+              l10n.asScanTag,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: Space.md),
             TextField(
-              controller: tagCtrl,
-              decoration: InputDecoration(hintText: l10n.asSearchHint),
+              controller: _tag,
+              decoration: InputDecoration(hintText: l10n.asScanHint),
               autofocus: true,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (v) => Navigator.pop(context, v.trim()),
             ),
             const SizedBox(height: Space.md),
             PrimaryButton(
-              label: context.isBangla ? 'খুঁজুন' : 'Search Tag',
-              onPressed: () => Navigator.pop(ctx, tagCtrl.text.trim()),
+              label: l10n.asScanSearch,
+              onPressed: () => Navigator.pop(context, _tag.text.trim()),
             ),
           ],
         ),
       ),
     );
-    tagCtrl.dispose();
-    if (tag != null && tag.isNotEmpty && mounted) {
-      setState(() => _query = tag);
-    }
   }
 }
