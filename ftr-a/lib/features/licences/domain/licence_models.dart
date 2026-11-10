@@ -191,6 +191,7 @@ class Licence {
     this.expiresAt,
     this.typeName,
     this.typeNameBn,
+    this.validityMonths = 12,
     this.renewal,
     this.letters = const [],
     this.letterCount = 0,
@@ -228,6 +229,7 @@ class Licence {
       expiresAt: _t(j['expiresAt']),
       typeName: typ?['name'] as String?,
       typeNameBn: typ?['nameBn'] as String?,
+      validityMonths: (typ?['validityMonths'] as num?)?.toInt() ?? 12,
       renewal: j['renewal'] is Map
           ? LicenceRenewal.fromJson(_map(j['renewal']))
           : null,
@@ -258,6 +260,7 @@ class Licence {
   final DateTime? expiresAt;
   final String? typeName;
   final String? typeNameBn;
+  final int validityMonths;
   final LicenceRenewal? renewal;
   final List<LicenceLetter> letters;
   final int letterCount;

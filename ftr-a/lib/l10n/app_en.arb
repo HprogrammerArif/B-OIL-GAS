@@ -2974,6 +2974,33 @@
   "moduleCompliance": "Licences",
   "cpIntro": "Permits the plant needs to stay open. Those that run out first sit at the top.",
   "cpSearchHint": "Search by name or number",
+  "cpFilter": "Filters",
+  "cpFilterAgencies": "Agency",
+  "cpFilterStages": "Renewal stage",
+  "cpFilterAllStages": "All stages",
+  "cpChannelEmail": "Email",
+  "cpChannelCourier": "Courier",
+  "cpChannelHand": "By hand",
+  "cpTrackParcel": "Track parcel",
+  "cpReadyPct": "{pct}% ready",
+  "@cpReadyPct": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "cpErrInspector": "Name the inspector.",
+  "cpErrSentence": "Write at least one short sentence.",
+  "cpWhyMatters": "Why this matters",
+  "cpExposureDay": "{amount} a day",
+  "@cpExposureDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "cpNew": "Add a licence",
   "cpNewIntro": "Register a permit the company already holds.",
   "cpTabMine": "Mine",

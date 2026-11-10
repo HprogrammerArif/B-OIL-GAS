@@ -5489,6 +5489,49 @@ class AppL10nBn extends AppL10n {
   String get cpSearchHint => 'নাম বা নম্বর দিয়ে খুঁজুন';
 
   @override
+  String get cpFilter => 'ফিল্টার';
+
+  @override
+  String get cpFilterAgencies => 'সংস্থা';
+
+  @override
+  String get cpFilterStages => 'নবায়নের ধাপ';
+
+  @override
+  String get cpFilterAllStages => 'সকল ধাপ';
+
+  @override
+  String get cpChannelEmail => 'ইমেইল';
+
+  @override
+  String get cpChannelCourier => 'কুরিয়ার';
+
+  @override
+  String get cpChannelHand => 'হাতে';
+
+  @override
+  String get cpTrackParcel => 'পার্সেল দেখুন';
+
+  @override
+  String cpReadyPct(String pct) {
+    return '$pct% তৈরি';
+  }
+
+  @override
+  String get cpErrInspector => 'পরিদর্শকের নাম লিখুন।';
+
+  @override
+  String get cpErrSentence => 'অন্তত একটি ছোট বাক্য লিখুন।';
+
+  @override
+  String get cpWhyMatters => 'কেন জরুরি';
+
+  @override
+  String cpExposureDay(String amount) {
+    return '$amount প্রতিদিন';
+  }
+
+  @override
   String get cpNew => 'লাইসেন্স যোগ করুন';
 
   @override

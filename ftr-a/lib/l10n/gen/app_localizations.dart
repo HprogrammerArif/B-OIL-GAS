@@ -9882,6 +9882,84 @@ abstract class AppL10n {
   /// **'Search by name or number'**
   String get cpSearchHint;
 
+  /// No description provided for @cpFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get cpFilter;
+
+  /// No description provided for @cpFilterAgencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Agency'**
+  String get cpFilterAgencies;
+
+  /// No description provided for @cpFilterStages.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal stage'**
+  String get cpFilterStages;
+
+  /// No description provided for @cpFilterAllStages.
+  ///
+  /// In en, this message translates to:
+  /// **'All stages'**
+  String get cpFilterAllStages;
+
+  /// No description provided for @cpChannelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get cpChannelEmail;
+
+  /// No description provided for @cpChannelCourier.
+  ///
+  /// In en, this message translates to:
+  /// **'Courier'**
+  String get cpChannelCourier;
+
+  /// No description provided for @cpChannelHand.
+  ///
+  /// In en, this message translates to:
+  /// **'By hand'**
+  String get cpChannelHand;
+
+  /// No description provided for @cpTrackParcel.
+  ///
+  /// In en, this message translates to:
+  /// **'Track parcel'**
+  String get cpTrackParcel;
+
+  /// No description provided for @cpReadyPct.
+  ///
+  /// In en, this message translates to:
+  /// **'{pct}% ready'**
+  String cpReadyPct(String pct);
+
+  /// No description provided for @cpErrInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the inspector.'**
+  String get cpErrInspector;
+
+  /// No description provided for @cpErrSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Write at least one short sentence.'**
+  String get cpErrSentence;
+
+  /// No description provided for @cpWhyMatters.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this matters'**
+  String get cpWhyMatters;
+
+  /// No description provided for @cpExposureDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a day'**
+  String cpExposureDay(String amount);
+
   /// No description provided for @cpNew.
   ///
   /// In en, this message translates to:

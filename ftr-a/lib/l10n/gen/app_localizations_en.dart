@@ -5510,6 +5510,49 @@ class AppL10nEn extends AppL10n {
   String get cpSearchHint => 'Search by name or number';
 
   @override
+  String get cpFilter => 'Filters';
+
+  @override
+  String get cpFilterAgencies => 'Agency';
+
+  @override
+  String get cpFilterStages => 'Renewal stage';
+
+  @override
+  String get cpFilterAllStages => 'All stages';
+
+  @override
+  String get cpChannelEmail => 'Email';
+
+  @override
+  String get cpChannelCourier => 'Courier';
+
+  @override
+  String get cpChannelHand => 'By hand';
+
+  @override
+  String get cpTrackParcel => 'Track parcel';
+
+  @override
+  String cpReadyPct(String pct) {
+    return '$pct% ready';
+  }
+
+  @override
+  String get cpErrInspector => 'Name the inspector.';
+
+  @override
+  String get cpErrSentence => 'Write at least one short sentence.';
+
+  @override
+  String get cpWhyMatters => 'Why this matters';
+
+  @override
+  String cpExposureDay(String amount) {
+    return '$amount a day';
+  }
+
+  @override
   String get cpNew => 'Add a licence';
 
   @override

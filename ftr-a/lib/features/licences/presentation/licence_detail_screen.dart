@@ -5,11 +5,11 @@ import 'package:bogcl_oneops/app/routes.dart';
 import 'package:bogcl_oneops/core/network/api_error.dart';
 import 'package:bogcl_oneops/core/theme/tokens.dart';
 import 'package:bogcl_oneops/core/utils/dates.dart';
-import 'package:bogcl_oneops/core/utils/money.dart';
 import 'package:bogcl_oneops/features/licences/data/licence_repository.dart';
 import 'package:bogcl_oneops/features/licences/domain/licence_models.dart';
 import 'package:bogcl_oneops/features/licences/presentation/licence_providers.dart';
 import 'package:bogcl_oneops/features/licences/presentation/licence_ui.dart';
+import 'package:bogcl_oneops/l10n/gen/app_localizations.dart';
 import 'package:bogcl_oneops/shared/widgets/app_text_field.dart';
 import 'package:bogcl_oneops/shared/widgets/buttons.dart';
 import 'package:bogcl_oneops/shared/widgets/state_views.dart';
@@ -69,154 +69,240 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
     }
   }
 
-  Future<void> _completeAllChecklistItems(Licence l, LicenceRenewal r) async {
-    final pending = r.checklist.where((c) => c.status != 'PASSED').toList();
-    if (pending.isEmpty) {
-      AppToast.show(
-        context,
-        context.isBangla
-            ? 'সকল চেকলিস্ট আগেই সম্পন্ন হয়েছে'
-            : 'All checklist items are already passed',
-      );
-      return;
-    }
+  EdgeInsets _sheetPad(BuildContext ctx) => EdgeInsets.fromLTRB(
+    Space.lg,
+    0,
+    Space.lg,
+    MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
+  );
 
-    setState(() => _busy = true);
-    try {
-      for (final item in pending) {
-        await _repo.tickItem(l.id, item.id, {'status': 'PASSED'});
-      }
-      _refresh();
-      if (!mounted) return;
-      AppToast.show(
-        context,
-        context.isBangla
-            ? 'সকল অডিট চেকলিস্ট সম্পন্ন হিসেবে চিহ্নিত করা হয়েছে'
-            : 'All ${pending.length} checklist items certified PASSED',
-        tone: StatusTone.success,
-      );
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      AppToast.show(context, _err(e), tone: StatusTone.danger);
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+  Future<bool?> _sheet({required Widget Function(BuildContext) builder}) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) => Padding(padding: _sheetPad(ctx), child: builder(ctx)),
+    );
   }
 
-  Future<void> _openInspectorModal(Licence l) async {
-    final bangla = context.isBangla;
-    final nameCtrl = TextEditingController(
-      text: 'Engr. A. K. Rahman (Chief Inspector)',
+  Future<void> _openBookInspection(Licence l) async {
+    final l10n = context.l10n;
+    final nameCtrl = TextEditingController();
+    final confirmed = await _sheet(
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.cpActInspect, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          AppTextField(label: l10n.cpFieldInspector, controller: nameCtrl),
+          const SizedBox(height: Space.md),
+          PrimaryButton(
+            label: l10n.cpActInspect,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
     );
-    final findingsCtrl = TextEditingController(
-      text: 'All storage tanks, fire hydrants and nitrogen blanketing systems fully compliant.',
+    final name = nameCtrl.text.trim();
+    nameCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+    if (name.length < 3) {
+      AppToast.show(context, l10n.cpErrInspector, tone: StatusTone.warning);
+      return;
+    }
+    await _run(
+      () => _repo.act(l.id, 'advance', {'inspectorName': name}),
+      l10n.cpDoneAdvance,
     );
-    var outcome = 'SATISFACTORY';
+  }
 
+  Future<void> _openFindings(Licence l) async {
+    final l10n = context.l10n;
+    final findingsCtrl = TextEditingController();
+    final confirmed = await _sheet(
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.cpActFindings, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          AppTextField(
+            label: l10n.cpFieldFindings,
+            controller: findingsCtrl,
+            maxLines: 4,
+          ),
+          const SizedBox(height: Space.md),
+          PrimaryButton(
+            label: l10n.cpActFindings,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+    final findings = findingsCtrl.text.trim();
+    findingsCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+    if (findings.length < 10) {
+      AppToast.show(context, l10n.cpErrSentence, tone: StatusTone.warning);
+      return;
+    }
+    await _run(
+      () => _repo.act(l.id, 'advance', {'auditFindings': findings}),
+      l10n.cpDoneAdvance,
+    );
+  }
+
+  Future<void> _openCertificate(Licence l) async {
+    final l10n = context.l10n;
+    final now = DateTime.now();
+    final neu = DateTime(now.year, now.month + l.validityMonths, now.day);
+    final certCtrl = TextEditingController(text: l.licenceNo);
+    final expiryCtrl = TextEditingController(
+      text:
+          '${neu.year.toString().padLeft(4, '0')}-'
+          '${neu.month.toString().padLeft(2, '0')}-'
+          '${neu.day.toString().padLeft(2, '0')}',
+    );
+    final chalanCtrl = TextEditingController();
+    final confirmed = await _sheet(
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.cpActComplete, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          AppTextField(label: l10n.cpFieldCert, controller: certCtrl),
+          const SizedBox(height: Space.sm),
+          AppTextField(label: l10n.cpFieldNewExpiry, controller: expiryCtrl),
+          if (l.feeAmount > 0) ...[
+            const SizedBox(height: Space.sm),
+            AppTextField(label: l10n.cpFieldChalan, controller: chalanCtrl),
+          ],
+          const SizedBox(height: Space.md),
+          PrimaryButton(
+            label: l10n.cpActComplete,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+    final cert = certCtrl.text.trim();
+    final exp = expiryCtrl.text.trim();
+    final chalan = chalanCtrl.text.trim();
+    certCtrl.dispose();
+    expiryCtrl.dispose();
+    chalanCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+    if (cert.isEmpty || exp.isEmpty) {
+      AppToast.show(context, l10n.cpErrNo, tone: StatusTone.warning);
+      return;
+    }
+    await _run(
+      () => _repo.act(l.id, 'advance', {
+        'certificateNo': cert,
+        'newExpiresAt': exp.contains('T') ? exp : '${exp}T00:00:00.000Z',
+        if (l.feeAmount > 0) 'chalanNo': chalan,
+      }),
+      l10n.cpDoneAdvance,
+    );
+  }
+
+  Future<void> _openRevert(Licence l) async {
+    final l10n = context.l10n;
+    final reasonCtrl = TextEditingController();
+    final confirmed = await _sheet(
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.cpActBack, style: Theme.of(ctx).textTheme.titleLarge),
+          const SizedBox(height: Space.md),
+          AppTextField(
+            label: l10n.cpFieldReason,
+            controller: reasonCtrl,
+            maxLines: 3,
+          ),
+          const SizedBox(height: Space.md),
+          PrimaryButton.secondary(
+            label: l10n.cpActBack,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+    final reason = reasonCtrl.text.trim();
+    reasonCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+    if (reason.length < 10) {
+      AppToast.show(context, l10n.cpErrSentence, tone: StatusTone.warning);
+      return;
+    }
+    await _run(
+      () => _repo.act(l.id, 'back', {'reason': reason}),
+      l10n.cpDoneBack,
+    );
+  }
+
+  Future<void> _openLetter(Licence l) async {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final heading = l.heading(bangla: bangla);
+    final subjectCtrl = TextEditingController(
+      text: bangla
+          ? '$heading নবায়ন দ্রুত ইস্যুর অনুরোধ।'
+          : 'Request to expedite renewal of $heading.',
+    );
+    final bodyCtrl = TextEditingController(
+      text: bangla
+          ? '${l.licenceNo} নবায়নের প্রস্তুতি শেষ। সনদ ইস্যুর অনুরোধ।'
+          : 'Renewal preparations for ${l.licenceNo} are complete. Please issue the certificate.',
+    );
+    var channel = 'EMAIL';
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
+        builder: (ctx, setModal) => Padding(
+          padding: _sheetPad(ctx),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                bangla
-                    ? 'মাঠ পরিদর্শন ফলাফল নথিভুক্তকরণ'
-                    : 'Log Field Inspection Findings',
-                style: Theme.of(ctx).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: Space.xs),
-              Text(
-                bangla
-                    ? 'পরিদর্শক কর্মকর্তার পর্যবেক্ষণ এবং নবায়ন সুপারিশ লিখুন।'
-                    : 'Record regulatory inspector findings and safety audit clearance.',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
+              Text(l10n.cpActLetter, style: Theme.of(ctx).textTheme.titleLarge),
               const SizedBox(height: Space.md),
-              AppTextField(
-                label: bangla
-                    ? 'পরিদর্শকের নাম ও পদবি'
-                    : 'Inspector Name & Designation',
-                controller: nameCtrl,
-              ),
-              const SizedBox(height: Space.xs),
               Wrap(
                 spacing: Space.xs,
                 children: [
-                  ActionChip(
-                    label: const Text(
-                      'Engr. A. K. Rahman (Chief Inspector)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () => setModalState(
-                      () => nameCtrl.text =
-                          'Engr. A. K. Rahman (Chief Inspector)',
-                    ),
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelEmail),
+                    selected: channel == 'EMAIL',
+                    onSelected: (_) => setModal(() => channel = 'EMAIL'),
                   ),
-                  ActionChip(
-                    label: const Text(
-                      'Md. Tariqul Islam (Deputy Director)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () => setModalState(
-                      () =>
-                          nameCtrl.text = 'Md. Tariqul Islam (Deputy Director)',
-                    ),
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelCourier),
+                    selected: channel == 'COURIER',
+                    onSelected: (_) => setModal(() => channel = 'COURIER'),
+                  ),
+                  ChoiceChip(
+                    label: Text(l10n.cpChannelHand),
+                    selected: channel == 'HAND',
+                    onSelected: (_) => setModal(() => channel = 'HAND'),
                   ),
                 ],
               ),
               const SizedBox(height: Space.sm),
-              Text(
-                bangla ? 'পরিদর্শন ফলাফল' : 'Inspection Outcome',
-                style: Theme.of(ctx).textTheme.labelMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(
-                      bangla
-                          ? 'সন্তোষজনক (অনুমোদনযোগ্য)'
-                          : 'Satisfactory (Recommended)',
-                    ),
-                    selected: outcome == 'SATISFACTORY',
-                    onSelected: (_) =>
-                        setModalState(() => outcome = 'SATISFACTORY'),
-                  ),
-                  const SizedBox(width: Space.sm),
-                  ChoiceChip(
-                    label: Text(bangla ? 'শর্তসাপেক্ষ' : 'Conditional'),
-                    selected: outcome == 'CONDITIONAL',
-                    onSelected: (_) =>
-                        setModalState(() => outcome = 'CONDITIONAL'),
-                  ),
-                ],
-              ),
+              AppTextField(label: l10n.cpFieldSubject, controller: subjectCtrl),
               const SizedBox(height: Space.sm),
               AppTextField(
-                label: bangla
-                    ? 'পরিদর্শন পর্যবেক্ষণ ও মন্তব্য'
-                    : 'Audit Observations & Findings',
-                controller: findingsCtrl,
-                maxLines: 3,
+                label: l10n.cpFieldLetter,
+                controller: bodyCtrl,
+                maxLines: 4,
               ),
               const SizedBox(height: Space.md),
               PrimaryButton(
-                label: bangla
-                    ? 'সংরক্ষণ ও মন্ত্রণালয় যাচাইয়ে পাঠান'
-                    : 'Save & Move to Ministry Vetting',
+                label: l10n.cpActLetter,
                 onPressed: () => Navigator.pop(ctx, true),
               ),
             ],
@@ -224,466 +310,26 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
         ),
       ),
     );
-
-    if (confirmed == true && mounted) {
-      final name = nameCtrl.text.trim();
-      final findings = findingsCtrl.text.trim();
-      if (name.isEmpty || findings.length < 10) {
-        AppToast.show(
-          context,
-          bangla
-              ? 'পরিদর্শকের নাম এবং কমপক্ষে ১০ অক্ষরের ফলাফল লিখুন'
-              : 'Enter inspector name and at least 10 characters for findings',
-          tone: StatusTone.warning,
-        );
-        return;
-      }
-      await _run(
-        () => _repo.act(l.id, 'advance', {
-          'inspectorName': name,
-          'auditFindings': '[$outcome] $findings',
-        }),
-        bangla
-            ? 'পরিদর্শন সম্পন্ন এবং মন্ত্রণালয় যাচাইয়ে পাঠানো হয়েছে'
-            : 'Inspection logged and forwarded to Ministry',
-      );
-    }
+    final subject = subjectCtrl.text.trim();
+    final body = bodyCtrl.text.trim();
+    subjectCtrl.dispose();
+    bodyCtrl.dispose();
+    if (confirmed != true || !mounted) return;
+    await _run(
+      () => _repo.act(l.id, 'letters', {
+        'subject': subject,
+        'body': body,
+        'channel': channel,
+      }),
+      l10n.cpDoneLetter,
+    );
   }
 
-  Future<void> _openCertificateModal(Licence l) async {
-    final bangla = context.isBangla;
-    final year = DateTime.now().year;
-    final nextYear = year + 1;
-    final certCtrl = TextEditingController(
-      text:
-          '${l.bodyCode}/RNW/$year/${l.licenceNo.split('/').lastOrNull ?? '09'}',
-    );
-    final expiryCtrl = TextEditingController(
-      text: DateTime(nextYear, 12, 31).toIso8601String().substring(0, 10),
-    );
-    final chalanCtrl = TextEditingController(text: 'CHALAN-SONALI-$year-78941');
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                bangla
-                    ? 'নবায়ন সনদ ও লাইসেন্স ইস্যু নিশ্চিতকরণ'
-                    : 'Confirm Renewal Certificate Issued',
-                style: Theme.of(ctx).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: Space.xs),
-              Text(
-                bangla
-                    ? 'মন্ত্রণালয় বা নিয়ন্ত্রক সংস্থা কর্তৃক প্রদত্ত নবায়ন সনদ নম্বর ও মেয়াদ নথিভুক্ত করুন।'
-                    : 'Record official renewed licence reference and validity extension issued by the regulator.',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
-              const SizedBox(height: Space.md),
-              AppTextField(
-                label: bangla
-                    ? 'নতুন সনদ / লাইসেন্স নম্বর'
-                    : 'New Certificate / Licence No',
-                controller: certCtrl,
-              ),
-              const SizedBox(height: Space.sm),
-              AppTextField(
-                label: bangla
-                    ? 'নতুন মেয়াদোত্তীর্ণ তারিখ (YYYY-MM-DD)'
-                    : 'New Expiration Date (YYYY-MM-DD)',
-                controller: expiryCtrl,
-              ),
-              if (l.feeAmount > 0) ...[
-                const SizedBox(height: Space.sm),
-                AppTextField(
-                  label: bangla
-                      ? 'সরকারি ট্রেজারি চালান নম্বর'
-                      : 'Treasury Challan No',
-                  controller: chalanCtrl,
-                ),
-              ],
-              const SizedBox(height: Space.md),
-              PrimaryButton(
-                label: bangla
-                    ? 'সনদ অনুমোদন ও সক্রিয়করণ'
-                    : 'Issue Certificate & Activate',
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      final cert = certCtrl.text.trim();
-      final exp = expiryCtrl.text.trim();
-      final chalan = chalanCtrl.text.trim();
-      if (cert.isEmpty || exp.isEmpty) {
-        AppToast.show(
-          context,
-          bangla
-              ? 'সনদ নম্বর ও মেয়াদ পূরণ করুন'
-              : 'Enter certificate number and expiry date',
-          tone: StatusTone.warning,
-        );
-        return;
-      }
-      await _run(
-        () => _repo.act(l.id, 'advance', {
-          'certificateNo': cert,
-          'newExpiresAt': exp.contains('T') ? exp : '${exp}T00:00:00.000Z',
-          if (l.feeAmount > 0) 'chalanNo': chalan,
-        }),
-        bangla
-            ? 'লাইসেন্স সফলভাবে নবায়ন ও সক্রিয় করা হয়েছে!'
-            : 'Licence renewed and activated successfully!',
-      );
-    }
-  }
-
-  Future<void> _openRevertModal(Licence l) async {
-    final bangla = context.isBangla;
-    final reasonCtrl = TextEditingController();
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          Space.lg,
-          0,
-          Space.lg,
-          MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              bangla
-                  ? 'পূর্ববর্তী ধাপে ফেরত পাঠান'
-                  : 'Revert to Previous Stage',
-              style: Theme.of(ctx).textTheme.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: Space.xs),
-            Text(
-              bangla
-                  ? 'নিয়ন্ত্রক সংস্থা বা অডিট দল কর্তৃক কোনো সংশোধন চাওয়া হলে কারণ উল্লেখ করে পূর্ববর্তী ধাপে ফেরত দিন।'
-                  : 'Specify the reason for stepping back if regulator or audit team requires corrections.',
-              style: Theme.of(ctx).textTheme.bodySmall,
-            ),
-            const SizedBox(height: Space.md),
-            AppTextField(
-              label: bangla
-                  ? 'ফেরত পাঠানোর সুনির্দিষ্ট কারণ'
-                  : 'Reason for Reversion',
-              controller: reasonCtrl,
-              maxLines: 3,
-            ),
-            const SizedBox(height: Space.md),
-            PrimaryButton.secondary(
-              label: bangla ? 'পূর্ববর্তী ধাপে স্থানান্তর' : 'Revert Stage',
-              onPressed: () => Navigator.pop(ctx, true),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      final reason = reasonCtrl.text.trim();
-      if (reason.length < 5) {
-        AppToast.show(
-          context,
-          bangla
-              ? 'কমপক্ষে ৫ অক্ষরের কারণ লিখুন'
-              : 'Please provide a valid reason (min 5 chars)',
-          tone: StatusTone.warning,
-        );
-        return;
-      }
-      await _run(
-        () => _repo.act(l.id, 'back', {'reason': reason}),
-        bangla
-            ? 'ফাইল পূর্ববর্তী ধাপে ফেরত পাঠানো হয়েছে'
-            : 'File reverted to previous stage',
-      );
-    }
-  }
-
-  Future<void> _openDoLetterModal(Licence l) async {
-    final bangla = context.isBangla;
-    final year = DateTime.now().year;
-    final memoNo = 'BOGCL/CMD-DO/${l.bodyCode}-$year-0101';
-    final subject = bangla
-        ? '${l.heading(bangla: true)} নবায়ন দ্রুত ইস্যুর অনুরোধ — কেরানীগঞ্জ প্ল্যান্ট।'
-        : 'Request to expedite renewal of ${l.heading(bangla: false)} — Keraniganj Plant.';
-    final body = bangla
-        ? 'কেরানীগঞ্জ বিটুমিন প্ল্যান্টে ${l.licenceNo} এর সকল প্রাক-নবায়ন প্রস্তুতি এবং সরকারি ফি ${l.feeAmount > 0 ? licenceTaka(l.feeAmount, bangla: true) : ''} সম্পন্ন হয়েছে (${l.statutoryLaw(bangla: true)})। নবায়নে বিলম্ব ঘটলে রিফাইনারি উৎপাদন ও বিটুমিন সরবরাহ ব্যাহত হয়ে দৈনিক ${Money.fromPaisa((l.shutdownRiskPerDay * 100).round()).format(bengali: true)} ক্ষতির ঝুঁকি সৃষ্টি হবে। বিষয়টি জরুরি বিবেচনায় নবায়ন সনদ ইস্যু করার অনুরোধ করছি।'
-        : 'Statutory compliance audits for permit ${l.licenceNo} under ${l.statutoryLaw(bangla: false)} are complete. Ongoing plant operations and nationwide bitumen supplies require immediate renewal; any operational halt carries a plant shutdown exposure of ${Money.fromPaisa((l.shutdownRiskPerDay * 100).round()).format()}/day. We respectfully request expeditious issuance of the renewal certificate.';
-
-    final subjectCtrl = TextEditingController(text: subject);
-    final bodyCtrl = TextEditingController(text: body);
-    var channel = 'COURIER'; // COURIER, ENOTHI, LIAISON
-
-    final confirmed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.mark_email_read_outlined,
-                      color: Theme.of(ctx).colorScheme.primary,
-                    ),
-                    const SizedBox(width: Space.xs),
-                    Expanded(
-                      child: Text(
-                        bangla
-                            ? 'সরকারি ডিও লেটার প্রণয়ন ও প্রেরণ'
-                            : 'Official Chairman Demi-Official (DO) Letter',
-                        style: Theme.of(ctx).textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: Space.xs),
-                Text(
-                  bangla
-                      ? 'নিয়ন্ত্রক সংস্থার মহাপরিচালক বরাবর চেয়ারম্যান মহোদয়ের আনুষ্ঠানিক ডিও পত্র।'
-                      : 'Expedited regulatory clearance memorandum signed by Chairman & Managing Director.',
-                  style: Theme.of(ctx).textTheme.bodySmall,
-                ),
-                const SizedBox(height: Space.md),
-
-                // Formal Letterhead Box
-                Container(
-                  padding: const EdgeInsets.all(Space.md),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.amber.shade300),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          'BASHUNDHARA GROUP',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                            color: Colors.red.shade900,
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          bangla
-                              ? 'চেয়ারম্যান ও ব্যবস্থাপনা পরিচালকের দপ্তর'
-                              : 'Office of the Chairman & Managing Director',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Memo: $memoNo',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            DateFmt.date(DateTime.now(), bangla ? 'bn' : 'en'),
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: Space.md),
-
-                Text(
-                  bangla
-                      ? 'প্রেরণ মাধ্যম (Cross-Module Integration)'
-                      : 'Dispatch Channel & Cross-Module Integration',
-                  style: Theme.of(ctx).textTheme.labelMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: Space.xs,
-                  runSpacing: 4,
-                  children: [
-                    ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.local_shipping_outlined, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            bangla
-                                ? 'অফিসিয়াল কুরিয়ার (MOD-04 পার্সেল)'
-                                : 'Official Courier (Tracked Parcel)',
-                          ),
-                        ],
-                      ),
-                      selected: channel == 'COURIER',
-                      onSelected: (_) =>
-                          setModalState(() => channel = 'COURIER'),
-                    ),
-                    ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.account_balance_outlined, size: 14),
-                          const SizedBox(width: 4),
-                          Text(
-                            bangla
-                                ? 'সরকারি ই-নথি (Digital Govt)'
-                                : 'Govt e-Nothi Portal',
-                          ),
-                        ],
-                      ),
-                      selected: channel == 'ENOTHI',
-                      onSelected: (_) =>
-                          setModalState(() => channel = 'ENOTHI'),
-                    ),
-                    ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.person_pin_circle_outlined,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            bangla
-                                ? 'লিয়াজোঁ কর্মকর্তা (হাতে হাতে)'
-                                : 'Liaison Officer (Hand)',
-                          ),
-                        ],
-                      ),
-                      selected: channel == 'LIAISON',
-                      onSelected: (_) =>
-                          setModalState(() => channel = 'LIAISON'),
-                    ),
-                  ],
-                ),
-
-                if (channel == 'COURIER') ...[
-                  const SizedBox(height: Space.xs),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Colors.blue.shade800,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            bangla
-                                ? 'কুরিয়ার প্রেরণে ক্লিক করলে MOD-04 Parcels-এ একটি ট্র্যাকযোগ্য সিলগালা পার্সেল স্বয়ংক্রিয়ভাবে তৈরি হবে।'
-                                : 'Selecting Official Courier automatically creates a confidential tracked parcel in MOD-04 (Parcels).',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue.shade900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: Space.sm),
-                AppTextField(
-                  label: bangla ? 'চিঠির বিষয়' : 'Letter Subject',
-                  controller: subjectCtrl,
-                ),
-                const SizedBox(height: Space.sm),
-                AppTextField(
-                  label: bangla ? 'চিঠির মূল বক্তব্য' : 'Letter Body',
-                  controller: bodyCtrl,
-                  maxLines: 4,
-                ),
-                const SizedBox(height: Space.md),
-                PrimaryButton(
-                  label: bangla
-                      ? 'ডিও লেটার প্রেরণ ও নথিভুক্ত করুন'
-                      : 'Dispatch DO Letter Now',
-                  onPressed: () => Navigator.pop(ctx, true),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      await _run(
-        () => _repo.act(l.id, 'letters', {
-          'subject': subjectCtrl.text.trim(),
-          'body': bodyCtrl.text.trim(),
-          'channel': channel,
-        }),
-        bangla
-            ? 'ডিও লেটার সফলভাবে প্রেরিত হয়েছে${channel == 'COURIER' ? ' (MOD-04 পার্সেল তৈরি হয়েছে)' : ''}'
-            : 'DO letter dispatched successfully${channel == 'COURIER' ? ' (Tracked in MOD-04 Parcels)' : ''}',
-      );
-    }
-  }
+  String _channelLabel(AppL10n l10n, String channel) => switch (channel) {
+    'COURIER' || 'DISPATCH_RIDER' => l10n.cpChannelCourier,
+    'HAND' => l10n.cpChannelHand,
+    _ => l10n.cpChannelEmail,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -691,16 +337,13 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
     final bangla = context.isBangla;
     final async = ref.watch(licenceDetailProvider(widget.id));
     final scheme = Theme.of(context).colorScheme;
+    final heading = async.value?.heading(bangla: bangla);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.moduleCompliance),
+        title: Text(heading ?? l10n.moduleCompliance),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: bangla ? 'রিফ্রেশ' : 'Refresh',
-            onPressed: _refresh,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _refresh),
         ],
       ),
       body: async.when(
@@ -712,210 +355,145 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
           final m = l.me;
           final r = l.renewal;
           final who = l.owner?.display(bangla: bangla) ?? '';
+          final expired = l.urgency == 'EXPIRED';
           final riskTk = l.shutdownRiskPerDay > 0
               ? l.shutdownRiskPerDay
               : l.exposurePerDay;
+          final statute = l.statutoryLaw(bangla: bangla);
+          final penalty = l.statutoryPenalty(bangla: bangla);
+          final days = l.daysToExpiry < 0
+              ? l10n.cpUrgExpired
+              : l10n.cpDays(l.daysToExpiry);
 
           return ListView(
             padding: const EdgeInsets.all(Space.md),
             children: [
-              // Top Verdict Card
-              Container(
-                padding: const EdgeInsets.all(Space.md),
-                decoration: BoxDecoration(
-                  color: l.urgency == 'CRITICAL' || l.urgency == 'EXPIRED'
-                      ? scheme.errorContainer.withValues(alpha: 0.25)
-                      : scheme.primaryContainer.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: l.urgency == 'CRITICAL' || l.urgency == 'EXPIRED'
-                        ? scheme.error.withValues(alpha: 0.4)
-                        : scheme.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l.heading(bangla: bangla),
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                [
-                                  l.bodyCode,
-                                  l.licenceNo,
-                                  l.siteLabel(bangla: bangla),
-                                ].join(' · '),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      fontFamily: 'monospace',
-                                      color: scheme.onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        StatusPill(
-                          label: licenceUrgencyLabel(l10n, l.urgency),
-                          tone: licenceUrgencyTone(l.urgency),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 16),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            licenceNextLine(l10n, l, bangla: bangla),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: Space.md),
-
-              // CARD 1: Statutory Risk & Legal Penalty Card
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.red.shade300),
+                  side: BorderSide(
+                    color: expired
+                        ? scheme.error.withValues(alpha: 0.45)
+                        : scheme.outlineVariant,
+                  ),
                 ),
-                color: Colors.red.shade50.withValues(alpha: 0.3),
                 child: Padding(
                   padding: const EdgeInsets.all(Space.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.gavel,
-                            color: Colors.red.shade800,
-                            size: 20,
-                          ),
-                          const SizedBox(width: Space.xs),
-                          Text(
-                            bangla
-                                ? 'সংবিধিবদ্ধ আইন ও জরিমানা ধারা'
-                                : 'Statutory Law & Regulatory Exposure',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red.shade900,
+                          Expanded(
+                            child: Text(
+                              l.heading(bangla: bangla),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
+                          if (expired)
+                            StatusPill(
+                              label: licenceUrgencyLabel(l10n, l.urgency),
+                              tone: licenceUrgencyTone(l.urgency),
+                            ),
                         ],
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        l.statutoryLaw(bangla: bangla),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSurface,
-                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        l.statutoryPenalty(bangla: bangla),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.red.shade900,
-                        ),
+                        [
+                          l.bodyCode,
+                          l.licenceNo,
+                          l.siteLabel(bangla: bangla),
+                        ].join(' · '),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
+                      if (statute.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          statute,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ],
+                      if (l.expiresAt != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.cpExpires(
+                            DateFmt.date(l.expiresAt!, bangla ? 'bn' : 'en'),
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ],
+                      if (who.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.cpWho(who, days),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
+                        ),
+                      ],
                       const SizedBox(height: Space.sm),
-                      Container(
-                        padding: const EdgeInsets.all(Space.sm),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    bangla
-                                        ? 'দৈনিক রিফাইনারি উৎপাদন ক্ষতি'
-                                        : 'Daily Plant Shutdown Exposure',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                    riskTk > 0
-                                        ? (bangla
-                                              ? '${Money.fromPaisa((riskTk * 100).round()).format(bengali: true)} / দিন'
-                                              : '${Money.fromPaisa((riskTk * 100).round()).format()} / day')
-                                        : (bangla
-                                              ? 'ঝুঁকিমুক্ত'
-                                              : 'Low risk profile'),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.red.shade800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: Space.xs),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade100,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                bangla
-                                    ? 'গুরুত্বপূর্ণ সংবিধিবদ্ধ'
-                                    : 'MANDATORY STATUTORY',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red.shade900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      Text(
+                        licenceNextLine(l10n, l, bangla: bangla),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
                 ),
               ),
 
+              if (penalty.isNotEmpty) ...[
+                const SizedBox(height: Space.sm),
+                Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: Space.sm,
+                    ),
+                    childrenPadding: const EdgeInsets.fromLTRB(
+                      Space.md,
+                      0,
+                      Space.md,
+                      Space.md,
+                    ),
+                    title: Text(
+                      l10n.cpWhyMatters,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          penalty,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      if (riskTk > 0) ...[
+                        const SizedBox(height: Space.xs),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            l10n.cpExposureDay(
+                              licenceTaka(riskTk, bangla: bangla),
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: Space.md),
 
-              // CARD 2: 5-Stage Interactive Renewal Pipeline Stepper
               Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -928,400 +506,25 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            bangla
-                                ? '৫-ধাপ বিশিষ্ট নবায়ন প্রক্রিয়া'
-                                : '5-Stage Renewal Pipeline',
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: _PipelineVisualStepper(
+                              currentStage:
+                                  r?.stage ??
+                                  (l.status == 'ACTIVE' ? 'RENEWED' : null),
+                              l10n: l10n,
+                            ),
                           ),
-                          if (r != null)
+                          if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
+                            const SizedBox(width: Space.sm),
                             Text(
-                              '${r.readinessPct.round()}% Ready',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: scheme.primary,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: Space.sm),
-                      _PipelineVisualStepper(
-                        currentStage:
-                            r?.stage ??
-                            (l.status == 'ACTIVE' ? 'RENEWED' : null),
-                        bangla: bangla,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: Space.md),
-
-              // CARD 3: Active Stage Gate Action Panel
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: scheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(Space.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bangla
-                            ? 'সক্রিয় নবায়ন কার্যক্রম ও গেট'
-                            : 'Active Renewal Actions & Gates',
-                        style: Theme.of(context).textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: Space.sm),
-
-                      // If no renewal open:
-                      if (r == null) ...[
-                        Text(
-                          bangla
-                              ? 'লাইসেন্সের বর্তমান মেয়াদ সচল রয়েছে অথবা এখনও নবায়ন শুরু হয়নি।'
-                              : 'Current permit is active or renewal file has not yet been initiated.',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: Space.md),
-                        if (m.canRenew)
-                          PrimaryButton(
-                            label: bangla
-                                ? 'নবায়ন ফাইল সূচনা করুন (৯০ দিনের চক্র)'
-                                : 'Initiate Renewal File (90-Day Cycle)',
-                            onPressed: _busy
-                                ? null
-                                : () => unawaited(
-                                    _run(
-                                      () => _repo.act(l.id, 'renewals'),
-                                      bangla
-                                          ? 'নবায়ন ফাইল খোলা হয়েছে'
-                                          : 'Renewal file initiated',
-                                    ),
-                                  ),
-                          ),
-                      ],
-
-                      // Stage 1: Internal Review & Checklist Gate
-                      if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                bangla
-                                    ? 'গেট ১: প্রাক-আবেদন অডিট চেকলিস্ট'
-                                    : 'Gate 1: Pre-Submission Audit Checklist',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _busy
-                                  ? null
-                                  : () => _completeAllChecklistItems(l, r),
-                              icon: const Icon(Icons.done_all, size: 16),
-                              label: Text(
-                                bangla
-                                    ? 'সব টিক দিন (ডেমো)'
-                                    : 'Pass All (Demo)',
-                                style: const TextStyle(fontSize: 11),
-                              ),
+                              l10n.cpReadyPct('${r.readinessPct.round()}'),
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(color: scheme.primary),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: Space.xs),
-                        for (final c in r.checklist)
-                          CheckboxListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              c.display(bangla: bangla),
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                            value: c.status == 'PASSED',
-                            subtitle: c.note != null
-                                ? Text(
-                                    c.note!,
-                                    style: const TextStyle(fontSize: 11),
-                                  )
-                                : null,
-                            onChanged:
-                                !m.canChecklist || c.status == 'PASSED' || _busy
-                                ? null
-                                : (_) => unawaited(
-                                    _run(
-                                      () => _repo.tickItem(l.id, c.id, {
-                                        'status': 'PASSED',
-                                      }),
-                                      context.isBangla
-                                          ? 'চেকলিস্ট সম্পন্ন'
-                                          : 'Item passed',
-                                    ),
-                                  ),
-                          ),
-                        const SizedBox(height: Space.sm),
-                        PrimaryButton(
-                          label: bangla
-                              ? 'আবেদন দাখিল ও সরকারি চালান ধাপে যান'
-                              : 'File Application & Advance to Fee Gate',
-                          onPressed: _busy || !m.canAdvance
-                              ? null
-                              : () => unawaited(
-                                  _run(
-                                    () => _repo.act(l.id, 'advance'),
-                                    bangla
-                                        ? 'আবেদন দাখিল সম্পন্ন হয়েছে'
-                                        : 'Application filed successfully',
-                                  ),
-                                ),
-                        ),
-                      ],
-
-                      // Stage 2: Application Filed & Fee Challan Gate
-                      if (r != null && r.stage == 'APPLICATION_FILED') ...[
-                        Text(
-                          bangla
-                              ? 'গেট ২: সরকারি ট্রেজারি চালান ও অর্থ বিভাগ অনুমোদন'
-                              : 'Gate 2: Treasury Challan & Fee Clearance',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: Space.xs),
-                        Container(
-                          padding: const EdgeInsets.all(Space.sm),
-                          decoration: BoxDecoration(
-                            color: scheme.surfaceContainerHighest.withValues(
-                              alpha: 0.5,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    bangla
-                                        ? 'সরকারি লাইসেন্স ফি'
-                                        : 'Statutory Licence Fee',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  Text(
-                                    licenceTaka(r.feeAmount, bangla: bangla),
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Sonali Bank Treasury Code: 1-4241-0000-2031',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: Space.xs),
-                              Row(
-                                children: [
-                                  Text(
-                                    bangla
-                                        ? 'অর্থ বিভাগ স্ট্যাটাস: '
-                                        : 'Finance Status: ',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  StatusPill(
-                                    label: r.fundApproved
-                                        ? (bangla ? 'অনুমোদিত' : 'FEE APPROVED')
-                                        : (bangla
-                                              ? 'অনুমোদন পেন্ডিং'
-                                              : 'PENDING FINANCE'),
-                                    tone: r.fundApproved
-                                        ? StatusTone.success
-                                        : StatusTone.warning,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: Space.md),
-                        if (!r.fundApproved) ...[
-                          PrimaryButton(
-                            label: bangla
-                                ? 'সরকারি চালান ফি অনুমোদন করুন (HOD Finance)'
-                                : 'Approve Statutory Challan Fee',
-                            onPressed: _busy
-                                ? null
-                                : () => unawaited(
-                                    _run(
-                                      () => _repo.act(l.id, 'fund'),
-                                      bangla
-                                          ? 'চালান ফি অনুমোদিত হয়েছে'
-                                          : 'Treasury fee approved',
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(height: Space.xs),
                         ],
-                        PrimaryButton(
-                          label: bangla
-                              ? 'পরিদর্শন নির্ধারণ করুন (ধাপ ৩)'
-                              : 'Schedule & Log Field Inspection',
-                          onPressed: _busy || !r.fundApproved
-                              ? null
-                              : () => _openInspectorModal(l),
-                        ),
-                      ],
-
-                      // Stage 3: Field Inspection Gate
-                      if (r != null && r.stage == 'FIELD_INSPECTION') ...[
-                        Text(
-                          bangla
-                              ? 'গেট ৩: সরেজমিন মাঠ পরিদর্শন ফলাফল'
-                              : 'Gate 3: Field Inspection Findings',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: Space.xs),
-                        if (r.inspectorName != null) ...[
-                          Text(
-                            'Inspector: ${r.inspectorName}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                        if (r.auditFindings != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            'Findings: ${r.auditFindings}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: Space.md),
-                        PrimaryButton(
-                          label: bangla
-                              ? 'পরিদর্শন ফলাফল রেকর্ড ও মন্ত্রণালয় যাচাইয়ে পাঠান'
-                              : 'Log Inspector Findings & Advance',
-                          onPressed: _busy
-                              ? null
-                              : () => _openInspectorModal(l),
-                        ),
-                      ],
-
-                      // Stage 4: Ministry Vetting Gate
-                      if (r != null && r.stage == 'MINISTRY_VETTING') ...[
-                        Text(
-                          bangla ? 'গেট ৪: মন্ত্রণালয়ে যাচাই ও সনদ ইস্যু' : 'Gate 4: Ministry Vetting & Certificate Issuance',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: Space.xs),
-                        Text(
-                          bangla
-                              ? 'নথি বর্তমানে সংশ্লিষ্ট মন্ত্রণালয় / অধিদপ্তরের টেবিলে স্বাক্ষরের অপেক্ষায় রয়েছে।'
-                              : 'File is currently under vetting at the ministry / regulatory directorate.',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: Space.md),
-                        PrimaryButton(
-                          label: bangla
-                              ? 'নবায়ন সনদ ইস্যু নিশ্চিতকরণ (ধাপ ৫)'
-                              : 'Confirm Renewal Certificate Issued',
-                          onPressed: _busy
-                              ? null
-                              : () => _openCertificateModal(l),
-                        ),
-                      ],
-
-                      // Stage 5: Renewed & Active
-                      if (r != null && r.stage == 'RENEWED') ...[
-                        Container(
-                          padding: const EdgeInsets.all(Space.md),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green.shade300),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green.shade800,
-                                  ),
-                                  const SizedBox(width: Space.xs),
-                                  Text(
-                                    bangla
-                                        ? 'লাইসেন্স সফলভাবে নবায়িত ও সক্রিয়'
-                                        : 'Licence Renewed & Fully Active',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (r.certificateNo != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Certificate No: ${r.certificateNo}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      // Revert Button
-                      if (m.canBack &&
-                          r != null &&
-                          r.stage != 'INTERNAL_REVIEW' &&
-                          r.stage != 'RENEWED') ...[
-                        const SizedBox(height: Space.md),
-                        Center(
-                          child: TextButton.icon(
-                            onPressed: _busy ? null : () => _openRevertModal(l),
-                            icon: const Icon(Icons.undo, size: 16),
-                            label: Text(
-                              bangla
-                                  ? 'পূর্ববর্তী ধাপে ফেরত পাঠান (Revert)'
-                                  : 'Revert to Previous Stage',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
@@ -1329,61 +532,10 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
 
               const SizedBox(height: Space.md),
 
-              // CARD 4: Official DO Letter Generator & Dispatcher (with MOD-04 Parcel Integration)
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.amber.shade300),
-                ),
-                color: Colors.amber.shade50.withValues(alpha: 0.3),
-                child: Padding(
-                  padding: const EdgeInsets.all(Space.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.mark_email_unread_outlined,
-                            color: Colors.brown.shade800,
-                            size: 20,
-                          ),
-                          const SizedBox(width: Space.xs),
-                          Text(
-                            bangla
-                                ? 'চেয়ারম্যান ডিও পত্র (DO Letter Dispatch)'
-                                : 'Chairman Demi-Official (DO) Letter',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.brown.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: Space.xs),
-                      Text(
-                        bangla
-                            ? 'নবায়ন প্রক্রিয়া দ্রুততর করতে নিয়ন্ত্রক অধিদপ্তরের মহাপরিচালক বরাবরে চেয়ারম্যান মহোদয়ের আনুষ্ঠানিক ডিও পত্র প্রেরণ করুন।'
-                            : 'Expedite agency processing by generating an official Demi-Official letter to the regulatory Director General.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: Space.sm),
-                      PrimaryButton.secondary(
-                        label: bangla
-                            ? 'ডিও লেটার তৈরি ও প্রেরণ করুন'
-                            : 'Generate & Dispatch DO Letter',
-                        onPressed: _busy ? null : () => _openDoLetterModal(l),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // CARD 5: Dispatched DO Letters & Cross-Module Parcel Tracking
-              if (l.letters.isNotEmpty) ...[
-                const SizedBox(height: Space.md),
+              if (m.canRenew ||
+                  m.canBack ||
+                  (r != null && r.stage != 'RENEWED') ||
+                  (r?.certificateNo != null))
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -1395,76 +547,148 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          bangla
-                              ? 'প্রেরিত ডিও চিঠিপত্র ও পার্সেল ট্র্যাকিং'
-                              : 'Dispatched Letters & Parcel Tracking',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: Space.sm),
-                        for (final letter in l.letters) ...[
-                          Container(
-                            padding: const EdgeInsets.all(Space.sm),
-                            margin: const EdgeInsets.only(bottom: Space.sm),
-                            decoration: BoxDecoration(
-                              color: scheme.surfaceContainerHighest.withValues(
-                                alpha: 0.4,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                        if (r == null) ...[
+                          if (m.canRenew)
+                            PrimaryButton(
+                              label: l10n.cpActRenew,
+                              loading: _busy,
+                              onPressed: _busy
+                                  ? null
+                                  : () => unawaited(
+                                      _run(
+                                        () => _repo.act(l.id, 'renewals'),
+                                        l10n.cpDoneRenew,
+                                      ),
+                                    ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      letter.memoNo,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'monospace',
+                        ],
+
+                        if (r != null && r.stage == 'INTERNAL_REVIEW') ...[
+                          Text(
+                            l10n.cpChecklist,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: Space.xs),
+                          if (r.feeAmount > 0) ...[
+                            Text(
+                              l10n.cpFieldFee,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                            Text(
+                              licenceTaka(r.feeAmount, bangla: bangla),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: Space.sm),
+                            if (m.canFund)
+                              PrimaryButton(
+                                label: l10n.cpActFund,
+                                loading: _busy,
+                                onPressed: _busy
+                                    ? null
+                                    : () => unawaited(
+                                        _run(
+                                          () => _repo.act(l.id, 'fund'),
+                                          l10n.cpDoneFund,
+                                        ),
+                                      ),
+                              ),
+                            if (m.canFund) const SizedBox(height: Space.sm),
+                          ],
+                          for (final c in r.checklist)
+                            CheckboxListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(c.display(bangla: bangla)),
+                              value: c.status == 'PASSED',
+                              subtitle: c.note != null ? Text(c.note!) : null,
+                              onChanged:
+                                  !m.canChecklist ||
+                                      c.status == 'PASSED' ||
+                                      _busy
+                                  ? null
+                                  : (_) => unawaited(
+                                      _run(
+                                        () => _repo.tickItem(l.id, c.id, {
+                                          'status': 'PASSED',
+                                        }),
+                                        l10n.cpDoneTick,
                                       ),
                                     ),
-                                    StatusPill(
-                                      label: letter.channel,
-                                      tone: StatusTone.info,
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  letter.subject,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                if (letter.parcelId != null) ...[
-                                  const SizedBox(height: Space.xs),
-                                  ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      visualDensity: VisualDensity.compact,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                    ),
-                                    onPressed: () => context.push(
-                                      AppRoutes.parcelDetail(letter.parcelId!),
-                                    ),
-                                    icon: const Icon(
-                                      Icons.local_shipping,
-                                      size: 14,
-                                    ),
-                                    label: Text(
-                                      bangla
-                                          ? 'MOD-04 পার্সেল ট্র্যাক করুন (#${letter.parcelId})'
-                                          : 'Track in MOD-04 Parcels (#${letter.parcelId})',
-                                      style: const TextStyle(fontSize: 11),
+                            ),
+                          const SizedBox(height: Space.sm),
+                          PrimaryButton(
+                            label: l10n.cpActFile,
+                            loading: _busy,
+                            onPressed:
+                                _busy ||
+                                    !m.canAdvance ||
+                                    r.checklist.any(
+                                      (c) => c.status == 'PENDING',
+                                    ) ||
+                                    (r.feeAmount > 0 && !r.fundApproved)
+                                ? null
+                                : () => unawaited(
+                                    _run(
+                                      () => _repo.act(l.id, 'advance'),
+                                      l10n.cpDoneAdvance,
                                     ),
                                   ),
-                                ],
-                              ],
+                          ),
+                        ],
+
+                        if (r != null && r.stage == 'APPLICATION_FILED') ...[
+                          PrimaryButton(
+                            label: l10n.cpActInspect,
+                            loading: _busy,
+                            onPressed: _busy || !m.canAdvance
+                                ? null
+                                : () => unawaited(_openBookInspection(l)),
+                          ),
+                        ],
+
+                        if (r != null && r.stage == 'FIELD_INSPECTION') ...[
+                          if (r.inspectorName != null) ...[
+                            Text(
+                              r.inspectorName!,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: Space.sm),
+                          ],
+                          PrimaryButton(
+                            label: l10n.cpActFindings,
+                            loading: _busy,
+                            onPressed: _busy || !m.canAdvance
+                                ? null
+                                : () => unawaited(_openFindings(l)),
+                          ),
+                        ],
+
+                        if (r != null && r.stage == 'MINISTRY_VETTING') ...[
+                          PrimaryButton(
+                            label: l10n.cpActComplete,
+                            loading: _busy,
+                            onPressed: _busy || !m.canAdvance
+                                ? null
+                                : () => unawaited(_openCertificate(l)),
+                          ),
+                        ],
+
+                        if (r != null &&
+                            r.stage == 'RENEWED' &&
+                            r.certificateNo != null)
+                          Text(
+                            r.certificateNo!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+
+                        if (m.canBack) ...[
+                          const SizedBox(height: Space.md),
+                          Center(
+                            child: TextButton(
+                              onPressed: _busy
+                                  ? null
+                                  : () => unawaited(_openRevert(l)),
+                              child: Text(l10n.cpActBack),
                             ),
                           ),
                         ],
@@ -1472,44 +696,68 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
                     ),
                   ),
                 ),
+
+              if (m.canLetter) ...[
+                const SizedBox(height: Space.md),
+                PrimaryButton.secondary(
+                  label: l10n.cpActLetter,
+                  loading: _busy,
+                  onPressed: _busy ? null : () => unawaited(_openLetter(l)),
+                ),
               ],
 
-              const SizedBox(height: Space.md),
-
-              // CARD 6: Metadata & Details Tile
-              ExpansionTile(
-                title: Text(l10n.cpDetails),
-                children: [
-                  ListTile(
-                    title: Text(l10n.cpPassport),
-                    subtitle: Text(
-                      [l.ref, l.licenceNo, l.bodyCode].join(' · '),
-                    ),
-                  ),
-                  if (l.expiresAt != null)
-                    ListTile(
-                      title: Text(bangla ? 'মেয়াদ শেষ' : 'Expiry Date'),
-                      subtitle: Text(
-                        DateFmt.date(l.expiresAt!, bangla ? 'bn' : 'en'),
+              if (l.letters.isNotEmpty) ...[
+                const SizedBox(height: Space.md),
+                for (final letter in l.letters)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: Space.sm),
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: scheme.outlineVariant),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(Space.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    letter.memoNo,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall,
+                                  ),
+                                ),
+                                StatusPill(
+                                  label: _channelLabel(l10n, letter.channel),
+                                  tone: StatusTone.info,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              letter.subject,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (letter.parcelId != null)
+                              TextButton(
+                                onPressed: () => unawaited(
+                                  context.push(
+                                    AppRoutes.parcelDetail(letter.parcelId!),
+                                  ),
+                                ),
+                                child: Text(l10n.cpTrackParcel),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                  ListTile(
-                    title: Text(
-                      bangla
-                          ? 'দায়িত্বপ্রাপ্ত কর্মকর্তা'
-                          : 'Permit Focal / Owner',
-                    ),
-                    subtitle: Text(
-                      who.isNotEmpty ? who : 'Plant Operations GM',
-                    ),
                   ),
-                  if (l.feeAmount > 0)
-                    ListTile(
-                      title: Text(l10n.cpFieldFee),
-                      subtitle: Text(licenceTaka(l.feeAmount, bangla: bangla)),
-                    ),
-                ],
-              ),
+              ],
             ],
           );
         },
@@ -1521,23 +769,23 @@ class _LicenceDetailScreenState extends ConsumerState<LicenceDetailScreen> {
 class _PipelineVisualStepper extends StatelessWidget {
   const _PipelineVisualStepper({
     required this.currentStage,
-    required this.bangla,
+    required this.l10n,
   });
 
   final String? currentStage;
-  final bool bangla;
+  final AppL10n l10n;
 
-  static const _steps = [
-    ('INTERNAL_REVIEW', '1. App Prep', '১. আবেদন'),
-    ('APPLICATION_FILED', '2. Fee', '২. ফি'),
-    ('FIELD_INSPECTION', '3. Inspection', '৩. পরিদর্শন'),
-    ('MINISTRY_VETTING', '4. Vetting', '৪. যাচাই'),
-    ('RENEWED', '5. Active', '৫. সক্রিয়'),
+  static const _codes = [
+    'INTERNAL_REVIEW',
+    'APPLICATION_FILED',
+    'FIELD_INSPECTION',
+    'MINISTRY_VETTING',
+    'RENEWED',
   ];
 
   int _currentIndex() {
     if (currentStage == null) return -1;
-    final idx = _steps.indexWhere((s) => s.$1 == currentStage);
+    final idx = _codes.indexOf(currentStage!);
     return idx >= 0 ? idx : 0;
   }
 
@@ -1548,7 +796,7 @@ class _PipelineVisualStepper extends StatelessWidget {
 
     return Row(
       children: [
-        for (var i = 0; i < _steps.length; i++) ...[
+        for (var i = 0; i < _codes.length; i++) ...[
           Expanded(
             child: Column(
               children: [
@@ -1558,12 +806,12 @@ class _PipelineVisualStepper extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: i < cur
-                        ? Colors.green
+                        ? scheme.primary
                         : (i == cur ? scheme.primary : scheme.outlineVariant),
                   ),
                   child: Center(
                     child: i < cur
-                        ? const Icon(Icons.check, size: 14, color: Colors.white)
+                        ? Icon(Icons.check, size: 14, color: scheme.onPrimary)
                         : Text(
                             '${i + 1}',
                             style: TextStyle(
@@ -1578,9 +826,9 @@ class _PipelineVisualStepper extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  bangla ? _steps[i].$3 : _steps[i].$2,
+                  licenceStageLabel(l10n, _codes[i]),
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 10,
@@ -1591,11 +839,11 @@ class _PipelineVisualStepper extends StatelessWidget {
               ],
             ),
           ),
-          if (i < _steps.length - 1)
+          if (i < _codes.length - 1)
             Container(
-              width: 12,
+              width: 8,
               height: 2,
-              color: i < cur ? Colors.green : scheme.outlineVariant,
+              color: i < cur ? scheme.primary : scheme.outlineVariant,
             ),
         ],
       ],
