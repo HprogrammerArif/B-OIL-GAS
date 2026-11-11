@@ -121,31 +121,36 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
     required String title,
     required List<Widget> children,
   }) {
+    final w = MediaQuery.sizeOf(context).width;
     return showModalBottomSheet<T>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
+      constraints: BoxConstraints(minWidth: w, maxWidth: w),
       builder: (ctx) {
         final maxH = MediaQuery.sizeOf(ctx).height * 0.7;
         return SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxH),
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    Space.lg,
-                    0,
-                    Space.lg,
-                    Space.sm,
+          child: SizedBox(
+            width: double.infinity,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxH),
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Space.md,
+                      0,
+                      Space.md,
+                      Space.sm,
+                    ),
+                    child: Text(
+                      title,
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
                   ),
-                  child: Text(
-                    title,
-                    style: Theme.of(ctx).textTheme.titleMedium,
-                  ),
-                ),
-                ...children,
-              ],
+                  ...children,
+                ],
+              ),
             ),
           ),
         );
@@ -292,19 +297,12 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
       body: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
-          Space.lg,
           Space.md,
-          Space.lg,
+          Space.md,
+          Space.md,
           Space.xxl,
         ),
         children: [
-          Text(
-            l10n.inFormIntro,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: Space.lg),
           _Card(
             title: l10n.inFormWhat,
             children: [
@@ -331,7 +329,7 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
                     ),
                 ],
               ),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               AppTextField(
                 label: l10n.inFieldTitle,
                 hint: l10n.inTitleHint,
@@ -343,7 +341,7 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
                     : null,
                 onChanged: (_) => setState(() => _draftIndex = null),
               ),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               AppTextField(
                 label: l10n.inFieldDesc,
                 hint: l10n.inDescHint,
@@ -357,14 +355,14 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
                     : null,
                 onChanged: (_) => setState(() => _draftIndex = null),
               ),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               _TapRow(
                 icon: Icons.category_outlined,
                 label: l10n.inFieldType,
                 value: incidentTypeLabel(l10n, _type),
                 onTap: () => unawaited(_pickType()),
               ),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               EvidenceStrip(
                 fileIds: _photos,
                 canAdd: true,
@@ -400,7 +398,7 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
                     ),
                 ],
               ),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               _TapRow(
                 icon: Icons.map_outlined,
                 label: l10n.inFieldZone,
@@ -454,14 +452,14 @@ class _IncidentNewScreenState extends ConsumerState<IncidentNewScreen> {
                   ),
                 ),
               ],
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.inFieldAnon),
+                subtitle: Text(l10n.inFieldAnonHelp),
+                value: _anon,
+                onChanged: (v) => setState(() => _anon = v),
+              ),
             ],
-          ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(l10n.inFieldAnon),
-            subtitle: Text(l10n.inFieldAnonHelp),
-            value: _anon,
-            onChanged: (v) => setState(() => _anon = v),
           ),
         ],
       ),
@@ -479,16 +477,16 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: Space.lg),
+      padding: const EdgeInsets.only(bottom: Space.md),
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(Space.lg),
+          padding: const EdgeInsets.all(Space.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: theme.textTheme.titleSmall),
-              const SizedBox(height: Space.md),
+              const SizedBox(height: Space.sm),
               ...children,
             ],
           ),
@@ -523,7 +521,7 @@ class _TapRow extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.symmetric(
           horizontal: Space.md,
-          vertical: Space.md,
+          vertical: Space.sm,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Radii.md),

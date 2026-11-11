@@ -1250,6 +1250,153 @@
   "busTitle": "Staff bus",
   "busTabMySeat": "My seat",
   "busTabRoutes": "Routes",
+  "busTabFleet": "Fleet",
+  "busTabDesk": "Desk",
+  "busDirInbound": "To plant",
+  "busDirOutbound": "Home",
+  "busSupervisorMode": "Supervisor",
+  "busRefresh": "Refresh",
+  "busBroadcastTooltip": "Broadcast",
+  "busFleetPick": "Choose a bus",
+  "busFleetOf": "{n} of {total}",
+  "@busFleetOf": {
+    "placeholders": {
+      "n": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "busFleetOcc": "{occ}/{cap} · {free} free",
+  "@busFleetOcc": {
+    "placeholders": {
+      "occ": { "type": "String" },
+      "cap": { "type": "String" },
+      "free": { "type": "String" }
+    }
+  },
+  "busFleetPlate": "{plate} · {driver}",
+  "@busFleetPlate": {
+    "placeholders": {
+      "plate": { "type": "String" },
+      "driver": { "type": "String" }
+    }
+  },
+  "busSearchSeat": "Search name or seat",
+  "busLegendYou": "You",
+  "busLegendOccupied": "Occupied",
+  "busLegendVacated": "Vacated today",
+  "busLegendOpen": "Free",
+  "busDriver": "Driver: {name}",
+  "@busDriver": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "busEntry": "Entry",
+  "busYou": "YOU",
+  "busPassTitle": "Boarding pass",
+  "busPassSeat": "Seat {no}",
+  "@busPassSeat": {
+    "placeholders": {
+      "no": { "type": "String" }
+    }
+  },
+  "busPassHolder": "Tanvir Ahmed · EMP-1042",
+  "busDone": "Done",
+  "busSeatHead": "Seat {no} · {route}",
+  "@busSeatHead": {
+    "placeholders": {
+      "no": { "type": "String" },
+      "route": { "type": "String" }
+    }
+  },
+  "busSeatYours": "Your allocated seat",
+  "busVacateToday": "Vacate for today",
+  "busVacatedToast": "Seat vacated for today.",
+  "busReclaimVacated": "Reclaim seat",
+  "busReclaimedToast": "Seat reclaimed.",
+  "busSwapColleague": "Swap with a colleague",
+  "busViewPass": "Boarding pass",
+  "busVacatedToday": "Vacated for today",
+  "busSeatOpen": "Seat is free",
+  "busShiftPassHint": "You can join the waitlist for today.",
+  "busBookShift": "Join waitlist for today",
+  "busApplyMonthly": "Apply for a monthly seat",
+  "busSeatTaken": "This seat is taken",
+  "busOccupantDemo": "Occupant: Engr. M. Rahman · General shift",
+  "busProposeSwap": "Propose a swap",
+  "busBroadcastTitle": "Route alert",
+  "busBroadcastHint": "Goes to everyone on this route today.",
+  "busBroadcastDelayChip": "Delayed 12m (Mohakhali)",
+  "busBroadcastDelayBody": "Bus delayed 12 mins at Mohakhali Flyover.",
+  "busBroadcastGateChip": "Pickup Gate 2 today",
+  "busBroadcastGateBody": "Alternate evening boarding at Gate 2 today.",
+  "busBroadcastBody": "Message",
+  "busBroadcastSend": "Send alert",
+  "busNoRoute": "No bus route is loaded.",
+  "busSwapSent": "Swap request sent for seat {no}.",
+  "@busSwapSent": {
+    "placeholders": {
+      "no": { "type": "String" }
+    }
+  },
+  "busWaitlisted": "You are on the waitlist for {code}.",
+  "@busWaitlisted": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "busBroadcastShort": "Write at least a short sentence.",
+  "busAlertSent": "Alert sent on {code}.",
+  "@busAlertSent": {
+    "placeholders": {
+      "code": { "type": "String" }
+    }
+  },
+  "busAllBoarded": "Every seat is already marked boarded.",
+  "busSeatBoarded": "Seat {no} marked boarded on {code}.",
+  "@busSeatBoarded": {
+    "placeholders": {
+      "no": { "type": "String" },
+      "code": { "type": "String" }
+    }
+  },
+  "busNoOther": "There is no other bus to assign.",
+  "busReassigned": "{bus} is now assigned to {code}.",
+  "@busReassigned": {
+    "placeholders": {
+      "bus": { "type": "String" },
+      "code": { "type": "String" }
+    }
+  },
+  "busConductorTitle": "Boarding",
+  "busBoardedOf": "{count} of {total} boarded ({pct}%)",
+  "@busBoardedOf": {
+    "placeholders": {
+      "count": { "type": "String" },
+      "total": { "type": "String" },
+      "pct": { "type": "String" }
+    }
+  },
+  "busScanBoard": "Mark boarded",
+  "busWaitPromote": "Waitlist",
+  "busWaitPromoteHint": "Assign waiting staff to a free seat.",
+  "busAssign3b": "Assign to seat 3B",
+  "busAssignedFarhan": "Assigned Engr. Farhan to seat 3B.",
+  "busAdminTitle": "Route and fleet",
+  "busDelayAlert": "Delay alert",
+  "busSwapCoach": "Swap bus",
+  "busOfferOnRoute": "A seat is offered on {route}.",
+  "@busOfferOnRoute": {
+    "placeholders": {
+      "route": { "type": "String" }
+    }
+  },
+  "busOfferExpires": "Offer expires: {when}",
+  "@busOfferExpires": {
+    "placeholders": {
+      "when": { "type": "String" }
+    }
+  },
   "busRouteTitle": "Route",
   "busRouteMeta": "Bus {bus} · {km} km",
   "@busRouteMeta": {

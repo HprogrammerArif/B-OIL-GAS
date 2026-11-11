@@ -228,80 +228,98 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     AppToast.show(context, message, tone: StatusTone.danger);
   }
 
+  BoxConstraints _fullSheet(BuildContext ctx) {
+    final w = MediaQuery.sizeOf(ctx).width;
+    return BoxConstraints(minWidth: w, maxWidth: w);
+  }
+
   Future<void> _requestSwap(int seatNo) async {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
     try {
       final route = await _selectedRoute();
       if (route == null) {
-        _busFail('No bus route is loaded.');
+        _busFail(l10n.busNoRoute);
         return;
       }
       await _bus.requestSwap(route.id, seatNo);
       if (!mounted) return;
-      AppToast.show(context, 'Swap request sent for seat $seatNo.');
-    } on ApiException catch (e) {
-      _busFail(e.message);
+      AppToast.show(context, l10n.busSwapSent(digits(seatNo, bangla: bangla)));
+    } on ApiException {
+      _busFail(l10n.busErrFailed);
     }
   }
 
   Future<void> _joinSelected() async {
+    final l10n = context.l10n;
     try {
       final route = await _selectedRoute();
       if (route == null) {
-        _busFail('No bus route is loaded.');
+        _busFail(l10n.busNoRoute);
         return;
       }
       await _bus.join(route.id);
       ref.invalidate(busRoutesProvider);
       if (!mounted) return;
-      AppToast.show(context, 'You are on the waitlist for ${route.code}.');
-    } on ApiException catch (e) {
-      _busFail(e.message);
+      AppToast.show(context, l10n.busWaitlisted(route.code));
+    } on ApiException {
+      _busFail(l10n.busErrFailed);
     }
   }
 
   Future<void> _broadcast(String message) async {
+    final l10n = context.l10n;
     if (message.length < 5) {
-      _busFail('Write at least a short sentence.');
+      _busFail(l10n.busBroadcastShort);
       return;
     }
     try {
       final route = await _selectedRoute();
       await _bus.broadcast(message: message, routeId: route?.id);
       if (!mounted) return;
-      AppToast.show(context, 'Alert sent on ${route?.code ?? 'the route'}.');
-    } on ApiException catch (e) {
-      _busFail(e.message);
+      AppToast.show(
+        context,
+        l10n.busAlertSent(route?.code ?? l10n.busRouteTitle),
+      );
+    } on ApiException {
+      _busFail(l10n.busErrFailed);
     }
   }
 
   Future<void> _markBoarded() async {
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
     final seat = [for (var n = 1; n <= 52; n++) n]
         .where((n) => !_boardedSeats.contains(n))
         .firstOrNull;
     if (seat == null) {
-      _busFail('Every seat is already marked boarded.');
+      _busFail(l10n.busAllBoarded);
       return;
     }
     try {
       final route = await _selectedRoute();
       if (route == null) {
-        _busFail('No bus route is loaded.');
+        _busFail(l10n.busNoRoute);
         return;
       }
       await _bus.setSeat(route.id, seat, boarded: true);
       if (!mounted) return;
       setState(() => _boardedSeats.add(seat));
-      AppToast.show(context, 'Seat $seat marked boarded on ${route.code}.');
-    } on ApiException catch (e) {
-      _busFail(e.message);
+      AppToast.show(
+        context,
+        l10n.busSeatBoarded(digits(seat, bangla: bangla), route.code),
+      );
+    } on ApiException {
+      _busFail(l10n.busErrFailed);
     }
   }
 
   Future<void> _swapBus() async {
+    final l10n = context.l10n;
     try {
       final routes = await _bus.routes();
       if (routes.length < 2) {
-        _busFail('There is no other bus to assign.');
+        _busFail(l10n.busNoOther);
         return;
       }
       final index = _selectedBusIndex.clamp(0, routes.length - 1);
@@ -312,10 +330,13 @@ class _BusScreenState extends ConsumerState<BusScreen> {
       if (!mounted) return;
       AppToast.show(
         context,
-        '${other.busNo} is now assigned to ${current.code}.',
+        l10n.busReassigned(
+          other.busNo.isEmpty ? other.code : other.busNo,
+          current.code,
+        ),
       );
-    } on ApiException catch (e) {
-      _busFail(e.message);
+    } on ApiException {
+      _busFail(l10n.busErrFailed);
     }
   }
 
@@ -328,79 +349,77 @@ class _BusScreenState extends ConsumerState<BusScreen> {
   }
 
   void _showBoardingPassModal(int seatNo, String routeName) {
+    final l10n = context.l10n;
     final bangla = context.isBangla;
+    final scheme = Theme.of(context).colorScheme;
     unawaited(
       showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
-        builder: (ctx) => Padding(
-          padding: const EdgeInsets.all(Space.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                bangla
-                    ? 'ডিজিটাল শাটল বোর্ডিং পাস'
-                    : 'Digital Shuttle Boarding Pass',
-                style: Theme.of(ctx).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+        constraints: _fullSheet(context),
+        builder: (ctx) => SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                0,
+                Space.md,
+                Space.md,
               ),
-              const SizedBox(height: Space.xs),
-              Text(
-                routeName,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(ctx).colorScheme.primary,
-                ),
-              ),
-              const Divider(height: 24),
-              Container(
-                padding: const EdgeInsets.all(Space.md),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade400),
-                      ),
-                      child: const Center(
-                        child: Icon(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.busPassTitle,
+                    style: Theme.of(ctx).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: Space.xs),
+                  Text(
+                    routeName,
+                    style: TextStyle(fontSize: 12, color: scheme.primary),
+                  ),
+                  const Divider(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(Space.md),
+                    decoration: BoxDecoration(
+                      color: scheme.surface,
+                      borderRadius: BorderRadius.circular(Corner.md),
+                      border: Border.all(color: scheme.outlineVariant),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
                           Icons.qr_code_2,
                           size: 120,
-                          color: Colors.black87,
+                          color: scheme.onSurface,
                         ),
-                      ),
+                        const SizedBox(height: Space.sm),
+                        Text(
+                          l10n.busPassSeat(digits(seatNo, bangla: bangla)),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        Text(
+                          l10n.busPassHolder,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: Space.sm),
-                    Text(
-                      'SEAT $seatNo · BOGCL SHUTTLE',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const Text(
-                      'Tanvir Ahmed · EMP-1042',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: Space.md),
+                  PrimaryButton(
+                    label: l10n.busDone,
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
               ),
-              const SizedBox(height: Space.md),
-              PrimaryButton(
-                label: bangla ? 'সম্পন্ন' : 'Done',
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -414,164 +433,144 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     bool isVacated,
     bool isFree,
   ) {
+    final l10n = context.l10n;
     final bangla = context.isBangla;
+    final scheme = Theme.of(context).colorScheme;
     unawaited(
       showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setSheetState) => Padding(
-            padding: const EdgeInsets.all(Space.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.event_seat_rounded, color: Colors.blue),
-                    const SizedBox(width: Space.xs),
+        constraints: _fullSheet(context),
+        builder: (ctx) => SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Space.md,
+                0,
+                Space.md,
+                Space.md,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.event_seat_rounded, color: scheme.primary),
+                      const SizedBox(width: Space.xs),
+                      Expanded(
+                        child: Text(
+                          l10n.busSeatHead(
+                            digits(seatNo, bangla: bangla),
+                            routeName,
+                          ),
+                          style: Theme.of(ctx).textTheme.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+                  if (isMySeat) ...[
                     Text(
-                      'Seat $seatNo · $routeName',
-                      style: Theme.of(ctx).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      l10n.busSeatYours,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: Space.sm),
+                    if (!_myVacatedSeats.contains(seatNo))
+                      PrimaryButton.secondary(
+                        label: l10n.busVacateToday,
+                        onPressed: () {
+                          Haptics.tap();
+                          setState(() => _myVacatedSeats.add(seatNo));
+                          Navigator.pop(ctx);
+                          AppToast.show(context, l10n.busVacatedToast);
+                        },
+                      )
+                    else
+                      PrimaryButton(
+                        label: l10n.busReclaimVacated,
+                        onPressed: () {
+                          Haptics.tap();
+                          setState(() => _myVacatedSeats.remove(seatNo));
+                          Navigator.pop(ctx);
+                          AppToast.show(
+                            context,
+                            l10n.busReclaimedToast,
+                            tone: StatusTone.success,
+                          );
+                        },
+                      ),
+                    const SizedBox(height: Space.xs),
+                    PrimaryButton.secondary(
+                      label: l10n.busSwapColleague,
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        unawaited(_requestSwap(seatNo));
+                      },
+                    ),
+                    const SizedBox(height: Space.xs),
+                    PrimaryButton(
+                      label: l10n.busViewPass,
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _showBoardingPassModal(seatNo, routeName);
+                      },
+                    ),
+                  ] else if (isVacated || isFree) ...[
+                    Text(
+                      isVacated ? l10n.busVacatedToday : l10n.busSeatOpen,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: Space.xs),
+                    Text(
+                      l10n.busShiftPassHint,
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: Space.md),
+                    PrimaryButton(
+                      label: l10n.busBookShift,
+                      onPressed: () {
+                        Haptics.tap();
+                        Navigator.pop(ctx);
+                        unawaited(_joinSelected());
+                      },
+                    ),
+                    const SizedBox(height: Space.xs),
+                    PrimaryButton.secondary(
+                      label: l10n.busApplyMonthly,
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        unawaited(_joinSelected());
+                      },
+                    ),
+                  ] else ...[
+                    Text(
+                      l10n.busSeatTaken,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.busOccupantDemo,
+                      style: Theme.of(ctx).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: Space.md),
+                    PrimaryButton.secondary(
+                      label: l10n.busProposeSwap,
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        unawaited(_requestSwap(seatNo));
+                      },
                     ),
                   ],
-                ),
-                const Divider(height: 20),
-
-                // If it's the current user's seat
-                if (isMySeat) ...[
-                  Text(
-                    bangla
-                        ? 'আপনার বরাদ্দকৃত নিয়মিত আসন'
-                        : 'Your permanent allocated seat',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  if (!_myVacatedSeats.contains(seatNo))
-                    PrimaryButton.secondary(
-                      label: bangla
-                          ? 'আজকের জন্য আসন ছেড়ে দিন (Vacate Seat)'
-                          : 'Vacate My Seat for Today',
-                      onPressed: () {
-                        Haptics.tap();
-                        setState(() => _myVacatedSeats.add(seatNo));
-                        Navigator.pop(ctx);
-                        AppToast.show(
-                          context,
-                          bangla
-                              ? 'আজকের জন্য আপনার আসনটি মুক্ত করা হয়েছে'
-                              : 'Seat $seatNo vacated for today. Available for standby waitlist.',
-                        );
-                      },
-                    )
-                  else
-                    PrimaryButton(
-                      label: bangla
-                          ? 'আসন পুনরুদ্ধার করুন (Reclaim Seat)'
-                          : 'Reclaim My Vacated Seat',
-                      onPressed: () {
-                        Haptics.tap();
-                        setState(() => _myVacatedSeats.remove(seatNo));
-                        Navigator.pop(ctx);
-                        AppToast.show(
-                          context,
-                          bangla
-                              ? 'আসনটি পুনরায় গ্রহণ করা হয়েছে'
-                              : 'Seat $seatNo reclaimed successfully',
-                          tone: StatusTone.success,
-                        );
-                      },
-                    ),
-                  const SizedBox(height: Space.xs),
-                  PrimaryButton.secondary(
-                    label: bangla
-                        ? 'সহকর্মীর সাথে আসন বিনিময় (Swap)'
-                        : 'Request Seat Swap with Colleague',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      unawaited(_requestSwap(seatNo));
-                    },
-                  ),
-                  const SizedBox(height: Space.xs),
-                  PrimaryButton(
-                    label: bangla
-                        ? 'ডিজিটাল বোর্ডিং পাস দেখুন'
-                        : 'View Digital Boarding QR Pass',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _showBoardingPassModal(seatNo, routeName);
-                    },
-                  ),
-                ] else if (isVacated || isFree) ...[
-                  Text(
-                    isVacated
-                        ? (bangla
-                              ? 'আজকের জন্য আসনটি মুক্ত আছে (Vacated Seat)'
-                              : 'Seat voluntarily vacated for today')
-                        : (bangla
-                              ? 'আসনটি উন্মুক্ত রয়েছে'
-                              : 'Seat is available'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: Space.xs),
-                  Text(
-                    bangla
-                        ? 'আপনি আজকের ট্রিপের জন্য একক শিফট-পাস নিশ্চিত করতে পারেন।'
-                        : "You can instantly book a single shift pass for today's trip.",
-                    style: Theme.of(ctx).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: Space.md),
-                  PrimaryButton(
-                    label: bangla
-                        ? 'একক শিফট-পাস বুক করুন (আজকের জন্য)'
-                        : 'Book Single Shift Pass (Today Only)',
-                    onPressed: () {
-                      Haptics.tap();
-                      Navigator.pop(ctx);
-                      unawaited(_joinSelected());
-                    },
-                  ),
-                  const SizedBox(height: Space.xs),
-                  PrimaryButton.secondary(
-                    label: bangla
-                        ? 'নিয়মিত মাসিক বরাদ্দের আবেদন'
-                        : 'Apply for Monthly Permanent Seat',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      unawaited(_joinSelected());
-                    },
-                  ),
-                ] else ...[
-                  Text(
-                    bangla
-                        ? 'আসনটি সংরক্ষিত / যাত্রী নির্ধারিত'
-                        : 'Occupied Permanent Seat',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Occupant: Engr. M. Rahman · Shift: General (09:00 - 18:00)',
-                    style: Theme.of(ctx).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: Space.md),
-                  PrimaryButton.secondary(
-                    label: bangla
-                        ? 'আসন বিনিময়ের প্রস্তাব পাঠান'
-                        : 'Propose Mutual Seat Swap',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      unawaited(_requestSwap(seatNo));
-                    },
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -580,87 +579,89 @@ class _BusScreenState extends ConsumerState<BusScreen> {
   }
 
   void _showBroadcastModal() {
-    final bangla = context.isBangla;
-    final msgCtrl = TextEditingController(
-      text: 'Bus #01 delayed 12 mins at Mohakhali Flyover due to traffic.',
-    );
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+    final msgCtrl = TextEditingController(text: l10n.busBroadcastDelayBody);
     unawaited(
       showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
-        builder: (ctx) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            Space.lg,
-            0,
-            Space.lg,
-            MediaQuery.viewInsetsOf(ctx).bottom + Space.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        constraints: _fullSheet(context),
+        builder: (ctx) => SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                Space.md,
+                0,
+                Space.md,
+                Space.md + MediaQuery.viewInsetsOf(ctx).bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.campaign_outlined, color: Colors.orange),
-                  const SizedBox(width: Space.xs),
+                  Row(
+                    children: [
+                      Icon(Icons.campaign_outlined, color: scheme.primary),
+                      const SizedBox(width: Space.xs),
+                      Expanded(
+                        child: Text(
+                          l10n.busBroadcastTitle,
+                          style: Theme.of(ctx).textTheme.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Space.xs),
                   Text(
-                    bangla
-                        ? 'রুটের যাত্রীদের জরুরি বার্তা প্রেরণ'
-                        : 'Broadcast Route Delay / Traffic Alert',
-                    style: Theme.of(ctx).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    l10n.busBroadcastHint,
+                    style: Theme.of(ctx).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: Space.sm),
+                  Wrap(
+                    spacing: Space.xs,
+                    children: [
+                      ActionChip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(
+                          l10n.busBroadcastDelayChip,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        onPressed: () =>
+                            msgCtrl.text = l10n.busBroadcastDelayBody,
+                      ),
+                      ActionChip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(
+                          l10n.busBroadcastGateChip,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                        onPressed: () =>
+                            msgCtrl.text = l10n.busBroadcastGateBody,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Space.sm),
+                  AppTextField(
+                    label: l10n.busBroadcastBody,
+                    controller: msgCtrl,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: Space.md),
+                  PrimaryButton(
+                    label: l10n.busBroadcastSend,
+                    onPressed: () {
+                      final message = msgCtrl.text.trim();
+                      Haptics.heavy();
+                      Navigator.pop(ctx);
+                      unawaited(_broadcast(message));
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: Space.xs),
-              Text(
-                bangla
-                    ? 'এই বাসের সকল নিবন্ধিত যাত্রী ও অপেক্ষমাণ কর্মীদের ফোনে তাৎক্ষণিক পুশ নোটিফিকেশন যাবে।'
-                    : 'Sends immediate push notification to all passengers riding this route today.',
-                style: Theme.of(ctx).textTheme.bodySmall,
-              ),
-              const SizedBox(height: Space.sm),
-              Wrap(
-                spacing: Space.xs,
-                children: [
-                  ActionChip(
-                    label: const Text(
-                      'Delayed 12m (Mohakhali)',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () => msgCtrl.text =
-                        'Bus #01 delayed 12 mins at Mohakhali Flyover.',
-                  ),
-                  ActionChip(
-                    label: const Text(
-                      'Pickup Gate 2 today',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                    onPressed: () => msgCtrl.text =
-                        'Alternate evening boarding at Refinery Gate #2 today.',
-                  ),
-                ],
-              ),
-              const SizedBox(height: Space.sm),
-              AppTextField(
-                label: bangla ? 'বার্তার বিবরণ' : 'Alert Message Body',
-                controller: msgCtrl,
-                maxLines: 3,
-              ),
-              const SizedBox(height: Space.md),
-              PrimaryButton(
-                label: bangla
-                    ? 'সকলকে নোটিফিকেশন পাঠান'
-                    : 'Broadcast Alert Now',
-                onPressed: () {
-                  final message = msgCtrl.text.trim();
-                  Haptics.heavy();
-                  Navigator.pop(ctx);
-                  unawaited(_broadcast(message));
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -674,7 +675,8 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     final session = ref.watch(sessionControllerProvider).value;
     final canSeat = session?.can('bus:seat-self') ?? false;
     final canManage = session?.can('bus:manage') ?? false;
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final effectiveTab = (!canSeat && _tab == _BusTab.mySeat)
         ? _BusTab.fleetAndDeck
         : _tab;
@@ -682,6 +684,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     Widget subTabChip(_BusTab tab, String label, IconData icon) => Padding(
       padding: const EdgeInsets.only(right: Space.xs),
       child: ChoiceChip(
+        visualDensity: VisualDensity.compact,
         avatar: Icon(icon, size: 16),
         label: Text(label),
         selected: effectiveTab == tab,
@@ -694,115 +697,65 @@ class _BusScreenState extends ConsumerState<BusScreen> {
         title: Text(l10n.busTitle),
         actions: [
           IconButton(
-            tooltip: bangla ? 'রিফ্রেশ' : 'Refresh',
+            tooltip: l10n.busRefresh,
             onPressed: _refresh,
             icon: const Icon(Icons.refresh),
           ),
           if (canManage)
             IconButton(
-              tooltip: bangla ? 'রুট ব্রডকাস্ট' : 'Broadcast Alert',
+              tooltip: l10n.busBroadcastTooltip,
               onPressed: _showBroadcastModal,
-              icon: const Icon(Icons.campaign_outlined, color: Colors.amber),
+              icon: Icon(Icons.campaign_outlined, color: scheme.primary),
             ),
         ],
       ),
       body: Column(
         children: [
-          // Perspective and Commute Direction Header
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
-            child: Container(
-              padding: const EdgeInsets.all(Space.sm),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: scheme.outlineVariant),
-              ),
-              child: Row(
-                children: [
-                  // Direction Toggle Pill
-                  InkWell(
-                    onTap: () {
+            child: Row(
+              children: [
+                FilterChip(
+                  visualDensity: VisualDensity.compact,
+                  selected: true,
+                  showCheckmark: false,
+                  avatar: Icon(
+                    _inbound ? Icons.login_rounded : Icons.logout_rounded,
+                    size: 16,
+                  ),
+                  label: Text(
+                    _inbound ? l10n.busDirInbound : l10n.busDirOutbound,
+                  ),
+                  onSelected: (_) {
+                    Haptics.tap();
+                    setState(() {
+                      _inbound = !_inbound;
+                      _selectedBusIndex = 0;
+                    });
+                  },
+                ),
+                const Spacer(),
+                if (canManage) ...[
+                  Text(
+                    l10n.busSupervisorMode,
+                    style: theme.textTheme.labelMedium,
+                  ),
+                  const SizedBox(width: 4),
+                  Switch(
+                    value: _supervisorMode,
+                    onChanged: (v) {
                       Haptics.tap();
                       setState(() {
-                        _inbound = !_inbound;
-                        _selectedBusIndex = 0;
+                        _supervisorMode = v;
+                        if (v) _tab = _BusTab.supervisor;
                       });
                     },
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _inbound
-                            ? Colors.blue.shade100
-                            : Colors.indigo.shade100,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _inbound
-                                ? Icons.login_rounded
-                                : Icons.logout_rounded,
-                            size: 14,
-                            color: _inbound
-                                ? Colors.blue.shade900
-                                : Colors.indigo.shade900,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _inbound
-                                ? (bangla
-                                      ? 'ইনবাউন্ড (প্ল্যান্ট গমন)'
-                                      : 'Inbound (To Plant)')
-                                : (bangla
-                                      ? 'আউটবাউন্ড (বাসা প্রত্যাবর্তন)'
-                                      : 'Outbound (Home)'),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: _inbound
-                                  ? Colors.blue.shade900
-                                  : Colors.indigo.shade900,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  const Spacer(),
-                  // Perspective Switch (Staff vs Supervisor)
-                  if (canManage) ...[
-                    Text(
-                      bangla ? 'তত্ত্বাবধায়ক মোড' : 'Supervisor Mode',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Switch(
-                      value: _supervisorMode,
-                      onChanged: (v) {
-                        Haptics.tap();
-                        setState(() {
-                          _supervisorMode = v;
-                          if (v) _tab = _BusTab.supervisor;
-                        });
-                      },
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
           ),
-
-          // Sub-Tab Switcher
           Padding(
             padding: const EdgeInsets.fromLTRB(Space.md, Space.xs, Space.md, 0),
             child: SingleChildScrollView(
@@ -812,20 +765,18 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   if (canSeat)
                     subTabChip(
                       _BusTab.mySeat,
-                      bangla ? 'আমার আসন ও পাস' : 'My Seat & Pass',
+                      l10n.busTabMySeat,
                       Icons.event_seat_outlined,
                     ),
                   subTabChip(
                     _BusTab.fleetAndDeck,
-                    bangla
-                        ? '১০-বাস বহর ও ৫২-আসন ম্যাপ'
-                        : '10-Bus Fleet & 52-Seat Deck',
+                    l10n.busTabFleet,
                     Icons.directions_bus_filled_outlined,
                   ),
                   if (canManage)
                     subTabChip(
                       _BusTab.supervisor,
-                      bangla ? 'কমান্ড ও ওয়েটিংলিস্ট' : 'Command & Waitlist',
+                      l10n.busTabDesk,
                       Icons.admin_panel_settings_outlined,
                     ),
                 ],
@@ -854,6 +805,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
   }
 
   Widget _buildFleetAndDeckTab(BuildContext context, bool bangla) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final buses = _visibleBuses;
     final index = _selectedBusIndex.clamp(0, buses.length - 1);
@@ -862,21 +814,21 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     return ListView(
       padding: const EdgeInsets.all(Space.md),
       children: [
-        // 10-Bus Fleet Overview Grid
         Row(
           children: [
             Expanded(
               child: Text(
-                bangla
-                    ? '১০টি বাস বহর সারসংক্ষেপ (বাস নির্বাচন করুন)'
-                    : '10-Bus Fleet Grid (Select Bus)',
+                l10n.busFleetPick,
                 style: Theme.of(context).textTheme.titleSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: Space.xs),
             Text(
-              '${index + 1} of ${buses.length}',
+              l10n.busFleetOf(
+                digits(index + 1, bangla: bangla),
+                digits(buses.length, bangla: bangla),
+              ),
               style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
           ],
@@ -948,7 +900,11 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         ),
                       ),
                       Text(
-                        '${b.occupied}/${b.capacity} Seats · ${b.vacated} Free',
+                        l10n.busFleetOcc(
+                          digits(b.occupied, bangla: bangla),
+                          digits(b.capacity, bangla: bangla),
+                          digits(b.vacated, bangla: bangla),
+                        ),
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -964,7 +920,6 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
         const SizedBox(height: Space.md),
 
-        // Active Bus Information Header Card
         Container(
           padding: const EdgeInsets.all(Space.md),
           decoration: BoxDecoration(
@@ -974,14 +929,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.directions_bus, color: scheme.primary),
-              ),
+              Icon(Icons.directions_bus, color: scheme.primary),
               const SizedBox(width: Space.sm),
               Expanded(
                 child: Column(
@@ -995,7 +943,18 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                       ),
                     ),
                     Text(
-                      'Plate: ${activeBus.plate} · Driver: ${activeBus.driver}',
+                      l10n.busFleetOcc(
+                        digits(activeBus.occupied, bangla: bangla),
+                        digits(activeBus.capacity, bangla: bangla),
+                        digits(activeBus.vacated, bangla: bangla),
+                      ),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      l10n.busFleetPlate(activeBus.plate, activeBus.driver),
                       style: TextStyle(
                         fontSize: 11,
                         color: scheme.onSurfaceVariant,
@@ -1010,12 +969,9 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
         const SizedBox(height: Space.md),
 
-        // Passenger Search Box
         TextField(
           decoration: InputDecoration(
-            hintText: bangla
-                ? 'যাত্রীর নাম বা আসন অনুসন্ধান করুন...'
-                : 'Search passenger name or seat number...',
+            hintText: l10n.busSearchSeat,
             prefixIcon: const Icon(Icons.search, size: 18),
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(
@@ -1029,26 +985,28 @@ class _BusScreenState extends ConsumerState<BusScreen> {
 
         const SizedBox(height: Space.sm),
 
-        // 52-Seat Coach Deck Legend
         Wrap(
           spacing: Space.sm,
           runSpacing: 4,
           alignment: WrapAlignment.spaceAround,
           children: [
             _LegendItem(
-              color: Colors.blue.shade700,
-              label: '★ YOU',
+              color: scheme.primary,
+              label: l10n.busLegendYou,
               border: true,
             ),
-            _LegendItem(color: Colors.blueGrey.shade600, label: '● Occupied'),
             _LegendItem(
-              color: Colors.amber.shade800,
-              label: '◎ Vacated Today',
+              color: scheme.onSurfaceVariant,
+              label: l10n.busLegendOccupied,
+            ),
+            _LegendItem(
+              color: scheme.tertiary,
+              label: l10n.busLegendVacated,
               dashed: true,
             ),
             _LegendItem(
-              color: Colors.teal.shade700,
-              label: '○ Free / Open',
+              color: scheme.secondary,
+              label: l10n.busLegendOpen,
               outline: true,
             ),
           ],
@@ -1060,20 +1018,19 @@ class _BusScreenState extends ConsumerState<BusScreen> {
         Container(
           padding: const EdgeInsets.all(Space.md),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade400, width: 2),
+            border: Border.all(color: scheme.outlineVariant),
           ),
           child: Column(
             children: [
-              // Front Header: Driver & Door
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: Space.md,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: scheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -1085,7 +1042,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              'Driver: ${activeBus.driver}',
+                              l10n.busDriver(activeBus.driver),
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 11,
@@ -1097,13 +1054,13 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                       ),
                     ),
                     const SizedBox(width: Space.xs),
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.door_front_door_outlined, size: 16),
-                        SizedBox(width: 4),
+                        const Icon(Icons.door_front_door_outlined, size: 16),
+                        const SizedBox(width: 4),
                         Text(
-                          'ENTRY / QR SCAN',
-                          style: TextStyle(
+                          l10n.busEntry,
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1130,10 +1087,10 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                       width: 24,
                       alignment: Alignment.center,
                       child: Text(
-                        '$r',
+                        digits(r, bangla: bangla),
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey.shade600,
+                          color: scheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1155,7 +1112,9 @@ class _BusScreenState extends ConsumerState<BusScreen> {
   }
 
   Widget _buildSeatCell(int row, int col, String routeName) {
-    // Seat number calculation
+    final l10n = context.l10n;
+    final bangla = context.isBangla;
+    final scheme = Theme.of(context).colorScheme;
     final seatNo = (row - 1) * 4 + col;
     final isMySeat = seatNo == 4; // Seat 4A is Tanvir Ahmed
     final isVacated =
@@ -1163,7 +1122,6 @@ class _BusScreenState extends ConsumerState<BusScreen> {
     final isFree = seatNo == 51 || seatNo == 52;
     final isBoarded = _boardedSeats.contains(seatNo);
 
-    // Tags
     String? categoryTag;
     if (row == 1 && (col == 1 || col == 2)) {
       categoryTag = '★ Exec';
@@ -1171,32 +1129,31 @@ class _BusScreenState extends ConsumerState<BusScreen> {
       categoryTag = '♀ Lady';
     }
 
-    // Highlighting for search
     final isHighlighted =
         _seatSearch.isNotEmpty &&
         (seatNo.toString() == _seatSearch ||
             (isMySeat && 'tanvir'.contains(_seatSearch)) ||
             (seatNo == 1 && 'harun'.contains(_seatSearch)));
 
-    var bgColor = Colors.blueGrey.shade600;
-    var textColor = Colors.white;
+    var bgColor = scheme.onSurfaceVariant;
+    var textColor = scheme.onPrimary;
     Border? border;
 
     if (isMySeat) {
-      bgColor = Colors.blue.shade700;
-      border = Border.all(color: Colors.blue.shade900, width: 2);
+      bgColor = scheme.primary;
+      border = Border.all(color: scheme.primary, width: 2);
     } else if (isVacated) {
-      bgColor = Colors.amber.shade100;
-      textColor = Colors.amber.shade900;
-      border = Border.all(color: Colors.amber.shade800, width: 1.5);
+      bgColor = scheme.tertiaryContainer;
+      textColor = scheme.onTertiaryContainer;
+      border = Border.all(color: scheme.tertiary, width: 1.5);
     } else if (isFree) {
-      bgColor = Colors.teal.shade50;
-      textColor = Colors.teal.shade900;
-      border = Border.all(color: Colors.teal.shade700, width: 1.5);
+      bgColor = scheme.secondaryContainer;
+      textColor = scheme.onSecondaryContainer;
+      border = Border.all(color: scheme.secondary, width: 1.5);
     }
 
     if (isHighlighted) {
-      border = Border.all(color: Colors.red, width: 2.5);
+      border = Border.all(color: scheme.error, width: 2.5);
     }
 
     return InkWell(
@@ -1219,7 +1176,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  isMySeat ? '★ YOU' : '$seatNo',
+                  isMySeat ? l10n.busYou : digits(seatNo, bangla: bangla),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -1243,7 +1200,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                 child: Icon(
                   Icons.check_circle,
                   size: 8,
-                  color: Colors.green.shade300,
+                  color: scheme.inversePrimary,
                 ),
               ),
           ],
@@ -1253,20 +1210,20 @@ class _BusScreenState extends ConsumerState<BusScreen> {
   }
 
   Widget _buildSupervisorTab(BuildContext context, bool bangla) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final boardedCount = _boardedSeats.length;
+    final pct = ((boardedCount / 48) * 100).round();
 
     return ListView(
       padding: const EdgeInsets.all(Space.md),
       children: [
-        // Live Conductor QR Boarding Progress Card
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.blue.shade300),
+            side: BorderSide(color: scheme.outlineVariant),
           ),
-          color: Colors.blue.shade50.withValues(alpha: 0.3),
           child: Padding(
             padding: const EdgeInsets.all(Space.md),
             child: Column(
@@ -1276,18 +1233,20 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        bangla
-                            ? 'কন্ডাকটর কিউআর বোর্ডিং স্ক্যানার'
-                            : 'Conductor QR Boarding Verification',
+                        l10n.busConductorTitle,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
+                          color: scheme.primary,
                         ),
                       ),
                     ),
                     const SizedBox(width: Space.xs),
                     Text(
-                      '$boardedCount of 48 Boarded (${((boardedCount / 48) * 100).round()}%)',
+                      l10n.busBoardedOf(
+                        digits(boardedCount, bangla: bangla),
+                        digits(48, bangla: bangla),
+                        digits(pct, bangla: bangla),
+                      ),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -1301,45 +1260,33 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   child: LinearProgressIndicator(
                     value: boardedCount / 48,
                     minHeight: 8,
-                    backgroundColor: Colors.blue.shade100,
-                    color: Colors.blue.shade700,
+                    backgroundColor: scheme.surfaceContainerHighest,
+                    color: scheme.primary,
                   ),
                 ),
                 const SizedBox(height: Space.sm),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue.shade800,
-                      foregroundColor: Colors.white,
-                    ),
+                  child: FilledButton.icon(
                     onPressed: () {
                       Haptics.heavy();
                       unawaited(_markBoarded());
                     },
                     icon: const Icon(Icons.qr_code_scanner, size: 16),
-                    label: Text(
-                      bangla
-                          ? 'যাত্রী স্ক্যান / বোর্ডিং নিশ্চিত করুন'
-                          : 'Scan / Mark Passenger Boarded',
-                    ),
+                    label: Text(l10n.busScanBoard),
                   ),
                 ),
               ],
             ),
           ),
         ),
-
         const SizedBox(height: Space.md),
-
-        // FIFO Waitlist Queue & 1-Tap Promotion Card
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.amber.shade300),
+            side: BorderSide(color: scheme.outlineVariant),
           ),
-          color: Colors.amber.shade50.withValues(alpha: 0.3),
           child: Padding(
             padding: const EdgeInsets.all(Space.md),
             child: Column(
@@ -1349,18 +1296,16 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                   children: [
                     Icon(
                       Icons.hourglass_top_rounded,
-                      color: Colors.amber.shade900,
+                      color: scheme.primary,
                       size: 20,
                     ),
                     const SizedBox(width: Space.xs),
                     Expanded(
                       child: Text(
-                        bangla
-                            ? 'এফআইএফও অপেক্ষমাণ তালিকা ও আসন বরাদ্দ'
-                            : 'FIFO Standby Waitlist Queue & 1-Tap Promotion',
+                        l10n.busWaitPromote,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade900,
+                          color: scheme.primary,
                         ),
                       ),
                     ),
@@ -1368,9 +1313,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                 ),
                 const SizedBox(height: Space.xs),
                 Text(
-                  bangla
-                      ? 'মুক্ত বা শূন্য আসনের বিপরীতে অগ্রাধিকারভিত্তিতে অপেক্ষমাণ কর্মীকে ১-ট্যাপে বরাদ্দ দিন।'
-                      : 'Promote waiting employees into vacated seats according to priority order.',
+                  l10n.busWaitPromoteHint,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const Divider(height: 16),
@@ -1380,7 +1323,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          '#${i + 1} ${_waitlistQueue[i]}',
+                          '#${digits(i + 1, bangla: bangla)} ${_waitlistQueue[i]}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1388,26 +1331,22 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                         ),
                       ),
                       if (i == 0)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
                             visualDensity: VisualDensity.compact,
-                            backgroundColor: Colors.green.shade800,
-                            foregroundColor: Colors.white,
                           ),
                           onPressed: () {
                             Haptics.success();
                             setState(() => _waitlistQueue.removeAt(0));
                             AppToast.show(
                               context,
-                              bangla
-                                  ? 'ইঞ্জি. ফারহানকে শূন্য আসন ৩বি-তে বরাদ্দ দেওয়া হয়েছে!'
-                                  : 'Assigned Engr. Farhan to vacated Seat 3B. SMS sent!',
+                              l10n.busAssignedFarhan,
                               tone: StatusTone.success,
                             );
                           },
                           icon: const Icon(Icons.check, size: 14),
                           label: Text(
-                            bangla ? 'আসন ৩বি বরাদ্দ দিন' : 'Assign to Seat 3B',
+                            l10n.busAssign3b,
                             style: const TextStyle(fontSize: 11),
                           ),
                         ),
@@ -1419,10 +1358,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: Space.md),
-
-        // Supervisor Administrative Actions Card
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -1435,9 +1371,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  bangla
-                      ? 'রুট ও বাস ব্যবস্থাপনা'
-                      : 'Route & Fleet Administration',
+                  l10n.busAdminTitle,
                   style: Theme.of(context).textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -1448,7 +1382,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                       child: OutlinedButton.icon(
                         onPressed: _showBroadcastModal,
                         icon: const Icon(Icons.campaign, size: 16),
-                        label: Text(bangla ? 'বিলম্ব বার্তা' : 'Delay Alert'),
+                        label: Text(l10n.busDelayAlert),
                       ),
                     ),
                     const SizedBox(width: Space.sm),
@@ -1459,7 +1393,7 @@ class _BusScreenState extends ConsumerState<BusScreen> {
                           unawaited(_swapBus());
                         },
                         icon: const Icon(Icons.swap_horiz, size: 16),
-                        label: Text(bangla ? 'বাস বদল' : 'Swap Bus'),
+                        label: Text(l10n.busSwapCoach),
                       ),
                     ),
                   ],
@@ -1644,12 +1578,12 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
           );
         }
         return ListView(
-          padding: const EdgeInsets.all(Space.lg),
+          padding: const EdgeInsets.all(Space.md),
           children: [
             if (w != null && !w.offered)
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(Space.lg),
+                  padding: const EdgeInsets.all(Space.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1669,11 +1603,11 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: Space.md),
+                      const SizedBox(height: Space.sm),
                       Text(
                         '${l10n.busPosition(digits(w.position, bangla: bangla))} · ${l10n.busEstimate(digits(w.estimatedWaitDays, bangla: bangla))}',
                       ),
-                      const SizedBox(height: Space.md),
+                      const SizedBox(height: Space.sm),
                       PrimaryButton.danger(
                         label: l10n.busLeave,
                         loading: _busy,
@@ -1686,7 +1620,7 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
             if (w != null && w.offered)
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(Space.lg),
+                  padding: const EdgeInsets.all(Space.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1710,23 +1644,23 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                       ),
                       const SizedBox(height: Space.xs),
                       Text(
-                        bangla
-                            ? '${w.route.displayName(bangla: true)} রুটে আপনার জন্য আসন নির্ধারণ করা হয়েছে।'
-                            : 'A seat has been offered to you on the ${w.route.displayName(bangla: false)} route.',
+                        l10n.busOfferOnRoute(
+                          w.route.displayName(bangla: bangla),
+                        ),
                       ),
                       if (w.expiresAt != null)
                         Padding(
                           padding: const EdgeInsets.only(top: Space.xs),
                           child: Text(
-                            bangla
-                                ? 'মেয়াদ শেষ: ${DateFmt.dateTime(w.expiresAt!, lang)}'
-                                : 'Offer expires: ${DateFmt.dateTime(w.expiresAt!, lang)}',
+                            l10n.busOfferExpires(
+                              DateFmt.dateTime(w.expiresAt!, lang),
+                            ),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: context.bogcl.warning,
                             ),
                           ),
                         ),
-                      const SizedBox(height: Space.md),
+                      const SizedBox(height: Space.sm),
                       Row(
                         children: [
                           Expanded(
@@ -1754,7 +1688,7 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
             if (a != null)
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(Space.lg),
+                  padding: const EdgeInsets.all(Space.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1807,7 +1741,7 @@ class _MySeatTabState extends ConsumerState<_MySeatTab> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: Space.md),
+                      const SizedBox(height: Space.sm),
                       if (a.vacated)
                         PrimaryButton(
                           label: l10n.busReclaim,

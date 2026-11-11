@@ -55,10 +55,12 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
   Future<void> _openFilters() async {
     final l10n = context.l10n;
     Haptics.tap();
+    final sheetWidth = MediaQuery.sizeOf(context).width;
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
+      constraints: BoxConstraints(minWidth: sheetWidth, maxWidth: sheetWidth),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setSheet) {
@@ -82,58 +84,61 @@ class _IncidentsScreenState extends ConsumerState<IncidentsScreen> {
             );
 
             return SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  Space.lg,
-                  0,
-                  Space.lg,
-                  Space.lg + MediaQuery.viewInsetsOf(ctx).bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.inFilter,
-                      style: Theme.of(ctx).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(
-                      l10n.inFilterViews,
-                      style: Theme.of(ctx).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: Space.xs),
-                    Wrap(
-                      children: [
-                        chip(
-                          selected: _view == 'statutory',
-                          label: l10n.inTabStatutory,
-                          onTap: () => _view = 'statutory',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: Space.md),
-                    Text(
-                      l10n.inFilterZones,
-                      style: Theme.of(ctx).textTheme.labelLarge,
-                    ),
-                    const SizedBox(height: Space.xs),
-                    Wrap(
-                      children: [
-                        chip(
-                          selected: _zoneFilter == 'ALL',
-                          label: l10n.inFilterAllZones,
-                          onTap: () => _zoneFilter = 'ALL',
-                        ),
-                        for (final z in incidentPlantZones)
+              child: SizedBox(
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    Space.md,
+                    0,
+                    Space.md,
+                    Space.md + MediaQuery.viewInsetsOf(ctx).bottom,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.inFilter,
+                        style: Theme.of(ctx).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: Space.md),
+                      Text(
+                        l10n.inFilterViews,
+                        style: Theme.of(ctx).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: Space.xs),
+                      Wrap(
+                        children: [
                           chip(
-                            selected: _zoneFilter == z,
-                            label: incidentZoneLabel(l10n, z),
-                            onTap: () => _zoneFilter = z,
+                            selected: _view == 'statutory',
+                            label: l10n.inTabStatutory,
+                            onTap: () => _view = 'statutory',
                           ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: Space.md),
+                      Text(
+                        l10n.inFilterZones,
+                        style: Theme.of(ctx).textTheme.labelLarge,
+                      ),
+                      const SizedBox(height: Space.xs),
+                      Wrap(
+                        children: [
+                          chip(
+                            selected: _zoneFilter == 'ALL',
+                            label: l10n.inFilterAllZones,
+                            onTap: () => _zoneFilter = 'ALL',
+                          ),
+                          for (final z in incidentPlantZones)
+                            chip(
+                              selected: _zoneFilter == z,
+                              label: incidentZoneLabel(l10n, z),
+                              onTap: () => _zoneFilter = z,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

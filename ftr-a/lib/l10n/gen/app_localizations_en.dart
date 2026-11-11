@@ -2452,6 +2452,240 @@ class AppL10nEn extends AppL10n {
   String get busTabRoutes => 'Routes';
 
   @override
+  String get busTabFleet => 'Fleet';
+
+  @override
+  String get busTabDesk => 'Desk';
+
+  @override
+  String get busDirInbound => 'To plant';
+
+  @override
+  String get busDirOutbound => 'Home';
+
+  @override
+  String get busSupervisorMode => 'Supervisor';
+
+  @override
+  String get busRefresh => 'Refresh';
+
+  @override
+  String get busBroadcastTooltip => 'Broadcast';
+
+  @override
+  String get busFleetPick => 'Choose a bus';
+
+  @override
+  String busFleetOf(String n, String total) {
+    return '$n of $total';
+  }
+
+  @override
+  String busFleetOcc(String occ, String cap, String free) {
+    return '$occ/$cap · $free free';
+  }
+
+  @override
+  String busFleetPlate(String plate, String driver) {
+    return '$plate · $driver';
+  }
+
+  @override
+  String get busSearchSeat => 'Search name or seat';
+
+  @override
+  String get busLegendYou => 'You';
+
+  @override
+  String get busLegendOccupied => 'Occupied';
+
+  @override
+  String get busLegendVacated => 'Vacated today';
+
+  @override
+  String get busLegendOpen => 'Free';
+
+  @override
+  String busDriver(String name) {
+    return 'Driver: $name';
+  }
+
+  @override
+  String get busEntry => 'Entry';
+
+  @override
+  String get busYou => 'YOU';
+
+  @override
+  String get busPassTitle => 'Boarding pass';
+
+  @override
+  String busPassSeat(String no) {
+    return 'Seat $no';
+  }
+
+  @override
+  String get busPassHolder => 'Tanvir Ahmed · EMP-1042';
+
+  @override
+  String get busDone => 'Done';
+
+  @override
+  String busSeatHead(String no, String route) {
+    return 'Seat $no · $route';
+  }
+
+  @override
+  String get busSeatYours => 'Your allocated seat';
+
+  @override
+  String get busVacateToday => 'Vacate for today';
+
+  @override
+  String get busVacatedToast => 'Seat vacated for today.';
+
+  @override
+  String get busReclaimVacated => 'Reclaim seat';
+
+  @override
+  String get busReclaimedToast => 'Seat reclaimed.';
+
+  @override
+  String get busSwapColleague => 'Swap with a colleague';
+
+  @override
+  String get busViewPass => 'Boarding pass';
+
+  @override
+  String get busVacatedToday => 'Vacated for today';
+
+  @override
+  String get busSeatOpen => 'Seat is free';
+
+  @override
+  String get busShiftPassHint => 'You can join the waitlist for today.';
+
+  @override
+  String get busBookShift => 'Join waitlist for today';
+
+  @override
+  String get busApplyMonthly => 'Apply for a monthly seat';
+
+  @override
+  String get busSeatTaken => 'This seat is taken';
+
+  @override
+  String get busOccupantDemo => 'Occupant: Engr. M. Rahman · General shift';
+
+  @override
+  String get busProposeSwap => 'Propose a swap';
+
+  @override
+  String get busBroadcastTitle => 'Route alert';
+
+  @override
+  String get busBroadcastHint => 'Goes to everyone on this route today.';
+
+  @override
+  String get busBroadcastDelayChip => 'Delayed 12m (Mohakhali)';
+
+  @override
+  String get busBroadcastDelayBody =>
+      'Bus delayed 12 mins at Mohakhali Flyover.';
+
+  @override
+  String get busBroadcastGateChip => 'Pickup Gate 2 today';
+
+  @override
+  String get busBroadcastGateBody =>
+      'Alternate evening boarding at Gate 2 today.';
+
+  @override
+  String get busBroadcastBody => 'Message';
+
+  @override
+  String get busBroadcastSend => 'Send';
+
+  @override
+  String get busNoRoute => 'No bus route is loaded.';
+
+  @override
+  String busSwapSent(String no) {
+    return 'Swap request sent for seat $no.';
+  }
+
+  @override
+  String busWaitlisted(String code) {
+    return 'You are on the waitlist for $code.';
+  }
+
+  @override
+  String get busBroadcastShort => 'Write at least a short sentence.';
+
+  @override
+  String busAlertSent(String code) {
+    return 'Alert sent on $code.';
+  }
+
+  @override
+  String get busAllBoarded => 'Every seat is already marked boarded.';
+
+  @override
+  String busSeatBoarded(String no, String code) {
+    return 'Seat $no marked boarded on $code.';
+  }
+
+  @override
+  String get busNoOther => 'There is no other bus to assign.';
+
+  @override
+  String busReassigned(String bus, String code) {
+    return '$bus is now assigned to $code.';
+  }
+
+  @override
+  String get busConductorTitle => 'Boarding';
+
+  @override
+  String busBoardedOf(String count, String total, String pct) {
+    return '$count of $total boarded ($pct%)';
+  }
+
+  @override
+  String get busScanBoard => 'Mark boarded';
+
+  @override
+  String get busWaitPromote => 'Waitlist';
+
+  @override
+  String get busWaitPromoteHint => 'Assign waiting staff to a free seat.';
+
+  @override
+  String get busAssign3b => 'Assign to seat 3B';
+
+  @override
+  String get busAssignedFarhan => 'Assigned Engr. Farhan to seat 3B.';
+
+  @override
+  String get busAdminTitle => 'Route and fleet';
+
+  @override
+  String get busDelayAlert => 'Delay alert';
+
+  @override
+  String get busSwapCoach => 'Swap bus';
+
+  @override
+  String busOfferOnRoute(String route) {
+    return 'A seat is offered on $route.';
+  }
+
+  @override
+  String busOfferExpires(String when) {
+    return 'Offer expires: $when';
+  }
+
+  @override
   String get busRouteTitle => 'Route';
 
   @override
@@ -2699,9 +2933,6 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get busBroadcastMessage => 'Message';
-
-  @override
-  String get busBroadcastSend => 'Send';
 
   @override
   String get busBroadcastSent => 'Message sent';

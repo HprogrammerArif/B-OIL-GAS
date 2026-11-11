@@ -4345,6 +4345,414 @@ abstract class AppL10n {
   /// **'Routes'**
   String get busTabRoutes;
 
+  /// No description provided for @busTabFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Fleet'**
+  String get busTabFleet;
+
+  /// No description provided for @busTabDesk.
+  ///
+  /// In en, this message translates to:
+  /// **'Desk'**
+  String get busTabDesk;
+
+  /// No description provided for @busDirInbound.
+  ///
+  /// In en, this message translates to:
+  /// **'To plant'**
+  String get busDirInbound;
+
+  /// No description provided for @busDirOutbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get busDirOutbound;
+
+  /// No description provided for @busSupervisorMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get busSupervisorMode;
+
+  /// No description provided for @busRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get busRefresh;
+
+  /// No description provided for @busBroadcastTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast'**
+  String get busBroadcastTooltip;
+
+  /// No description provided for @busFleetPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a bus'**
+  String get busFleetPick;
+
+  /// No description provided for @busFleetOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {total}'**
+  String busFleetOf(String n, String total);
+
+  /// No description provided for @busFleetOcc.
+  ///
+  /// In en, this message translates to:
+  /// **'{occ}/{cap} · {free} free'**
+  String busFleetOcc(String occ, String cap, String free);
+
+  /// No description provided for @busFleetPlate.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · {driver}'**
+  String busFleetPlate(String plate, String driver);
+
+  /// No description provided for @busSearchSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name or seat'**
+  String get busSearchSeat;
+
+  /// No description provided for @busLegendYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get busLegendYou;
+
+  /// No description provided for @busLegendOccupied.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupied'**
+  String get busLegendOccupied;
+
+  /// No description provided for @busLegendVacated.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacated today'**
+  String get busLegendVacated;
+
+  /// No description provided for @busLegendOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get busLegendOpen;
+
+  /// No description provided for @busDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver: {name}'**
+  String busDriver(String name);
+
+  /// No description provided for @busEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get busEntry;
+
+  /// No description provided for @busYou.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU'**
+  String get busYou;
+
+  /// No description provided for @busPassTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding pass'**
+  String get busPassTitle;
+
+  /// No description provided for @busPassSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {no}'**
+  String busPassSeat(String no);
+
+  /// No description provided for @busPassHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Tanvir Ahmed · EMP-1042'**
+  String get busPassHolder;
+
+  /// No description provided for @busDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get busDone;
+
+  /// No description provided for @busSeatHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {no} · {route}'**
+  String busSeatHead(String no, String route);
+
+  /// No description provided for @busSeatYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your allocated seat'**
+  String get busSeatYours;
+
+  /// No description provided for @busVacateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacate for today'**
+  String get busVacateToday;
+
+  /// No description provided for @busVacatedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat vacated for today.'**
+  String get busVacatedToast;
+
+  /// No description provided for @busReclaimVacated.
+  ///
+  /// In en, this message translates to:
+  /// **'Reclaim seat'**
+  String get busReclaimVacated;
+
+  /// No description provided for @busReclaimedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat reclaimed.'**
+  String get busReclaimedToast;
+
+  /// No description provided for @busSwapColleague.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap with a colleague'**
+  String get busSwapColleague;
+
+  /// No description provided for @busViewPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding pass'**
+  String get busViewPass;
+
+  /// No description provided for @busVacatedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacated for today'**
+  String get busVacatedToday;
+
+  /// No description provided for @busSeatOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat is free'**
+  String get busSeatOpen;
+
+  /// No description provided for @busShiftPassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can join the waitlist for today.'**
+  String get busShiftPassHint;
+
+  /// No description provided for @busBookShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Join waitlist for today'**
+  String get busBookShift;
+
+  /// No description provided for @busApplyMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply for a monthly seat'**
+  String get busApplyMonthly;
+
+  /// No description provided for @busSeatTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'This seat is taken'**
+  String get busSeatTaken;
+
+  /// No description provided for @busOccupantDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupant: Engr. M. Rahman · General shift'**
+  String get busOccupantDemo;
+
+  /// No description provided for @busProposeSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Propose a swap'**
+  String get busProposeSwap;
+
+  /// No description provided for @busBroadcastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route alert'**
+  String get busBroadcastTitle;
+
+  /// No description provided for @busBroadcastHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes to everyone on this route today.'**
+  String get busBroadcastHint;
+
+  /// No description provided for @busBroadcastDelayChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delayed 12m (Mohakhali)'**
+  String get busBroadcastDelayChip;
+
+  /// No description provided for @busBroadcastDelayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus delayed 12 mins at Mohakhali Flyover.'**
+  String get busBroadcastDelayBody;
+
+  /// No description provided for @busBroadcastGateChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Gate 2 today'**
+  String get busBroadcastGateChip;
+
+  /// No description provided for @busBroadcastGateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate evening boarding at Gate 2 today.'**
+  String get busBroadcastGateBody;
+
+  /// No description provided for @busBroadcastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get busBroadcastBody;
+
+  /// No description provided for @busBroadcastSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get busBroadcastSend;
+
+  /// No description provided for @busNoRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'No bus route is loaded.'**
+  String get busNoRoute;
+
+  /// No description provided for @busSwapSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap request sent for seat {no}.'**
+  String busSwapSent(String no);
+
+  /// No description provided for @busWaitlisted.
+  ///
+  /// In en, this message translates to:
+  /// **'You are on the waitlist for {code}.'**
+  String busWaitlisted(String code);
+
+  /// No description provided for @busBroadcastShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Write at least a short sentence.'**
+  String get busBroadcastShort;
+
+  /// No description provided for @busAlertSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert sent on {code}.'**
+  String busAlertSent(String code);
+
+  /// No description provided for @busAllBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Every seat is already marked boarded.'**
+  String get busAllBoarded;
+
+  /// No description provided for @busSeatBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Seat {no} marked boarded on {code}.'**
+  String busSeatBoarded(String no, String code);
+
+  /// No description provided for @busNoOther.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no other bus to assign.'**
+  String get busNoOther;
+
+  /// No description provided for @busReassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{bus} is now assigned to {code}.'**
+  String busReassigned(String bus, String code);
+
+  /// No description provided for @busConductorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarding'**
+  String get busConductorTitle;
+
+  /// No description provided for @busBoardedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} boarded ({pct}%)'**
+  String busBoardedOf(String count, String total, String pct);
+
+  /// No description provided for @busScanBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark boarded'**
+  String get busScanBoard;
+
+  /// No description provided for @busWaitPromote.
+  ///
+  /// In en, this message translates to:
+  /// **'Waitlist'**
+  String get busWaitPromote;
+
+  /// No description provided for @busWaitPromoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign waiting staff to a free seat.'**
+  String get busWaitPromoteHint;
+
+  /// No description provided for @busAssign3b.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to seat 3B'**
+  String get busAssign3b;
+
+  /// No description provided for @busAssignedFarhan.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Engr. Farhan to seat 3B.'**
+  String get busAssignedFarhan;
+
+  /// No description provided for @busAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route and fleet'**
+  String get busAdminTitle;
+
+  /// No description provided for @busDelayAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay alert'**
+  String get busDelayAlert;
+
+  /// No description provided for @busSwapCoach.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap bus'**
+  String get busSwapCoach;
+
+  /// No description provided for @busOfferOnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'A seat is offered on {route}.'**
+  String busOfferOnRoute(String route);
+
+  /// No description provided for @busOfferExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer expires: {when}'**
+  String busOfferExpires(String when);
+
   /// No description provided for @busRouteTitle.
   ///
   /// In en, this message translates to:
@@ -4764,12 +5172,6 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Message'**
   String get busBroadcastMessage;
-
-  /// No description provided for @busBroadcastSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get busBroadcastSend;
 
   /// No description provided for @busBroadcastSent.
   ///

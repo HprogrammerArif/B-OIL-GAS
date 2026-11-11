@@ -2444,6 +2444,239 @@ class AppL10nBn extends AppL10n {
   String get busTabRoutes => 'রুট';
 
   @override
+  String get busTabFleet => 'বহর';
+
+  @override
+  String get busTabDesk => 'ডেস্ক';
+
+  @override
+  String get busDirInbound => 'প্ল্যান্টে';
+
+  @override
+  String get busDirOutbound => 'বাসায়';
+
+  @override
+  String get busSupervisorMode => 'তত্ত্বাবধায়ক';
+
+  @override
+  String get busRefresh => 'রিফ্রেশ';
+
+  @override
+  String get busBroadcastTooltip => 'বার্তা';
+
+  @override
+  String get busFleetPick => 'বাস বেছে নিন';
+
+  @override
+  String busFleetOf(String n, String total) {
+    return '$total-এর $n';
+  }
+
+  @override
+  String busFleetOcc(String occ, String cap, String free) {
+    return '$occ/$cap · $free খালি';
+  }
+
+  @override
+  String busFleetPlate(String plate, String driver) {
+    return '$plate · $driver';
+  }
+
+  @override
+  String get busSearchSeat => 'নাম বা আসন খুঁজুন';
+
+  @override
+  String get busLegendYou => 'আপনি';
+
+  @override
+  String get busLegendOccupied => 'বরাদ্দ';
+
+  @override
+  String get busLegendVacated => 'আজ খালি';
+
+  @override
+  String get busLegendOpen => 'খালি';
+
+  @override
+  String busDriver(String name) {
+    return 'চালক: $name';
+  }
+
+  @override
+  String get busEntry => 'প্রবেশ';
+
+  @override
+  String get busYou => 'আপনি';
+
+  @override
+  String get busPassTitle => 'বোর্ডিং পাস';
+
+  @override
+  String busPassSeat(String no) {
+    return 'আসন $no';
+  }
+
+  @override
+  String get busPassHolder => 'তানভীর আহমেদ · EMP-1042';
+
+  @override
+  String get busDone => 'সম্পন্ন';
+
+  @override
+  String busSeatHead(String no, String route) {
+    return 'আসন $no · $route';
+  }
+
+  @override
+  String get busSeatYours => 'আপনার বরাদ্দ আসন';
+
+  @override
+  String get busVacateToday => 'আজকের জন্য ছেড়ে দিন';
+
+  @override
+  String get busVacatedToast => 'আসন আজকের জন্য খালি।';
+
+  @override
+  String get busReclaimVacated => 'আসন ফিরে নিন';
+
+  @override
+  String get busReclaimedToast => 'আসন ফিরে নেওয়া হয়েছে।';
+
+  @override
+  String get busSwapColleague => 'সহকর্মীর সাথে বদল';
+
+  @override
+  String get busViewPass => 'বোর্ডিং পাস';
+
+  @override
+  String get busVacatedToday => 'আজ খালি রাখা';
+
+  @override
+  String get busSeatOpen => 'আসন খালি';
+
+  @override
+  String get busShiftPassHint =>
+      'আজকের জন্য অপেক্ষমাণ তালিকায় নাম লেখাতে পারেন।';
+
+  @override
+  String get busBookShift => 'আজকের তালিকায় যোগ দিন';
+
+  @override
+  String get busApplyMonthly => 'মাসিক আসনের আবেদন';
+
+  @override
+  String get busSeatTaken => 'এই আসন নেওয়া';
+
+  @override
+  String get busOccupantDemo => 'যাত্রী: প্রকৌ. এম. রহমান · সাধারণ শিফট';
+
+  @override
+  String get busProposeSwap => 'বদলের প্রস্তাব';
+
+  @override
+  String get busBroadcastTitle => 'রুট সতর্কতা';
+
+  @override
+  String get busBroadcastHint => 'আজকের এই রুটের সবাইকে যাবে।';
+
+  @override
+  String get busBroadcastDelayChip => '১২ মি বিলম্ব (মহাখালী)';
+
+  @override
+  String get busBroadcastDelayBody => 'মহাখালী উড়ালপথে বাস ১২ মিনিট দেরি।';
+
+  @override
+  String get busBroadcastGateChip => 'আজ গেট ২';
+
+  @override
+  String get busBroadcastGateBody => 'আজ সন্ধ্যায় বোর্ডিং গেট ২ থেকে।';
+
+  @override
+  String get busBroadcastBody => 'বার্তা';
+
+  @override
+  String get busBroadcastSend => 'পাঠান';
+
+  @override
+  String get busNoRoute => 'কোনো বাস রুট লোড হয়নি।';
+
+  @override
+  String busSwapSent(String no) {
+    return 'আসন $no-এর জন্য বদলের অনুরোধ পাঠানো হয়েছে।';
+  }
+
+  @override
+  String busWaitlisted(String code) {
+    return '$code রুটের অপেক্ষমাণ তালিকায় আপনি আছেন।';
+  }
+
+  @override
+  String get busBroadcastShort => 'অন্তত একটি ছোট বাক্য লিখুন।';
+
+  @override
+  String busAlertSent(String code) {
+    return '$code-এ সতর্কতা পাঠানো হয়েছে।';
+  }
+
+  @override
+  String get busAllBoarded => 'সব আসন ইতিমধ্যে বোর্ড করা।';
+
+  @override
+  String busSeatBoarded(String no, String code) {
+    return '$code-এ আসন $no বোর্ড করা হয়েছে।';
+  }
+
+  @override
+  String get busNoOther => 'বদল করার অন্য বাস নেই।';
+
+  @override
+  String busReassigned(String bus, String code) {
+    return '$bus এখন $code-এ আছে।';
+  }
+
+  @override
+  String get busConductorTitle => 'বোর্ডিং';
+
+  @override
+  String busBoardedOf(String count, String total, String pct) {
+    return '$total-এর $count বোর্ড ($pct%)';
+  }
+
+  @override
+  String get busScanBoard => 'বোর্ড চিহ্নিত করুন';
+
+  @override
+  String get busWaitPromote => 'অপেক্ষমাণ তালিকা';
+
+  @override
+  String get busWaitPromoteHint => 'খালি আসনে অপেক্ষমাণ কর্মী বসান।';
+
+  @override
+  String get busAssign3b => 'আসন ৩বি দিন';
+
+  @override
+  String get busAssignedFarhan => 'প্রকৌ. ফারহানকে আসন ৩বি দেওয়া হয়েছে।';
+
+  @override
+  String get busAdminTitle => 'রুট ও বহর';
+
+  @override
+  String get busDelayAlert => 'বিলম্ব সতর্কতা';
+
+  @override
+  String get busSwapCoach => 'বাস বদল';
+
+  @override
+  String busOfferOnRoute(String route) {
+    return '$route রুটে আসন প্রস্তাবিত।';
+  }
+
+  @override
+  String busOfferExpires(String when) {
+    return 'মেয়াদ শেষ: $when';
+  }
+
+  @override
   String get busRouteTitle => 'রুট';
 
   @override
@@ -2690,9 +2923,6 @@ class AppL10nBn extends AppL10n {
 
   @override
   String get busBroadcastMessage => 'বার্তা';
-
-  @override
-  String get busBroadcastSend => 'পাঠান';
 
   @override
   String get busBroadcastSent => 'বার্তা পাঠানো হয়েছে';
